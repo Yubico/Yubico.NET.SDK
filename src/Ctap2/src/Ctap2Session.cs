@@ -26,7 +26,6 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Ctap2.Backend;
 using Yubico.YubiKit.Ctap2.Cbor;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2;
 
@@ -35,8 +34,11 @@ namespace Yubico.YubiKit.Ctap2;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Implements CTAP 2.1/2.3 specification. Supports both SmartCard (CCID) 
-/// and FIDO HID transports.
+/// Exposes CTAP2 operations and selected optional features over FIDO HID and SmartCard (CCID).
+/// GetInfo advertisement, current configuration, product, firmware, transport and PIN/UV permissions
+/// determine availability; the firmware feature thresholds below are not complete support checks.
+/// See <see cref="ICtap2Session"/> for caller verification, sequencing, cancellation and byte-lifetime
+/// responsibilities. Secure-channel IsAuthenticated state is not CTAP PIN/UV authorization.
 /// </para>
 /// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html
@@ -45,37 +47,37 @@ namespace Yubico.YubiKit.Ctap2;
 public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 {
     /// <summary>
-    /// Feature flag for FIDO2 support (requires firmware 5.0+).
+    /// Nominal firmware threshold for FIDO2 (5.0+), not a per-device capability or authorization check.
     /// </summary>
     public static readonly Feature FeatureFido2 = new("FIDO2", 5, 0, 0);
 
     /// <summary>
-    /// Feature flag for Bio Enrollment support (requires firmware 5.2+).
+    /// Nominal firmware threshold for Bio Enrollment (5.2+); product and GetInfo support still matter.
     /// </summary>
     public static readonly Feature FeatureBioEnrollment = new("Bio Enrollment", 5, 2, 0);
 
     /// <summary>
-    /// Feature flag for Credential Management support (requires firmware 5.2+).
+    /// Nominal firmware threshold for Credential Management (5.2+), not permission to manage credentials.
     /// </summary>
     public static readonly Feature FeatureCredentialManagement = new("Credential Management", 5, 2, 0);
 
     /// <summary>
-    /// Feature flag for hmac-secret-mc extension (requires firmware 5.4+).
+    /// Nominal firmware threshold for hmac-secret-mc (5.4+); check extension advertisement separately.
     /// </summary>
     public static readonly Feature FeatureHmacSecretMc = new("hmac-secret-mc", 5, 4, 0);
 
     /// <summary>
-    /// Feature flag for Authenticator Config support (requires firmware 5.4+).
+    /// Nominal firmware threshold for Authenticator Config (5.4+), not a configured-state or permission check.
     /// </summary>
     public static readonly Feature FeatureAuthenticatorConfig = new("Authenticator Config", 5, 4, 0);
 
     /// <summary>
-    /// Feature flag for credBlob extension (requires firmware 5.5+).
+    /// Nominal firmware threshold for credBlob (5.5+); check extension advertisement and size limits separately.
     /// </summary>
     public static readonly Feature FeatureCredBlob = new("credBlob", 5, 5, 0);
 
     /// <summary>
-    /// Feature flag for Encrypted Identifier support (requires firmware 5.7+).
+    /// Nominal firmware threshold for Encrypted Identifier (5.7+), not a guarantee the field is returned.
     /// </summary>
     public static readonly Feature FeatureEncIdentifier = new("Encrypted Identifier", 5, 7, 0);
 
@@ -94,8 +96,26 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     }
 
     /// <summary>
-    /// Creates and initializes a FIDO session from a connection.
+    /// Creates and initializes a CTAP2 session using a caller-owned connection.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The session borrows the connection; dispose the session before disposing or reusing the
+    /// connection. PreferredConnectionType asserts the supplied connection's type, rather than opening
+    /// or switching transports. The caller also owns supplied SCP key parameters and the presence prompt.
+    /// After healthy sequential use an idle borrowed connection can host another session, but disposal
+    /// during an active built-in macOS HID exchange can leave it unusable. After uncertain exchange or
+    /// teardown state, dispose and reopen the connection rather than assuming recovery.
+    /// </para>
+    /// <para>
+    /// HID channel preparation precedes GetInfo. SmartCard selects the FIDO AID and reads GetInfo
+    /// before the USB firmware gate and SCP establishment; NFC skips that USB gate. The gate uses
+    /// detected GetInfo firmware, not FirmwareVersionOverride. Missing firmware becomes 0.0.0 and
+    /// Feature treats Major == 0 sentinel versions as supported; this is not proof of actual firmware.
+    /// The override configures session/protocol firmware after that gate, and later GetInfo calls do
+    /// not update it. SCP on HID is rejected before channel initialization or GetInfo.
+    /// </para>
+    /// </remarks>
     /// <param name="connection">The connection to the YubiKey (SmartCard or FIDO HID).</param>
     /// <param name="options">Optional cross-cutting session creation settings.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -128,7 +148,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         if (backend is SmartCardBackend smartCardBackend)
             await smartCardBackend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
 
-        // Get firmware version from authenticator info
+        // The transport gate uses detected firmware; an override only affects later configuration.
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
         var detectedFirmwareVersion = info.FirmwareVersion ?? new FirmwareVersion();
 
@@ -137,7 +157,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             EnsureSmartCardTransportSupported(smartCardConnection.Transport, detectedFirmwareVersion);
         }
 
-        // Initialize base class
+        // Configure the session firmware snapshot, then establish SCP and rebind the backend if needed.
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
                 firmwareVersionOverride ?? detectedFirmwareVersion,
@@ -253,7 +273,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 
             _logger.LogDebug("MakeCredential for RP: {RpId}", rp.Id);
 
-            // makeCredential always collects user presence (up=false is rejected above).
+            // This is a presence-policy notification, not verification of the returned UP/UV flags.
             UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
                 new UserPresenceContext
                 {
@@ -270,10 +290,12 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         {
             if (request is not null)
             {
+                // Clear our encoded request, not borrowed caller inputs or the transferred response.
                 CryptographicOperations.ZeroMemory(request);
             }
         }
 
+        // CTAP status and terminal notification resolution precede decode; failure here is not rollback.
         var result = MakeCredentialResponse.Decode(response);
 
         _logger.LogInformation(
@@ -330,10 +352,12 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         {
             if (request is not null)
             {
+                // Clear our encoded request, not borrowed caller inputs or decoded response copies.
                 CryptographicOperations.ZeroMemory(request);
             }
         }
 
+        // Parsing is not relying-party verification and can fail after a successful device exchange.
         var result = GetAssertionResponse.Decode(response);
 
         _logger.LogInformation(
@@ -349,6 +373,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     {
         EnsureInitialized();
 
+        // The caller preserves device sequence adjacency and tracks the first response's count.
         var request = CtapRequestBuilder.Create(CtapCommand.GetNextAssertion).Build();
 
         var response = await _backend.SendCborAsync(

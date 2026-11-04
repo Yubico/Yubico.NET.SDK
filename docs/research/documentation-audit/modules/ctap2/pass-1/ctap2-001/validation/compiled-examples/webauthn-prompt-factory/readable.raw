@@ -1,0 +1,12 @@
+// SOURCE src/WebAuthn/README.md#f6
+// Alternative factory call: replace the demo's call; do not append another live client.
+await using var client = await device.CreateWebAuthnClientAsync(
+    origin, clientOptions, sessionOptions: new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
+
+// SOURCE src/WebAuthn/README.md#f5
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
+}
+

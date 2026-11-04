@@ -22,6 +22,8 @@ public class HmacSecretInputTests
     [Fact]
     public void HmacSecretInput_EncodesCorrectly()
     {
+        // Synthetic P-256-shaped dictionary: this fixture asserts only nonempty encoding/map count,
+        // not key-agreement coherence, all nested bytes or protocol cryptography.
         var keyAgreement = new Dictionary<int, object?>
         {
             { 1, 2 },

@@ -1,0 +1,1297 @@
+{
+  "baseline": "5b09a9b6942ded3913b5c9340c3e126617e61a82",
+  "file_count": 183,
+  "csharp_count": 170,
+  "owner_counts": {
+    "A": 30,
+    "B": 13,
+    "C": 30,
+    "D": 20,
+    "E": 57,
+    "F": 33
+  },
+  "note": "G owns cross-layer report/matrix, not overlapping module file edits; full semantic dispositions are still pending.",
+  "files": [
+    {
+      "path": "src/Ctap2/CLAUDE.md",
+      "owner": "F",
+      "bytes": 23027,
+      "sha256": "89879e2ba3473cbd1238dcbc4e878e727b1fc219121a0473f992089ea73f7689",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/PACKAGE_README.md",
+      "owner": "F",
+      "bytes": 1565,
+      "sha256": "58941e31f860a7c6ab71b5669b41114be9f7515ebfd789e8a6ce2f77f1fe4668",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/README.md",
+      "owner": "F",
+      "bytes": 11075,
+      "sha256": "1984ff0bc3acc2c8567cd2d9251da11297efd5ff89ecca7d260c5f925e762e00",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/AccessMenu.cs",
+      "owner": "F",
+      "bytes": 6636,
+      "sha256": "57fd256eb73aec303095f04a40e3ba854b789d39363d669b9adc650a1d30335f",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/ConfigMenu.cs",
+      "owner": "F",
+      "bytes": 5954,
+      "sha256": "5b3e57a83c84051db4319af67c6d669bbb100565cb06fc37ed7fd4367c5099a7",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/CredentialMenu.cs",
+      "owner": "F",
+      "bytes": 6700,
+      "sha256": "8184097dee77e05d0b8de9aa9988a46a365761f3113a2403d651a5a0a274c836",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/CredentialsMenu.cs",
+      "owner": "F",
+      "bytes": 9925,
+      "sha256": "40eb75ee156765d5a7f188a4dd0561a55e6f80ff693fa4ea75c9dd672b27a4df",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/FingerprintsMenu.cs",
+      "owner": "F",
+      "bytes": 10047,
+      "sha256": "9e9939ababb1862240cfc5a9ed6d9984454574989accd0e539b630c94f625e9a",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/InfoMenu.cs",
+      "owner": "F",
+      "bytes": 6476,
+      "sha256": "1801d44bbe9381653c0b741e4c24ad4b07aa1dd439bcc370c43f8642a73ba598",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/ResetMenu.cs",
+      "owner": "F",
+      "bytes": 5559,
+      "sha256": "54e8339592a4f4a15b4ad30be7bbe3344291675320432ec3fd1638e52189e62c",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Output/OutputHelpers.cs",
+      "owner": "F",
+      "bytes": 3744,
+      "sha256": "419069ee0bdf7b90e397f9f26d9dc9be873527455f47e640303656d11ab25cbc",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "owner": "F",
+      "bytes": 7221,
+      "sha256": "f210d7f24f5516d81f6b8c1cc9d1a1606cd40fbb08fd3caac23d217cba691e06",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs",
+      "owner": "F",
+      "bytes": 1898,
+      "sha256": "7116232a0f49979cbcf8ea5adaa9dca0815bbd01fd7e2670db01eee452b782ab",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/FidoPinHelper.cs",
+      "owner": "F",
+      "bytes": 4088,
+      "sha256": "0206c7bcc19f22ac51983cac64f10ecaa7e6aa00907ddecdad8a276554b028f2",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/BioEnrollment.cs",
+      "owner": "F",
+      "bytes": 14851,
+      "sha256": "dabf55db1bf1372b1872c3d6637548370231251ecee660dec4ccd45b57a5fc2b",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/ConfigManagement.cs",
+      "owner": "F",
+      "bytes": 7521,
+      "sha256": "065c1a92ad811e09232c30408ab49b0e2ce0c87485937ce69f940c9e2e4fef76",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/CredentialManagement.cs",
+      "owner": "F",
+      "bytes": 13752,
+      "sha256": "bb9256d10886777fc74e5a1ee9f9e81e669ab2079b11a39fe3f56034695a1ef3",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/GetAssertion.cs",
+      "owner": "F",
+      "bytes": 5276,
+      "sha256": "1fabaef9c31022cec63af485d0fd30de1471b1013419539e6744bcb37b581552",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/GetAuthenticatorInfo.cs",
+      "owner": "F",
+      "bytes": 2507,
+      "sha256": "01402817991040651af2ef017f582536dba91268fb187118237f1607576c4f9d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/MakeCredential.cs",
+      "owner": "F",
+      "bytes": 6287,
+      "sha256": "d6178f264515702ebf83d8a5bb8c91c966dabf6e6e2eda323ff9a1f293091e71",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/PinManagement.cs",
+      "owner": "F",
+      "bytes": 9455,
+      "sha256": "c24444d4dd9eb854e9a517716f0a4894f1946e1de070652940392eee2f83df2e",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/ResetAuthenticator.cs",
+      "owner": "F",
+      "bytes": 5680,
+      "sha256": "923132f0d3ea12d7b5aed3e368e6563178e88f00ccdc6af76b8092b732ddef9f",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+      "owner": "F",
+      "bytes": 991,
+      "sha256": "215e66d92064a4de6cf37b5d68781e31365f54822631e0a9c5bfcce22fd207d7",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Program.cs",
+      "owner": "F",
+      "bytes": 28226,
+      "sha256": "43e81dbe92211f5cc59cfa4add0d98efe81b204a2a5a45f56fbe3025449e00dd",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/README.md",
+      "owner": "F",
+      "bytes": 4601,
+      "sha256": "d08ddef07243c136cb0f4395c2e8e2b5bc36875bbfa0c296f5a57b0ebea64fa5",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Arkg/ArkgP256.cs",
+      "owner": "E",
+      "bytes": 2448,
+      "sha256": "583fc29768ac23a5b1ffa1f270e4041422ca0d4273980fee02fb5ff68af82bcf",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/AuthenticatorInfo.cs",
+      "owner": "A",
+      "bytes": 24529,
+      "sha256": "fc91bedc43b2d2dc6600808864d4a73192cd4965e6e5876cb3a82bceafe84935",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Backend/HidBackend.cs",
+      "owner": "A",
+      "bytes": 4204,
+      "sha256": "335654513b9f236cbf413d9e46ac0eb3b13fd7f3dd4ca41df7894e1f40f188b7",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Backend/ICtap2Backend.cs",
+      "owner": "A",
+      "bytes": 1628,
+      "sha256": "5f8c5aad09050ec225b387b8db8dde55b34d0a39ab72527a3f4138b9803d8708",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Backend/SmartCardBackend.cs",
+      "owner": "A",
+      "bytes": 5383,
+      "sha256": "aec6e747801c2066d188eb1193e1175a67ad1a76bae4a50b446dd401034f0ce0",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/BioEnrollment/BioEnrollmentModels.cs",
+      "owner": "D",
+      "bytes": 11486,
+      "sha256": "df1758f48df228818fe6b02ff0a1989f70b541f2d64f63c08d8972862c9a30fe",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/BioEnrollment/BioEnrollmentSubCommand.cs",
+      "owner": "D",
+      "bytes": 2082,
+      "sha256": "9fce2fc0afa8aa42702032609531ea717017e9646b4053332591e9b2a75c0e36",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/BioEnrollment/FingerprintBioEnrollment.cs",
+      "owner": "D",
+      "bytes": 19804,
+      "sha256": "dd4feafc985ac8fe3ba6c8c1f2fc936f17590d60a1ca045d0a78fd7133a6777b",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/AaguidConverter.cs",
+      "owner": "A",
+      "bytes": 3501,
+      "sha256": "ebb5f6ce47d98a8b2b94a9333d9a72b12fe205f331d0cada76c5946116d22859",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/CoseKeyWriter.cs",
+      "owner": "C",
+      "bytes": 2043,
+      "sha256": "5a6a313bf85a4d194842c53a9797f5f6c13d2992cb0f405aa6efc899967a74b8",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs",
+      "owner": "C",
+      "bytes": 7095,
+      "sha256": "792c0bc7ec6ca8335c0bddfc35307f47373d1d9911c5c04de1000312e23fc2a7",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/CtapRequestBuilder.cs",
+      "owner": "A",
+      "bytes": 7157,
+      "sha256": "3df6adae013a0006b6203dd6ba843757839114aeca01391b1e3add9366e4f5e6",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/CtapResponseParser.cs",
+      "owner": "A",
+      "bytes": 7262,
+      "sha256": "b92cacd4edfec7d7397cf086b6ef6f0f301666cd3218db03ff0026024b05f762",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Config/AuthenticatorConfig.cs",
+      "owner": "D",
+      "bytes": 10653,
+      "sha256": "2e08ef1fe9febc7c006f7413df6d078b2a313c2cfb9839aff481049fc4fd781a",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Config/ConfigSubCommand.cs",
+      "owner": "D",
+      "bytes": 2413,
+      "sha256": "5d791b1bba0856f372faa8883464c0fd8433316c3e48865811a7b77f4ee86098",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Cose/CoseAlgorithm.cs",
+      "owner": "C",
+      "bytes": 5944,
+      "sha256": "0ccecb0cf634928b629a263f23108e6562d98e5a6babdc88f39669b3e34fb410",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs",
+      "owner": "C",
+      "bytes": 8375,
+      "sha256": "a9043ad4760fddf12fca862df27765ccbcd30ca0a0a9a54d5083ddc87a96b01e",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Cose/CoseKey.cs",
+      "owner": "C",
+      "bytes": 12105,
+      "sha256": "46263a28e5b3bc19ae39452b2366d805283e2156c113258337faab91b882d543",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/CredManagementSubCommand.cs",
+      "owner": "D",
+      "bytes": 2106,
+      "sha256": "0eabfefab902c24b2abf37277a8a39212a718e97c76a15a9cf3cef29f1106ddb",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/CredentialEnumerationResult.cs",
+      "owner": "D",
+      "bytes": 1763,
+      "sha256": "1e25e0271556e9bf3edb9a34eaa67b7fb0a011cf88fe552d715ce5c52e26c62e",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/CredentialManagement.cs",
+      "owner": "D",
+      "bytes": 17083,
+      "sha256": "6737c0b1a5948f6479810c6336e7ef2d4978738f5041516bef7e3009f29243f1",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/CredentialManagementModels.cs",
+      "owner": "D",
+      "bytes": 6134,
+      "sha256": "54e05826700f1b961e3af7bffd4b89e0c1d34870bae1c6702331eeca077372fb",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/RelyingPartyEnumerationResult.cs",
+      "owner": "D",
+      "bytes": 1346,
+      "sha256": "e663e11f562591197a2fd6e0042390394ca2b4b34192a3c291b0e86056bd763a",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/StoredCredentialInfo.cs",
+      "owner": "D",
+      "bytes": 7142,
+      "sha256": "a7d8f547b46f81ccc6c2d35013dea7125083f359ee6cab92568d81322dd847c4",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/AttestationFormat.cs",
+      "owner": "C",
+      "bytes": 2131,
+      "sha256": "ddf681106962091168483b5a2892768648ee81747eb8876fe3d767b3b2d93065",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/AttestationStatement.cs",
+      "owner": "C",
+      "bytes": 9442,
+      "sha256": "a32718acedf5e00ebad3f248be956dc0891f30a2bcd7014ba0dcb4ed9fd5e9ec",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/AttestedCredentialData.cs",
+      "owner": "C",
+      "bytes": 4472,
+      "sha256": "2c17c76fba01f3070d24f2f1f9e492186d55744cdaad4b7426eceb50090bce60",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/AuthenticatorData.cs",
+      "owner": "C",
+      "bytes": 7771,
+      "sha256": "73fe5d7d097c28570fef4af46b3d09432c2407ac757726212067fca790916aab",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs",
+      "owner": "C",
+      "bytes": 1135,
+      "sha256": "67f1de4e7765c6d653f6c491292a7041d040315ed207325d571cefbdf043b336",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/GetAssertionOptions.cs",
+      "owner": "C",
+      "bytes": 4117,
+      "sha256": "6b53b31c6840e5d480b84374ece91fe9ecfd0f8a11809ac5ca21959c64b3ed6c",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+      "owner": "C",
+      "bytes": 7564,
+      "sha256": "3f0e26570b69a6ca6fc2e9bdd144bb12a63cb50ac268b4e93b430a3a18c74578",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/MakeCredentialOptions.cs",
+      "owner": "C",
+      "bytes": 5385,
+      "sha256": "f855135de37fd261d720e0e4841f8db913fd66d2c009bcaa6ff46da5dbe6ead6",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/MakeCredentialResponse.cs",
+      "owner": "C",
+      "bytes": 10924,
+      "sha256": "38eccda2216f12d7ffb251a82dc7e834c316d86d4cd8cf1b31841a1282d81198",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/PublicKeyCredentialTypes.cs",
+      "owner": "C",
+      "bytes": 12345,
+      "sha256": "7b46a428e025b61224615d1a6086ae4224b0af55b374cf3f8dc07a6656354e05",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Crypto/EncryptedMetadataDecryptor.cs",
+      "owner": "E",
+      "bytes": 5635,
+      "sha256": "2c70d124afa15d2edf5205ddd3f21fab7ad4b8caa824ae649e2c1b1003d0aa9b",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Ctap/CtapCommand.cs",
+      "owner": "A",
+      "bytes": 2617,
+      "sha256": "a9f0128fb62011b3b8be7f51f77af87cc75bdd93943b71769067dcf992feb79d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Ctap/CtapException.cs",
+      "owner": "A",
+      "bytes": 5597,
+      "sha256": "4ad21336e63b5d65b0f5b3b743d10d6dab16d02f49de89a41762634d99c39056",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Ctap/CtapStatus.cs",
+      "owner": "A",
+      "bytes": 6877,
+      "sha256": "35a9a829a53b5d7fbf980491e615cd07c8d2bd9db1e3d1b8013bf56dfbb8d6e2",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Ctap2Session.cs",
+      "owner": "A",
+      "bytes": 16877,
+      "sha256": "fffd6c87437e310cfd340d5265fe28c5ffdd4070dc0dc8643f27974796af6b5f",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/CredBlob/CredBlobAssertionOutput.cs",
+      "owner": "E",
+      "bytes": 1640,
+      "sha256": "56611e70bb6df613469c5561617f8768f7e04ee3727394bc2eeb7b7aad0ec049",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/CredBlob/CredBlobInput.cs",
+      "owner": "E",
+      "bytes": 2748,
+      "sha256": "d79153300199baf4746214ba77e3d9d8daf343d5eaa82fd84b28f77f8387d992",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/CredBlob/CredBlobMakeCredentialOutput.cs",
+      "owner": "E",
+      "bytes": 1695,
+      "sha256": "4c1756a0cc9b6902c088776c033a9e5588a15806c5021f8979d86a77e3a218ba",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/CredProtect/CredProtectPolicy.cs",
+      "owner": "E",
+      "bytes": 2269,
+      "sha256": "f36f1412bf927d68b761c60cf4ec477b55615857cad55da73547c4b86f56f38b",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/HmacSecret/HmacSecretInput.cs",
+      "owner": "E",
+      "bytes": 4344,
+      "sha256": "8d7b470f90e633ed6784710b4c2cd6c0d2137b26a81e6d8388b3f4ce81c9918d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/HmacSecret/HmacSecretOutput.cs",
+      "owner": "E",
+      "bytes": 2472,
+      "sha256": "4c70b8b5f6e21d8c34d71809ebe18cdb09e1e4439d9495996dfc01b631be3a94",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/LargeBlob/LargeBlobOutput.cs",
+      "owner": "E",
+      "bytes": 3221,
+      "sha256": "fc95aa2ff10f2a7f8cd173cbc73fc61306b8bce996cc992a1f17c6023288a1c0",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/MinPinLength/MinPinLengthInput.cs",
+      "owner": "E",
+      "bytes": 2237,
+      "sha256": "a329ae641893197520809e3056480cbc107f680ee559ff9cce9651d174e81199",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/MinPinLength/MinPinLengthOutput.cs",
+      "owner": "E",
+      "bytes": 1638,
+      "sha256": "38807bf8252ddce1826100ce5b4243c62360382b17e7874d43e5e187e9d372a1",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/ArkgP256SignArgs.cs",
+      "owner": "E",
+      "bytes": 4974,
+      "sha256": "f6b6b68d3fd33792148e37c1a4da3bd3b5966a828c04c2cadb9c9b94bf90b017",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/CoseSignArgs.cs",
+      "owner": "E",
+      "bytes": 2762,
+      "sha256": "0a40e8d0927f2bc7a979c191896b6556db5e812814888d255c0c94ba01a6ff5d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignAuthenticationOutput.cs",
+      "owner": "E",
+      "bytes": 1435,
+      "sha256": "c50facde1ef9eb15259d04d2320acc04d38fe70ffbfa23950393c1204e06f7f6",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignCbor.cs",
+      "owner": "E",
+      "bytes": 19614,
+      "sha256": "5f13a06755d836d4ee294c10254cd87bb12e2fc0806f6fe13fbdb5fd0f5e31ae",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignDerivedKey.cs",
+      "owner": "E",
+      "bytes": 6900,
+      "sha256": "1af9b2e387ba1f52cae76485aa493db45a7ac7278a80025a231d824d2bdaa889",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignGeneratedKey.cs",
+      "owner": "E",
+      "bytes": 5478,
+      "sha256": "1da678efe3fb36b8948386f25686cf956b8bf050357b43f90415365860275f2b",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignRegistrationInput.cs",
+      "owner": "E",
+      "bytes": 2494,
+      "sha256": "cb745bd4e4c7241aa36b371ed277fad56ce33dac9565bf4df5c53d60be9924c3",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs",
+      "owner": "E",
+      "bytes": 3522,
+      "sha256": "93ad826fe7fb6f00a9452dea72eb6a7f175284e21c43a9894006b06a48ec29ac",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignSigningParams.cs",
+      "owner": "E",
+      "bytes": 3122,
+      "sha256": "bb13ca8fdc44f7db52dffef94b0a60869fb08ef2ec6c5c5c1904bf9c57f72f35",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs",
+      "owner": "E",
+      "bytes": 17977,
+      "sha256": "b7f4abd3f98f416d9741e97344e600eb841c048cc7820da038b4a79bbaa692b0",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/Shared/ExtensionIdentifiers.cs",
+      "owner": "E",
+      "bytes": 3708,
+      "sha256": "665ec81f678885c44d09517a4ba6d92fae2c9c8ed854ab45b49bcdcb6d9fe42d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/Shared/ExtensionOutput.cs",
+      "owner": "E",
+      "bytes": 11694,
+      "sha256": "8c34ea956f276f204ec2f81b51090a30a4eb54181bd2c424e66b4dac2063f739",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/ICtap2Session.cs",
+      "owner": "A",
+      "bytes": 7042,
+      "sha256": "5d2f4075ee510dd0f7fb8bf940676947905ace7e619968a4d59ebdfcbf0eda25",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/IYubiKeyExtensions.cs",
+      "owner": "A",
+      "bytes": 9813,
+      "sha256": "bce49013ac83fdd1dbdc694063fe0871b91ec266d87938307e62abe715eb2204",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/LargeBlobs/ILargeBlobStorage.cs",
+      "owner": "E",
+      "bytes": 2032,
+      "sha256": "d511f706729633489c48fa5540fd81b8c4a0eb2b797688be560a4ad9a6589b34",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/LargeBlobs/LargeBlobData.cs",
+      "owner": "E",
+      "bytes": 17400,
+      "sha256": "93d72f8a3379b870f41f678d8bdfcc5f3cb56185b46a2d300b9e2905db1b0167",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs",
+      "owner": "E",
+      "bytes": 17896,
+      "sha256": "21e8db4b552070a8096ca51f49849e5b7660e6b327592c40810923d54ade9c77",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Pin/ClientPin.cs",
+      "owner": "B",
+      "bytes": 27149,
+      "sha256": "0ed9d4b0ca55c9d09590ffaee2a8c10e9458ec8858c0e1a31810dd867222dc5d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Pin/ClientPinSubCommand.cs",
+      "owner": "B",
+      "bytes": 5496,
+      "sha256": "da314d9c8487dec1cf9277c53b20fee3d020d435433fe9800903027be62d05bc",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Pin/IPinUvAuthProtocol.cs",
+      "owner": "B",
+      "bytes": 4868,
+      "sha256": "c5c4e2ef0239738f26136d9d428646e6d2b3595e089fa792af4a695769742207",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Pin/PinRetryStatus.cs",
+      "owner": "B",
+      "bytes": 1232,
+      "sha256": "561e8b40417a218d9438ac65f2797c09e7b7fa1499f19cd1798324fa330615e9",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Pin/PinUvAuthHelpers.cs",
+      "owner": "B",
+      "bytes": 4514,
+      "sha256": "3ff46427d8b3a75b49f882184efdfe48d6d8809fe8a7043eed5bda9c8cc78e97",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Pin/PinUvAuthProtocolV1.cs",
+      "owner": "B",
+      "bytes": 7214,
+      "sha256": "bc9e6abe4e4faabe1cd5ec271e1a6f916d0ff919d8a5b707a30d0f10308e8559",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Pin/PinUvAuthProtocolV2.cs",
+      "owner": "B",
+      "bytes": 9518,
+      "sha256": "067914b51ccaa81da3c7cc3f4c6c1c01b6542b95e278a6f64ed0f5784ec27f7d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Pin/UserVerificationRetryStatus.cs",
+      "owner": "B",
+      "bytes": 1300,
+      "sha256": "90f8f7db1743d39765a9dbf94e446b28f06c75b13c7f3d44b5323e64ee36aeb0",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/PublicAPI.Shipped.txt",
+      "owner": "F",
+      "bytes": 17,
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/PublicAPI.Unshipped.txt",
+      "owner": "F",
+      "bytes": 109329,
+      "sha256": "c50ce758af58fac75685c66fb1bca2355094ecf02b1411008818ced5fe161ef5",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "owner": "F",
+      "bytes": 1250,
+      "sha256": "c1efd496a29f25fd1828531644c20ec2cdaf2ce33b6c1fa04f97f559db15a0e3",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/CLAUDE.md",
+      "owner": "F",
+      "bytes": 6316,
+      "sha256": "9018db5ce9b8786718c3cd421d4e74c91282633f7ef31ea1e46186fb349386ef",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs",
+      "owner": "E",
+      "bytes": 7769,
+      "sha256": "813394a4700eb1c3776ffa0ea9f3bd35a7c7a08bbc7a4296f1793326dfc28463",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2RequestAuditReproTests.cs",
+      "owner": "C",
+      "bytes": 1908,
+      "sha256": "22390bfa00ffe83c0c33865a1b80cfab297abafb875b9526eba389199bd53d47",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AlgorithmSupportTests.cs",
+      "owner": "C",
+      "bytes": 5859,
+      "sha256": "f21a1085c88084322b2e799ad532d5fc70d46ad48ab5265078f735ed54a3a916",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AuthenticatorConfigTests.cs",
+      "owner": "D",
+      "bytes": 12348,
+      "sha256": "e135154ee80d4bb533ce350424f1d43567efe210bf774e20d5f1afcd4ddd3562",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2BioEnrollmentTests.cs",
+      "owner": "D",
+      "bytes": 3615,
+      "sha256": "f897183aab6c00a579ec6c2b95c6ef910f5d60e3f88c3a72affe7427e013c804",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredBlobTests.cs",
+      "owner": "E",
+      "bytes": 11633,
+      "sha256": "62a76ade03ff84b76e527628c6ea2584fa7cf291ef7833a5301800b65d89b0f2",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredProtectTests.cs",
+      "owner": "E",
+      "bytes": 11785,
+      "sha256": "cd44b471575cd6ba7026162237f8372a8850d55b5f92bd00253cb7cdf1681d21",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementExtendedTests.cs",
+      "owner": "D",
+      "bytes": 9586,
+      "sha256": "799f0b13acdfa06a5e7989f6609fb62ce083b20fc79b0e2141d267e7f60d521d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementTests.cs",
+      "owner": "D",
+      "bytes": 12327,
+      "sha256": "11cec719d989b3d52033c4f0a2ab85c28a7817276eff1e595a1291e3d08373f8",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EncryptedMetadataTests.cs",
+      "owner": "E",
+      "bytes": 9479,
+      "sha256": "c658f54fbc8845542eb835daf2fef2f299657f56956a0296b248e902fb90e300",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnhancedPinTests.cs",
+      "owner": "B",
+      "bytes": 4661,
+      "sha256": "35ce8220403999bcf5b879cf62b64f1e8f9374ea5867e83ad742d249685c2e89",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnterpriseAttestationTests.cs",
+      "owner": "C",
+      "bytes": 5172,
+      "sha256": "6e3ca2480b0289d236aa789e43ac52e44bb428ae54c625202b514116e51c0468",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2FipsComplianceTests.cs",
+      "owner": "C",
+      "bytes": 3421,
+      "sha256": "84425474d72515da6a328a23dab203a42d16f8bfb482cba9b189c2509d279112",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetAssertionTests.cs",
+      "owner": "C",
+      "bytes": 12264,
+      "sha256": "d0c2c1e0220bda3023de28982b4870914b89af0d1a7631d146bbb32cf5f49408",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetInfoTests.cs",
+      "owner": "A",
+      "bytes": 7171,
+      "sha256": "8eaf5376139d4e5ec20a0b14b89f927e87cfbc9eeddb55327a8e4dd25ce48b35",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2HmacSecretTests.cs",
+      "owner": "E",
+      "bytes": 17787,
+      "sha256": "a1cee13b76ca35f72dfc850d488fabf50e5b41a6b40d7d37e0ca2fa90eb8f603",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2LargeBlobTests.cs",
+      "owner": "E",
+      "bytes": 9818,
+      "sha256": "c0e1396ee13e91c9598f75e816b985da9a8c5165c3f8cd70d80b7f16283f421d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MakeCredentialTests.cs",
+      "owner": "C",
+      "bytes": 14658,
+      "sha256": "85ff532a67b1e7d190094fd586c1de9998b100bfb2154676c65a696b38ba068b",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MinPinLengthTests.cs",
+      "owner": "E",
+      "bytes": 4905,
+      "sha256": "c2bfa0e76d239b06b2596267ccc827bfbfd296be683a80a61e846ab1f8842f40",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PinManagementTests.cs",
+      "owner": "B",
+      "bytes": 8891,
+      "sha256": "4dde07bd8e981a153c439f2f7fb0b7882f95695b281a75b2aecef4f30ea4f580",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PreviewSignTests.cs",
+      "owner": "E",
+      "bytes": 36269,
+      "sha256": "98e6264c0966f2d678c01fba7ba7787d6786625b335a2473e4385eddb5f34ab5",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PrfTests.cs",
+      "owner": "E",
+      "bytes": 10040,
+      "sha256": "f5d35dc50d75e5cdd29300237dd84ffb0d6aca2df1f4302c491911a22c17b512",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SessionSimpleTests.cs",
+      "owner": "A",
+      "bytes": 7851,
+      "sha256": "296a9b6ab597ab18a1d7ba8b7a2baa3bfae8b6f26c071e447ded81f520f66c4d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SmartCardTests.cs",
+      "owner": "A",
+      "bytes": 5284,
+      "sha256": "336ef4e412f1b42e5f44c0c5d1d82a0ee3ab4d3144bc9fee319a30a734f3ca42",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestData.cs",
+      "owner": "A",
+      "bytes": 3633,
+      "sha256": "4721331674180aed3296243418ab71d807fbb0c709c37c93c724295d166bd4c0",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestHelpers.cs",
+      "owner": "A",
+      "bytes": 6539,
+      "sha256": "93b214c26ee7f4063c258358a24bba63bd6431a48ebb61999d9810baae23bb33",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TransportTests.cs",
+      "owner": "A",
+      "bytes": 9093,
+      "sha256": "00bfeee3da192c9fdbd95197e811d2837904eb5f508061261d08163c80a44fa9",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/IntegrationTestBase.cs",
+      "owner": "A",
+      "bytes": 1033,
+      "sha256": "9dd0f9f7473c012650ae2e36da22f38029d082a5b6d2464d780819addb4767f0",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs",
+      "owner": "A",
+      "bytes": 12064,
+      "sha256": "1697385e7513701c24041668a8cf43fec3b97cfd809498c050fc0d361f89dfec",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/UserPresenceProbeTests.cs",
+      "owner": "A",
+      "bytes": 5796,
+      "sha256": "df100a100aff93b109720bc4aa1e5109b878119465b1aee48fa7f6657d743ecc",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+      "owner": "F",
+      "bytes": 1662,
+      "sha256": "17e0a1500445f3a31c824b80f23e89d5250eeff6113476993953a8c8a5437228",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/xunit.runner.json",
+      "owner": "F",
+      "bytes": 201,
+      "sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2ExtensionAuditReproTests.cs",
+      "owner": "E",
+      "bytes": 2808,
+      "sha256": "12747e3b32412078153b77337f66761b4a6dc803991c4f04f49456885f0f5dc0",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs",
+      "owner": "E",
+      "bytes": 5802,
+      "sha256": "58ff6fc93d6086ac355786021f9341f71c652e59e295b95fc7335ae29cd4c23c",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2RequestAuditReproTests.cs",
+      "owner": "C",
+      "bytes": 5370,
+      "sha256": "281a7428d37d36a7f6dc5a401a0e94e951aa9a73f188c4239b6b17d30315508d",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuthenticatorInfoTests.cs",
+      "owner": "A",
+      "bytes": 16582,
+      "sha256": "bc6583ae183daffff41a6b010e8d1ff031be5e35ac12864666c83fd89c73da60",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/BioEnrollmentModelsTests.cs",
+      "owner": "D",
+      "bytes": 12988,
+      "sha256": "fbd364f760d1858e7846b46c90ddb7812ad403bc639240527b978b79f464f54c",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/FingerprintBioEnrollmentTests.cs",
+      "owner": "D",
+      "bytes": 18223,
+      "sha256": "de2725041e6ab1377cbd5fbe37c88211f158b464530834e128544b612918b706",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/Ctap2SessionRequestEncodingTests.cs",
+      "owner": "C",
+      "bytes": 7891,
+      "sha256": "9f387d24eb3d6f2bc385929fb2d0d0d398c54bbe83529bc65d9a91da2c48c63c",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/CtapResponseParserTests.cs",
+      "owner": "A",
+      "bytes": 7789,
+      "sha256": "5d9c9b2701229a143f891f2899f84fd20578d33166d4a1b2f5e1b9bc79a7ae50",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Config/AuthenticatorConfigTests.cs",
+      "owner": "D",
+      "bytes": 13896,
+      "sha256": "06d2332a6946c7651718012f7cd4b7c4cd4a7eae30f0629aa6460dae8c8af93b",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs",
+      "owner": "C",
+      "bytes": 9995,
+      "sha256": "4f14b3b5d569cd74399263a17c7dbfe72c87a5bafe7b6ac349d5dd28665ca53b",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cose/CoseKeyForwardCompatibilityTests.cs",
+      "owner": "C",
+      "bytes": 7006,
+      "sha256": "bbddd607fc391c225ef2b855bce7d7f022e45d1406622ae11afb2852b18f7c6f",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementModelsTests.cs",
+      "owner": "D",
+      "bytes": 17451,
+      "sha256": "feb36053a496a44799e9fb90460adb25daff2ecc7b42bb7ba3b201e20c0984d8",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementWireTests.cs",
+      "owner": "D",
+      "bytes": 15215,
+      "sha256": "533d1d9dd904619f2351cb468a7edc37e88e6bc56a643cddf5d93a7afd26d391",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/AttestationStatementTests.cs",
+      "owner": "C",
+      "bytes": 3699,
+      "sha256": "476f57fbbd06e378af18b95636c0958141798af7a57bd6bb6fe1d9c5aaffd01e",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/AuthenticatorDataTests.cs",
+      "owner": "C",
+      "bytes": 4601,
+      "sha256": "3e5851a818aea4383a7fda74d2b86cfed0dc982b2f25d006b915699d3d82fecb",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/CredentialResponseTests.cs",
+      "owner": "C",
+      "bytes": 12607,
+      "sha256": "870bfd72a51e221c8da1767387ec0af1cceebfbf4c6d37966427a104517ad3ec",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/PublicKeyCredentialTypesTests.cs",
+      "owner": "C",
+      "bytes": 8564,
+      "sha256": "b3828fbf2266e446bfb269144f36ef01ccdcff07f9ddeb958825a8cf03951657",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Crypto/EncryptedMetadataDecryptorTests.cs",
+      "owner": "E",
+      "bytes": 15220,
+      "sha256": "3ffdd79f823e572b056cedb6513a1ca87a475bfd3b1f93e8037aebd8ef2c0f81",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2BackendLifecycleTests.cs",
+      "owner": "A",
+      "bytes": 8644,
+      "sha256": "cae8dbad9b7464625055029234251a0c619b88fe369c3becbccb9cda71903839",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs",
+      "owner": "A",
+      "bytes": 13919,
+      "sha256": "030b1f1b56bdec19ac9fa29cab679089fe3b368760010c9e0995e74989c5afb1",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionTests.cs",
+      "owner": "A",
+      "bytes": 28350,
+      "sha256": "698a5e6b15eb3707a561771421e26deb9c3b5e81728a9a2358ae193b2fb26e40",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapExceptionTests.cs",
+      "owner": "A",
+      "bytes": 3102,
+      "sha256": "e0aad9eb0a7249c6abc89952c7170fa655ecaf563c405ad99625a04f6964d692",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapRequestBuilderTests.cs",
+      "owner": "A",
+      "bytes": 3473,
+      "sha256": "471ff966af7e189ae7fc4dbd75c760c947fb5c7e7ab82b906ee5a291c56f2784",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/CredBlob/CredBlobAssertionOutputTests.cs",
+      "owner": "E",
+      "bytes": 1216,
+      "sha256": "cfebcd3ef77fcc0a37dba80918a88a3ff54e4e93566c9f17a2fb5ab1ba4ac1d3",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/CredBlob/CredBlobInputTests.cs",
+      "owner": "E",
+      "bytes": 1092,
+      "sha256": "3a4e0e5e60c6fe8d8dfb57c8c42f58ad98367ad9b697a8849fc5debfd8a4e2b2",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/CredBlob/CredBlobMakeCredentialOutputTests.cs",
+      "owner": "E",
+      "bytes": 1167,
+      "sha256": "bf7cb305d1c11815c81a5997fd312f5d5e6b5f199b4ecb1aaa9b1ae86e61c0be",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/CredProtect/CredProtectPolicyTests.cs",
+      "owner": "E",
+      "bytes": 1093,
+      "sha256": "0400352e623b25b7861fa1cf7bb6b649cf52f54b43cf7aed95283d049c28ca34",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretInputTests.cs",
+      "owner": "E",
+      "bytes": 1469,
+      "sha256": "aff2ab6d2f72eb163af964152ece02c29bc19d1905d5008cce9929d29c474849",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretOutputTests.cs",
+      "owner": "E",
+      "bytes": 1603,
+      "sha256": "f2f09fe66b2dafe8dde58ca7b251646f6e24dbc3e3db901a29110a39b7a43059",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/LargeBlob/LargeBlobOutputTests.cs",
+      "owner": "E",
+      "bytes": 1457,
+      "sha256": "33aaffd7bad44886d03bc750c57f897297ecd7225488bdd944526dc6d34bff6c",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/MinPinLength/MinPinLengthInputTests.cs",
+      "owner": "E",
+      "bytes": 1041,
+      "sha256": "340fd792e4c3350f5c5113f2e03ac125603c74042c2f6acf860ac886ec824966",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/MinPinLength/MinPinLengthOutputTests.cs",
+      "owner": "E",
+      "bytes": 1142,
+      "sha256": "aef3eeff2465f783a86d5b9915db2a1bc80fe21ed45186970e7b44adb5b17db0",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/PreviewSign/ArkgP256SignArgsTests.cs",
+      "owner": "E",
+      "bytes": 2808,
+      "sha256": "b90c4321160e06e97cda8a3a75b6a05951c4c7d69802e35608370c3624194bf0",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/PreviewSign/CoseSignArgsTests.cs",
+      "owner": "E",
+      "bytes": 1744,
+      "sha256": "d85efc02f4071e8697acd63ace71ded7fcfd1d762a7f126054b27c98e0cf7925",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/PreviewSign/PreviewSignCborTests.cs",
+      "owner": "E",
+      "bytes": 12430,
+      "sha256": "b62e9a14d3653ce919a6690898c111b4e91e93e8c695986d3d9dcf79a7cabb89",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/PreviewSign/PreviewSignGeneratedKeyTests.cs",
+      "owner": "E",
+      "bytes": 4631,
+      "sha256": "296a52c93fcba0c5f65f465ae22553dc1f33ba803e2bafb00960d6264d6b83a3",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionBuilderTests.cs",
+      "owner": "E",
+      "bytes": 14520,
+      "sha256": "9ee541cdb7d3b35a49c4982c10f8b40ccd6d027d4ed80a3404d5d375891c0963",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionIdentifiersTests.cs",
+      "owner": "E",
+      "bytes": 1309,
+      "sha256": "28f67f9911a78293316ac426ea87c7ab7ba061d1818005382d69492ba71445a1",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionOutputTests.cs",
+      "owner": "E",
+      "bytes": 6586,
+      "sha256": "bbcd2844da7169827c24ff7773a7cbfa86c8fe32620d6ceae47c38d28e243fff",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "owner": "A",
+      "bytes": 9426,
+      "sha256": "f874fe5a1fd1a997e1cebfc67252cd0456e73146c532abacebc44231c67b99bd",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobDataTests.cs",
+      "owner": "E",
+      "bytes": 9647,
+      "sha256": "f4b08c6d358a246c8a3c60323178bb1804e47846c087bc3af6aa105e10c36f13",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobSpecFormatTests.cs",
+      "owner": "E",
+      "bytes": 10920,
+      "sha256": "613bfa4eaf0aea8707100dd1e25336b894173438adf9c5347f66ff8c728a6353",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobStorageTests.cs",
+      "owner": "E",
+      "bytes": 12535,
+      "sha256": "03e02699c1a2890be81da9f0cb93cd2b1658d73cf9fcb4120df45495fd515a16",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/MakeCredentialResponseTests.cs",
+      "owner": "C",
+      "bytes": 3125,
+      "sha256": "7e9ca3a0e705180d3ba856cf466741395b46bd46e1e20a6d19f1b981b1569532",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/ClientPinTests.cs",
+      "owner": "B",
+      "bytes": 20338,
+      "sha256": "fec34f5af3cf11c85a85e2019f79901cf6ddca0a69a8e925683827c02783f1d1",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV1Tests.cs",
+      "owner": "B",
+      "bytes": 10311,
+      "sha256": "5f8c1246987c011555ddd584dd538ce23cc4e26fc6acb688034d05149d8db77e",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV2Tests.cs",
+      "owner": "B",
+      "bytes": 13169,
+      "sha256": "d94efb8fe3e2c6e2bb96383812fc7e3906c8d5bb0e03c6844d30d2b076a44cdb",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj",
+      "owner": "F",
+      "bytes": 1100,
+      "sha256": "096513880c3c05eda48888e1135db8a15f5eb39cc4263e41dc1df0ca361d7b5e",
+      "status": "inventoried-not-yet-investigated"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/xunit.runner.json",
+      "owner": "F",
+      "bytes": 77,
+      "sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+      "status": "inventoried-not-yet-investigated"
+    }
+  ]
+}

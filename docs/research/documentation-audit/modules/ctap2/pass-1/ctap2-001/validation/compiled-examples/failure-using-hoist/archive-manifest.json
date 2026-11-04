@@ -1,0 +1,460 @@
+{
+  "status": "Immutable complete failed-input/script/config/host/log snapshot before using-hoist fix",
+  "files": [
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/extract.py",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/extract.py",
+      "sha256": "7e8a83a74d29c7c20081396fc34bb35eed096ded3e7a9100b77ea5a4d21c39bd"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/selection.py",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/selection.py",
+      "sha256": "f775ed42df29ca43fe0b72de9e28f78caa47dcca5c4b9b9eff26048a2a26c1e8"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/manifest.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/manifest.json",
+      "sha256": "1971c10ff7a858f01ceeadc8f9c72e507a0ea8d16aafb95d95e68c4f90fcc850"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/strict-raw-not-applicable.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/strict-raw-not-applicable.json",
+      "sha256": "13e6cdc10733d72291efccefa659b1a7ea2cb697be0a9b16671667f9279a88f4"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/verify-inputs.py",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/verify-inputs.py",
+      "sha256": "47889d7e71afaf93fd564e2b2ad9a69e9e1f079d60636d201a63d439c642a566"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/static-verification.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/static-verification.json",
+      "sha256": "a0c7f676be605efe2850547ebd6f5f374bd756ec141737928fb3fd7ecc8f44a0"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-session/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-session/complete.cs",
+      "sha256": "c6054f9c9cb758a3e02086c11f0ba0cfd6d29a27e7889e9183d6cf18887d968f"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-session/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-session/readable.raw",
+      "sha256": "7ca5aa1dd29685e861142437c5e54405de840726d328ea9f44b4c9efb229e516"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-info/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-info/complete.cs",
+      "sha256": "d28d9b6dfbcd7dc1baf17776b53dd5b44feadafa82f3e76abd8c37d6211c3d2d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-info/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-info/readable.raw",
+      "sha256": "ce52c8b77c3026f814c1b91f472450d35853fdc8527c736df4fe903c3ece26f0"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-pin-create/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-pin-create/complete.cs",
+      "sha256": "4833bf5a1504308b46767e42e040e5a6ca34422a6bb8cc83bb9ea471ba7829d1"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-pin-create/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-pin-create/readable.raw",
+      "sha256": "97ae46dd165f1e83ab4ed9934be7163402392c4ee422d19a99b60f42c7758e77"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-extensions/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-extensions/complete.cs",
+      "sha256": "e2953677ebcad96f4130ebccdac8334722b86a1512801512d8b4f0e86c4320f7"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-extensions/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-extensions/readable.raw",
+      "sha256": "0d7efd826828aad0033721e6ae8b2b08e9ccbfb959dd57182ca1cbfa0d34a177"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-admin/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-admin/complete.cs",
+      "sha256": "9761e8582b55ba797bb87a21a0b063a126d25200c1ac7b35ec951e86f79a83d3"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-admin/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-admin/readable.raw",
+      "sha256": "fc98c0d4e74aa9e11c7e0fb11a795e2d83594e0e21a2090fd316de6ace952f5c"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-raw/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-raw/complete.cs",
+      "sha256": "b563ad0490daa5980272e7938bbf27707749f6ba25f8923750bce99d7bbf9171"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-raw/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-raw/readable.raw",
+      "sha256": "7e066ae861f61fc77d95c093e791e6f33581348f8a3f44023e81003fe099ee3b"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-memory/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-memory/complete.cs",
+      "sha256": "43fda2968a9bfafe7cf98890bbe7a612d3fe9d30862efd0a29520487954568f6"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-memory/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-memory/readable.raw",
+      "sha256": "111f3e2145a263d295dc0cd82f23cb93a794b7bbe3e535ee38c41bfff06c2d85"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-protocol/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-protocol/complete.cs",
+      "sha256": "ef866a438150360f087128a4b9c66014c84fbc8c0e3c458f50a57710ad235e0b"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-protocol/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-protocol/readable.raw",
+      "sha256": "6832a268b74722740c91e921e3ba6e29d93635f1bb5d0fb8743c3db2e19df71e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-threshold/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-threshold/complete.cs",
+      "sha256": "af022b2f2e697bf04d5a059b1ecdff8382f6c3a6bf5759d504169f2e574b3b9b"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-threshold/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/guide-threshold/readable.raw",
+      "sha256": "87d9b7b13c6c9105f112b356797452535db37629b37c8128fe3c855db89e3016"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/unit-versions/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/unit-versions/complete.cs",
+      "sha256": "60bf13f6b21fd83470fd117c1175e9eda10e5f5fea05b9ee56a64b4e921dcd27"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/unit-versions/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/unit-versions/readable.raw",
+      "sha256": "c35fe42ca428fc29434ce25b9d10de0ec957e5294e2135c5cc0b01853c67102f"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/unit-retries/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/unit-retries/complete.cs",
+      "sha256": "463e8ec6481184fcd425780120bfdb7ab1337785b0157f39b4b56508ad45e57a"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/unit-retries/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/unit-retries/readable.raw",
+      "sha256": "6b90db04d73ce0a8019f33d50bad2a7f9632ad62ef5dae7deb069837efbc8258"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-info/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/hardware-info/complete.cs",
+      "sha256": "71ba45c306fd7cc8723e121c805eabbf8b9898c87685d96ff33a40ca01f5bd92"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-info/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/hardware-info/readable.raw",
+      "sha256": "a3d77bdf0de080cc5e393b0c828c6346b80e5ce82b498439779a89a72904416a"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-paired/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/readme-paired/complete.cs",
+      "sha256": "2923136986ba24ee26b6961d90d578ffe3c0b0aeb0052804124d80a45312cc4d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-paired/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/readme-paired/readable.raw",
+      "sha256": "79b613c79189f55fdd0a42ddd90e221e3a4f6462616b57f30547436598a6acea"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-discoverable/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/readme-discoverable/complete.cs",
+      "sha256": "55604a44642b8431f377006c05bf4ea136ff588d2279986d4268c32d3c3a3b13"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-discoverable/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/readme-discoverable/readable.raw",
+      "sha256": "c55b0ac863222ffa3e3ba5ae211f434e587f7bb0cc557c542ab04ec2ad839166"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-admin/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/readme-admin/complete.cs",
+      "sha256": "2649ad541db1259de100366047ec452947d5c3942cc89a1ec3a465edad7ce376"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-admin/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/readme-admin/readable.raw",
+      "sha256": "cae290c3ab6415f819c3d341ba5759669db360df9ed061a4ca21a62c57ad018d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-prompt-factory/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/readme-prompt-factory/complete.cs",
+      "sha256": "9fef4d52580b5e555757a74a96fd2e3159340c6ffe7bbdfdc2ff25c97929a931"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-prompt-factory/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/readme-prompt-factory/readable.raw",
+      "sha256": "c5bb9c6cae2768e9ffcdcf52c5896bd2f6d637b93f237847968e4f0e2991b2e2"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-create/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/hardware-create/complete.cs",
+      "sha256": "35c9aa10441d62e75efcdceb038795e754fed7fb4bc3e90c00dfd490b197ec03"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-create/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/hardware-create/readable.raw",
+      "sha256": "3b1440886ab6785f3a9969fcdf7f9117a7629174c8dd60b43392d62fdfc49217"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-set-pin/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/hardware-set-pin/complete.cs",
+      "sha256": "52cfd2386ce3e7f61567873c21a22c005c62565a713bfb12d54d78f5a4a76b7a"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-set-pin/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/hardware-set-pin/readable.raw",
+      "sha256": "55cd52b4a4fcfa679166ac16035ebed34c52c355c78abf6767e8171d8a6699cc"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/unit-cbor-fixture/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/unit-cbor-fixture/complete.cs",
+      "sha256": "0a07e47d5f40331350be3eb0ed438fd47395a7ac872b2fc3ea4e30a60f7a6279"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/unit-cbor-fixture/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/unit-cbor-fixture/readable.raw",
+      "sha256": "13dd1ede43e8980c6f0d36053b0227854cf1c5c6e3efa467e3f9ad4a67a6c2ca"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/unit-extension/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/unit-extension/complete.cs",
+      "sha256": "11d53326ea3dd16bca5834e92ee9f7d345f641b6dac5df8193d6d7bae68e1990"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/unit-extension/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/unit-extension/readable.raw",
+      "sha256": "f6ce405fda26820b04d4eaec8fb564bc252b4fd029d6287396136c6fa27746cc"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-info/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/xml-info/complete.cs",
+      "sha256": "a2d4d4ef1823b879f8880b7a998af0a1cced5356ba7fbc4cb5b877a6b934f82e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-info/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/xml-info/readable.raw",
+      "sha256": "f0a0ace81a48399fe7e1de06da1a93d1de515d099d5c62483e722578838b6b33"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-session-alternatives/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/xml-session-alternatives/complete.cs",
+      "sha256": "9cd3b9baa60411dbd3eab699a99087c6269a7c47831e89aa29ab10ffcb0ace52"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-session-alternatives/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/xml-session-alternatives/readable.raw",
+      "sha256": "f1e90d0f6a315e698b29f7a81635963eb42c62f180ecaaa9bf4809596b0c4aec"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-builder/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/xml-builder/complete.cs",
+      "sha256": "ab6d12baf894e85c2b72906e09d0d61350304f689d04da6f58d044c6c3001437"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-builder/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/xml-builder/readable.raw",
+      "sha256": "a915a5fb00d29a16b6e0062a7381b2afea0fab0a75696868c7cdf1f12004b06e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-output/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/xml-output/complete.cs",
+      "sha256": "7021d2741e9dfe8de378c5a78b9d82ea0329925a6e69f12c84b8a74b98c67b4c"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-output/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/xml-output/readable.raw",
+      "sha256": "333d3180fe60df075b0842b1d23cf1674aa0fec168a03309bc757b2d8e01e5c3"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-operation-wording/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-operation-wording/complete.cs",
+      "sha256": "9199702e30dfe9c74494b1c79464fae6dd61499070ee95b5b7f96eb98708d314"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-operation-wording/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-operation-wording/readable.raw",
+      "sha256": "8edb2aef454b22ccd07d6fdf94bd00852129a6ad207b72f2a261cc85d0707971"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-intent-callback/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-intent-callback/complete.cs",
+      "sha256": "3e6cdd44e2cf13dc71008c649e1ed43d90b15917390e5d40f39da7f5178c74e6"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-intent-callback/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-intent-callback/readable.raw",
+      "sha256": "e4c4443cb23feb6d831ab42590b4bb694c489cb1c874c49616505c327e99dc2c"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-intent-task/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-intent-task/complete.cs",
+      "sha256": "350398f9be555a35ba771115eccc5d8bd0579853a1e02e4843f4c0999df40baa"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-intent-task/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-intent-task/readable.raw",
+      "sha256": "6390a1e842acfb574c5c612d9b9f5f9b7320b2fc4fc00b140da1a1d6e8b08df9"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-raw-hid/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-raw-hid/complete.cs",
+      "sha256": "0d922b0cf7c0eaaf1ed18c97fdabcf6ee36f1b9503a3fa8ac6524b8dd6aaa16d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-raw-hid/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-raw-hid/readable.raw",
+      "sha256": "abcd066369ca1219a32257283a78ad9afda9509ce2380d5db2019c651ce149de"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-hid-management/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-hid-management/complete.cs",
+      "sha256": "f9d49ab7efb0cb13807b4f7ffafd1ccc155c86f09633b90e9dfecb24b0dcf681"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-hid-management/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/shared-hid-management/readable.raw",
+      "sha256": "2809c1cd3137ed3e941d8a3b115f7d8dcb0455b162084f84aeb9d6e07e2d2ec8"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-paired/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/webauthn-paired/complete.cs",
+      "sha256": "5bbae54bf1f94c814cdbc7be7a2ef64e0c73385a0a26887992caac44413c5387"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-paired/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/webauthn-paired/readable.raw",
+      "sha256": "d409c19f31c7ccc4b805a549c70ebc5ae198d6f338f6267564e6ee9eef9cc582"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-pin-config/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/webauthn-pin-config/complete.cs",
+      "sha256": "95e63b8966237cbb26e99daf5e3e1f5b166d0fbe6fa00f0a31269e528f79619d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-pin-config/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/webauthn-pin-config/readable.raw",
+      "sha256": "e556e057c63198d61e992cc4170c084f310e798e9be71843799cc5198e0285dd"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-prompt-factory/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/webauthn-prompt-factory/complete.cs",
+      "sha256": "fbf53ac952dfe4ab858b439336cd1bbd76779c0b67873b7e09f0cfe1aad9ef8e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-prompt-factory/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/webauthn-prompt-factory/readable.raw",
+      "sha256": "df6c5970b6618db4d16f86b871f947dd2cbe28d6fe6071cc5edf8a77f0ed7064"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-pair-policy/complete.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/webauthn-pair-policy/complete.cs",
+      "sha256": "f9f95ecde36fe5508f991c80ba2f2525e78189fc762b10660dfa8a93b07be54e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-pair-policy/readable.raw",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/compiled-examples/webauthn-pair-policy/readable.raw",
+      "sha256": "0fa7bac218b307040c935c3fdcf4168b7769d35c685535014b0f4a9d5cacca75"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/run-contexts.py",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/run-contexts.py",
+      "sha256": "964202a94b889e3e1f50243c7890b7ff53511f9b032f3a819b0ea939177e9105"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/snippet-preparation.md",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/snippet-preparation.md",
+      "sha256": "a59df21aac30f36d008d8baa3f786258e510008fa55ceab72a472b367204ed99"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/prepare-project-context.py",
+      "sha256": "6068aa4e5fc1a3c12c0d2e0646a12f432f53d690e5da567a537da2ce3f084a9d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/context/contexts-manifest.json",
+      "sha256": "d97b6d3fe7463a942975082dda81eea299ff1f436a19024e31cf98d512620511"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/Directory.Build.props.template",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/context/Directory.Build.props.template",
+      "sha256": "82616bb538b4ec4a0ce6862a9b27627edf438cf8613af206030a28d9ba1f3c4f"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/Directory.Build.targets.template",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/context/Directory.Build.targets.template",
+      "sha256": "ea70485f6d64bf73ba96ed52324d0f5367ba8f6f6afda2a90a68d4dba7215391"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-lib/Directory.Build.props",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/context/consumer-lib/Directory.Build.props",
+      "sha256": "e7e67c6e3141560f883e74c05a4ee36a5d8ca3f58cc1337519313073e5343139"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-lib/Directory.Build.targets",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/context/consumer-lib/Directory.Build.targets",
+      "sha256": "dca4eaaf9d6e20610be49bfebc9ea9e81ae024d09eff20336877e0e8928e0d28"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-lib/Context.Packages.props",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/context/consumer-lib/Context.Packages.props",
+      "sha256": "54dcc129e2d523fff248e0d1b0f4b6ca22cf2333a17e9468e11abded7077220f"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-lib/Context.Items.props",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/context/consumer-lib/Context.Items.props",
+      "sha256": "d74c9d9c3c665212706752c9cbc92753b91fae6b7b111e1f6d4cb21a064af6a7"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-lib/context-manifest.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/context/consumer-lib/context-manifest.json",
+      "sha256": "d15a2cab749c4a38fe69661120e88be066a9fdf0e4c6a5277dcf957565fe3ab4"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-lib/src/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/checker-source/context/consumer-lib/src/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.snapshot",
+      "sha256": "73054ed3d0b0f8a7d02bf89de65dd9fb7d8fce2acb2e1a4b547ef1b2898ebcd6"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/context-runs/consumer-lib.log",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/context-runs/consumer-lib.log",
+      "sha256": "bfe53285a76fe763c5f0d3d5cc57d5850c89399fedacfe54ce06ea88b1ff0498"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/context-runs/result.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/context-runs/result.json",
+      "sha256": "a6821f0f9e8dc6c0a4cba5851e11fc6f00632abf868d1f4aead97989dbd43fa8"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/context-runs/consumer-lib-20261104-014251-526-build/run.log",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/context-runs/consumer-lib-20261104-014251-526-build/run.log",
+      "sha256": "8e4d3867a2a7d50ec973cc3c4ce08ec3b4a89296bdbd65830a7536b91b74f56e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/context-runs/consumer-lib-20261104-014251-526-build/01-clean-AuditCt001.Examples.consumer-lib.log",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/context-runs/consumer-lib-20261104-014251-526-build/01-clean-AuditCt001.Examples.consumer-lib.log",
+      "sha256": "6b6979dbe2c3061feaacb9a5d8628a69b201c5793df669859c610bbe11bc35da"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/context-runs/consumer-lib-20261104-014251-526-build/02-build-AuditCt001.Examples.consumer-lib.log",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/context-runs/consumer-lib-20261104-014251-526-build/02-build-AuditCt001.Examples.consumer-lib.log",
+      "sha256": "201e9ebe647f01e35cf55e9b0fe8438ee7674b020d5dd84ffc14bdf5e252e5cf"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/context-runs/consumer-lib-20261104-014251-526-build/result.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/context-runs/consumer-lib-20261104-014251-526-build/result.txt",
+      "sha256": "00a323a04ca1858ad900e6638eafd5d080ce4d55ea75765d79a8cfc0d79a5f88"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/context-runs/consumer-lib-20261104-014251-526-build/result.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/validation/context-runs/consumer-lib-20261104-014251-526-build/result.json",
+      "sha256": "a38e69731d3e596a1e55e5e11b30a7aeceb57adfbe1426a320bf129543ffe119"
+    }
+  ]
+}

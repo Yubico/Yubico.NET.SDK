@@ -1,0 +1,100 @@
+{
+  "status": "Preserved entire failed MSBuild workspace before replacement; includes assets/generated inputs/resolved references/analyzers",
+  "files": [
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/analyzer-configs.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/analyzer-configs.txt",
+      "sha256": "4d13c87d2b0aebc955d5fb778e602ce348760ffeae1f05d908b06f37223892b6"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/analyzers.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/analyzers.txt",
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/resolved-references.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/resolved-references.txt",
+      "sha256": "e775d2fc034465db2b6b952a30fe45b2a82d1b8bbca7aca3ebf4be024c2cb4f6"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/compile-inputs.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/compile-inputs.txt",
+      "sha256": "c0dd53aa1d5a2e7aa59fcf0d64eae54572e09da30d62b7bfab56b0dc59d246cd"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.nuget.dgspec.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.nuget.dgspec.json",
+      "sha256": "7cc0c7adec807366a03806660a39cc36683d433d990f5bcedc6ee6ba7dd5af59"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/project.nuget.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/project.nuget.cache",
+      "sha256": "e3263ca02671908f0029f31476562ac7189f12101a3427e2bc68a47f8be5650a"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/project.assets.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/project.assets.json",
+      "sha256": "240e63dfff6f39ca0d841382d14547edcae4db0505eaaaf7c8ea81d7b6be9643"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.nuget.g.targets",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.nuget.g.targets",
+      "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.nuget.g.props",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.nuget.g.props",
+      "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.FileListAbsolute.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.FileListAbsolute.txt",
+      "sha256": "6d17e89ab1a14397cd53646f661dc4c9a7a3176cd379a270cde898470c0477d3"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.sourcelink.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.sourcelink.json",
+      "sha256": "128ad8acff0ac29a866b02fed4c4de1b809d5d5a560193c610bc56988f3887f7"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.CoreCompileInputs.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.CoreCompileInputs.cache",
+      "sha256": "5892106d5bab90eabf332cba2de428d140d524aea4e22c2da799f37dbc3c96e9"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.AssemblyInfo.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.AssemblyInfo.cs",
+      "sha256": "9e631964d721c2011c59d07e85fecf1c800ba5611995af6979a5f2f851a6fd8f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.AssemblyInfoInputs.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.AssemblyInfoInputs.cache",
+      "sha256": "ff72f2dc02aa8330201a4d015d1331562c7c45fcedb36ccf3f4689b68efba78e"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.GeneratedMSBuildEditorConfig.editorconfig",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.GeneratedMSBuildEditorConfig.editorconfig",
+      "sha256": "2c200d3bd02f25a8e98b239ef734d09e40353a3a1f6565198fee7d01c3f5322e"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.AssemblyReference.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.AssemblyReference.cache",
+      "sha256": "85e832541759ed85bd3d936edf73e43a529c2633139747445b2bc12333d1dd15"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.GlobalUsings.g.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.GlobalUsings.g.cs",
+      "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.assets.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-using-hoist/failed-msbuild-workspace/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.assets.cache",
+      "sha256": "9ef2c182865e6858a735e600493b78412d129002d272ac99236e932af5e68206"
+    }
+  ]
+}

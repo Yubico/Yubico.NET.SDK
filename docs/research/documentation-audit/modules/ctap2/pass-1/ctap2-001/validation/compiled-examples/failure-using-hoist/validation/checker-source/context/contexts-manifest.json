@@ -1,0 +1,40 @@
+{
+  "baseline": "5b09a9b6942ded3913b5c9340c3e126617e61a82",
+  "extraction_manifest": "../../compiled-examples/manifest.json",
+  "status": "Preparation only; final roots must both be PRIMARY before preparer runs. All DLL hashes provisional until coordinator's final SDK build.",
+  "contexts": [
+    {
+      "id": "consumer-lib", "kind": "consumer", "output_type": "Library",
+      "source_project": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "groups": ["guide-session", "guide-info", "guide-pin-create", "guide-extensions", "guide-admin", "guide-raw", "guide-memory", "guide-protocol", "guide-threshold", "readme-discoverable", "readme-admin", "readme-prompt-factory", "xml-info", "xml-session-alternatives", "xml-builder", "xml-output", "shared-operation-wording", "shared-intent-callback", "shared-raw-hid"],
+      "modules": [], "references": []
+    },
+    {
+      "id": "consumer-demo", "kind": "consumer", "output_type": "Exe",
+      "source_project": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "groups": ["readme-paired"], "modules": [], "references": []
+    },
+    {
+      "id": "unit-v3", "kind": "xunit3", "output_type": "Exe",
+      "source_project": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj",
+      "groups": ["unit-versions", "unit-retries", "unit-cbor-fixture", "unit-extension"], "modules": [], "references": []
+    },
+    {
+      "id": "hardware-v2", "kind": "xunit2", "output_type": "Library",
+      "source_project": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+      "groups": ["hardware-info", "hardware-create", "hardware-set-pin", "shared-hid-management"],
+      "modules": ["Management"],
+      "references": ["src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll", "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll"]
+    },
+    {
+      "id": "consumer-wa-demo", "kind": "consumer", "output_type": "Exe",
+      "source_project": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "groups": ["webauthn-paired"], "modules": ["WebAuthn"], "references": []
+    },
+    {
+      "id": "consumer-wa-lib", "kind": "consumer", "output_type": "Library",
+      "source_project": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "groups": ["shared-intent-task", "webauthn-pin-config", "webauthn-prompt-factory", "webauthn-pair-policy"], "modules": ["WebAuthn"], "references": []
+    }
+  ]
+}

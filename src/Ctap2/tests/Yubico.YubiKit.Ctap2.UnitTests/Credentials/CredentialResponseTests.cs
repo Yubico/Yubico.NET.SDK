@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Credentials;
 /// <summary>
 /// Unit tests for MakeCredentialResponse and GetAssertionResponse decoding.
 /// </summary>
+/// <remarks>
+/// Signatures and zero-coordinate public keys are synthetic parsing fixtures, not cryptographic proofs.
+/// Missing-descriptor cases pin decoder permissiveness/fallbacks; CTAP 2.0 permits omission only for
+/// an exactly singleton request allowList, while CTAP 2.1/2.3 require the descriptor.
+/// </remarks>
 public class CredentialResponseTests
 {
     /// <summary>
@@ -36,7 +41,7 @@ public class CredentialResponseTests
         writer.WriteInt32(1);
         writer.WriteTextString(format);
 
-        // 0x02: authData (minimal: 37 bytes with AT flag)
+        // 0x02: authData (37-byte fixed prefix with AT, followed by complete synthetic attested fields)
         writer.WriteInt32(2);
         var authData = CreateAuthDataWithAttestedCredentialData();
         writer.WriteByteString(authData);
@@ -45,7 +50,7 @@ public class CredentialResponseTests
         writer.WriteInt32(3);
         if (format == "packed")
         {
-            // Packed attestation requires alg + sig per CTAP 2.1 §8.2.
+            // Packed attestation alg/sig fields are defined by WebAuthn L2 §8.2; signature bytes below are synthetic.
             writer.WriteStartMap(2);
             writer.WriteTextString("alg");
             writer.WriteInt32(-7); // ES256
@@ -55,7 +60,7 @@ public class CredentialResponseTests
         }
         else
         {
-            // "none" format has empty attStmt per CTAP 2.1 §8.7.
+            // "none" has empty attStmt per WebAuthn L2 §8.7, not signed self attestation.
             writer.WriteStartMap(0);
             writer.WriteEndMap();
         }
@@ -145,7 +150,7 @@ public class CredentialResponseTests
 
         writer.WriteStartMap(mapCount);
 
-        // 0x01: credential (optional)
+        // 0x01: credential (optional in this fixture, not universally optional under CTAP)
         if (includeCredential)
         {
             writer.WriteInt32(1);
@@ -279,7 +284,7 @@ public class CredentialResponseTests
         var publicKey = response.GetCredentialPublicKey();
         Assert.False(publicKey.IsEmpty);
 
-        // Verify it's valid CBOR
+        // Check a nonempty map header only, not complete CBOR/COSE validity or a valid public point.
         var reader = new CborReader(publicKey);
         var mapLength = reader.ReadStartMap();
         Assert.True(mapLength > 0);

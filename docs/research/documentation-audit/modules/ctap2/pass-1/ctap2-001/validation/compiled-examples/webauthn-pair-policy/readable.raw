@@ -1,0 +1,11 @@
+// SOURCE src/WebAuthn/README.md#f7
+var allowedPairs = new HashSet<(string Origin, string RpId)>
+{
+    ("https://login.example.com", "example.com"),
+    ("https://login.example.com", "partner.test")
+};
+var allowlistOptions = new WebAuthnClientOptions
+{
+    RpIdValidator = (requestOrigin, rpId) => allowedPairs.Contains((requestOrigin.StringValue, rpId))
+};
+

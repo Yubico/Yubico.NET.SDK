@@ -1,0 +1,16 @@
+// SOURCE src/Ctap2/src/IYubiKeyExtensions.cs#x2
+// Ordinary session: dispose before opening another connection on this physical key.
+{
+    await using var session = await yubiKey.CreateCtap2SessionAsync();
+    var info = await session.GetInfoAsync();
+}
+
+// Alternative: SCP03 over SmartCard on a device provisioned for these keys.
+using var scpKeys = Scp03KeyParameters.Default;
+await using var secureSession = await yubiKey.CreateCtap2SessionAsync(
+    new SessionCreationOptions
+    {
+        ScpKeyParameters = scpKeys,
+        PreferredConnectionType = ConnectionType.SmartCard
+    });
+

@@ -1,0 +1,6 @@
+// SOURCE docs/usage/user-interaction.md#f3
+using (UserPresenceIntent.BeginScope("approve the transfer of 500 EUR"))
+{
+    await client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken);
+}
+

@@ -21,9 +21,15 @@ using Yubico.YubiKit.Ctap2.Credentials;
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
 
 /// <summary>
-/// Provides secure FIDO2 PIN prompting with proper memory zeroing.
-/// Returns <see cref="IMemoryOwner{T}"/> that auto-zeros on disposal.
+/// Provides FIDO2 PIN entry as UTF-8 bytes in an <see cref="IMemoryOwner{T}"/> that clears on disposal.
 /// </summary>
+/// <remarks>
+/// Dispose the owner after the awaited operation. CLI arguments remain immutable strings in process
+/// memory and may be exposed by shell history/process listings; clearing encoded bytes cannot erase
+/// them. Interactive prompts are synchronous and do not honor the operation cancellation token while
+/// blocked. The console preset counts UTF-16 characters before encoding, not CTAP code points/bytes;
+/// it is not complete UTF-8/NFC/device-PIN-policy validation.
+/// </remarks>
 internal static class FidoPinHelper
 {
     private static readonly ConsoleCredentialReader Reader = new();
@@ -65,7 +71,7 @@ internal static class FidoPinHelper
     {
         if (cliArg is not null)
         {
-            // CLI arg is already a string in process memory -- encode directly to avoid extra heap copy
+            // Encode into the owned byte buffer; disposal cannot erase the original immutable CLI string.
             var byteCount = Encoding.UTF8.GetByteCount(cliArg);
             var buffer = new DisposableArrayPoolBuffer(byteCount, clearOnCreate: false);
             Encoding.UTF8.GetBytes(cliArg, buffer.Span);
@@ -85,7 +91,7 @@ internal static class FidoPinHelper
     {
         if (cliArg is not null)
         {
-            // Encode directly to avoid extra heap copy of new PIN bytes
+            // Encode into the owned byte buffer; args/shell history remain outside this cleanup boundary.
             var byteCount = Encoding.UTF8.GetByteCount(cliArg);
             var buffer = new DisposableArrayPoolBuffer(byteCount, clearOnCreate: false);
             Encoding.UTF8.GetBytes(cliArg, buffer.Span);

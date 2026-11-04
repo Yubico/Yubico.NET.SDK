@@ -22,8 +22,14 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 
 /// <summary>
 /// Interactive menu for PIN/access management operations.
-/// Mirrors ykman's "fido access" command group.
+/// Uses ykman-like grouping for a subset of access operations, not CLI compatibility.
 /// </summary>
+/// <remarks>
+/// PIN byte owners stay alive through awaits and clear on disposal; synchronous prompts do not honor
+/// cancellation while blocked. Retry models default missing values, and CTAP 2.1 has no UV power-cycle
+/// signal. The current verify helper's missing RP scope can cause request rejection; a failed result
+/// is not necessarily a wrong PIN. See PinManagement and the sample README before retrying.
+/// </remarks>
 public static class AccessMenu
 {
     /// <summary>

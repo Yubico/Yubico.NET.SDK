@@ -1,0 +1,13 @@
+// SOURCE docs/TESTING.md#f15
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+public async Task ManagementOverFido_Works(YubiKeyTestState state)
+{
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        Assert.Equal(ConnectionType.HidFido, mgmt.ConnectionType);
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+    }, preferredConnection: state.ConnectionType);
+}
+

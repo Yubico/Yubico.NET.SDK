@@ -15,15 +15,21 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Ctap2.BioEnrollment;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 
 /// <summary>
 /// Biometric (fingerprint) enrollment operations.
-/// Requires firmware 5.2+ and the bioEnroll authenticator option.
+/// Requires actual sensor hardware, advertised support and appropriate authorization.
 /// </summary>
+/// <remarks>
+/// Current standard bio helpers have known subcommand/authentication/timeout, template-array schema
+/// and sample-status limitations; these methods are not qualified standardized enrollment workflows.
+/// Protocol 2 is selected without negotiation. PIN input is borrowed and tokens are finally-cleared,
+/// not an end-to-end cleanup guarantee. General catches convert cancellation/errors to failed results;
+/// failure or decoded completion does not establish device state or rollback.
+/// </remarks>
 public static class BioEnrollmentExample
 {
     /// <summary>
@@ -134,6 +140,12 @@ public static class BioEnrollmentExample
     /// Enrolls a fingerprint with a multi-sample capture loop.
     /// Calls <paramref name="onSampleCaptured"/> after each sample for progress reporting.
     /// </summary>
+    /// <remarks>
+    /// Retains the begin template ID independently because continuation responses need not repeat it.
+    /// IsComplete only tests decoded remaining count, with known missing-field defaults. Token cancellation
+    /// is not the CTAP enrollment-cancel command: the explicit cancel below is reached only on the checked
+    /// loop-exit path, not after a thrown cancellation or callback failure. No automatic rollback is provided.
+    /// </remarks>
     public static async Task<EnrollResult> EnrollFingerprintAsync(
         IYubiKey yubiKey,
         ReadOnlyMemory<byte> pin,
@@ -164,7 +176,7 @@ public static class BioEnrollmentExample
 
             onSampleCaptured?.Invoke(sampleNumber, result.RemainingSamples, result.LastSampleStatus);
 
-            // Capture remaining samples
+            // Continue using the begin ID, not result.TemplateId from a later sample.
             while (!result.IsComplete && !cancellationToken.IsCancellationRequested)
             {
                 try
@@ -349,8 +361,12 @@ public static class BioEnrollmentExample
     }
 
     /// <summary>
-    /// Checks if the authenticator supports bio enrollment.
+    /// Returns true only for a successful read with bioEnroll=true.
     /// </summary>
+    /// <remarks>
+    /// False also covers every caught error/cancellation. bioEnroll=false still advertises support with
+    /// no provisioned templates; this probe currently misclassifies that state and ignores preview support.
+    /// </remarks>
     public static async Task<bool> IsSupported(
         IYubiKey yubiKey,
         CancellationToken cancellationToken = default)

@@ -1,0 +1,8 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-info/complete.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-create/complete.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-set-pin/complete.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-hid-management/complete.cs
+/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
+/tmp/opencode/ctap2-001-hardware-v2-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.hardware-v2.GlobalUsings.g.cs
+/tmp/opencode/ctap2-001-hardware-v2-context/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/ctap2-001-hardware-v2-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.hardware-v2.AssemblyInfo.cs

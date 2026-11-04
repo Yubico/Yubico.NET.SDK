@@ -27,11 +27,18 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// <summary>
 /// Integration tests for GetAssertion (authentication) operations.
 /// </summary>
+/// <remarks>
+/// Requires a human-coordinated dedicated device with known PIN state; setup can normalize the PIN.
+/// Uses synthetic hash-sized inputs without client-data construction or RP verification. The resident
+/// case compares the exact user ID and the no-credential case checks CTAP status; signature checks
+/// establish only nonempty bytes. Deletion is best effort and tokens/auth buffers lack comprehensive
+/// finally-zeroing, so these workflows are not secure application-lifetime examples.
+/// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2GetAssertionTests
 {
     /// <summary>
-    /// Tests that GetAssertion returns a valid signature after creating a credential.
+    /// Checks that GetAssertion returns nonempty signature bytes after credential creation.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -112,7 +119,7 @@ public class Ctap2GetAssertionTests
                         PinUvAuthProtocol = clientPin.Protocol.Version
                     });
 
-                // Assert
+                // Presence checks only: no signature verification, RP-hash or returned-ID association assertion.
                 Assert.NotNull(assertionResult);
                 Assert.NotNull(assertionResult.AuthenticatorData);
                 Assert.False(assertionResult.Signature.IsEmpty, "Signature should not be empty");
@@ -289,7 +296,7 @@ public class Ctap2GetAssertionTests
         }
         catch
         {
-            // Cleanup failures should not fail the test
+            // Best-effort deletion preserves the primary result; failure can leave credentials and token bytes.
         }
     }
 }

@@ -1,0 +1,132 @@
+[
+  {
+    "path": "/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App/10.0.14/System.Private.CoreLib.dll",
+    "sha256": "dbe82a7a9a38f468d8dafb7890a3301f904c420718a8a985a302aa182c1268bc",
+    "bytes": 15577896
+  },
+  {
+    "path": "/tmp/opencode/ctap2-001-framework-probe/bin/Release/net10.0/System.Formats.Cbor.dll",
+    "sha256": "18875c3b5b857ec0426464e25f544c9c15cbbbc85f0a3b6005e6041c1e2861c9",
+    "bytes": 93960
+  },
+  {
+    "path": "/tmp/opencode/ctap2-001-framework-probe/bin/Release/net10.0/Yubico.YubiKit.Ctap2.FrameworkProbe.dll",
+    "sha256": "6f0ba6e5b1ff4cfc57381df03540ba7a0676e6446983229cbe4bc4e2f4a785ad",
+    "bytes": 11776
+  },
+  {
+    "path": "Directory.Packages.props",
+    "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3",
+    "bytes": 3142
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/CborReader-v10.0.2.cs",
+    "sha256": "c7493df311a5f7229a7f59bba256b087b7637dc29a8682c06320447d7a34d0a5",
+    "bytes": 18175
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/CborReader.Map-v10.0.2.cs",
+    "sha256": "4bb627ee7ab85e40d48c4f19d496e1546f8b97eeb7cb1cf2949cf9bf9ee549a5",
+    "bytes": 9627
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/CborWriter-v10.0.2.cs",
+    "sha256": "0c0d9dd6700e689529a5c70f0ee7e2f1e5475977103221e48e7f8afaa0ee4be2",
+    "bytes": 22198
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/CborWriter.Map-v10.0.2.cs",
+    "sha256": "14549e61adba45feb51295c5313ca251365ceaad93d35c6da282a33d6141be57",
+    "bytes": 12804
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/Directory.Build.props",
+    "sha256": "24e0fdc392158a7ff2512ac165a98cd66709ce10064ab09e5886e5bf0c3dbd89",
+    "bytes": 692
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/Directory.Build.targets",
+    "sha256": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea",
+    "bytes": 12
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/Guid-ToByteArray-net10.html",
+    "sha256": "50b2f23ad33dd5b72881b6d68653657cf97c865f6b09bccd9e78fc4628070725",
+    "bytes": 66907
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/Guid-constructor-net10.html",
+    "sha256": "2cdc910562c51826de9bd1e4f7585dbbfa34655f932028f990fe18e8224d4470",
+    "bytes": 129539
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/Guid-v10.0.14.cs",
+    "sha256": "8849825055730b57406e92c1851d5d7fd868d0981fed619b658082578ef219a8",
+    "bytes": 73290
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/build-result.json",
+    "sha256": "f3c9544a9caa680dbb577aecd112ec8d35c25e5857aa25a8f5923d4053244cca",
+    "bytes": 702
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/build-step.log",
+    "sha256": "69db0ad995eadace74c235ff77fc29c6ccab89490ec1ef36e076e9e48f4e6728",
+    "bytes": 607
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/build.log",
+    "sha256": "baed9ca1967e9c7af760f6e66e119718f3c48eb8fe62ab6eee9c82b86dc7fe73",
+    "bytes": 1472
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/context7-record.md",
+    "sha256": "6682260e8f17c871d88e8e003c27569bd8d610c6f5e7189d020d7d35582decc0",
+    "bytes": 1822
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/dotnet-info.log",
+    "sha256": "e1b9da8616a6b00156996cabac3d110d14dfdc2bf70f9f4ac8f2830064012667",
+    "bytes": 1897
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/preservation.json",
+    "sha256": "4df54b3ce16fb8e3ecba6a15a8ea43b898fe7fd0146ba5495df5134a157d7a98",
+    "bytes": 38402
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/probe.log",
+    "sha256": "6215e109454b2b82b84f6e23d402caf633b9104592dcea979dcef1577fe2c66c",
+    "bytes": 2624
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/project.assets.json",
+    "sha256": "11fe37406fa3190d8547e9c8fad5e33970056c4aa7c449dc0a0d23b6e6f41311",
+    "bytes": 24316
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/retrieval.json",
+    "sha256": "7a3fa6e5d6d2820be0a2237b073fe93270fc47fceace19c1c1c95ca470d9f0d9",
+    "bytes": 3170
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/run-probe.sh",
+    "sha256": "91fb909ffcdd27620948b794d0c3c7b5c8aefb92a8418bf40ee68901940c97d1",
+    "bytes": 578
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/src/Yubico.YubiKit.Ctap2.FrameworkProbe.csproj",
+    "sha256": "5a0c6813e7b50471f7e9ef4f3fd937eabb30345ad5fc2c9064a3d1d0a8156651",
+    "bytes": 275
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/src/experiment_framework.cs",
+    "sha256": "867427cf77d2c69eb12e072431c62a4690400a23b9ed8f24e38db25078d8c180",
+    "bytes": 4926
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/framework-adjudication.md",
+    "sha256": "3401f31c7bb26faa84ffa5ff0e9b59c343107ebbcadc67a3ce79a36264347cdf",
+    "bytes": 14770
+  }
+]

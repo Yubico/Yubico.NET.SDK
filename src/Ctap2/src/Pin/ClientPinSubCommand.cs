@@ -70,7 +70,7 @@ public static class ClientPinSubCommand
 /// </summary>
 internal static class ClientPinParam
 {
-    /// <summary>PIN/UV protocol version (uint, required)</summary>
+    /// <summary>Platform-selected supported PIN/UV protocol version (uint); required by cryptographic subcommands, not by the general retry-query contract.</summary>
     public const int PinUvAuthProtocol = 0x01;
 
     /// <summary>Sub-command code (uint, required)</summary>
@@ -109,7 +109,7 @@ internal static class ClientPinResponse
     /// <summary>PIN retries remaining (uint)</summary>
     public const int PinRetries = 0x03;
 
-    /// <summary>Whether a power cycle is required (bool)</summary>
+    /// <summary>Optional power-cycle indication for getRetries only (bool). Omission provides no information; CTAP 2.1 does not define this field for getUvRetries.</summary>
     public const int PowerCycleState = 0x04;
 
     /// <summary>UV retries remaining (uint)</summary>
@@ -117,12 +117,16 @@ internal static class ClientPinResponse
 }
 
 /// <summary>
-/// Permission flags for PIN/UV auth tokens (CTAP 2.1).
+/// Permission flags for ordinary CTAP 2.1 tokens and the CTAP 2.2 persistent read-only token.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Permissions control what operations a PIN/UV auth token can authorize.
-/// Multiple permissions can be combined using bitwise OR.
+/// Ordinary permissions can be combined using bitwise OR when the authenticator supports the
+/// requested operations. MakeCredential/GetAssertion require an RP ID; CredentialManagement
+/// optionally binds to one RP. BioEnrollment, LargeBlobWrite and AuthenticatorConfig ignore RP ID.
+/// CredentialManagementRO is a separate persistent-token request and cannot be combined.
+/// The authenticator enforces scope and lifetime; these flags alone do not establish authorization.
 /// </para>
 /// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#permissions
@@ -146,24 +150,28 @@ public enum PinUvAuthTokenPermissions : uint
     /// <summary>Permission to execute authenticatorBioEnrollment.</summary>
     BioEnrollment = 0x08,
 
-    /// <summary>Permission to execute large blob operations.</summary>
+    /// <summary>Permission to authorize large blob writes; it is not required for all reads.</summary>
     LargeBlobWrite = 0x10,
 
     /// <summary>Permission to execute authenticatorConfig.</summary>
     AuthenticatorConfig = 0x20,
 
     /// <summary>
-    /// Read-only permission for authenticatorCredentialManagement.
+    /// Persistent Credential Management Read Only (pcmr, CTAP 2.2).
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This permission allows listing credentials and retrieving metadata 
-    /// (including encrypted metadata like encIdentifier and encCredStoreState),
-    /// but does not allow deleting or modifying credentials.
+    /// Requires perCredMgmtRO=true and must be requested without any other permission.
+    /// RP ID is ignored. The returned persistentPinUvAuthToken authorizes read credential-management
+    /// operations, not deletion or modification; its lifetime is distinct from ordinary tokens.
     /// </para>
     /// <para>
-    /// Requires CTAP 2.2+ support. Used for decrypting encrypted metadata fields
-    /// in AuthenticatorInfo without requiring full credential management permission.
+    /// CTAP 2.2 also derives the encIdentifier decryption key from this persistent token.
+    /// That does not establish the key contract for every encrypted metadata field. ClientPin
+    /// returns raw token bytes without validating this capability/combination or tracking persistence.
+    /// </para>
+    /// <para>
+    /// See: https://fidoalliance.org/specs/fido-v2.2-ps-20250714/fido-client-to-authenticator-protocol-v2.2-ps-20250714.html#pcmr
     /// </para>
     /// </remarks>
     CredentialManagementRO = 0x40,

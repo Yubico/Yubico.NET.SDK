@@ -4,8 +4,15 @@
 
 **Pass 1 is complete**, committed and pushed as
 `9399b94bdc6fe2786903b1b6e58808537aa8c94e` on `yubikit-docs-audit`.
-**Pass 2 has not started.** The 21 implementation/test follow-ups and one CTAP2 documentation dependency
-are a scoped backlog, not implemented fixes or approval of the limitations as intended contracts.
+**Pass 2 has not started.** The 21 implementation/test follow-ups remain a scoped backlog, not implemented
+fixes or approval of limitations as intended contracts. The original CTAP2 documentation dependency
+**WA-XREF-001** is satisfied by the independently reviewed CTAP2 Pass-1 correction; see the
+[fresh boundary review](modules/ctap2/pass-1/ctap2-001/boundary-review-final.md).
+
+The [CTAP2 cycle](ctap2.md) also reconciles narrowly affected WebAuthn requirements, requested-versus-issued
+permission wording, registration unsigned-output key0x06, and inner previewSign policy flags. No WebAuthn
+runtime fix or full new WebAuthn audit is implied. Original WA findings/errata remain unchanged under records/;
+WA-IMP-010 descriptor recovery, other engineering items and the native selected-user privacy decision remain open.
 
 Coverage: 131 module files, 44 public types, 542 API snapshot entries including generated members,
 and 30 external-reference files. The 51 initial investigator findings overlap; they are not 51

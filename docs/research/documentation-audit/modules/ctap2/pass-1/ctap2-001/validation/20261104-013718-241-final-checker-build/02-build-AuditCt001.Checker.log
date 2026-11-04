@@ -1,0 +1,10 @@
+$ dotnet build docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/src/Yubico.YubiKit.AuditCt001.Checker.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/src/Yubico.YubiKit.AuditCt001.Checker.csproj (in 61 ms).
+  Yubico.YubiKit.AuditCt001.Checker -> /tmp/opencode/ctap2-001-doccheck/bin/Release/net10.0/Yubico.YubiKit.Ctap2.DocCheck.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.86

@@ -1,0 +1,37 @@
+[
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/compile-contexts.py",
+    "snapshot": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/compile-contexts.py.snapshot",
+    "sha256": "e8cf667514798985623fb17d73c8a6327efa9d249991689f9e101cd2df39d299"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/extract.py",
+    "snapshot": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/extract.py.snapshot",
+    "sha256": "0f149ce6c21ff6a8780c263c98fefaef4fdbb71e9723f0e22bc58e61c8abaa2e"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/selection.py",
+    "snapshot": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/selection.py.snapshot",
+    "sha256": "f775ed42df29ca43fe0b72de9e28f78caa47dcca5c4b9b9eff26048a2a26c1e8"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/verify-inputs.py",
+    "snapshot": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/verify-inputs.py.snapshot",
+    "sha256": "1b66e366f3e3c6b89f93742aaaf6f0e32fd125c45ff55667142face5e6a94a4f"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/manifest.json",
+    "snapshot": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/manifest.json.snapshot",
+    "sha256": "6402578ca65eb04f2f24e3e35d692363c2f4e548458c9d9ceddaf784fa2f7376"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+    "snapshot": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/contexts-manifest.json.snapshot",
+    "sha256": "d97b6d3fe7463a942975082dda81eea299ff1f436a19024e31cf98d512620511"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+    "snapshot": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/prepare-project-context.py.snapshot",
+    "sha256": "6068aa4e5fc1a3c12c0d2e0646a12f432f53d690e5da567a537da2ce3f084a9d"
+  }
+]

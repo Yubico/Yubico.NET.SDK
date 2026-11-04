@@ -14,7 +14,6 @@
 
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.Tests.Shared;
@@ -26,16 +25,21 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// Integration tests for CTAP2 transport-related behavior including
 /// session creation over different transports and credential metadata.
 /// </summary>
+/// <remarks>Require approved PIN/presence work on a dedicated test device. Default normalization
+/// and explicit PIN helpers can set/change PIN or consume retries. Tokens/auth parameters are not
+/// cleared on all paths; helper disposal does not clear returned tokens. Random 32-byte hashes are
+/// protocol stand-ins, not complete WebAuthn client data or RP verification.</remarks>
 [Trait("Category", "Integration")]
 public class Ctap2TransportTests
 {
     /// <summary>
     /// Tests that a CTAP2 session created over SmartCard (CCID) transport
-    /// can successfully create and verify a credential end-to-end.
-    /// This validates the full SmartCardBackend path for credential operations.
+    /// returns a creation model with authenticator data and a nonempty credential ID.
+    /// It does not verify attestation, public-key algorithm or a subsequent assertion.
     /// </summary>
     /// <remarks>
-    /// CTAP2 over SmartCard is supported when the connected authenticator exposes the FIDO AID.
+    /// The test explicitly selects SmartCard; the FIDO AID and current-transport firmware gate apply.
+    /// Cleanup attempts to delete every enumerated credential for this RP, not just this test's credential.
     /// </remarks>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
@@ -115,8 +119,8 @@ public class Ctap2TransportTests
 
     /// <summary>
     /// Tests that a non-discoverable (non-resident) credential can be created
-    /// and used for assertion via the allow list pattern. This validates the
-    /// server-side credential flow where the credential ID is stored externally.
+    /// and used in a single-entry assertion allow list. Checks a nonempty ID and signature,
+    /// not cryptographic signature verification, RP-hash verification or response-ID association.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -131,6 +135,8 @@ public class Ctap2TransportTests
             }
             catch (CtapException ex) when (ex.Status is CtapStatus.PinBlocked or CtapStatus.PinAuthBlocked)
             {
+                // PinAuthBlocked is temporary (power cycle), unlike exhausted PinBlocked.
+                // The diagnostic below does not distinguish recovery; it is not a reset procedure.
                 Skip.If(true,
                     "PIN is blocked — CTAP2 reset required (re-insert YubiKey and reset within 10s of power-up)");
                 return;

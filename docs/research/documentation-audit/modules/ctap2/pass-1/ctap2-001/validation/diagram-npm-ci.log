@@ -1,0 +1,18 @@
+$ PUPPETEER_CACHE_DIR=/tmp/opencode/ctap2-001-browser-cache TMPDIR=/tmp/opencode npm ci
+
+added 192 packages, and audited 193 packages in 40s
+
+22 packages are looking for funding
+  run `npm fund` for details
+
+5 low severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm warn install-scripts 2 packages have install scripts not yet covered by allowScripts:
+npm warn install-scripts   @anthropic-ai/claude-code@2.1.199 (postinstall: node install.cjs)
+npm warn install-scripts   puppeteer@25.15.0 (postinstall: node install.mjs)
+npm warn install-scripts
+npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.

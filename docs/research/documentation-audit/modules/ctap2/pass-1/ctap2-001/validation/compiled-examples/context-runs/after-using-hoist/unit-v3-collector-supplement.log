@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/collect-unit-package-source.py
+PASS: prepared input hashes match; no compilation performed.
+Collected unit-v3: four exact wrappers plus pinned package/generated inputs; all policy/reference/analyzer checks preserved: /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/unit-v3/evidence
+EXIT=0

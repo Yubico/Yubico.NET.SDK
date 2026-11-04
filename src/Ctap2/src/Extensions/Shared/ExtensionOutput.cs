@@ -21,13 +21,23 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// </summary>
 /// <remarks>
 /// <para>
-/// This parser decodes the CBOR-encoded extensions map returned in makeCredential
-/// and getAssertion responses. Extension outputs are accessed via property methods.
+/// This convenience parser expects a definite-length authData extensions map, not the complete CTAP response or
+/// unsigned extension outputs. The memory overload reconstructs supported values into new CBOR arrays;
+/// it does not preserve byte-exact original encoding or every valid unknown CBOR value. Supported
+/// values are signed-range integers, byte/text strings, booleans, null, arrays and maps of those values.
+/// Tags, floats and other simple values can be lost or cause reconstruction failure; large unsigned
+/// integers can fail. Duplicate identifiers overwrite earlier values. Retain the source parent raw
+/// response/authenticator-data bytes when exact or unknown data is needed; their guarantees are separate.
 /// </para>
 /// <para>
-/// Example usage:
+/// Reconstructed values and byte-string getters allocate independent copies with no disposal/zeroing
+/// boundary. Session disposal or clearing the source does not clear those copies. Typed Try methods
+/// are shape-specific, may reject present values, and can throw for malformed/wrong-shape input.
+/// </para>
+/// <para>
+/// Composable fragment with existing nonempty ReadOnlyMemory&lt;byte&gt; extensionCbor from authData:
 /// <code>
-/// var output = ExtensionOutput.Decode(response.Extensions);
+/// var output = ExtensionOutput.Decode(extensionCbor);
 /// if (output.TryGetCredProtect(out var policy))
 /// {
 ///     Console.WriteLine($"Credential protection: {policy}");
@@ -58,7 +68,7 @@ public sealed class ExtensionOutput
     /// Attempts to get the credProtect extension output.
     /// </summary>
     /// <param name="policy">The credential protection policy.</param>
-    /// <returns>True if the extension was present.</returns>
+    /// <returns>True for a decoded policy in range 1–3; false for absence or an out-of-range integer.</returns>
     public bool TryGetCredProtect(out CredProtectPolicy policy)
     {
         policy = default;
@@ -84,7 +94,7 @@ public sealed class ExtensionOutput
     /// Attempts to get the credBlob extension output (makeCredential response).
     /// </summary>
     /// <param name="stored">Whether the blob was successfully stored.</param>
-    /// <returns>True if the extension was present.</returns>
+    /// <returns>True for a boolean storage result, including false; false for absence or another value shape.</returns>
     public bool TryGetCredBlobStored(out bool stored)
     {
         stored = false;
@@ -109,8 +119,8 @@ public sealed class ExtensionOutput
     /// <summary>
     /// Attempts to get the credBlob extension output (getAssertion response).
     /// </summary>
-    /// <param name="blob">The stored blob data.</param>
-    /// <returns>True if the extension was present and contained blob data.</returns>
+    /// <param name="blob">An independent byte-array copy, possibly empty; no cleanup owner is provided.</param>
+    /// <returns>True for a byte-string result, including an empty stored-blob result; false for absence or another shape.</returns>
     public bool TryGetCredBlob(out ReadOnlyMemory<byte> blob)
     {
         blob = default;
@@ -133,9 +143,14 @@ public sealed class ExtensionOutput
     }
 
     /// <summary>
-    /// Attempts to get the hmac-secret extension output.
+    /// Decodes encrypted assertion output at the hmac-secret key.
     /// </summary>
     /// <param name="output">The encrypted hmac-secret output.</param>
+    /// <remarks>
+    /// Not a registration-support accessor: hmac-secret's registration boolean causes a decoding error.
+    /// For hmac-secret-mc, use TryGetRawExtension with its identifier and HmacSecretOutput.Decode.
+    /// Decode the registration boolean explicitly from its raw value instead.
+    /// </remarks>
     /// <returns>True if the extension was present.</returns>
     public bool TryGetHmacSecret(out HmacSecretOutput? output)
     {
@@ -151,9 +166,14 @@ public sealed class ExtensionOutput
     }
 
     /// <summary>
-    /// Attempts to get the largeBlob extension output.
+    /// Decodes the legacy convenience largeBlob value, not standard direct CTAP output.
     /// </summary>
     /// <param name="output">The largeBlob output.</param>
+    /// <remarks>
+    /// A boolean is mapped to Written; a map is passed to LargeBlobOutput.Decode. Neither establishes
+    /// standard registration support or a completed storage write. CTAP direct largeBlob outputs are
+    /// unsigned and require different modeling; the implemented key/storage route uses envelope keys.
+    /// </remarks>
     /// <returns>True if the extension was present.</returns>
     public bool TryGetLargeBlob(out LargeBlobOutput? output)
     {
@@ -166,7 +186,7 @@ public sealed class ExtensionOutput
 
         var reader = new CborReader(data, CborConformanceMode.Lax);
 
-        // During makeCredential, output is just a boolean
+        // Legacy convenience mapping, not the standard unsigned {supported: true} registration output.
         if (reader.PeekState() == CborReaderState.Boolean)
         {
             var supported = reader.ReadBoolean();
@@ -174,15 +194,19 @@ public sealed class ExtensionOutput
             return true;
         }
 
-        // During getAssertion, output is a map
+        // Decode the legacy combined map; this is not a direct CTAP read-output decoder.
         output = LargeBlobOutput.Decode(reader);
         return true;
     }
 
     /// <summary>
-    /// Attempts to get the largeBlobKey from extension output.
+    /// Looks for a largeBlobKey in legacy convenience extension data.
     /// </summary>
     /// <param name="key">The large blob key.</param>
+    /// <remarks>
+    /// Standard CTAP largeBlobKey has no authData extension output. Use MakeCredentialResponse.LargeBlobKey
+    /// or GetAssertionResponse.LargeBlobKey instead. This method's copied secret has no cleanup owner.
+    /// </remarks>
     /// <returns>True if the extension was present and contained the key.</returns>
     public bool TryGetLargeBlobKey(out ReadOnlyMemory<byte> key)
     {
@@ -207,7 +231,7 @@ public sealed class ExtensionOutput
     /// <summary>
     /// Attempts to get the minPinLength extension output.
     /// </summary>
-    /// <param name="minLength">The minimum PIN length.</param>
+    /// <param name="minLength">The reported minimum in Unicode code points; zero on false is only an out-parameter default.</param>
     /// <returns>True if the extension was present.</returns>
     public bool TryGetMinPinLength(out int minLength)
     {
@@ -227,7 +251,7 @@ public sealed class ExtensionOutput
     /// Attempts to get raw extension data by identifier.
     /// </summary>
     /// <param name="extensionId">The extension identifier.</param>
-    /// <param name="data">The raw CBOR-encoded extension data.</param>
+    /// <param name="data">Reconstructed CBOR, or empty data from the identifiers-only reader overload; not an original encoded slice.</param>
     /// <returns>True if the extension was present.</returns>
     public bool TryGetRawExtension(string extensionId, out ReadOnlyMemory<byte> data)
     {
@@ -235,10 +259,10 @@ public sealed class ExtensionOutput
     }
 
     /// <summary>
-    /// Decodes extension output from CBOR bytes, preserving raw data for each extension.
+    /// Reconstructs supported extension values from CBOR bytes into independent encoded copies.
     /// </summary>
     /// <param name="data">The CBOR-encoded extensions map.</param>
-    /// <returns>The decoded extension output with raw data preserved.</returns>
+    /// <returns>The convenience output, subject to the reconstruction and ownership limits in the class remarks.</returns>
     public static ExtensionOutput Decode(ReadOnlyMemory<byte> data) =>
         DecodeWithRawData(data);
 
@@ -248,7 +272,9 @@ public sealed class ExtensionOutput
     /// <param name="reader">The CBOR reader positioned at the extensions map.</param>
     /// <returns>The decoded extension output.</returns>
     /// <remarks>
-    /// Note: This method skips values and stores empty data. Use DecodeWithRawData for full data preservation.
+    /// This overload retains identifiers only and stores empty data after skipping each value.
+    /// HasExtensions/ExtensionIds remain usable, but typed value accessors are not usable on its output.
+    /// Use the memory overload for limited value reconstruction, or retain source raw bytes for exact data.
     /// </remarks>
     public static ExtensionOutput Decode(CborReader reader)
     {
@@ -260,7 +286,7 @@ public sealed class ExtensionOutput
         for (var i = 0; i < mapCount; i++)
         {
             var key = reader.ReadTextString();
-            // Skip the value - use DecodeWithRawData if you need the raw data
+            // This overload intentionally retains only the identifier, not a decodable value.
             reader.SkipValue();
             extensions[key] = ReadOnlyMemory<byte>.Empty;
         }
@@ -270,10 +296,10 @@ public sealed class ExtensionOutput
     }
 
     /// <summary>
-    /// Decodes extension output from CBOR bytes, preserving raw data.
+    /// Reconstructs supported extension values from CBOR bytes; the name does not imply byte-exact preservation.
     /// </summary>
     /// <param name="data">The CBOR-encoded extensions map.</param>
-    /// <returns>The decoded extension output with raw data preserved.</returns>
+    /// <returns>Independent reconstructed values with the class-level unknown-data/cleanup limitations.</returns>
     public static ExtensionOutput DecodeWithRawData(ReadOnlyMemory<byte> data)
     {
         if (data.IsEmpty)
@@ -289,7 +315,7 @@ public sealed class ExtensionOutput
         {
             var key = reader.ReadTextString();
 
-            // Get the start position and read/encode the value to get its bytes
+            // Re-encode supported values, rather than retaining a slice of the original encoding.
             var valueWriter = new CborWriter(CborConformanceMode.Lax);
             CopyCborValue(reader, valueWriter);
             extensions[key] = valueWriter.Encode();

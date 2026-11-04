@@ -17,7 +17,6 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -29,15 +28,19 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
 /// </summary>
 /// <remarks>
 ///     <para>
-///     Before each test session, <see cref="NormalizePinAsync" /> ensures the
-///     authenticator has the known test PIN (<c>"11234567"</c>) configured.
-///     This avoids the need for a CTAP2 reset (which requires a manual
-///     unplug/replug/touch ceremony that cannot be automated).
+///     After session creation, each helper call defaults to <see cref="NormalizePinAsync" />
+///     before invoking the action. Normalization can set a PIN, change it twice for forcePinChange
+///     recovery or request a token to verify it. These paths require approved PIN work and known
+///     state on a dedicated device, even when the action only reads GetInfo. Pass normalizePin:false
+///     only when the test deliberately needs no normalization; touch filtering does not disable it.
 ///     </para>
 ///     <para>
-///     If the PIN is already set to the known value, normalization is a no-op.
-///     If no PIN is set, <c>SetPinAsync</c> is called. If the PIN differs or
-///     is blocked, the test is skipped with a diagnostic message.
+///     A matching PIN still triggers a token exchange. A mismatch can consume a retry before a skip.
+///     A skip or cancellation does not roll back PIN changes. Force-change recovery can leave the
+///     temporary reversed PIN if its second change fails; that temporary buffer is cleared only on
+///     success. The verification token is discarded without clearing. Reset advice in diagnostic
+///     strings is not a coordinated product reset procedure, and temporary PinAuthBlocked differs
+///     from exhausted PinBlocked.
 ///     </para>
 /// </remarks>
 public static class Ctap2TestStateExtensions
@@ -46,7 +49,8 @@ public static class Ctap2TestStateExtensions
     ///     The known test PIN used across all CTAP2 integration tests: <c>"11234567"</c>.
     /// </summary>
     /// <remarks>
-    ///     This 8-digit PIN satisfies the YubiKey 5.7+ PIN complexity requirements.
+    ///     This known 8-digit test value is not a universal product/firmware complexity guarantee.
+    ///     The device's configured PIN policy still applies; it is not production secret input.
     ///     UTF-8 bytes: <c>[0x31, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37]</c>.
     /// </remarks>
     public static readonly byte[] KnownTestPin = [0x31, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37];
@@ -57,14 +61,15 @@ public static class Ctap2TestStateExtensions
     public const string KnownTestPinString = "11234567";
 
     /// <summary>
-    ///     Ensures the authenticator has the known test PIN configured.
+    ///     Attempts to set, recover or verify the known test PIN before the action.
     /// </summary>
     /// <remarks>
     ///     <list type="bullet">
     ///         <item>If no PIN is set, calls <c>SetPinAsync</c> with the known PIN.</item>
     ///         <item>If a PIN is set, verifies it matches the known PIN by requesting a PIN token.</item>
     ///         <item>If the PIN is wrong, skips the test with a diagnostic message.</item>
-    ///         <item>If the PIN is blocked, skips the test with a manual reset instruction.</item>
+    ///         <item>If forcePinChange is reported, attempts known→temporary→known PIN changes.</item>
+    ///         <item>If PIN authentication is blocked, skips with a diagnostic; recovery depends on the status.</item>
     ///     </list>
     /// </remarks>
     private static async Task NormalizePinAsync(
@@ -97,8 +102,8 @@ public static class Ctap2TestStateExtensions
         // If a prior test left forcePinChange set, clear it via PIN change.
         // ChangePinAsync uses direct PIN hash encryption (not PIN tokens), so it
         // works even when forcePinChange blocks token requests.
-        // We use a reversed-PIN temporary value because Enhanced PIN keys (5.7+)
-        // reject same-PIN changes with PinPolicyViolation.
+        // A reversed temporary value avoids a same-PIN change where device policy rejects it.
+        // This is not transactional: a failed second change can leave the temporary PIN configured.
         if (info.ForcePinChange == true)
         {
             try
@@ -108,6 +113,7 @@ public static class Ctap2TestStateExtensions
                     .ConfigureAwait(false);
                 await clientPin.ChangePinAsync(tempPin, KnownTestPin, cancellationToken)
                     .ConfigureAwait(false);
+                // This success-path clearing does not cover failed changes.
                 CryptographicOperations.ZeroMemory(tempPin);
             }
             catch (CtapException ex) when (ex.Status is CtapStatus.PinInvalid
@@ -119,7 +125,8 @@ public static class Ctap2TestStateExtensions
             }
         }
 
-        // PIN is configured -- verify it matches the known test PIN.
+        // A token request verifies the PIN even when it already matches; a mismatch can consume a retry.
+        // The returned secret is currently discarded without clearing.
         try
         {
             _ = await clientPin.GetPinTokenAsync(KnownTestPin, cancellationToken)
@@ -150,8 +157,8 @@ public static class Ctap2TestStateExtensions
         /// </summary>
         /// <param name="action">The async action to execute with the session.</param>
         /// <param name="normalizePin">
-        ///     When <c>true</c> (the default), ensures the authenticator has the known
-        ///     test PIN (<c>"11234567"</c>) configured before running the test action.
+        ///     When true (the default), attempts known-PIN setup/recovery/token verification after
+        ///     creation and before the action. Requires approved PIN work, including for GetInfo tests.
         /// </param>
         /// <param name="configuration">Optional protocol configuration.</param>
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
@@ -202,13 +209,13 @@ public static class Ctap2TestStateExtensions
         }
 
         /// <summary>
-        ///     Executes an action with a CTAP2 session and returns the authenticator info.
+        ///     Executes an action with a CTAP2 session and a fresh authenticator-info snapshot.
         ///     Automatically handles connection and session lifecycle.
         /// </summary>
         /// <param name="action">The async action to execute with the session and info.</param>
         /// <param name="normalizePin">
-        ///     When <c>true</c> (the default), ensures the authenticator has the known
-        ///     test PIN (<c>"11234567"</c>) configured before running the test action.
+        ///     When true (the default), attempts known-PIN setup/recovery/token verification after
+        ///     creation and before the fresh info read/action. Requires approved PIN work.
         /// </param>
         /// <param name="configuration">Optional protocol configuration.</param>
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>

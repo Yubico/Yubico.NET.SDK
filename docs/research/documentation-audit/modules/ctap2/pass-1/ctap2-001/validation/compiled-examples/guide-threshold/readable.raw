@@ -1,0 +1,6 @@
+// SOURCE src/Ctap2/CLAUDE.md#f15
+if (!Ctap2Session.FeatureBioEnrollment.IsSupportedByFirmware(firmwareVersion))
+{
+    throw new NotSupportedException("Bio enrollment requires firmware 5.2+");
+}
+

@@ -25,6 +25,11 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// by its type and ID, with optional transport hints.
 /// </para>
 /// <para>
+/// Constructors borrow ID memory and the transport collection; keep them stable during use and
+/// through an awaited request. Parse materializes new ID/transport storage. Transport hints are
+/// metadata, not proof that an interface is reachable, and Encode writes only modeled fields.
+/// </para>
+/// <para>
 /// See: https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialdescriptor
 /// </para>
 /// </remarks>
@@ -53,9 +58,9 @@ public sealed class PublicKeyCredentialDescriptor
     /// <summary>
     /// Creates a new credential descriptor.
     /// </summary>
-    /// <param name="id">The credential ID.</param>
+    /// <param name="id">The nonempty credential ID; its storage is borrowed without copying.</param>
     /// <param name="type">The credential type (default: "public-key").</param>
-    /// <param name="transports">Optional transport hints.</param>
+    /// <param name="transports">Optional borrowed transport hints; no immutable snapshot is made.</param>
     public PublicKeyCredentialDescriptor(
         ReadOnlyMemory<byte> id,
         string type = PublicKeyType,
@@ -168,6 +173,10 @@ public sealed class PublicKeyCredentialDescriptor
 /// relying party responsible for the request.
 /// </para>
 /// <para>
+/// The constructor checks only nonempty ID text, not domain syntax or authorization against an origin.
+/// The client must establish a valid RP ID and client-data binding; the RP verifies the ceremony.
+/// </para>
+/// <para>
 /// See: https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialrpentity
 /// </para>
 /// </remarks>
@@ -257,12 +266,21 @@ public sealed class PublicKeyCredentialRpEntity
 }
 
 /// <summary>
-/// Represents a user entity for credential creation.
+/// Represents account information for credential creation or an authenticator response.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Per WebAuthn/CTAP specification, the user entity describes the user
-/// account for which the credential is being created.
+/// Id is an opaque RP-scoped account handle, not display text. WebAuthn L2 §5.4.3 requires RP
+/// authentication/authorization decisions to use the ID rather than name/displayName; the handle
+/// must not contain personally identifying information. Response identifying fields can be absent
+/// and are prohibited without authenticator UV under CTAP 2.1/2.3 §6.2.2.
+/// </para>
+/// <para>
+/// The public constructor requires a nonempty ID of at most 64 bytes and nonempty name/displayName.
+/// These are current SDK restrictions: CTAP permits omitted display inputs for privacy and permits
+/// an empty account ID (though it recommends avoiding it); WebAuthn's nonempty handle rule is narrower.
+/// Parse permits absent display fields but still rejects empty/oversized IDs. Constructors borrow ID
+/// memory; Parse creates an independent ID array. Keep borrowed bytes stable during use/transmission.
 /// </para>
 /// <para>
 /// See: https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialuserentity
@@ -271,7 +289,7 @@ public sealed class PublicKeyCredentialRpEntity
 public sealed class PublicKeyCredentialUserEntity
 {
     /// <summary>
-    /// Gets the user handle (unique identifier for the user).
+    /// Gets the opaque RP-scoped user handle used for account binding, not a human-readable name.
     /// </summary>
     public ReadOnlyMemory<byte> Id { get; }
 
@@ -294,9 +312,9 @@ public sealed class PublicKeyCredentialUserEntity
     /// <summary>
     /// Creates a new user entity.
     /// </summary>
-    /// <param name="id">The user handle (up to 64 bytes).</param>
-    /// <param name="name">The user name.</param>
-    /// <param name="displayName">The display name.</param>
+    /// <param name="id">The nonempty user handle (up to 64 bytes); byte storage is borrowed.</param>
+    /// <param name="name">The nonempty name required by this SDK constructor, not an authorization identifier.</param>
+    /// <param name="displayName">The nonempty display name required by this SDK constructor.</param>
     public PublicKeyCredentialUserEntity(
         ReadOnlyMemory<byte> id,
         string name,
@@ -346,6 +364,10 @@ public sealed class PublicKeyCredentialUserEntity
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The parsed user entity.</returns>
+    /// <remarks>
+    /// Requires an ID and copies its bytes; name/displayName are optional and unknown fields are skipped.
+    /// This parser does not filter identifying fields based on UV or complete RP account verification.
+    /// </remarks>
     public static PublicKeyCredentialUserEntity Parse(CborReader reader)
     {
         var mapLength = reader.ReadStartMap();

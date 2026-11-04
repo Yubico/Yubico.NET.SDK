@@ -1,0 +1,8 @@
+RESULT: PASSED  (dotnet toolchain.cs -- build --project AuditCt001.Examples.consumer-lib --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      1.4s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-014940-722-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

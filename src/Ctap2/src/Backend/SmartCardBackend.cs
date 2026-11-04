@@ -19,13 +19,15 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.Backend;
 
 /// <summary>
 /// FIDO backend that communicates over SmartCard (CCID) transport using ISO 7816-4 APDUs.
 /// </summary>
+/// <remarks>Uses a borrowed protocol. With no in-flight presence signal, an operation's supplied
+/// policy notification is requested before transmission. Resolution uses CTAP status before typed
+/// decoding, not verified UP/UV or RP success. Only an untransferred response is cleared here.</remarks>
 internal sealed class SmartCardBackend : ICtap2Backend
 {
     private const byte NfcCtapMsg = 0x10;  // Used as APDU INS
@@ -43,6 +45,8 @@ internal sealed class SmartCardBackend : ICtap2Backend
     /// <summary>
     /// Selects the FIDO2 application.
     /// </summary>
+    /// <remarks>Any SELECT ApduException is currently wrapped as NotSupportedException with its
+    /// original inner exception. The wrapper alone does not prove the FIDO AID was absent.</remarks>
     public async Task SelectApplicationAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -97,7 +101,7 @@ internal sealed class SmartCardBackend : ICtap2Backend
             var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
             responseData = apduResponse.Data;
 
-            // First byte of response data is the CTAP status
+            // The first payload byte is CTAP status; missing status produces synthetic Other.
             if (responseData.Length < 1)
             {
                 throw new CtapException(CtapStatus.Other, "Empty response from authenticator");
@@ -118,7 +122,7 @@ internal sealed class SmartCardBackend : ICtap2Backend
 
             await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
 
-            // Return the response data (without status byte)
+            // Transfer after notification resolution; success here does not guarantee typed decoding.
             responseTransferred = true;
             return responseData[1..];
         }

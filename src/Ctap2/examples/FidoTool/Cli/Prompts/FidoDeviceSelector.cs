@@ -23,6 +23,10 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
 /// Supports FIDO HID and SmartCard transports.
 /// In non-interactive mode, prefers FIDO HID as the native CTAP2 transport.
 /// </summary>
+/// <remarks>
+/// This is an alternative shared-base selector. Program and menus currently use DeviceSelector instead;
+/// do not infer active retry, cancellation or target-binding behavior from this class.
+/// </remarks>
 public sealed class FidoDeviceSelector : DeviceSelectorBase
 {
     /// <summary>

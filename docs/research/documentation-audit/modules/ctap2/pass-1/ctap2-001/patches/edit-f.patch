@@ -1,0 +1,2289 @@
+diff --git i/docs/TESTING.md w/docs/TESTING.md
+index fcc53858..65bcf9d9 100644
+--- i/docs/TESTING.md
++++ w/docs/TESTING.md
+@@ -206,7 +206,11 @@ Use these lanes:
+ | FIDO2 reset | `authenticatorReset` | No | Needs the power-cycle window plus touch — timing, not destruction, is why |
+ | Insert/remove/touch timing | Reset power-cycle window, physical insertion/removal | No | Human-coordinated timing only |
+ 
+-Agent-safe FIDO2/WebAuthn integration commands must skip User Presence:
++These filters skip User Presence, but are not by themselves an agent-safety guarantee. In particular,
++CTAP2 `WithCtap2SessionAsync` defaults to PIN normalization before its callback: it can set/change a PIN
++or consume a retry even when the final operation is GetInfo. Inspect the selected tests' setup and apply
++the existing PIN/interaction policy; GetInfo itself needs no additional approval gate. See
++[CTAP2 test guidance](../src/Ctap2/tests/CLAUDE.md#reset-before-tests).
+ 
+ ```bash
+ dotnet toolchain.cs -- test --integration --project Ctap2 --smoke
+diff --git i/docs/architecture/sdk-architecture-diagrams.md w/docs/architecture/sdk-architecture-diagrams.md
+index cb007c4c..2a85f00a 100644
+--- i/docs/architecture/sdk-architecture-diagrams.md
++++ w/docs/architecture/sdk-architecture-diagrams.md
+@@ -115,7 +115,7 @@ flowchart TD
+     end
+ 
+     subgraph CtapLayer["CTAP2 path (beside APDU, not below it)"]
+-        CborB["CtapRequestBuilder → CBOR bytes<br/>CtapResponseParser ← CBOR bytes"]
++        CborB["Ctap2SessionRequestEncoding → request bytes<br/>MakeCredentialResponse / GetAssertionResponse.Decode ← response bytes"]
+         FBack["ICtap2Backend"]
+         HidB["HidBackend<br/>CTAPHID_CBOR (0x10) frames"]
+         ScB["SmartCardBackend<br/>wraps CTAP in APDU (CLA 0x80, INS 0x10)"]
+@@ -172,8 +172,11 @@ flowchart TD
+   - *Backend pattern (multi-transport):* Management, CTAP2, YubiOTP — an `IxxxBackend`
+     interface with a `SmartCard` impl and a `Hid` impl.
+ - **CTAP2 path (the box beside APDU):** CTAP2 does **not** build APDUs at the session
+-  layer — it builds **CBOR** via `CtapRequestBuilder` and parses replies via
+-  `CtapResponseParser`. That CBOR then goes through `ICtap2Backend`, which has two impls:
++  layer — `Ctap2SessionRequestEncoding` composes command-prefixed **CBOR** through
++  `CtapRequestBuilder`. `ICtap2Backend` exchanges those bytes and resolves the response status;
++  the session then calls `MakeCredentialResponse.Decode` or `GetAssertionResponse.Decode`.
++  `CtapResponseParser` is a general utility, not the decoder on these traced credential paths.
++  The backend has two impls:
+   - `HidBackend` — sends CTAPHID_CBOR frames (command `0x10`) over `IFidoHidProtocol`.
+     This is the genuinely separate path.
+   - `SmartCardBackend` — wraps the CTAP payload in a single APDU (`CLA 0x80, INS 0x10`) and
+@@ -243,13 +246,13 @@ sequenceDiagram
+     autonumber
+     actor Caller as Your code
+     participant Sess as Ctap2Session
+-    participant Build as CtapRequestBuilder
++    participant Build as Ctap2SessionRequestEncoding
+     participant Back as ICtap2Backend
+-    participant Parse as CtapResponseParser
++    participant Parse as MakeCredentialResponse
+     participant HW as YubiKey
+ 
+     Caller->>Sess: MakeCredentialAsync(params)
+-    Sess->>Build: Create(0x01).Add(...).Build()
++    Sess->>Build: BuildMakeCredentialRequest(params)
+     Build-->>Sess: command byte + CBOR payload
+     alt HID transport (USB)
+         Sess->>Back: SendCborAsync(request) [HidBackend]
+@@ -263,15 +266,17 @@ sequenceDiagram
+     end
+     Back->>Back: check CtapStatus, strip status byte
+     Back-->>Sess: CBOR response bytes
+-    Sess->>Parse: parse CBOR → typed result
+-    Parse-->>Sess: MakeCredentialData
++    Sess->>Parse: Decode(CBOR response)
++    Parse-->>Sess: MakeCredentialResponse
+     Sess-->>Caller: typed credential
+ ```
+ 
+ **Teaching notes (CTAP2):**
+-- **CBOR in, CBOR out** — `CtapRequestBuilder` / `CtapResponseParser` replace the inline
+-  `ApduCommand` build that every other module uses. This is *the* CTAP2 exception to the flat
+-  command model.
++- **CBOR in, CBOR out** — the internal `Ctap2SessionRequestEncoding` helper composes the request
++  through `CtapRequestBuilder`, and `MakeCredentialResponse.Decode` parses the returned envelope.
++  These are flat encoding/decoding helpers, not operation-specific command executors. The sequence
++  shows the main exchange, not every validation, callback or cleanup branch; status/notification
++  resolution precedes typed decode, so a later failure need not mean the device created nothing.
+ - **Status byte convention:** the authenticator's reply starts with a single `CtapStatus`
+   byte; the backend checks it (`CtapException.ThrowIfError`) then strips it before parsing.
+ - **The convergence point:** in the SmartCard branch, everything below "wrap in APDU" is the
+diff --git i/docs/migration/v1-to-v2-map.yml w/docs/migration/v1-to-v2-map.yml
+index 35d0aa4d..83ec5063 100644
+--- i/docs/migration/v1-to-v2-map.yml
++++ w/docs/migration/v1-to-v2-map.yml
+@@ -527,7 +527,7 @@ mappings:
+       - yubikit:src/WebAuthn/src/Client/WebAuthnClient.cs
+       - yubikit:src/WebAuthn/src/Client/WebAuthnClientOptions.cs
+       - yubikit:src/WebAuthn/CLAUDE.md
+-    notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Ctap2 (ICtap2Session); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt (set via WebAuthnClientOptions.CredentialPrompt - see `webauthn-client-construction-and-streams` for the options-record construction change), an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (WebAuthnClientOptions.MaxPromptAttempts, default 3, now caller-configurable); returning null from the prompt means the user declined, not a retry request. This replaces the credential-collection part of KeyCollector only for WebAuthn; the lower-level Yubico.YubiKit.Ctap2.ICtap2Session still takes PIN bytes explicitly. Touch is separate and no longer a gap; supply IUserPresencePrompt through the FIDO SessionCreationOptions, and FIDO HID reports DeviceWaiting from the authenticator's live user-presence-needed keep-alive. Review the credential prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
++    notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Ctap2 (ICtap2Session); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt (set via WebAuthnClientOptions.CredentialPrompt - see `webauthn-client-construction-and-streams` for the options-record construction change), an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (WebAuthnClientOptions.MaxPromptAttempts, default 3, now caller-configurable); returning null from the prompt means the user declined, not a retry request. This replaces the credential-collection part of KeyCollector only for WebAuthn; lower-level CTAP callers pass PIN bytes to ClientPin to acquire a token, then supply PinUvAuthParam/PinUvAuthProtocol through credential options on ICtap2Session (omitting the mutually exclusive uv key). Touch is separate; supply IUserPresencePrompt through CTAP2 SessionCreationOptions. HID reports DeviceWaiting on a user-presence-needed keep-alive; SmartCard ordinary creation/assertion reports PolicyRequires before the APDU, while generic helper traffic has no modeled notification. A notification is not proof of gesture, UV or RP acceptance. Review the credential prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
+     last_reviewed_commit: a05f96552f504a031823fd8c315df4e37656abff
+   - id: yubihsm-credential-password-bytes
+     status: assisted
+diff --git i/src/Ctap2/CLAUDE.md w/src/Ctap2/CLAUDE.md
+index dc94962a..8b3ec3d5 100644
+--- i/src/Ctap2/CLAUDE.md
++++ w/src/Ctap2/CLAUDE.md
+@@ -25,7 +25,10 @@ This file provides Claude-specific guidance for working with the CTAP2 module. *
+ - `CtapCommand`, `CtapStatus`, and `CtapException` belong directly to `Yubico.YubiKit.Ctap2`,
+   even though their files remain in the module-local `Ctap/` source folder. Touch operation IDs use `UserPresenceOperations.Ctap2`.
+ 
+-The CTAP2 module implements CTAP 2.1/2.3 (Client to Authenticator Protocol) for YubiKey authenticators. This module supports passkey creation, authentication, and advanced CTAP2 features like credential management, biometric enrollment, and WebAuthn extensions.
++The module exposes CTAP2 credential operations and selected CTAP 2.1/2.3 features. Revision advertisement,
++optional capabilities, configured state, token permissions and firmware metadata are separate checks;
++none alone proves per-device support or standards conformance. The session sends/parses protocol data,
++not RP registration/sign-in verification. See the README for the complete protocol-demo/RP boundary.
+ 
+ **Transports Supported:**
+ - FIDO HID protocol over USB (primary transport)
+@@ -62,7 +65,9 @@ Yubico.YubiKit.Ctap2/
+ │   ├── Cbor/                       # CBOR serialization
+ │   │   ├── CtapRequestBuilder.cs   # Fluent CBOR request builder
+ │   │   └── CtapResponseParser.cs   # CBOR response parsing utilities
+-│   ├── Config/                     # authenticatorConfig (FW 5.4+)
++│   ├── Cose/                       # Public-key carriers, including experimental ARKG seed keys
++│   ├── Arkg/                       # Experimental offline derivation convenience
++│   ├── Config/                     # authenticatorConfig; per-subcommand advertised support
+ │   │   ├── ConfigSubCommand.cs
+ │   │   └── AuthenticatorConfig.cs
+ │   ├── CredentialManagement/       # Credential enumeration/management
+@@ -80,7 +85,7 @@ Yubico.YubiKit.Ctap2/
+ │   │   ├── MakeCredentialResponse.cs
+ │   │   ├── GetAssertionResponse.cs
+ │   │   └── PublicKeyCredentialTypes.cs
+-│   ├── Crypto/                     # YK 5.7/5.8 encrypted metadata
++│   ├── Crypto/                     # Offline encrypted GetInfo metadata helpers
+ │   │   └── EncryptedMetadataDecryptor.cs
+ │   ├── Ctap/                       # CTAP protocol types
+ │   │   ├── CtapCommand.cs
+@@ -91,11 +96,10 @@ Yubico.YubiKit.Ctap2/
+ │   │   ├── CredProtect/            # credProtect policy
+ │   │   ├── CredBlob/               # credBlob inputs and outputs
+ │   │   ├── HmacSecret/             # hmac-secret inputs and outputs
+-│   │   ├── LargeBlob/              # largeBlob inputs, support enum, outputs
++│   │   ├── LargeBlob/              # Legacy largeBlob convenience output decoder
+ │   │   ├── MinPinLength/           # minPinLength inputs and outputs
+-│   │   ├── Prf/                    # PRF inputs and outputs
+ │   │   └── PreviewSign/            # previewSign types and canonical CBOR encoder
+-│   ├── BioEnrollment/              # Fingerprint enrollment (FW 5.2+)
++│   ├── BioEnrollment/              # Fingerprint APIs; known standard wire/schema limitations
+ │   │   ├── BioEnrollmentSubCommand.cs
+ │   │   ├── BioEnrollmentModels.cs
+ │   │   └── FingerprintBioEnrollment.cs
+@@ -107,8 +111,7 @@ Yubico.YubiKit.Ctap2/
+ │       ├── PinUvAuthProtocolV1.cs
+ │       ├── PinUvAuthProtocolV2.cs
+ │       ├── ClientPin.cs
+-│       ├── ClientPinSubCommand.cs
+-│       └── PinUvAuthTokenPermissions.cs
++│       └── ClientPinSubCommand.cs   # Includes PinUvAuthTokenPermissions
+ └── tests/
+     ├── Yubico.YubiKit.Ctap2.UnitTests/
+     └── Yubico.YubiKit.Ctap2.IntegrationTests/
+@@ -123,13 +126,16 @@ only on `SmartCardBackend`; neither `ICtap2Backend` nor `HidBackend` exposes sel
+ before channel initialization or GetInfo; SmartCard selection and firmware discovery still precede SCP establishment.
+ 
+ ```csharp
+-// Recommended: Use extension method
++// With IYubiKey yubiKey in an async method; this factory owns the opened connection.
+ await using var session = await yubiKey.CreateCtap2SessionAsync();
+-
+-// Or direct creation
+-await using var directSession = await Ctap2Session.CreateAsync(connection);
+ ```
+ 
++Alternatively, pass an existing supported `IConnection connection` to
++`Ctap2Session.CreateAsync(connection)`. That session borrows the connection; keep the caller's disposal
++scope outside the session's. Do not append the direct factory or a one-shot GetInfo helper while another
++connection-owning session is live on the same key. SCP03 requires an authorized SmartCard key configured
++with the supplied keys; own/dispose `Scp03KeyParameters` outside the secure session scope.
++
+ ### GetInfo (No User Presence Required)
+ 
+ ```csharp
+@@ -140,12 +146,18 @@ var info = await session.GetInfoAsync();
+ bool ctap2_1 = info.Versions.Contains("FIDO_2_1");
+ 
+ // Check supported extensions
+-bool hasHmacSecret = info.Extensions?.Contains("hmac-secret") ?? false;
++bool hasHmacSecret = info.Extensions.Contains("hmac-secret");
+ 
+ // Check options
+-bool hasRk = info.Options?.TryGetValue("rk", out var rk) == true && rk;
++bool hasRk = info.Options.TryGetValue("rk", out var rk) && rk;
+ ```
+ 
++Do not generalize optional-field null preservation. Optional numeric, Boolean and text fields retain
++null when absent, but decoded `EncIdentifier`/`EncCredStoreState` convert absent byte arrays to present
++empty nullable memory. `HasValue` is not a wire-presence/capability check, and nullable presence/length
++does not distinguish missing fields from encoded empty byte strings. Use the complete `RawData` map
++to inspect encoded presence. Missing required AAGUID separately defaults to empty, not a valid response.
++
+ ### PIN/UV Auth Protocols
+ 
+ There is no separate initialization step. The protocol object is stateless with respect to the
+@@ -153,12 +165,15 @@ authenticator; `ClientPin` performs the `getKeyAgreement` round trip and ECDH en
+ internally on each token request.
+ 
+ ```csharp
+-// Protocol V2 (recommended, CTAP 2.1)
++// Fragment: session, byte[] pin, string rpId, byte[32] clientDataHash,
++// MakeCredentialOptions options, RP/user entities and CancellationToken cancellationToken are supplied.
++// Requires mutually supported protocol 2; this constructor does not negotiate it.
+ using var protocol = new PinUvAuthProtocolV2();
+ using var clientPin = new ClientPin(session, protocol);
+ 
+ // Get PIN token with permissions. rpId is required for MakeCredential/GetAssertion permissions.
+ byte[]? pinToken = null;
++byte[]? authParam = null;
+ try
+ {
+     pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+@@ -168,41 +183,69 @@ try
+         cancellationToken);
+ 
+     // Authenticate command
+-    var authParam = protocol.Authenticate(pinToken, clientDataHash);
++    authParam = protocol.Authenticate(pinToken, clientDataHash);
+     options.WithPinUvAuth(authParam, protocol.Version);
++    // Keep options.UserVerification null; even uv:false is mutually exclusive with token auth.
++    await session.MakeCredentialAsync(
++        clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options,
++        cancellationToken);
+ }
+ finally
+ {
+     if (pinToken is not null) CryptographicOperations.ZeroMemory(pinToken);
++    if (authParam is not null) CryptographicOperations.ZeroMemory(authParam);
+ }
+ ```
+ 
+-The returned token is caller-owned; zero it when done (see
++This composable fragment sends a creation command but does not verify RP registration. Supply a fresh
++exact client-data hash and RP/account context as described in the README, or demo inputs on the dedicated
++evaluation key. The PIN is borrowed; the caller clears it after the final await.
++`ClientPin.Dispose` disposes its supplied protocol, not the session. The returned token is caller-owned;
++zero it when done (see
+ `examples/FidoTool/FidoExamples/MakeCredential.cs`). On authenticators that do not advertise the
+ `pinUvAuthToken` option, `GetPinUvAuthTokenUsingPinAsync` falls back to the legacy
+-`getPinToken` subcommand and the requested permissions do not apply.
++`getPinToken` subcommand with the same protocol; requested permissions/RP do not apply. This is not V1
++negotiation or general administrative authorization. Built-in UV token acquisition needs configured UV,
++token capability and any permission-specific gates, and can require biometric interaction without an
++SDK presence notification. Token issuance/lifetime and host buffer lifetime are different boundaries.
+ 
+ ### Extensions (WebAuthn)
+ 
+-The SDK uses the **ExtensionBuilder** fluent pattern for all WebAuthn/CTAP extensions. Extensions are NOT implemented as separate classes that you instantiate—instead, you compose them via the builder.
++Compose CTAP extension bytes with `ExtensionBuilder`; some overloads take typed inputs such as
++`HmacSecretInput` and `PreviewSignRegistrationInput`. Building bytes does not negotiate support, enforce
++RP policy or perform a ceremony. Client-side WebAuthn transformations belong in the WebAuthn package.
+ 
+ #### Available Extensions
+ 
+-| Extension | Builder Method | Description | YubiKey FW |
++| Extension | Builder Method | Description | Availability check |
+ |-----------|---------------|-------------|------------|
+-| credProtect | `.WithCredProtect()` | Credential protection level | 5.2+ |
+-| hmac-secret | `.WithHmacSecret()` (makeCredential: `true`) / `.WithHmacSecret(...)` (getAssertion: encrypted salts) | CTAP2 symmetric secret derivation; WebAuthn's prf extension is built on it in the WebAuthn package | 5.2+ |
+-| hmac-secret-mc | `.WithHmacSecretMakeCredential()` | hmac-secret during MakeCredential | 5.4+ |
+-| credBlob | `.WithCredBlob()` | Per-credential blob storage | 5.5+ |
+-| largeBlob | `.WithLargeBlob()` / `.WithLargeBlobKey()` | Large blob support (makeCredential) and the storage key (§12.3); blobs are read/written with `LargeBlobStorage` (§6.10). The direct §12.4 getAssertion read/write extension is not implemented (no YubiKey supports it) | 5.5+ |
+-| minPinLength | `.WithMinPinLength()` | Require minimum PIN length | 5.4+ |
+-| previewSign | `.WithPreviewSign(...)` | Delegated signing with a generated signing key | YubiKey FW with previewSign support |
++| credProtect | `.WithCredProtect(...)` | Requests policy; `enforcePolicy` is currently not honored | Extension support and applicable UV policy |
++| hmac-secret | `.WithHmacSecret()` / `.WithHmacSecret(...)` | Registration enablement / assertion encrypted salts | Advertised extension, protocol and UP |
++| hmac-secret-mc | `.WithHmacSecretMakeCredential(input)` | Encrypted evaluation during creation; also emits hmac-secret=true | Separate advertisement; firmware metadata alone is insufficient |
++| credBlob | `.WithCredBlob(blobData)` / `.WithGetCredBlob()` | Store at creation / retrieve at assertion | Advertised extension and maxCredBlobLength |
++| largeBlobKey | `.WithLargeBlobKey()` | Key in response envelope; `LargeBlobStorage` reads/writes shared array | Extension plus largeBlobs option and discoverable credential |
++| minPinLength | `.WithMinPinLength()` | Reports existing code-point minimum during creation, only to authorized RP IDs | Extension plus configured disclosure RP list |
++| previewSign | `.WithPreviewSign(...)` | Generated-key signing in experimental vendor draft | Advertised previewSign and algorithm support |
+ 
+-> **Note:** The `previewSign` extension is a first-class CTAP2 extension via `WithPreviewSign(PreviewSignRegistrationInput)` and `WithPreviewSign(PreviewSignAuthenticationInput)`. The generic signing API is algorithm-agile: `tbs` and optional `additionalArgs` are algorithm-specific bytes and are encoded unchanged. **WARNING -- EXPERIMENTAL --** Public ARKG helpers remain available as experimental conveniences; they are not ready for production use and must not be treated as production cryptographic guidance. Convert them to raw `additionalArgs` with `PreviewSignCbor.EncodeAdditionalArgs(...)`. WebAuthn provides a high-level adapter (`Yubico.YubiKit.WebAuthn.Extensions.PreviewSign`) for Client API consumers; both layers share the canonical encoder in Ctap2.
++`previewSign` follows the experimental [Yubico sign-extension draft v4](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension)
++(Editor's Draft, 2025-08-26), not CTAP v4 or an adopted W3C signing standard. CTAP overloads take
++`PreviewSignRegistrationInput` or `PreviewSignSigningParams`; `PreviewSignAuthenticationInput` is a
++WebAuthn-layer type. Generic `tbs` and optional `additionalArgs` are encoded unchanged; callers must
++provide algorithm-appropriate TBS/prehashing and a CBOR COSE_Sign_Args map when required. Inner attestation
++is parsed, not trust-verified. **WARNING -- EXPERIMENTAL --** Public ARKG conveniences are not ready for
++production and must not be treated as production cryptographic guidance. Convert arguments with
++`PreviewSignCbor.EncodeAdditionalArgs(...)`. The seed algorithm placeholder -65700 and BL=-1/KEM=-2
++labels agree with ARKG Internet-Draft -10, as does the example's derived ESP256=-9. The SDK's outer kty=2
++and byte-string-wrapped nested maps differ from the draft's kty=-65537/direct maps; the SDK also requires
++an integer derived algorithm where the draft permits an optional int/text value. This partial agreement
++is not full-profile conformance; the draft's stated expiry is 2026-08-31. Signing and derived-key
++identifiers remain distinct; the convenience verifier handles raw
++messages with P-256/SHA-256 and limited DER parsing, not arbitrary generic TBS algorithms.
+ 
+ #### Example Usage
+ 
+ ```csharp
++// Builder fragment: ReadOnlyMemory<byte> blobData and the hmac-secret inputs below are caller-supplied.
+ // Build extensions for MakeCredential
+ var extensions = new ExtensionBuilder()
+     .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
+@@ -216,24 +259,40 @@ var options = new MakeCredentialOptions
+ };
+ 
+ // For GetAssertion: encrypted salts under the shared secret from key agreement
++// protocol/sharedSecret/keyAgreement and 32-byte salt1/salt2 belong to the caller.
+ var assertionExtensions = new ExtensionBuilder()
+     .WithHmacSecret(protocol, sharedSecret, keyAgreement, salt1, salt2)
+     .Build();
+ ```
+ 
++Keep borrowed extension inputs unchanged through encoding/transmission and clear caller-owned secrets.
++For sensitive/PII credBlob content the RP must request level-3 credProtect with enforcement; the current
++builder does not enforce that policy, so this composition alone is not a safe sensitive-storage recipe.
++Use nonsensitive demo blobData unless support/policy prevention is independently handled.
++
+ #### hmac-secret vs WebAuthn PRF
+ 
+-`hmac-secret` is the CTAP2 extension (§12.7) and lives here. WebAuthn's `prf` extension (L3 §10.1.4) is a
++`hmac-secret` is the CTAP2 extension (2.1 §12.5; 2.3 §12.7) and lives here. Its credential-scoped random
++secrets have separate verified/unverified variants; repeatability depends on credential, salt and UV
++mode, not on the PIN/biometric value. Salt authentication under the shared secret differs from command
++token authentication over clientDataHash. WebAuthn's `prf` extension (L3 §10.1.4) is a
+ *client* extension built on top of it: the WebAuthn package hashes the relying party's inputs into salts
+ (`SHA-256("WebAuthn PRF" || 0x00 || input)`), performs key agreement, encrypts and authenticates the salts
+ with `WithHmacSecret(...)`, and decrypts the result. There is no `"prf"` key on the CTAP wire, so this
+ package has no PRF types; see `Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput` and
+ docs/architecture/webauthn-extension-processing.md ("Where code belongs").
+ 
++The current WebAuthn adapter does not enforce PRF's required verified-variant UV override, and result/
++intermediate copies lack an owned cleanup guarantee; retain these limitations when linking the transform.
++For large blobs, the SDK uses largeBlobKey/storage rather than the standard direct largeBlob extension.
++The direct route does define makeCredential support input; its absence here is an SDK-route limitation,
++not a claim that CTAP forbids it or that every current YubiKey lacks it.
++
+ ### Credential Management
+ 
+ ```csharp
+-var credMgmt = new CredentialManagement(session, protocol, pinToken);
++// With live session/protocol, authorized borrowed pinToken, returned RP hash and descriptor credentialId.
++using var credMgmt = new CredentialManagement(session, protocol, pinToken);
+ 
+ // Get credential metadata
+ var metadata = await credMgmt.GetCredentialsMetadataAsync();
+@@ -258,6 +317,21 @@ collection count. `ClientPin.GetPinRetriesAsync` and `GetUvRetriesAsync` return
+ `PinRetryStatus` and `UserVerificationRetryStatus` models; their response parsers retain the existing protocol
+ behavior.
+ 
++Use the returned RP hash unchanged: RP display text can be truncated. Enumeration eagerly sends begin
++and the reported number of next calls; missing total yields one result, and malformed totals are not
++fully validated. Do not interleave other device operations. A continuation failure throws rather than
++returning partial results. `CredentialManagement.Dispose` currently only marks a field that operations
++do not check; it neither owns/clears the borrowed token nor ends device authorization. Config/bio/storage
++helpers also borrow these dependencies. Toggle alwaysUv only after reading current state; after an
++uncertain outcome re-read before repeating. minPinLength disclosure is not setting policy.
++
++Bio helpers have known standard subcommand/authentication/timeout and template-array decoding limitations.
++Do not claim interoperable enrollment from fake fixtures or sensor metadata. Retain the begin template
++ID for continuation; sample `IsComplete` is only decoded remaining-count equality, including unsafe
++missing-field defaults. .NET cancellation does not automatically send enrollment cancel. Blob updates
++are shared-array read-modify-write operations without whole-sequence conflict protection or rollback;
++the SDK requires protocol/token authorization for writes, stricter than CTAP's conditional rule.
++
+ ### User-presence notifications
+ 
+ Supply `SessionCreationOptions.UserPresencePrompt` when creating a `Ctap2Session` to receive touch
+@@ -290,10 +364,13 @@ var response = await session.SendCborRequestAsync(request);
+ 
+ Key rules:
+ - Parameters are **integer keys** (not strings) for CTAP
+-- Use **Ctap2Canonical** conformance mode (sorted integer keys)
++- Use **Ctap2Canonical** conformance mode (map keys sorted by encoded type/length/bytes, not numeric or alphabetical order; the current writer sorts at map completion)
+ - Build request returns command byte + CBOR payload
+ - Use `.WithValue(key, writer => ...)` for complex values or sensitive byte spans that should be written directly instead of copied through `.WithBytes(...)`
+ - Keep operation-level request builders as pure encoding helpers; do not introduce operation-specific CTAP command classes
++- WithBytes/encoded inputs retain private copies with no disposal owner; WithValue callbacks run at Build.
++  Keep callback inputs valid until Build. Clear caller-owned encoded request arrays after the awaited send.
++  Canonical mode alone does not enforce command schema, CTAP depth, device maxMsgSize or full input exhaustion.
+ 
+ ## Forward compatibility and escape hatches
+ 
+@@ -301,10 +378,16 @@ Valid authenticator response data that is not yet modeled must remain usable wit
+ 
+ - `RawData` on response owners such as `AuthenticatorInfo`, credential metadata, relying-party information, `StoredCredentialInfo`, `FingerprintSensorInfo`, and `EnrollmentSampleResult` preserves the complete response envelope. Dispose `StoredCredentialInfo` directly, or its owning `CredentialEnumerationResult`, because its envelope can contain secret fields.
+ - `AttestedCredentialData.CredentialPublicKey`, with `CoseOtherKey.RawCbor` when an unmodeled key type is not claimed by a modeled algorithm. COSE keys must still report an algorithm.
+-- `ExtensionOutput.TryGetRawExtension` and `WebAuthnAuthenticatorData.ParsedExtensions` for extension outputs.
++- AuthenticatorData raw extension bytes and `WebAuthnAuthenticatorData.ParsedExtensions` expose encoded
++  extension data. `ExtensionOutput.TryGetRawExtension` is a limited reconstruction, not byte-exact
++  preservation of every CBOR type; its reader overload stores identifiers with empty values only.
+ - `ICtap2Session.SendCborRequestAsync` for explicitly constructed raw CTAP CBOR requests and responses.
+ 
+-PIN/UV key agreement is a separate security-critical boundary: forward-compatible response handling must not relax its required P-256 key type, curve, coordinates, or protocol structure. Raw response access is not a bypass, and unknown response fields must not be blindly copied into requests.
++PIN/UV key agreement is a separate security-critical boundary: do not relax required P-256 key type,
++curve, coordinates or protocol structure for forward compatibility. Current helper checks coordinates
++but omits required peer-label checks; that is a validation gap, not a sanctioned bypass. Unknown response
++fields must not be blindly copied into requests. Credential/GetInfo decoders also have known required-
++field/envelope-validation gaps; preserve valid unknown data without promising universal malformed rejection.
+ 
+ Add `RawData` to models that own a complete, non-secret authenticator response. A response that can contain
+ secret material instead needs explicit disposable ownership. `StoredCredentialInfo` owns one private complete
+@@ -317,23 +400,22 @@ Use `RawCbor` only for an encoded nested CBOR structure, such as an attestation
+ 
+ ### Memory Handling
+ 
+-```csharp
+-// ✅ Zero sensitive data
+-CryptographicOperations.ZeroMemory(pinBytes);
++This synchronous fragment illustrates cleanup of a caller-owned PIN and its derived hash, not the
++complete ClientPin protocol. Small synchronous buffers use stack allocation; bytes crossing an await
++need Memory/owned storage instead. Never log the PIN, hash, tokens or secret-derived extension output.
+ 
+-// ✅ Use ArrayPool for crypto buffers
+-var buffer = ArrayPool<byte>.Shared.Rent(32);
++```csharp
++// With byte[] pinBytes supplied by the caller, in a synchronous method.
++Span<byte> pinHash = stackalloc byte[32];
+ try
+ {
+-    // use buffer
++    SHA256.HashData(pinBytes, pinHash);
+ }
+ finally
+ {
+-    CryptographicOperations.ZeroMemory(buffer.AsSpan(0, 32));
+-    ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
++    CryptographicOperations.ZeroMemory(pinHash);
++    CryptographicOperations.ZeroMemory(pinBytes);
+ }
+-
+-// ❌ NEVER log PIN, keys, or sensitive CTAP data
+ ```
+ 
+ ### Protocol Disposal
+@@ -344,10 +426,11 @@ using var protocol = new PinUvAuthProtocolV2();
+ ```
+ 
+ The ephemeral ECDH key pair lives entirely inside a single `Encapsulate` call:
+-`PinUvAuthHelpers.PerformEcdhKeyAgreement` creates it with `using var ecdh = ...` and the raw
+-shared point `z` is zeroed in that call's `finally`. `Encapsulate` hands the derived shared secret
++`PinUvAuthHelpers.PerformEcdhKeyAgreement` creates it with `using var ecdh = ...`; after the helper
++returns, `Encapsulate` zeroes raw `z` in its `finally`. This does not cover the helper's post-derivation
++allocation-failure gap or all provider/internal copies. `Encapsulate` hands the derived shared secret
+ to the caller, who owns it — `ClientPin` zeroes it in its own `finally`. Still use `using` on the
+-protocol so disposed-instance misuse throws `ObjectDisposedException` rather than silently working.
++protocol so its crypto methods reject disposed-instance use; Version/AuthenticationTagLength remain readable.
+ 
+ ## Test Patterns
+ 
+@@ -357,7 +440,7 @@ protocol so disposed-instance misuse throws `ObjectDisposedException` rather tha
+ [Fact]
+ public void AuthenticatorInfo_Decode_ParsesVersions()
+ {
+-    // Arrange - raw CBOR bytes
++    // Partial parser fixture, not a conforming GetInfo envelope: the required AAGUID is absent.
+     var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+     writer.WriteStartMap(1);
+     writer.WriteInt32(1);
+@@ -379,27 +462,35 @@ public void AuthenticatorInfo_Decode_ParsesVersions()
+ 
+ When testing classes that send CBOR commands via `ICtap2Session`:
+ 
++The following complete method belongs in the CTAP UnitTests project with xUnit v3, NSubstitute,
++System.Formats.Cbor and PIN namespaces imported. It checks a real helper request, not biometric or
++cryptographic interoperability. Mock `ICtap2Session`, not the sealed `Ctap2Session`.
++
+ ```csharp
+-// 1. Mock ICtap2Session (not Ctap2Session - it's sealed)
+-var session = Substitute.For<ICtap2Session>();
++[Fact]
++public async Task PinRetries_EncodesProtocolAndSubcommand()
++{
++    var session = Substitute.For<ICtap2Session>();
++    ReadOnlyMemory<byte> mockResponse = new byte[] { 0xA1, 0x03, 0x08 }; // {pinRetries: 8}
++    ReadOnlyMemory<byte> capturedRequest = default;
++    session.SendCborRequestAsync(
++        Arg.Do<ReadOnlyMemory<byte>>(value => capturedRequest = value),
++        Arg.Any<CancellationToken>()).Returns(mockResponse);
++    using var protocol = new PinUvAuthProtocolV2();
++    using var clientPin = new ClientPin(session, protocol);
+ 
+-// 2. Mock SendCborRequestAsync with the 2-arg signature
+-session.SendCborRequestAsync(
+-    Arg.Any<ReadOnlyMemory<byte>>(), 
+-    Arg.Any<CancellationToken>())
+-    .Returns(mockResponse);
++    var retries = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
+ 
+-// 3. When capturing request for assertions:
+-ReadOnlyMemory<byte> capturedRequest = default;
+-session.SendCborRequestAsync(
+-    Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x),
+-    Arg.Any<CancellationToken>())
+-    .Returns(mockResponse);
+-
+-// 4. Request format: [command_byte][cbor_payload]
+-// Skip byte 0 when parsing the CBOR payload:
+-var cborPayload = capturedRequest.Slice(1);  // Skip command byte
+-var reader = new CborReader(cborPayload, CborConformanceMode.Ctap2Canonical);
++    Assert.Equal(8, retries.RetriesRemaining);
++    Assert.Equal(CtapCommand.ClientPin, capturedRequest.Span[0]);
++    var reader = new CborReader(capturedRequest.Slice(1), CborConformanceMode.Ctap2Canonical);
++    Assert.Equal(2, reader.ReadStartMap());
++    Assert.Equal(1, reader.ReadInt32());
++    Assert.Equal(protocol.Version, reader.ReadInt32());
++    Assert.Equal(2, reader.ReadInt32());
++    Assert.Equal(ClientPinSubCommand.GetRetries, reader.ReadInt32());
++    reader.ReadEndMap();
++}
+ ```
+ 
+ **Common gotcha:** Tests may fail if they parse `capturedRequest` directly without skipping the command byte prefix.
+@@ -408,36 +499,42 @@ var reader = new CborReader(cborPayload, CborConformanceMode.Ctap2Canonical);
+ 
+ Tests requiring user presence must be marked and excluded from unattended runs:
+ 
++Use the xUnit v2 IntegrationTests project with Tests.Shared, its Infrastructure namespace and Core
++Devices/Sessions namespaces imported. This direct-session example has no PIN-normalizing helper setup:
++
+ ```csharp
+-// Test that can run without user interaction
+-[Fact]
+-public async Task GetInfoAsync_Returns_AAGUID()
++[SkippableTheory]
++[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
++public async Task GetInfoAsync_Returns_Aaguid(YubiKeyTestState state)
+ {
+-    await using var session = await device.CreateCtap2SessionAsync();
++    await using var session = await state.Device.CreateCtap2SessionAsync(
++        new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido });
+     var info = await session.GetInfoAsync();
+     Assert.Equal(16, info.Aaguid.Length);
+ }
+-
+-// Test requiring user touch - MUST be excluded from automated runs
+-[Fact]
+-[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+-public async Task MakeCredentialAsync_CreatesPasskey()
+-{
+-    // This requires user touch
+-}
+ ```
+ 
+-Run tests excluding user presence:
++For a meaningful marked creation example, use [tests/CLAUDE.md](tests/CLAUDE.md#user-interaction-and-coordination-lanes).
++Keep its actual setup, arguments, assertion and cleanup in the real test-project context. Most existing
++`WithCtap2SessionAsync` calls default to PIN normalization before the callback; even a final GetInfo can
++therefore set/change a PIN or consume a retry. Smoke filters do not make those paths read-only. Preserve
++the existing module human-coordination policy; GetInfo itself needs no new approval gate.
++
++From the repository root, the first command selects units only; the second includes unit/integration
++projects then filters to integration smoke. The latter still requires inspecting actual setup for PIN/
++state work under the existing coordination policy; it is not an unattended safety guarantee.
+ ```bash
+-dotnet toolchain.cs -- test --project Ctap2 --smoke --filter "Category!=RequiresUserPresence"
++dotnet toolchain.cs -- test --project Ctap2
++dotnet toolchain.cs -- test --integration --project Ctap2 --smoke --filter "FullyQualifiedName~Yubico.YubiKit.Ctap2.IntegrationTests"
+ ```
+ 
+ ## Feature Flags
+ 
+-The module defines firmware feature flags:
++The following schematic declarations summarize actual `Ctap2Session` firmware metadata, not a new class
++to paste into the library. They do not check model hardware, advertised command/extension or permission:
+ 
+ ```csharp
+-public static readonly Feature FeatureCtap2 = new("CTAP2", 5, 0, 0);
++public static readonly Feature FeatureFido2 = new("FIDO2", 5, 0, 0);
+ public static readonly Feature FeatureBioEnrollment = new("Bio Enrollment", 5, 2, 0);
+ public static readonly Feature FeatureCredentialManagement = new("Credential Management", 5, 2, 0);
+ public static readonly Feature FeatureHmacSecretMc = new("hmac-secret-mc", 5, 4, 0);
+@@ -446,7 +543,8 @@ public static readonly Feature FeatureCredBlob = new("credBlob", 5, 5, 0);
+ public static readonly Feature FeatureEncIdentifier = new("Encrypted Identifier", 5, 7, 0);
+ ```
+ 
+-Check firmware support before using features:
++With a `FirmwareVersion firmwareVersion`, a threshold comparison can rule out known older firmware.
++Major-zero sentinel/default metadata passes `IsSupportedByFirmware`; this is not qualified feature support:
+ ```csharp
+ if (!Ctap2Session.FeatureBioEnrollment.IsSupportedByFirmware(firmwareVersion))
+ {
+@@ -456,15 +554,18 @@ if (!Ctap2Session.FeatureBioEnrollment.IsSupportedByFirmware(firmwareVersion))
+ 
+ ## Common Pitfalls
+ 
+-1. **CBOR Key Order**: CTAP2 requires canonical CBOR with sorted integer keys. Always use `CborConformanceMode.Ctap2Canonical`.
++1. **CBOR Key Order**: CTAP2 canonical keys sort by encoded type/length/bytes, not numeric value.
++   Use `CborConformanceMode.Ctap2Canonical`; the current writer sorts completed maps automatically.
+ 
+-2. **PIN Padding**: Client PIN commands require specific padding (64 bytes, PKCS#7 style) before encryption.
++2. **PIN Padding**: ClientPin right-zero-pads a new PIN to 64 bytes before encryption. AES uses no padding,
++   not PKCS#7. Caller input must meet UTF-8/NFC/code-point/device-policy requirements; byte count alone is insufficient.
+ 
+ 3. **Protocol Reuse**: PIN/UV auth protocols are stateless with respect to the authenticator; token requests perform key agreement internally. Dispose the protocol when done.
+ 
+ 4. **User Presence**: Configure `SessionCreationOptions.UserPresencePrompt` for SDK notifications; do not infer touch from generic CBOR traffic. Hardware tests that actually require touch must still use the `RequiresUserPresence` trait.
+ 
+-5. **Extension Order**: Extensions map keys must be in canonical order when encoding.
++5. **Extension Order**: Canonical output uses encoded-key order, not numeric/alphabetical insertion;
++   the current Ctap2Canonical writer sorts completed maps. Do not infer broken update-user wire from insertion order.
+ 
+ ## References
+ 
+diff --git i/src/Ctap2/PACKAGE_README.md w/src/Ctap2/PACKAGE_README.md
+index 93ae308a..ea9215e9 100644
+--- i/src/Ctap2/PACKAGE_README.md
++++ w/src/Ctap2/PACKAGE_README.md
+@@ -4,6 +4,12 @@ CTAP2 authenticator support for YubiKey devices: read capabilities, create and a
+ credentials, manage the PIN, and drive credential management, biometric enrollment, large blobs, and
+ authenticator configuration. For the higher-level WebAuthn ceremony API, use `Yubico.YubiKit.WebAuthn`.
+ 
++Operations depend on the connected authenticator's advertised features, configured state, transport and
++authorization; firmware thresholds alone do not qualify support. Biometric APIs currently have known
++standard-command wire/schema limitations. Responses are parsed, not RP-server verified; this package
++does not complete account registration or sign-in. Experimental previewSign/ARKG helpers are evaluation
++conveniences, not ready for production or production cryptographic guidance.
++
+ The authenticator retains its FIDO application identity and FIDO2 PIN. CTAPHID is the shared USB
+ transport; this package supplies CTAP2 operations, not a replacement identity for the transport.
+ 
+diff --git i/src/Ctap2/README.md w/src/Ctap2/README.md
+index f6f37930..7d80aac1 100644
+--- i/src/Ctap2/README.md
++++ w/src/Ctap2/README.md
+@@ -1,6 +1,6 @@
+ # Yubico.YubiKit.Ctap2
+ 
+-The FIDO application on a YubiKey is a CTAP 2.1/2.3 authenticator. This package speaks CTAP2 directly: read
++This package exposes CTAP2 operations and selected CTAP 2.1/2.3 features on YubiKey authenticators: read
+ capabilities, create and assert credentials, manage the PIN, and drive the credential, biometric, large-blob,
+ and config sub-systems. `Yubico.YubiKit.WebAuthn` builds the WebAuthn client API on top of it.
+ 
+@@ -11,16 +11,23 @@ and config sub-systems. `Yubico.YubiKit.WebAuthn` builds the WebAuthn client API
+ 
+ - .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
+ - YubiKey 5 series, Security Key series, or YubiKey Bio series with firmware 5.0.0 or later.
+-- Transports: HID FIDO over USB, or SmartCard (CCID) where the FIDO AID is exposed - NFC always, USB on 5.8.0+.
++- Transports: HID FIDO over USB, or SmartCard (CCID) where the connected authenticator exposes the FIDO AID.
++  NFC requires a current PC/SC connection reporting `Transport.Nfc`; USB SmartCard uses the SDK's 5.8.0+ gate.
+ 
+-| Feature | Minimum firmware |
++| Feature | SDK firmware threshold |
+ |---------|------------------|
+-| CTAP2 (CTAP2) | 5.0.0 |
++| CTAP2 (`FeatureFido2`) | 5.0.0 |
+ | Credential management, fingerprint bio enrollment | 5.2.0 |
+ | Authenticator config, hmac-secret-mc extension | 5.4.0 |
+ | credBlob extension | 5.5.0 |
+ | CTAP2 over USB SmartCard | 5.8.0 |
+ 
++These thresholds are SDK metadata, not a device-support or standards-conformance matrix. Check the actual
++`GetInfoAsync` versions, extensions and options, configured state, transport and required authorization.
++Fingerprint enrollment also needs sensor hardware. Early credential-management support can be a prototype;
++`CredentialManagement` sends the standard command only. The hmac-secret-mc threshold does not establish its
++earliest support on every family; request it only when advertised.
++
+ ## Installation
+ 
+ ```bash
+@@ -51,8 +58,16 @@ var info = await session.GetInfoAsync();
+ Console.WriteLine($"CTAP versions: {string.Join(", ", info.Versions)}");
+ ```
+ 
+-Later snippets assume these directives and a `device` obtained the same way. `GetInfoAsync` needs no touch and no PIN;
+-`info.Options`, `info.Extensions`, and `info.Aaguid` describe the rest. For a single read, the one-shot `device.GetCtap2InfoAsync()` opens and closes a session for you.
++Later snippets use these directives and the same open `session`. `GetInfoAsync` needs no touch or PIN and
++makes a fresh query; it does not refresh the session's construction-time firmware configuration.
++Options can describe state: `clientPin: false` means PIN support with no PIN set, not no PIN support.
++For a one-shot read, use `device.GetCtap2InfoAsync()` **instead of** opening this session, or after disposing
++it. The helper opens/closes its own session and performs an initialization probe plus the requested read.
++
++For decoded encrypted GetInfo metadata, absent `EncIdentifier` and `EncCredStoreState` fields currently
++become present zero-length `ReadOnlyMemory<byte>?` values. `HasValue` is therefore not evidence that the
++authenticator returned a field or supports the feature; nullable presence/length also cannot distinguish
++absence from an encoded empty byte string. Inspect the original CBOR in `info.RawData` for field presence.
+ 
+ ## Common operations
+ 
+@@ -67,28 +82,64 @@ still say **FIDO2 PIN**, while operation identifiers use names such as `Ctap2.Ma
+ 
+ ### Create a credential
+ 
+-This asks for a touch and nothing else; `UserVerification` and credProtect need a PIN token, so they appear in the PIN flow below.
++This is a protocol demonstration on a dedicated evaluation key, not RP account registration. It creates
++a persistent credential. The random hash and user handle below are stand-ins; they cannot produce a
++verifiable WebAuthn registration. Use the PIN flow below when the device's configured policy requires
++authorization. Built-in UV is a separate, capability-dependent route, not PIN collection.
+ 
+ ```csharp
+-byte[] clientDataHash = SHA256.HashData(Encoding.UTF8.GetBytes("""{"challenge":"replace-me"}"""));
++byte[] registrationHash = RandomNumberGenerator.GetBytes(32); // Demo only, not collected client data.
+ var rp = new PublicKeyCredentialRpEntity("example.com", "Example Corp");
+ var user = new PublicKeyCredentialUserEntity(
+     RandomNumberGenerator.GetBytes(32), "user@example.com", "Example User");
+ 
+ var response = await session.MakeCredentialAsync(
+-    clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()],
+-    new MakeCredentialOptions { ResidentKey = true });
+-ReadOnlyMemory<byte> credentialId = response.AuthenticatorData.AttestedCredentialData!.CredentialId;
++    registrationHash, rp, user, [PublicKeyCredentialParameters.CreateES256()],
++    new MakeCredentialOptions { ResidentKey = false });
++var attested = response.AuthenticatorData.AttestedCredentialData
++    ?? throw new InvalidOperationException("No attested credential data was returned.");
++ReadOnlyMemory<byte> credentialId = attested.CredentialId;
++ReadOnlyMemory<byte> publicKeyCbor = attested.CredentialPublicKey;
+ ```
+ 
+ ### Get an assertion
+ 
+ ```csharp
+-var assertion = await session.GetAssertionAsync("example.com", clientDataHash, new GetAssertionOptions());
++byte[] authenticationHash = RandomNumberGenerator.GetBytes(32); // A separate demo ceremony.
++var assertion = await session.GetAssertionAsync("example.com", authenticationHash,
++    new GetAssertionOptions { AllowList = [new PublicKeyCredentialDescriptor(credentialId)] });
+ Console.WriteLine($"Signature: {Convert.ToHexString(assertion.Signature.Span)}");
+ ```
+ 
+-Leave `AllowList` unset to search discoverable credentials; if `NumberOfCredentials` exceeds one, call `GetNextAssertionAsync`.
++The allow list targets the preceding credential. Leave it unset to search discoverable credentials
++for the RP instead. This alternative requires an existing discoverable credential for `example.com`;
++the preceding nonresident credential is not eligible for that search. Collect all responses before
++selecting an account or issuing any other device command:
++
++```csharp
++// Alternative to the allow-list assertion above, not an additional use of its ceremony hash.
++var first = await session.GetAssertionAsync("example.com", authenticationHash, new GetAssertionOptions());
++var assertions = new List<GetAssertionResponse> { first };
++int total = first.NumberOfCredentials ?? 1;
++for (int index = 1; index < total; index++)
++{
++    assertions.Add(await session.GetNextAssertionAsync());
++}
++```
++
++Issue the `total - 1` next calls promptly and consecutively: no intervening GetInfo, PIN, administrative
++or raw command, including from another caller. The SDK does not reserve the entire sequence or track its
++count/timer. Interrupted, expired or exhausted device state can produce `NotAllowed`; CTAP's greater-than-
++30-second timer steps are optional over NFC. An absent count means one response, not proof of one account.
++
++For application integration, obtain fresh registration/authentication challenges, RP options and the
++stable account user handle from your RP protocol. Hash the **exact serialized collected client-data bytes**
++for each ceremony with SHA-256; do not hash just the challenge or reserialize the bytes before submission.
++Send those same bytes and the credential/attestation or assertion data to the RP. The RP independently
++checks ceremony type, challenge freshness, origin, RP ID hash, UP/UV, credential/account binding, signature,
++counter policy and attestation trust where required. Retain credential ID/public key in the RP record only
++after verification. A decoded response or printed signature is not registration or sign-in. The
++[WebAuthn package](../WebAuthn/README.md) supplies client orchestration, not RP-server acceptance.
+ 
+ Credential-management enumeration returns `RelyingPartyEnumerationResult` or `CredentialEnumerationResult`.
+ Read the owned, read-only `RelyingParties` or `Credentials` collection and use `ReportedTotal` when the
+@@ -97,6 +148,7 @@ Dispose credential results after use because each `StoredCredentialInfo` owns a
+ can contain a large-blob key:
+ 
+ ```csharp
++// Existing helper and hash supplied by the caller; see the authorization prerequisites below.
+ using var credentialResult = await credentialManagement.EnumerateCredentialsAsync(rpIdHash);
+ foreach (StoredCredentialInfo credential in credentialResult.Credentials)
+ {
+@@ -113,19 +165,35 @@ clears the model's private clone and is not an end-to-end response cleanup guara
+ 
+ ### Verify the user with a PIN
+ 
+-A verified ceremony carries a PIN token: acquire one for the permission you need, authenticate the same
+-`clientDataHash` you send, and set both `PinUvAuthParam` and `PinUvAuthProtocol`. Setting `UserVerification` alone is rejected. `ClientPin` also has `SetPinAsync`, `ChangePinAsync`, and `GetPinRetriesAsync`.
++For PIN authorization, acquire a token for the operation and RP, authenticate the exact hash sent with
++that command, and set `PinUvAuthParam` and `PinUvAuthProtocol`. **Omit `UserVerification` entirely** when
++supplying token authentication: even `uv:false` must not accompany `pinUvAuthParam`. `UserVerification=true`
++without token authentication requests configured built-in UV on a capable authenticator; the SDK does
++not reject it categorically. Inspect returned flags and leave independent ceremony verification to the RP.
++
++Choose a mutually supported protocol from `info.PinUvAuthProtocols`; this example requires protocol 2 and
++an already configured, known evaluation PIN. It does not set a PIN. If `pinUvAuthToken` is not true,
++`ClientPin` uses the legacy token command with the same supplied protocol, dropping requested permissions
++and RP scope. This is not protocol-1 negotiation or a guarantee of administrative authorization.
+ 
+ `GetPinRetriesAsync` and `GetUvRetriesAsync` return `PinRetryStatus` and
+-`UserVerificationRetryStatus`; read `RetriesRemaining` and `PowerCycleRequired` from those results.
++`UserVerificationRetryStatus`. Their missing counts/defaulted booleans do not prove known retry state;
++`PowerCycleRequired=false` is not assurance that a power cycle is unnecessary, and CTAP 2.1 defines no such
++UV power-cycle field. Stop on blocked states rather than blindly retrying: temporary `PinAuthBlocked`
++differs from exhausted `PinBlocked`. `ClientPin` also exposes PIN set/change operations. PIN bytes must
++represent NFC-normalized UTF-8, satisfy the current code-point minimum and byte limit, and not end in NUL;
++the SDK's 4–63-byte check alone does not establish these requirements.
+ 
+ ```csharp
+ byte[] pin = Encoding.UTF8.GetBytes("123456");
+ byte[]? pinToken = null;
++byte[]? authParam = null;
+ try
+ {
+     using var protocol = new PinUvAuthProtocolV2();
+     using var clientPin = new ClientPin(session, protocol);
++    byte[] pinRegistrationHash = RandomNumberGenerator.GetBytes(32); // Separate demo creation.
++    byte[] pinAuthenticationHash = RandomNumberGenerator.GetBytes(32); // Separate demo assertion.
+     pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+         pin, PinUvAuthTokenPermissions.MakeCredential, "example.com");
+     var options = new MakeCredentialOptions
+@@ -133,41 +201,70 @@ try
+         ResidentKey = true,
+         Extensions = new ExtensionBuilder().WithCredProtect(CredProtectPolicy.UserVerificationRequired).Build()
+     };
+-    options.WithPinUvAuth(protocol.Authenticate(pinToken, clientDataHash), protocol.Version);
+-    options.WithUserVerification(true);
+-    await session.MakeCredentialAsync(
+-        clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options);
++    authParam = protocol.Authenticate(pinToken, pinRegistrationHash);
++    options.WithPinUvAuth(authParam, protocol.Version); // uv remains absent.
++    var created = await session.MakeCredentialAsync(
++        pinRegistrationHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options);
++    var createdData = created.AuthenticatorData.AttestedCredentialData
++        ?? throw new InvalidOperationException("No attested credential data was returned.");
++
++    // The first token requested only MakeCredential permission. Authorize the separate assertion.
++    CryptographicOperations.ZeroMemory(authParam);
++    CryptographicOperations.ZeroMemory(pinToken);
++    pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
++        pin, PinUvAuthTokenPermissions.GetAssertion, "example.com");
++    authParam = protocol.Authenticate(pinToken, pinAuthenticationHash);
++    var assertionOptions = new GetAssertionOptions
++    {
++        AllowList = [new PublicKeyCredentialDescriptor(createdData.CredentialId)]
++    };
++    assertionOptions.WithPinUvAuth(authParam, protocol.Version);
++    var verified = await session.GetAssertionAsync("example.com", pinAuthenticationHash, assertionOptions);
+ }
+ finally
+ {
+     CryptographicOperations.ZeroMemory(pin);
+-    CryptographicOperations.ZeroMemory(pinToken);
++    if (pinToken is not null) CryptographicOperations.ZeroMemory(pinToken);
++    if (authParam is not null) CryptographicOperations.ZeroMemory(authParam);
+ }
+ ```
+ 
+-The assertion side is the same shape with a `GetAssertion` token:
++The literal PIN is only an evaluation convenience; an immutable string cannot be securely erased.
++The builder forwards credProtect but does not implement `enforcePolicy`. If policy failure must prevent
++creation, assess support before sending; inspecting output afterward does not undo creation.
+ 
+-```csharp
+-// Inside the same try block: a token is bound to its permission, so acquire a fresh one.
+-CryptographicOperations.ZeroMemory(pinToken);
+-pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+-    pin, PinUvAuthTokenPermissions.GetAssertion, "example.com");
+-var assertionOptions = new GetAssertionOptions();
+-assertionOptions.WithPinUvAuth(protocol.Authenticate(pinToken, clientDataHash), protocol.Version);
+-assertionOptions.WithUserVerification(true);
+-var verified = await session.GetAssertionAsync("example.com", clientDataHash, assertionOptions);
+-```
++Administrative helpers borrow the session, protocol and token; keep them alive and token bytes unchanged
++through awaited calls, then clear the caller-owned token. Credential-management enumeration is eager and
++must not be interleaved with other device operations. Route credentials using the returned `RpIdHash`,
++not a hash recalculated from possibly truncated RP display text. Deletion has no undo or automatic
++associated-blob cleanup; updating names keeps the existing user handle and does not update the RP account.
++`AuthenticatorConfig` requires advertised subcommand support and appropriate authorization; `alwaysUv`
++is a toggle, not an idempotent desired-state setter. Re-read GetInfo to reconcile state after an uncertain
++outcome before another toggle. Setting minimum PIN policy is separate from the `minPinLength` extension,
++which only discloses the current code-point minimum to authorized RPs during creation.
+ 
+-`CredentialManagement`, `FingerprintBioEnrollment`, `LargeBlobStorage`, and `AuthenticatorConfig` are built the same way: session, protocol, and a token with the matching permission.
++`FingerprintBioEnrollment` currently has known standard-command wire, response-schema and sample-status
++limitations; do not treat its presence or a firmware threshold as a working standardized enrollment flow.
++Keep the begin template ID independently for continuation. A decoded remaining count of zero is not
++verified enrollment completion; cancellation of a .NET token is not `EnrollCancelAsync`.
++
++For blobs, request `WithLargeBlobKey()`, read the top-level response `LargeBlobKey`, and use
++`LargeBlobStorage` for the shared storage array. The alternative direct `largeBlob` extension is standard
++but not implemented by this builder/storage route. Writes require the SDK's protocol/token path and
++`LargeBlobWrite` authorization; coordinate the whole read-modify-write sequence and re-read after failures.
+ 
+ ## User interaction
+ 
+-`MakeCredentialAsync`, `GetAssertionAsync`, `SelectionAsync`, and `ResetAsync` require a touch; `GetInfoAsync`
+-and the `ClientPin` commands are silent. Pass a `cancellationToken` to request cancellation;
++Ordinary creation and default assertions request user presence; assertions can request `up:false`.
++Selection/reset have device-specific presence requirements, and NFC presence need not mean a fresh button
++touch. Built-in UV token acquisition can require biometric interaction even though generic `ClientPin`
++traffic has no modeled SDK presence notification. GetInfo itself needs neither PIN nor touch.
++Pass a `cancellationToken` to request cancellation;
+ it does not instantly stop an admitted device exchange or undo a command already sent. On HID,
+ the SDK sends `CTAPHID_CANCEL` when it observes cancellation during a keep-alive, then waits
+-for and drains a valid terminal response before reporting cancellation. On SmartCard, admitted
+-exchanges run to completion.
++for and drains a valid terminal response. Success can win the cancellation race. On SmartCard, admitted
++exchanges run to completion. Callback or decode failure may follow successful device side effects; a failed
++call is not rollback evidence. Await calls without overlap and preserve stateful-command adjacency.
+ 
+ ```csharp
+ sealed class TouchPrompt : IUserPresencePrompt
+@@ -178,18 +275,24 @@ sealed class TouchPrompt : IUserPresencePrompt
+ ```
+ 
+ ```csharp
+-await using var promptingSession = await device.CreateCtap2SessionAsync(
++// Replace the original session factory above; do not open a second session while it is live.
++await using var session = await device.CreateCtap2SessionAsync(
+     new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
+ ```
+ 
+-The prompt shows the indication and returns without waiting. Over HID the request carries `UserPresenceBasis.DeviceWaiting` on the first keep-alive; SmartCard has no in-flight signal, so MakeCredential and GetAssertion report `PolicyRequires` before the command.
++The prompt shows the indication and returns without waiting. Over HID the request carries
++`UserPresenceBasis.DeviceWaiting` on the first user-presence-needed keep-alive (`0x02`); SmartCard has no
++in-flight signal, so ordinary MakeCredential/GetAssertion report `PolicyRequires` before the command.
++Notification completion reflects the exchange status before typed decoding, not proof of gesture, UV or
++RP acceptance. See [user interaction](../../docs/usage/user-interaction.md) for callback contracts.
+ 
+ ## Constraints
+ 
+ Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, GetInfo follows channel
+ preparation directly; there is no applet-selection step.
+ 
+-- The default transport is HID FIDO, falling back to SmartCard; `SessionCreationOptions.PreferredConnectionType`
++- The default selects HID FIDO when exposed, otherwise SmartCard; it never retries another transport after
++  opening/initialization failure. `SessionCreationOptions.PreferredConnectionType`
+   forces one. `ConnectionType.HidOtp` throws `ArgumentException`, an unexposed one `NotSupportedException`.
+ - SCP runs only over SmartCard. `ScpKeyParameters` without an explicit preference selects SmartCard; pairing
+   them with `ConnectionType.HidFido` throws `NotSupportedException` during initialization.
+@@ -197,14 +300,30 @@ preparation directly; there is no applet-selection step.
+   a second session throws `ConnectionInUseException` until the first is disposed.
+ - Sessions from `device.CreateCtap2SessionAsync()` own the connection they opened; `Ctap2Session.CreateAsync`
+   borrows yours and you dispose it. Use `await using` for both; there is no finalizer backstop.
+-- `ResetAsync` erases every credential and the PIN, irreversibly, and is refused unless it arrives within five
+-  seconds of insertion. Firmware gates throw `NotSupportedException`.
++- `ResetAsync` invalidates generated credentials, including non-discoverable/U2F credentials, erases
++  discoverable credentials and clears the PIN. Storage/configuration effects depend on the applicable
++  protocol/product. CTAP 2.1/2.3 require receipt within ten seconds of power-up for displayless devices;
++  Yubico documents five seconds before firmware 5.5.2 and ten on 5.5.4+, without classifying 5.5.2/5.5.3
++  in that passage. The separate USB presence wait and any long-touch requirement still apply. The SDK
++  does not orchestrate a power cycle or enforce a local reset timer. See the
++  [reset procedure and sample limitations](examples/FidoTool/README.md#reset).
+ 
+ ## Security notes
+ 
+-- PINs and PIN tokens are borrowed buffers; zero yours with `CryptographicOperations.ZeroMemory` in a `finally`.
+-- `ClientPin` zeroes what it derives internally and `PinUvAuthProtocolV2` zeroes the raw ECDH output.
++- Caller PIN buffers are borrowed; returned ClientPin tokens are caller-owned (administrative helpers
++  borrow them). Clear each with `CryptographicOperations.ZeroMemory` after the final await, in a `finally`.
++- `ClientPin` disposes the supplied protocol, not the session. Its named PIN/hash/shared-secret buffers
++  have scoped cleanup, but requests, builder-retained copies and successful responses do not have an
++  end-to-end zeroing guarantee. Protocol disposal does not clear caller-owned returned tokens or outputs.
+ - Never log PINs, PIN tokens, or secret-derived extension outputs such as hmac-secret and PRF results.
++- Credential/extension response copies, including plaintext large-blob keys, have no general disposable
++  secret-owner contract. Clearing a caller copy or disposing the session does not clear those copies.
++- hmac-secret derives from credential-scoped random secrets, with distinct verified/unverified modes.
++  WebAuthn PRF adds client-side input hashing and requires the verified variant; the current WebAuthn
++  adapter's UV-override and result-cleanup limitations remain disclosed in its guide.
++- previewSign is the experimental Yubico sign-extension draft v4, not CTAP v4. Public ARKG helpers are
++  **WARNING -- EXPERIMENTAL --**, not ready for production or production cryptographic guidance; their
++  actual SDK profile and limited P-256/SHA-256 raw-message verifier are not full draft conformance.
+ 
+ ## Example
+ 
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Menus/AccessMenu.cs w/src/Ctap2/examples/FidoTool/Cli/Menus/AccessMenu.cs
+index ef3e2167..bfeaca4a 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Menus/AccessMenu.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Menus/AccessMenu.cs
+@@ -22,8 +22,14 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
+ 
+ /// <summary>
+ /// Interactive menu for PIN/access management operations.
+-/// Mirrors ykman's "fido access" command group.
++/// Uses ykman-like grouping for a subset of access operations, not CLI compatibility.
+ /// </summary>
++/// <remarks>
++/// PIN byte owners stay alive through awaits and clear on disposal; synchronous prompts do not honor
++/// cancellation while blocked. Retry models default missing values, and CTAP 2.1 has no UV power-cycle
++/// signal. The current verify helper's missing RP scope can cause request rejection; a failed result
++/// is not necessarily a wrong PIN. See PinManagement and the sample README before retrying.
++/// </remarks>
+ public static class AccessMenu
+ {
+     /// <summary>
+@@ -193,4 +199,4 @@ private static async Task RunUvRetriesAsync(IYubiKey device, CancellationToken c
+             OutputHelpers.WriteError(result.ErrorMessage!);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Menus/ConfigMenu.cs w/src/Ctap2/examples/FidoTool/Cli/Menus/ConfigMenu.cs
+index 3240f590..6787e6b4 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Menus/ConfigMenu.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Menus/ConfigMenu.cs
+@@ -22,8 +22,14 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
+ 
+ /// <summary>
+ /// Interactive menu for authenticator configuration operations.
+-/// Mirrors ykman's "fido config" command group.
++/// Uses ykman-like grouping, not command compatibility.
+ /// </summary>
++/// <remarks>
++/// Support probes also return false for caught errors/cancellation; firmware metadata is not complete
++/// subcommand support. Prompts are synchronous. Current executable always-UV wording overstates scope:
++/// it affects credential ceremonies, not GetInfo/every operation. Re-read state before repeating an
++/// uncertain toggle. Minimum length is a code-point policy and may force change even with the flag false.
++/// </remarks>
+ public static class ConfigMenu
+ {
+     /// <summary>
+@@ -41,7 +47,7 @@ public static async Task RunAsync(CancellationToken cancellationToken)
+ 
+         OutputHelpers.WriteActiveDevice(selection.DisplayName);
+ 
+-        // Check feature support
++        // Probe boolean support; false also masks connection/read/cancellation failures.
+         var supported = await ConfigManagement.IsSupported(selection.Device, cancellationToken);
+         if (!supported)
+         {
+@@ -170,4 +176,4 @@ await ConfigManagement.SetMinPinLengthAsync(
+             OutputHelpers.WriteError(result.ErrorMessage!);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Menus/CredentialMenu.cs w/src/Ctap2/examples/FidoTool/Cli/Menus/CredentialMenu.cs
+index 82e15684..e44c2409 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Menus/CredentialMenu.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Menus/CredentialMenu.cs
+@@ -22,6 +22,13 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
+ /// <summary>
+ /// Interactive menu for credential operations: MakeCredential and GetAssertion.
+ /// </summary>
++/// <remarks>
++/// These are persistent protocol demos, not account registration/sign-in. The helpers fabricate hashes
++/// and user handles, do not verify RP proofs and return only the first discoverable assertion. Production
++/// needs fresh exact client-data bytes/challenges, stable RP account handles and independent RP verification.
++/// The PIN branches still combine mutually exclusive uv/token fields; executable fixes are pending.
++/// Prompts are synchronous and general helper catches lose cancellation/error provenance.
++/// </remarks>
+ public static class CredentialMenu
+ {
+     /// <summary>
+@@ -150,6 +157,12 @@ internal static void DisplayCredentialResult(MakeCredential.MakeCredentialResult
+     /// <summary>
+     /// Displays GetAssertion result details.
+     /// </summary>
++    /// <remarks>
++    /// Flag/name/signature-length display is inspection, not verification. User IDs are opaque account
++    /// handles; optional names can be absent and are not authorization identifiers. Missing descriptors
++    /// are accepted by the parser without request/version recovery; only CTAP2.0's one-entry allow-list
++    /// exception is standard, whereas 2.1/2.3 require the descriptor.
++    /// </remarks>
+     internal static void DisplayAssertionResult(GetAssertion.GetAssertionResult result)
+     {
+         var assertion = result.Assertion!;
+@@ -181,4 +194,4 @@ internal static void DisplayAssertionResult(GetAssertion.GetAssertionResult resu
+             OutputHelpers.WriteKeyValue("Total Matching Credentials", result.TotalCredentials.ToString());
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Menus/CredentialsMenu.cs w/src/Ctap2/examples/FidoTool/Cli/Menus/CredentialsMenu.cs
+index faa41591..e4f95a77 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Menus/CredentialsMenu.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Menus/CredentialsMenu.cs
+@@ -22,9 +22,14 @@
+ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
+ 
+ /// <summary>
+-/// Interactive menu for credential management: list and delete discoverable credentials.
+-/// Mirrors ykman's "fido credentials" command group.
++/// Interactive credential-management subset: list, delete, metadata and user-name updates.
+ /// </summary>
++/// <remarks>
++/// The support probe can mask errors/cancellation as unsupported. Prompts are synchronous. Returned
++/// hashes route RP enumeration even when display text is truncated, and owned credential results are
++/// disposed after display. "Remaining slots" is an estimate, not a reservation. Update must preserve
++/// the existing user ID; it changes names, not RP account binding. Delete has no undo/blob cleanup.
++/// </remarks>
+ public static class CredentialsMenu
+ {
+     /// <summary>
+@@ -147,7 +152,7 @@ await CredentialManagementExample.EnumerateRelyingPartiesAsync(
+ 
+             OutputHelpers.WriteHex("    RP ID Hash", rp.RpIdHash);
+ 
+-            // Enumerate credentials for this RP
++            // Use the returned hash unchanged; display RP text may be truncated.
+             using var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
+                 device, pinOwner.Memory, rp.RpIdHash, cancellationToken);
+ 
+@@ -281,4 +286,4 @@ internal static void DisplayStoredCredential(StoredCredentialInfo cred)
+             OutputHelpers.WriteKeyValue("      Cred Protect", protectLevel);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Menus/FingerprintsMenu.cs w/src/Ctap2/examples/FidoTool/Cli/Menus/FingerprintsMenu.cs
+index da3ee5bf..6404a32b 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Menus/FingerprintsMenu.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Menus/FingerprintsMenu.cs
+@@ -23,8 +23,15 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
+ 
+ /// <summary>
+ /// Interactive menu for fingerprint enrollment operations.
+-/// Mirrors ykman's "fido fingerprints" command group.
++/// Exposes a ykman-like subset, not compatible or qualified standardized enrollment.
+ /// </summary>
++/// <remarks>
++/// Bio helpers have known standard wire/schema/status and completion-default limitations. The support
++/// probe treats bioEnroll=false as unsupported although it can mean no templates, and masks errors/
++/// cancellation. An empty list is not reliable absence evidence. Progress/result display is not verified
++/// enrollment completion; a thrown cancellation can skip explicit cancel. Prompts are synchronous.
++/// The current sensor display treats every non-Touch kind as Swipe; unknown-kind UI correction is deferred.
++/// </remarks>
+ public static class FingerprintsMenu
+ {
+     /// <summary>
+@@ -294,4 +301,4 @@ internal static void DisplayTemplate(TemplateInfo template)
+             OutputHelpers.WriteKeyValue("    Samples", template.SampleCount.ToString());
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Menus/InfoMenu.cs w/src/Ctap2/examples/FidoTool/Cli/Menus/InfoMenu.cs
+index d9ddc077..08069bf5 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Menus/InfoMenu.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Menus/InfoMenu.cs
+@@ -55,6 +55,12 @@ public static async Task RunAsync(CancellationToken cancellationToken)
+     /// <summary>
+     /// Displays authenticator info for CLI verb mode (no interactive prompts).
+     /// </summary>
++    /// <remarks>
++    /// Displays advertised metadata/current state, not feature execution or certification verification.
++    /// false/absent options have field-specific meanings. PIN lengths are code points (encoded-byte
++    /// limits remain separate), and remaining discoverable capacity is an estimate. The display itself
++    /// has no prompts; the preceding selection flow can prompt or swallow info-query failures.
++    /// </remarks>
+     public static void DisplayAuthenticatorInfo(AuthenticatorInfo info)
+     {
+         // Versions
+@@ -195,4 +201,4 @@ public static void DisplayAuthenticatorInfo(AuthenticatorInfo info)
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Menus/ResetMenu.cs w/src/Ctap2/examples/FidoTool/Cli/Menus/ResetMenu.cs
+index 7639f2b0..4ff5d11a 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Menus/ResetMenu.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Menus/ResetMenu.cs
+@@ -23,6 +23,13 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
+ /// <summary>
+ /// Interactive menu for factory reset of the FIDO application.
+ /// </summary>
++/// <remarks>
++/// Human-coordinated only. The post-reinsert selection is not bound to the confirmed physical key and
++/// reuses the old transport choice; a different key can be reset. Preflight defaults and current prompt
++/// strings are not authoritative transport/timing evidence. ReadLine/confirmation prompts do not honor
++/// cancellation while blocked. Follow the sample README's qualified product reset procedure and verify
++/// the final physical target; a failed result does not establish unchanged credentials/PIN/settings.
++/// </remarks>
+ public static class ResetMenu
+ {
+     /// <summary>
+@@ -88,7 +95,7 @@ public static async Task RunAsync(CancellationToken cancellationToken)
+         AnsiConsole.MarkupLine("[grey]Press Enter after re-inserting your YubiKey.[/]");
+         Console.ReadLine();
+ 
+-        // Re-select device after reinsertion
++        // Known target-continuity defect: independent selection can return a different physical key.
+         var newSelection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+         if (newSelection is null)
+         {
+@@ -96,7 +103,7 @@ public static async Task RunAsync(CancellationToken cancellationToken)
+             return;
+         }
+ 
+-        // Query preflight from the reinserted device for the accurate touch message
++        // Old transport is reused; preflight can fail/default and is not a target/timing guarantee.
+         var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
+             newSelection.Device, resetTransport, cancellationToken);
+ 
+@@ -136,4 +143,4 @@ internal static ConnectionType SelectResetTransport(ConnectionType availableConn
+         ConnectionType.SmartCard => null,
+         _ => throw new ArgumentException("FIDO reset requires HID FIDO or SmartCard.", nameof(concreteTransport))
+     };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs w/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs
+index 7e199db3..aaf50320 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs
+@@ -26,7 +26,14 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
+ /// </summary>
+ /// <remarks>
+ /// CTAP2 is NOT available over OTP HID. USB should prefer the FIDO HID interface;
+-/// SmartCard transport is available over NFC and USB on firmware 5.8.0+ when the FIDO AID is exposed.
++/// NFC SmartCard requires a current connection reporting Transport.Nfc and an exposed FIDO AID.
++/// USB SmartCard uses the SDK's 5.8.0+ firmware gate and also requires the FIDO AID.
++/// The actual filter tests exposed HID FIDO or SmartCard interfaces, not CTAP revision or FIDO AID;
++/// SmartCard-only non-CTAP devices can be admitted. One candidate auto-selects; multiple candidates prompt
++/// only interactively, otherwise preferring HID-capable/first. Synchronous retry/selection prompts do not
++/// honor cancellation while blocked and retry prompts can occur noninteractively. Device-info failures,
++/// including cancellation, are swallowed with development Debug output. Duplicate display labels can
++/// resolve to the first match. Reset callers must not assume a second selection is the confirmed key.
+ /// </remarks>
+ public static class DeviceSelector
+ {
+@@ -37,7 +44,7 @@ public static class DeviceSelector
+     ];
+ 
+     /// <summary>
+-    /// Finds all connected YubiKeys and allows user to select one.
++    /// Finds exposed-interface candidates, then auto-selects or prompts according to terminal interactivity.
+     /// </summary>
+     public static async Task<DeviceSelection?> SelectDeviceAsync(
+         CancellationToken cancellationToken = default)
+@@ -194,4 +201,4 @@ private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
+ 
+         return $"YubiKey {FormFactorFormatter.Format(info.Value.FormFactor)} - Serial: {info.Value.SerialNumber?.ToString() ?? "N/A"}, Firmware: {info.Value.FirmwareVersion} ({transport})";
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs w/src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs
+index d505bdb7..0cac78ac 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs
+@@ -23,6 +23,10 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
+ /// Supports FIDO HID and SmartCard transports.
+ /// In non-interactive mode, prefers FIDO HID as the native CTAP2 transport.
+ /// </summary>
++/// <remarks>
++/// This is an alternative shared-base selector. Program and menus currently use DeviceSelector instead;
++/// do not infer active retry, cancellation or target-binding behavior from this class.
++/// </remarks>
+ public sealed class FidoDeviceSelector : DeviceSelectorBase
+ {
+     /// <summary>
+@@ -48,4 +52,4 @@ public sealed class FidoDeviceSelector : DeviceSelectorBase
+     protected override IYubiKey? AutoSelectDevice(IReadOnlyList<IYubiKey> devices) =>
+         devices.FirstOrDefault(d => d.SupportsConnection(ConnectionType.HidFido))
+         ?? devices[0];
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/Cli/Prompts/FidoPinHelper.cs w/src/Ctap2/examples/FidoTool/Cli/Prompts/FidoPinHelper.cs
+index 8a8813cb..e0dc41d2 100644
+--- i/src/Ctap2/examples/FidoTool/Cli/Prompts/FidoPinHelper.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Prompts/FidoPinHelper.cs
+@@ -21,9 +21,15 @@
+ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
+ 
+ /// <summary>
+-/// Provides secure FIDO2 PIN prompting with proper memory zeroing.
+-/// Returns <see cref="IMemoryOwner{T}"/> that auto-zeros on disposal.
++/// Provides FIDO2 PIN entry as UTF-8 bytes in an <see cref="IMemoryOwner{T}"/> that clears on disposal.
+ /// </summary>
++/// <remarks>
++/// Dispose the owner after the awaited operation. CLI arguments remain immutable strings in process
++/// memory and may be exposed by shell history/process listings; clearing encoded bytes cannot erase
++/// them. Interactive prompts are synchronous and do not honor the operation cancellation token while
++/// blocked. The console preset counts UTF-16 characters before encoding, not CTAP code points/bytes;
++/// it is not complete UTF-8/NFC/device-PIN-policy validation.
++/// </remarks>
+ internal static class FidoPinHelper
+ {
+     private static readonly ConsoleCredentialReader Reader = new();
+@@ -65,7 +71,7 @@ internal static class FidoPinHelper
+     {
+         if (cliArg is not null)
+         {
+-            // CLI arg is already a string in process memory -- encode directly to avoid extra heap copy
++            // Encode into the owned byte buffer; disposal cannot erase the original immutable CLI string.
+             var byteCount = Encoding.UTF8.GetByteCount(cliArg);
+             var buffer = new DisposableArrayPoolBuffer(byteCount, clearOnCreate: false);
+             Encoding.UTF8.GetBytes(cliArg, buffer.Span);
+@@ -85,7 +91,7 @@ internal static class FidoPinHelper
+     {
+         if (cliArg is not null)
+         {
+-            // Encode directly to avoid extra heap copy of new PIN bytes
++            // Encode into the owned byte buffer; args/shell history remain outside this cleanup boundary.
+             var byteCount = Encoding.UTF8.GetByteCount(cliArg);
+             var buffer = new DisposableArrayPoolBuffer(byteCount, clearOnCreate: false);
+             Encoding.UTF8.GetBytes(cliArg, buffer.Span);
+@@ -94,4 +100,4 @@ internal static class FidoPinHelper
+ 
+         return PromptForNewPin(prompt);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/FidoExamples/BioEnrollment.cs w/src/Ctap2/examples/FidoTool/FidoExamples/BioEnrollment.cs
+index b3991b59..76d3452c 100644
+--- i/src/Ctap2/examples/FidoTool/FidoExamples/BioEnrollment.cs
++++ w/src/Ctap2/examples/FidoTool/FidoExamples/BioEnrollment.cs
+@@ -22,8 +22,15 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
+ 
+ /// <summary>
+ /// Biometric (fingerprint) enrollment operations.
+-/// Requires firmware 5.2+ and the bioEnroll authenticator option.
++/// Requires actual sensor hardware, advertised support and appropriate authorization.
+ /// </summary>
++/// <remarks>
++/// Current standard bio helpers have known subcommand/authentication/timeout, template-array schema
++/// and sample-status limitations; these methods are not qualified standardized enrollment workflows.
++/// Protocol 2 is selected without negotiation. PIN input is borrowed and tokens are finally-cleared,
++/// not an end-to-end cleanup guarantee. General catches convert cancellation/errors to failed results;
++/// failure or decoded completion does not establish device state or rollback.
++/// </remarks>
+ public static class BioEnrollmentExample
+ {
+     /// <summary>
+@@ -134,6 +141,12 @@ public static async Task<SensorInfoResult> GetSensorInfoAsync(
+     /// Enrolls a fingerprint with a multi-sample capture loop.
+     /// Calls <paramref name="onSampleCaptured"/> after each sample for progress reporting.
+     /// </summary>
++    /// <remarks>
++    /// Retains the begin template ID independently because continuation responses need not repeat it.
++    /// IsComplete only tests decoded remaining count, with known missing-field defaults. Token cancellation
++    /// is not the CTAP enrollment-cancel command: the explicit cancel below is reached only on the checked
++    /// loop-exit path, not after a thrown cancellation or callback failure. No automatic rollback is provided.
++    /// </remarks>
+     public static async Task<EnrollResult> EnrollFingerprintAsync(
+         IYubiKey yubiKey,
+         ReadOnlyMemory<byte> pin,
+@@ -164,7 +177,7 @@ public static async Task<EnrollResult> EnrollFingerprintAsync(
+ 
+             onSampleCaptured?.Invoke(sampleNumber, result.RemainingSamples, result.LastSampleStatus);
+ 
+-            // Capture remaining samples
++            // Continue using the begin ID, not result.TemplateId from a later sample.
+             while (!result.IsComplete && !cancellationToken.IsCancellationRequested)
+             {
+                 try
+@@ -349,8 +362,12 @@ public static async Task<BioResult> RemoveEnrollmentAsync(
+     }
+ 
+     /// <summary>
+-    /// Checks if the authenticator supports bio enrollment.
++    /// Returns true only for a successful read with bioEnroll=true.
+     /// </summary>
++    /// <remarks>
++    /// False also covers every caught error/cancellation. bioEnroll=false still advertises support with
++    /// no provisioned templates; this probe currently misclassifies that state and ignores preview support.
++    /// </remarks>
+     public static async Task<bool> IsSupported(
+         IYubiKey yubiKey,
+         CancellationToken cancellationToken = default)
+@@ -404,4 +421,4 @@ private static string MapCtapError(CtapException ex) =>
+             CtapStatus.InvalidCommand => "Bio enrollment is not supported on this authenticator.",
+             _ => $"CTAP error: {ex.Message} (0x{(byte)ex.Status:X2})"
+         };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/FidoExamples/ConfigManagement.cs w/src/Ctap2/examples/FidoTool/FidoExamples/ConfigManagement.cs
+index e778a141..bea28e49 100644
+--- i/src/Ctap2/examples/FidoTool/FidoExamples/ConfigManagement.cs
++++ w/src/Ctap2/examples/FidoTool/FidoExamples/ConfigManagement.cs
+@@ -22,8 +22,14 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
+ 
+ /// <summary>
+ /// Authenticator configuration operations: enterprise attestation, always-UV, min PIN length.
+-/// Requires firmware 5.4+ and the authnrCfg authenticator option.
++/// Needs advertised subcommand support, configured state and appropriate authorization.
+ /// </summary>
++/// <remarks>
++/// Firmware thresholds alone do not establish support. These paths select protocol 2 without negotiation,
++/// borrow caller PIN input and finally-clear returned tokens. General catches flatten cancellation and
++/// error provenance; a failed result is not evidence that persistent configuration remained unchanged.
++/// AuthenticatorConfig borrows session/protocol/token and does not verify or roll back resulting state.
++/// </remarks>
+ public static class ConfigManagement
+ {
+     /// <summary>
+@@ -85,6 +91,11 @@ public static async Task<ConfigResult> EnableEnterpriseAttestationAsync(
+     /// <summary>
+     /// Toggles the always-UV setting on the authenticator.
+     /// </summary>
++    /// <remarks>
++    /// This affects credential ceremonies, not every CTAP operation. Read fresh GetInfo state before
++    /// deciding to toggle; after an uncertain result re-read before retrying, which could invert the intent.
++    /// Disabling can be refused by device policy. This method performs no post-command verification.
++    /// </remarks>
+     public static async Task<ConfigResult> ToggleAlwaysUvAsync(
+         IYubiKey yubiKey,
+         ReadOnlyMemory<byte> pin,
+@@ -127,8 +138,13 @@ public static async Task<ConfigResult> ToggleAlwaysUvAsync(
+     }
+ 
+     /// <summary>
+-    /// Sets the minimum PIN length on the authenticator.
++    /// Sets minimum-PIN policy in Unicode code points, not the PIN itself.
+     /// </summary>
++    /// <remarks>
++    /// Increasing the minimum can force a PIN change even when forceChangePin is false. Nonempty RP IDs
++    /// replace mutable disclosure entries; null/empty lists and false-force fields are omitted by the
++    /// helper. An empty list does not clear recipients. minPinLength extension output only reports policy.
++    /// </remarks>
+     public static async Task<ConfigResult> SetMinPinLengthAsync(
+         IYubiKey yubiKey,
+         ReadOnlyMemory<byte> pin,
+@@ -178,7 +194,7 @@ public static async Task<ConfigResult> SetMinPinLengthAsync(
+     }
+ 
+     /// <summary>
+-    /// Checks if the authenticator supports authenticator configuration.
++    /// Returns the authnrCfg boolean from a successful query, or false for any caught failure/cancellation.
+     /// </summary>
+     public static async Task<bool> IsSupported(
+         IYubiKey yubiKey,
+@@ -210,4 +226,4 @@ private static string MapCtapError(CtapException ex) =>
+                 "The new minimum PIN length violates the authenticator's PIN policy.",
+             _ => $"CTAP error: {ex.Message} (0x{(byte)ex.Status:X2})"
+         };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/FidoExamples/CredentialManagement.cs w/src/Ctap2/examples/FidoTool/FidoExamples/CredentialManagement.cs
+index 5c5d2a74..54445c3c 100644
+--- i/src/Ctap2/examples/FidoTool/FidoExamples/CredentialManagement.cs
++++ w/src/Ctap2/examples/FidoTool/FidoExamples/CredentialManagement.cs
+@@ -23,8 +23,15 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
+ 
+ /// <summary>
+ /// Credential management operations: enumerate, delete, and update stored credentials.
+-/// Requires firmware 5.2+ and the credentialMgmt authenticator option.
++/// Uses the standard credential-management command (credMgmt), not prototype fallback.
+ /// </summary>
++/// <remarks>
++/// Actual support/authorization is separate from firmware metadata. Helpers select protocol 2 without
++/// negotiation, borrow PIN input and finally-clear tokens. CredentialManagement borrows the token and
++/// does not privately clone it; its Dispose currently does not prevent operations. General catches
++/// flatten cancellation/transport/decode provenance and do not establish rollback. Coordinate complete
++/// eager enumeration sequences without interleaving other authenticator operations.
++/// </remarks>
+ public static class CredentialManagementExample
+ {
+     /// <summary>
+@@ -112,7 +119,7 @@ public sealed record CredMgmtResult
+     }
+ 
+     /// <summary>
+-    /// Gets credential storage metadata (existing count and remaining slots).
++    /// Gets credential storage metadata (existing count and estimated remaining capacity).
+     /// </summary>
+     public static async Task<MetadataResult> GetMetadataAsync(
+         IYubiKey yubiKey,
+@@ -158,7 +165,7 @@ public static async Task<MetadataResult> GetMetadataAsync(
+     }
+ 
+     /// <summary>
+-    /// Enumerates all relying parties with stored credentials, and all credentials per RP.
++    /// Enumerates relying parties with stored credentials; it does not enumerate their credentials.
+     /// </summary>
+     public static async Task<EnumerateRpsResult> EnumerateRelyingPartiesAsync(
+         IYubiKey yubiKey,
+@@ -206,6 +213,11 @@ public static async Task<EnumerateRpsResult> EnumerateRelyingPartiesAsync(
+     /// <summary>
+     /// Enumerates all credentials for a specific relying party.
+     /// </summary>
++    /// <remarks>
++    /// Pass the returned RpIdHash unchanged, not a hash of potentially truncated RP display text.
++    /// Dispose the successful result to clear owned secret-bearing credential envelopes; independent
++    /// decoded fields and the underlying response buffers are not all cleared by that disposal.
++    /// </remarks>
+     public static async Task<EnumerateCredentialsResult> EnumerateCredentialsAsync(
+         IYubiKey yubiKey,
+         ReadOnlyMemory<byte> pin,
+@@ -259,6 +271,7 @@ public static async Task<EnumerateCredentialsResult> EnumerateCredentialsAsync(
+     /// <summary>
+     /// Deletes a credential by its ID.
+     /// </summary>
++    /// <remarks>No undo or automatic associated-large-blob cleanup is performed.</remarks>
+     public static async Task<CredMgmtResult> DeleteCredentialAsync(
+         IYubiKey yubiKey,
+         ReadOnlyMemory<byte> pin,
+@@ -307,6 +320,10 @@ public static async Task<CredMgmtResult> DeleteCredentialAsync(
+     /// <summary>
+     /// Updates user information on an existing credential.
+     /// </summary>
++    /// <remarks>
++    /// Supply its existing userId; names change, not credential/account binding or the RP database.
++    /// The canonical writer automatically sorts encoded user-map keys when the map is completed.
++    /// </remarks>
+     public static async Task<CredMgmtResult> UpdateUserInfoAsync(
+         IYubiKey yubiKey,
+         ReadOnlyMemory<byte> pin,
+@@ -357,7 +374,7 @@ public static async Task<CredMgmtResult> UpdateUserInfoAsync(
+     }
+ 
+     /// <summary>
+-    /// Checks if the authenticator supports credential management.
++    /// Returns the credMgmt boolean from a successful query, or false for any caught failure/cancellation.
+     /// </summary>
+     public static async Task<bool> IsSupported(
+         IYubiKey yubiKey,
+@@ -388,4 +405,4 @@ private static string MapCtapError(CtapException ex) =>
+             CtapStatus.KeyStoreFull => "The authenticator's credential storage is full.",
+             _ => $"CTAP error: {ex.Message} (0x{(byte)ex.Status:X2})"
+         };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/FidoExamples/GetAssertion.cs w/src/Ctap2/examples/FidoTool/FidoExamples/GetAssertion.cs
+index 5f290986..3a3e151a 100644
+--- i/src/Ctap2/examples/FidoTool/FidoExamples/GetAssertion.cs
++++ w/src/Ctap2/examples/FidoTool/FidoExamples/GetAssertion.cs
+@@ -21,8 +21,17 @@
+ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
+ 
+ /// <summary>
+-/// Authenticates using an existing CTAP2 credential on the authenticator.
++/// Obtains the first discoverable CTAP2 assertion for a protocol demonstration.
+ /// </summary>
++/// <remarks>
++/// This does not sign an account in or verify the signature. The random hash is not returned and has
++/// no collected-client-data context, so the result is not an RP-verifiable WebAuthn response. Production
++/// requires a fresh RP challenge, exact client-data bytes, credential/account association and RP
++/// verification. Multiple assertions are not collected here; getNext calls would have to precede any
++/// unrelated command and session disposal. The PIN branch still combines mutually exclusive uv/token
++/// fields; executable correction is pending. Protocol 2 is not negotiated. General catches flatten
++/// cancellation and other failure provenance; failure is not rollback. PIN input remains caller-owned.
++/// </remarks>
+ public static class GetAssertion
+ {
+     /// <summary>
+@@ -66,7 +75,7 @@ public static async Task<GetAssertionResult> AssertAsync(
+         byte[]? pinToken = null;
+         try
+         {
+-            // Generate random clientDataHash (32 bytes) for demo/testing purposes
++            // Demo stand-in, not collected client data; this hash is not exposed in the result.
+             var clientDataHash = new byte[32];
+             RandomNumberGenerator.Fill(clientDataHash);
+ 
+@@ -89,6 +98,7 @@ public static async Task<GetAssertionResult> AssertAsync(
+ 
+                 var authParam = protocol.Authenticate(pinToken, clientDataHash);
+                 options.WithPinUvAuth(authParam, protocol.Version);
++                // Known sample defect: omit uv entirely beside pinUvAuthParam; executable fix is deferred.
+                 options.WithUserVerification(true);
+             }
+ 
+@@ -100,6 +110,7 @@ public static async Task<GetAssertionResult> AssertAsync(
+ 
+             var totalCredentials = response.NumberOfCredentials ?? 1;
+ 
++            // This sample returns the first response only, not the reported set of credentials.
+             return GetAssertionResult.Succeeded(response, totalCredentials);
+         }
+         catch (CtapException ex)
+@@ -134,4 +145,4 @@ private static string MapCtapError(CtapException ex) =>
+             CtapStatus.OperationDenied => "The operation was denied by the authenticator.",
+             _ => $"CTAP error: {ex.Message} (0x{(byte)ex.Status:X2})"
+         };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/FidoExamples/GetAuthenticatorInfo.cs w/src/Ctap2/examples/FidoTool/FidoExamples/GetAuthenticatorInfo.cs
+index 7b594b9f..ca62bca7 100644
+--- i/src/Ctap2/examples/FidoTool/FidoExamples/GetAuthenticatorInfo.cs
++++ w/src/Ctap2/examples/FidoTool/FidoExamples/GetAuthenticatorInfo.cs
+@@ -20,6 +20,12 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
+ /// <summary>
+ /// Queries authenticator capabilities via the CTAP2 authenticatorGetInfo command.
+ /// </summary>
++/// <remarks>
++/// Performs session initialization plus a fresh GetInfo query; no PIN normalization or user presence is
++/// requested by this helper. Advertised versions/options describe the response, not complete conformance,
++/// configured authorization or exercised feature support. General catches flatten cancellation/transport/
++/// decode provenance into failed results. GetInfo does not refresh the session's firmware configuration.
++/// </remarks>
+ public static class GetAuthenticatorInfo
+ {
+     /// <summary>
+@@ -66,4 +72,4 @@ public static async Task<AuthenticatorInfoResult> QueryAsync(
+             return AuthenticatorInfoResult.Failed($"Failed to query authenticator: {ex.Message}");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/FidoExamples/MakeCredential.cs w/src/Ctap2/examples/FidoTool/FidoExamples/MakeCredential.cs
+index c4a6f15e..f909c4e7 100644
+--- i/src/Ctap2/examples/FidoTool/FidoExamples/MakeCredential.cs
++++ w/src/Ctap2/examples/FidoTool/FidoExamples/MakeCredential.cs
+@@ -23,6 +23,15 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
+ /// <summary>
+ /// Creates a discoverable CTAP2 credential on the authenticator.
+ /// </summary>
++/// <remarks>
++/// This is a persistent protocol demo, not RP account registration: it fabricates the hash and user
++/// handle. Production ceremonies need fresh exact client-data bytes, RP options and a stable RP account
++/// handle, followed by independent RP verification. The PIN branch currently combines uv with token auth,
++/// which CTAP forbids; executable correction is pending. Protocol 2 is selected without negotiation.
++/// General exception handling converts cancellation/transport/decode failures into failed results;
++/// failure does not establish that the authenticator created nothing. PIN input is borrowed, and token
++/// finally-zeroing does not clear all auth-param/request/response copies.
++/// </remarks>
+ public static class MakeCredential
+ {
+     /// <summary>
+@@ -70,11 +79,11 @@ public static async Task<MakeCredentialResult> CreateAsync(
+         byte[]? pinToken = null;
+         try
+         {
+-            // Generate random clientDataHash (32 bytes) for demo/testing purposes
++            // Stand-in hash, not SHA-256 of any collected client data; not an RP-verifiable ceremony.
+             var clientDataHash = new byte[32];
+             RandomNumberGenerator.Fill(clientDataHash);
+ 
+-            // Generate random user ID (32 bytes)
++            // Demo account handle; production uses the RP's stable handle, not a new random account each call.
+             var userId = new byte[32];
+             RandomNumberGenerator.Fill(userId);
+ 
+@@ -111,6 +120,8 @@ public static async Task<MakeCredentialResult> CreateAsync(
+ 
+                 var authParam = protocol.Authenticate(pinToken, clientDataHash);
+                 options.WithPinUvAuth(authParam, protocol.Version);
++                // Known sample defect: uv must be omitted beside pinUvAuthParam (even uv:false).
++                // Preserve this executable call for the separately scoped sample fix.
+                 options.WithUserVerification(true);
+             }
+ 
+@@ -159,4 +170,4 @@ private static string MapCtapError(CtapException ex) =>
+             CtapStatus.OperationDenied => "The operation was denied by the authenticator.",
+             _ => $"CTAP error: {ex.Message} (0x{(byte)ex.Status:X2})"
+         };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/FidoExamples/PinManagement.cs w/src/Ctap2/examples/FidoTool/FidoExamples/PinManagement.cs
+index f4ac45f6..021f7937 100644
+--- i/src/Ctap2/examples/FidoTool/FidoExamples/PinManagement.cs
++++ w/src/Ctap2/examples/FidoTool/FidoExamples/PinManagement.cs
+@@ -22,6 +22,13 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
+ /// <summary>
+ /// PIN management operations: set, change, and query retry counts.
+ /// </summary>
++/// <remarks>
++/// These examples select protocol 2 without negotiation and borrow caller PIN bytes; keep them valid
++/// through the await, then clear them. Local 4–63-byte validation is not complete UTF-8/NFC/code-point/
++/// device-policy validation. General catches turn cancellation/transport/decode failures into failed
++/// results; failure does not establish unchanged PIN state or safe retry. Temporary PinAuthBlocked
++/// differs from exhausted PinBlocked. Returned token finally-zeroing is not end-to-end request cleanup.
++/// </remarks>
+ public static class PinManagement
+ {
+     /// <summary>
+@@ -134,6 +141,11 @@ public static async Task<PinResult> ChangePinAsync(
+     /// <summary>
+     /// Verifies the PIN by attempting to obtain a PIN token.
+     /// </summary>
++    /// <remarks>
++    /// The current permission-token request asks for GetAssertion without its required RP ID; permission-
++    /// capable devices can reject it for request scope, not a wrong PIN. Legacy fallback drops permissions.
++    /// Executable request correction is deferred. This method does not perform an RP assertion/verification.
++    /// </remarks>
+     /// <param name="yubiKey">The YubiKey device.</param>
+     /// <param name="pin">The PIN as UTF-8 bytes to verify.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -215,6 +227,10 @@ public static async Task<PinRetriesResult> GetPinRetriesAsync(
+     /// <summary>
+     /// Gets the number of UV (user verification) retries remaining.
+     /// </summary>
++    /// <remarks>
++    /// The result copies the parser's defaulted count/boolean. CTAP 2.1 provides no UV power-cycle field;
++    /// false does not prove a cycle is unnecessary, and missing counts are not known zero-retry evidence.
++    /// </remarks>
+     /// <param name="yubiKey">The YubiKey device.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The UV retries result.</returns>
+@@ -258,4 +274,4 @@ private static string MapCtapPinError(CtapException ex) =>
+                 "Operation not allowed. A PIN may already be set (use 'change' instead of 'set').",
+             _ => $"CTAP error: {ex.Message} (0x{(byte)ex.Status:X2})"
+         };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/FidoExamples/ResetAuthenticator.cs w/src/Ctap2/examples/FidoTool/FidoExamples/ResetAuthenticator.cs
+index 0f3d382c..dd36e353 100644
+--- i/src/Ctap2/examples/FidoTool/FidoExamples/ResetAuthenticator.cs
++++ w/src/Ctap2/examples/FidoTool/FidoExamples/ResetAuthenticator.cs
+@@ -21,8 +21,17 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
+ 
+ /// <summary>
+ /// Factory reset of the FIDO application on the authenticator.
+-/// This permanently deletes ALL stored credentials, PINs, and settings.
++/// Invalidates generated credentials (including non-discoverable/U2F), erases discoverable credentials
++/// and clears the PIN; named storage/configuration effects depend on the applicable protocol/product.
+ /// </summary>
++/// <remarks>
++/// This helper does not power-cycle, verify target continuity, enforce a local reset timer or roll back.
++/// CTAP 2.1/2.3 require receipt within ten seconds of power-up for displayless devices; Yubico documents
++/// five seconds before firmware 5.5.2 and ten on 5.5.4+, with 5.5.2/5.5.3 unspecified in that passage.
++/// Separate transport/product presence requirements apply. Current executable timing/error prompts are
++/// overgeneralized and remain deferred; see the sample README's qualified reset procedure. General catches
++/// flatten cancellation/error provenance. A failed result is not evidence that no destructive action occurred.
++/// </remarks>
+ public static class ResetAuthenticator
+ {
+     /// <summary>
+@@ -43,19 +52,19 @@ public sealed record ResetResult
+     public sealed record ResetPreflightInfo
+     {
+         /// <summary>
+-        /// Whether the authenticator requires a long (10-second) touch for reset.
+-        /// When false, a short tap is sufficient.
++        /// The parsed long-touch option, defaulting absent metadata to false.
++        /// CTAP 2.3's enabled option requires at least five seconds; false is not proof a short tap suffices.
+         /// </summary>
+         public bool LongTouchForReset { get; init; }
+ 
+         /// <summary>
+         /// Transports the authenticator allows for reset (e.g. "usb", "nfc").
+-        /// Empty means all transports are allowed.
++        /// Empty metadata does not prove that all transports are allowed.
+         /// </summary>
+         public IReadOnlyList<string> TransportsForReset { get; init; } = [];
+ 
+         /// <summary>
+-        /// Returns the appropriate touch prompt message for the user.
++        /// Returns the sample's current touch message, not a qualified per-product timing contract.
+         /// </summary>
+         public string TouchMessage => LongTouchForReset
+             ? "Press and hold the YubiKey button for 10 seconds to confirm."
+@@ -64,8 +73,8 @@ public sealed record ResetPreflightInfo
+ 
+     /// <summary>
+     /// Queries the authenticator for reset-related information before performing
+-    /// the actual reset. Use this to display the correct touch message and validate
+-    /// transport restrictions.
++    /// the actual reset. Missing fields are defaulted and all failures/cancellation return null;
++    /// the result does not validate reset timing, target identity or transport restrictions.
+     /// </summary>
+     public static async Task<ResetPreflightInfo?> GetPreflightInfoAsync(
+         IYubiKey yubiKey,
+@@ -100,7 +109,8 @@ public sealed record ResetPreflightInfo
+     /// <summary>
+     /// Performs a factory reset of the FIDO application.
+     /// The YubiKey must have been recently re-inserted before calling this method,
+-    /// and the user must touch (or hold for 10 seconds on newer firmware) when prompted.
++    /// and the user must meet its separate presence/long-touch requirements. Firmware alone is not a
++    /// universal ten-second-touch rule, and session initialization consumes the receipt window too.
+     /// </summary>
+     public static async Task<ResetResult> ResetAsync(
+         IYubiKey yubiKey,
+@@ -145,4 +155,4 @@ private static string MapCtapError(CtapException ex) =>
+                 "Reset not allowed. Remove the YubiKey, re-insert it, and try again within 5 seconds.",
+             _ => $"CTAP error: {ex.Message} (0x{(byte)ex.Status:X2})"
+         };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/FidoTool.csproj w/src/Ctap2/examples/FidoTool/FidoTool.csproj
+index bbd101b1..72e878ff 100644
+--- i/src/Ctap2/examples/FidoTool/FidoTool.csproj
++++ w/src/Ctap2/examples/FidoTool/FidoTool.csproj
+@@ -6,7 +6,7 @@
+     <AssemblyName>FidoTool</AssemblyName>
+     <IsPackable>false</IsPackable>
+ 
+-    <!-- Suppress analyzer warnings that are noisy for example/CLI apps -->
++    <!-- Existing sample exception for CA1852 (sealing internal types); other analyzer policy is unchanged. -->
+     <NoWarn>$(NoWarn);CA1852</NoWarn>
+   </PropertyGroup>
+ 
+diff --git i/src/Ctap2/examples/FidoTool/Program.cs w/src/Ctap2/examples/FidoTool/Program.cs
+index c10f2bc6..6e5c2a31 100644
+--- i/src/Ctap2/examples/FidoTool/Program.cs
++++ w/src/Ctap2/examples/FidoTool/Program.cs
+@@ -61,7 +61,8 @@
+ return exitCode;
+ 
+ // ---------------------------------------------------------------------------
+-// CLI verb routing — mirrors ykman fido command tree
++// CLI verb routing — a small ykman-like grouping, not command/parser compatibility or the full SDK API.
++// Help/parser/cancellation defects remain executable follow-up work; see the sample README.
+ // ---------------------------------------------------------------------------
+ static async Task<int> RunVerbAsync(string[] args, CancellationToken cancellationToken)
+ {
+@@ -134,7 +135,7 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
+ 
+     if (!force)
+     {
+-        // Query preflight info from the currently connected device
++        // Query a selected device, but this identity is not bound to the later destructive selection.
+         var preSelection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+         if (preSelection is null)
+         {
+@@ -170,7 +171,8 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
+ 
+     var resetTransport = ResetMenu.SelectResetTransport(selection.Device.AvailableConnections);
+ 
+-    // Query the (reinserted) device for accurate touch message
++    // Selection is not correlated to the earlier key; another physical device can be reset.
++    // Preflight can fail/default; its message is not authoritative timing/transport qualification.
+     var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
+         selection.Device, resetTransport, cancellationToken);
+ 
+@@ -724,4 +726,4 @@ static int ShowUnknownCommand(string command)
+     OutputHelpers.WriteError($"Unknown command: {command}");
+     AnsiConsole.MarkupLine("[grey]Run 'FidoTool help' for available commands.[/]");
+     return 1;
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/examples/FidoTool/README.md w/src/Ctap2/examples/FidoTool/README.md
+index 089d166b..47920a3a 100644
+--- i/src/Ctap2/examples/FidoTool/README.md
++++ w/src/Ctap2/examples/FidoTool/README.md
+@@ -1,6 +1,9 @@
+ # FidoTool - YubiKey CTAP2 CLI
+ 
+-A Spectre.Console CLI application that exposes the full CTAP2 API surface of the Yubico.NET.SDK. The CLI command structure mirrors [ykman](https://docs.yubico.com/software/yubikey/tools/ykman/FIDO_Commands.html)'s `fido` command group.
++A Spectre.Console example for a subset of the SDK's CTAP2 operations. Its familiar command grouping
++resembles [ykman](https://docs.yubico.com/software/yubikey/tools/ykman/FIDO_Commands.html)'s `fido` group,
++but it is not a compatible replacement or the full API. There are no large-blob, hmac-secret/PRF,
++previewSign, raw-CBOR or authenticator-selection command flows.
+ 
+ The tool retains its FIDO CLI identity: the application is FIDO and its PIN is a FIDO2 PIN.
+ `Yubico.YubiKit.Ctap2` provides CTAP2 operations over the shared CTAPHID USB transport or the
+@@ -8,20 +11,29 @@ FIDO SmartCard application. WebAuthn is the higher-level ceremony API, not the H
+ 
+ ## Quick Start
+ 
++PIN-changing and token-authorized flows select PIN/UV protocol 2 without negotiation. Before using
++them, check that `AuthenticatorInfo.PinUvAuthProtocols` from a GetInfo query advertises 2. Legacy
++token-command fallback retains protocol 2, not protocol-1 negotiation. This prerequisite does not
++apply to plain info/reset or every PINless operation.
++
+ ```bash
+-# Build
++# From the repository root: build the SDK module (does not compile this sample).
+ dotnet toolchain.cs -- build --project Ctap2
+ 
+-# Interactive mode (menu-driven)
+-dotnet run
++# Compile/run the sample separately, from the repository root.
++dotnet run --project src/Ctap2/examples/FidoTool/FidoTool.csproj
+ 
+-# CLI mode (ykman-compatible commands)
+-dotnet run -- info
+-dotnet run -- access change-pin --pin 12345678 --new-pin 87654321
++# CLI example; omit PIN arguments to use interactive entry.
++dotnet run --project src/Ctap2/examples/FidoTool/FidoTool.csproj -- info
++dotnet run --project src/Ctap2/examples/FidoTool/FidoTool.csproj -- access change-pin
+ ```
+ 
+ ## Commands
+ 
++The commands below assume a built `FidoTool` executable on PATH. With `dotnet run`, use the explicit
++project path above followed by `--` and the arguments. Select a dedicated evaluation key whose state
++you know; PIN attempts can consume retries and administrative operations change persistent state.
++
+ ### info
+ 
+ Display general status of the FIDO application.
+@@ -32,69 +44,109 @@ FidoTool info
+ 
+ ### reset
+ 
+-Reset all FIDO applications. Permanently deletes all credentials, PINs, and settings.
++Reset the selected authenticator's FIDO application: invalidate generated credentials (including
++non-discoverable/U2F credentials), erase discoverable credentials and clear the PIN. Storage/configuration
++effects follow the applicable product/protocol, not a promise to reset every applet/setting on the key.
++Some blocked Bio Multi-protocol states require the product's device-wide reset instead.
+ 
+ ```bash
+-# Interactive reset (requires confirmation + touch within 5s of insertion)
++# Confirmation and power-cycle instructions; human-coordinated device presence is still required.
+ FidoTool reset
+ 
+-# Skip confirmation prompts (for CI/testing)
++# Skips confirmation AND remove/reinsert instructions, not device timing/presence restrictions.
+ FidoTool reset -f
+ ```
+ 
++1. Check the physical target and authorize the irreversible reset on that dedicated key.
++2. Power-cycle and send reset promptly. CTAP 2.1/2.3 specify receipt within ten seconds for displayless
++   devices. [Yubico's reset guide](https://docs.yubico.com/yesdk/users-manual/application-fido2/fido2-reset.html)
++   documents five seconds before firmware 5.5.2 and ten on 5.5.4+, but does not classify 5.5.2/5.5.3 there.
++   Discovery, session initialization and preflight reads also consume this interval.
++3. Meet the separate presence requirement: the guide describes a USB touch wait of thirty seconds,
++   NFC remaining in reader contact, and product-dependent long touch. CTAP 2.3's enabled long-touch
++   option requires at least five seconds, not a universal ten-second press.
++
++The sample independently selects again after reinsert; it does **not** bind that selection to the
++originally confirmed physical key. Another key can be reset. Manually verify the final target and avoid
++ambiguous multi-key setups. Preflight failures/cancellation can be swallowed and defaults displayed;
++missing metadata is not proof of unrestricted transports or a short touch. Existing executable prompts
++still contain overgeneralized five/ten-second wording; follow the qualified product procedure, not those
++messages as a timing authority. `-f` is not an unattended CI reset mode. A failed call does not prove no reset.
++
+ ### access
+ 
+ Manage the FIDO2 PIN.
+ 
+ ```bash
+ # Change PIN (prompts interactively if --pin/--new-pin omitted)
+-FidoTool access change-pin --pin 12345678 --new-pin 87654321
++FidoTool access change-pin
+ 
+ # Verify current PIN
+-FidoTool access verify-pin --pin 12345678
++FidoTool access verify-pin
++
++# Set a first PIN (implemented even though current help omits it)
++FidoTool access set-pin
+ ```
+ 
++The current `verify-pin` helper requests GetAssertion permission without its required RP ID.
++A permission-capable authenticator can reject that request even with the correct PIN; legacy fallback
++drops the requested permission/RP scope. Failure is not proof of a wrong PIN. Do not blindly retry;
++the request-scope correction remains pending.
++
+ ### config
+ 
+-Configure authenticator settings. Requires firmware 5.4+.
++Configure advertised authenticator settings with appropriate PIN authorization. Firmware metadata
++alone is insufficient. alwaysUv is a toggle affecting credential ceremonies, not every CTAP operation;
++read current GetInfo state before acting and re-read after an uncertain outcome rather than repeating
++the toggle blindly. The menu also sets minimum-PIN policy in code points; it does not expose the helper's
++RP-list argument. This differs from the minPinLength reporting extension. Empty RP lists are omitted by the current helper,
++not a request to clear recipients; raising the minimum can force a PIN change.
+ 
+ ```bash
+ # Toggle always-UV setting
+-FidoTool config toggle-always-uv --pin 12345678
++FidoTool config toggle-always-uv
+ 
+ # Enable enterprise attestation (irreversible without reset)
+-FidoTool config enable-ep-attestation --pin 12345678
++FidoTool config enable-ep-attestation
+ ```
+ 
+ ### credentials
+ 
+-Manage discoverable credentials. Requires firmware 5.2+.
++Manage discoverable credentials using the standard credential-management command. A preview-only
++advertisement or nominal 5.2 threshold does not guarantee that route. IDs are full hexadecimal values,
++not ykman's credential-ID substring matching. Set `CREDENTIAL_ID_HEX` to the actual full ID to delete:
+ 
+ ```bash
+ # List all stored credentials
+-FidoTool credentials list --pin 12345678
++FidoTool credentials list
+ 
+ # Delete a credential by ID (prompts for confirmation unless -f)
+-FidoTool credentials delete <hex-credential-id> --pin 12345678
+-FidoTool credentials delete <hex-credential-id> --pin 12345678 -f
++FidoTool credentials delete "$CREDENTIAL_ID_HEX"
++FidoTool credentials delete "$CREDENTIAL_ID_HEX" -f
+ ```
+ 
+ ### fingerprints
+ 
+-Manage fingerprint enrollments. Requires firmware 5.2+ with biometric hardware.
++Fingerprint flows need actual biometric hardware and advertised support; a firmware threshold is not
++qualification. The current SDK bio helper has known standard wire/authentication/timeout, template-array
++schema and sample-status limitations. An empty inventory can mean an unsupported command, and decoded
++remaining-samples zero is not verified enrollment completion. Next replies need not repeat the begin
++template ID; the sample correctly retains it separately. A thrown cancellation can skip the explicit
++enrollment-cancel path. Do not rely on these flows as working standardized enrollment or cancellation.
++Set `FINGERPRINT_ID_HEX` to the actual template ID:
+ 
+ ```bash
+ # List enrolled fingerprints
+-FidoTool fingerprints list --pin 12345678
++FidoTool fingerprints list
+ 
+ # Enroll new fingerprint with a name
+-FidoTool fingerprints add "Right index" --pin 12345678
++FidoTool fingerprints add "Right index"
+ 
+ # Delete a fingerprint enrollment
+-FidoTool fingerprints delete <hex-fingerprint-id> --pin 12345678 -f
++FidoTool fingerprints delete "$FINGERPRINT_ID_HEX" -f
+ 
+ # Rename a fingerprint enrollment
+-FidoTool fingerprints rename <hex-fingerprint-id> "Left thumb" --pin 12345678
++FidoTool fingerprints rename "$FINGERPRINT_ID_HEX" "Left thumb"
+ ```
+ 
+ ## Global Options
+@@ -102,7 +154,12 @@ FidoTool fingerprints rename <hex-fingerprint-id> "Left thumb" --pin 12345678
+ | Option | Description |
+ |--------|-------------|
+ | `--pin PIN` | Provide PIN on the command line. If omitted, the tool prompts interactively. |
+-| `-f`, `--force` | Skip confirmation prompts for destructive operations. |
++| `--new-pin PIN` | New PIN for set/change; omitted values use interactive entry. |
++| `-f`, `--force` | Skip confirmations where implemented; reset also skips remove/reinsert instructions. |
++
++These are per-command options, not a complete parser contract. Unknown/incomplete subcommands can show
++usage with exit code zero, and subcommand help can select a device first. The simple parser can treat
++another flag as an option value. Exit status/help are not a complete validation or operation-provenance API.
+ 
+ ## Interactive Mode
+ 
+@@ -112,9 +169,9 @@ Run without arguments to launch the interactive menu:
+ FidoTool
+ ```
+ 
+-The interactive menu provides guided flows for all operations including additional features not exposed as CLI verbs:
++The menu exposes additional sample operations, not all SDK APIs:
+ 
+-- Set PIN (first time)
++- Set PIN (first time; also available as `access set-pin`)
+ - PIN/UV retry counts
+ - Create credential (MakeCredential)
+ - Get assertion (GetAssertion)
+@@ -122,16 +179,24 @@ The interactive menu provides guided flows for all operations including addition
+ - Sensor info for biometric hardware
+ - Min PIN length configuration
+ 
+-## Firmware Feature Gating
++Create/get helpers use random hash inputs and generated user handles, return the first discoverable
++assertion only, and do not complete RP account registration/sign-in. The assertion hash is not returned.
++The PIN branches currently also send mutually exclusive uv and token-auth fields; executable correction
++is pending. The [module README](../../README.md) shows the correct token form and fresh exact-client-data/
++challenge/account/RP verification responsibilities. Do not turn the sample's success display into login.
+ 
+-| Feature | Min Firmware | Commands |
++## Feature Checks
++
++| Feature | SDK threshold metadata | Commands |
+ |---------|-------------|----------|
+ | CTAP2 base | 5.0 | info, reset, access |
+ | Credential Management | 5.2 | credentials list/delete |
+ | Bio Enrollment | 5.2 | fingerprints list/add/delete/rename |
+ | Authenticator Config | 5.4 | config toggle-always-uv/enable-ep-attestation |
+ 
+-Operations targeting unsupported firmware will return a clear error message.
++Check actual GetInfo versions/extensions/options, enabled state, transport and permissions. Several
++sample support probes catch every exception, including cancellation, and report false; "not supported"
++can therefore mean a connection/read/cancellation failure rather than absent capability.
+ 
+ ## Transport Support
+ 
+@@ -142,12 +207,24 @@ Prefer HID FIDO for ordinary USB CTAP2 coverage. USB SmartCard CTAP2 is supporte
+ 
+ ## Device Selection
+ 
+-When only one YubiKey is connected, it is selected automatically. When multiple devices are present, the tool prompts for device selection.
++The active `DeviceSelector` admits exposed HID FIDO **or SmartCard** interfaces, not confirmed CTAP/AID
++support; SmartCard-only non-CTAP keys can appear. One candidate auto-selects. Multiple candidates prompt
++in an interactive terminal; noninteractive mode auto-selects HID-capable/first. Duplicate formatted
++labels can resolve to the first matching choice. No-device retry prompts can still occur noninteractively.
++`FidoDeviceSelector` is an unused alternative, not the selector used by Program/menus.
++
++Ctrl+C requests a cancellation token; synchronous menu/PIN/ReadLine prompts do not honor that token
++while blocked. Operation helpers catch general exceptions and return failure results, losing cancellation
++and error provenance. Device-info/support probes can swallow errors, and development Debug output remains.
++No immediate prompt termination, uniform error normalization, safe retry or rollback is guaranteed.
+ 
+ ## Security Notes
+ 
+-- PINs are zeroed from memory immediately after use via `CryptographicOperations.ZeroMemory()`
+-- PIN tokens are zeroed after each operation
+-- PINs are never logged
+-- `clientDataHash` values are random 32-byte arrays for testing purposes; production WebAuthn implementations must use the SHA-256 of the actual clientData JSON
+-- The `-f` flag on destructive operations is intended for automated testing only
++- PIN byte owners are disposed after awaited operations; token arrays are cleared in finally. Borrowed
++  PIN input remains the caller's responsibility. This is not end-to-end SDK request/response cleanup.
++- CLI PIN arguments remain immutable strings in args/process memory and can appear in process listings
++  or shell history. Clearing encoded bytes cannot erase these strings; prefer interactive entry.
++- Do not log PINs, tokens, secret-derived outputs or application-sensitive blob data. Credential/template
++  identifiers and display fields can correlate accounts even when they are not cryptographic secrets.
++- Response/extension copies lack a general disposable secret owner; do not infer their clearing from
++  session disposal. Destructive operations require target/state review, and reset remains human-timed.
+diff --git i/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj w/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
+index eaf94933..42536374 100644
+--- i/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
++++ w/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
+@@ -6,7 +6,7 @@
+     <AssemblyName>Yubico.YubiKit.Ctap2</AssemblyName>
+ 
+     <!-- Package Metadata -->
+-    <Description>CTAP2 authenticator support for YubiKey devices including credential management, biometric authentication, and passwordless login.</Description>
++    <Description>CTAP2 protocol operations for YubiKey authenticators, including credential/PIN management and selected configuration, biometric, and extension APIs; device support and RP verification are separate responsibilities.</Description>
+     <PackageTags>yubikey;yubico;fido2;webauthn;ctap2;passwordless;biometric</PackageTags>
+ 
+     <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+diff --git i/src/Ctap2/tests/CLAUDE.md w/src/Ctap2/tests/CLAUDE.md
+index 5ac9a7db..c626f776 100644
+--- i/src/Ctap2/tests/CLAUDE.md
++++ w/src/Ctap2/tests/CLAUDE.md
+@@ -22,7 +22,7 @@ CTAP2 tests must be aware of transport differences:
+ **USB Tests:**
+ - Use `IFidoHidConnection` (HID FIDO interface)
+ - Primary test transport
+-- Supports all CTAP2 features
++- Exercises the HID path; feature availability still depends on advertised capabilities, model/state and authorization
+ 
+ **NFC Tests:**
+ - Use `ISmartCardConnection` (CCID interface)
+@@ -38,19 +38,48 @@ CTAP2 tests must be aware of transport differences:
+ 
+ ### User Interaction And Coordination Lanes
+ 
+-CTAP2 operations require user presence (touch) and user verification (PIN/bio):
++Creation and ordinary assertion tests can require UP and PIN/built-in UV. GetInfo itself needs neither.
++The following meaningful creation method belongs in the xUnit v2 IntegrationTests project, with
++Tests.Shared/Infrastructure, TestExtensions, Ctap2 Credentials/Pin, Core Devices, and System.Security.Cryptography
++imports. It uses the existing known-PIN helper, whose default setup may set/change/verify a PIN before
++the callback. Run it only under the existing approval policy below; it creates a persistent demo credential,
++does not verify RP registration, and does not restore prior PIN state or delete the credential.
+ 
+ ```csharp
+ [SkippableTheory]
+-[WithYubiKey(RequireUsb = true)] // CTAP2 needs HID or NFC
++[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
++[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+ public async Task MakeCredential_TouchRequired_Succeeds(YubiKeyTestState state)
+ {
+-    await using var session = await state.Device.CreateCtap2SessionAsync();
+-    
+-    // Test will wait for user to touch YubiKey
+-    // Timeout after 30 seconds if no touch
+-    var response = await session.MakeCredentialAsync(
+-        clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options);
++    await state.WithCtap2SessionAsync(async session =>
++    {
++        using var protocol = new PinUvAuthProtocolV2(); // Test device must support V2.
++        using var clientPin = new ClientPin(session, protocol);
++        byte[]? token = null;
++        byte[]? authParam = null;
++        try
++        {
++            byte[] clientDataHash = RandomNumberGenerator.GetBytes(32); // Protocol demo, not client data.
++            var rp = new PublicKeyCredentialRpEntity("example.com", "Example");
++            var user = new PublicKeyCredentialUserEntity(
++                RandomNumberGenerator.GetBytes(32), "test@example.com", "Test");
++            token = await clientPin.GetPinUvAuthTokenUsingPinAsync(
++                Ctap2TestStateExtensions.KnownTestPin,
++                PinUvAuthTokenPermissions.MakeCredential, rp.Id);
++            authParam = protocol.Authenticate(token, clientDataHash);
++            var options = new MakeCredentialOptions { ResidentKey = true };
++            options.WithPinUvAuth(authParam, protocol.Version); // uv absent.
++            var response = await session.MakeCredentialAsync(
++                clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options);
++            var attested = Assert.IsType<AttestedCredentialData>(response.AuthenticatorData.AttestedCredentialData);
++            Assert.False(attested.CredentialId.IsEmpty);
++        }
++        finally
++        {
++            if (token is not null) CryptographicOperations.ZeroMemory(token);
++            if (authParam is not null) CryptographicOperations.ZeroMemory(authParam);
++        }
++    }, preferredConnection: ConnectionType.HidFido);
+ }
+ ```
+ 
+@@ -58,7 +87,7 @@ Classify CTAP2 hardware tests before running them:
+ 
+ | Lane | Examples | Agent-runnable? | Rule |
+ |------|----------|-----------------|------|
+-| Read-only smoke | `GetInfo`, session creation, transport discovery | Yes | Use `--smoke` for integration |
++| Read-only smoke | Direct `GetInfo`, session creation, transport discovery without PIN setup | Yes | Inspect setup; `--smoke` excludes traits, not implicit PIN normalization |
+ | User Presence | `MakeCredential`, `GetAssertion`, `previewSign` ceremonies | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
+ | User Verification / PIN | PIN-token, UV-required/preferred, biometric checks | No by default | Requires explicit human approval and known PIN/device state |
+ | Reset/destructive | `ResetAsync`, broad credential cleanup | No | Human-approved destructive run only |
+@@ -68,7 +97,9 @@ Agents must not run User Presence, UV, reset, insert/remove, or destructive CTAP
+ 
+ ### PIN Management in Tests
+ 
+-Tests requiring PIN should use test-specific PINs:
++Tests requiring PIN use known test bytes only on the explicitly approved device. This fragment requires
++an existing `ICtap2Session session` on a device with PIN support and **no PIN already set**; it sets the
++PIN, not verifies/normalizes an existing one:
+ 
+ ```csharp
+ // With an existing ICtap2Session session; only on a human-approved test device.
+@@ -87,26 +118,31 @@ finally
+ 
+ ### Reset Before Tests
+ 
+-Do not reset the FIDO application as routine test setup. `Ctap2TestStateExtensions` normalizes
+-the known test PIN for explicitly approved PIN tests. A CTAP2 `ResetAsync` permanently deletes
++Do not reset the FIDO application as routine test setup. `WithCtap2SessionAsync` defaults to
++`normalizePin: true`: after initialization it may set the known test PIN, request a token to verify it,
++or change it through a temporary value for forcePinChange recovery. Even a matching PIN is not a no-op;
++a mismatch can consume a retry before a skip. Failed recovery can leave the temporary PIN, and current
++helpers have cleanup gaps. Use explicit `normalizePin: false` when the test is intended to make only
++read-only calls; do not treat existing default-helper smoke paths as read-only. A CTAP2 `ResetAsync` permanently deletes
+ credentials and requires a human-approved unplug/replug/touch ceremony; see the FidoTool reset example.
+ 
+ ## Running Tests
+ 
+ ```bash
+-# Run all CTAP2 tests
++# Default CTAP2 selection: unit projects only
+ dotnet toolchain.cs -- test --project Ctap2 --filter "FullyQualifiedName~Yubico.YubiKit.Ctap2"
+ 
+-# Run unit tests only
++# Explicit unit-test FQN filter (still unit projects only)
+ dotnet toolchain.cs -- test --project Ctap2 --filter "FullyQualifiedName~Yubico.YubiKit.Ctap2.UnitTests"
+ 
+-# Run integration smoke tests only; skips Slow and RequiresUserPresence
++# Includes both project kinds, then filters to integration; excludes Slow and RequiresUserPresence.
++# Inspect PIN-normalizing setup and apply the existing approval policy before any hardware run.
+ dotnet toolchain.cs -- test --integration --project Ctap2 --smoke --filter "FullyQualifiedName~Yubico.YubiKit.Ctap2.IntegrationTests"
+ 
+ # Human-coordinated only; requires touch/UP approval immediately before running
+ dotnet toolchain.cs -- test --integration --project Ctap2 --filter "Category=RequiresUserPresence"
+ 
+-# Run specific test class
++# Focused unit-test class
+ dotnet toolchain.cs -- test --project Ctap2 --filter "FullyQualifiedName~Ctap2SessionTests"
+ ```
+ 
+@@ -115,7 +151,8 @@ dotnet toolchain.cs -- test --project Ctap2 --filter "FullyQualifiedName~Ctap2Se
+ ### Mock CBOR Responses
+ 
+ ```csharp
+-// GetInfo response payload (the backend strips the CTAP status byte).
++// Partial parser fixture (backend status already stripped), not a conforming GetInfo response.
++// Required AAGUID is absent; current decoder accepts this incomplete envelope.
+ var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+ writer.WriteStartMap(1);
+ writer.WriteInt32(1);
+@@ -126,22 +163,27 @@ writer.WriteEndMap();
+ byte[] mockResponse = writer.Encode();
+ ```
+ 
+-### Test WebAuthn Extensions
++### Test CTAP Extension Encoding
++
++This complete method belongs in the UnitTests project with xUnit v3, System.Formats.Cbor and Ctap2
++Extensions imports. It checks the encoded input fields only, not device enforcement or WebAuthn PRF:
+ 
+ ```csharp
+-var options = new MakeCredentialOptions
++[Fact]
++public void RegistrationExtensions_EncodePolicyAndHmacEnablement()
+ {
+-    // ... standard options
+-    Extensions = new ExtensionBuilder()
++    var encoded = new ExtensionBuilder()
+         .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
+-        .WithHmacSecret(hmacSecretInput)
+-        .Build()
+-};
+-
+-// clientDataHash, rp, user, and PIN/UV authorization come from the test setup.
+-var response = await session.MakeCredentialAsync(
+-    clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options);
+-Assert.NotNull(response.Extensions);
++        .WithHmacSecret()
++        .Build() ?? throw new InvalidOperationException("Expected extension bytes.");
++    var reader = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
++    Assert.Equal(2, reader.ReadStartMap());
++    Assert.Equal("credProtect", reader.ReadTextString());
++    Assert.Equal((int)CredProtectPolicy.UserVerificationRequired, reader.ReadInt32());
++    Assert.Equal("hmac-secret", reader.ReadTextString());
++    Assert.True(reader.ReadBoolean());
++    reader.ReadEndMap();
++}
+ ```
+ 
+ ## Critical Test Warnings
+@@ -150,4 +192,9 @@ Assert.NotNull(response.Extensions);
+ - **PIN retry limits**: Excessive failed PIN attempts block CTAP2
+ - **User interaction required**: Tests involving touch/PIN need manual intervention or test automation
+ - **Firmware version gates**: Some tests only work on specific firmware versions (check AuthenticatorInfo)
+-- **Resident key limits**: YubiKeys have limited storage (~25-32 credentials)
++- **Resident key limits**: Read credential metadata; remaining discoverable capacity is an estimate, not a fixed slot count
++- **Evidence scope**: Parsed responses, nonempty signatures and fake-wire assertions are not RP/attestation,
++  firmware, biometric or FIPS qualification. Bio APIs have known standard wire/schema/completion limitations.
++- **Secret lifetime**: Existing integration fixtures have cleanup gaps; the optional AuditV2 blob interop
++  fixture can export a large-blob key as immutable hex text to disk. It is a human-controlled secret-export
++  path, not a no-persistence or unattended safety example.
+diff --git i/src/WebAuthn/README.md w/src/WebAuthn/README.md
+index 9fce5617..78229ba3 100644
+--- i/src/WebAuthn/README.md
++++ w/src/WebAuthn/README.md
+@@ -18,8 +18,12 @@ the transport name.
+ 
+ - .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
+ - YubiKey 5 series, Security Key series, or YubiKey Bio series with firmware 5.0.0 or later. This module adds no
+-  firmware gates of its own; [../Ctap2/README.md](../Ctap2/README.md) lists the per-feature minimums.
+-- Transports: HID FIDO over USB by default, or SmartCard where the FIDO AID is exposed - NFC always, USB on 5.8.0+.
++  firmware gates of its own; [../Ctap2/README.md](../Ctap2/README.md) lists SDK firmware thresholds, not
++  a qualified per-model support matrix. Revision/extension advertisement, configured state and permission
++  requirements still apply independently of firmware metadata.
++- Transports: HID FIDO over USB by default, or SmartCard where the connected authenticator exposes the
++  FIDO AID. NFC requires a current PC/SC connection reporting `Transport.Nfc`; USB SmartCard uses the
++  CTAP2 SDK's 5.8.0+ gate. NFC capability metadata alone does not establish the current transport.
+ - The supported origin representation is HTTPS, or HTTP on `localhost` / `*.localhost`; this parser is not
+   a complete browser Secure Contexts evaluation. Native/opaque/custom-scheme origins are not supported.
+ - PIN/UV token acquisition and PRF key agreement currently use PIN/UV protocol 2, without protocol-1

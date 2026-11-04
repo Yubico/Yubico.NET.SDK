@@ -18,7 +18,10 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// Output from the previewSign extension authentication.
 /// </summary>
 /// <remarks>
-/// Contains the signature over the to-be-signed data.
+/// Contains signature bytes without verification. The Yubico Labs previewSign v4 Editor's Draft
+/// is experimental; algorithm-specific message hashing and signature format remain caller concerns.
+/// The constructor borrows storage, while PreviewSignCbor decoding creates an independent byte-string
+/// copy. Keep borrowed storage stable during use; this DTO has no disposal/zeroing boundary.
 /// </remarks>
 public sealed class PreviewSignAuthenticationOutput
 {

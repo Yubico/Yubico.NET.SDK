@@ -1,0 +1,31 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- build --project AuditCt001.Examples.consumer-lib --clean",
+  "started": "2026-11-04T01:42:51.5265359+01:00",
+  "durationSeconds": 1.9,
+  "runDirectory": "artifacts/toolchain/runs/20261104-014251-526-build",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "failed",
+      "durationSeconds": 1.8,
+      "error": "`dotnet build docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-lib/src/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261104-014251-526-build/02-build-AuditCt001.Examples.consumer-lib.log"
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

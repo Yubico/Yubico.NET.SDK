@@ -1,0 +1,5 @@
+// SOURCE src/Ctap2/src/IYubiKeyExtensions.cs#x1
+var info = await yubiKey.GetCtap2InfoAsync();
+Console.WriteLine($"AAGUID: {Convert.ToHexString(info.Aaguid.Span)}");
+Console.WriteLine($"Supports CTAP2.1: {info.Versions.Contains("FIDO_2_1")}");
+

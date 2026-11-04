@@ -40,19 +40,27 @@ internal static class PinUvAuthHelpers
     /// <summary>
     /// Performs ECDH P-256 key agreement with the peer's COSE key.
     /// </summary>
-    /// <param name="peerCoseKey">The peer's COSE key containing EC2 P-256 public key coordinates.</param>
+    /// <param name="peerCoseKey">The borrowed peer key, required by CTAP to contain kty=2, alg=-25, crv=1 and 32-byte big-endian X/Y coordinates, without other optional parameters.</param>
     /// <returns>
-    /// A tuple of the our COSE key dictionary (for key agreement) and the raw ECDH shared secret (Z).
-    /// The caller MUST zero the raw shared secret after deriving protocol-specific keys via KDF.
+    /// A new platform public-key dictionary and a caller-owned raw ECDH secret (Z), the 32-byte
+    /// big-endian X coordinate of the shared point. Clear Z after deriving protocol-specific keys,
+    /// including when that derivation fails. Public coordinates are not secret material.
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="peerCoseKey"/> is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when the peer key is missing, invalid, or ECDH derivation fails.</exception>
+    /// <remarks>
+    /// Explicit checks currently cover only coordinate types and lengths, not required COSE labels
+    /// or optional-parameter restrictions. Import forces P-256 and delegates point validation to the
+    /// provider. The ephemeral crypto objects are disposed, but allocation of the public dictionary
+    /// after derivation is not protected by a Z-clearing guard.
+    /// </remarks>
+    /// <exception cref="ArgumentException">Thrown for missing/invalid coordinate types or lengths, or a wrapped cryptographic error from raw-secret derivation.</exception>
+    /// <exception cref="CryptographicException">Peer-key import can raise an unwrapped provider error before the derivation catch.</exception>
     internal static (Dictionary<int, object?> KeyAgreement, byte[] RawSharedSecret)
         PerformEcdhKeyAgreement(IReadOnlyDictionary<int, object?> peerCoseKey)
     {
         ArgumentNullException.ThrowIfNull(peerCoseKey);
 
-        // Validate and extract peer's public key coordinates
+        // Check coordinate storage here; required kty/alg/crv labels are not yet validated.
         if (!peerCoseKey.TryGetValue(CoseEC2X, out var xObj) || xObj is not byte[] peerX)
         {
             throw new ArgumentException("Peer COSE key missing or invalid X coordinate (-2).", nameof(peerCoseKey));
@@ -78,7 +86,7 @@ internal static class PinUvAuthHelpers
         using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         var ourParams = ecdh.ExportParameters(includePrivateParameters: false);
 
-        // Import peer's public key
+        // Import as P-256; provider point-validation errors here are outside the derivation catch.
         var peerParams = new ECParameters
         {
             Curve = ECCurve.NamedCurves.nistP256,

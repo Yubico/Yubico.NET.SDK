@@ -25,6 +25,12 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// <summary>
 /// Integration tests for CTAP2 minPinLength extension.
 /// </summary>
+/// <remarks>
+/// These fixtures do not configure minPinLengthRPIDs or require output presence. They conditionally
+/// inspect a reported code-point minimum, not policy changes, current PIN length or authorized-disclosure
+/// enforcement. Setup can normalize the PIN even for GetInfo; creation cleanup deletes all RP credentials.
+/// Use an explicitly approved dedicated device; token cleanup is not comprehensive.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Extension", "minPinLength")]
 public class Ctap2MinPinLengthTests

@@ -115,7 +115,7 @@ flowchart TD
     end
 
     subgraph CtapLayer["CTAP2 path (beside APDU, not below it)"]
-        CborB["CtapRequestBuilder → CBOR bytes<br/>CtapResponseParser ← CBOR bytes"]
+        CborB["Ctap2SessionRequestEncoding → request bytes<br/>MakeCredentialResponse / GetAssertionResponse.Decode ← response bytes"]
         FBack["ICtap2Backend"]
         HidB["HidBackend<br/>CTAPHID_CBOR (0x10) frames"]
         ScB["SmartCardBackend<br/>wraps CTAP in APDU (CLA 0x80, INS 0x10)"]
@@ -172,8 +172,11 @@ flowchart TD
   - *Backend pattern (multi-transport):* Management, CTAP2, YubiOTP — an `IxxxBackend`
     interface with a `SmartCard` impl and a `Hid` impl.
 - **CTAP2 path (the box beside APDU):** CTAP2 does **not** build APDUs at the session
-  layer — it builds **CBOR** via `CtapRequestBuilder` and parses replies via
-  `CtapResponseParser`. That CBOR then goes through `ICtap2Backend`, which has two impls:
+  layer — `Ctap2SessionRequestEncoding` composes command-prefixed **CBOR** through
+  `CtapRequestBuilder`. `ICtap2Backend` exchanges those bytes and resolves the response status;
+  the session then calls `MakeCredentialResponse.Decode` or `GetAssertionResponse.Decode`.
+  `CtapResponseParser` is a general utility, not the decoder on these traced credential paths.
+  The backend has two impls:
   - `HidBackend` — sends CTAPHID_CBOR frames (command `0x10`) over `IFidoHidProtocol`.
     This is the genuinely separate path.
   - `SmartCardBackend` — wraps the CTAP payload in a single APDU (`CLA 0x80, INS 0x10`) and
@@ -243,13 +246,13 @@ sequenceDiagram
     autonumber
     actor Caller as Your code
     participant Sess as Ctap2Session
-    participant Build as CtapRequestBuilder
+    participant Build as Ctap2SessionRequestEncoding
     participant Back as ICtap2Backend
-    participant Parse as CtapResponseParser
+    participant Parse as MakeCredentialResponse
     participant HW as YubiKey
 
     Caller->>Sess: MakeCredentialAsync(params)
-    Sess->>Build: Create(0x01).Add(...).Build()
+    Sess->>Build: BuildMakeCredentialRequest(params)
     Build-->>Sess: command byte + CBOR payload
     alt HID transport (USB)
         Sess->>Back: SendCborAsync(request) [HidBackend]
@@ -263,15 +266,17 @@ sequenceDiagram
     end
     Back->>Back: check CtapStatus, strip status byte
     Back-->>Sess: CBOR response bytes
-    Sess->>Parse: parse CBOR → typed result
-    Parse-->>Sess: MakeCredentialData
+    Sess->>Parse: Decode(CBOR response)
+    Parse-->>Sess: MakeCredentialResponse
     Sess-->>Caller: typed credential
 ```
 
 **Teaching notes (CTAP2):**
-- **CBOR in, CBOR out** — `CtapRequestBuilder` / `CtapResponseParser` replace the inline
-  `ApduCommand` build that every other module uses. This is *the* CTAP2 exception to the flat
-  command model.
+- **CBOR in, CBOR out** — the internal `Ctap2SessionRequestEncoding` helper composes the request
+  through `CtapRequestBuilder`, and `MakeCredentialResponse.Decode` parses the returned envelope.
+  These are flat encoding/decoding helpers, not operation-specific command executors. The sequence
+  shows the main exchange, not every validation, callback or cleanup branch; status/notification
+  resolution precedes typed decode, so a later failure need not mean the device created nothing.
 - **Status byte convention:** the authenticator's reply starts with a single `CtapStatus`
   byte; the backend checks it (`CtapException.ThrowIfError`) then strips it before parsing.
 - **The convergence point:** in the SmartCard branch, everything below "wrap in APDU" is the

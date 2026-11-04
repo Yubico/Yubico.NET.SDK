@@ -1,0 +1,1087 @@
+diff --git i/src/Ctap2/src/Pin/ClientPin.cs w/src/Ctap2/src/Pin/ClientPin.cs
+index 8fb55fbb..cd49e3b4 100644
+--- i/src/Ctap2/src/Pin/ClientPin.cs
++++ w/src/Ctap2/src/Pin/ClientPin.cs
+@@ -34,8 +34,38 @@ namespace Yubico.YubiKit.Ctap2.Pin;
+ /// </list>
+ /// </para>
+ /// <para>
+-/// The ClientPin uses PIN/UV auth protocols (V1 or V2) for secure key agreement
+-/// and encrypted PIN operations.
++/// Select a mutually supported protocol from authenticatorGetInfo's PinUvAuthProtocols before
++/// constructing this helper. The helper does not negotiate V1/V2. It borrows the session but owns
++/// disposal of the supplied protocol; keep the session open until all helper operations complete.
++/// Each PIN set/change or token request performs fresh key agreement.
++/// </para>
++/// <para>
++/// Supply PINs as NFC-normalized UTF-8, with at least four Unicode characters and no final 0x00
++/// byte. For a new PIN, also meet the authenticator's current minimum in Unicode code points and
++/// any additional device policy. The SDK checks only 4–63 input bytes: it does not validate UTF-8,
++/// normalization, code-point count, a final zero byte or the advertised minimum. It hashes the
++/// exact supplied bytes, so do not append padding to a PIN argument.
++/// </para>
++/// <para>
++/// If GetInfo reports forcePINChange=true, change the PIN before requesting a PIN token.
++/// Under original CTAP 2.1, after verifying the correct PIN, legacy getPinToken (0x05) returns
++/// PIN_INVALID for forced change, while getPinUvAuthTokenUsingPinWithPermissions (0x09) returns
++/// PIN_POLICY_VIOLATION. PIN_INVALID alone proves neither an incorrect PIN nor forced-change state.
++/// This helper does not preflight forcePINChange or automatically retry PIN requests.
++/// </para>
++/// <para>
++/// PIN arguments remain caller-owned. Keep them unchanged until the returned task completes,
++/// faults or is canceled, then clear them when no longer needed. Returned tokens are separate
++/// caller-owned secrets; clear them after their last use. The helper clears its named shared-secret,
++/// PIN-hash and padded-PIN buffers in finally blocks, not every builder/request/response copy.
++/// Disposal does not provide end-to-end secret erasure or invalidate tokens on the authenticator.
++/// </para>
++/// <para>
++/// The authenticator enforces token scope and lifetime. Ordinary tokens can expire, lose permissions
++/// after user-presence checks, or be invalidated by another token issuance, PIN change, power cycle
++/// or reset. A host byte array remaining readable is not evidence that its token is still authorized.
++/// When authorizing MakeCredential or GetAssertion with pinUvAuthParam, omit the uv option key,
++/// even false. Inspect the returned authenticator data for the operation's verification result.
+ /// </para>
+ /// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#authenticatorClientPIN
+@@ -54,8 +84,8 @@ public sealed class ClientPin : IDisposable
+     /// <summary>
+     /// Initializes a new instance of the <see cref="ClientPin"/> class.
+     /// </summary>
+-    /// <param name="session">The CTAP2 session to use for commands.</param>
+-    /// <param name="protocol">The PIN/UV auth protocol to use.</param>
++    /// <param name="session">The borrowed CTAP2 session. This helper does not dispose it.</param>
++    /// <param name="protocol">The caller-selected, mutually supported protocol. Disposing this helper disposes this supplied object; do not share it with a longer-lived consumer.</param>
+     /// <exception cref="ArgumentNullException">If session or protocol is null.</exception>
+     public ClientPin(ICtap2Session session, IPinUvAuthProtocol protocol)
+     {
+@@ -69,13 +99,20 @@ public ClientPin(ICtap2Session session, IPinUvAuthProtocol protocol)
+     /// <summary>
+     /// Gets the PIN/UV auth protocol used by this instance.
+     /// </summary>
++    /// <remarks>This property remains readable after disposal and returns the same, then-disposed protocol reference. It does not extend that protocol's usable lifetime.</remarks>
+     public IPinUvAuthProtocol Protocol => _protocol;
+ 
+     /// <summary>
+-    /// Gets the number of PIN retries remaining before the authenticator locks.
++    /// Reads a snapshot of the PIN retry count and optional power-cycle state.
+     /// </summary>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The authenticator's current PIN retry status.</returns>
++    /// <remarks>
++    /// Missing response fields currently default to zero retries and false power-cycle state;
++    /// false therefore does not prove another attempt is safe. PIN_AUTH_BLOCKED indicates a
++    /// temporary block requiring a power cycle, whereas PIN_BLOCKED indicates exhausted retries
++    /// requiring reset. Do not blindly retry an incorrect PIN.
++    /// </remarks>
+     public async Task<PinRetryStatus> GetPinRetriesAsync(
+         CancellationToken cancellationToken = default)
+     {
+@@ -94,10 +131,16 @@ public async Task<PinRetryStatus> GetPinRetriesAsync(
+     }
+ 
+     /// <summary>
+-    /// Gets the number of UV retries remaining (CTAP 2.1).
++    /// Reads a snapshot of the built-in user-verification retry count (CTAP 2.1).
+     /// </summary>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The authenticator's current user-verification retry status.</returns>
++    /// <remarks>
++    /// Missing counts currently default to zero. CTAP 2.1 defines no power-cycle field for this
++    /// response; the result's false default is not recovery evidence. Exhausted built-in UV retries
++    /// can be re-enabled by reset or a successful configured ClientPIN token request. This method
++    /// does not attempt recovery or decide whether the caller should fall back to PIN.
++    /// </remarks>
+     public async Task<UserVerificationRetryStatus> GetUvRetriesAsync(
+         CancellationToken cancellationToken = default)
+     {
+@@ -119,12 +162,14 @@ public async Task<UserVerificationRetryStatus> GetUvRetriesAsync(
+     /// Sets a new PIN on the authenticator (first-time setup).
+     /// </summary>
+     /// <param name="newPin">
+-    ///     The borrowed UTF-8 encoded PIN, 4-63 bytes. The caller owns the buffer and must
+-    ///     clear it after use.
++    ///     The borrowed, unpadded NFC UTF-8 new PIN, 4–63 bytes. Meet the current device minimum
++    ///     in code points and additional policy; the SDK checks byte length only. Keep the buffer
++    ///     unchanged through task completion and clear it after its last use, including on failure.
+     /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <exception cref="ArgumentException">If the PIN byte length is invalid.</exception>
+-    /// <exception cref="CtapException">If the authenticator already has a PIN set.</exception>
++    /// <exception cref="CtapException">If the authenticator rejects setup, for example because a PIN is already set or device PIN policy is not met.</exception>
++    /// <remarks>The PIN must not end in 0x00. This method right-zero-pads it to exactly 64 bytes before encryption; AES adds no padding.</remarks>
+     public async Task SetPinAsync(ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
+     {
+         EnsureNotDisposed();
+@@ -142,7 +187,7 @@ public async Task SetPinAsync(ReadOnlyMemory<byte> newPin, CancellationToken can
+         byte[]? pinUvAuthParam = null;
+         try
+         {
+-            // Pad and encrypt PIN
++            // Right-zero-pad the unpadded PIN to 64 bytes; AES itself uses no padding.
+             pinBytes = PadPin(newPin.Span);
+             newPinEnc = _protocol.Encrypt(sharedSecret, pinBytes);
+ 
+@@ -173,16 +218,22 @@ await _session.SendCborRequestAsync(request, cancellationToken)
+     /// Changes the existing PIN on the authenticator.
+     /// </summary>
+     /// <param name="currentPin">
+-    ///     The borrowed UTF-8 encoded current PIN. The caller owns the buffer and must clear
+-    ///     it after use.
++    ///     The borrowed, unpadded NFC UTF-8 current PIN, 4–63 bytes, with no final 0x00.
++    ///     Keep it unchanged through task completion and clear it after its last use, including on failure.
+     /// </param>
+     /// <param name="newPin">
+-    ///     The borrowed UTF-8 encoded new PIN, 4-63 bytes. The caller owns the buffer and must
+-    ///     clear it after use.
++    ///     The borrowed, unpadded NFC UTF-8 new PIN, 4–63 bytes, with no final 0x00. Meet the
++    ///     current device minimum in code points and additional policy; the SDK checks byte length
++    ///     only. Keep it unchanged through task completion and clear it after its last use.
+     /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <exception cref="ArgumentException">If either PIN byte length is invalid.</exception>
+-    /// <exception cref="CtapException">If the current PIN is incorrect.</exception>
++    /// <exception cref="CtapException">If the authenticator rejects the change, including an incorrect/blocked current PIN or a new PIN that violates policy.</exception>
++    /// <remarks>
++    /// A successful change invalidates existing authenticator tokens. This helper does not retain
++    /// authorization state or roll the change back; a failed or canceled call is not proof that
++    /// the device PIN remained unchanged.
++    /// </remarks>
+     public async Task ChangePinAsync(
+         ReadOnlyMemory<byte> currentPin,
+         ReadOnlyMemory<byte> newPin,
+@@ -211,7 +262,7 @@ public async Task ChangePinAsync(
+             currentPinHash = ComputePinHash(currentPin.Span);
+             pinHashEnc = _protocol.Encrypt(sharedSecret, currentPinHash);
+ 
+-            // Pad and encrypt new PIN
++            // Right-zero-pad the new PIN to 64 bytes before no-padding AES encryption.
+             newPinBytes = PadPin(newPin.Span);
+             newPinEnc = _protocol.Encrypt(sharedSecret, newPinBytes);
+ 
+@@ -247,18 +298,23 @@ await _session.SendCborRequestAsync(request, cancellationToken)
+     }
+ 
+     /// <summary>
+-    /// Gets a PIN token using the PIN.
++    /// Requests a token with the legacy getPinToken subcommand using the PIN.
+     /// </summary>
+     /// <param name="pin">
+-    ///     The borrowed UTF-8 encoded PIN. The caller owns the buffer and must clear it after
+-    ///     use.
++    ///     The borrowed, unpadded NFC UTF-8 PIN, 4–63 bytes, with no final 0x00. The SDK checks
++    ///     byte length only. Keep it unchanged through task completion and clear it after its last use.
+     /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+-    /// <returns>The decrypted PIN token.</returns>
++    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including if a subsequent operation fails. CTAP V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes. This helper does not validate the decrypted token length.</returns>
++    /// <exception cref="ArgumentException">If the PIN byte length is outside 4–63 bytes.</exception>
+     /// <exception cref="CtapException">If the PIN is incorrect.</exception>
+     /// <remarks>
+-    /// The returned token can be used with <see cref="IPinUvAuthProtocol.Authenticate"/>
+-    /// to create pinUvAuthParam values for subsequent CTAP commands.
++    /// Use <see cref="IPinUvAuthProtocol.Authenticate"/> to compute pinUvAuthParam, not to
++    /// establish device authorization. Under CTAP 2.1, legacy tokens receive default MakeCredential
++    /// and GetAssertion permissions and bind to the RP on first use, unless
++    /// noMcGaPermissionsWithClientPin suppresses those permissions. This command sends no explicit
++    /// permissions or RP ID; it does not grant arbitrary administrative permissions. PIN token
++    /// issuance does not itself establish user presence.
+     /// </remarks>
+     public async Task<byte[]> GetPinTokenAsync(
+         ReadOnlyMemory<byte> pin,
+@@ -304,26 +360,37 @@ public async Task<byte[]> GetPinTokenAsync(
+     }
+ 
+     /// <summary>
+-    /// Gets a PIN/UV auth token using PIN with specified permissions (CTAP 2.1).
++    /// Requests a PIN/UV auth token using PIN, with explicit permissions when supported.
+     /// </summary>
+     /// <param name="pin">
+-    ///     The borrowed UTF-8 encoded PIN. The caller owns the buffer and must clear it after
+-    ///     use.
++    ///     The borrowed, unpadded NFC UTF-8 PIN, 4–63 bytes, with no final 0x00. The SDK checks
++    ///     byte length only. Keep it unchanged through task completion and clear it after its last use.
+     /// </param>
+-    /// <param name="permissions">The permissions to request.</param>
+-    /// <param name="rpId">Optional RP ID for credential-related permissions.</param>
++    /// <param name="permissions">The nonzero permissions to request. The caller must choose a valid combination supported by the authenticator; only None is locally rejected.</param>
++    /// <param name="rpId">Required for MakeCredential/GetAssertion permissions; optional to restrict CredentialManagement to one RP; ignored for BioEnrollment, LargeBlobWrite, AuthenticatorConfig and CredentialManagementRO. Null or empty omits the field.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+-    /// <returns>The decrypted PIN/UV auth token.</returns>
++    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. CTAP V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes; decrypted length is not checked here. The array carries no permission, RP, expiry or persistence metadata.</returns>
++    /// <exception cref="ArgumentException">If the PIN byte length is outside 4–63 bytes or permissions is None.</exception>
+     /// <exception cref="CtapException">If the PIN is incorrect or permissions are invalid.</exception>
+     /// <remarks>
+     /// <para>
+-    /// CTAP 2.1 introduces scoped tokens with explicit permissions. This method
+-    /// should be used instead of <see cref="GetPinTokenAsync"/> when working with
+-    /// CTAP 2.1 authenticators.
++    /// This method calls the supplied session's GetInfoAsync. With a concrete Ctap2Session,
++    /// that is a fresh authenticator query. If and only if options contains pinUvAuthToken=true,
++    /// it sends getPinUvAuthTokenUsingPinWithPermissions (0x09). Otherwise it calls legacy
++    /// getPinToken (0x05), dropping the requested permissions and RP ID. The supplied protocol
++    /// version is unchanged, and a failed 0x09 exchange is not retried with 0x05.
+     /// </para>
+     /// <para>
+-    /// The rpId parameter is required for <see cref="PinUvAuthTokenPermissions.MakeCredential"/>
+-    /// and <see cref="PinUvAuthTokenPermissions.GetAssertion"/> permissions.
++    /// Permission-token issuance requires a configured clientPin and pinUvAuthToken=true.
++    /// The authenticator also checks operation capabilities and noMcGaPermissionsWithClientPin;
++    /// this helper does not preflight these checks or enforce RP requirements. PIN acquisition
++    /// does not establish user presence, and no PIN retry loop is performed.
++    /// </para>
++    /// <para>
++    /// CredentialManagementRO is CTAP 2.2's persistent read-only permission (pcmr). Request it
++    /// alone, only with perCredMgmtRO=true; the authenticator ignores RP ID. Ordinary token timers
++    /// are not its lifetime contract. This helper does not check those conditions or model persistent
++    /// token identity; legacy fallback cannot request pcmr.
+     /// </para>
+     /// </remarks>
+     public async Task<byte[]> GetPinUvAuthTokenUsingPinAsync(
+@@ -340,9 +407,8 @@ public async Task<byte[]> GetPinUvAuthTokenUsingPinAsync(
+             throw new ArgumentException("At least one permission must be specified.", nameof(permissions));
+         }
+ 
+-        // Check if authenticator supports pinUvAuthToken (CTAP 2.1 permissions-based tokens).
+-        // If not, fall back to legacy getPinToken (subcommand 0x05) without permissions.
+-        // This matches python-fido2's ClientPin.get_pin_token() logic.
++        // Choose the subcommand from GetInfo, not the protocol version. Concrete Ctap2Session
++        // queries fresh info; absent/false pinUvAuthToken drops permissions and RP on legacy 0x05.
+         var info = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+         bool supportsTokenWithPermissions = info.Options.TryGetValue("pinUvAuthToken", out var supported) && supported;
+ 
+@@ -394,24 +460,33 @@ public async Task<byte[]> GetPinUvAuthTokenUsingPinAsync(
+     }
+ 
+     /// <summary>
+-    /// Gets a PIN/UV auth token using UV with specified permissions (CTAP 2.1).
++    /// Requests a permission token using the authenticator's configured built-in user verification.
+     /// </summary>
+-    /// <param name="permissions">The permissions to request.</param>
+-    /// <param name="rpId">Optional RP ID for credential-related permissions.</param>
++    /// <param name="permissions">The nonzero permissions to request. Choose a valid, supported combination; CredentialManagementRO must be requested alone.</param>
++    /// <param name="rpId">Required for MakeCredential/GetAssertion; optional to scope CredentialManagement; ignored for BioEnrollment, LargeBlobWrite, AuthenticatorConfig and CredentialManagementRO. Null or empty omits the field.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+-    /// <returns>The decrypted PIN/UV auth token.</returns>
++    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. CTAP V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes; decrypted length is not checked here. No scope or persistence metadata accompanies the array.</returns>
++    /// <exception cref="ArgumentException">If permissions is None.</exception>
+     /// <exception cref="CtapException">If UV fails or permissions are invalid.</exception>
+     /// <remarks>
+     /// <para>
+-    /// This method uses user verification (e.g., biometrics) instead of PIN.
+-    /// The authenticator must support UV (check authenticatorGetInfo options.uv).
++    /// Use this method when GetInfo reports both uv=true and pinUvAuthToken=true and built-in
++    /// UV, such as biometrics, is configured. CTAP 2.1 requires the authenticator to implement
++    /// this subcommand when both option IDs are true; it does not require the caller to invoke it.
++    /// Operation capabilities also apply; BioEnrollment and AuthenticatorConfig additionally
++    /// require uvBioEnroll and uvAcfg respectively. This helper checks only nonzero permissions;
++    /// it does not query GetInfo or preflight these capabilities, configuration or RP requirements.
+     /// </para>
+     /// <para>
+-    /// The rpId parameter is required for <see cref="PinUvAuthTokenPermissions.MakeCredential"/>
+-    /// and <see cref="PinUvAuthTokenPermissions.GetAssertion"/> permissions.
++    /// The authenticator performs the verification interaction and may establish user presence.
++    /// This helper uses generic CBOR exchange, so no operation-specific SDK touch notification is
++    /// guaranteed. It performs one token request without an automatic UV retry or PIN fallback;
++    /// the caller or higher-level client decides recovery from UV errors.
+     /// </para>
+     /// <para>
+-    /// <b>Note:</b> This operation requires user interaction and cannot be automated.
++    /// CredentialManagementRO requests CTAP 2.2's persistent read-only token only when
++    /// perCredMgmtRO=true and no other permission is requested. RP ID is ignored. The helper
++    /// does not enforce those conditions or manage the persistent token's lifetime.
+     /// </para>
+     /// </remarks>
+     public async Task<byte[]> GetPinUvAuthTokenUsingUvAsync(
+@@ -481,9 +556,9 @@ public async Task<byte[]> GetPinUvAuthTokenUsingUvAsync(
+     }
+ 
+     /// <summary>
+-    ///     Validates the encoded length of a UTF-8 encoded PIN.
++    ///     Checks only the PIN argument's byte length, not its Unicode encoding or device policy.
+     /// </summary>
+-    /// <param name="pin">The UTF-8 encoded PIN bytes.</param>
++    /// <param name="pin">The supplied, unpadded PIN bytes.</param>
+     /// <param name="paramName">
+     ///     The name of the public parameter <paramref name="pin" /> was supplied through. The
+     ///     public surface spells this parameter three different ways — <c>pin</c>,
+@@ -492,7 +567,7 @@ public async Task<byte[]> GetPinUvAuthTokenUsingUvAsync(
+     ///     which matches nothing a caller can filter on.
+     /// </param>
+     /// <exception cref="ArgumentException">
+-    ///     Thrown when the UTF-8 encoding is shorter than <see cref="PinMinLength" /> bytes or
++    ///     Thrown when the supplied data is shorter than <see cref="PinMinLength" /> bytes or
+     ///     longer than <see cref="PinMaxLength" /> bytes.
+     /// </exception>
+     private static void ValidatePin(ReadOnlyMemory<byte> pin, string paramName)
+@@ -512,6 +587,7 @@ private static void ValidatePin(ReadOnlyMemory<byte> pin, string paramName)
+ 
+     private static byte[] PadPin(ReadOnlySpan<byte> pin)
+     {
++        // Zero-initialized tail supplies CTAP's right padding, not PKCS#7.
+         var padded = new byte[PinBlockSize];
+         pin.CopyTo(padded);
+         return padded;
+@@ -533,6 +609,7 @@ private static byte[] ComputePinHash(ReadOnlySpan<byte> pin)
+ 
+     private static (int Retries, bool PowerCycleRequired) ParsePinRetriesResponse(ReadOnlyMemory<byte> data)
+     {
++        // Omitted powerCycleState means unknown in CTAP; this model collapses it to false.
+         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
+         var mapLength = reader.ReadStartMap();
+ 
+@@ -563,6 +640,7 @@ private static (int Retries, bool PowerCycleRequired) ParsePinRetriesResponse(Re
+ 
+     private static (int Retries, bool PowerCycleRequired) ParseUvRetriesResponse(ReadOnlyMemory<byte> data)
+     {
++        // CTAP 2.1 defines no UV powerCycleState; current parsing still accepts field 4.
+         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
+         var mapLength = reader.ReadStartMap();
+ 
+@@ -620,6 +698,7 @@ private static (int Retries, bool PowerCycleRequired) ParseUvRetriesResponse(Rea
+ 
+     private static byte[] ParsePinTokenResponse(ReadOnlyMemory<byte> data)
+     {
++        // This encrypted-token copy is not cleared here; the caller receives separate plaintext.
+         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
+         var mapLength = reader.ReadStartMap();
+ 
+@@ -685,7 +764,8 @@ private void EnsureNotDisposed()
+         ObjectDisposedException.ThrowIf(_disposed, this);
+     }
+ 
+-    /// <inheritdoc />
++    /// <summary>Disposes the supplied protocol and marks this helper disposed, without disposing the borrowed session.</summary>
++    /// <remarks>Repeated disposal has no effect. Operations reject subsequent use; Protocol remains readable. Caller PINs and returned tokens are not cleared by this method.</remarks>
+     public void Dispose()
+     {
+         if (_disposed)
+@@ -694,4 +774,4 @@ public void Dispose()
+         _protocol.Dispose();
+         _disposed = true;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Pin/ClientPinSubCommand.cs w/src/Ctap2/src/Pin/ClientPinSubCommand.cs
+index 16dc54d3..abc96b7f 100644
+--- i/src/Ctap2/src/Pin/ClientPinSubCommand.cs
++++ w/src/Ctap2/src/Pin/ClientPinSubCommand.cs
+@@ -70,7 +70,7 @@ public static class ClientPinSubCommand
+ /// </summary>
+ internal static class ClientPinParam
+ {
+-    /// <summary>PIN/UV protocol version (uint, required)</summary>
++    /// <summary>Platform-selected supported PIN/UV protocol version (uint); required by cryptographic subcommands, not by the general retry-query contract.</summary>
+     public const int PinUvAuthProtocol = 0x01;
+ 
+     /// <summary>Sub-command code (uint, required)</summary>
+@@ -109,7 +109,7 @@ internal static class ClientPinResponse
+     /// <summary>PIN retries remaining (uint)</summary>
+     public const int PinRetries = 0x03;
+ 
+-    /// <summary>Whether a power cycle is required (bool)</summary>
++    /// <summary>Optional power-cycle indication for getRetries only (bool). Omission provides no information; CTAP 2.1 does not define this field for getUvRetries.</summary>
+     public const int PowerCycleState = 0x04;
+ 
+     /// <summary>UV retries remaining (uint)</summary>
+@@ -117,12 +117,16 @@ internal static class ClientPinResponse
+ }
+ 
+ /// <summary>
+-/// Permission flags for PIN/UV auth tokens (CTAP 2.1).
++/// Permission flags for ordinary CTAP 2.1 tokens and the CTAP 2.2 persistent read-only token.
+ /// </summary>
+ /// <remarks>
+ /// <para>
+ /// Permissions control what operations a PIN/UV auth token can authorize.
+-/// Multiple permissions can be combined using bitwise OR.
++/// Ordinary permissions can be combined using bitwise OR when the authenticator supports the
++/// requested operations. MakeCredential/GetAssertion require an RP ID; CredentialManagement
++/// optionally binds to one RP. BioEnrollment, LargeBlobWrite and AuthenticatorConfig ignore RP ID.
++/// CredentialManagementRO is a separate persistent-token request and cannot be combined.
++/// The authenticator enforces scope and lifetime; these flags alone do not establish authorization.
+ /// </para>
+ /// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#permissions
+@@ -146,25 +150,29 @@ public enum PinUvAuthTokenPermissions : uint
+     /// <summary>Permission to execute authenticatorBioEnrollment.</summary>
+     BioEnrollment = 0x08,
+ 
+-    /// <summary>Permission to execute large blob operations.</summary>
++    /// <summary>Permission to authorize large blob writes; it is not required for all reads.</summary>
+     LargeBlobWrite = 0x10,
+ 
+     /// <summary>Permission to execute authenticatorConfig.</summary>
+     AuthenticatorConfig = 0x20,
+ 
+     /// <summary>
+-    /// Read-only permission for authenticatorCredentialManagement.
++    /// Persistent Credential Management Read Only (pcmr, CTAP 2.2).
+     /// </summary>
+     /// <remarks>
+     /// <para>
+-    /// This permission allows listing credentials and retrieving metadata 
+-    /// (including encrypted metadata like encIdentifier and encCredStoreState),
+-    /// but does not allow deleting or modifying credentials.
++    /// Requires perCredMgmtRO=true and must be requested without any other permission.
++    /// RP ID is ignored. The returned persistentPinUvAuthToken authorizes read credential-management
++    /// operations, not deletion or modification; its lifetime is distinct from ordinary tokens.
+     /// </para>
+     /// <para>
+-    /// Requires CTAP 2.2+ support. Used for decrypting encrypted metadata fields
+-    /// in AuthenticatorInfo without requiring full credential management permission.
++    /// CTAP 2.2 also derives the encIdentifier decryption key from this persistent token.
++    /// That does not establish the key contract for every encrypted metadata field. ClientPin
++    /// returns raw token bytes without validating this capability/combination or tracking persistence.
++    /// </para>
++    /// <para>
++    /// See: https://fidoalliance.org/specs/fido-v2.2-ps-20250714/fido-client-to-authenticator-protocol-v2.2-ps-20250714.html#pcmr
+     /// </para>
+     /// </remarks>
+     CredentialManagementRO = 0x40,
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Pin/IPinUvAuthProtocol.cs w/src/Ctap2/src/Pin/IPinUvAuthProtocol.cs
+index b1bd061e..e1ac5e3f 100644
+--- i/src/Ctap2/src/Pin/IPinUvAuthProtocol.cs
++++ w/src/Ctap2/src/Pin/IPinUvAuthProtocol.cs
+@@ -25,11 +25,18 @@ namespace Yubico.YubiKit.Ctap2.Pin;
+ /// <para>
+ /// Two protocol versions are defined:
+ /// <list type="bullet">
+-///   <item><description>V1: Uses ECDH P-256, HKDF-SHA-256 (32 bytes), AES-256-CBC</description></item>
+-///   <item><description>V2: Uses ECDH P-256, HKDF-SHA-256 (64 bytes for HMAC+AES), AES-256-CBC</description></item>
++///   <item><description>V1: ECDH P-256, SHA-256(z) (32 bytes), AES-256-CBC with a zero IV, and 16-byte HMAC tags.</description></item>
++///   <item><description>V2: ECDH P-256, two separate HKDF-SHA-256 derivations (32-byte HMAC key followed by 32-byte AES key), AES-256-CBC with a random IV, and 32-byte HMAC tags.</description></item>
+ /// </list>
+ /// </para>
+ /// <para>
++/// Inputs are borrowed for the duration of each synchronous call. The caller owns every returned
++/// byte array and must clear secret-bearing or secret-derived output when no longer needed,
++/// including on failure in subsequent operations. The V1 and V2 implementations retain no key
++/// material between calls; disposing them does not clear returned arrays. Their cryptographic
++/// operations reject use after disposal, but their version and tag-length properties remain readable.
++/// </para>
++/// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#pinProto
+ /// </para>
+ /// </remarks>
+@@ -48,61 +55,75 @@ public interface IPinUvAuthProtocol : IDisposable
+     /// <summary>
+     /// Performs ECDH key agreement with the authenticator's public key and derives a shared secret.
+     /// </summary>
+-    /// <param name="peerCoseKey">The authenticator's COSE EC2 public key.</param>
++    /// <param name="peerCoseKey">
++    /// The borrowed authenticator key and coordinate arrays, which are neither retained nor cleared.
++    /// CTAP requires kty=2 (EC2), alg=-25, crv=1 (P-256),
++    /// and 32-byte big-endian X and Y coordinates (-2 and -3), with no other optional parameters.
++    /// </param>
+     /// <returns>
+     /// A tuple containing:
+     /// <list type="bullet">
+-    ///   <item><description>KeyAgreement: The platform's COSE public key to send to the authenticator.</description></item>
+-    ///   <item><description>SharedSecret: The derived shared secret for subsequent cryptographic operations.</description></item>
++    ///   <item><description>KeyAgreement: A new platform COSE public-key dictionary with exported public coordinates to send to the authenticator. These coordinates are not secret material.</description></item>
++    ///   <item><description>SharedSecret: A new caller-owned array, 32 bytes for V1 or 64 bytes for V2. Clear it after the last operation that uses it.</description></item>
+     /// </list>
+     /// </returns>
+     /// <exception cref="ArgumentNullException">If <paramref name="peerCoseKey"/> is null.</exception>
+-    /// <exception cref="ArgumentException">If the peer key is malformed or invalid.</exception>
++    /// <remarks>
++    /// The V1/V2 helper explicitly checks coordinate types and lengths, but currently does not
++    /// validate the required kty, alg and crv labels or the optional-parameter restriction.
++    /// Curve-point validation is delegated to the cryptographic provider; this limitation does
++    /// not relax CTAP's required key structure. Each call generates a fresh ephemeral key pair.
++    /// </remarks>
++    /// <exception cref="ArgumentException">If a coordinate is missing, has the wrong type or length, or ECDH derivation raises a cryptographic error.</exception>
++    /// <exception cref="System.Security.Cryptography.CryptographicException">A cryptographic provider may reject the peer key during import, before the derivation error is wrapped.</exception>
+     (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
+         IReadOnlyDictionary<int, object?> peerCoseKey);
+ 
+     /// <summary>
+     /// Derives a symmetric key from a raw ECDH shared secret using the protocol's KDF.
+     /// </summary>
+-    /// <param name="z">The raw ECDH shared secret (X coordinate of shared point).</param>
+-    /// <returns>The derived key material.</returns>
++    /// <param name="z">The borrowed raw ECDH secret: the 32-byte big-endian X coordinate of the shared point. V1/V2 currently reject only empty input, not other lengths.</param>
++    /// <returns>A new caller-owned array: SHA-256(z), 32 bytes, for V1; HMAC key || AES key, 64 bytes, for V2. Clear both the input secret and this result when no longer needed.</returns>
++    /// <exception cref="ArgumentException">If <paramref name="z"/> is empty.</exception>
+     byte[] Kdf(ReadOnlySpan<byte> z);
+ 
+     /// <summary>
+-    /// Encrypts plaintext using AES-256-CBC with the protocol's key derivation.
++    /// Encrypts plaintext using AES-256-CBC without padding.
+     /// </summary>
+-    /// <param name="key">The shared secret key.</param>
+-    /// <param name="plaintext">The plaintext to encrypt. Must be a multiple of 16 bytes.</param>
+-    /// <returns>For V1: ciphertext only. For V2: IV || ciphertext.</returns>
+-    /// <exception cref="ArgumentException">If plaintext is not a multiple of 16 bytes.</exception>
++    /// <param name="key">The borrowed, already-derived shared secret: 32 bytes for V1 or 64 bytes for V2, which uses the final 32 bytes as its AES key. This method does not call Kdf.</param>
++    /// <param name="plaintext">The borrowed plaintext, a nonempty multiple of 16 bytes. PIN right-zero-padding to 64 bytes is performed by ClientPin, not by AES.</param>
++    /// <returns>A new caller-owned array: N bytes of ciphertext for V1, or a 16-byte random IV || N bytes of ciphertext for V2, where N is the plaintext length.</returns>
++    /// <exception cref="ArgumentException">If the key length is invalid or plaintext is not a nonempty multiple of 16 bytes.</exception>
+     byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext);
+ 
+     /// <summary>
+-    /// Decrypts ciphertext using AES-256-CBC with the protocol's key derivation.
++    /// Decrypts ciphertext using AES-256-CBC without removing padding or verifying integrity.
+     /// </summary>
+-    /// <param name="key">The shared secret key.</param>
+-    /// <param name="ciphertext">For V1: ciphertext only. For V2: IV || ciphertext.</param>
+-    /// <returns>The decrypted plaintext.</returns>
+-    /// <exception cref="ArgumentException">If ciphertext has invalid length.</exception>
++    /// <param name="key">The borrowed, already-derived shared secret: 32 bytes for V1 or 64 bytes for V2, which uses the final 32 bytes as its AES key. This method does not call Kdf.</param>
++    /// <param name="ciphertext">Borrowed V1 ciphertext, a nonempty multiple of 16 bytes; or V2 IV || ciphertext, at least 32 bytes and a multiple of 16 bytes.</param>
++    /// <returns>A new caller-owned plaintext array: the input length for V1, or the input length minus 16 for V2. Clear it when no longer needed.</returns>
++    /// <exception cref="ArgumentException">If the key or ciphertext length is invalid.</exception>
+     byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext);
+ 
+     /// <summary>
+     /// Computes an authentication tag (MAC) over a message.
+     /// </summary>
+-    /// <param name="key">The shared secret key.</param>
+-    /// <param name="message">The message to authenticate.</param>
++    /// <param name="key">A borrowed token or derived shared secret: 16 or 32 bytes for V1; 32 or 64 bytes for V2, which uses the first 32 bytes as its HMAC key.</param>
++    /// <param name="message">The borrowed message to authenticate; it may be empty.</param>
+     /// <returns>
+-    /// For V1: First 16 bytes of HMAC-SHA-256.
+-    /// For V2: All 32 bytes of HMAC-SHA-256.
++    /// A new caller-owned, secret-derived tag: the first 16 bytes of HMAC-SHA-256 for V1,
++    /// or all 32 bytes for V2. Clear it after its last use.
+     /// </returns>
++    /// <exception cref="ArgumentException">If the key length is invalid.</exception>
+     byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message);
+ 
+     /// <summary>
+-    /// Verifies an authentication tag against an expected value.
++    /// Checks a local authentication tag using a constant-time comparison for equal-length tags.
+     /// </summary>
+-    /// <param name="key">The shared secret key.</param>
+-    /// <param name="message">The message that was authenticated.</param>
+-    /// <param name="signature">The authentication tag to verify.</param>
+-    /// <returns>True if the signature is valid; otherwise, false.</returns>
++    /// <param name="key">The borrowed token or shared secret accepted by Authenticate.</param>
++    /// <param name="message">The borrowed message that was authenticated.</param>
++    /// <param name="signature">The borrowed tag: 16 bytes for V1 or 32 bytes for V2.</param>
++    /// <returns>True if the tag matches; false for a mismatch or wrong tag length. This does not check device token validity, permissions, RP binding or expiry.</returns>
++    /// <exception cref="ArgumentException">If the tag has the expected length but the key length is invalid.</exception>
+     bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature);
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Pin/PinRetryStatus.cs w/src/Ctap2/src/Pin/PinRetryStatus.cs
+index f6d70046..f0ebba39 100644
+--- i/src/Ctap2/src/Pin/PinRetryStatus.cs
++++ w/src/Ctap2/src/Pin/PinRetryStatus.cs
+@@ -17,16 +17,18 @@ namespace Yubico.YubiKit.Ctap2.Pin;
+ /// <summary>
+ /// Represents the authenticator's current PIN retry status.
+ /// </summary>
++/// <remarks>A snapshot, not permission to retry. PIN_AUTH_BLOCKED requires a power cycle; PIN_BLOCKED means retries are exhausted and reset is required.</remarks>
+ public sealed class PinRetryStatus
+ {
+     /// <summary>
+-    /// Gets the number of PIN attempts remaining.
++    /// Gets the parsed PIN retry count, currently defaulted to zero if the response omits it.
+     /// </summary>
+     public int RetriesRemaining { get; }
+ 
+     /// <summary>
+-    /// Gets whether the authenticator requires a power cycle before the next PIN attempt.
++    /// Gets the parsed power-cycle indication, currently defaulted to false if omitted.
+     /// </summary>
++    /// <remarks>CTAP defines omission as unknown. False does not prove a power cycle is unnecessary or a PIN attempt is safe; this model does not distinguish omission from explicit false.</remarks>
+     public bool PowerCycleRequired { get; }
+ 
+     internal PinRetryStatus(int retriesRemaining, bool powerCycleRequired)
+@@ -34,4 +36,4 @@ internal PinRetryStatus(int retriesRemaining, bool powerCycleRequired)
+         RetriesRemaining = retriesRemaining;
+         PowerCycleRequired = powerCycleRequired;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Pin/PinUvAuthHelpers.cs w/src/Ctap2/src/Pin/PinUvAuthHelpers.cs
+index 7d7d0db1..2ffa9775 100644
+--- i/src/Ctap2/src/Pin/PinUvAuthHelpers.cs
++++ w/src/Ctap2/src/Pin/PinUvAuthHelpers.cs
+@@ -40,19 +40,27 @@ internal static class PinUvAuthHelpers
+     /// <summary>
+     /// Performs ECDH P-256 key agreement with the peer's COSE key.
+     /// </summary>
+-    /// <param name="peerCoseKey">The peer's COSE key containing EC2 P-256 public key coordinates.</param>
++    /// <param name="peerCoseKey">The borrowed peer key, required by CTAP to contain kty=2, alg=-25, crv=1 and 32-byte big-endian X/Y coordinates, without other optional parameters.</param>
+     /// <returns>
+-    /// A tuple of the our COSE key dictionary (for key agreement) and the raw ECDH shared secret (Z).
+-    /// The caller MUST zero the raw shared secret after deriving protocol-specific keys via KDF.
++    /// A new platform public-key dictionary and a caller-owned raw ECDH secret (Z), the 32-byte
++    /// big-endian X coordinate of the shared point. Clear Z after deriving protocol-specific keys,
++    /// including when that derivation fails. Public coordinates are not secret material.
+     /// </returns>
+     /// <exception cref="ArgumentNullException">Thrown when <paramref name="peerCoseKey"/> is null.</exception>
+-    /// <exception cref="ArgumentException">Thrown when the peer key is missing, invalid, or ECDH derivation fails.</exception>
++    /// <remarks>
++    /// Explicit checks currently cover only coordinate types and lengths, not required COSE labels
++    /// or optional-parameter restrictions. Import forces P-256 and delegates point validation to the
++    /// provider. The ephemeral crypto objects are disposed, but allocation of the public dictionary
++    /// after derivation is not protected by a Z-clearing guard.
++    /// </remarks>
++    /// <exception cref="ArgumentException">Thrown for missing/invalid coordinate types or lengths, or a wrapped cryptographic error from raw-secret derivation.</exception>
++    /// <exception cref="CryptographicException">Peer-key import can raise an unwrapped provider error before the derivation catch.</exception>
+     internal static (Dictionary<int, object?> KeyAgreement, byte[] RawSharedSecret)
+         PerformEcdhKeyAgreement(IReadOnlyDictionary<int, object?> peerCoseKey)
+     {
+         ArgumentNullException.ThrowIfNull(peerCoseKey);
+ 
+-        // Validate and extract peer's public key coordinates
++        // Check coordinate storage here; required kty/alg/crv labels are not yet validated.
+         if (!peerCoseKey.TryGetValue(CoseEC2X, out var xObj) || xObj is not byte[] peerX)
+         {
+             throw new ArgumentException("Peer COSE key missing or invalid X coordinate (-2).", nameof(peerCoseKey));
+@@ -78,7 +86,7 @@ internal static (Dictionary<int, object?> KeyAgreement, byte[] RawSharedSecret)
+         using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+         var ourParams = ecdh.ExportParameters(includePrivateParameters: false);
+ 
+-        // Import peer's public key
++        // Import as P-256; provider point-validation errors here are outside the derivation catch.
+         var peerParams = new ECParameters
+         {
+             Curve = ECCurve.NamedCurves.nistP256,
+@@ -110,4 +118,4 @@ internal static (Dictionary<int, object?> KeyAgreement, byte[] RawSharedSecret)
+ 
+         return (keyAgreement, z);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Pin/PinUvAuthProtocolV1.cs w/src/Ctap2/src/Pin/PinUvAuthProtocolV1.cs
+index 39a5d6c0..46ba1acb 100644
+--- i/src/Ctap2/src/Pin/PinUvAuthProtocolV1.cs
++++ w/src/Ctap2/src/Pin/PinUvAuthProtocolV1.cs
+@@ -17,7 +17,7 @@
+ namespace Yubico.YubiKit.Ctap2.Pin;
+ 
+ /// <summary>
+-/// PIN/UV authentication protocol version 1 implementation (legacy).
++/// PIN/UV authentication protocol version 1 implementation.
+ /// </summary>
+ /// <remarks>
+ /// <para>
+@@ -25,13 +25,20 @@ namespace Yubico.YubiKit.Ctap2.Pin;
+ /// <list type="bullet">
+ ///   <item><description>ECDH P-256 for key agreement</description></item>
+ ///   <item><description>SHA-256 of raw ECDH output as shared secret (32 bytes)</description></item>
+-///   <item><description>AES-256-CBC with zero IV for encryption</description></item>
++///   <item><description>AES-256-CBC with zero IV and no AES padding</description></item>
+ ///   <item><description>HMAC-SHA-256 for authentication (truncated to 16 bytes)</description></item>
+ /// </list>
+ /// </para>
+ /// <para>
+-/// V1 is considered legacy and has security limitations compared to V2.
+-/// New implementations should prefer V2 when supported by the authenticator.
++/// V1 uses the same 32-byte shared secret for AES and HMAC. V2 derives separate keys, prefixes
++/// ciphertext with a random IV, and uses full 32-byte tags. Callers may prefer V2 when both sides
++/// support it; constructing this object does not negotiate a protocol with the authenticator.
++/// </para>
++/// <para>
++/// The instance retains no keys. Dispose marks it disposed: cryptographic operations then throw,
++/// while Version and AuthenticationTagLength remain readable. Caller-owned outputs are not cleared
++/// by disposal. Encapsulate clears its raw ECDH secret after derivation, and AES operations clear
++/// their temporary key/input arrays; this is not an end-to-end or all-exception-path cleanup guarantee.
+ /// </para>
+ /// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#pinProto1
+@@ -219,9 +226,9 @@ public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlyS
+         }
+     }
+ 
+-    /// <inheritdoc />
++    /// <summary>Marks this instance disposed without clearing caller-owned inputs or outputs.</summary>
+     public void Dispose()
+     {
+         _disposed = true;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Pin/PinUvAuthProtocolV2.cs w/src/Ctap2/src/Pin/PinUvAuthProtocolV2.cs
+index 90b4c2e4..d4f7f053 100644
+--- i/src/Ctap2/src/Pin/PinUvAuthProtocolV2.cs
++++ w/src/Ctap2/src/Pin/PinUvAuthProtocolV2.cs
+@@ -24,8 +24,8 @@ namespace Yubico.YubiKit.Ctap2.Pin;
+ /// V2 uses:
+ /// <list type="bullet">
+ ///   <item><description>ECDH P-256 for key agreement</description></item>
+-///   <item><description>HKDF-SHA-256 to derive separate HMAC and AES keys (64 bytes total)</description></item>
+-///   <item><description>AES-256-CBC with random IV for encryption</description></item>
++///   <item><description>Two independent HKDF-SHA-256 derivations with info "CTAP2 HMAC key" and "CTAP2 AES key", each producing 32 bytes (64 bytes total)</description></item>
++///   <item><description>AES-256-CBC with random IV and no AES padding</description></item>
+ ///   <item><description>HMAC-SHA-256 for authentication (full 32-byte output)</description></item>
+ /// </list>
+ /// </para>
+@@ -37,6 +37,17 @@ namespace Yubico.YubiKit.Ctap2.Pin;
+ /// </code>
+ /// </para>
+ /// <para>
++/// CTAP 2.1 specifies a 32-zero-byte HKDF salt. The empty salt used here is HMAC-equivalent;
++/// the two derivations are not a single 64-byte HKDF expansion. Select this protocol only when
++/// the authenticator advertises support for version 2.
++/// </para>
++/// <para>
++/// The instance retains no keys. Dispose marks it disposed: cryptographic operations then throw,
++/// while Version and AuthenticationTagLength remain readable. Caller-owned outputs are not cleared
++/// by disposal. Encapsulate clears its raw ECDH secret and Kdf clears partially derived output on
++/// failure; AES clears its named temporary arrays, not every possible failed output or provider copy.
++/// </para>
++/// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#pinProto2
+ /// </para>
+ /// </remarks>
+@@ -47,7 +58,7 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
+     private const int HmacKeyLength = 32;
+     private const int SharedSecretLength = HmacKeyLength + AesKeyLength;
+ 
+-    // HKDF info strings as per CTAP2.1 spec
++    // Distinct CTAP 2.1 HKDF info values keep HMAC and AES derivations separate.
+     private static ReadOnlySpan<byte> HkdfInfoHmacKey => "CTAP2 HMAC key"u8;
+     private static ReadOnlySpan<byte> HkdfInfoAesKey => "CTAP2 AES key"u8;
+ 
+@@ -279,9 +290,9 @@ public bool Verify(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message, ReadOnlyS
+         }
+     }
+ 
+-    /// <inheritdoc />
++    /// <summary>Marks this instance disposed without clearing caller-owned inputs or outputs.</summary>
+     public void Dispose()
+     {
+         _disposed = true;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Pin/UserVerificationRetryStatus.cs w/src/Ctap2/src/Pin/UserVerificationRetryStatus.cs
+index 9e7d928c..cc41425f 100644
+--- i/src/Ctap2/src/Pin/UserVerificationRetryStatus.cs
++++ w/src/Ctap2/src/Pin/UserVerificationRetryStatus.cs
+@@ -17,16 +17,18 @@ namespace Yubico.YubiKit.Ctap2.Pin;
+ /// <summary>
+ /// Represents the authenticator's current user-verification retry status.
+ /// </summary>
++/// <remarks>For exhausted built-in UV retries, CTAP 2.1 permits recovery by reset or a successful configured ClientPIN token request. This snapshot does not perform recovery.</remarks>
+ public sealed class UserVerificationRetryStatus
+ {
+     /// <summary>
+-    /// Gets the number of user-verification attempts remaining.
++    /// Gets the parsed built-in UV retry count, currently defaulted to zero if omitted.
+     /// </summary>
+     public int RetriesRemaining { get; }
+ 
+     /// <summary>
+-    /// Gets whether the authenticator requires a power cycle before the next user-verification attempt.
++    /// Gets response field 4 when present, otherwise the parser's false default.
+     /// </summary>
++    /// <remarks>CTAP 2.1 defines powerCycleState only for PIN retries, not UV retries. The current parser accepts it here, but neither true nor false establishes a standardized UV power-cycle recovery rule.</remarks>
+     public bool PowerCycleRequired { get; }
+ 
+     internal UserVerificationRetryStatus(int retriesRemaining, bool powerCycleRequired)
+@@ -34,4 +36,4 @@ internal UserVerificationRetryStatus(int retriesRemaining, bool powerCycleRequir
+         RetriesRemaining = retriesRemaining;
+         PowerCycleRequired = powerCycleRequired;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnhancedPinTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnhancedPinTests.cs
+index 6835afd7..3a455498 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnhancedPinTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnhancedPinTests.cs
+@@ -21,8 +21,15 @@
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+-/// Integration tests for enhanced PIN complexity requirements.
++/// Inspects optional PIN-policy fields and checks configured PIN state after SetOrVerifyPinAsync.
+ /// </summary>
++/// <remarks>
++/// All cases use the helper's default PIN normalization, which may set/change a PIN or request a
++/// token before the callback. These are known-state PIN workflows, not read-only GetInfo lanes.
++/// The first case returns without assertions below its firmware gate; when reached, it checks
++/// clientPin=true, not complexity-policy enforcement. Optional-field cases check only present
++/// scalar values, and the retry case checks a count in 0–8. No case asserts secret-buffer clearing.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ public class Ctap2EnhancedPinTests
+ {
+@@ -36,6 +43,7 @@ await state.WithCtap2SessionAsync(async session =>
+             if (info.FirmwareVersion is null || info.FirmwareVersion.Major < 5 ||
+                 (info.FirmwareVersion.Major == 5 && info.FirmwareVersion.Minor < 8))
+             {
++                // This early return does not exercise enhanced PIN behavior or assert support.
+                 return;
+             }
+ 
+@@ -113,4 +121,4 @@ await state.WithCtap2SessionAsync(async session =>
+             Assert.True(status.RetriesRemaining >= 0, "PIN retries should be non-negative");
+             Assert.True(status.RetriesRemaining <= 8, "PIN retries should not exceed 8");
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PinManagementTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PinManagementTests.cs
+index 5df40392..c91e516a 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PinManagementTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PinManagementTests.cs
+@@ -24,9 +24,13 @@
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+-/// Integration tests for FIDO2 PIN management operations including PIN change,
+-/// and credential creation with user verification discouraged.
++/// Exercises a PIN change followed by token retrieval, and credential creation with token authorization.
+ /// </summary>
++/// <remarks>
++/// Default session setup normalizes the known test PIN and can fail before either callback runs.
++/// Restoration and credential cleanup are callback-scoped, not guaranteed restoration of every
++/// setup side effect. Returned token/authentication-parameter arrays are not cleared by these tests.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ public class Ctap2PinManagementTests
+ {
+@@ -35,10 +39,9 @@ public class Ctap2PinManagementTests
+     private static readonly byte[] ChangedPinUtf8 = Encoding.UTF8.GetBytes(ChangedPin);
+ 
+     /// <summary>
+-    /// Tests that the PIN can be changed and the new PIN works for subsequent operations.
+-    /// Sets the PIN, changes it to a new value, then verifies the new PIN by obtaining
+-    /// a PIN token with it.
++    /// Changes the known test PIN and checks that token retrieval with the new PIN returns nonempty bytes.
+     /// </summary>
++    /// <remarks>The test does not assert rejection of the old PIN or invalidation of old tokens. Restoration is best effort and can submit an incorrect PIN if the change did not complete.</remarks>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+@@ -50,8 +53,7 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+             try
+             {
+-                // NormalizePinAsync already set the PIN to KnownTestPin.
+-                // Create a ClientPin to change it.
++                // Reaching this callback means default normalization completed with the known PIN.
+                 IPinUvAuthProtocol protocol = protocolVersion == 2
+                     ? new PinUvAuthProtocolV2()
+                     : new PinUvAuthProtocolV1();
+@@ -82,14 +84,14 @@ await state.WithCtap2SessionAsync(async session =>
+             }
+             catch (CtapException ex) when (ex.Status is CtapStatus.PinBlocked or CtapStatus.PinAuthBlocked)
+             {
+-                // PIN is blocked from accumulated failures across test runs.
+-                // A CTAP2 reset (requires re-insertion within 10s of power-up) is needed.
++                // PIN_AUTH_BLOCKED is temporary and requires a power cycle; PIN_BLOCKED requires reset.
++                // The diagnostic below conflates them and does not establish a product reset window.
+                 Skip.If(true,
+                     "PIN is blocked — CTAP2 reset required (re-insert YubiKey and reset within 10s of power-up)");
+             }
+             finally
+             {
+-                // Restore known test PIN for other tests
++                // Attempt restoration only for this callback; failure does not prove the PIN state.
+                 try
+                 {
+                     var restoreProtocol = protocolVersion == 2
+@@ -106,11 +108,9 @@ await state.WithCtap2SessionAsync(async session =>
+         });
+ 
+     /// <summary>
+-    /// Tests that a credential can be created with user verification set to false
+-    /// (UV discouraged mode). The authenticator should still create the credential
+-    /// since PIN/UV auth is provided, but the UV flag behavior depends on the
+-    /// authenticator's policy.
++    /// Creates a nonresident credential with pinUvAuthParam and the uv option omitted.
+     /// </summary>
++    /// <remarks>Assertions check response/authenticator-data presence and a nonempty credential ID, not the UV flag. Omitted uv with token authorization does not prove user verification was discouraged or absent.</remarks>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+@@ -126,6 +126,7 @@ await state.WithCtap2SessionAsync(async session =>
+                 }
+                 catch (CtapException ex) when (ex.Status is CtapStatus.PinBlocked or CtapStatus.PinAuthBlocked)
+                 {
++                    // The diagnostic conflates temporary PIN_AUTH_BLOCKED with exhausted PIN_BLOCKED.
+                     Skip.If(true,
+                         "PIN is blocked — CTAP2 reset required (re-insert YubiKey and reset within 10s of power-up)");
+                     return;
+@@ -157,9 +158,8 @@ await state.WithCtap2SessionAsync(async session =>
+                 var pinUvAuthParam = Ctap2TestHelpers.ComputeMakeCredentialAuthParam(
+                     clientPin.Protocol, pinToken, challenge);
+ 
+-                // Create credential with UV omitted (discouraged behavior).
+-                // Per CTAP 2.0 spec, omitting "uv" from the options map is how the client
+-                // signals UV-discouraged. Sending "uv": false is rejected by some authenticators.
++                // CTAP requires omission of the uv key alongside pinUvAuthParam, even uv:false.
++                // The assertions below do not inspect the returned UV flag.
+                 var result = await session.MakeCredentialAsync(
+                     clientDataHash: challenge,
+                     rp: rp,
+@@ -182,9 +182,7 @@ or CtapStatus.InvalidParameter
+                                                or CtapStatus.UnsupportedOption
+                                                or CtapStatus.InvalidOption)
+             {
+-                // Some authenticators reject MakeCredential with UV discouraged when
+-                // a PIN is set, returning CTAP1_ERR_INVALID_COMMAND or similar.
+-                // This is authenticator-policy dependent, not a test bug.
++                // These statuses skip the test but do not identify a policy or wire-error cause.
+                 Skip.If(true,
+                     $"Authenticator does not support UV-discouraged MakeCredential (CTAP status: {ex.Status})");
+             }
+@@ -194,4 +192,4 @@ await Ctap2TestHelpers.DeleteAllCredentialsForRpAsync(
+                     session, Ctap2TestData.RpId, Ctap2TestData.PinUtf8);
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/ClientPinTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/ClientPinTests.cs
+index afeed1a0..20e2f004 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/ClientPinTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/ClientPinTests.cs
+@@ -25,7 +25,10 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
+ /// </summary>
+ /// <remarks>
+ /// These tests use NSubstitute to mock the ICtap2Session.
+-/// Tests that require protocol mocking use a concrete FakePinUvAuthProtocol.
++/// The concrete FakePinUvAuthProtocol copies encryption/decryption inputs and always accepts Verify.
++/// Send counts and non-null tokens do not establish cryptographic interoperability, RP binding,
++/// permission fallback or secret clearing. The canonical retry-request cases separately decode
++/// and assert the command, ordered keys, protocol version and subcommand.
+ /// </remarks>
+ public sealed class ClientPinTests : IDisposable
+ {
+@@ -67,7 +70,7 @@ public async Task GetPinRetriesAsync_ReturnsCorrectRetries()
+     {
+         using var clientPin = CreateClientPin();
+ 
+-        // Setup mock response: pinRetries = 5, powerCycleState = false
++        // powerCycleState is omitted: false below is the parser default, not explicit device state.
+         var responseData = CreatePinRetriesResponse(5, false);
+         SetupMockResponse(responseData);
+ 
+@@ -97,6 +100,7 @@ public async Task GetUvRetriesAsync_ReturnsCorrectRetries()
+         using var clientPin = CreateClientPin();
+ 
+         var responseData = CreateUvRetriesResponse(3, false);
++        // This fixture omits field 4; CTAP 2.1 defines no UV power-cycle signal.
+         SetupMockResponse(responseData);
+ 
+         var status = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
+@@ -162,7 +166,7 @@ public async Task SetPinAsync_WithValidPin_SendsCommand()
+ 
+         await clientPin.SetPinAsync(Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken);
+ 
+-        // Verify two commands were sent (GetKeyAgreement and SetPin)
++        // Count two sends; this assertion does not decode the GetKeyAgreement/SetPin fields.
+         await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
+     }
+ 
+@@ -179,7 +183,7 @@ public async Task ChangePinAsync_WithValidPins_SendsCommand()
+ 
+         await clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("oldpin1234"), Encoding.UTF8.GetBytes("newpin5678"), TestContext.Current.CancellationToken);
+ 
+-        // Verify two commands were sent (GetKeyAgreement and ChangePin)
++        // Count two sends; this assertion does not decode the GetKeyAgreement/ChangePin fields.
+         await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
+     }
+ 
+@@ -227,7 +231,7 @@ public async Task GetPinTokenAsync_ReturnsDecryptedToken()
+ 
+         var token = await clientPin.GetPinTokenAsync(Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken);
+ 
+-        // Token is decrypted by the fake protocol
++        // Fake Decrypt copies bytes; these assertions check only presence and length.
+         Assert.NotNull(token);
+         Assert.Equal(encryptedToken.Length, token.Length);
+     }
+@@ -343,7 +347,7 @@ public async Task GetPinRetriesAsync_SendsCorrectProtocolVersion()
+ 
+         await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
+ 
+-        // Verify the request was sent
++        // Count one send only; the next test, not this assertion, checks the encoded version.
+         await _mockSession.ReceivedWithAnyArgs(1).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
+     }
+ 
+@@ -522,7 +526,7 @@ public void Dispose()
+ }
+ 
+ /// <summary>
+-/// Fake implementation of IPinUvAuthProtocol for unit testing.
++/// ClientPin test double with identity-copy encryption/decryption and no cryptographic verification.
+ /// </summary>
+ internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
+ {
+@@ -568,4 +572,4 @@ public void Dispose()
+             DisposeCount++;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV1Tests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV1Tests.cs
+index 785d5c30..e9bf627e 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV1Tests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV1Tests.cs
+@@ -20,6 +20,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
+ /// <summary>
+ /// Unit tests for <see cref="PinUvAuthProtocolV1"/>.
+ /// </summary>
++/// <remarks>SHA-256 and truncated-HMAC cases compare expected computations; AES cases check local shapes/round trips. These assertions do not establish device interoperability, token state or buffer clearing.</remarks>
+ public sealed class PinUvAuthProtocolV1Tests
+ {
+     [Fact]
+@@ -48,6 +49,7 @@ public void Encapsulate_ValidPeerKey_ReturnsKeyAgreementAndSecret()
+ 
+         var peerCoseKey = new Dictionary<int, object?>
+         {
++            // The fixture omits required alg=-25; success reflects the current missing label check.
+             { 1, 2 },
+             { -1, 1 },
+             { -2, peerParams.Q.X },
+@@ -328,4 +330,4 @@ public void V1AndV2_ProduceDifferentSharedSecrets_FromSameKey()
+         // First 32 bytes should be different due to different KDF
+         Assert.NotEqual(v1Secret, v2Secret[..32].ToArray());
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV2Tests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV2Tests.cs
+index 5a54bfa1..5b8c13a0 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV2Tests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV2Tests.cs
+@@ -20,6 +20,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
+ /// <summary>
+ /// Unit tests for <see cref="PinUvAuthProtocolV2"/>.
+ /// </summary>
++/// <remarks>KDF cases check length/determinism, not an independent two-info HKDF vector. AES/MAC cases check local behavior, not device interoperability, token state or buffer clearing.</remarks>
+ public sealed class PinUvAuthProtocolV2Tests
+ {
+     [Fact]
+@@ -49,6 +50,7 @@ public void Encapsulate_ValidPeerKey_ReturnsKeyAgreementAndSecret()
+ 
+         var peerCoseKey = new Dictionary<int, object?>
+         {
++            // The fixture omits required alg=-25; success reflects the current missing label check.
+             { 1, 2 },      // kty: EC2
+             { -1, 1 },     // crv: P-256
+             { -2, peerParams.Q.X },
+@@ -398,8 +400,8 @@ public void Encapsulate_ReturnsUniqueKeyAgreementEachCall()
+         var (keyAgreement1, _) = protocol.Encapsulate(peerCoseKey);
+         var (keyAgreement2, _) = protocol.Encapsulate(peerCoseKey);
+ 
+-        // Each call should generate a new ephemeral key
++        // Compare exported public coordinates only, not remote agreement or ephemeral-key clearing.
+         Assert.NotEqual(keyAgreement1[-2], keyAgreement2[-2]);
+         Assert.NotEqual(keyAgreement1[-3], keyAgreement2[-3]);
+     }
+-}
+\ No newline at end of file
++}

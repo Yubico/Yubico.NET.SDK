@@ -29,8 +29,10 @@ namespace Yubico.YubiKit.Ctap2.Arkg;
 /// <see cref="IArkgPrimitives"/> (via <see cref="CryptographyProviders.ArkgPrimitivesCreator"/>).
 /// The full algorithm body lives in <c>Yubico.YubiKit.Core.Cryptography.ArkgPrimitivesOpenSsl.Derive</c>
 /// because it needs Core's internal OpenSSL P/Invoke surface.
-/// Conforms to draft-bradleylundberg-cfrg-arkg-10; reference implementation in
-/// cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs.
+/// This delegates the SDK's experimental ARKG profile; it does not establish full conformance to
+/// draft-bradleylundberg-cfrg-arkg-10 (27 February 2026), an Internet-Draft whose stated expiration
+/// is 31 August 2026. The previewSign signing identifier (-65539), seed-key marker (-65700),
+/// and derived verification identifier (-9) have distinct roles in this profile.
 /// </para>
 /// </remarks>
 internal static class ArkgP256

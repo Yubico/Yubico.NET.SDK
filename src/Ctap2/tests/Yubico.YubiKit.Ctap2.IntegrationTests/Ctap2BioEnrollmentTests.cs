@@ -23,9 +23,16 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for CTAP2 biometric (fingerprint) enrollment.
-/// Requires a YubiKey Bio series device with fingerprint sensor.
+/// Device sensor-info checks for a fingerprint-capable authenticator.
 /// </summary>
+/// <remarks>
+/// The sole test asserts a positive decoded sample hint and Touch/Swipe kind; it never
+/// enrolls, captures, cancels, renames or removes a fingerprint. Default known-PIN
+/// normalization runs before callback capability checks and may set/change PIN state or
+/// consume retries. This remains human-approved PIN work, not read-only setup. Sensor
+/// metadata alone does not qualify biometric interoperability or fix the helper's standard
+/// request/schema limitations. The explicitly acquired bio token is cleared in finally.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Feature", "BioEnrollment")]
 public class Ctap2BioEnrollmentTests
@@ -38,7 +45,7 @@ public class Ctap2BioEnrollmentTests
         {
             var info = await session.GetInfoAsync();
 
-            // Check for bio enrollment support
+            // Option presence indicates support; false means no templates provisioned, not unsupported.
             var hasBioEnroll = info.Options.TryGetValue("bioEnroll", out var bioEnrollValue);
             var hasPrototypeBioEnroll = info.Options.TryGetValue("userVerificationMgmtPreview", out var previewValue);
 

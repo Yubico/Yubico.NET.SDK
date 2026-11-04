@@ -24,8 +24,8 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 /// V2 uses:
 /// <list type="bullet">
 ///   <item><description>ECDH P-256 for key agreement</description></item>
-///   <item><description>HKDF-SHA-256 to derive separate HMAC and AES keys (64 bytes total)</description></item>
-///   <item><description>AES-256-CBC with random IV for encryption</description></item>
+///   <item><description>Two independent HKDF-SHA-256 derivations with info "CTAP2 HMAC key" and "CTAP2 AES key", each producing 32 bytes (64 bytes total)</description></item>
+///   <item><description>AES-256-CBC with random IV and no AES padding</description></item>
 ///   <item><description>HMAC-SHA-256 for authentication (full 32-byte output)</description></item>
 /// </list>
 /// </para>
@@ -35,6 +35,17 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 /// sharedSecret[0..31]  = HMAC key (32 bytes)
 /// sharedSecret[32..63] = AES key (32 bytes)
 /// </code>
+/// </para>
+/// <para>
+/// CTAP 2.1 specifies a 32-zero-byte HKDF salt. The empty salt used here is HMAC-equivalent;
+/// the two derivations are not a single 64-byte HKDF expansion. Select this protocol only when
+/// the authenticator advertises support for version 2.
+/// </para>
+/// <para>
+/// The instance retains no keys. Dispose marks it disposed: cryptographic operations then throw,
+/// while Version and AuthenticationTagLength remain readable. Caller-owned outputs are not cleared
+/// by disposal. Encapsulate clears its raw ECDH secret and Kdf clears partially derived output on
+/// failure; AES clears its named temporary arrays, not every possible failed output or provider copy.
 /// </para>
 /// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#pinProto2
@@ -47,7 +58,7 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
     private const int HmacKeyLength = 32;
     private const int SharedSecretLength = HmacKeyLength + AesKeyLength;
 
-    // HKDF info strings as per CTAP2.1 spec
+    // Distinct CTAP 2.1 HKDF info values keep HMAC and AES derivations separate.
     private static ReadOnlySpan<byte> HkdfInfoHmacKey => "CTAP2 HMAC key"u8;
     private static ReadOnlySpan<byte> HkdfInfoAesKey => "CTAP2 AES key"u8;
 
@@ -279,7 +290,7 @@ public sealed class PinUvAuthProtocolV2 : IPinUvAuthProtocol
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>Marks this instance disposed without clearing caller-owned inputs or outputs.</summary>
     public void Dispose()
     {
         _disposed = true;

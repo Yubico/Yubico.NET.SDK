@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Run only with the coordinator's reserved build lane; no SDK or test execution.
+set -euo pipefail
+repo=/home/rupicola/Code/y/Yubico.Yubikit.NET
+workspace=/tmp/opencode/ctap2-001-framework-probe
+cd "$repo"
+dotnet --info
+dotnet toolchain.cs -- build --project Ctap2.FrameworkProbe > /tmp/opencode/ctap2-001-framework-build.log 2>&1
+cat /tmp/opencode/ctap2-001-framework-build.log
+dotnet "$workspace/bin/Release/net10.0/Yubico.YubiKit.Ctap2.FrameworkProbe.dll" > /tmp/opencode/ctap2-001-framework-probe.log 2>&1
+cat /tmp/opencode/ctap2-001-framework-probe.log

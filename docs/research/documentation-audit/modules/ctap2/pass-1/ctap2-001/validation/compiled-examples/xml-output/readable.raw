@@ -1,0 +1,7 @@
+// SOURCE src/Ctap2/src/Extensions/Shared/ExtensionOutput.cs#x1
+var output = ExtensionOutput.Decode(extensionCbor);
+if (output.TryGetCredProtect(out var policy))
+{
+    Console.WriteLine($"Credential protection: {policy}");
+}
+

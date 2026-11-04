@@ -23,10 +23,17 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for CTAP2.1 authenticatorConfig operations.
-/// Tests AlwaysUV toggle, minimum PIN length, and force PIN change.
-/// Requires firmware 5.4+ with authenticatorConfig support.
+/// Device tests for alwaysUv state, a minimum-PIN target and force-change behavior.
 /// </summary>
+/// <remarks>
+/// All callbacks use default known-PIN normalization before their capability checks;
+/// setup can set/change a PIN or consume retries. These require human-approved PIN work
+/// and known device state, not a read-only GetInfo lane. Support is checked per option,
+/// not qualified by a firmware threshold. Restoration is partial/best-effort: a failed
+/// assertion can leave alwaysUv toggled, the minimum is not reduced, and a failed second
+/// PIN change can leave the temporary PIN. The outer finally clears configPinToken but
+/// does not cover all newly allocated token/PIN buffers on exceptional paths.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Feature", "AuthenticatorConfig")]
 public class Ctap2AuthenticatorConfigTests
@@ -81,8 +88,8 @@ public class Ctap2AuthenticatorConfigTests
 
                 Assert.NotEqual(initialAlwaysUv, newAlwaysUv);
 
-                // Toggle back to restore original state
-                // Need a fresh token since the previous one may have been consumed
+                // Attempt a second toggle only after the assertion; not exception-safe restoration.
+                // A fresh token is requested, but the restored state is not re-read or asserted.
                 byte[] restorePinToken;
                 if (supportsPermissions)
                 {
@@ -146,14 +153,13 @@ public class Ctap2AuthenticatorConfigTests
 
             try
             {
-                // Fixed target well below our 8-char test PIN. Using a constant
-                // avoids the old currentMinLength+1 pattern that accumulated
-                // across runs until it exceeded the test PIN length.
+                // Fixed target below the eight-ASCII-code-point test PIN avoids accumulating increases.
+                // Equality with the current minimum is allowed; this does not always prove an increase.
                 const int testMinPinLength = 6;
 
                 var currentMinLength = info.MinPinLength ?? 4;
 
-                // setMinPINLength is one-way (increase only, factory reset to undo).
+                // The minimum cannot decrease; FIDO reset restores the preconfigured minimum and invalidates credentials.
                 // If already above our target, skip with diagnostic.
                 if (currentMinLength > testMinPinLength)
                 {
@@ -170,6 +176,7 @@ public class Ctap2AuthenticatorConfigTests
                     rpIds: [Ctap2TestData.RpId]);
 
                 var updatedInfo = await session.GetInfoAsync();
+                // Asserts only the minimum bound, not RP-list storage or minPinLength extension output.
                 Assert.True(updatedInfo.MinPinLength >= testMinPinLength,
                     $"Min PIN length should be >= {testMinPinLength}, was {updatedInfo.MinPinLength}");
             }
@@ -180,10 +187,15 @@ public class Ctap2AuthenticatorConfigTests
         });
 
     /// <summary>
-    /// Tests the full forcePinChange lifecycle: set the flag, verify PIN tokens are
-    /// blocked, change PIN to clear the flag, verify tokens work again.
-    /// Matches the python-fido2 test_force_pin_change pattern.
+    /// Attempts force-change flag/token/PIN-change checks with best-effort recovery.
     /// </summary>
+    /// <remarks>
+    /// The token-block assertion uses legacy GetPinTokenAsync (0x05) and expects PinInvalid,
+    /// as specified by CTAP 2.1 (2022-06-21 errata), Section 6.5.5.7.1, for forcePINChange.
+    /// The permission-based 0x09 method instead returns PinPolicyViolation (Section 6.5.5.7.2)
+    /// and is not exercised by that assertion. Later successful steps assert a nonempty
+    /// legacy token and a cleared flag, not every restored setting or permission-token behavior.
+    /// </remarks>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
@@ -204,7 +216,7 @@ public class Ctap2AuthenticatorConfigTests
                 return;
             }
 
-            // Pre-condition: forcePinChange should not be set (NormalizePinAsync clears it)
+            // Require a clear flag after normalization's attempted recovery; setup can fail before this callback.
             Assert.True(info.ForcePinChange != true,
                 "ForcePinChange should not be set before test. NormalizePinAsync should have cleared it.");
 
@@ -238,12 +250,12 @@ public class Ctap2AuthenticatorConfigTests
                 Assert.True(flaggedInfo.ForcePinChange,
                     "ForcePinChange should be true after SetMinPinLength with forceChangePin=true");
 
-                // Step 3: Verify PIN token requests are blocked
+                // Step 3: Legacy 0x05 returns PinInvalid for forcePINChange in CTAP 2.1 Section 6.5.5.7.1.
                 var ex = await Assert.ThrowsAsync<CtapException>(
                     () => clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8));
                 Assert.Equal(CtapStatus.PinInvalid, ex.Status);
 
-                // Step 4: Clear flag via PIN change (reverse then restore, matching python-fido2 pattern)
+                // Step 4: Attempt two PIN changes; second-change failure can leave the reversed PIN and uncleared bytes.
                 byte[] reversedPin = Ctap2TestData.PinUtf8.Reverse().ToArray();
                 await clientPin.ChangePinAsync(Ctap2TestData.PinUtf8, reversedPin);
                 await clientPin.ChangePinAsync(reversedPin, Ctap2TestData.PinUtf8);
@@ -263,8 +275,8 @@ public class Ctap2AuthenticatorConfigTests
             {
                 CryptographicOperations.ZeroMemory(configPinToken);
 
-                // Safety net: if test failed before step 4, clear forcePinChange.
-                // Uses reversed-PIN pattern because Enhanced PIN keys reject same-PIN changes.
+                // Best-effort recovery only if the flag still appears set. This is not rollback:
+                // it assumes the known PIN remains current and does not cover a failed second change.
                 try
                 {
                     var checkInfo = await session.GetInfoAsync();
@@ -278,7 +290,7 @@ public class Ctap2AuthenticatorConfigTests
                 }
                 catch
                 {
-                    // Best-effort — NormalizePinAsync will also attempt recovery
+                    // Recovery errors are ignored; later normalization may also fail. State is not guaranteed restored.
                 }
             }
         });

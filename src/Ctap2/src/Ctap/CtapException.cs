@@ -17,10 +17,14 @@ namespace Yubico.YubiKit.Ctap2;
 /// <summary>
 /// Exception thrown when a CTAP command fails.
 /// </summary>
+/// <remarks>Nonzero wire CTAP statuses are preserved without normalization. Backends also use
+/// Other for an empty response, and public constructors accept caller-supplied statuses.
+/// Transport/CTAPHID errors, APDU failures, SDK validation, callbacks and model decoding have
+/// different exception origins. This exception is not a rollback or no-side-effects guarantee.</remarks>
 public class CtapException : Exception
 {
     /// <summary>
-    /// Gets the CTAP status code from the authenticator.
+    /// Gets the received, synthesized or caller-supplied CTAP status code.
     /// </summary>
     public CtapStatus Status { get; }
 

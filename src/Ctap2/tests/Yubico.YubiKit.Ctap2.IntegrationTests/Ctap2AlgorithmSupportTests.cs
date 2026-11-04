@@ -28,6 +28,14 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// <summary>
 /// Integration tests for algorithm support in CTAP2 credentials.
 /// </summary>
+/// <remarks>
+/// Requests each named algorithm and checks attested-data presence and nonempty credential ID/key,
+/// not the returned COSE algorithm/curve or cryptographic validity. Optional unsupported algorithms
+/// return normally without creating a credential. Requires an approved dedicated device and known
+/// PIN state with human UP/UV coordination; setup can normalize the PIN before the callback.
+/// Credential deletion is best effort, and tokens/auth parameters are not comprehensively cleared.
+/// These fixtures use arbitrary hash-sized test data, not a complete client-data/RP ceremony.
+/// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2AlgorithmSupportTests
 {
@@ -141,7 +149,7 @@ public class Ctap2AlgorithmSupportTests
         }
         catch
         {
-            // Cleanup failures should not fail the test
+            // Best-effort deletion preserves the primary result; failure can leave credentials and token bytes.
         }
     }
 }

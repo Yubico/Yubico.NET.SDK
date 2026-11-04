@@ -23,6 +23,9 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <para>
 /// Contains the encrypted derived secret(s). The client must decrypt using
 /// the shared secret established during key agreement.
+/// This byte-string shape is used for assertion output and hmac-secret-mc evaluation output,
+/// not the boolean hmac-secret registration support result. Decrypted output depends on the
+/// credential, salts and actual UV mode. Clear caller-owned shared secrets and plaintext after use.
 /// </para>
 /// </remarks>
 public sealed class HmacSecretOutput
@@ -34,12 +37,15 @@ public sealed class HmacSecretOutput
     /// <para>
     /// Contains one or two 32-byte derived secrets, encrypted:
     /// <list type="bullet">
-    ///   <item><description>For one salt: encrypt(sharedSecret, output1) = 32+ bytes</description></item>
-    ///   <item><description>For two salts: encrypt(sharedSecret, output1 || output2) = 64+ bytes</description></item>
+    ///   <item><description>Protocol 1: 32 bytes for one output, 64 bytes for two; no IV prefix.</description></item>
+    ///   <item><description>Protocol 2: 48 bytes for one output, 80 bytes for two; includes a 16-byte IV.</description></item>
     /// </list>
     /// </para>
     /// <para>
     /// For PIN protocol 2, includes the IV prefix (16 bytes).
+    /// Direct init borrows supplied storage; keep it stable during use. Decode allocates an independent
+    /// byte-array copy and does not validate these lengths.
+    /// This DTO has no disposal/zeroing boundary; response or session disposal does not clear the copy.
     /// </para>
     /// </remarks>
     public required ReadOnlyMemory<byte> Output { get; init; }

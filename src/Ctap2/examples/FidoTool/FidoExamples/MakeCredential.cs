@@ -15,7 +15,6 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
@@ -23,6 +22,15 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 /// <summary>
 /// Creates a discoverable CTAP2 credential on the authenticator.
 /// </summary>
+/// <remarks>
+/// This is a persistent protocol demo, not RP account registration: it fabricates the hash and user
+/// handle. Production ceremonies need fresh exact client-data bytes, RP options and a stable RP account
+/// handle, followed by independent RP verification. The PIN branch currently combines uv with token auth,
+/// which CTAP forbids; executable correction is pending. Protocol 2 is selected without negotiation.
+/// General exception handling converts cancellation/transport/decode failures into failed results;
+/// failure does not establish that the authenticator created nothing. PIN input is borrowed, and token
+/// finally-zeroing does not clear all auth-param/request/response copies.
+/// </remarks>
 public static class MakeCredential
 {
     /// <summary>
@@ -70,11 +78,11 @@ public static class MakeCredential
         byte[]? pinToken = null;
         try
         {
-            // Generate random clientDataHash (32 bytes) for demo/testing purposes
+            // Stand-in hash, not SHA-256 of any collected client data; not an RP-verifiable ceremony.
             var clientDataHash = new byte[32];
             RandomNumberGenerator.Fill(clientDataHash);
 
-            // Generate random user ID (32 bytes)
+            // Demo account handle; production uses the RP's stable handle, not a new random account each call.
             var userId = new byte[32];
             RandomNumberGenerator.Fill(userId);
 
@@ -111,6 +119,8 @@ public static class MakeCredential
 
                 var authParam = protocol.Authenticate(pinToken, clientDataHash);
                 options.WithPinUvAuth(authParam, protocol.Version);
+                // Known sample defect: uv must be omitted beside pinUvAuthParam (even uv:false).
+                // Preserve this executable call for the separately scoped sample fix.
                 options.WithUserVerification(true);
             }
 

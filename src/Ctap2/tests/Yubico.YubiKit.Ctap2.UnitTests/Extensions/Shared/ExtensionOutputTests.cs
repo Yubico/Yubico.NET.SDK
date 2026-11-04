@@ -102,6 +102,7 @@ public class ExtensionOutputTests
     [Fact]
     public void Decode_WithLargeBlobKey_ParsesCorrectly()
     {
+        // Synthetic convenience map only. Standard CTAP keys are outside authData extensions.
         var key = new byte[32];
         Random.Shared.NextBytes(key);
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -201,6 +202,7 @@ public class ExtensionOutputTests
     [Fact]
     public void ExtensionOutput_WithUnsupportedExtension_YieldsEmptyOutputMap()
     {
+        // Despite the retained name, this supplies empty input, not an unsupported identifier/value.
         var emptyExtensions = ReadOnlyMemory<byte>.Empty;
 
         var output = ExtensionOutput.Decode(emptyExtensions);

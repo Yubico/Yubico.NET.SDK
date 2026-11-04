@@ -1,0 +1,15 @@
+{
+  "rendered_source_blocks": 7,
+  "changed_source_renders_retained": [
+    "L2-layered-stack",
+    "L3b-fido2-ctap-sequence"
+  ],
+  "unchanged_source_cached_renders_retained": [
+    "L0-context",
+    "L1-assembly-deps",
+    "L3-apdu-sequence",
+    "L4-discovery",
+    "L4-connection"
+  ],
+  "reason": "Renderer output is nondeterministic; unchanged-source outputs reuse exact verified baseline images and manifest hashes, with identical tool version/configuration. Changed L2/L3b use new generated SVG/PNG."
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+  </PropertyGroup>
+  <Import Project="../Context.Packages.props" />
+  <Import Project="../Context.Items.props" />
+</Project>

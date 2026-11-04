@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "baseline": "5b09a9b6942ded3913b5c9340c3e126617e61a82",
+  "repo": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "context": {
+    "id": "hardware-v2",
+    "kind": "xunit2",
+    "output_type": "Library",
+    "source_project": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+    "groups": [
+      "hardware-info",
+      "hardware-create",
+      "hardware-set-pin",
+      "shared-hid-management"
+    ],
+    "modules": [
+      "Management"
+    ],
+    "references": [
+      "src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll",
+      "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll"
+    ]
+  },
+  "source_project_closure": [
+    "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+    "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+    "src/Core/src/Yubico.YubiKit.Core.csproj",
+    "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj",
+    "src/Management/src/Yubico.YubiKit.Management.csproj"
+  ],
+  "package_origins": {
+    "Microsoft.NET.Test.Sdk": [
+      "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj"
+    ],
+    "xunit": [
+      "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj"
+    ],
+    "Xunit.SkippableFact": [
+      "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+      "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+    ],
+    "xunit.runner.visualstudio": [
+      "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj"
+    ],
+    "coverlet.collector": [
+      "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj"
+    ],
+    "Microsoft.Extensions.DependencyInjection": [
+      "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj"
+    ],
+    "Microsoft.Extensions.Logging.Console": [
+      "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+      "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+    ],
+    "Microsoft.Extensions.Logging.Abstractions": [
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+    ],
+    "System.Formats.Cbor": [
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+    ],
+    "Microsoft.Extensions.Hosting.Abstractions": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "Microsoft.Extensions.Logging": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+    ],
+    "Yubico.NativeShims": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "Microsoft.Extensions.Configuration": [
+      "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+    ],
+    "Microsoft.Extensions.Configuration.Binder": [
+      "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+    ],
+    "Microsoft.Extensions.Configuration.Json": [
+      "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+    ],
+    "xunit.core": [
+      "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+    ],
+    "xunit.abstractions": [
+      "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+    ]
+  },
+  "groups": [
+    {
+      "name": "hardware-info",
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-info/complete.cs"
+    },
+    {
+      "name": "hardware-create",
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-create/complete.cs"
+    },
+    {
+      "name": "hardware-set-pin",
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-set-pin/complete.cs"
+    },
+    {
+      "name": "shared-hid-management",
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-hid-management/complete.cs"
+    }
+  ],
+  "direct_references": [
+    "src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+    "src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll",
+    "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+    "src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll",
+    "src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll"
+  ],
+  "inputs": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.props",
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.targets",
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Packages.props",
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/global.json",
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+      "sha256": "b01ad512410118f525cc5ed42093ca9400fb4e0dd46d6daeb4dd9b3e4bebbb93"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "sha256": "9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "sha256": "60705e6469ab458aa47a288fe1b2749e20506dfc006335bdbdb27d82e8668203"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj",
+      "sha256": "4f37a8227bd5b8c1ef9fb089c65667c989b60d9b80f2d5e7c5e3287ae494a963"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+      "sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+      "sha256": "d97b6d3fe7463a942975082dda81eea299ff1f436a19024e31cf98d512620511"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/manifest.json",
+      "sha256": "6402578ca65eb04f2f24e3e35d692363c2f4e548458c9d9ceddaf784fa2f7376"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+      "sha256": "6068aa4e5fc1a3c12c0d2e0646a12f432f53d690e5da567a537da2ce3f084a9d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/hardware-v2/Directory.Build.props",
+      "sha256": "d6dcabf8affb4f738c511bacbac9f1ff7396876876df67ea36c0f87a102612cd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/hardware-v2/Context.Packages.props",
+      "sha256": "6d3e8493b04c5c921719aa3c7c4fe732f129b93952b5c2741e6a9d02ee54edc1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/hardware-v2/Context.Items.props",
+      "sha256": "b301b03b529f786b05085553a34aedd11755ef85d939a23a12a45f12e7dadc8b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/hardware-v2/Directory.Build.targets",
+      "sha256": "197f92f0fe7cdb3ae787be0e13bfad779b90ab4481bae3811ff346ecb8f1ed1b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/hardware-v2/src/Yubico.YubiKit.AuditCt001.Examples.hardware-v2.csproj",
+      "sha256": "c7a92625b336f24cda03dc9d08058cd2750c4748959a60ed3f4d2232fc320e88"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/Directory.Build.props.template",
+      "sha256": "82616bb538b4ec4a0ce6862a9b27627edf438cf8613af206030a28d9ba1f3c4f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/Directory.Build.targets.template",
+      "sha256": "ea70485f6d64bf73ba96ed52324d0f5367ba8f6f6afda2a90a68d4dba7215391"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+      "sha256": "ea7a626a634bb4d025fcebb441ad49a6bc568aff1f3c33f3668720ce45fbd5e2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll",
+      "sha256": "cf707e4c441e7e3502c99482d6362a4cb7c4894d34889f3670dcd0789ccf3a93"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+      "sha256": "6a8cbbb5c37749b2b017b007f51df7f4f5165f0e9aa2c43b9a12c0b67a31aa40"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll",
+      "sha256": "0095786e5a2d5a62c71215b04e5420f4f8b259c32dc2f99e076f2b8f42a230a8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll",
+      "sha256": "822d4ad4b5b34a92611a9e24c74eaa4df98e38b9c995a4134c56222d66c15f20"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-info/complete.cs",
+      "sha256": "71ba45c306fd7cc8723e121c805eabbf8b9898c87685d96ff33a40ca01f5bd92"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-info/readable.raw",
+      "sha256": "a3d77bdf0de080cc5e393b0c828c6346b80e5ce82b498439779a89a72904416a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/CLAUDE.md",
+      "sha256": "0bfe308f3dcaf2307bc2e3d463f174bd4a341a85b583c1ac2cb07d0ad65c2dcf"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-create/complete.cs",
+      "sha256": "35c9aa10441d62e75efcdceb038795e754fed7fb4bc3e90c00dfd490b197ec03"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-create/readable.raw",
+      "sha256": "3b1440886ab6785f3a9969fcdf7f9117a7629174c8dd60b43392d62fdfc49217"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/CLAUDE.md",
+      "sha256": "b93c7a963573e93380ef82181baebce2b106b62ea4237d16efad1b0de602d266"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-set-pin/complete.cs",
+      "sha256": "52cfd2386ce3e7f61567873c21a22c005c62565a713bfb12d54d78f5a4a76b7a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-set-pin/readable.raw",
+      "sha256": "55cd52b4a4fcfa679166ac16035ebed34c52c355c78abf6767e8171d8a6699cc"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-hid-management/complete.cs",
+      "sha256": "f9d49ab7efb0cb13807b4f7ffafd1ccc155c86f09633b90e9dfecb24b0dcf681"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-hid-management/readable.raw",
+      "sha256": "2809c1cd3137ed3e941d8a3b115f7d8dcb0455b162084f84aeb9d6e07e2d2ec8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/TESTING.md",
+      "sha256": "1db21b42b4a8b6443a872b2b0be37fcc0ced84202ec49a8c8db1c5210e6af401"
+    }
+  ],
+  "limits": "Prepared inputs only; no restore/build/analyzer/snippet execution. Source-local warning suppressions not copied."
+}

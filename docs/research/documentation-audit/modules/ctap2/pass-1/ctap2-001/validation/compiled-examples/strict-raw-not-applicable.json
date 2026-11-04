@@ -1,0 +1,5 @@
+{
+  "status": "not-applicable",
+  "groups": [],
+  "reason": "All groups use explicitly reviewed real SDK/MSBuild contexts from the start; optional raw consumer check not selected."
+}

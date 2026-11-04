@@ -40,6 +40,9 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// To request a signature from the YubiKey using this derived key, pass the
 /// <see cref="DeviceKeyHandle"/>, <see cref="ArkgKeyHandle"/>, and
 /// <see cref="Context"/> properties to the previewSign authentication extension input.
+/// Memory properties retain their supplied storage. The derivation helper supplies new point/ARKG
+/// handle/context arrays but borrows the original device handle. There is no disposable cleanup
+/// owner. Public points are not secrets; application-sensitive contexts/handles need caller policy.
 /// </para>
 /// </remarks>
 public sealed class PreviewSignDerivedKey
@@ -92,14 +95,16 @@ public sealed class PreviewSignDerivedKey
     /// and must not be treated as production cryptographic guidance.
     /// </para>
     /// <para>
-    /// This method verifies that a signature produced by the ESP256-split-ARKG
-    /// previewSign path is valid for the given message using the derived public key
-    /// from ARKG-P256 derivation.
+    /// This helper always imports P-256 and hashes the raw message with SHA-256; it is not an
+    /// algorithm-agile verifier or attestation/RP verification. Passing an already-hashed Tbs value
+    /// hashes it again. Match the experimental signing operation's Tbs convention to this raw-message API.
     /// </para>
     /// <para>
     /// The signature must be in DER-encoded ECDSA format, as returned by the
     /// YubiKey's previewSign extension. The message should be the original raw data,
     /// not a pre-hashed value.
+    /// The current DER converter reads two INTEGERs without checking complete sequence/root consumption
+    /// or all positive/canonical component conditions. Do not rely on it as strict DER validation.
     /// </para>
     /// </remarks>
     /// <param name="message">
@@ -111,7 +116,7 @@ public sealed class PreviewSignDerivedKey
     /// </param>
     /// <returns>
     /// <c>true</c> if the signature is valid for the message using the derived
-    /// public key; otherwise, <c>false</c>.
+    /// public key under this fixed P-256/SHA-256 helper; also false for caught parsing/crypto errors.
     /// </returns>
     public bool VerifySignature(ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature)
     {
@@ -150,7 +155,7 @@ public sealed class PreviewSignDerivedKey
 
     private static byte[] ConvertDerToIeee(ReadOnlySpan<byte> derSignature)
     {
-        // Parse DER: SEQUENCE { r INTEGER, s INTEGER }
+        // Read r and s; complete consumption and full component validation are not checked here.
         var reader = new AsnReader(derSignature.ToArray(), AsnEncodingRules.DER);
         var sequence = reader.ReadSequence();
         var r = sequence.ReadIntegerBytes();

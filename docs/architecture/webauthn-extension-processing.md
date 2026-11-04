@@ -115,8 +115,8 @@ Rules:
   omit that processor's result. This is SDK exception-isolation policy, not a rule quoted from
   WebAuthn §9.4. Other exceptions, including CTAP storage failures and explicit previewSign errors,
   can propagate after the main authenticator operation succeeded.
-- Processors are **single-use**. A PUAT retry creates a fresh session, so encrypted salts and key
-  agreements are re-derived against the new token.
+- Processors are **single-use**. A PUAT retry creates a fresh extension session; fresh per-attempt key
+  agreement and encrypted salts are prepared after token reacquisition, not derived from the token bytes.
 - `ExtensionContext.Protocol` is available without a token; hmac-secret key agreement need not have
   a PUAT. The current backend nevertheless uses protocol 2, without protocol-1 negotiation, for this
   exchange and PIN/UV token acquisition. Do not infer universal CTAP2.0 compatibility from token absence.
@@ -187,7 +187,9 @@ The shared probe implementation:
 - No extension CBOR is produced before `GetInfo` has been read.
 - Most unadvertised extensions produce no input/output; client-derived credProps and largeBlob's
   separate support policy must not be forced into that rule.
-- The token requested for a ceremony carries every processor's permissions.
+- The ceremony's token request combines its own permission with the processors' requested permissions.
+  Legacy PIN-token command fallback omits the explicit permission/RP request; a returned token does not
+  prove that every requested operation is authorized.
 - With an allow list, the real `getAssertion` carries exactly one descriptor.
 - A `selected`-dependent input (`evalByCredential`, `signByCredential`) always names the selected credential.
 - A PUAT retry never reuses a processor instance.

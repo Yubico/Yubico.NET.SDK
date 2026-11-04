@@ -22,6 +22,14 @@ namespace Yubico.YubiKit.Ctap2.Cose;
 /// <remarks>
 /// See <see href="https://datatracker.ietf.org/doc/html/rfc8152#section-7">
 /// COSE Key Objects</see>.
+/// <para>
+/// These are public-key data carriers, not mathematical validators or trusted-algorithm selectors.
+/// Direct construction retains supplied byte memory. Decode materializes modeled byte strings and
+/// copies CoseOtherKey raw input; modeled encoders write new arrays and omit unmodeled parameters.
+/// Unknown identifiers remain representable without implying protocol or cryptographic validity.
+/// PIN/UV key agreement has its own required EC2/P-256/alg=-25 structure; these generic carriers are
+/// not a substitute for that security-critical validation.
+/// </para>
 /// </remarks>
 public abstract record CoseKey
 {
@@ -39,7 +47,15 @@ public abstract record CoseKey
     /// Decodes a COSE_Key from CBOR-encoded bytes.
     /// </summary>
     /// <param name="coseEncoded">CBOR-encoded COSE_Key.</param>
-    /// <returns>A <see cref="CoseKey"/> subclass based on the key type.</returns>
+    /// <returns>A modeled key, an algorithm-selected experimental ARKG seed, or an opaque other-key carrier.</returns>
+    /// <remarks>
+    /// Requires int32 kty/alg and the modeled parameter types for EC2, OKP and RSA. Unknown labels are
+    /// skipped for modeled keys; Other preserves a copy of the complete supplied bytes. Canonical CBOR
+    /// checks do not establish curve/algorithm compatibility, coordinate/point validity or complete
+    /// envelope consumption; there is no remaining-byte check after the map.
+    /// </remarks>
+    /// <exception cref="CborContentException">The reader rejects malformed or noncanonical CBOR.</exception>
+    /// <exception cref="InvalidOperationException">A required modeled parameter is missing or has an unsupported representation.</exception>
     public static CoseKey Decode(ReadOnlyMemory<byte> coseEncoded)
     {
         Dictionary<int, object?> parameters = ReadParameters(coseEncoded);
@@ -228,8 +244,8 @@ public abstract record CoseKey
 /// </summary>
 /// <param name="Algorithm">COSE algorithm identifier.</param>
 /// <param name="Curve">Curve identifier (crv, label -1).</param>
-/// <param name="X">X coordinate (label -2).</param>
-/// <param name="Y">Y coordinate (label -3).</param>
+/// <param name="X">Borrowed X-coordinate bytes (label -2); construction does not validate points.</param>
+/// <param name="Y">Borrowed Y-coordinate bytes (label -3).</param>
 public sealed record CoseEc2Key(
     CoseAlgorithm Algorithm,
     int Curve,
@@ -244,7 +260,7 @@ public sealed record CoseEc2Key(
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
 
-        // Keys must be in sorted order for canonical CBOR: -3, -2, -1, 1, 3
+        // Numeric insertion order is not canonical encoded order; the writer sorts to 1, 3, -1, -2, -3.
         writer.WriteInt32(-3);
         writer.WriteByteString(Y.Span);
 
@@ -270,7 +286,7 @@ public sealed record CoseEc2Key(
 /// </summary>
 /// <param name="Algorithm">COSE algorithm identifier.</param>
 /// <param name="Curve">Curve identifier (crv, label -1).</param>
-/// <param name="X">X coordinate (label -2).</param>
+/// <param name="X">Borrowed public-key bytes (label -2); construction does not validate the key.</param>
 public sealed record CoseOkpKey(
     CoseAlgorithm Algorithm,
     int Curve,
@@ -284,7 +300,7 @@ public sealed record CoseOkpKey(
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(4);
 
-        // Keys must be in sorted order for canonical CBOR: -2, -1, 1, 3
+        // The canonical writer sorts this numeric insertion order to 1, 3, -1, -2.
         writer.WriteInt32(-2);
         writer.WriteByteString(X.Span);
 
@@ -306,8 +322,8 @@ public sealed record CoseOkpKey(
 /// RSA COSE key.
 /// </summary>
 /// <param name="Algorithm">COSE algorithm identifier.</param>
-/// <param name="Modulus">RSA modulus (n, label -1).</param>
-/// <param name="Exponent">RSA public exponent (e, label -2).</param>
+/// <param name="Modulus">Borrowed RSA modulus bytes (n, label -1).</param>
+/// <param name="Exponent">Borrowed RSA public-exponent bytes (e, label -2); construction does not validate RSA parameters.</param>
 public sealed record CoseRsaKey(
     CoseAlgorithm Algorithm,
     ReadOnlyMemory<byte> Modulus,
@@ -321,7 +337,7 @@ public sealed record CoseRsaKey(
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(4);
 
-        // Keys must be in sorted order for canonical CBOR: -2, -1, 1, 3
+        // The canonical writer sorts this numeric insertion order to 1, 3, -1, -2.
         writer.WriteInt32(-2);
         writer.WriteByteString(Exponent.Span);
 
@@ -340,11 +356,11 @@ public sealed record CoseRsaKey(
 }
 
 /// <summary>
-/// Unknown/Other COSE key type.
+/// Opaque COSE key carrier for an unmodeled key type not selected by the ARKG seed algorithm.
 /// </summary>
 /// <param name="KeyType">The COSE key type value.</param>
 /// <param name="Algorithm">COSE algorithm identifier.</param>
-/// <param name="RawCbor">The original CBOR-encoded bytes.</param>
+/// <param name="RawCbor">Encoded input bytes; direct construction borrows them, while Decode supplies a copy.</param>
 public sealed record CoseOtherKey(
     int KeyType,
     CoseAlgorithm Algorithm,

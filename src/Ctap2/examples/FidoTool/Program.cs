@@ -61,7 +61,8 @@ await YubiKeyManager.ShutdownAsync();
 return exitCode;
 
 // ---------------------------------------------------------------------------
-// CLI verb routing — mirrors ykman fido command tree
+// CLI verb routing — a small ykman-like grouping, not command/parser compatibility or the full SDK API.
+// Help/parser/cancellation defects remain executable follow-up work; see the sample README.
 // ---------------------------------------------------------------------------
 static async Task<int> RunVerbAsync(string[] args, CancellationToken cancellationToken)
 {
@@ -134,7 +135,7 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
 
     if (!force)
     {
-        // Query preflight info from the currently connected device
+        // Query a selected device, but this identity is not bound to the later destructive selection.
         var preSelection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (preSelection is null)
         {
@@ -170,7 +171,8 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
 
     var resetTransport = ResetMenu.SelectResetTransport(selection.Device.AvailableConnections);
 
-    // Query the (reinserted) device for accurate touch message
+    // Selection is not correlated to the earlier key; another physical device can be reset.
+    // Preflight can fail/default; its message is not authoritative timing/transport qualification.
     var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
         selection.Device, resetTransport, cancellationToken);
 

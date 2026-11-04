@@ -22,6 +22,13 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 /// <summary>
 /// Interactive menu for credential operations: MakeCredential and GetAssertion.
 /// </summary>
+/// <remarks>
+/// These are persistent protocol demos, not account registration/sign-in. The helpers fabricate hashes
+/// and user handles, do not verify RP proofs and return only the first discoverable assertion. Production
+/// needs fresh exact client-data bytes/challenges, stable RP account handles and independent RP verification.
+/// The PIN branches still combine mutually exclusive uv/token fields; executable fixes are pending.
+/// Prompts are synchronous and general helper catches lose cancellation/error provenance.
+/// </remarks>
 public static class CredentialMenu
 {
     /// <summary>
@@ -150,6 +157,12 @@ public static class CredentialMenu
     /// <summary>
     /// Displays GetAssertion result details.
     /// </summary>
+    /// <remarks>
+    /// Flag/name/signature-length display is inspection, not verification. User IDs are opaque account
+    /// handles; optional names can be absent and are not authorization identifiers. Missing descriptors
+    /// are accepted by the parser without request/version recovery; only CTAP2.0's one-entry allow-list
+    /// exception is standard, whereas 2.1/2.3 require the descriptor.
+    /// </remarks>
     internal static void DisplayAssertionResult(GetAssertion.GetAssertionResult result)
     {
         var assertion = result.Assertion!;

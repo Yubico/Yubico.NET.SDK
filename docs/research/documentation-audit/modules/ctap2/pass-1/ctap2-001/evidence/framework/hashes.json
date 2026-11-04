@@ -1,0 +1,64 @@
+{
+  "schema_version": 2,
+  "note": "2026-11-04 validation-artifact discovery isolation only. Current harness metadata was not built or executed. Original executed commands/results/assembly hashes belong to the immutable execution manifest below, not to the renamed project.",
+  "original_execution_manifest": {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/original/hashes.json.snapshot",
+    "sha256": "c0d6b732a6e7f40d01b9c98392fea63149df27c8089743d7d53379c78ef144a3",
+    "bytes": 5853,
+    "run": "20261103-234138-628-build"
+  },
+  "retained_path_mapping": [
+    {
+      "original_path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/src/Yubico.YubiKit.Ctap2.FrameworkProbe.csproj",
+      "retained_path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/original/Yubico.YubiKit.Ctap2.FrameworkProbe.csproj.snapshot",
+      "sha256": "5a0c6813e7b50471f7e9ef4f3fd937eabb30345ad5fc2c9064a3d1d0a8156651",
+      "bytes": 275
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/run-probe.sh",
+      "retained_path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/original/run-probe.sh.snapshot",
+      "sha256": "91fb909ffcdd27620948b794d0c3c7b5c8aefb92a8418bf40ee68901940c97d1",
+      "bytes": 578
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/hashes.json",
+      "retained_path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/original/hashes.json.snapshot",
+      "sha256": "c0d6b732a6e7f40d01b9c98392fea63149df27c8089743d7d53379c78ef144a3",
+      "bytes": 5853
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/framework-adjudication.md",
+      "retained_path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/original/framework-adjudication.md.snapshot",
+      "sha256": "3401f31c7bb26faa84ffa5ff0e9b59c343107ebbcadc67a3ce79a36264347cdf",
+      "bytes": 14770
+    }
+  ],
+  "current_unexecuted_harness": [
+    {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/src/Yubico.YubiKit.AuditCt001.FrameworkProbe.csproj",
+      "sha256": "868bc62205935a7a563787a24369b2b9041c1324a4721b97ede17e2236a33422",
+      "bytes": 344
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/run-probe.sh",
+      "sha256": "958f8865239bdc30514a4082f2e4976a624f8cdcb2df032b3d3688914387addf",
+      "bytes": 767
+    }
+  ],
+  "unchanged_source_proof": [
+    {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/src/experiment_framework.cs",
+      "sha256": "867427cf77d2c69eb12e072431c62a4690400a23b9ed8f24e38db25078d8c180",
+      "bytes": 4926,
+      "proof": "Current source bytes match the original executed manifest entry. No C# source changed."
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/framework-adjudication.md",
+      "sha256": "3401f31c7bb26faa84ffa5ff0e9b59c343107ebbcadc67a3ce79a36264347cdf",
+      "bytes": 14770,
+      "proof": "Historical report unchanged. Resolve original project/script/hash links with retained_path_mapping, not current harness bytes."
+    }
+  ],
+  "mapping_document": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/tooling-discovery.md",
+  "navigation_correction": "2026-11-04: original adjudication report bytes preserved in a snapshot before repairing its current project hyperlink to the retained original project. Original execution claims/hashes remain intact."
+}

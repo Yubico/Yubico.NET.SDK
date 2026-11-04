@@ -26,7 +26,14 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
 /// </summary>
 /// <remarks>
 /// CTAP2 is NOT available over OTP HID. USB should prefer the FIDO HID interface;
-/// SmartCard transport is available over NFC and USB on firmware 5.8.0+ when the FIDO AID is exposed.
+/// NFC SmartCard requires a current connection reporting Transport.Nfc and an exposed FIDO AID.
+/// USB SmartCard uses the SDK's 5.8.0+ firmware gate and also requires the FIDO AID.
+/// The actual filter tests exposed HID FIDO or SmartCard interfaces, not CTAP revision or FIDO AID;
+/// SmartCard-only non-CTAP devices can be admitted. One candidate auto-selects; multiple candidates prompt
+/// only interactively, otherwise preferring HID-capable/first. Synchronous retry/selection prompts do not
+/// honor cancellation while blocked and retry prompts can occur noninteractively. Device-info failures,
+/// including cancellation, are swallowed with development Debug output. Duplicate display labels can
+/// resolve to the first match. Reset callers must not assume a second selection is the confirmed key.
 /// </remarks>
 public static class DeviceSelector
 {
@@ -37,7 +44,7 @@ public static class DeviceSelector
     ];
 
     /// <summary>
-    /// Finds all connected YubiKeys and allows user to select one.
+    /// Finds exposed-interface candidates, then auto-selects or prompts according to terminal interactivity.
     /// </summary>
     public static async Task<DeviceSelection?> SelectDeviceAsync(
         CancellationToken cancellationToken = default)

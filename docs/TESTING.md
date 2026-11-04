@@ -206,7 +206,11 @@ Use these lanes:
 | FIDO2 reset | `authenticatorReset` | No | Needs the power-cycle window plus touch — timing, not destruction, is why |
 | Insert/remove/touch timing | Reset power-cycle window, physical insertion/removal | No | Human-coordinated timing only |
 
-Agent-safe FIDO2/WebAuthn integration commands must skip User Presence:
+These filters skip User Presence, but are not by themselves an agent-safety guarantee. In particular,
+CTAP2 `WithCtap2SessionAsync` defaults to PIN normalization before its callback: it can set/change a PIN
+or consume a retry even when the final operation is GetInfo. Inspect the selected tests' setup and apply
+the existing PIN/interaction policy; GetInfo itself needs no additional approval gate. See
+[CTAP2 test guidance](../src/Ctap2/tests/CLAUDE.md#reset-before-tests).
 
 ```bash
 dotnet toolchain.cs -- test --integration --project Ctap2 --smoke

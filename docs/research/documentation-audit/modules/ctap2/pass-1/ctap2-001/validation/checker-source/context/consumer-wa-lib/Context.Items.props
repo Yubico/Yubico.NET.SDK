@@ -1,0 +1,19 @@
+<Project>
+  <ItemGroup>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-intent-task/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-pin-config/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-prompt-factory/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-pair-policy/complete.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Yubico.YubiKit.Core">
+      <HintPath>$(RepositoryRoot)/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.Ctap2">
+      <HintPath>$(RepositoryRoot)/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.WebAuthn">
+      <HintPath>$(RepositoryRoot)/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

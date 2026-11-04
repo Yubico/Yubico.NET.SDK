@@ -23,6 +23,13 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 /// <summary>
 /// Interactive menu for factory reset of the FIDO application.
 /// </summary>
+/// <remarks>
+/// Human-coordinated only. The post-reinsert selection is not bound to the confirmed physical key and
+/// reuses the old transport choice; a different key can be reset. Preflight defaults and current prompt
+/// strings are not authoritative transport/timing evidence. ReadLine/confirmation prompts do not honor
+/// cancellation while blocked. Follow the sample README's qualified product reset procedure and verify
+/// the final physical target; a failed result does not establish unchanged credentials/PIN/settings.
+/// </remarks>
 public static class ResetMenu
 {
     /// <summary>
@@ -88,7 +95,7 @@ public static class ResetMenu
         AnsiConsole.MarkupLine("[grey]Press Enter after re-inserting your YubiKey.[/]");
         Console.ReadLine();
 
-        // Re-select device after reinsertion
+        // Known target-continuity defect: independent selection can return a different physical key.
         var newSelection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (newSelection is null)
         {
@@ -96,7 +103,7 @@ public static class ResetMenu
             return;
         }
 
-        // Query preflight from the reinserted device for the accurate touch message
+        // Old transport is reused; preflight can fail/default and is not a target/timing guarantee.
         var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
             newSelection.Device, resetTransport, cancellationToken);
 

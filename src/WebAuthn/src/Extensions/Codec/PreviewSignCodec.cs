@@ -84,7 +84,7 @@ internal static class PreviewSignCodec
     /// Parses the previewSign registration output from authenticator data.
     /// </summary>
     /// <param name="authData">The authenticator data with parsed extensions.</param>
-    /// <param name="unsignedExtensionOutputs">Top-level unsigned extension outputs (CTAP key 8).</param>
+    /// <param name="unsignedExtensionOutputs">Top-level unsigned extension outputs from the CTAP makeCredential response (key 0x06).</param>
     /// <returns>
     /// A <see cref="PreviewSignRegistrationOutput"/> when decoding succeeds, or null when the signed
     /// previewSign output is absent. Attestation decoding does not verify its signature or trust.

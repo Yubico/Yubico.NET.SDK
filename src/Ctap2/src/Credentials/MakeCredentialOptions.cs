@@ -27,6 +27,14 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// - pinUvAuthProtocol (0x09): PIN/UV protocol version
 /// - enterpriseAttestation (0x0A): Enterprise attestation type
 /// </para>
+/// <para>
+/// This mutable options object retains supplied lists and byte memory, not immutable snapshots.
+/// Keep it and its borrowed storage unchanged through the awaited command. The caller owns and clears
+/// auth-parameter/secret-bearing input buffers after completion, including failure; request cleanup
+/// does not clear them. These options encode requests, not capability negotiation or RP verification.
+/// Token authorization depends on authenticator state/permissions, not a persistent logged-in state
+/// established by setting these properties.
+/// </para>
 /// </remarks>
 public sealed class MakeCredentialOptions
 {
@@ -34,8 +42,9 @@ public sealed class MakeCredentialOptions
     /// Gets or sets the list of credentials to exclude.
     /// </summary>
     /// <remarks>
-    /// If any of these credentials exist, the authenticator will return an error.
-    /// Used to prevent duplicate credential creation.
+    /// Requests exclusion of these credentials under the authenticator's RP and authorization checks.
+    /// This is not a global duplicate-user guarantee. Null/empty lists are omitted from the request;
+    /// the supplied collection and descriptor IDs are borrowed.
     /// </remarks>
     public IReadOnlyList<PublicKeyCredentialDescriptor>? ExcludeList { get; set; }
 
@@ -43,8 +52,9 @@ public sealed class MakeCredentialOptions
     /// Gets or sets whether to create a discoverable credential (resident key).
     /// </summary>
     /// <remarks>
-    /// When true, the credential is stored on the authenticator and can be
-    /// discovered without providing a credential ID.
+    /// True requests a credential discoverable by RP ID without supplying its ID. Support, storage
+    /// capacity, authorization and credential-protection policy still apply. Null omits rk and false
+    /// explicitly requests non-discoverable creation; neither describes where all key material is stored.
     /// </remarks>
     public bool? ResidentKey { get; set; }
 
@@ -61,10 +71,13 @@ public sealed class MakeCredentialOptions
     public bool? UserPresence { get; set; }
 
     /// <summary>
-    /// Gets or sets whether user verification is required.
+    /// Gets or sets the CTAP uv option requesting built-in user verification.
     /// </summary>
     /// <remarks>
-    /// When true, the authenticator must verify the user (e.g., PIN or biometric).
+    /// Null omits the uv key; false still sends it. CTAP 2.1/2.3 §6.1 require platforms to omit uv if
+    /// built-in UV is unsupported and to omit it whenever PinUvAuthParam is supplied, even when false.
+    /// PIN authorization uses a token/auth parameter, not this option. The SDK does not enforce these
+    /// combinations or obtain a PIN here. Inspect the returned UV bit, then apply RP verification policy.
     /// </remarks>
     public bool? UserVerification { get; set; }
 
@@ -72,13 +85,21 @@ public sealed class MakeCredentialOptions
     /// Gets or sets the PIN/UV auth parameter for authorization.
     /// </summary>
     /// <remarks>
-    /// Required when user verification is needed. Computed using ClientPin.
+    /// Authenticate the exact 32-byte clientDataHash with a valid PIN/UV token and the matching protocol.
+    /// Permission-bearing tokens require MakeCredential permission and the RP scope; authenticator
+    /// state/lifetime still govern authorization. Omit UserVerification when using this parameter.
+    /// Null/empty memory is omitted, so this surface does not encode a zero-length auth probe. The SDK
+    /// does not validate tag length or token permissions here. The supplied memory remains caller-owned.
     /// </remarks>
     public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
 
     /// <summary>
     /// Gets or sets the PIN/UV auth protocol version.
     /// </summary>
+    /// <remarks>
+    /// Match the protocol used for PinUvAuthParam. With nonempty auth bytes, null encodes version 2;
+    /// this is an encoding default, not negotiation. Without auth bytes, this field is omitted.
+    /// </remarks>
     public int? PinUvAuthProtocol { get; set; }
 
     /// <summary>
@@ -86,13 +107,18 @@ public sealed class MakeCredentialOptions
     /// </summary>
     /// <remarks>
     /// Values: 1 = vendor-facilitated, 2 = platform-managed.
-    /// Requires authenticator support for enterprise attestation.
+    /// Requires advertised support, enabled configuration and applicable RP authorization. These
+    /// options do not validate those conditions or the integer range; the response field reports use.
     /// </remarks>
     public int? EnterpriseAttestation { get; set; }
 
     /// <summary>
     /// Gets or sets extension inputs as a CBOR-encoded map.
     /// </summary>
+    /// <remarks>
+    /// Borrowed encoded bytes are written as supplied, without extension capability/policy validation.
+    /// Null/zero-byte input is omitted; an encoded empty CBOR map is still present on the wire.
+    /// </remarks>
     public ReadOnlyMemory<byte>? Extensions { get; set; }
 
     /// <summary>
@@ -116,7 +142,7 @@ public sealed class MakeCredentialOptions
     /// <summary>
     /// Sets the user verification option.
     /// </summary>
-    /// <param name="value">Whether to require user verification.</param>
+    /// <param name="value">The built-in UV request value; this setter does not clear existing token authentication.</param>
     /// <returns>This options instance for chaining.</returns>
     public MakeCredentialOptions WithUserVerification(bool value)
     {
@@ -127,7 +153,7 @@ public sealed class MakeCredentialOptions
     /// <summary>
     /// Sets the PIN/UV authentication parameters.
     /// </summary>
-    /// <param name="param">The PIN/UV auth parameter.</param>
+    /// <param name="param">Caller-owned auth parameter over clientDataHash; keep stable through the awaited command.</param>
     /// <param name="protocol">The protocol version.</param>
     /// <returns>This options instance for chaining.</returns>
     public MakeCredentialOptions WithPinUvAuth(ReadOnlyMemory<byte> param, int protocol)

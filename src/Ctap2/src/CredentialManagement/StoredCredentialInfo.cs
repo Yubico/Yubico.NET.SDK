@@ -32,7 +32,8 @@ public sealed class StoredCredentialInfo : IDisposable
     /// </summary>
     /// <remarks>
     /// This view is valid until this instance is disposed. Copy it before disposal if it must be
-    /// retained. Disposal clears only the private response copy owned by this instance; it does not
+    /// retained; the caller must clear any retained secret-bearing copy when finished, including on failure.
+    /// Disposal clears only the private response copy owned by this instance; it does not
     /// clear the buffer passed to <see cref="Decode(ReadOnlyMemory{byte})"/> or transport buffers.
     /// </remarks>
     /// <exception cref="ObjectDisposedException">The instance has been disposed.</exception>
@@ -56,12 +57,12 @@ public sealed class StoredCredentialInfo : IDisposable
     public PublicKeyCredentialDescriptor CredentialId { get; }
 
     /// <summary>
-    /// Gets the COSE public key.
+    /// Gets an independent copy of the encoded COSE public-key map, not private-key bytes.
     /// </summary>
     public ReadOnlyMemory<byte> PublicKey { get; }
 
     /// <summary>
-    /// Gets the total number of credentials for this RP (only present in first response).
+    /// Gets the total copied from this response, or null when omitted; the standard supplies it in the begin response.
     /// </summary>
     public int? TotalCredentials { get; }
 
@@ -75,7 +76,8 @@ public sealed class StoredCredentialInfo : IDisposable
     /// </summary>
     /// <remarks>
     /// This is a view into the owned raw response and is valid until this instance is disposed.
-    /// Copy it before disposal if it must be retained.
+    /// A retained copy is caller-owned secret key material: clear it with
+    /// CryptographicOperations.ZeroMemory when finished, including on failure.
     /// </remarks>
     /// <exception cref="ObjectDisposedException">The instance has been disposed.</exception>
     public ReadOnlyMemory<byte>? LargeBlobKey
@@ -192,6 +194,11 @@ public sealed class StoredCredentialInfo : IDisposable
     /// <summary>
     /// Clears the complete private response copy, including unrecognized fields.
     /// </summary>
+    /// <remarks>
+    /// Previously captured RawData and LargeBlobKey views refer to the cleared buffer.
+    /// User, CredentialId and PublicKey are independent decoded data and remain usable.
+    /// Borrowed decoder input, transport storage and caller-made copies are not cleared.
+    /// </remarks>
     public void Dispose()
     {
         if (_disposed)

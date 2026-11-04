@@ -1,0 +1,24 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Formats.Cbor;
+using Yubico.YubiKit.Ctap2.Cbor;
+
+namespace AuditCt001.Prepared.unit_cbor_fixture;
+
+public static class Example
+{
+public static void Run()
+{
+// Partial parser fixture (backend status already stripped), not a conforming GetInfo response.
+// Required AAGUID is absent; current decoder accepts this incomplete envelope.
+var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+writer.WriteStartMap(1);
+writer.WriteInt32(1);
+writer.WriteStartArray(1);
+writer.WriteTextString("FIDO_2_0");
+writer.WriteEndArray();
+writer.WriteEndMap();
+byte[] mockResponse = writer.Encode();
+}
+}

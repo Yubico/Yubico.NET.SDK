@@ -1,0 +1,13 @@
+// SOURCE src/Ctap2/CLAUDE.md#f8
+// With byte[] pinBytes supplied by the caller, in a synchronous method.
+Span<byte> pinHash = stackalloc byte[32];
+try
+{
+    SHA256.HashData(pinBytes, pinHash);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pinHash);
+    CryptographicOperations.ZeroMemory(pinBytes);
+}
+

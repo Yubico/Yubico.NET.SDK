@@ -1,0 +1,8 @@
+// SOURCE src/Ctap2/CLAUDE.md#f7
+var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+    .WithInt(1, protocol.Version)
+    .WithInt(2, ClientPinSubCommand.GetRetries)
+    .Build();
+
+var response = await session.SendCborRequestAsync(request);
+

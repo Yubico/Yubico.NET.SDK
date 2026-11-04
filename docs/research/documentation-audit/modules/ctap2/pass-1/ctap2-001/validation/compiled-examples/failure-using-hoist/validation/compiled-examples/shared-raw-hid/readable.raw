@@ -1,0 +1,9 @@
+// SOURCE docs/architecture/raw-access-tiers.md#f4
+await using RawCtapHidSession raw =
+    await yubiKey.CreateRawCtapHidSessionAsync(cancellationToken);
+
+ReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(
+    ctapHidCommand,
+    payload,
+    cancellationToken);
+

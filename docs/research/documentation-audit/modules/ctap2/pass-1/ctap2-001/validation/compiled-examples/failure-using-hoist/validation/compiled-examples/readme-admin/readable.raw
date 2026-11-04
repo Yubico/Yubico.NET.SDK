@@ -1,0 +1,8 @@
+// SOURCE src/Ctap2/README.md#f6
+// Existing helper and hash supplied by the caller; see the authorization prerequisites below.
+using var credentialResult = await credentialManagement.EnumerateCredentialsAsync(rpIdHash);
+foreach (StoredCredentialInfo credential in credentialResult.Credentials)
+{
+    Console.WriteLine(Convert.ToHexString(credential.CredentialId.Id.Span));
+}
+

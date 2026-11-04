@@ -1,0 +1,419 @@
+[
+  {
+    "context": "consumer-lib",
+    "groups": [
+      "guide-session",
+      "guide-info",
+      "guide-pin-create",
+      "guide-extensions",
+      "guide-admin",
+      "guide-raw",
+      "guide-memory",
+      "guide-protocol",
+      "guide-threshold",
+      "readme-discoverable",
+      "readme-admin",
+      "readme-prompt-factory",
+      "xml-info",
+      "xml-session-alternatives",
+      "xml-builder",
+      "xml-output",
+      "shared-operation-wording",
+      "shared-intent-callback",
+      "shared-raw-hid"
+    ],
+    "steps": [
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-lib"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-lib",
+          "--check"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "AuditCt001.Examples.consumer-lib",
+          "--clean"
+        ],
+        "exit_code": 0,
+        "retained_toolchain_run": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/consumer-lib-20261104-014940-722-build",
+        "result_passed": true,
+        "warnings_zero": true
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-lib",
+          "--collect"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "status": "compiled-warning-free-and-inputs-collected"
+  },
+  {
+    "context": "consumer-demo",
+    "groups": [
+      "readme-paired"
+    ],
+    "steps": [
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-demo"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-demo",
+          "--check"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "AuditCt001.Examples.consumer-demo",
+          "--clean"
+        ],
+        "exit_code": 0,
+        "retained_toolchain_run": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/consumer-demo-20261104-014942-728-build",
+        "result_passed": true,
+        "warnings_zero": true
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-demo",
+          "--collect"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "status": "compiled-warning-free-and-inputs-collected"
+  },
+  {
+    "context": "unit-v3",
+    "groups": [
+      "unit-versions",
+      "unit-retries",
+      "unit-cbor-fixture",
+      "unit-extension"
+    ],
+    "steps": [
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "unit-v3"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "unit-v3",
+          "--check"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "AuditCt001.Examples.unit-v3",
+          "--clean"
+        ],
+        "exit_code": 0,
+        "retained_toolchain_run": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/unit-v3-20261104-014944-861-build",
+        "result_passed": true,
+        "warnings_zero": true
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "unit-v3",
+          "--collect"
+        ],
+        "exit_code": 1
+      }
+    ],
+    "status": "failed"
+  },
+  {
+    "context": "hardware-v2",
+    "groups": [
+      "hardware-info",
+      "hardware-create",
+      "hardware-set-pin",
+      "shared-hid-management"
+    ],
+    "steps": [
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "hardware-v2"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "hardware-v2",
+          "--check"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "AuditCt001.Examples.hardware-v2",
+          "--clean"
+        ],
+        "exit_code": 0,
+        "retained_toolchain_run": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/hardware-v2-20261104-014947-005-build",
+        "result_passed": true,
+        "warnings_zero": true
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "hardware-v2",
+          "--collect"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "status": "compiled-warning-free-and-inputs-collected"
+  },
+  {
+    "context": "consumer-wa-demo",
+    "groups": [
+      "webauthn-paired"
+    ],
+    "steps": [
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-wa-demo"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-wa-demo",
+          "--check"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "AuditCt001.Examples.consumer-wa-demo",
+          "--clean"
+        ],
+        "exit_code": 0,
+        "retained_toolchain_run": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/consumer-wa-demo-20261104-014949-112-build",
+        "result_passed": true,
+        "warnings_zero": true
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-wa-demo",
+          "--collect"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "status": "compiled-warning-free-and-inputs-collected"
+  },
+  {
+    "context": "consumer-wa-lib",
+    "groups": [
+      "shared-intent-task",
+      "webauthn-pin-config",
+      "webauthn-prompt-factory",
+      "webauthn-pair-policy"
+    ],
+    "steps": [
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-wa-lib"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-wa-lib",
+          "--check"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "AuditCt001.Examples.consumer-wa-lib",
+          "--clean"
+        ],
+        "exit_code": 0,
+        "retained_toolchain_run": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/context-runs/after-using-hoist/consumer-wa-lib-20261104-014951-198-build",
+        "result_passed": true,
+        "warnings_zero": true
+      },
+      {
+        "command": [
+          "python3",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+          "--repo",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+          "--manifest",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+          "--context",
+          "consumer-wa-lib",
+          "--collect"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "status": "compiled-warning-free-and-inputs-collected"
+  }
+]

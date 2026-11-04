@@ -27,8 +27,19 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <list type="bullet">
 ///   <item><description>Disk encryption keys</description></item>
 ///   <item><description>Password manager vault keys</description></item>
-///   <item><description>Any application requiring a stable secret derived from biometrics/PIN</description></item>
+///   <item><description>Credential-scoped symmetric key derivation</description></item>
 /// </list>
+/// </para>
+/// <para>
+/// The authenticator creates random credential secrets, with separate verified and unverified
+/// variants. PINs and biometrics authorize use; they are not the source of those secrets. Repeatable
+/// output requires the same credential, salt and actual UV mode. hmac-secret does not support up:false.
+/// Salt authentication is separate from the ceremony's pinUvAuthParam over clientDataHash.
+/// </para>
+/// <para>
+/// This DTO borrows its dictionary and byte buffers until encoding/transmission completes. It does
+/// not validate capability advertisement, key-agreement coherence or protocol-specific lengths.
+/// Clear caller-owned sensitive inputs and encoded copies after use; the DTO has no cleanup owner.
 /// </para>
 /// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-hmac-secret-extension
@@ -52,8 +63,8 @@ public sealed class HmacSecretInput
     /// <para>
     /// Contains one or two 32-byte salts encrypted with the shared secret:
     /// <list type="bullet">
-    ///   <item><description>For one salt: encrypt(sharedSecret, salt1) = 32 bytes</description></item>
-    ///   <item><description>For two salts: encrypt(sharedSecret, salt1 || salt2) = 64 bytes</description></item>
+    ///   <item><description>Protocol 1: 32 bytes for one salt, 64 bytes for two; no IV prefix.</description></item>
+    ///   <item><description>Protocol 2: 48 bytes for one salt, 80 bytes for two; includes a 16-byte IV.</description></item>
     /// </list>
     /// </para>
     /// <para>
@@ -114,7 +125,7 @@ public sealed class HmacSecretInput
     /// <summary>
     /// Encodes this hmac-secret input as a CBOR byte array.
     /// </summary>
-    /// <returns>The CBOR-encoded input.</returns>
+    /// <returns>A new caller-owned CBOR copy of the encrypted salts and authentication material.</returns>
     public byte[] Encode()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);

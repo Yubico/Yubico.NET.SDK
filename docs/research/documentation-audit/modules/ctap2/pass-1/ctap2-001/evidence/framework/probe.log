@@ -1,0 +1,32 @@
+Runtime=.NET 10.0.14; RID=linux-x64; LittleEndian=True
+Assembly=System.Formats.Cbor, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51; Info=10.0.2+44525024595742ebe09023abe709df51de65009b; Path=/tmp/opencode/ctap2-001-framework-probe/bin/Release/net10.0/System.Formats.Cbor.dll; SHA256=18875C3B5B857EC0426464E25F544C9C15CBBBC85F0A3B6005E6041C1E2861C9
+Assembly=System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e; Info=10.0.14-servicing.26522.126+0427b9abbead3fa64c6655eb4290c537397131fa; Path=/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App/10.0.14/System.Private.CoreLib.dll; SHA256=DBE82A7A9A38F468D8DAFB7890A3301F904C420718A8A985A302AA182C1268BC
+PASS: Text map auto-sorted id,name,displayName
+Text insertion=displayName,id,name; wire=A362696400646E616D65006B646973706C61794E616D6500
+PASS: Integer map auto-sorted 1,3,-1,-2,-3
+Integer insertion=-3,-2,-1,1,3; wire=A501000300200021002200
+PASS: Reader default multiple=false
+PASS: ReadEndMap leaves trailing item
+Reader mode=Ctap2Canonical; multiple=False; ReadEndMap=returned; BytesRemaining=1; PeekState=Finished
+Second root read=InvalidOperationException: No more CBOR data items to read in the current context.
+PASS: Reader default multiple=false
+PASS: ReadEndMap leaves trailing item
+Reader mode=Ctap2Canonical; multiple=True; ReadEndMap=returned; BytesRemaining=1; PeekState=UnsignedInteger
+PASS: Multiple=true permits second root
+PASS: Reader default multiple=false
+PASS: ReadEndMap leaves trailing item
+Reader mode=Lax; multiple=False; ReadEndMap=returned; BytesRemaining=1; PeekState=Finished
+Second root read=InvalidOperationException: No more CBOR data items to read in the current context.
+PASS: Reader default multiple=false
+PASS: ReadEndMap leaves trailing item
+Reader mode=Lax; multiple=True; ReadEndMap=returned; BytesRemaining=1; PeekState=UnsignedInteger
+PASS: Multiple=true permits second root
+PASS: Fixture executed only on little-endian host
+PASS: Reversed default constructor agrees with explicit network constructor
+PASS: Default ToByteArray is mixed-endian fixture
+PASS: Default TryWriteBytes agrees with ToByteArray
+PASS: Reversed default write agrees with network output
+Guid expected=00112233-4455-6677-8899-aabbccddeeff; default constructor(network)=33221100-5544-7766-8899-aabbccddeeff; reversed constructor=00112233-4455-6677-8899-aabbccddeeff
+Guid ToByteArray=33221100554477668899AABBCCDDEEFF; explicit bigEndian=00112233445566778899AABBCCDDEEFF
+No-reversal fixture demonstrates default API interpretation only, NOT big-endian platform execution.
+PROBE PASSED

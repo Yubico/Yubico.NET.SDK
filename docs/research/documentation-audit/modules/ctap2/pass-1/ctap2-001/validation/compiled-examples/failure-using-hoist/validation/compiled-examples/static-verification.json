@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-04",
+  "root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "guide_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "baseline": "5b09a9b6942ded3913b5c9340c3e126617e61a82",
+  "status": "Static preparation input verification only; NOT compiled, built, restored, tested, executed or hardware-qualified",
+  "commands": [
+    {"command": "python3 docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/extract.py --materialize", "exit_code": 0},
+    {"command": "python3 docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/extract.py --check", "exit_code": 0},
+    {"command": "python3 docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/verify-inputs.py", "exit_code": 0},
+    {"command": "git diff --check -- docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/snippet-preparation.md", "exit_code": 0, "limit": "Git diff check does not certify formatting of untracked generated artifacts or C# syntax."}
+  ],
+  "counts": {"module_fences": 39, "module_xml": 5, "total_blocks": 95, "selected_blocks": 39, "excluded_blocks": 56, "groups": 33},
+  "contexts": {"consumer": 19, "consumer-demo": 1, "unit-v3": 4, "hardware-v2": 4, "consumer-wa-demo": 1, "consumer-wa-lib": 4},
+  "static_checks": ["Exact current PRIMARY roots", "Fail-closed body hashes/anchors and document/block universes", "Every selected body retained unchanged after initial import relocation", "Raw/wrapped/original/document hashes", "Python ast.parse for three scripts", "Module XML structural parsing", "Explicit disjoint/exhaustive group assignment", "Genuine source-project package closures: no xUnit2/v3 mixture", "No Tests.Shared/helper/SkippableFact reference in unit-v3", "32 actual source evidence paths and 66 reference paths hashed", "30 literal document/URL reference records; no remote content verification"],
+  "snapshot_hashes": {
+    "extract.py": "7e8a83a74d29c7c20081396fc34bb35eed096ded3e7a9100b77ea5a4d21c39bd",
+    "selection.py": "2acfeffcbdbf6c2b1023e224040947ad934fc493a630682d17b600c992a17d22",
+    "verify-inputs.py": "47889d7e71afaf93fd564e2b2ad9a69e9e1f079d60636d201a63d439c642a566",
+    "manifest.json": "bc195ed012a8dfae5ab5e519011d9e5ceae337fd4b4a17972c242530ebb5b2e4",
+    "../checker-source/context/contexts-manifest.json": "cc320fbcd5aa385dbe278552a250e84e89b11f3eb56d633326633a001e03c7df"
+  },
+  "prerequisites_remaining": ["Final boundary review/corrections; re-extract after input changes", "Coordinator final clean SDK/helper DLL build", "Regenerate provisional DLL hash observations after final dependency build", "Coordinator serialized context preparation, clean compile-only builds, input/policy collection and retained full logs", "Require actual PASSED + Warnings0; collector success is not build success"],
+  "never_run": ["prepare-project-context.py in any mode", ".NET compiler/checker/snippet host", "restore/build/test", "sample CLI", "hardware/PIN/UP/UV/bio/blob/reset", "commit", "delegation"],
+  "strict_raw": "Explicit not-applicable empty optional partition; no raw compiler invocation or vacuous passing result"
+}

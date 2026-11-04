@@ -1,0 +1,42 @@
+{
+  "status": "All six clean SDK-context host builds PASSED with zero warnings; all six actual compiler-input/policy collections verified",
+  "root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "guide_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "compiled_contexts": 6,
+  "compiled_groups": 33,
+  "selected_blocks": 39,
+  "excluded_blocks": 56,
+  "module_fences": 39,
+  "module_xml": 5,
+  "original_blocks_preserved": 95,
+  "readable_raw_files_preserved": 33,
+  "only_changed_wrapper": "guide-protocol",
+  "compiler_analyzer_warnings": 0,
+  "host_test_device_execution": false,
+  "verification": {
+    "command": "python3 docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/verify-validation.py",
+    "exit_code": 0,
+    "checks": ["Fresh frozen PRIMARY document/reference hashes", "Original extracted/verbatim blocks unchanged", "All raw/wrapped hashes", "No resource using hoisted before namespace", "Immutable failure archive hashes", "No duplicate archived *.csproj", "Six retained toolchain PASSED/Warnings0 results", "Six context input snapshots and actual Csc/reference/analyzer/config/policy hashes"]
+  },
+  "results": [
+    {"context": "consumer-lib", "groups": 19, "build": "PASSED", "warnings": 0, "collection": "PASSED", "run": "after-using-hoist/consumer-lib-20261104-014940-722-build", "evidence_sha256": "d6841006d81e4d661c130d7a80d73a8a3701a9bb546a9522fcc1b681c4cf87fe"},
+    {"context": "consumer-demo", "groups": 1, "build": "PASSED", "warnings": 0, "collection": "PASSED", "run": "after-using-hoist/consumer-demo-20261104-014942-728-build", "evidence_sha256": "21b4887be5c0e07c1dfc4e6e96b6fa45fc801858340b047851ac34dde910cd76"},
+    {"context": "unit-v3", "groups": 4, "build": "PASSED", "warnings": 0, "collection": "PASSED via focused pinned-package collector", "run": "after-using-hoist/unit-v3-20261104-014944-861-build", "evidence_sha256": "89f326d0ebd2b1f7f5651242d330354c10165d6d454cdcfe54771ac87fda15d5"},
+    {"context": "hardware-v2", "groups": 4, "build": "PASSED", "warnings": 0, "collection": "PASSED", "run": "after-using-hoist/hardware-v2-20261104-014947-005-build", "evidence_sha256": "f168c2f7bcb393f83e497562fd10267856744142693c0777a231401b69be5f59"},
+    {"context": "consumer-wa-demo", "groups": 1, "build": "PASSED", "warnings": 0, "collection": "PASSED", "run": "after-using-hoist/consumer-wa-demo-20261104-014949-112-build", "evidence_sha256": "1b59e51fde7b3203b10468b32fd484234cbd2516c62e39a9b48d5165d7ea4e74"},
+    {"context": "consumer-wa-lib", "groups": 4, "build": "PASSED", "warnings": 0, "collection": "PASSED", "run": "after-using-hoist/consumer-wa-lib-20261104-014951-198-build", "evidence_sha256": "9298060dd80c3ab5f4a8ee21c6fccbae9fbd695c6538a5a7196304c61c3de437"}
+  ],
+  "collection_path_rule": "../../checker-source/context/<id>/evidence/resolved-inputs.json relative to this result file's context-runs directory",
+  "preserved_failures": [
+    {"stage": "Original consumer-lib build", "diagnostic": "CS1529", "reason": "Extractor hoisted using var protocol resource declaration", "original_log": "../../context-runs/consumer-lib.log", "archive": "../failure-using-hoist/archive-manifest.json", "workspace_archive": "../failure-using-hoist/workspace-manifest.json"},
+    {"stage": "Post-fix generic unit-v3 collection", "reason": "Generic collector rejected genuine xunit.v3.core/3.0.0/_content/DefaultRunnerReporters.cs Compile source", "log": "after-using-hoist/unit-v3.log", "archive": "../failure-xunit-package-content/archive-manifest.json", "supplement_log": "after-using-hoist/unit-v3-collector-supplement.log"}
+  ],
+  "snapshot_hashes": {
+    "extract.py": "0f149ce6c21ff6a8780c263c98fefaef4fdbb71e9723f0e22bc58e61c8abaa2e",
+    "manifest.json": "6402578ca65eb04f2f24e3e35d692363c2f4e548458c9d9ceddaf784fa2f7376",
+    "verify-inputs.py": "1b66e366f3e3c6b89f93742aaaf6f0e32fd125c45ff55667142face5e6a94a4f",
+    "collect-unit-package-source.py": "a305e8c768f70e25d0d5c1cec119fea30d8b79ed26f3aed5cdd04289c25475d5",
+    "contexts-manifest.json": "d97b6d3fe7463a942975082dda81eea299ff1f436a19024e31cf98d512620511"
+  },
+  "limits": ["No raw Roslyn run or claim that raw CS1701 disappeared", "SDK-resolved context builds use unchanged canonical policy; actual SDK default NoWarn captured, no new suppression", "No SDK/source documentation edit", "No SDK tests run in this follow-up", "No snippet/host/helper/hardware execution", "No commit/delegation", "Generic collector remains unchanged; focused unit package-source supplement is explicitly retained"]
+}

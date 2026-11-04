@@ -24,8 +24,12 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// algorithms for registration (key generation).
 /// </para>
 /// <para>
-/// See: CTAP v4 draft Web Authentication sign extension
-/// Reference: Plans/cnh-authenticator-rs-previewsign-parity.md
+/// See https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension:
+/// Yubico Labs previewSign version 4, Editor's Draft of 26 August 2025, not CTAP version 4.
+/// This preview and its algorithms/identifiers may change; do not use it as production guidance.
+/// The algorithms list is borrowed until encoding/transmission completes. The constructor checks a
+/// nonempty list, but init properties can replace values and the encoder does not validate flags,
+/// algorithm support or ceremony policy.
 /// </para>
 /// </remarks>
 public sealed class PreviewSignRegistrationInput
@@ -40,8 +44,9 @@ public sealed class PreviewSignRegistrationInput
     /// Gets the user presence and verification policy for signing operations.
     /// </summary>
     /// <remarks>
-    /// Flags: 0x01 = RequireUserPresence, 0x05 = RequireUserVerification.
-    /// Per CTAP v4 draft specification, flags default to 0x01 if not specified.
+    /// Draft policies: 0 = unattended, 0x01 = UP required, 0x05 = UP and UV required.
+    /// The constructor defaults to 0x01 and the encoder always sends this property. The device's
+    /// signing policy is fixed at key generation; a later request cannot relax it.
     /// </remarks>
     public byte Flags { get; init; }
 

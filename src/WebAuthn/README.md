@@ -18,8 +18,12 @@ the transport name.
 
 - .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
 - YubiKey 5 series, Security Key series, or YubiKey Bio series with firmware 5.0.0 or later. This module adds no
-  firmware gates of its own; [../Ctap2/README.md](../Ctap2/README.md) lists the per-feature minimums.
-- Transports: HID FIDO over USB by default, or SmartCard where the FIDO AID is exposed - NFC always, USB on 5.8.0+.
+  firmware gates of its own; [../Ctap2/README.md](../Ctap2/README.md) lists SDK firmware thresholds, not
+  a qualified per-model support matrix. Revision/extension advertisement, configured state and permission
+  requirements still apply independently of firmware metadata.
+- Transports: HID FIDO over USB by default, or SmartCard where the connected authenticator exposes the
+  FIDO AID. NFC requires a current PC/SC connection reporting `Transport.Nfc`; USB SmartCard uses the
+  CTAP2 SDK's 5.8.0+ gate. NFC capability metadata alone does not establish the current transport.
 - The supported origin representation is HTTPS, or HTTP on `localhost` / `*.localhost`; this parser is not
   a complete browser Secure Contexts evaluation. Native/opaque/custom-scheme origins are not supported.
 - PIN/UV token acquisition and PRF key agreement currently use PIN/UV protocol 2, without protocol-1

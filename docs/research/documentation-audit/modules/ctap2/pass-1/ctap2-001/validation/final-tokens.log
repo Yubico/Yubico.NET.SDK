@@ -1,0 +1,186 @@
+$ dotnet /tmp/opencode/ctap2-001-doccheck/bin/Release/net10.0/Yubico.YubiKit.Ctap2.DocCheck.dll tokens-import-removals /home/rupicola/Code/y/Yubico.Yubikit.NET docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/import-removals.json
+IMPORT EXCEPTION MANIFEST: /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/import-removals.json; SHA256=3B53BA417658B6E760569BB7EA5709645DCD2E3ED4F0993301F3D70DC061DA24; baseline=5b09a9b6942ded3913b5c9340c3e126617e61a82
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Menus/AccessMenu.cs; SHA256=8DC705F7953D2ED15E7197BA7DC6BBC6EFAD10B77128CC8F186A7FE5FB65EEED
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Menus/ConfigMenu.cs; SHA256=BE4E1FDB1D0C208B9E89341E059791C2521A4BD060E6E2BEFEACCF711FFBB8EC
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Menus/CredentialMenu.cs; SHA256=9A83801C7D1B6170ACBCE3B012A08B91DFACA5A2420B3DBE20A1994804D0AA9E
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Menus/CredentialsMenu.cs; SHA256=11B12667AE26B534469DDA9E1D78C68433E374EF2EACD14D97CA9E6E5B65AF14
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Menus/FingerprintsMenu.cs; SHA256=0FA65B82C9A557860ABCFAA8B5BCA534B46612F03FFD0934EB1BA8B90FD452FB
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Menus/InfoMenu.cs; SHA256=2DD65CC6EEACB6DAF0B43F89DB3D15449442652F449461BD3A577C356FE2BA7B
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Menus/ResetMenu.cs; SHA256=FC2B2EA7A47195D7220953B2FAFDDFAEFADEF370B68D78F7B316C6E157A45EDC
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs; SHA256=65D3FA4B4B38CD2F8E78577CD2E63E36FD5500D4C7194C7575B563EC0E71F8DF
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs; SHA256=A5431235EAFE09F02AA72BB3ABE477EB28B6BF21C172FB3B1D8954136DB63579
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Cli/Prompts/FidoPinHelper.cs; SHA256=8D15BB347DEE47F8A99B8E0571A6098F4E749BD502807D3E771213FBBFF827BF
+IMPORT REMOVAL: src/Ctap2/examples/FidoTool/FidoExamples/BioEnrollment.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/examples/FidoTool/FidoExamples/BioEnrollment.cs; SHA256=4DE08DC00320C85072401E8F6ECD6D8E587B567DB6ED2D966185876708EE4D5C
+IMPORT REMOVAL: src/Ctap2/examples/FidoTool/FidoExamples/ConfigManagement.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/examples/FidoTool/FidoExamples/ConfigManagement.cs; SHA256=090CB2FDFF405429081E5E9D20D025F65991B48EB4857887C541A0E2D6AC2AFB
+IMPORT REMOVAL: src/Ctap2/examples/FidoTool/FidoExamples/CredentialManagement.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/examples/FidoTool/FidoExamples/CredentialManagement.cs; SHA256=BAD6C4C6F528AC73F44B8E938D2AB4E0B5004946887AAA3C11ADCCAF2E85BB85
+IMPORT REMOVAL: src/Ctap2/examples/FidoTool/FidoExamples/GetAssertion.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/examples/FidoTool/FidoExamples/GetAssertion.cs; SHA256=41961F00F084B1728E8EF889C44E03AB019209309999B88173C997487A0F5C22
+IMPORT REMOVAL: src/Ctap2/examples/FidoTool/FidoExamples/GetAuthenticatorInfo.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/examples/FidoTool/FidoExamples/GetAuthenticatorInfo.cs; SHA256=7CCA575B6BBE0A6C8CB2BB765954993AACDC216B83A502641C57617C74D16480
+IMPORT REMOVAL: src/Ctap2/examples/FidoTool/FidoExamples/MakeCredential.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/examples/FidoTool/FidoExamples/MakeCredential.cs; SHA256=A16BDEE4E2F9EA0B4CF6207B81AD4760EEA96D73E23742572C6952FB10D29FC4
+IMPORT REMOVAL: src/Ctap2/examples/FidoTool/FidoExamples/PinManagement.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/examples/FidoTool/FidoExamples/PinManagement.cs; SHA256=81374D1A87743662B8F80055DBD4BE55514C92DDDE0D979726EB5E83D93FE15D
+IMPORT REMOVAL: src/Ctap2/examples/FidoTool/FidoExamples/ResetAuthenticator.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/examples/FidoTool/FidoExamples/ResetAuthenticator.cs; SHA256=8A85FB4A081AEF06B87FE9353C9D0D033E5CA6AA9E5D658421234193D2F4295F
+PASS: strict tokens/directives src/Ctap2/examples/FidoTool/Program.cs; SHA256=146BDB4703A47932EE813A6AC5C478F5E571E31B3C1D90B21FCED7ABB1642855
+PASS: strict tokens/directives src/Ctap2/src/Arkg/ArkgP256.cs; SHA256=4C3BAD64517CF6C52768BBB99D6B2E137B9529B87A76DE117A49D36105173356
+PASS: strict tokens/directives src/Ctap2/src/AuthenticatorInfo.cs; SHA256=699BC772CA085FBFE05E267FC0286E153C57938853BC1DC2790DBB1CB9F56EE3
+IMPORT REMOVAL: src/Ctap2/src/Backend/HidBackend.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/Backend/HidBackend.cs; SHA256=14941F940C60035457B0D3EDF6B6F87B2422ABA25AD62F28FE900EC4E6EF6C55
+PASS: strict tokens/directives src/Ctap2/src/Backend/ICtap2Backend.cs; SHA256=383E3D5E0789A6E07EDA2D91EEEE1958B3AE14014C004EF135767DE401486556
+IMPORT REMOVAL: src/Ctap2/src/Backend/SmartCardBackend.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/Backend/SmartCardBackend.cs; SHA256=D684C8AAEDFC9C407F6E0830EE088AF490B7EA06AB5C3CF597B54BDF88A602FA
+PASS: strict tokens/directives src/Ctap2/src/BioEnrollment/BioEnrollmentModels.cs; SHA256=6B7C669FDAAF0BCAB43880F5F4F4181FD5FA206524A27D44D1E843812FBF9E33
+PASS: strict tokens/directives src/Ctap2/src/BioEnrollment/BioEnrollmentSubCommand.cs; SHA256=FED2223E0A67A75BC8CB516C7DCA2CD1B4E0E0CBDB183648A4449B06E52DE77E
+IMPORT REMOVAL: src/Ctap2/src/BioEnrollment/FingerprintBioEnrollment.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/BioEnrollment/FingerprintBioEnrollment.cs; SHA256=299CAF5B54124CAD5BCC0A04445DC0B2A8D919A8B19F7483889618B529F09202
+PASS: strict tokens/directives src/Ctap2/src/Cbor/AaguidConverter.cs; SHA256=95A7A228FA33BD7C202EE702ACA657DDF5DD1EFBDE672BB89FC31C74616F4599
+PASS: strict tokens/directives src/Ctap2/src/Cbor/CoseKeyWriter.cs; SHA256=5F07EF7D119F023394A401647B74F6837DCF9FAFC611AAFE10944F402BDC8909
+IMPORT REMOVAL: src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs; SHA256=1F5A6BC3C290E4C50A03ABE5664572F84D968E4F87864B546F2C7CA9596E87DE
+PASS: strict tokens/directives src/Ctap2/src/Cbor/CtapRequestBuilder.cs; SHA256=16DE24024B3E27548370C8BB82C6602E1F6D13E4AC811D958756552F8B1F9CC1
+PASS: strict tokens/directives src/Ctap2/src/Cbor/CtapResponseParser.cs; SHA256=16FA164BBA14801B923A8C689C39A042AA7B9EF0EC9AB786FABB2268133CD010
+IMPORT REMOVAL: src/Ctap2/src/Config/AuthenticatorConfig.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/Config/AuthenticatorConfig.cs; SHA256=8AF20970500B79FBA1A2CDF79FBBD92DB031CB0DDE65DE8DD63A75DB3877B65E
+PASS: strict tokens/directives src/Ctap2/src/Config/ConfigSubCommand.cs; SHA256=64CF36EE7942B60EC266CD249BA9F616D24B0642F39CA73FE0065FE8EFEA12DC
+PASS: strict tokens/directives src/Ctap2/src/Cose/CoseAlgorithm.cs; SHA256=17C9556E7DD8FC187BBE6C61B45677D23B9C50A642CFD8D1764477DE354BC44F
+PASS: strict tokens/directives src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs; SHA256=813FF15A4E2EDAC8181271A5D627EAD8A683990AB0239CA5A58DC8F60CB873A2
+PASS: strict tokens/directives src/Ctap2/src/Cose/CoseKey.cs; SHA256=DAE1A7ED03AEB98523F4BA75295855492017DD464B71E42977D78C3C1A97032E
+PASS: strict tokens/directives src/Ctap2/src/CredentialManagement/CredManagementSubCommand.cs; SHA256=906D8FC2F4591D8B2ECC21198DCCCDABC30EDDD8F5647CA68E89E2582B82F3CC
+PASS: strict tokens/directives src/Ctap2/src/CredentialManagement/CredentialEnumerationResult.cs; SHA256=371444B634CB1D3CEC10D24CF5F9A7436EF58A0BFA7E9B658AFC2B87F14870A7
+IMPORT REMOVAL: src/Ctap2/src/CredentialManagement/CredentialManagement.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/CredentialManagement/CredentialManagement.cs; SHA256=994474858AF5ECDCB5A6A01020B66F60DB4F7557CB6183AE0DAC33D54F823AA7
+PASS: strict tokens/directives src/Ctap2/src/CredentialManagement/CredentialManagementModels.cs; SHA256=AC41A11D13731DF0E1110224113128E30D750CC2C257A22353ED5B28C9F29BE6
+PASS: strict tokens/directives src/Ctap2/src/CredentialManagement/RelyingPartyEnumerationResult.cs; SHA256=14F5BABEE49290976EE4C792D95F6E8A2B9A771E8DBAA93B06B68061655DC31F
+PASS: strict tokens/directives src/Ctap2/src/CredentialManagement/StoredCredentialInfo.cs; SHA256=7EE5B797692CFBE19983DDF7D74E80542C55778030E3DB46ED22FB6D55DE2753
+PASS: strict tokens/directives src/Ctap2/src/Credentials/AttestationFormat.cs; SHA256=2FA3E0A1E0E8CAEE7894DBCE37671B5E8CAB985503E8EC9857E29A6364622560
+PASS: strict tokens/directives src/Ctap2/src/Credentials/AttestationStatement.cs; SHA256=A5B0CF9AE01D8D59DE708415D4EBB20CE4E1CD6F24E405D47A1E5B1E841944E7
+PASS: strict tokens/directives src/Ctap2/src/Credentials/AttestedCredentialData.cs; SHA256=483E59000489970914C589EBF5BBB7E44EEBE5F14DDF00350BD63ACC97BB32BC
+PASS: strict tokens/directives src/Ctap2/src/Credentials/AuthenticatorData.cs; SHA256=AF166A2B1D54EA46218EDF436082619CBAF746EF7A32BFC0FEBC328785BC96B7
+PASS: strict tokens/directives src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs; SHA256=9EF655B1A725752243026F45D85D72E3516DCA5C84AA803599D72B4964252901
+PASS: strict tokens/directives src/Ctap2/src/Credentials/GetAssertionOptions.cs; SHA256=7F326F279FC9048F1E09FC56E28C33EACD58D822921E058A5BE8294E6B7FE4D3
+PASS: strict tokens/directives src/Ctap2/src/Credentials/GetAssertionResponse.cs; SHA256=44BCEDDFD5691092DC76AC757AB486A4509F73F83051A44628A64F9D92BBC0AB
+PASS: strict tokens/directives src/Ctap2/src/Credentials/MakeCredentialOptions.cs; SHA256=8E20DEFD2B96B1C8130C8926CE929BE2B38E6BBAFD9DF6D312A63D920471D755
+PASS: strict tokens/directives src/Ctap2/src/Credentials/MakeCredentialResponse.cs; SHA256=46DE2B3348F861A89D507ACDE0840F227A609E998C93575AE361CD005AA8E1FB
+PASS: strict tokens/directives src/Ctap2/src/Credentials/PublicKeyCredentialTypes.cs; SHA256=269AAB7260DD7E62F00972B5D9662F7FA4ECA8578C61C9F3B8CA0A1A11F9B034
+PASS: strict tokens/directives src/Ctap2/src/Crypto/EncryptedMetadataDecryptor.cs; SHA256=FAB860AC2408457483363A61CB1CE44DA847C00C18966EA13B8A5F6711FC521C
+PASS: strict tokens/directives src/Ctap2/src/Ctap/CtapException.cs; SHA256=113E60D156960EFB11A09FDE1EDCE0D9F5122EC2F85CB799A82761AACE9503F7
+PASS: strict tokens/directives src/Ctap2/src/Ctap/CtapStatus.cs; SHA256=66367F7D0BD94583188B5CE1AC5CE22CE4C7210BEED10AA83C3857A5D0B90C8D
+IMPORT REMOVAL: src/Ctap2/src/Ctap2Session.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/Ctap2Session.cs; SHA256=870046812FE2802A82EF3C84AB1AF7BD118E283A0E2F3CE21934E8C5C8087729
+PASS: strict tokens/directives src/Ctap2/src/Extensions/CredBlob/CredBlobAssertionOutput.cs; SHA256=03BBACDDF2192FB70BFC5AEA6DED359AB47F65AEA78B196853705B6F0630CC47
+PASS: strict tokens/directives src/Ctap2/src/Extensions/CredBlob/CredBlobInput.cs; SHA256=B8E563E15188A97AA5BD364F688EAD1B52FFDD7E5E2FDC9169D06A65BE6A5A93
+PASS: strict tokens/directives src/Ctap2/src/Extensions/CredProtect/CredProtectPolicy.cs; SHA256=99EEA66ACD8FAF86CD3875CC7F6EF46A06E7A9145B06F2162F4B2874A6D9F5A9
+PASS: strict tokens/directives src/Ctap2/src/Extensions/HmacSecret/HmacSecretInput.cs; SHA256=226FB0ED79CAFE7995147B8AF9EAF2E79A4225ED926FF3B5AC2CA0A96EC838D5
+PASS: strict tokens/directives src/Ctap2/src/Extensions/HmacSecret/HmacSecretOutput.cs; SHA256=6C48B9E51EC8D8CCED213EAECC06931042F26BA15BB07C2CD114EB1F72095240
+PASS: strict tokens/directives src/Ctap2/src/Extensions/LargeBlob/LargeBlobOutput.cs; SHA256=3F83851E43F1DF578F1077A1D97F416EF2B4FA58AAB39AC534920B14B54762EA
+PASS: strict tokens/directives src/Ctap2/src/Extensions/MinPinLength/MinPinLengthInput.cs; SHA256=5BF12F812E6886F4EFFC9A57D868759CD60A6F08E1277113AE4F0F8DFAE4A5AB
+PASS: strict tokens/directives src/Ctap2/src/Extensions/MinPinLength/MinPinLengthOutput.cs; SHA256=D1D9DC5B9089563A32ABD379EC79C4D908D34224BAB5FD75DC257F65312A05AA
+PASS: strict tokens/directives src/Ctap2/src/Extensions/PreviewSign/ArkgP256SignArgs.cs; SHA256=BF80E794252141B6DF982EF701AD25B46AA5F4401362DB12DC0F5AE40971DC49
+PASS: strict tokens/directives src/Ctap2/src/Extensions/PreviewSign/CoseSignArgs.cs; SHA256=07B158E91A65553140A61C232D60F886BAD3414F4D78B31F3AF65623FBD1AC70
+PASS: strict tokens/directives src/Ctap2/src/Extensions/PreviewSign/PreviewSignAuthenticationOutput.cs; SHA256=A90B90F9B3B9C4068A93E7DE45BB6F0D857C057F601858F2BD75D4DBA68EBA6C
+PASS: strict tokens/directives src/Ctap2/src/Extensions/PreviewSign/PreviewSignCbor.cs; SHA256=7FCF8E09F52D62CCC5F2841396C5B672BDDC49D52C7F4A12D84F3FA6D911F10F
+PASS: strict tokens/directives src/Ctap2/src/Extensions/PreviewSign/PreviewSignDerivedKey.cs; SHA256=75B43EAEA4AC8C47EAD16E077DB0A101538B7B3044D1615BEE28D55FB79176D4
+PASS: strict tokens/directives src/Ctap2/src/Extensions/PreviewSign/PreviewSignGeneratedKey.cs; SHA256=D4BDF3938E7981106D25A03DC0E9EE7EB246E6809972AD95354A9D35D2FA4D04
+PASS: strict tokens/directives src/Ctap2/src/Extensions/PreviewSign/PreviewSignRegistrationInput.cs; SHA256=655FFDA86D394EF97B6859782DD02622B97901EF06BAE35F57B294089B4693B8
+PASS: strict tokens/directives src/Ctap2/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs; SHA256=91AD5E86ED22F9BA2C625F236027094C633C7DF9BD1DFB4329A81D45A8CC70E2
+PASS: strict tokens/directives src/Ctap2/src/Extensions/PreviewSign/PreviewSignSigningParams.cs; SHA256=5406A0C12B2906A3C40CBA5AD41C705389E9A90C392905368A633950906F0542
+PASS: strict tokens/directives src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs; SHA256=A5F964CA86C800BEFC5586BBF96E6B24284E250E158E37C1EE8F84CAAA98794C
+PASS: strict tokens/directives src/Ctap2/src/Extensions/Shared/ExtensionIdentifiers.cs; SHA256=7B1A4E2320D514105BA09D9B05304D2FAF730CA970C8E2BEB8634159D6C0605C
+PASS: strict tokens/directives src/Ctap2/src/Extensions/Shared/ExtensionOutput.cs; SHA256=1DD27DDE999D69C083BAB76DE83E461AEA8A4EC349CA2BC17BA7856970CFF66E
+IMPORT REMOVAL: src/Ctap2/src/ICtap2Session.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/ICtap2Session.cs; SHA256=1D463A8B64228B2193778CA0F575925AEBD79B30ED83801D78DED8235220131B
+IMPORT REMOVAL: src/Ctap2/src/IYubiKeyExtensions.cs: using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+IMPORT REMOVAL: src/Ctap2/src/IYubiKeyExtensions.cs: using Yubico.YubiKit.Core.Protocols.SmartCard.Scp; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/IYubiKeyExtensions.cs; SHA256=4A456736BCB7C35D25CBBEE5508DDE57A4DFED04A9F039F56740A9AD6C411673
+PASS: strict tokens/directives src/Ctap2/src/LargeBlobs/ILargeBlobStorage.cs; SHA256=3D50A721F5192316EDFE13C1EB110BD985EEEAF58E7B8976572BF711319279B3
+PASS: strict tokens/directives src/Ctap2/src/LargeBlobs/LargeBlobData.cs; SHA256=3EFBC371993AF0789B73489E87267B01936DAD8EFE0E5B4ADCE18D4B83D99A67
+IMPORT REMOVAL: src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs; SHA256=46D419F3ED536A5CDB31571AC983CA7E3D6D3666AF41D4DFCA5497AFD9051BDF
+IMPORT REMOVAL: src/Ctap2/src/Pin/ClientPin.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/src/Pin/ClientPin.cs; SHA256=F05A11468D6ADC6BDD732070523CCE09C8BCCD8E307CE4B85E47F1C2854B5B4F
+PASS: strict tokens/directives src/Ctap2/src/Pin/ClientPinSubCommand.cs; SHA256=BF45DDB79C6FD902297C89325C9BE0D5BC55CBA19FA0550492AEE2F3D46E162F
+PASS: strict tokens/directives src/Ctap2/src/Pin/IPinUvAuthProtocol.cs; SHA256=9D8046605655262B8C07433526073DB814F02011EC0CB57765CFB1441D51C07E
+PASS: strict tokens/directives src/Ctap2/src/Pin/PinRetryStatus.cs; SHA256=C90DD259FA097F4358EE517DE09EEC9C5782F7C4A4E148A758CFAD6572BBA9A2
+PASS: strict tokens/directives src/Ctap2/src/Pin/PinUvAuthHelpers.cs; SHA256=47D199377344B2505FA593FBE3AD4F31FB0EEB937B5F63D572AE5F702A617643
+PASS: strict tokens/directives src/Ctap2/src/Pin/PinUvAuthProtocolV1.cs; SHA256=4B58B0909B1C1D1EFD9868AB1FC84E5D778E06C7B666CAE378C065CF91123620
+PASS: strict tokens/directives src/Ctap2/src/Pin/PinUvAuthProtocolV2.cs; SHA256=44BACB7B55B09B278A26C0972D3DBE381682C3F972697E7F1BC8D2884EE4ADBD
+PASS: strict tokens/directives src/Ctap2/src/Pin/UserVerificationRetryStatus.cs; SHA256=3C5AB454ABD7EC444FE8B792B8BE08EE529A880E088992D5775992F339876371
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs; SHA256=07A6CF9AA2E87924A870C3562765FF3CD8B6111785FB45B9AF6C4E20FC178C22
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2RequestAuditReproTests.cs; SHA256=102DC66A8DB7CC6FF27CDF5721B5E78D860AF7BDE6D0A1871725A4A2A56825D3
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AlgorithmSupportTests.cs; SHA256=B4306263E979E797A729311CB22C4FBE2B1F0B26B05044A2F249D4666BD7E747
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AuthenticatorConfigTests.cs; SHA256=F2EA3B85CA48B2413933C00FBBEE53A4889AA4AE34F34C6EB2FA43B6915594CC
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2BioEnrollmentTests.cs; SHA256=C0AD78BE4E200DFF158E236566F6B1D23D195F5D4A127C4477F419AEA6E488AA
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredBlobTests.cs; SHA256=7154C8FE2B9A01C7CF6CAA15D53EC5FC07E29FF87D3602C0E88158642596C419
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredProtectTests.cs; SHA256=BB519203836A6DDD02C10EF43A9A142E3412E39C9046814851F96580E4A1F406
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementExtendedTests.cs; SHA256=ED7D2F15E5874978D5DB3039FC409F97CE48E34755C15A1F011657739FFD760C
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementTests.cs; SHA256=652328CDF058DC46619EBE13BFBA48B011FD520D35050D2193C3F286E067CF6B
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EncryptedMetadataTests.cs; SHA256=BB833889B102E68AB0171A7AF64A55F9FCCFFABD0FDC321E0CA7EB232AC65AB8
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnhancedPinTests.cs; SHA256=A374EDB54F961F2944933F772D8934BFF7115ECFF1678E55808A41B74AB8F886
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnterpriseAttestationTests.cs; SHA256=13A8FFEAF97378A6654D2389871BB1C478CFE6C6A2DE1415D48F3A2BF1785EE1
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2FipsComplianceTests.cs; SHA256=F25BC7D5596489C21F741534DE8668A098FA64B3D745310ECAEC4EBA2FD6CA07
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetAssertionTests.cs; SHA256=AF5948E4419B24ADE09F4937F99899CC7903D3ACCCBF9C42C1ECFB0B00F64F9F
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetInfoTests.cs; SHA256=2F4520568966101A1A0A169AF0CB00D6EE1F47D7CF02506BDD92288F45CF7E17
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2HmacSecretTests.cs; SHA256=7E2F2DDB44648390D3AEE8EAB78036CF9D70522A6F8ADB7C1E13D130579CA3F0
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2LargeBlobTests.cs; SHA256=4E42C8003D468F295615F022C811894D2AEAA52C93E633139E3598BF9F27FA69
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MakeCredentialTests.cs; SHA256=0649C9107777ADBF774A87E3FEF257C168E331C7B1965E942397AC85F666E2D2
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MinPinLengthTests.cs; SHA256=CD27A0AAD7DE7D2B6A18217C57D5135870B22A5A059726CC1509177B74852AA1
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PinManagementTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PinManagementTests.cs; SHA256=0D5794060ED4D4E27AA7DEDCD88167E8F4312403376873D88271133C62947C2A
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PreviewSignTests.cs; SHA256=ECA2BFE872CD15D0CCAC81BD32D8A38C7A2B429D0FFA059732E557089B087884
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PrfTests.cs; SHA256=CE0C3AEE338169535132099144012EC6DEEB363E5E7C5212BC7BB1281AB313D0
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SessionSimpleTests.cs; SHA256=7E281267E2BA4042ACDF6D4AF72BAE9FCFBE4BD6DAA2913D74CB2298BA507ACD
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SmartCardTests.cs; SHA256=D7FB3B7FBA83D647A19DE531257E9C883E230482FC2633FF1E94C06104616547
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestData.cs; SHA256=B4E6A59C07353A26144C76AF8C2FD3B84028B6C0839EECECF0DC9D1E7AE0F7B3
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestHelpers.cs; SHA256=597AC645ACD5A6BDE8D9B92F807FA0BD321E4B8487F78BA06A4157818924F29D
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TransportTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TransportTests.cs; SHA256=36AFCE1A5E7314E3EF597D5DBD661C32B3E445C2591C73F0C10DF9A733795E63
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/IntegrationTestBase.cs; SHA256=4D87F512CF056D06F0A49D1BE6A6F6115EFD6C3DB4C7B1D5CB86D5CEEBFEAEDE
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs; SHA256=5484A5FB10F15F6E60CFB9C3D0F0CE57A6545CDBDE153F5DADAAC3794AEFBE45
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2ExtensionAuditReproTests.cs; SHA256=D695DF452D5C6ACCA1DB9EC25E8E1F5283A69D0E5A351D95371F8BC4AF0E497B
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs; SHA256=06EB91B1A300F40A160269D8D3D02895CEE1D8EBFB127FC7459D603FCA73CA34
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuthenticatorInfoTests.cs; SHA256=075D5855B7D8FDEDE61A31A064564238EACF70A85C9033D571AE12E580D2D96C
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/BioEnrollmentModelsTests.cs; SHA256=41AA07192D6FB0EEE3A59EEC8CB0C8139FAA4DA1365E5D65DF2BC878823154E0
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/FingerprintBioEnrollmentTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/FingerprintBioEnrollmentTests.cs; SHA256=835B7EED6BAB5CD92F4C720624E7232306CE0A8CF603008ABDA69871AAADB491
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/Ctap2SessionRequestEncodingTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/Ctap2SessionRequestEncodingTests.cs; SHA256=A6F5727D76FB2A9632764CEF8A475EE7168C28B3970311A9767DF0189C40B972
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Config/AuthenticatorConfigTests.cs; SHA256=3E68F08A7B0AF3DD7F01A7BC9CB65E5296999C3B85687F9C74B6712EDADB74F4
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs; SHA256=45111042BE2B19802F121BC801A00095F1366EDAA8B0848FDD02B98D00AD8566
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementModelsTests.cs; SHA256=23C7EDB5968E408CC701F8D8F7024C321C7AED45CB2AE11D2C1B59646515CBD7
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementWireTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementWireTests.cs; SHA256=6F9C9A085160F538724A8C0A34939A0698E9F62DCA80A8EF1E7DA2C8CFF437B3
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/AuthenticatorDataTests.cs; SHA256=6711F69E5E3DA453553DC51CF28163D8E62B0BA4B5854917F601D24E8385934C
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/CredentialResponseTests.cs; SHA256=ABD636A445241592CC58DEA12E6A8CE459437CA0A704705354307D7B29CFF699
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/PublicKeyCredentialTypesTests.cs; SHA256=5A2798B32CBE1CB84745DBB96CC87A33D2DB5D30F9F24B1880F3EC484A3CD65A
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Crypto/EncryptedMetadataDecryptorTests.cs; SHA256=91C745C020FCF367420393B87FBBD709BFA4FDDA834AB8B19AB751C9C46ADE8B
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs; SHA256=CCC861CE2011BBF3D7ED6BA29628E0C5485E0639685291E0371A8EB10711A63F
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionTests.cs; SHA256=FB5B52248C399214DDA8DF0B4C53B93D693F41235C361CA66610F07C7619C10C
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapExceptionTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapExceptionTests.cs; SHA256=191098345C8F029E53BDBE97C7E01B31AB31BB0231050F64F3D1B15DDD4C9A2F
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapRequestBuilderTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapRequestBuilderTests.cs; SHA256=46F4E5A9E2346273EDFDFFE4BD19007FBEDB9DE8CA92776B04EB59CBEF061B9E
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretInputTests.cs; SHA256=52DA1A464031AF4AFB492BC435BAAB337F497CACEC55A46714B1452BF021B30D
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretOutputTests.cs; SHA256=666A7FA3327053E75836B87031AA1D82B7B2FA9021B154DF7643932E94FF40E1
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/LargeBlob/LargeBlobOutputTests.cs; SHA256=D3D871FF126D0B436C36853836B7D31D9F746D4CDC8AB1BCADD6BE44A695A559
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/PreviewSign/PreviewSignCborTests.cs; SHA256=B3BA5D7D8982F4973448E5C946C01870B9262A0DD7E4AA34A727367D9E0C1D34
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/PreviewSign/PreviewSignGeneratedKeyTests.cs; SHA256=F6F368EFD215B44FE1D072CFEB86A00595F96892280933F5C355C6344A038836
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionBuilderTests.cs; SHA256=5665645627A7BE097F4AC0C158B72BEF955AFB1CE41941970EB477F927DF4749
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionOutputTests.cs; SHA256=58A0FFDB31CA8B01AFDD091AE5E4ACD9E4E2AB6453DBF34D4454F5F9461DCEAE
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/IYubiKeyExtensionsTransportTests.cs; SHA256=68EC9451406BE4E5EE3FBBC571D3D59DE9BC4681606176C1A03F29EF6CBFAAF8
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobSpecFormatTests.cs; SHA256=5A07965A02829DFAE50C2926F81D3F4028189C57437FA2668EC214022A4060DB
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobStorageTests.cs; SHA256=59AAC0D9E4AD7445E0F28AECEA21FB4FC3B1258399EBA2C080196A2F0789B341
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/MakeCredentialResponseTests.cs; SHA256=893FBDCE04044B915FACF4108125AB1388C0E294C280CC6768B4F68764FA408C
+IMPORT REMOVAL: src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/ClientPinTests.cs: using Yubico.YubiKit.Ctap2; IDE0005 provenance=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/ClientPinTests.cs; SHA256=67880B4D4AE39E9063E1AFA1C8F03775D7735904805FB44BA7652F8399F03A82
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV1Tests.cs; SHA256=9F9B07C2E4EB3BF50094E694733DCF1F8C89A10CB0DFE507BE4A69717E172E3E
+PASS: strict tokens/directives src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV2Tests.cs; SHA256=AAB2399AD4A31B37B9D2DCC41A6F477E5B724E2C63DD2DA87256422FEB5CDE96
+PASS: strict tokens/directives src/WebAuthn/src/Extensions/Codec/PreviewSignCodec.cs; SHA256=ACE27282DAE2D6D505174ED6A46E6F3BBA4077E0B8F1A2E0DCC0242703766BB9
+Import-accounted comparison against 5b09a9b6942ded3913b5c9340c3e126617e61a82: files=152, exception-files=30, explicitly-listed-removals=31, failures=0; syntax is NOT identical: only listed ordinary namespace imports plus the existing directive-free using order allowance were normalized.

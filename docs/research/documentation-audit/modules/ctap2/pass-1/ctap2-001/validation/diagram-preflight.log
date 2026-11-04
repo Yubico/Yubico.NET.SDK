@@ -1,0 +1,2 @@
+$ TMPDIR=/tmp/opencode bash scripts/architecture/render-architecture.sh --check
+ERROR: mmdc not found. Install @mermaid-js/mermaid-cli@11.16.0.

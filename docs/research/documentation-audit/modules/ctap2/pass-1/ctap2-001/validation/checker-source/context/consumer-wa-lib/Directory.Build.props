@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <RepositoryRoot>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)', 'toolchain.cs'))</RepositoryRoot>
+    <!-- Selected from the genuine source project before canonical test policy is imported. -->
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+  <Import Project="$(RepositoryRoot)/Directory.Build.props" />
+  <PropertyGroup>
+    <DocumentationWorkspace>/tmp/opencode/ctap2-001-consumer-wa-lib-context</DocumentationWorkspace>
+    <BaseIntermediateOutputPath>$(DocumentationWorkspace)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(DocumentationWorkspace)/obj/</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(DocumentationWorkspace)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

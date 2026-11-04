@@ -245,6 +245,7 @@ public class PublicKeyCredentialTypesTests
     [Fact]
     public void GetAssertionOptions_FluentApi_ChainsCorrectly()
     {
+        // Setter-storage fixture only: uv + token auth is prohibited on CTAP wire, and the short tag is synthetic.
         var authParam = new byte[] { 0xAB, 0xCD };
 
         var options = new GetAssertionOptions()

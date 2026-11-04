@@ -1,0 +1,11 @@
+$ dotnet build docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-demo/src/Yubico.YubiKit.AuditCt001.Examples.consumer-demo.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-demo/src/Yubico.YubiKit.AuditCt001.Examples.consumer-demo.csproj (in 173 ms).
+  PASS: prepared input hashes match; no compilation performed.
+  Yubico.YubiKit.AuditCt001.Examples.consumer-demo -> /tmp/opencode/ctap2-001-consumer-demo-context/bin/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-demo.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.97

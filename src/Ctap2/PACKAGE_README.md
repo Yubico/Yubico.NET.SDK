@@ -4,6 +4,12 @@ CTAP2 authenticator support for YubiKey devices: read capabilities, create and a
 credentials, manage the PIN, and drive credential management, biometric enrollment, large blobs, and
 authenticator configuration. For the higher-level WebAuthn ceremony API, use `Yubico.YubiKit.WebAuthn`.
 
+Operations depend on the connected authenticator's advertised features, configured state, transport and
+authorization; firmware thresholds alone do not qualify support. Biometric APIs currently have known
+standard-command wire/schema limitations. Responses are parsed, not RP-server verified; this package
+does not complete account registration or sign-in. Experimental previewSign/ARKG helpers are evaluation
+conveniences, not ready for production or production cryptographic guidance.
+
 The authenticator retains its FIDO application identity and FIDO2 PIN. CTAPHID is the shared USB
 transport; this package supplies CTAP2 operations, not a replacement identity for the transport.
 

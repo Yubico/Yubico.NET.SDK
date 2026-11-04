@@ -29,18 +29,19 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// These tests verify that the CTAP2 layer correctly handles previewSign extension inputs
-/// and outputs, independent of the WebAuthn-layer adapter logic.
+/// These fixtures call CTAP2 directly, without WebAuthn's selection/adapter logic. Positive assertions
+/// inspect outputs and one experimental signature round trip; they do not verify generated-key attestation.
 /// </para>
 /// <para>
-/// The previewSign extension uses CTAP v4 draft wire format with integer-keyed CBOR maps:
+/// Yubico Labs previewSign v4 Editor's Draft (26 August 2025), not CTAP version 4, defines:
 /// - Registration input: {3: [alg...], 4: flags}
 /// - Registration output: authData.extensions["previewSign"] + unsignedExtensionOutputs["previewSign"]
 /// </para>
 /// <para>
-/// Per the architectural principle: "CTAP2 is the canonical CTAP2 resource. WebAuthn integration
-/// tests should be supplementary at best." This file closes the gap surfaced in Phase 9.5 where
-/// WebAuthn proved previewSign registration on hardware but CTAP2 did not have an equivalent test.
+/// Setup normalizes the PIN; cleanup is best-effort and tokens/copies are not comprehensively cleared.
+/// Negative tests catch CtapException around setup as well as the target operation, so they can finish
+/// before the intended request. Exact status/phase assertions remain unfinished work. These fixtures
+/// require a human-approved dedicated device; their presence in the suite is not hardware qualification.
 /// </para>
 /// </remarks>
 [Trait("Category", "Integration")]
@@ -53,8 +54,7 @@ public class Ctap2PreviewSignTests
     /// <remarks>
     /// <para>
     /// This test exercises the previewSign registration flow at the CTAP2 layer (not through
-    /// the WebAuthn adapter). It manually constructs the CBOR-encoded extension input per
-    /// CTAP v4 draft specification and verifies that:
+    /// the WebAuthn adapter). It uses ExtensionBuilder for the v4 Editor's Draft input and checks that:
     /// - The authenticator returns extension output in authData.extensions["previewSign"]
     /// - The output contains the selected algorithm
     /// - The response includes unsignedExtensionOutputs["previewSign"] with attestation data
@@ -64,12 +64,9 @@ public class Ctap2PreviewSignTests
     /// production use and must not be treated as production cryptographic guidance.
     /// </para>
     /// <para>
-    /// YubiKey 5.8.0-beta firmware accepts only Esp256SplitArkgPlaceholder
-    /// (COSE algorithm -65539, "ARKG-P256-ESP256") as the request alg for previewSign.
-    /// Esp256 (-9) describes the *output signature* algorithm internally — it must NEVER appear
-    /// on the wire as the request alg. Sending -9 yields an "Unsupported algorithm" rejection
-    /// at firmware protocol-decode time. Verified across python-fido2, cnh-authenticator-rs,
-    /// and the Yubico.NET.SDK-Legacy preview-sign branch (commit fe82b007).
+    /// This experimental ARKG fixture requests signing-op -65539. The seed marker -65700 and derived
+    /// verification algorithm -9 have different roles. The fixture does not establish the full set
+    /// of algorithms accepted by every preview-capable authenticator or the phase of a rejection.
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -116,9 +113,7 @@ public class Ctap2PreviewSignTests
                     clientPin.Protocol, pinToken, challenge);
 
                 // Build previewSign extension input via ExtensionBuilder
-                // Using Esp256SplitArkgPlaceholder (-65539) — the only request alg YubiKey
-                // 5.8.0-beta accepts for previewSign+ARKG. Sending -9 (Esp256) here yields
-                // an "Unsupported algorithm" rejection at protocol-decode time.
+                // Use this profile's experimental signing-op identifier, not its derived-key algorithm.
                 var previewSignInput = new Extensions.PreviewSignRegistrationInput(
                     algorithms: [-65539], // Esp256SplitArkgPlaceholder (ARKG-P256-ESP256)
                     flags: 0x01);         // RequireUserPresence
@@ -155,7 +150,7 @@ public class Ctap2PreviewSignTests
                 Assert.NotNull(result.AuthenticatorData.Extensions);
 
                 // Decode the extensions CBOR to verify previewSign is present
-                // Extensions is a CBOR map: {"previewSign": {3: alg, 4: flags}}
+                // Signed outer output carries {3: alg}; policy flags belong in the inner attestation.
                 var extensionsReader = new CborReader(
                     result.AuthenticatorData.Extensions.Value,
                     CborConformanceMode.Ctap2Canonical);
@@ -169,8 +164,7 @@ public class Ctap2PreviewSignTests
                     {
                         foundPreviewSign = true;
                         // Decode the previewSign output to verify algorithm.
-                        // YK 5.8.0-beta echoes back the negotiated request alg (-65539,
-                        // Esp256SplitArkgPlaceholder), NOT the internal output sig alg (-9, Esp256).
+                        // Assert this fixture's chosen signing-op algorithm, not the derived-key marker.
                         var algorithm = DecodePreviewSignAlgorithm(extensionsReader);
                         Assert.Equal(-65539, algorithm); // Esp256SplitArkgPlaceholder (ARKG-P256-ESP256)
                     }
@@ -229,15 +223,16 @@ public class Ctap2PreviewSignTests
     /// production cryptographic guidance, and must not be copied into production code as-is.
     /// </para>
     /// <para>
-    /// This test exercises the complete previewSign ARKG-P256 ceremony:
-    /// 1. Register credential with previewSign (touch #1)
+    /// This test requests the following experimental ARKG-P256 flow:
+    /// 1. Register credential with previewSign and flags 0 (unattended signing policy)
     /// 2. Extract generated seed key
     /// 3. Offline derive public key using random IKM + test context
-    /// 4. Sign arbitrary message via GetAssertion with ARKG key handle (touch #2)
+    /// 4. Request signing with up:false and no PIN/UV auth parameter
     /// 5. Offline verify signature against derived public key
     /// </para>
     /// <para>
-    /// Mirrors Legacy SDK test at Yubico.NET.SDK-Legacy/.../PreviewSignTests.cs:62-109.
+    /// Registration still has ordinary creation presence requirements. No second touch is requested
+    /// by the signing options, and these assertions do not establish an exact gesture count.
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -283,9 +278,9 @@ public class Ctap2PreviewSignTests
                 var pinUvAuthParam = Ctap2TestHelpers.ComputeMakeCredentialAuthParam(
                     clientPin.Protocol, pinToken, challenge);
 
-                // Step A: Register with previewSign extension (touch #1)
+                // Step A: Ordinary credential creation; signing-key policy is separately flags 0.
                 // WARNING -- EXPERIMENTAL -- test only: ARKG previewSign is not production cryptographic guidance.
-                // flags: 0 matches python-fido2 reference (silent assertion at GetAssertion time)
+                // flags 0 requests unattended signing; the later assertion also sets up:false.
                 var previewSignInput = new Extensions.PreviewSignRegistrationInput(
                     algorithms: [-65539], // Esp256SplitArkgPlaceholder (ARKG-P256-ESP256)
                     flags: 0);            // No UP requirement on derived signing key
@@ -294,7 +289,7 @@ public class Ctap2PreviewSignTests
                     .WithPreviewSign(previewSignInput)
                     .Build();
 
-                // Phase D: mirror python-fido2 reference — non-resident credential, no rk option
+                // Omit rk for this non-discoverable-credential fixture.
                 var options = new MakeCredentialOptions
                 {
                     PinUvAuthParam = pinUvAuthParam,
@@ -329,14 +324,12 @@ public class Ctap2PreviewSignTests
                 Assert.Equal(65, derivedKey.PublicKey.Length); // SEC1 uncompressed
                 Assert.NotEmpty(derivedKey.ArkgKeyHandle.Span.ToArray());
 
-                // Step C: Sign with derived credential (touch #2)
+                // Step C: Request signing without UP, consistent with the generated signing-key policy.
                 byte[] messageRaw = System.Text.Encoding.ASCII.GetBytes("hello-previewsign-integration-test");
                 byte[] message = System.Security.Cryptography.SHA256.HashData(messageRaw);
 
-                // Phase D: skip second PIN token acquisition (python-fido2 doesn't do this).
-                // The previewSign extension carries its own auth via the inner args field;
-                // re-running ClientPin protocol after MakeCredential resets ECDH state and
-                // appears to invalidate the firmware's previewSign verification context.
+                // This fixture obtains no second token. ARKG arguments bind the derivation but are
+                // not a generic substitute for CTAP ceremony authorization; device policy still applies.
 
                 var signingParams = new Extensions.PreviewSignSigningParams(
                     keyHandle: derivedKey.DeviceKeyHandle,
@@ -350,10 +343,8 @@ public class Ctap2PreviewSignTests
                     .WithPreviewSign(signingParams)
                     .Build();
 
-                // Phase D root-cause fix: mirror python-fido2 reference exactly.
-                // - previewSign extension carries its own auth via inner args field
-                // - omit CTAP-level pinUvAuthParam/Protocol (firmware returns 0x7F otherwise)
-                // - options={up:false} for silent assertion (matches flags=0 registration)
+                // Request up:false and omit pinUvAuthParam/Protocol for this flags-0 case.
+                // This does not establish a general ECDH-state or firmware-0x7F restriction.
                 var assertionOptions = new GetAssertionOptions
                 {
                     AllowList = [new PublicKeyCredentialDescriptor(credentialId)],
@@ -412,7 +403,7 @@ public class Ctap2PreviewSignTests
                 bool verified = derivedKey.VerifySignature(messageRaw, signature);
                 Assert.True(verified);
 
-                // Cleanup PIN tokens
+                // Success-path token clearing only; failure-path ownership remains unfinished test work.
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(pinToken);
             }
             finally
@@ -442,28 +433,22 @@ public class Ctap2PreviewSignTests
         }
         catch
         {
-            // Cleanup failures should not fail the test
+            // Best-effort deletion: failure is swallowed and can leave credentials/token storage behind.
         }
     }
-
-    /// <summary>
-    /// Equality comparer for ReadOnlyMemory&lt;byte&gt; that compares byte sequences.
-    /// </summary>
 
     /// <summary>
     /// Tests that MakeCredential with an unsupported algorithm rejects the request.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Mirrors python-fido2 test_register_unsupported_alg (test_sign_extension_v4.py:407-413).
-    /// The YubiKey 5.8.0-beta firmware accepts ONLY Esp256SplitArkgPlaceholder (-65539)
-    /// as the request algorithm for previewSign+ARKG. Sending a standard CTAP2 algorithm
-    /// like Es256 (-7) yields an "Unsupported algorithm" rejection.
+    /// This fixture supplies ES256 (-7) where it expects the experimental ARKG signing-op -65539.
+    /// The generic previewSign draft is algorithm-agile; this assumption is profile-specific.
     /// </para>
     /// <para>
-    /// Expected behavior: The authenticator rejects at protocol-decode time with a
-    /// CTAP2_ERR_UNSUPPORTED_ALGORITHM error. This may occur before user touch is consumed,
-    /// depending on firmware implementation.
+    /// The draft's unsupported-algorithm status is the desired specific check. Current assertions
+    /// only require CtapException, and the outer catch also accepts a setup failure; no rejection
+    /// phase, exact status or user-presence consumption is established.
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -507,9 +492,7 @@ public class Ctap2PreviewSignTests
                 var pinUvAuthParam = Ctap2TestHelpers.ComputeMakeCredentialAuthParam(
                     clientPin.Protocol, pinToken, challenge);
 
-                // Build previewSign extension input with Es256 (-7) — a standard CTAP2 algorithm
-                // that the previewSign extension does NOT accept. YubiKey 5.8.0-beta firmware
-                // only accepts Esp256SplitArkgPlaceholder (-65539).
+                // Profile-specific negative input; this is not a universal previewSign algorithm rule.
                 var previewSignInput = new Extensions.PreviewSignRegistrationInput(
                     algorithms: [-7], // Es256 — unsupported for previewSign
                     flags: 0x01);
@@ -527,7 +510,7 @@ public class Ctap2PreviewSignTests
                 };
 
                 // Act & Assert: Expect rejection with CtapException
-                // TODO: tighten error-code assertion when CTAP2_ERR_UNSUPPORTED_ALGORITHM constant is added
+                // TODO: assert existing CtapStatus.UnsupportedAlgorithm after isolating target-operation errors.
                 await Assert.ThrowsAsync<CtapException>(() => session.MakeCredentialAsync(
                     clientDataHash: challenge,
                     rp: rp,
@@ -540,7 +523,7 @@ public class Ctap2PreviewSignTests
             }
             catch (CtapException)
             {
-                // Expected - test passes if we get CtapException
+                // This also accepts setup errors; it does not prove the target request was rejected.
             }
         });
 
@@ -549,14 +532,14 @@ public class Ctap2PreviewSignTests
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Mirrors python-fido2 test_register_invalid_flags (test_sign_extension_v4.py:416-424).
-    /// Per CTAP v4 draft, previewSign flags must be one of:
+    /// Per Yubico Labs previewSign v4 Editor's Draft, signing policy flags are:
     /// - 0x00 (no user presence/verification required)
     /// - 0x01 (require user presence)
-    /// - 0x05 (require user verification)
+    /// - 0x05 (require both user presence and user verification)
     /// </para>
     /// <para>
-    /// Values outside this set (e.g., 0x02) are rejected with CTAP2_ERR_INVALID_OPTION.
+    /// The draft specifies INVALID_OPTION for other flags. This fixture checks only CtapException,
+    /// including setup errors caught by the outer catch, not the exact target-operation status.
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -619,7 +602,7 @@ public class Ctap2PreviewSignTests
                 };
 
                 // Act & Assert: Expect rejection with CtapException
-                // TODO: tighten error-code assertion when CTAP2_ERR_INVALID_OPTION constant is added
+                // TODO: assert existing CtapStatus.InvalidOption after isolating target-operation errors.
                 await Assert.ThrowsAsync<CtapException>(() => session.MakeCredentialAsync(
                     clientDataHash: challenge,
                     rp: rp,
@@ -632,7 +615,7 @@ public class Ctap2PreviewSignTests
             }
             catch (CtapException)
             {
-                // Expected - test passes if we get CtapException
+                // This also accepts setup errors; it does not prove the target request was rejected.
             }
         });
 
@@ -641,13 +624,13 @@ public class Ctap2PreviewSignTests
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Mirrors python-fido2 test_assert_missing_args (test_sign_extension_v4.py:578-596).
-    /// When a credential is created with an ARKG algorithm (Esp256SplitArkgPlaceholder),
+    /// When a credential uses this experimental ARKG signing profile (Esp256SplitArkgPlaceholder),
     /// subsequent GetAssertion requests MUST include additionalArgs with the ARKG key handle
     /// and context in the previewSign extension input.
     /// </para>
     /// <para>
-    /// Omitting additionalArgs when it's required yields CTAP2_ERR_MISSING_PARAMETER.
+    /// The v4 draft specifies MISSING_PARAMETER when required args are omitted. This fixture accepts
+    /// any CtapException, including setup failures, so exact target rejection remains unasserted.
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -776,7 +759,7 @@ public class Ctap2PreviewSignTests
                 };
 
                 // Act & Assert: Expect rejection with CtapException (CTAP2_ERR_MISSING_PARAMETER)
-                // TODO: tighten error-code assertion when CTAP2_ERR_MISSING_PARAMETER constant is added
+                // TODO: assert existing CtapStatus.MissingParameter after isolating target-operation errors.
                 await Assert.ThrowsAsync<CtapException>(() => session.GetAssertionAsync(
                     rpId: Ctap2TestData.RpId,
                     clientDataHash: challenge,
@@ -787,7 +770,7 @@ public class Ctap2PreviewSignTests
             }
             catch (CtapException)
             {
-                // Expected - test passes if we get CtapException
+                // This also accepts setup errors; it does not prove the target request was rejected.
             }
             finally
             {

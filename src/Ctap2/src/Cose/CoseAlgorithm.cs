@@ -26,22 +26,22 @@ namespace Yubico.YubiKit.Ctap2.Cose;
 public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorithm>
 {
     /// <summary>
-    /// ECDSA with SHA-256 (P-256 curve).
+    /// ES256: ECDSA with SHA-256; the WebAuthn credential-key profile uses P-256.
     /// </summary>
     public static readonly CoseAlgorithm Es256 = new(-7);
 
     /// <summary>
-    /// EdDSA (Ed25519 curve).
+    /// Generic EdDSA identifier (-8); the WebAuthn credential-key profile uses Ed25519.
     /// </summary>
     public static readonly CoseAlgorithm EdDsa = new(-8);
 
     /// <summary>
-    /// ECDSA with SHA-256 (secp256k1 curve).
+    /// ESP256: ECDSA using P-256 and SHA-256 (-9), not ES256K/secp256k1 (-47).
     /// </summary>
     public static readonly CoseAlgorithm Esp256 = new(-9);
 
     /// <summary>
-    /// ECDSA with SHA-384 (P-384 curve).
+    /// ES384: ECDSA with SHA-384; the WebAuthn credential-key profile uses P-384.
     /// </summary>
     public static readonly CoseAlgorithm Es384 = new(-35);
 
@@ -62,7 +62,7 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     /// This is the wire-level COSE algorithm identifier for the ARKG-P256-ESP256 signing operation,
     /// written under key 3 of a <c>COSE_Sign_Args</c> map (previewSign authentication request).
     /// Do NOT confuse with the seed-key COSE-key alg identifier <c>-65700</c>
-    /// (<c>ARKG_P256_PLACEHOLDER.ALGORITHM</c> in python-fido2) which lives at a different protocol layer.
+    /// used by this SDK's experimental seed-key profile, which lives at a different protocol layer.
     /// </para>
     /// </remarks>
     public static readonly CoseAlgorithm Esp256SplitArkgPlaceholder = new(-65539);
@@ -77,15 +77,14 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     /// and must not be treated as production cryptographic guidance.
     /// </para>
     /// <para>
-    /// Stable, intent-revealing alias for the ARKG-P256 signing-operation alg ID. Use this on
-    /// <c>ArkgP256SignArgs.Algorithm</c> and any caller-facing API that names the request alg.
-    /// The underlying value is intentionally identical to <see cref="Esp256SplitArkgPlaceholder"/>;
-    /// when Yubico finalises the alg ID we can rename one without churning consumers of the other.
+    /// Intent-revealing alias for the experimental signing-operation placeholder. Its value is identical
+    /// to <see cref="Esp256SplitArkgPlaceholder"/>; the alias does not make the identifier standardized
+    /// or promise a stable future wire profile.
     /// </para>
     /// <para>
     /// Wire value: <c>-65539</c>. This is the request-side signing algorithm and goes on the wire
     /// at <c>COSE_Sign_Args</c> key 3. It is NOT the seed-key COSE-key alg (which is <c>-65700</c>
-    /// in python-fido2's <c>ARKG_P256_PLACEHOLDER</c>).
+    /// in this SDK's experimental seed-key profile).
     /// </para>
     /// </remarks>
     public static readonly CoseAlgorithm ArkgP256 = Esp256SplitArkgPlaceholder;
@@ -100,9 +99,9 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     /// </para>
     /// <para>
     /// This is the seed-key COSE-key <c>alg</c> parameter (key 3) identifying an ARKG-P256
-    /// placeholder key structure, per python-fido2's <c>ARKG_P256_PLACEHOLDER.ALGORITHM</c>.
-    /// It marks a COSE_Key as containing KEM and blinding public keys (at parameters -1/-2)
-    /// instead of standard EC2 curve coordinates.
+    /// placeholder key structure emitted by this SDK, not a registered standard seed-key profile.
+    /// It marks a COSE_Key as containing BL at -1 and KEM at -2 instead of ordinary EC2 parameters.
+    /// See <see cref="CoseArkgP256SeedKey"/> for the byte-string-wrapped nested-map encoding and draft differences.
     /// </para>
     /// <para>
     /// Do NOT confuse with the signing-operation algorithm <see cref="ArkgP256"/> (<c>-65539</c>),
@@ -113,8 +112,9 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     public static readonly CoseAlgorithm ArkgP256SeedKey = new(-65700);
 
     /// <summary>
-    /// Gets a value indicating whether this is a known algorithm.
+    /// Gets whether this SDK recognizes the integer, including its experimental placeholders.
     /// </summary>
+    /// <remarks>This does not establish registry status, algorithm implementation, device availability or production approval.</remarks>
     public bool IsKnown => Value switch
     {
         -7 or -8 or -9 or -35 or -257 or -65539 or -65700 => true,

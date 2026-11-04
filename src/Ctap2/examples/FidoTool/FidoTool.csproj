@@ -6,7 +6,7 @@
     <AssemblyName>FidoTool</AssemblyName>
     <IsPackable>false</IsPackable>
 
-    <!-- Suppress analyzer warnings that are noisy for example/CLI apps -->
+    <!-- Existing sample exception for CA1852 (sealing internal types); other analyzer policy is unchanged. -->
     <NoWarn>$(NoWarn);CA1852</NoWarn>
   </PropertyGroup>
 

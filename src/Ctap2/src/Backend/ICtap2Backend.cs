@@ -22,6 +22,8 @@ namespace Yubico.YubiKit.Ctap2.Backend;
 /// <remarks>
 /// This allows Ctap2Session to be transport-agnostic while supporting both
 /// SmartCard (CCID) and FIDO HID (CTAPHID) communication.
+/// Backends borrow protocols; the session manages their lifecycle. CTAP status handling and
+/// notification resolution precede transfer of the response view, not model or RP verification.
 /// </remarks>
 internal interface ICtap2Backend
 {

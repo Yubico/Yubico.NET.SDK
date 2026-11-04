@@ -13,13 +13,18 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 
 /// <summary>
 /// Queries authenticator capabilities via the CTAP2 authenticatorGetInfo command.
 /// </summary>
+/// <remarks>
+/// Performs session initialization plus a fresh GetInfo query; no PIN normalization or user presence is
+/// requested by this helper. Advertised versions/options describe the response, not complete conformance,
+/// configured authorization or exercised feature support. General catches flatten cancellation/transport/
+/// decode provenance into failed results. GetInfo does not refresh the session's firmware configuration.
+/// </remarks>
 public static class GetAuthenticatorInfo
 {
     /// <summary>

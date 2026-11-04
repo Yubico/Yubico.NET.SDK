@@ -35,6 +35,7 @@ public class HmacSecretOutputTests
     [Fact]
     public void HmacSecretMcOutput_DecodesCorrectly()
     {
+        // Direct byte-string DTO decode; no hmac-secret-mc identifier/envelope routing is exercised.
         var outputData = new byte[48];
         Random.Shared.NextBytes(outputData);
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);

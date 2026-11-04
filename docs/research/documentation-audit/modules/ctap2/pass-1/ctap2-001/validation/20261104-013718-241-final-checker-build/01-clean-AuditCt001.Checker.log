@@ -1,0 +1,8 @@
+$ dotnet clean docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/src/Yubico.YubiKit.AuditCt001.Checker.csproj -c Release
+Build started 11/4/2026 1:37:18 AM.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.26

@@ -1,0 +1,2000 @@
+diff --git i/src/Ctap2/src/AuthenticatorInfo.cs w/src/Ctap2/src/AuthenticatorInfo.cs
+index 71f13e4d..dc270043 100644
+--- i/src/Ctap2/src/AuthenticatorInfo.cs
++++ w/src/Ctap2/src/AuthenticatorInfo.cs
+@@ -24,7 +24,15 @@ namespace Yubico.YubiKit.Ctap2;
+ /// </summary>
+ /// <remarks>
+ /// <para>
++/// A GetInfo response is a snapshot, not SDK enforcement or permission to use a feature. Some option
++/// values describe configured state. Query again after state changes, outside any continuation sequence.
++/// Absent lists and maps become empty; optional numeric, Boolean and text fields remain null.
++/// A missing required AAGUID also becomes empty. The encrypted metadata properties expose absent
++/// fields as present empty memory. Use RawData to inspect encoded presence rather than these fallbacks.
++/// </para>
++/// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#authenticatorGetInfo
++/// CTAP2.3 fields: https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#authenticatorGetInfo
+ /// </para>
+ /// </remarks>
+ public sealed class AuthenticatorInfo
+@@ -75,7 +83,8 @@ public sealed class AuthenticatorInfo
+     /// Gets the CTAP versions supported by the authenticator.
+     /// </summary>
+     /// <remarks>
+-    /// Common values: "FIDO_2_0", "FIDO_2_1", "FIDO_2_1_PRE", "U2F_V2"
++    /// Common values: "FIDO_2_0", "FIDO_2_1", "FIDO_2_1_PRE", "FIDO_2_3", "U2F_V2".
++    /// Advertisement does not establish complete SDK implementation of that revision.
+     /// </remarks>
+     public IReadOnlyList<string> Versions { get; init; } = [];
+ 
+@@ -88,26 +97,33 @@ public sealed class AuthenticatorInfo
+     /// Gets the AAGUID (Authenticator Attestation GUID).
+     /// </summary>
+     /// <remarks>
+-    /// This is a 128-bit identifier that identifies the type of authenticator.
++    /// The protocol requires a 16-byte identifier for the authenticator type, not an individual
++    /// credential. This decoder does not enforce field presence or length; a missing field becomes empty.
+     /// </remarks>
+     public ReadOnlyMemory<byte> Aaguid { get; init; }
+ 
+     /// <summary>
+-    /// Gets the options supported by the authenticator.
++    /// Gets reported capability and configured-state option values.
+     /// </summary>
+     /// <remarks>
+-    /// Common options: "rk" (resident key), "up" (user presence), "uv" (user verification),
+-    /// "plat" (platform device), "clientPin", "credentialMgmt", "bioEnroll", etc.
++    /// Common keys include "rk", "up", "plat", "clientPin", "uv", "credMgmt", "authnrCfg" and
++    /// "bioEnroll". For clientPin, true means capable with a PIN set, false means capable without
++    /// a PIN, and absence means not capable. For uv, true means built-in verification is configured,
++    /// false means capable but unconfigured, and absence means unsupported. A false bioEnroll value
++    /// still indicates enrollment capability, with no enrollment provisioned. Interpret each key's
++    /// protocol definition rather than treating every false or absent value as the same condition.
+     /// </remarks>
+     public IReadOnlyDictionary<string, bool> Options { get; init; } = ReadOnlyDictionary<string, bool>.Empty;
+ 
+     /// <summary>
+     /// Gets the maximum message size in bytes.
+     /// </summary>
++    /// <remarks>Null preserves absence; the CTAP2.1 protocol default is 1024 bytes. This model
++    /// does not enforce the limit on requests, and the HID framing limit is a separate constraint.</remarks>
+     public int? MaxMsgSize { get; init; }
+ 
+     /// <summary>
+-    /// Gets the PIN/UV auth protocol versions supported.
++    /// Gets advertised PIN/UV auth protocol versions in decreasing authenticator preference.
+     /// </summary>
+     public IReadOnlyList<int> PinUvAuthProtocols { get; init; } = [];
+ 
+@@ -124,10 +140,12 @@ public sealed class AuthenticatorInfo
+     /// <summary>
+     /// Gets the transports supported by the authenticator.
+     /// </summary>
++    /// <remarks>Advertised names are not proof of an exposed or reachable host connection.
++    /// Unknown names are preserved; callers must tolerate them.</remarks>
+     public IReadOnlyList<string> Transports { get; init; } = [];
+ 
+     /// <summary>
+-    /// Gets the algorithms supported for credential creation.
++    /// Gets advertised credential-creation algorithms in authenticator preference order.
+     /// </summary>
+     public IReadOnlyList<PublicKeyCredentialParameters> Algorithms { get; init; } = [];
+ 
+@@ -142,13 +160,15 @@ public sealed class AuthenticatorInfo
+     public bool? ForcePinChange { get; init; }
+ 
+     /// <summary>
+-    /// Gets the minimum PIN length required.
++    /// Gets the current minimum PIN length in Unicode code points, when reported.
+     /// </summary>
+     public int? MinPinLength { get; init; }
+ 
+     /// <summary>
+-    /// Gets the firmware version as reported by the authenticator.
++    /// Gets the reported firmware value interpreted using YubiKey's packed major/minor/patch layout.
+     /// </summary>
++    /// <remarks>CTAP's unsigned firmwareVersion field does not standardize this layout. This
++    /// property is not a Management firmware lookup or an update to the session firmware snapshot.</remarks>
+     public FirmwareVersion? FirmwareVersion { get; init; }
+ 
+     /// <summary>
+@@ -177,8 +197,9 @@ public sealed class AuthenticatorInfo
+     public IReadOnlyDictionary<string, int> Certifications { get; init; } = ReadOnlyDictionary<string, int>.Empty;
+ 
+     /// <summary>
+-    /// Gets the remaining discoverable credential slots.
++    /// Gets the estimated number of additional discoverable credentials, when reported.
+     /// </summary>
++    /// <remarks>The estimate uses credential-size assumptions; it is not an exact free-slot count.</remarks>
+     public int? RemainingDiscoverableCredentials { get; init; }
+ 
+     /// <summary>
+@@ -199,19 +220,29 @@ public sealed class AuthenticatorInfo
+     /// <summary>
+     /// Gets whether long touch is required for reset.
+     /// </summary>
++    /// <remarks>In CTAP2.3, true means supported and enabled (touch for at least five seconds),
++    /// false means supported but disabled, and absence means unsupported (represented here by null).
++    /// This is separate from reset's
++    /// power-up-to-command-receipt window; see <see cref="ICtap2Session.ResetAsync"/>.</remarks>
+     public bool? LongTouchForReset { get; init; }
+ 
+     /// <summary>
+-    /// Gets the encrypted credential identifier (YubiKey 5.7+).
++    /// Gets the optional encrypted device identifier defined by CTAP2.3.
+     /// </summary>
+     /// <remarks>
+     /// <para>
+-    /// This field contains an encrypted unique identifier for discoverable credentials.
+-    /// It can be decrypted using the PPUAT (Persistent PIN/UV Auth Token) with the
++    /// The representation is IV followed by ciphertext for a 128-bit device identifier, not a
++    /// credential ID or a means to select a credential. It can be decrypted using the corresponding
++    /// persistent PIN/UV auth token with the
+     /// <see cref="Crypto.EncryptedMetadataDecryptor.DecryptIdentifier"/> method.
+     /// </para>
+     /// <para>
+-    /// Available on YubiKey firmware 5.7+ when a PPUAT is active.
++    /// Field availability depends on product, firmware and persistent-token state; an ordinary
++    /// permission-scoped token is not interchangeable. Decode reads the bytes without validating
++    /// encrypted length or decryptability.
++    /// When this field is absent, Decode produces a present zero-length memory value, not null.
++    /// HasValue therefore does not establish that the authenticator returned the field or supports it;
++    /// inspect RawData for encoded presence.
+     /// </para>
+     /// </remarks>
+     public ReadOnlyMemory<byte>? EncIdentifier { get; init; }
+@@ -222,6 +253,9 @@ public sealed class AuthenticatorInfo
+     /// <remarks>
+     /// This field indicates which transport methods can be used to reset the authenticator.
+     /// Common values include "usb", "nfc", and "ble".
++    /// Absence becomes an empty list in this model, not a conclusion that reset is unsupported.
++    /// Unknown transport names are retained. This list does not arrange the reset timing or presence
++    /// ceremony; see <see cref="ICtap2Session.ResetAsync"/>.
+     /// </remarks>
+     public IReadOnlyList<string> TransportsForReset { get; init; } = [];
+ 
+@@ -229,8 +263,9 @@ public sealed class AuthenticatorInfo
+     /// Gets whether PIN complexity policy is enforced (CTAP 2.3).
+     /// </summary>
+     /// <remarks>
+-    /// When true, the authenticator enforces a PIN complexity policy as defined
+-    /// by <see cref="PinComplexityPolicyUrl"/>.
++    /// In CTAP2.3, true means supported and enabled; false means supported but disabled; absence
++    /// means unsupported (represented here by null). <see cref="PinComplexityPolicyUrl"/> can
++    /// explain the policy to the user but is optional.
+     /// </remarks>
+     public bool? PinComplexityPolicy { get; init; }
+ 
+@@ -238,8 +273,8 @@ public sealed class AuthenticatorInfo
+     /// Gets the URL describing the PIN complexity policy (CTAP 2.3).
+     /// </summary>
+     /// <remarks>
+-    /// This URL points to a human-readable description of the PIN complexity requirements
+-    /// enforced by the authenticator.
++    /// The protocol field is an optional UTF-8 byte string, decoded here as text. It can inform the
++    /// user about the policy; the SDK does not fetch the URL or validate the described requirements.
+     /// </remarks>
+     public string? PinComplexityPolicyUrl { get; init; }
+ 
+@@ -249,20 +284,26 @@ public sealed class AuthenticatorInfo
+     /// <remarks>
+     /// This value indicates the maximum number of Unicode code points allowed in a PIN.
+     /// Complements <see cref="MinPinLength"/>.
++    /// Null preserves absence; with ClientPIN support the CTAP2.3 effective default is 63 code points.
++    /// The UTF-8 byte-length restriction remains separate; this value is not complete PIN validation.
+     /// </remarks>
+     public int? MaxPinLength { get; init; }
+ 
+     /// <summary>
+-    /// Gets the encrypted credential store state (YubiKey 5.8+).
++    /// Gets optional encrypted credential-store state defined by CTAP2.3.
+     /// </summary>
+     /// <remarks>
+     /// <para>
+-    /// This field contains encrypted metadata about the credential storage state.
+-    /// It can be decrypted using the PPUAT (Persistent PIN/UV Auth Token) with the
++    /// This is IV followed by ciphertext for a 128-bit credential-store state. It can be decrypted
++    /// using the corresponding persistent PIN/UV auth token with the
+     /// <see cref="Crypto.EncryptedMetadataDecryptor.DecryptCredStoreState"/> method.
+     /// </para>
+     /// <para>
+-    /// Available on YubiKey firmware 5.8+ when a PPUAT is active.
++    /// Availability depends on product, firmware and persistent-token state. Decode retains the
++    /// byte string without validating encrypted length or proving decryptability.
++    /// When this field is absent, Decode produces a present zero-length memory value, not null.
++    /// HasValue therefore does not establish that the authenticator returned the field or supports it;
++    /// inspect RawData for encoded presence.
+     /// </para>
+     /// </remarks>
+     public ReadOnlyMemory<byte>? EncCredStoreState { get; init; }
+@@ -284,6 +325,14 @@ public sealed class AuthenticatorInfo
+     /// <summary>
+     /// Decodes an AuthenticatorInfo from CBOR-encoded data.
+     /// </summary>
++    /// <remarks>The input is borrowed and left unchanged; the result owns an independent complete
++    /// RawData copy and separately materialized fields. Unknown fields are skipped at the typed
++    /// surface and preserved in RawData. Absent EncIdentifier and EncCredStoreState fields become
++    /// present empty memory values; use RawData to check encoded presence, not HasValue alone.
++    /// This parser does not enforce required Versions/AAGUID
++    /// presence, AAGUID length or all protocol integer constraints. It does not check for unread
++    /// bytes after the map: ReadEndMap and the default single-root reader setting do not establish
++    /// complete input consumption. A decoded result is not a conformance verdict.</remarks>
+     /// <param name="data">The CBOR-encoded response data.</param>
+     /// <returns>The decoded AuthenticatorInfo.</returns>
+     public static AuthenticatorInfo Decode(ReadOnlyMemory<byte> data)
+@@ -589,8 +638,8 @@ private static List<PublicKeyCredentialParameters> ReadAlgorithms(CborReader rea
+ 
+     private static FirmwareVersion DecodeFirmwareVersion(ulong value)
+     {
+-        // Firmware version is encoded as major.minor.patch in the upper bytes
+-        // YubiKey encodes as: major << 16 | minor << 8 | patch
++        // Interpret the YubiKey packed layout: major << 16 | minor << 8 | patch.
++        // CTAP itself specifies an unsigned model version, not these component bytes.
+         var major = (byte)((value >> 16) & 0xFF);
+         var minor = (byte)((value >> 8) & 0xFF);
+         var patch = (byte)(value & 0xFF);
+@@ -606,13 +655,15 @@ public sealed class PublicKeyCredentialParameters
+     private const string TypePublicKey = "public-key";
+ 
+     /// <summary>
+-    /// Gets the credential type (always "public-key").
++    /// Gets the credential type; defaults to "public-key" but can retain other supplied values.
+     /// </summary>
+     public string Type { get; init; } = TypePublicKey;
+ 
+     /// <summary>
+     /// Gets the COSE algorithm identifier.
+     /// </summary>
++    /// <remarks>An identifier is not device support, mathematical key validation or an RP's
++    /// approved-algorithm policy. The GetInfo parser defaults a missing algorithm to None.</remarks>
+     public CoseAlgorithmIdentifier Algorithm { get; init; }
+ 
+     /// <summary>
+@@ -696,4 +747,4 @@ internal static PublicKeyCredentialParameters Parse(CborReader reader)
+             Algorithm = algorithm
+         };
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Backend/HidBackend.cs w/src/Ctap2/src/Backend/HidBackend.cs
+index e5aadd42..34e7339a 100644
+--- i/src/Ctap2/src/Backend/HidBackend.cs
++++ w/src/Ctap2/src/Backend/HidBackend.cs
+@@ -25,6 +25,10 @@ namespace Yubico.YubiKit.Ctap2.Backend;
+ /// <summary>
+ /// FIDO backend that communicates over FIDO HID (CTAPHID_CBOR command).
+ /// </summary>
++/// <remarks>Uses a borrowed protocol. HID keep-alive status 0x02 can request a device-wait
++/// notification; the backend resolves the operation from the drained CTAP status before typed
++/// decoding. Completed means CTAP success, not verified presence, UV or RP authentication.
++/// Only an untransferred response is cleared here; a successful returned view has no cleanup owner.</remarks>
+ internal sealed class HidBackend : ICtap2Backend
+ {
+     private readonly IFidoHidProtocol _protocol;
+@@ -67,7 +71,7 @@ public async Task<ReadOnlyMemory<byte>> SendCborAsync(
+                     cancellationToken)
+                 .ConfigureAwait(false);
+ 
+-            // First byte is the CTAP status
++            // A missing status byte is reported as synthetic Other, not a received device status.
+             if (response.Length < 1)
+             {
+                 throw new CtapException(CtapStatus.Other, "Empty response from authenticator");
+@@ -88,7 +92,7 @@ public async Task<ReadOnlyMemory<byte>> SendCborAsync(
+ 
+             await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
+ 
+-            // Return the response data (without status byte)
++            // Transfer the status-stripped view after notification resolution; typed decode follows later.
+             responseTransferred = true;
+             return response[1..];
+         }
+@@ -112,4 +116,4 @@ public async Task<ReadOnlyMemory<byte>> SendCborAsync(
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Backend/ICtap2Backend.cs w/src/Ctap2/src/Backend/ICtap2Backend.cs
+index 6d0f2c72..ee35795b 100644
+--- i/src/Ctap2/src/Backend/ICtap2Backend.cs
++++ w/src/Ctap2/src/Backend/ICtap2Backend.cs
+@@ -22,6 +22,8 @@ namespace Yubico.YubiKit.Ctap2.Backend;
+ /// <remarks>
+ /// This allows Ctap2Session to be transport-agnostic while supporting both
+ /// SmartCard (CCID) and FIDO HID (CTAPHID) communication.
++/// Backends borrow protocols; the session manages their lifecycle. CTAP status handling and
++/// notification resolution precede transfer of the response view, not model or RP verification.
+ /// </remarks>
+ internal interface ICtap2Backend
+ {
+@@ -36,4 +38,4 @@ Task<ReadOnlyMemory<byte>> SendCborAsync(
+         ReadOnlyMemory<byte> request,
+         UserPresenceNotification userPresenceNotification,
+         CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Backend/SmartCardBackend.cs w/src/Ctap2/src/Backend/SmartCardBackend.cs
+index 91049551..113bf5c4 100644
+--- i/src/Ctap2/src/Backend/SmartCardBackend.cs
++++ w/src/Ctap2/src/Backend/SmartCardBackend.cs
+@@ -26,6 +26,9 @@ namespace Yubico.YubiKit.Ctap2.Backend;
+ /// <summary>
+ /// FIDO backend that communicates over SmartCard (CCID) transport using ISO 7816-4 APDUs.
+ /// </summary>
++/// <remarks>Uses a borrowed protocol. With no in-flight presence signal, an operation's supplied
++/// policy notification is requested before transmission. Resolution uses CTAP status before typed
++/// decoding, not verified UP/UV or RP success. Only an untransferred response is cleared here.</remarks>
+ internal sealed class SmartCardBackend : ICtap2Backend
+ {
+     private const byte NfcCtapMsg = 0x10;  // Used as APDU INS
+@@ -43,6 +46,8 @@ public SmartCardBackend(ISmartCardProtocol protocol)
+     /// <summary>
+     /// Selects the FIDO2 application.
+     /// </summary>
++    /// <remarks>Any SELECT ApduException is currently wrapped as NotSupportedException with its
++    /// original inner exception. The wrapper alone does not prove the FIDO AID was absent.</remarks>
+     public async Task SelectApplicationAsync(CancellationToken cancellationToken = default)
+     {
+         try
+@@ -97,7 +102,7 @@ public async Task<ReadOnlyMemory<byte>> SendCborAsync(
+             var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
+             responseData = apduResponse.Data;
+ 
+-            // First byte of response data is the CTAP status
++            // The first payload byte is CTAP status; missing status produces synthetic Other.
+             if (responseData.Length < 1)
+             {
+                 throw new CtapException(CtapStatus.Other, "Empty response from authenticator");
+@@ -118,7 +123,7 @@ public async Task<ReadOnlyMemory<byte>> SendCborAsync(
+ 
+             await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
+ 
+-            // Return the response data (without status byte)
++            // Transfer after notification resolution; success here does not guarantee typed decoding.
+             responseTransferred = true;
+             return responseData[1..];
+         }
+@@ -142,4 +147,4 @@ public async Task<ReadOnlyMemory<byte>> SendCborAsync(
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Cbor/AaguidConverter.cs w/src/Ctap2/src/Cbor/AaguidConverter.cs
+index 8854216c..2d165293 100644
+--- i/src/Ctap2/src/Cbor/AaguidConverter.cs
++++ w/src/Ctap2/src/Cbor/AaguidConverter.cs
+@@ -18,15 +18,18 @@ namespace Yubico.YubiKit.Ctap2.Cbor;
+ /// Helper for converting between big-endian AAGUID bytes and .NET Guid.
+ /// </summary>
+ /// <remarks>
+-/// CTAP2/WebAuthn store AAGUIDs in big-endian (network byte order) format,
+-/// while .NET Guid uses mixed-endian representation. This helper handles the conversion.
++/// CTAP2/WebAuthn encode AAGUIDs in network byte order. The default Guid byte APIs instead use
++/// little-endian order for the first 4-byte, 2-byte and 2-byte components, leaving the last eight
++/// bytes unchanged. This serialization convention is independent of native machine byte order.
++/// This implementation applies the required component reversal only on little-endian hosts;
++/// on a big-endian host it leaves those components in the wrong byte convention.
+ /// </remarks>
+ public static class AaguidConverter
+ {
+     /// <summary>
+     /// Converts a big-endian AAGUID byte array to a .NET Guid.
+     /// </summary>
+-    /// <param name="bigEndianBytes">The 16-byte big-endian AAGUID.</param>
++    /// <param name="bigEndianBytes">Exactly 16 big-endian AAGUID bytes; borrowed, copied and left unchanged.</param>
+     /// <returns>The corresponding Guid.</returns>
+     public static Guid FromBigEndianBytes(ReadOnlySpan<byte> bigEndianBytes)
+     {
+@@ -35,12 +38,12 @@ public static Guid FromBigEndianBytes(ReadOnlySpan<byte> bigEndianBytes)
+             throw new ArgumentException("AAGUID must be exactly 16 bytes", nameof(bigEndianBytes));
+         }
+ 
+-        // AAGUID is stored in big-endian (network byte order) format
+-        // .NET Guid constructor expects mixed-endian (first 3 components little-endian on little-endian systems)
++        // The default Guid span constructor expects the first 4/2/2 component groups in little-endian
++        // byte order, regardless of native machine order; AAGUID input uses network order.
+         Span<byte> guidBytes = stackalloc byte[16];
+         bigEndianBytes.CopyTo(guidBytes);
+ 
+-        // Convert from big-endian to little-endian for first 3 components on little-endian systems
++        // Required byte-convention reversal; this implementation applies it only on little-endian hosts.
+         if (BitConverter.IsLittleEndian)
+         {
+             // Reverse bytes for Data1 (4 bytes)
+@@ -58,30 +61,28 @@ public static Guid FromBigEndianBytes(ReadOnlySpan<byte> bigEndianBytes)
+     }
+ 
+     /// <summary>
+-    /// Converts a .NET Guid to a big-endian AAGUID byte array.
++    /// Produces an AAGUID byte array from a .NET Guid.
+     /// </summary>
+     /// <param name="guid">The Guid to convert.</param>
+-    /// <returns>A 16-byte array in big-endian format.</returns>
++    /// <returns>A newly allocated, caller-owned 16-byte array; network-order conversion has the
++    /// host limitation described in the class remarks.</returns>
+     public static byte[] ToBigEndianBytes(Guid guid)
+     {
+-        // .NET Guid.ToByteArray() produces mixed endianness on little-endian systems:
+-        // - First 4 bytes (time_low): little-endian
+-        // - Next 2 bytes (time_mid): little-endian
+-        // - Next 2 bytes (time_hi_and_version): little-endian
+-        // - Last 8 bytes (clock_seq_and_node): big-endian
+-        // WebAuthn/CTAP2 AAGUID is fully big-endian, so we reverse the first three components
++        // Default TryWriteBytes uses little-endian first 4/2/2 component groups and unchanged last8.
++        // This is a serialization convention, not Guid's native in-memory layout.
++        // Network-order output requires reversal of the first three groups.
+         Span<byte> bytes = stackalloc byte[16];
+         guid.TryWriteBytes(bytes);
+ 
+         if (BitConverter.IsLittleEndian)
+         {
+-            // Reverse first 3 components to convert to big-endian
++            // The required reversal is currently applied only on little-endian hosts.
+             bytes[0..4].Reverse();  // time_low
+             bytes[4..6].Reverse();  // time_mid
+             bytes[6..8].Reverse();  // time_hi_and_version
+-            // bytes[8..16] already big-endian
++            // The last eight bytes have the same order in both byte conventions.
+         }
+ 
+         return bytes.ToArray();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Cbor/CtapRequestBuilder.cs w/src/Ctap2/src/Cbor/CtapRequestBuilder.cs
+index 9d343cee..bdb6237d 100644
+--- i/src/Ctap2/src/Cbor/CtapRequestBuilder.cs
++++ w/src/Ctap2/src/Cbor/CtapRequestBuilder.cs
+@@ -25,6 +25,19 @@ namespace Yubico.YubiKit.Ctap2.Cbor;
+ /// CTAP2 requires deterministic CBOR encoding per specification:
+ /// https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#ctap2-canonical-cbor-encoding-form
+ /// </para>
++/// <para>
++/// Reusing a key replaces its previous value. Byte-string and encoded-value methods immediately
++/// retain private copies; this builder has no disposal or clearing API, and replacing a value does
++/// not clear its old copy. Callbacks run on each Build, not when added, and must write one complete value.
++/// Keep captured storage valid until the last Build. For sensitive bytes, WithValue can write
++/// directly without the WithBytes input clone, but does not guarantee all writer storage is cleared.
++/// </para>
++/// <para>
++/// The Ctap2Canonical writer automatically sorts map key encodings when each map is completed.
++/// Parameter insertion here is numerically sorted, which is not generally canonical encoded-key
++/// order for mixed positive/negative keys. Writer canonicalization does not validate command schema,
++/// authorization, CTAP's nesting limit or the authenticator's maximum message size.
++/// </para>
+ /// </remarks>
+ public sealed class CtapRequestBuilder
+ {
+@@ -68,7 +81,7 @@ public CtapRequestBuilder WithUInt(int key, uint value)
+     }
+ 
+     /// <summary>
+-    /// Adds a byte array parameter.
++    /// Immediately copies and retains a byte-string parameter for subsequent builds.
+     /// </summary>
+     /// <param name="key">The CBOR map key.</param>
+     /// <param name="value">The byte array value.</param>
+@@ -81,7 +94,7 @@ public CtapRequestBuilder WithBytes(int key, ReadOnlySpan<byte> value)
+     }
+ 
+     /// <summary>
+-    /// Adds a byte array parameter from Memory.
++    /// Immediately copies and retains a byte-string parameter from memory for subsequent builds.
+     /// </summary>
+     /// <param name="key">The CBOR map key.</param>
+     /// <param name="value">The memory value.</param>
+@@ -121,7 +134,7 @@ public CtapRequestBuilder WithBool(int key, bool value)
+     /// Adds a parameter using a caller-provided CBOR writer callback.
+     /// </summary>
+     /// <param name="key">The CBOR map key.</param>
+-    /// <param name="writeValue">Action that writes the complete CBOR value.</param>
++    /// <param name="writeValue">Action invoked on each Build to write one complete CBOR value.</param>
+     /// <returns>This builder for chaining.</returns>
+     public CtapRequestBuilder WithValue(int key, Action<CborWriter> writeValue)
+     {
+@@ -133,7 +146,7 @@ public CtapRequestBuilder WithValue(int key, Action<CborWriter> writeValue)
+     /// Adds a CBOR map parameter.
+     /// </summary>
+     /// <param name="key">The CBOR map key.</param>
+-    /// <param name="writeMap">Action that writes the map content.</param>
++    /// <param name="writeMap">Deferred action that writes the complete map, including start/end markers.</param>
+     /// <returns>This builder for chaining.</returns>
+     public CtapRequestBuilder WithMap(int key, Action<CborWriter> writeMap)
+     {
+@@ -144,7 +157,7 @@ public CtapRequestBuilder WithMap(int key, Action<CborWriter> writeMap)
+     /// Adds a CBOR array parameter.
+     /// </summary>
+     /// <param name="key">The CBOR map key.</param>
+-    /// <param name="writeArray">Action that writes the array content.</param>
++    /// <param name="writeArray">Deferred action that writes the complete array, including start/end markers.</param>
+     /// <returns>This builder for chaining.</returns>
+     public CtapRequestBuilder WithArray(int key, Action<CborWriter> writeArray)
+     {
+@@ -152,7 +165,7 @@ public CtapRequestBuilder WithArray(int key, Action<CborWriter> writeArray)
+     }
+ 
+     /// <summary>
+-    /// Adds a pre-encoded CBOR value parameter.
++    /// Immediately copies and retains a pre-encoded CBOR value for subsequent builds.
+     /// </summary>
+     /// <param name="key">The CBOR map key.</param>
+     /// <param name="encodedValue">The pre-encoded CBOR bytes.</param>
+@@ -167,6 +180,9 @@ public CtapRequestBuilder WithEncodedValue(int key, ReadOnlyMemory<byte> encoded
+     /// <summary>
+     /// Builds the CTAP request as a byte array.
+     /// </summary>
++    /// <remarks>Each call returns a new caller-owned command-prefixed array. Clear it when it contains
++    /// secrets and is no longer needed. Only the Encode intermediate copy is cleared here, not
++    /// retained inputs, captured callback storage, the returned array or all writer-internal storage.</remarks>
+     /// <returns>The serialized CTAP request (command byte + CBOR payload).</returns>
+     public byte[] Build()
+     {
+@@ -178,7 +194,7 @@ public byte[] Build()
+ 
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+ 
+-        // Write CBOR map with parameters sorted by key (canonical encoding)
++        // Insert in numeric order; Ctap2Canonical sorts encoded keys when the map is completed.
+         writer.WriteStartMap(_parameters.Count);
+ 
+         foreach (var (key, writeValue) in _parameters)
+@@ -206,8 +222,10 @@ public byte[] Build()
+     }
+ 
+     /// <summary>
+-    /// Builds the CTAP request as a ReadOnlyMemory.
++    /// Builds a new CTAP request array and returns its read-only view.
+     /// </summary>
++    /// <remarks>This is the same allocation/ownership as Build, not a borrowed-input view or a
++    /// disposable owner. Read-only access does not automatically clear secret bytes.</remarks>
+     /// <returns>The serialized CTAP request.</returns>
+     public ReadOnlyMemory<byte> BuildAsMemory() => Build();
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Cbor/CtapResponseParser.cs w/src/Ctap2/src/Cbor/CtapResponseParser.cs
+index 07d07296..aa5aa1ae 100644
+--- i/src/Ctap2/src/Cbor/CtapResponseParser.cs
++++ w/src/Ctap2/src/Cbor/CtapResponseParser.cs
+@@ -20,6 +20,8 @@ namespace Yubico.YubiKit.Ctap2.Cbor;
+ /// Utility class for parsing CTAP2 CBOR responses.
+ /// Provides common deserialization patterns to reduce duplication across response models.
+ /// </summary>
++/// <remarks>Optional readers inspect the current encoded value, not whether a map key was absent.
++/// The consuming model decides which fields are required and whether null/undefined is permitted.</remarks>
+ internal static class CtapResponseParser
+ {
+     /// <summary>
+@@ -32,7 +34,7 @@ internal static class CtapResponseParser
+     /// <param name="reader">The CBOR reader positioned at the start of a map.</param>
+     /// <param name="fieldHandler">
+     /// Action invoked for each field. Parameters are (key, reader).
+-    /// The handler should read exactly one value from the reader for the given key.
++    /// The handler must consume exactly one complete value, using SkipValue for an unknown key.
+     /// </param>
+     public static void ReadIntKeyMap(CborReader reader, Action<int, CborReader> fieldHandler)
+     {
+@@ -57,7 +59,7 @@ public static void ReadIntKeyMap(CborReader reader, Action<int, CborReader> fiel
+     /// <param name="reader">The CBOR reader positioned at the start of a map.</param>
+     /// <param name="fieldHandler">
+     /// Action invoked for each field. Parameters are (key, reader).
+-    /// The handler should read exactly one value from the reader for the given key.
++    /// The handler must consume exactly one complete value, using SkipValue for an unknown key.
+     /// </param>
+     public static void ReadTextKeyMap(CborReader reader, Action<string, CborReader> fieldHandler)
+     {
+@@ -77,7 +79,8 @@ public static void ReadTextKeyMap(CborReader reader, Action<string, CborReader>
+     /// Converts a nullable byte array to nullable ReadOnlyMemory.
+     /// </summary>
+     /// <param name="data">The byte array to convert, or null.</param>
+-    /// <returns>ReadOnlyMemory wrapping the data, or null if data is null.</returns>
++    /// <returns>A view of the same array without copying or transferring ownership; null for null
++    /// input and a present empty view for an empty array.</returns>
+     public static ReadOnlyMemory<byte>? ToNullableMemory(byte[]? data) =>
+         data is not null ? new ReadOnlyMemory<byte>(data) : null;
+ 
+@@ -126,7 +129,7 @@ public static List<T> ReadArrayAsList<T>(CborReader reader, Func<CborReader, T>
+     }
+ 
+     /// <summary>
+-    /// Safely reads an optional integer value from the reader, returning null if not present.
++    /// Reads the current integer value, consuming CBOR null or undefined as null.
+     /// </summary>
+     /// <param name="reader">The CBOR reader.</param>
+     /// <returns>The integer value, or null if the value is null/undefined.</returns>
+@@ -141,7 +144,7 @@ public static List<T> ReadArrayAsList<T>(CborReader reader, Func<CborReader, T>
+     }
+ 
+     /// <summary>
+-    /// Safely reads an optional boolean value from the reader, returning null if not present.
++    /// Reads the current boolean value, consuming CBOR null or undefined as null.
+     /// </summary>
+     /// <param name="reader">The CBOR reader.</param>
+     /// <returns>The boolean value, or null if the value is null/undefined.</returns>
+@@ -156,7 +159,7 @@ public static List<T> ReadArrayAsList<T>(CborReader reader, Func<CborReader, T>
+     }
+ 
+     /// <summary>
+-    /// Safely reads an optional byte array from the reader, returning null if not present.
++    /// Reads the current byte string, consuming CBOR null or undefined as null.
+     /// </summary>
+     /// <param name="reader">The CBOR reader.</param>
+     /// <returns>The byte array, or null if the value is null/undefined.</returns>
+@@ -171,7 +174,7 @@ public static List<T> ReadArrayAsList<T>(CborReader reader, Func<CborReader, T>
+     }
+ 
+     /// <summary>
+-    /// Safely reads an optional text string from the reader, returning null if not present.
++    /// Reads the current text string, consuming CBOR null or undefined as null.
+     /// </summary>
+     /// <param name="reader">The CBOR reader.</param>
+     /// <returns>The text string, or null if the value is null/undefined.</returns>
+@@ -184,4 +187,4 @@ public static List<T> ReadArrayAsList<T>(CborReader reader, Func<CborReader, T>
+         }
+         return reader.ReadTextString();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Ctap/CtapException.cs w/src/Ctap2/src/Ctap/CtapException.cs
+index 518e6aa9..c864642f 100644
+--- i/src/Ctap2/src/Ctap/CtapException.cs
++++ w/src/Ctap2/src/Ctap/CtapException.cs
+@@ -17,10 +17,14 @@ namespace Yubico.YubiKit.Ctap2;
+ /// <summary>
+ /// Exception thrown when a CTAP command fails.
+ /// </summary>
++/// <remarks>Nonzero wire CTAP statuses are preserved without normalization. Backends also use
++/// Other for an empty response, and public constructors accept caller-supplied statuses.
++/// Transport/CTAPHID errors, APDU failures, SDK validation, callbacks and model decoding have
++/// different exception origins. This exception is not a rollback or no-side-effects guarantee.</remarks>
+ public class CtapException : Exception
+ {
+     /// <summary>
+-    /// Gets the CTAP status code from the authenticator.
++    /// Gets the received, synthesized or caller-supplied CTAP status code.
+     /// </summary>
+     public CtapStatus Status { get; }
+ 
+@@ -129,4 +133,4 @@ public static void ThrowIfError(byte status)
+         CtapStatus.Other => "Unspecified error",
+         _ => $"Unknown CTAP error: 0x{(byte)status:X2}"
+     };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Ctap/CtapStatus.cs w/src/Ctap2/src/Ctap/CtapStatus.cs
+index cdf9449d..988bedec 100644
+--- i/src/Ctap2/src/Ctap/CtapStatus.cs
++++ w/src/Ctap2/src/Ctap/CtapStatus.cs
+@@ -19,14 +19,19 @@ namespace Yubico.YubiKit.Ctap2;
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// This enum includes CTAP 2.1 status codes plus CTAP 2.2 status-code additions used by
+-/// newer authenticators.
++/// Includes CTAP2.1 statuses and retained legacy identifiers. The meaning of some values differs
++/// by revision; enum membership does not establish that every revision assigns that status.
++/// These values do not collapse CTAPHID transport errors into CTAP CBOR response statuses.
+ /// </para>
+ /// <para>
+ /// CTAP 2.1: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#error-responses
+ /// </para>
+ /// <para>
+-/// CTAP 2.2 Review Draft: https://fidoalliance.org/specs/fido-v2.2-rd-20241003/fido-client-to-authenticator-protocol-v2.2-rd-20241003.html#error-responses
++/// CTAP2.0 legacy statuses: https://fidoalliance.org/specs/fido-v2.0-ps-20190130/fido-client-to-authenticator-protocol-v2.0-ps-20190130.html#error-responses
++/// </para>
++/// <para>
++/// CTAP2.2 Review Draft, October 3, 2024: https://fidoalliance.org/specs/fido-v2.2-rd-20241003/fido-client-to-authenticator-protocol-v2.2-rd-20241003.html#error-responses
++/// CTAP2.3 Proposed Standard, February 26, 2026: https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#error-responses
+ /// </para>
+ /// </remarks>
+ public enum CtapStatus : byte
+@@ -162,7 +167,7 @@ public enum CtapStatus : byte
+     InvalidOption = 0x2C,
+ 
+     /// <summary>
+-    /// Pending keep alive was cancelled.
++    /// The outstanding CTAP request was cancelled; this is its response, not a response to HID CANCEL.
+     /// </summary>
+     KeepAliveCancel = 0x2D,
+ 
+@@ -177,8 +182,7 @@ public enum CtapStatus : byte
+     UserActionTimeout = 0x2F,
+ 
+     /// <summary>
+-    /// Continuation command, such as authenticatorGetNextAssertion
+-    /// not allowed.
++    /// The command is not allowed in the current state, including an invalid continuation or late reset.
+     /// </summary>
+     NotAllowed = 0x30,
+ 
+@@ -188,7 +192,7 @@ public enum CtapStatus : byte
+     PinInvalid = 0x31,
+ 
+     /// <summary>
+-    /// PIN Blocked.
++    /// PIN retries are exhausted; FIDO reset is destructive and requires coordinated timing/presence.
+     /// </summary>
+     PinBlocked = 0x32,
+ 
+@@ -198,7 +202,7 @@ public enum CtapStatus : byte
+     PinAuthInvalid = 0x33,
+ 
+     /// <summary>
+-    /// PIN authentication using pinUvAuthToken blocked.
++    /// PIN authentication is temporarily blocked; CTAP2.1 requires a power cycle before further PIN attempts.
+     /// </summary>
+     PinAuthBlocked = 0x34,
+ 
+@@ -210,16 +214,19 @@ public enum CtapStatus : byte
+     /// <summary>
+     /// A pinUvAuthToken is required for the selected operation.
+     /// </summary>
++    /// <remarks>CTAP2.0 names value 0x36 PIN_REQUIRED; later revisions use PUAT_REQUIRED.</remarks>
+     PuatRequired = 0x36,
+ 
+     /// <summary>
+-    /// PIN policy violation. Currently only enforces minimum length.
++    /// PIN policy violation; CTAP2.1 describes minimum length, while CTAP2.3 also names complexity.
+     /// </summary>
+     PinPolicyViolation = 0x37,
+ 
+     /// <summary>
+-    /// The pinUvAuthToken has expired.
++    /// Legacy CTAP2.0 PIN_TOKEN_EXPIRED: the authenticator's pinToken expired.
+     /// </summary>
++    /// <remarks>Value 0x38 is reserved in CTAP2.1, the CTAP2.2 October 2024 Review Draft and
++    /// CTAP2.3 February 2026 Proposed Standard. This is not a CTAP2.2 status addition.</remarks>
+     PinTokenExpired = 0x38,
+ 
+     /// <summary>
+@@ -268,12 +275,12 @@ public enum CtapStatus : byte
+     Other = 0x7F,
+ 
+     /// <summary>
+-    /// CTAP 1/U2F error.
++    /// Start of the extension-specific error range (0xE0–0xEF).
+     /// </summary>
+     ExtensionFirst = 0xE0,
+ 
+     /// <summary>
+-    /// CTAP 1/U2F error.
++    /// End of the extension-specific error range (0xE0–0xEF).
+     /// </summary>
+     ExtensionLast = 0xEF,
+ 
+@@ -286,4 +293,4 @@ public enum CtapStatus : byte
+     /// Vendor specific error range end.
+     /// </summary>
+     VendorLast = 0xFF,
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Ctap2Session.cs w/src/Ctap2/src/Ctap2Session.cs
+index d55e6c14..43a9e7a0 100644
+--- i/src/Ctap2/src/Ctap2Session.cs
++++ w/src/Ctap2/src/Ctap2Session.cs
+@@ -35,8 +35,11 @@ namespace Yubico.YubiKit.Ctap2;
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// Implements CTAP 2.1/2.3 specification. Supports both SmartCard (CCID) 
+-/// and FIDO HID transports.
++/// Exposes CTAP2 operations and selected optional features over FIDO HID and SmartCard (CCID).
++/// GetInfo advertisement, current configuration, product, firmware, transport and PIN/UV permissions
++/// determine availability; the firmware feature thresholds below are not complete support checks.
++/// See <see cref="ICtap2Session"/> for caller verification, sequencing, cancellation and byte-lifetime
++/// responsibilities. Secure-channel IsAuthenticated state is not CTAP PIN/UV authorization.
+ /// </para>
+ /// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html
+@@ -45,37 +48,37 @@ namespace Yubico.YubiKit.Ctap2;
+ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
+ {
+     /// <summary>
+-    /// Feature flag for FIDO2 support (requires firmware 5.0+).
++    /// Nominal firmware threshold for FIDO2 (5.0+), not a per-device capability or authorization check.
+     /// </summary>
+     public static readonly Feature FeatureFido2 = new("FIDO2", 5, 0, 0);
+ 
+     /// <summary>
+-    /// Feature flag for Bio Enrollment support (requires firmware 5.2+).
++    /// Nominal firmware threshold for Bio Enrollment (5.2+); product and GetInfo support still matter.
+     /// </summary>
+     public static readonly Feature FeatureBioEnrollment = new("Bio Enrollment", 5, 2, 0);
+ 
+     /// <summary>
+-    /// Feature flag for Credential Management support (requires firmware 5.2+).
++    /// Nominal firmware threshold for Credential Management (5.2+), not permission to manage credentials.
+     /// </summary>
+     public static readonly Feature FeatureCredentialManagement = new("Credential Management", 5, 2, 0);
+ 
+     /// <summary>
+-    /// Feature flag for hmac-secret-mc extension (requires firmware 5.4+).
++    /// Nominal firmware threshold for hmac-secret-mc (5.4+); check extension advertisement separately.
+     /// </summary>
+     public static readonly Feature FeatureHmacSecretMc = new("hmac-secret-mc", 5, 4, 0);
+ 
+     /// <summary>
+-    /// Feature flag for Authenticator Config support (requires firmware 5.4+).
++    /// Nominal firmware threshold for Authenticator Config (5.4+), not a configured-state or permission check.
+     /// </summary>
+     public static readonly Feature FeatureAuthenticatorConfig = new("Authenticator Config", 5, 4, 0);
+ 
+     /// <summary>
+-    /// Feature flag for credBlob extension (requires firmware 5.5+).
++    /// Nominal firmware threshold for credBlob (5.5+); check extension advertisement and size limits separately.
+     /// </summary>
+     public static readonly Feature FeatureCredBlob = new("credBlob", 5, 5, 0);
+ 
+     /// <summary>
+-    /// Feature flag for Encrypted Identifier support (requires firmware 5.7+).
++    /// Nominal firmware threshold for Encrypted Identifier (5.7+), not a guarantee the field is returned.
+     /// </summary>
+     public static readonly Feature FeatureEncIdentifier = new("Encrypted Identifier", 5, 7, 0);
+ 
+@@ -94,8 +97,26 @@ private Ctap2Session(
+     }
+ 
+     /// <summary>
+-    /// Creates and initializes a FIDO session from a connection.
++    /// Creates and initializes a CTAP2 session using a caller-owned connection.
+     /// </summary>
++    /// <remarks>
++    /// <para>
++    /// The session borrows the connection; dispose the session before disposing or reusing the
++    /// connection. PreferredConnectionType asserts the supplied connection's type, rather than opening
++    /// or switching transports. The caller also owns supplied SCP key parameters and the presence prompt.
++    /// After healthy sequential use an idle borrowed connection can host another session, but disposal
++    /// during an active built-in macOS HID exchange can leave it unusable. After uncertain exchange or
++    /// teardown state, dispose and reopen the connection rather than assuming recovery.
++    /// </para>
++    /// <para>
++    /// HID channel preparation precedes GetInfo. SmartCard selects the FIDO AID and reads GetInfo
++    /// before the USB firmware gate and SCP establishment; NFC skips that USB gate. The gate uses
++    /// detected GetInfo firmware, not FirmwareVersionOverride. Missing firmware becomes 0.0.0 and
++    /// Feature treats Major == 0 sentinel versions as supported; this is not proof of actual firmware.
++    /// The override configures session/protocol firmware after that gate, and later GetInfo calls do
++    /// not update it. SCP on HID is rejected before channel initialization or GetInfo.
++    /// </para>
++    /// </remarks>
+     /// <param name="connection">The connection to the YubiKey (SmartCard or FIDO HID).</param>
+     /// <param name="options">Optional cross-cutting session creation settings.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -128,7 +149,7 @@ private async Task InitializeAsync(
+         if (backend is SmartCardBackend smartCardBackend)
+             await smartCardBackend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
+ 
+-        // Get firmware version from authenticator info
++        // The transport gate uses detected firmware; an override only affects later configuration.
+         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
+         var detectedFirmwareVersion = info.FirmwareVersion ?? new FirmwareVersion();
+ 
+@@ -137,7 +158,7 @@ private async Task InitializeAsync(
+             EnsureSmartCardTransportSupported(smartCardConnection.Transport, detectedFirmwareVersion);
+         }
+ 
+-        // Initialize base class
++        // Configure the session firmware snapshot, then establish SCP and rebind the backend if needed.
+         var effectiveProtocol = await ConfigureProtocolAsync(
+                 protocol,
+                 firmwareVersionOverride ?? detectedFirmwareVersion,
+@@ -253,7 +274,7 @@ public async Task<MakeCredentialResponse> MakeCredentialAsync(
+ 
+             _logger.LogDebug("MakeCredential for RP: {RpId}", rp.Id);
+ 
+-            // makeCredential always collects user presence (up=false is rejected above).
++            // This is a presence-policy notification, not verification of the returned UP/UV flags.
+             UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+                 new UserPresenceContext
+                 {
+@@ -270,10 +291,12 @@ public async Task<MakeCredentialResponse> MakeCredentialAsync(
+         {
+             if (request is not null)
+             {
++                // Clear our encoded request, not borrowed caller inputs or the transferred response.
+                 CryptographicOperations.ZeroMemory(request);
+             }
+         }
+ 
++        // CTAP status and terminal notification resolution precede decode; failure here is not rollback.
+         var result = MakeCredentialResponse.Decode(response);
+ 
+         _logger.LogInformation(
+@@ -330,10 +353,12 @@ public async Task<GetAssertionResponse> GetAssertionAsync(
+         {
+             if (request is not null)
+             {
++                // Clear our encoded request, not borrowed caller inputs or decoded response copies.
+                 CryptographicOperations.ZeroMemory(request);
+             }
+         }
+ 
++        // Parsing is not relying-party verification and can fail after a successful device exchange.
+         var result = GetAssertionResponse.Decode(response);
+ 
+         _logger.LogInformation(
+@@ -349,6 +374,7 @@ public async Task<GetAssertionResponse> GetNextAssertionAsync(
+     {
+         EnsureInitialized();
+ 
++        // The caller preserves device sequence adjacency and tracks the first response's count.
+         var request = CtapRequestBuilder.Create(CtapCommand.GetNextAssertion).Build();
+ 
+         var response = await _backend.SendCborAsync(
+@@ -452,4 +478,4 @@ internal static void EnsureSmartCardTransportSupported(
+             "For older USB-connected YubiKeys, use IFidoHidConnection instead.");
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/ICtap2Session.cs w/src/Ctap2/src/ICtap2Session.cs
+index 68db459b..cf9677c7 100644
+--- i/src/Ctap2/src/ICtap2Session.cs
++++ w/src/Ctap2/src/ICtap2Session.cs
+@@ -23,8 +23,25 @@ namespace Yubico.YubiKit.Ctap2;
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// Implements CTAP 2.1/2.3 specification.
+-/// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html
++/// Exposes CTAP2 operations and selected optional features. Availability depends on the
++/// authenticator's advertised capabilities, current configuration, product, firmware and transport;
++/// advertisement alone does not grant PIN/UV permissions or establish support for every operation.
++/// CTAP2.1 reference: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html
++/// </para>
++/// <para>
++/// Await each call before starting another exchange. The session refuses overlapping exchanges,
++/// rather than queuing them, and does not reserve the authenticator across a multi-command sequence.
++/// A pre-canceled exchange is refused before wire admission.
++/// Cancellation is cooperative: admitted SmartCard exchanges complete, while HID cancellation is
++/// observed during keep-alive processing and the terminal response is drained. Cancellation can race
++/// a successful return and does not impose a host deadline or undo device work. A transport,
++/// notification callback or decoder failure is not proof that the authenticator made no change.
++/// </para>
++/// <para>
++/// User-presence notifications describe SDK policy or an observed HID wait. Their completion reflects
++/// the CTAP exchange before typed decoding, not verified UP/UV flags or relying-party authentication.
++/// The relying party remains responsible for challenge, origin, account binding, signature,
++/// attestation and requested UP/UV verification, including its counter policy.
+ /// </para>
+ /// </remarks>
+ public interface ICtap2Session : IApplicationSession
+@@ -39,33 +56,49 @@ public interface ICtap2Session : IApplicationSession
+     /// </para>
+     /// <para>
+     /// The request must include the CTAP command byte as the first byte, followed by
+-    /// the CBOR-encoded parameters (if any).
++    /// the CBOR-encoded parameters (if any). The caller selects the command schema, authorization
++    /// and stateful sequence, and must meet CTAP canonical encoding, nesting and device message-size
++    /// limits. This method does not perform capability, PIN/UV or command-schema preflight and does
++    /// not infer user-presence notifications. Transport framing and CTAP status handling still apply.
++    /// CTAP2.1 §8 limits nesting to four levels and messages to 1024 bytes unless GetInfo maxMsgSize
++    /// advertises a larger limit; the session does not enforce that device limit at this boundary.
++    /// </para>
++    /// <para>
++    /// Keep request storage valid and unchanged until the call completes, and clear caller-owned
++    /// secrets when no longer needed. The returned read-only view has no disposable or automatic
++    /// zeroing contract; clearing a copy does not clear the backend's response storage.
+     /// </para>
+     /// </remarks>
+     /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+-    /// <returns>The CBOR-encoded response data (without status byte).</returns>
++    /// <returns>The successful response payload without the CTAP status byte; it can be empty.</returns>
++    /// <exception cref="ArgumentException">The request has no command byte.</exception>
++    /// <exception cref="CtapException">A nonzero CTAP status is received, or Other is synthesized
++    /// for a response with no status byte. Transport/APDU errors have separate origins.</exception>
+     Task<ReadOnlyMemory<byte>> SendCborRequestAsync(
+         ReadOnlyMemory<byte> request,
+         CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+-    /// Gets authenticator information. Always fetches fresh data from device.
++    /// Queries the authenticator for information at the time of this call.
+     /// </summary>
+     /// <remarks>
+-    /// Callers should cache the result if needed. The session does not cache InfoData
+-    /// to ensure fresh data is always returned.
++    /// Each call sends GetInfo; options may change after PIN or configuration operations.
++    /// This read does not refresh the session's construction-time firmware or protocol configuration.
++    /// Do not insert GetInfo into a stateful assertion or administrative continuation sequence.
+     /// </remarks>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The authenticator information.</returns>
+     Task<AuthenticatorInfo> GetInfoAsync(CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+-    /// Requests the user to select this authenticator by touching the device.
++    /// Requests user presence to select this authenticator.
+     /// </summary>
+     /// <remarks>
+     /// This command is useful when multiple authenticators are present and the user
+-    /// needs to indicate which one they want to use.
++    /// needs to indicate which one they want to use. Presence depends on the transport and device.
++    /// The caller coordinates other authenticators and cancels their outstanding selection requests.
++    /// HID can report a device-wait notification; SmartCard does not predict a touch notification here.
+     /// </remarks>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     Task SelectionAsync(CancellationToken cancellationToken = default);
+@@ -75,17 +108,31 @@ Task<ReadOnlyMemory<byte>> SendCborRequestAsync(
+     /// </summary>
+     /// <remarks>
+     /// <para>
+-    /// This operation requires user presence (touch) within 5 seconds of device insertion.
+-    /// All credentials and settings will be permanently deleted.
++    /// Reset invalidates generated credentials, including non-discoverable and CTAP1/U2F credentials,
++    /// erases discoverable credentials and clears the FIDO PIN. Storage and configuration reset
++    /// effects depend on the applicable protocol revision and product; this is not a device-wide reset.
++    /// YubiKey Bio Multi-protocol Edition requires device-wide reset instead when individual FIDO reset
++    /// is blocked; this method does not choose or perform that alternate product procedure.
+     /// </para>
+     /// <para>
+-    /// WARNING: This is a destructive operation that cannot be undone.
++    /// Send reset promptly after power-up. CTAP2.1 and CTAP2.3 §6.6 specify command receipt within
++    /// ten seconds for displayless authenticators, separately from the subsequent presence wait.
++    /// Yubico documents ten seconds for firmware 5.5.4 and later and five seconds before 5.5.2;
++    /// that product guidance does not classify 5.5.2/5.5.3. Its USB touch wait is separately thirty
++    /// seconds. Meet the product's transport and any enabled long-touch requirements; inspect
++    /// <see cref="AuthenticatorInfo.TransportsForReset"/> and <see cref="AuthenticatorInfo.LongTouchForReset"/>
++    /// where advertised. The authenticator enforces these conditions; this method does not arrange
++    /// power cycling, enforce a local clock, refresh session state or roll back an attempted reset.
++    /// Reset is destructive and cannot be undone.
++    /// </para>
++    /// <para>
++    /// Product procedure: https://docs.yubico.com/yesdk/users-manual/application-fido2/fido2-reset.html
+     /// </para>
+     /// </remarks>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <exception cref="CtapException">
+     /// Thrown with <see cref="CtapStatus.NotAllowed"/> if reset is attempted too long after
+-    /// device insertion.
++    /// power-up; other reset refusals and presence timeouts can have different CTAP statuses.
+     /// </exception>
+     Task ResetAsync(CancellationToken cancellationToken = default);
+ 
+@@ -95,21 +142,40 @@ Task<ReadOnlyMemory<byte>> SendCborRequestAsync(
+     /// <remarks>
+     /// <para>
+     /// This method implements the CTAP2 authenticatorMakeCredential command.
+-    /// User presence is required (user must touch the authenticator).
++    /// User presence is requested; <see cref="MakeCredentialOptions.UserPresence"/> cannot be false.
++    /// The device's presence gesture depends on transport and policy, not always a physical touch.
+     /// </para>
+     /// <para>
+     /// For discoverable credentials, set <see cref="MakeCredentialOptions.ResidentKey"/> to true.
++    /// The caller constructs serialized client data and supplies its SHA-256 hash, not the raw RP
++    /// challenge. The session checks the hash length, not its contents or the RP ID's origin authority.
++    /// Preserve credential ID and user/account mapping and have the relying party verify the response.
++    /// </para>
++    /// <para>
++    /// Built-in UV is requested with UserVerification only on a capable authenticator. When supplying
++    /// PinUvAuthParam, omit UserVerification entirely (including false), use the appropriate protocol
++    /// and authenticate this exact hash with a token authorized for MakeCredential and this RP.
++    /// Legacy PIN-token fallback does not request explicit permissions/RP scope; select that route
++    /// only when the authenticator's applicable legacy authorization rules permit the operation.
++    /// The encoder does not negotiate capabilities or reject every invalid UV/token combination.
++    /// Keep borrowed entity IDs, option buffers and collections stable through completion. The session
++    /// clears its encoded request in finally, not caller inputs or decoded secret-bearing responses;
++    /// session disposal is not sensitive-result cleanup. CTAP success precedes decoding and is not
++    /// complete WebAuthn registration verification.
+     /// </para>
+     /// </remarks>
+-    /// <param name="clientDataHash">SHA-256 hash of the client data (32 bytes).</param>
++    /// <param name="clientDataHash">The 32-byte SHA-256 hash of serialized client data.</param>
+     /// <param name="rp">Relying party entity.</param>
+     /// <param name="user">User entity.</param>
+     /// <param name="pubKeyCredParams">Supported credential parameters in preference order.</param>
+     /// <param name="options">Optional parameters including exclude list, extensions, etc.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The created credential response with attestation.</returns>
++    /// <exception cref="ArgumentException">The hash is not 32 bytes, UserPresence is false,
++    /// or the credential parameter list is empty or contains duplicate type/algorithm pairs.</exception>
+     /// <exception cref="CtapException">
+-    /// Thrown with <see cref="CtapStatus.CredentialExcluded"/> if a credential in the exclude list exists.
++    /// Thrown with <see cref="CtapStatus.CredentialExcluded"/> when the authenticator's applicable
++    /// RP, credential and authorization processing finds an excluded credential, not a global duplicate-user check.
+     /// </exception>
+     Task<MakeCredentialResponse> MakeCredentialAsync(
+         ReadOnlyMemory<byte> clientDataHash,
+@@ -125,18 +191,34 @@ Task<MakeCredentialResponse> MakeCredentialAsync(
+     /// <remarks>
+     /// <para>
+     /// This method implements the CTAP2 authenticatorGetAssertion command.
+-    /// User presence is required (user must touch the authenticator).
++    /// User presence defaults to requested. Setting <see cref="GetAssertionOptions.UserPresence"/>
++    /// to false sends a silent request and suppresses the SDK notification, subject to device policy;
++    /// neither a notification nor its absence verifies the returned UP/UV flags.
+     /// </para>
+     /// <para>
+     /// If multiple credentials match, use <see cref="GetNextAssertionAsync"/> to retrieve
+-    /// additional assertions.
++    /// additional assertions according to the returned count. The caller supplies the SHA-256 hash
++    /// of serialized client data, retains credential/account associations and has the relying party
++    /// verify the proof. This method does not construct client data, authorize the RP ID against an
++    /// origin or verify signatures. When supplying PinUvAuthParam, omit UserVerification entirely
++    /// and use the matching protocol and GetAssertion permission/RP scope for the exact hash.
++    /// Legacy token fallback has no explicit permission/RP request; applicable device authorization
++    /// rules still govern its use. With no allow list, the request asks for applicable discoverable
++    /// credentials for this RP, not a global credential or account search.
++    /// </para>
++    /// <para>
++    /// Keep borrowed option buffers and collections stable through completion. Only the session's
++    /// encoded request is cleared in finally; caller inputs and decoded response copies are not
++    /// cleared by this method or session disposal. Callback or decode failure after CTAP success
++    /// does not imply the device did nothing.
+     /// </para>
+     /// </remarks>
+     /// <param name="rpId">Relying party identifier.</param>
+-    /// <param name="clientDataHash">SHA-256 hash of the client data (32 bytes).</param>
++    /// <param name="clientDataHash">The 32-byte SHA-256 hash of serialized client data.</param>
+     /// <param name="options">Optional parameters including allow list, extensions, etc.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The first assertion response.</returns>
++    /// <exception cref="ArgumentException">The RP ID is null/empty or the hash is not 32 bytes.</exception>
+     /// <exception cref="CtapException">
+     /// Thrown with <see cref="CtapStatus.NoCredentials"/> if no matching credential is found.
+     /// </exception>
+@@ -152,11 +234,15 @@ Task<GetAssertionResponse> GetAssertionAsync(
+     /// <remarks>
+     /// <para>
+     /// Call this method when <see cref="GetAssertionResponse.NumberOfCredentials"/> is greater than 1.
+-    /// This must be called immediately after <see cref="GetAssertionAsync"/> or a previous
+-    /// <see cref="GetNextAssertionAsync"/> call.
++    /// Collect N−1 additional responses promptly after the first count N. An absent count means one
++    /// at the protocol level. Do not interpose GetInfo, PIN, administrative, raw or other authenticator
++    /// operations, including on another channel. This method sends no new presence or PIN request
++    /// and tracks no local remaining count, timer or sequence reservation. CTAP2.1 §6.3 allows
++    /// NotAllowed for missing, exhausted or expired state (more than thirty seconds between calls);
++    /// its timeout step is optional over NFC. An exchange guard is not a lease for the whole sequence.
+     /// </para>
+     /// </remarks>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The next assertion response.</returns>
+     Task<GetAssertionResponse> GetNextAssertionAsync(CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/IYubiKeyExtensions.cs w/src/Ctap2/src/IYubiKeyExtensions.cs
+index d4bea121..59ca2271 100644
+--- i/src/Ctap2/src/IYubiKeyExtensions.cs
++++ w/src/Ctap2/src/IYubiKeyExtensions.cs
+@@ -44,11 +44,15 @@ public static class IYubiKeyExtensions
+         /// <remarks>
+         /// <para>
+         /// This is a convenience method that creates a temporary CTAP2 session, retrieves
+-        /// the authenticator info, and disposes of the session. For multiple operations,
++        /// the authenticator info, and disposes of the session and its owned connection. Creation
++        /// performs an initial GetInfo probe; this method then sends a second, fresh GetInfo read.
++        /// It needs no PIN or presence for GetInfo itself. For multiple operations,
+         /// use <c>CreateCtap2SessionAsync</c> instead to reuse the session.
+         /// </para>
+         /// </remarks>
+         /// <example>
++        /// Composable fragment with an available <see cref="IYubiKey"/> named yubiKey; reported
++        /// version advertisement is not certification or support for every optional feature.
+         /// <code>
+         /// var info = await yubiKey.GetCtap2InfoAsync();
+         /// Console.WriteLine($"AAGUID: {Convert.ToHexString(info.Aaguid.Span)}");
+@@ -80,7 +84,7 @@ public async Task<AuthenticatorInfo> GetCtap2InfoAsync(
+         /// <exception cref="NotSupportedException">
+         /// Thrown if the YubiKey does not expose a FIDO-capable connection
+         /// (<see cref="ConnectionType.HidFido"/> or <see cref="ConnectionType.SmartCard"/>), or if an
+-        /// an explicitly preferred connection is valid for CTAP2 but not exposed by this device.
++        /// explicitly preferred connection is valid for CTAP2 but not exposed by this device.
+         /// </exception>
+         /// <exception cref="ArgumentException">
+         /// Thrown if the preferred connection is not a single concrete transport or is a
+@@ -94,24 +98,38 @@ public async Task<AuthenticatorInfo> GetCtap2InfoAsync(
+         /// <item><description>FIDO HID: Uses CTAP HID protocol for USB communication (the default first choice)</description></item>
+         /// <item><description>SmartCard (CCID): Uses ISO 7816-4 APDUs over the FIDO AID (NFC, or USB on firmware 5.8.0+)</description></item>
+         /// </list>
+-        /// When a device exposes both, the default selects HID FIDO; pass
+-        /// Set <see cref="SessionCreationOptions.PreferredConnectionType" /> to
++        /// When a device exposes both, the default selects HID FIDO. Set
++        /// <see cref="SessionCreationOptions.PreferredConnectionType" /> to
+         /// <see cref="ConnectionType.SmartCard"/> to force SmartCard.
+         /// </para>
+         /// <para>
+         /// SCP (Secure Channel Protocol) is supported only on SmartCard. Supplying
+-        /// Secure-channel parameters without an explicit override select SmartCard automatically.
++        /// secure-channel parameters without an explicit preference selects SmartCard automatically.
+         /// Explicitly selecting HID FIDO with SCP parameters causes session initialization to throw
+-        /// <see cref="NotSupportedException"/> ("SCP is only supported on SmartCard protocols").
++        /// <see cref="NotSupportedException"/> before HID channel initialization or GetInfo.
++        /// </para>
++        /// <para>
++        /// The returned session owns the opened connection; dispose it before opening another session
++        /// on the same physical YubiKey. Connection failures do not trigger another transport attempt.
++        /// Caller-supplied SCP parameters and UserPresencePrompt remain caller-owned. SmartCard
++        /// selection and GetInfo precede the detected-firmware USB gate and SCP establishment;
++        /// FirmwareVersionOverride changes configured session firmware, not that gate's detected value.
++        /// Major == 0 sentinel/missing firmware passes Feature's optimistic check, not a hardware
++        /// firmware qualification. SCP authentication does not grant CTAP PIN/UV token permissions.
+         /// </para>
+         /// </remarks>
+         /// <example>
++        /// Two alternative composable fragments with an available <see cref="IYubiKey"/> named yubiKey.
++        /// The SCP03 alternative requires an authorized SmartCard device provisioned with the supplied
++        /// default keys; the defaults are not a production key-management recommendation.
+         /// <code>
+-        /// // Create a CTAP2 session and get authenticator info
+-        /// await using var session = await yubiKey.CreateCtap2SessionAsync();
+-        /// var info = await session.GetInfoAsync();
++        /// // Ordinary session: dispose before opening another connection on this physical key.
++        /// {
++        ///     await using var session = await yubiKey.CreateCtap2SessionAsync();
++        ///     var info = await session.GetInfoAsync();
++        /// }
+         /// 
+-        /// // Create a session with SCP03 over SmartCard (force the SmartCard transport)
++        /// // Alternative: SCP03 over SmartCard on a device provisioned for these keys.
+         /// using var scpKeys = Scp03KeyParameters.Default;
+         /// await using var secureSession = await yubiKey.CreateCtap2SessionAsync(
+         ///     new SessionCreationOptions
+@@ -188,4 +206,4 @@ private ConnectionType ResolveCtap2SessionTransport(ConnectionType? preferredCon
+     // CTAP2 default transport order: HID FIDO first (primary USB CTAP2 interface), then SmartCard CTAP2.
+     private static readonly ConnectionType[] Ctap2TransportOrder =
+         [ConnectionType.HidFido, ConnectionType.SmartCard];
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetInfoTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetInfoTests.cs
+index 431dec29..d4c508ce 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetInfoTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetInfoTests.cs
+@@ -21,11 +21,14 @@
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+-/// Integration tests for GetInfo validation.
++/// Integration checks of selected GetInfo fields on a dedicated, approved test device.
+ /// </summary>
+ /// <remarks>
+-/// These tests verify the authenticator info returned by GetInfo command.
+-/// Based on Java yubikit-android Ctap2SessionTests.testCtap2GetInfo() patterns.
++/// The shared helper defaults to PIN normalization before the GetInfo action: it can set/change
++/// the PIN or consume a retry. These paths require approved PIN work and known device state,
++/// even though GetInfo itself needs no PIN or presence. Assertions inspect metadata, not feature
++/// execution, complete GetInfo validity or protocol conformance; optional-field checks can be bypassed
++/// by absence. A setup skip does not establish that no device mutation occurred.
+ /// </remarks>
+ [Trait("Category", "Integration")]
+ public class Ctap2GetInfoTests
+@@ -50,7 +53,7 @@ await state.WithCtap2SessionAsync(async session =>
+         });
+ 
+     /// <summary>
+-    /// Tests that GetInfo returns a valid 16-byte AAGUID.
++    /// Checks length 16 and an additional nonzero-AAGUID test assumption, not authenticator identity verification.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -66,7 +69,7 @@ await state.WithCtap2SessionAsync(async session =>
+         });
+ 
+     /// <summary>
+-    /// Tests that GetInfo returns expected options for YubiKey.
++    /// Requires clientPin key presence and checks plat/rk/up values only if supplied.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -133,7 +136,7 @@ await state.WithCtap2SessionAsync(async session =>
+         });
+ 
+     /// <summary>
+-    /// Tests that GetInfo returns extensions list.
++    /// Checks a non-null extension list; the guarded disjunction does not establish hmac-secret support.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -153,7 +156,7 @@ await state.WithCtap2SessionAsync(async session =>
+         });
+ 
+     /// <summary>
+-    /// Tests that GetInfo returns firmware version.
++    /// Checks reported firmware against the test's accepted values only when the field is present.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -172,7 +175,7 @@ await state.WithCtap2SessionAsync(async session =>
+         });
+ 
+     /// <summary>
+-    /// Tests that GetInfo returns max message size.
++    /// Checks the reported message-size minimum only when the field is present.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -187,4 +190,4 @@ await state.WithCtap2SessionAsync(async session =>
+                     "Max message size should be at least 1024 bytes");
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SessionSimpleTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SessionSimpleTests.cs
+index a67d0d4e..ff61bb56 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SessionSimpleTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SessionSimpleTests.cs
+@@ -23,12 +23,13 @@
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+-/// Simple integration tests for Ctap2Session.
+-/// These tests exercise basic CTAP2 operations that do NOT require user presence.
++/// Integration checks of CTAP2 session creation, metadata, selection and reset refusal.
+ /// </summary>
+ /// <remarks>
+-/// Tests requiring user presence or PIN verification are excluded from automated runs.
+-/// Mark such tests with [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)] to exclude them.
++/// Helper-based tests use default PIN normalization and can set/change PIN or consume retries before
++/// their actions. They require approved PIN work and known device state; filtering touch traits does
++/// not make them read-only. Direct creation/GetInfo paths do not use that helper. Selection and reset
++/// require human coordination. Assertions establish only the properties named below, not certification.
+ /// </remarks>
+ public class Ctap2SessionSimpleTests
+ {
+@@ -78,7 +79,7 @@ await state.WithCtap2SessionAsync(async session =>
+         {
+             var info = await session.GetInfoAsync();
+ 
+-            // YubiKey 5+ should support CTAP2
++            // Require this advertised version string; do not infer execution of all CTAP2 features.
+             Assert.Contains("FIDO_2_0", info.Versions);
+         });
+ 
+@@ -89,7 +90,7 @@ await state.WithCtap2SessionAsync(async session =>
+         {
+             var info = await session.GetInfoAsync();
+ 
+-            // AAGUID should be 16 bytes
++            // Length is the protocol requirement; rejecting all-zero bytes is an additional test assumption.
+             Assert.Equal(16, info.Aaguid.Length);
+             Assert.False(info.Aaguid.Span.SequenceEqual(new byte[16]), "AAGUID should not be all zeros");
+         });
+@@ -103,6 +104,7 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+             if (info.Extensions is { Count: > 0 })
+             {
++                // This guarded disjunction is always true; it does not establish hmac-secret support.
+                 var hasHmacSecret = info.Extensions.Contains("hmac-secret");
+                 Assert.True(hasHmacSecret || info.Extensions.Count > 0,
+                     "YubiKey should support at least one extension");
+@@ -118,6 +120,7 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+             if (info.Algorithms is { Count: > 0 })
+             {
++                // ES256 is checked only for a nonempty advertisement, not by creating that algorithm.
+                 var hasEs256 = info.Algorithms.Any(a =>
+                     a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.ES256);
+                 Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
+@@ -133,6 +136,7 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+             if (info.Options is { Count: > 0 })
+             {
++                // This guarded disjunction does not establish that rk is present or enabled.
+                 var hasRk = info.Options.ContainsKey("rk");
+                 Assert.True(hasRk || info.Options.Count > 0,
+                     "YubiKey should have at least one option");
+@@ -176,7 +180,7 @@ public async Task GetInfoAsync_With_YubiKeyExtensionMethod(YubiKeyTestState stat
+     }
+ 
+     /// <summary>
+-    /// Tests SelectionAsync which requires user touch to confirm device selection.
++    /// Awaits selection completion on the coordinated HID device; no response UP/UV flags are asserted.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -188,8 +192,10 @@ await state.WithCtap2SessionAsync(async session =>
+         });
+ 
+     /// <summary>
+-    /// Tests ResetAsync which requires user presence within a short window after power-up.
++    /// Expects some CtapException from reset, without checking its status or whether state changed.
+     /// </summary>
++    /// <remarks>This is not a safe reset-window or no-deletion proof. Reset command receipt and
++    /// presence use separate clocks; human-approved power-cycle/presence coordination is required.</remarks>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+@@ -201,4 +207,4 @@ await Assert.ThrowsAsync<CtapException>(async () =>
+                 await session.ResetAsync();
+             });
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SmartCardTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SmartCardTests.cs
+index e3569c73..6e4040aa 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SmartCardTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SmartCardTests.cs
+@@ -25,12 +25,16 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// </summary>
+ /// <remarks>
+ /// These tests exercise the SmartCard CTAP2 APDU path when the connected authenticator exposes the FIDO AID.
++/// The helper's default PIN normalization can set/change a PIN or consume retries before GetInfo;
++/// these are approved known-PIN device tests, not read-only smoke. Each assertion covers the named
++/// metadata only. NotSupportedException is skipped, including the backend's broad SELECT-error wrapper;
++/// that skip does not independently establish the precise reason the application was unavailable.
+ /// </remarks>
+ [Trait("Category", "Integration")]
+ public class Ctap2SmartCardTests
+ {
+     /// <summary>
+-    /// Tests that creating a Ctap2Session over SmartCard succeeds and returns valid info.
++    /// Checks a returned model, nonempty versions and AAGUID length 16 over the selected SmartCard path.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+@@ -131,4 +135,4 @@ await state.WithCtap2SessionAsync(async session =>
+             Skip.If(true, "CTAP2 SmartCard session failed because the connected authenticator did not expose the FIDO AID or does not support USB SmartCard CTAP2 on this firmware.");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestData.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestData.cs
+index be399a9f..05573c56 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestData.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestData.cs
+@@ -45,10 +45,9 @@ public static class Ctap2TestData
+     public const string UserDisplayName = "Test User";
+ 
+     /// <summary>
+-    /// Known test PIN used for all CTAP2 integration tests. Must match the PIN
+-    /// physically set on the test YubiKey. Satisfies 5.7+ complexity requirements
+-    /// (8 digits, at least 2 unique characters).
+-    /// To set: ykman fido access change-pin --new-pin 11234567
++    /// Known PIN for approved dedicated test devices. Normalization may set or verify this value;
++    /// suitability depends on the product's configured minimum-length and complexity policy, not
++    /// firmware alone. This immutable test constant is not a production secret-input example.
+     /// </summary>
+     public const string Pin = TestExtensions.Ctap2TestStateExtensions.KnownTestPinString;
+ 
+@@ -68,8 +67,10 @@ public static class Ctap2TestData
+     public static byte[] GenerateUserId() => RandomNumberGenerator.GetBytes(16);
+ 
+     /// <summary>
+-    /// Generates a random 32-byte challenge (client data hash).
++    /// Generates 32 random bytes as a stand-in clientDataHash for CTAP protocol tests.
+     /// </summary>
++    /// <remarks>This does not serialize client data or hash an RP challenge. Complete WebAuthn
++    /// ceremonies must hash the exact serialized client data and have the RP verify it.</remarks>
+     public static byte[] GenerateChallenge() => RandomNumberGenerator.GetBytes(32);
+ 
+     /// <summary>
+@@ -101,4 +102,4 @@ public static PublicKeyCredentialUserEntity CreateUser(byte[] userId) =>
+     /// </summary>
+     public static IReadOnlyList<PublicKeyCredentialParameters> EdDSAParams =>
+         [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.EdDSA)];
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestHelpers.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestHelpers.cs
+index 63de81c6..8ce63c8d 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestHelpers.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestHelpers.cs
+@@ -22,15 +22,20 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// <summary>
+ /// Helper methods for CTAP2 integration tests.
+ /// </summary>
++/// <remarks>These are approved known-PIN device utilities, not production PIN collection or
++/// transaction-safe cleanup examples. PIN/token requests can mutate state or consume retries.</remarks>
+ public static class Ctap2TestHelpers
+ {
+     /// <summary>
+     /// Sets the PIN if not already configured, or validates the PIN is correct.
+     /// </summary>
++    /// <remarks>Verification requests a token even if the known PIN already matches. The returned
++    /// helper owns its supplied protocol but borrows the session; dispose it when done. A failure
++    /// before return has no disposal guard here, and the discarded verification token is not cleared.</remarks>
+     /// <param name="session">The CTAP2 session.</param>
+     /// <param name="pin">The PIN as UTF-8 bytes to set or verify.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+-    /// <returns>The ClientPin instance for further operations.</returns>
++    /// <returns>A caller-disposed ClientPin instance, which also disposes the selected protocol.</returns>
+     public static async Task<ClientPin> SetOrVerifyPinAsync(
+         ICtap2Session session,
+         ReadOnlyMemory<byte> pin,
+@@ -64,8 +69,12 @@ public static async Task<ClientPin> SetOrVerifyPinAsync(
+     }
+ 
+     /// <summary>
+-    /// Gets a PIN/UV auth token with credential management permission.
++    /// Requests a credential-management token, or a legacy token according to the version-string heuristic.
+     /// </summary>
++    /// <remarks>The heuristic recognizes FIDO_2_1/PRE, not every later version. ClientPin can also
++    /// fall back based on token capability. A legacy request carries no explicit CM permission, so
++    /// this tuple does not guarantee administrative authorization. The caller owns and must clear
++    /// the token; disposing ClientPin disposes its protocol, not the returned token or session.</remarks>
+     /// <param name="session">The CTAP2 session.</param>
+     /// <param name="pin">The PIN as UTF-8 bytes.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -89,7 +98,7 @@ public static async Task<ClientPin> SetOrVerifyPinAsync(
+         // Get token with credential management permission
+         byte[] pinToken;
+ 
+-        // Check if device supports CTAP 2.1 permissions
++        // Version-string heuristic only; actual token capability and authorization are separate.
+         var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
+                                    info.Versions.Contains("FIDO_2_1_PRE");
+ 
+@@ -112,6 +121,9 @@ public static async Task<ClientPin> SetOrVerifyPinAsync(
+     /// <summary>
+     /// Deletes all credentials for the specified relying party.
+     /// </summary>
++    /// <remarks>Deletes all enumerated credentials for the RP, not only a credential created by
++    /// this test. Earlier deletions are not rolled back on failure. The result and helpers are
++    /// disposed, but the acquired token is not cleared here. Only NoCredentials is ignored.</remarks>
+     /// <param name="session">The CTAP2 session.</param>
+     /// <param name="rpId">The relying party ID.</param>
+     /// <param name="pin">The PIN.</param>
+@@ -154,6 +166,8 @@ await credMan.DeleteCredentialAsync(cred.CredentialId, cancellationToken)
+     /// <summary>
+     /// Computes PIN/UV auth param for MakeCredential.
+     /// </summary>
++    /// <remarks>Authenticates the supplied hash bytes only; no RP scope or token permission is
++    /// verified locally. The returned auth-param array is caller-owned and must be cleared.</remarks>
+     public static byte[] ComputeMakeCredentialAuthParam(
+         IPinUvAuthProtocol protocol,
+         byte[] pinToken,
+@@ -165,6 +179,8 @@ public static byte[] ComputeMakeCredentialAuthParam(
+     /// <summary>
+     /// Computes PIN/UV auth param for GetAssertion.
+     /// </summary>
++    /// <remarks>Authenticates the supplied hash bytes only; no RP scope or token permission is
++    /// verified locally. The returned auth-param array is caller-owned and must be cleared.</remarks>
+     public static byte[] ComputeGetAssertionAuthParam(
+         IPinUvAuthProtocol protocol,
+         byte[] pinToken,
+@@ -172,4 +188,4 @@ public static byte[] ComputeGetAssertionAuthParam(
+     {
+         return protocol.Authenticate(pinToken, clientDataHash);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TransportTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TransportTests.cs
+index dd745dcd..e5330cc7 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TransportTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TransportTests.cs
+@@ -26,16 +26,21 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// Integration tests for CTAP2 transport-related behavior including
+ /// session creation over different transports and credential metadata.
+ /// </summary>
++/// <remarks>Require approved PIN/presence work on a dedicated test device. Default normalization
++/// and explicit PIN helpers can set/change PIN or consume retries. Tokens/auth parameters are not
++/// cleared on all paths; helper disposal does not clear returned tokens. Random 32-byte hashes are
++/// protocol stand-ins, not complete WebAuthn client data or RP verification.</remarks>
+ [Trait("Category", "Integration")]
+ public class Ctap2TransportTests
+ {
+     /// <summary>
+     /// Tests that a CTAP2 session created over SmartCard (CCID) transport
+-    /// can successfully create and verify a credential end-to-end.
+-    /// This validates the full SmartCardBackend path for credential operations.
++    /// returns a creation model with authenticator data and a nonempty credential ID.
++    /// It does not verify attestation, public-key algorithm or a subsequent assertion.
+     /// </summary>
+     /// <remarks>
+-    /// CTAP2 over SmartCard is supported when the connected authenticator exposes the FIDO AID.
++    /// The test explicitly selects SmartCard; the FIDO AID and current-transport firmware gate apply.
++    /// Cleanup attempts to delete every enumerated credential for this RP, not just this test's credential.
+     /// </remarks>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+@@ -115,8 +120,8 @@ await Ctap2TestHelpers.DeleteAllCredentialsForRpAsync(
+ 
+     /// <summary>
+     /// Tests that a non-discoverable (non-resident) credential can be created
+-    /// and used for assertion via the allow list pattern. This validates the
+-    /// server-side credential flow where the credential ID is stored externally.
++    /// and used in a single-entry assertion allow list. Checks a nonempty ID and signature,
++    /// not cryptographic signature verification, RP-hash verification or response-ID association.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -131,6 +136,8 @@ await state.WithCtap2SessionAsync(async session =>
+             }
+             catch (CtapException ex) when (ex.Status is CtapStatus.PinBlocked or CtapStatus.PinAuthBlocked)
+             {
++                // PinAuthBlocked is temporary (power cycle), unlike exhausted PinBlocked.
++                // The diagnostic below does not distinguish recovery; it is not a reset procedure.
+                 Skip.If(true,
+                     "PIN is blocked — CTAP2 reset required (re-insert YubiKey and reset within 10s of power-up)");
+                 return;
+@@ -211,4 +218,4 @@ await state.WithCtap2SessionAsync(async session =>
+             Assert.True(assertionResult.Signature.Length > 0,
+                     "Assertion signature should not be empty");
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/IntegrationTestBase.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/IntegrationTestBase.cs
+index 79a85e7c..61350037 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/IntegrationTestBase.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/IntegrationTestBase.cs
+@@ -19,9 +19,9 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// Tests use [WithYubiKey] attribute and YubiKeyTestState for device discovery.
+ /// </summary>
+ /// <remarks>
+-/// This base class exists for shared test utilities. Device discovery is handled
++/// This empty base class supplies no utilities. Device discovery is handled
+ /// by the standard WithYubiKey test infrastructure from Yubico.YubiKit.Tests.Shared.
+ /// </remarks>
+ public abstract class IntegrationTestBase
+ {
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs
+index f52847f9..9150b5e7 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs
+@@ -29,15 +29,19 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
+ /// </summary>
+ /// <remarks>
+ ///     <para>
+-///     Before each test session, <see cref="NormalizePinAsync" /> ensures the
+-///     authenticator has the known test PIN (<c>"11234567"</c>) configured.
+-///     This avoids the need for a CTAP2 reset (which requires a manual
+-///     unplug/replug/touch ceremony that cannot be automated).
++///     After session creation, each helper call defaults to <see cref="NormalizePinAsync" />
++///     before invoking the action. Normalization can set a PIN, change it twice for forcePinChange
++///     recovery or request a token to verify it. These paths require approved PIN work and known
++///     state on a dedicated device, even when the action only reads GetInfo. Pass normalizePin:false
++///     only when the test deliberately needs no normalization; touch filtering does not disable it.
+ ///     </para>
+ ///     <para>
+-///     If the PIN is already set to the known value, normalization is a no-op.
+-///     If no PIN is set, <c>SetPinAsync</c> is called. If the PIN differs or
+-///     is blocked, the test is skipped with a diagnostic message.
++///     A matching PIN still triggers a token exchange. A mismatch can consume a retry before a skip.
++///     A skip or cancellation does not roll back PIN changes. Force-change recovery can leave the
++///     temporary reversed PIN if its second change fails; that temporary buffer is cleared only on
++///     success. The verification token is discarded without clearing. Reset advice in diagnostic
++///     strings is not a coordinated product reset procedure, and temporary PinAuthBlocked differs
++///     from exhausted PinBlocked.
+ ///     </para>
+ /// </remarks>
+ public static class Ctap2TestStateExtensions
+@@ -46,7 +50,8 @@ public static class Ctap2TestStateExtensions
+     ///     The known test PIN used across all CTAP2 integration tests: <c>"11234567"</c>.
+     /// </summary>
+     /// <remarks>
+-    ///     This 8-digit PIN satisfies the YubiKey 5.7+ PIN complexity requirements.
++    ///     This known 8-digit test value is not a universal product/firmware complexity guarantee.
++    ///     The device's configured PIN policy still applies; it is not production secret input.
+     ///     UTF-8 bytes: <c>[0x31, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37]</c>.
+     /// </remarks>
+     public static readonly byte[] KnownTestPin = [0x31, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37];
+@@ -57,14 +62,15 @@ public static class Ctap2TestStateExtensions
+     public const string KnownTestPinString = "11234567";
+ 
+     /// <summary>
+-    ///     Ensures the authenticator has the known test PIN configured.
++    ///     Attempts to set, recover or verify the known test PIN before the action.
+     /// </summary>
+     /// <remarks>
+     ///     <list type="bullet">
+     ///         <item>If no PIN is set, calls <c>SetPinAsync</c> with the known PIN.</item>
+     ///         <item>If a PIN is set, verifies it matches the known PIN by requesting a PIN token.</item>
+     ///         <item>If the PIN is wrong, skips the test with a diagnostic message.</item>
+-    ///         <item>If the PIN is blocked, skips the test with a manual reset instruction.</item>
++    ///         <item>If forcePinChange is reported, attempts known→temporary→known PIN changes.</item>
++    ///         <item>If PIN authentication is blocked, skips with a diagnostic; recovery depends on the status.</item>
+     ///     </list>
+     /// </remarks>
+     private static async Task NormalizePinAsync(
+@@ -97,8 +103,8 @@ await clientPin.SetPinAsync(KnownTestPin, cancellationToken)
+         // If a prior test left forcePinChange set, clear it via PIN change.
+         // ChangePinAsync uses direct PIN hash encryption (not PIN tokens), so it
+         // works even when forcePinChange blocks token requests.
+-        // We use a reversed-PIN temporary value because Enhanced PIN keys (5.7+)
+-        // reject same-PIN changes with PinPolicyViolation.
++        // A reversed temporary value avoids a same-PIN change where device policy rejects it.
++        // This is not transactional: a failed second change can leave the temporary PIN configured.
+         if (info.ForcePinChange == true)
+         {
+             try
+@@ -108,6 +114,7 @@ await clientPin.ChangePinAsync(KnownTestPin, tempPin, cancellationToken)
+                     .ConfigureAwait(false);
+                 await clientPin.ChangePinAsync(tempPin, KnownTestPin, cancellationToken)
+                     .ConfigureAwait(false);
++                // This success-path clearing does not cover failed changes.
+                 CryptographicOperations.ZeroMemory(tempPin);
+             }
+             catch (CtapException ex) when (ex.Status is CtapStatus.PinInvalid
+@@ -119,7 +126,8 @@ await clientPin.ChangePinAsync(tempPin, KnownTestPin, cancellationToken)
+             }
+         }
+ 
+-        // PIN is configured -- verify it matches the known test PIN.
++        // A token request verifies the PIN even when it already matches; a mismatch can consume a retry.
++        // The returned secret is currently discarded without clearing.
+         try
+         {
+             _ = await clientPin.GetPinTokenAsync(KnownTestPin, cancellationToken)
+@@ -150,8 +158,8 @@ private static string GetWindowsHidAccessDeniedTestMessage(ConnectionType? prefe
+         /// </summary>
+         /// <param name="action">The async action to execute with the session.</param>
+         /// <param name="normalizePin">
+-        ///     When <c>true</c> (the default), ensures the authenticator has the known
+-        ///     test PIN (<c>"11234567"</c>) configured before running the test action.
++        ///     When true (the default), attempts known-PIN setup/recovery/token verification after
++        ///     creation and before the action. Requires approved PIN work, including for GetInfo tests.
+         /// </param>
+         /// <param name="configuration">Optional protocol configuration.</param>
+         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
+@@ -202,13 +210,13 @@ await NormalizePinAsync(session, cancellationToken)
+         }
+ 
+         /// <summary>
+-        ///     Executes an action with a CTAP2 session and returns the authenticator info.
++        ///     Executes an action with a CTAP2 session and a fresh authenticator-info snapshot.
+         ///     Automatically handles connection and session lifecycle.
+         /// </summary>
+         /// <param name="action">The async action to execute with the session and info.</param>
+         /// <param name="normalizePin">
+-        ///     When <c>true</c> (the default), ensures the authenticator has the known
+-        ///     test PIN (<c>"11234567"</c>) configured before running the test action.
++        ///     When true (the default), attempts known-PIN setup/recovery/token verification after
++        ///     creation and before the fresh info read/action. Requires approved PIN work.
+         /// </param>
+         /// <param name="configuration">Optional protocol configuration.</param>
+         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
+@@ -259,4 +267,4 @@ await NormalizePinAsync(session, cancellationToken)
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuthenticatorInfoTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuthenticatorInfoTests.cs
+index 6f2ba734..d97c5864 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuthenticatorInfoTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuthenticatorInfoTests.cs
+@@ -4,6 +4,9 @@
+ 
+ namespace Yubico.YubiKit.Ctap2.UnitTests;
+ 
++/// <summary>Mechanical decoding checks using synthetic field fixtures.</summary>
++/// <remarks>Several fixtures omit required AAGUID or other protocol conditions. They exercise
++/// selected parser behavior, not minimal conforming GetInfo responses or live feature support.</remarks>
+ public class AuthenticatorInfoTests
+ {
+     [Fact]
+@@ -30,7 +33,7 @@ public void Decode_WithKnownAndFutureTransports_PreservesExactStringList()
+ 
+         var info = AuthenticatorInfo.Decode(writer.Encode());
+ 
+-        // CTAP preserves the wire list, including unknown names, case, order and duplicates.
++        // This decoder preserves the supplied list; the duplicate is a deliberate nonconforming fixture.
+         // WebAuthn performs its own response-side sorting and deduplication.
+         Assert.Equal(advertised, info.Transports);
+     }
+@@ -38,7 +41,7 @@ public void Decode_WithKnownAndFutureTransports_PreservesExactStringList()
+     [Fact]
+     public void Decode_MinimalGetInfoResponse_ParsesVersions()
+     {
+-        // Arrange - Minimal GetInfo response with just versions
++        // Versions-only parser fixture: omits the protocol-required AAGUID, not a conforming minimum.
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(1);
+         writer.WriteInt32(0x01); // versions key
+@@ -301,6 +304,7 @@ public void Decode_WithUnknownKeys_SkipsUnknownValues()
+     [Fact]
+     public void Decode_WithEncIdentifier_ParsesByteString()
+     {
++        // Arbitrary 16-byte fixture: checks byte retention, not valid IV||ciphertext or decryption.
+         // Arrange
+         byte[] encIdentifier = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10];
+@@ -445,6 +449,7 @@ public void Decode_WithMaxPinLength_ParsesInteger()
+     [Fact]
+     public void Decode_WithEncCredStoreState_ParsesByteString()
+     {
++        // Arbitrary 16-byte fixture: checks byte retention, not valid IV||ciphertext or decryption.
+         // Arrange
+         byte[] encCredStoreState = [0xCA, 0xFE, 0xBA, 0xBE, 0xDE, 0xAD, 0xBE, 0xEF,
+                                      0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+@@ -497,4 +502,4 @@ public void Decode_WithAuthenticatorConfigCommands_ParsesIntegerArray()
+         info.AuthenticatorConfigCommands.Should().Contain(0x03);
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs
+index 3d6a3051..59a97641 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs
+@@ -9,6 +9,9 @@
+ 
+ namespace Yubico.YubiKit.Ctap2.UnitTests;
+ 
++/// <summary>Exercises framed HID sequencing and borrowed-connection lifetime through a fake macOS bridge.</summary>
++/// <remarks>Assertions cover the scripted cancellation/drain/reuse and pending-disposal cases, not
++/// live macOS I/O or universal recovery. Bound limits test waits, not the SDK's device-operation deadline.</remarks>
+ public class Ctap2SessionHidCrossLayerTests
+ {
+     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(5);
+@@ -150,6 +153,7 @@ public async Task MakeCredentialAsync_CancelledAtDeviceWaiting_DrainsBeforeRecov
+ 
+     private static byte[] MinimalGetInfoResponse()
+     {
++        // Versions-only fake probe; required AAGUID is deliberately absent from this parser fixture.
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(1);
+         writer.WriteInt32(0x01);
+@@ -315,4 +319,4 @@ private static byte[] Response(uint channel, byte command, ReadOnlySpan<byte> pa
+             return packet;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionTests.cs
+index 2bd9f4d2..117beb39 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionTests.cs
+@@ -50,8 +50,7 @@ await Assert.ThrowsAsync<InvalidOperationException>(() =>
+             Ctap2Session.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+ 
+         // Borrowed: the session did not create this connection, so disposal is the caller's.
+-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
++        // The assertion covers this failed probe's connection lifetime, not device interoperability.
+         connection.DidNotReceive().Dispose();
+     }
+ 
+@@ -184,7 +183,7 @@ public async Task MakeCredentialAsync_AfterDisposal_InvalidArgumentsThrowObjectD
+         Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
+     }
+ 
+-    /// <summary>up=false is refused at the session boundary, before any CBOR or prompt.</summary>
++    /// <summary>up=false refuses the makeCredential request and prompt; session initialization I/O occurs first.</summary>
+     [Fact]
+     [Trait("Audit", "YESDK-1618")]
+     public async Task MakeCredentialAsync_FalseUserPresence_ThrowsBeforeSendingOrPrompting()
+@@ -497,6 +496,7 @@ public async Task HidWait_ReportsSessionOperation(bool reset, string expectedOpe
+ 
+     private static byte[] MinimalGetInfoResponse()
+     {
++        // Versions-only fake probe; not a conforming GetInfo envelope (required AAGUID is omitted).
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(1);
+         writer.WriteInt32(0x01);
+@@ -665,4 +665,4 @@ public ValueTask OnUserPresenceResolvedAsync(
+                 : ValueTask.FromException(resolutionException);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapExceptionTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapExceptionTests.cs
+index acfbb734..3868db57 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapExceptionTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapExceptionTests.cs
+@@ -66,6 +66,8 @@ public void ThrowIfError_WithByte_ThrowsException()
+             .Which.Status.Should().Be(CtapStatus.PinBlocked);
+     }
+ 
++    // Checks retained numeric values only. PIN_TOKEN_EXPIRED 0x38 is assigned in CTAP2.0,
++    // but reserved in CTAP2.1/2.2 RD/2.3; the method name does not imply all-revision assignment.
+     [Theory]
+     [InlineData(CtapStatus.PinNotSet, 0x35)]
+     [InlineData(CtapStatus.PuatRequired, 0x36)]
+@@ -92,4 +94,4 @@ public void Constructor_WithKnownStatus_HasDescriptiveMessage(CtapStatus status,
+         // Assert
+         exception.Message.Should().ContainEquivalentOf(expectedContains);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapRequestBuilderTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapRequestBuilderTests.cs
+index eda14a0f..65fcd68d 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapRequestBuilderTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapRequestBuilderTests.cs
+@@ -5,6 +5,9 @@
+ 
+ namespace Yubico.YubiKit.Ctap2.UnitTests;
+ 
++/// <summary>Checks command prefixes and selected request-builder values.</summary>
++/// <remarks>Most With* cases assert only nonempty payload and command byte. They do not establish
++/// complete command schema, allocation behavior or canonical wire order from their method names.</remarks>
+ public class CtapRequestBuilderTests
+ {
+     [Fact]
+@@ -26,7 +29,7 @@ public void WithInt_AddsIntegerParameter()
+             .WithInt(1, 42)
+             .Build();
+ 
+-        // Assert - command byte + CBOR map {1: 42}
++        // Assert payload presence and command byte only; the map/value is not decoded here.
+         result.Should().HaveCountGreaterThan(1);
+         result[0].Should().Be(CtapCommand.ClientPin);
+     }
+@@ -76,6 +79,7 @@ public void WithBool_AddsBooleanParameter()
+     [Fact]
+     public void WithValue_WritesParameterWithoutIntermediateCopy()
+     {
++        // Decodes the key/value; no allocation measurement establishes the method name's copy claim.
+         // Arrange & Act
+         var result = CtapRequestBuilder.Create(CtapCommand.MakeCredential)
+             .WithValue(1, writer => writer.WriteByteString([0xAA, 0xBB]))
+@@ -100,10 +104,10 @@ public void MultipleParameters_SortedByKey()
+             .WithInt(2, 200)
+             .Build();
+ 
+-        // Assert - parameters should be sorted in canonical CBOR order
++        // Assert prefix/payload presence only; this test does not inspect the key order.
+         result.Should().HaveCountGreaterThan(1);
+         result[0].Should().Be(CtapCommand.MakeCredential);
+-        // CBOR map with 3 entries, keys 1, 2, 3 in sorted order
++        // Exact encoded-key order needs a separate byte-level assertion, not this length check.
+     }
+ 
+     [Fact]
+@@ -116,4 +120,4 @@ public void BuildAsMemory_ReturnsReadOnlyMemory()
+         result.Length.Should().Be(1);
+         result.Span[0].Should().Be(CtapCommand.GetInfo);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/IYubiKeyExtensionsTransportTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/IYubiKeyExtensionsTransportTests.cs
+index dcc49829..97f9fcec 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/IYubiKeyExtensionsTransportTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/IYubiKeyExtensionsTransportTests.cs
+@@ -22,8 +22,8 @@
+ namespace Yubico.YubiKit.Ctap2.UnitTests;
+ 
+ /// <summary>
+-///     Phase 38: CTAP2 transport selection — app-specific smart default (HID FIDO first, then SmartCard)
+-///     plus explicit caller override, validated over a fake probe that records the requested connection type.
++///     Checks CTAP2 transport selection and explicit preference using a fake connect probe.
++///     The probe records the requested type and fails before protocol initialization or device operations.
+ /// </summary>
+ public class IYubiKeyExtensionsTransportTests
+ {
+@@ -40,7 +40,7 @@ public async Task CreateCtap2SessionAsync_DefaultBothTransports_PicksHidFido()
+         Assert.Equal(typeof(IFidoHidConnection), device.RequestedConnection);
+     }
+ 
+-    // (b) default fallback: first choice (HID FIDO) absent -> SmartCard.
++    // SmartCard is selected when HID FIDO is absent, not retried after a HID connection failure.
+     [Fact]
+     public async Task CreateCtap2SessionAsync_DefaultSmartCardOnly_FallsBackToSmartCard()
+     {
+@@ -144,10 +144,8 @@ await Assert.ThrowsAsync<ConnectProbeException>(
+         Assert.Equal(typeof(ISmartCardConnection), device.RequestedConnection);
+     }
+ 
+-    // Phase 38.5 (ISC-10/ISC-14): the CTAP2 "no FIDO-capable connection" remap stays scoped to the
+-    // ResolveSessionTransport call only. When resolution succeeds but the HID FIDO connect
+-    // fails with a non-held error, that error must surface unchanged — NOT be masked as the generic
+-    // NotSupportedException — proving the remap did not widen around session connection creation.
++    // Connection failure after successful resolution must retain its diagnostic, rather than
++    // being masked by the resolve-only "no FIDO-capable connection" translation.
+     [Fact]
+     public async Task CreateCtap2SessionAsync_ConnectFailsNonHeld_SurfacesErrorNotGenericRemap()
+     {
+@@ -215,4 +213,4 @@ public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellatio
+     }
+ 
+     private sealed class ConnectProbeException : Exception;
+-}
+\ No newline at end of file
++}

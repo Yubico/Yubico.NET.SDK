@@ -1,0 +1,25 @@
+<Project>
+  <ItemGroup>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-info/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-create/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/hardware-set-pin/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-hid-management/complete.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Yubico.YubiKit.Core">
+      <HintPath>$(RepositoryRoot)/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.Ctap2">
+      <HintPath>$(RepositoryRoot)/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.Ctap2.IntegrationTests">
+      <HintPath>$(RepositoryRoot)/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.Management">
+      <HintPath>$(RepositoryRoot)/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.Tests.Shared">
+      <HintPath>$(RepositoryRoot)/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

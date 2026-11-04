@@ -1,0 +1,1731 @@
+diff --git i/src/Ctap2/src/Extensions/CredBlob/CredBlobAssertionOutput.cs w/src/Ctap2/src/Extensions/CredBlob/CredBlobAssertionOutput.cs
+index 34cc5512..6e0f555d 100644
+--- i/src/Ctap2/src/Extensions/CredBlob/CredBlobAssertionOutput.cs
++++ w/src/Ctap2/src/Extensions/CredBlob/CredBlobAssertionOutput.cs
+@@ -29,7 +29,10 @@ public sealed class CredBlobAssertionOutput
+     /// </summary>
+     /// <remarks>
+     /// The blob data that was stored during makeCredential.
+-    /// Empty if no blob was stored.
++    /// Empty if no blob was stored; an empty byte string is distinct from an absent extension.
++    /// Direct init borrows supplied storage; Decode creates an independent byte-array copy.
++    /// Keep borrowed storage stable during use. This DTO has no disposal/zeroing boundary;
++    /// disposing the session or clearing the source response does not clear that copy.
+     /// </remarks>
+     public ReadOnlyMemory<byte> Blob { get; init; }
+ 
+@@ -47,4 +50,4 @@ public static CredBlobAssertionOutput Decode(CborReader reader)
+ 
+         return new CredBlobAssertionOutput { Blob = blob };
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/CredBlob/CredBlobInput.cs w/src/Ctap2/src/Extensions/CredBlob/CredBlobInput.cs
+index 8e620879..d7325a5d 100644
+--- i/src/Ctap2/src/Extensions/CredBlob/CredBlobInput.cs
++++ w/src/Ctap2/src/Extensions/CredBlob/CredBlobInput.cs
+@@ -22,7 +22,9 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
+ /// <remarks>
+ /// <para>
+ /// The credBlob extension allows storing a small blob of data with a credential.
+-/// The maximum size is determined by the authenticator's maxCredBlobLength (up to 32 bytes minimum).
++/// The authenticator advertises maxCredBlobLength and must support at least 32 bytes, not exactly
++/// 32 bytes. This DTO currently restricts input to 1–32 bytes as an SDK limitation; the builder's
++/// WithCredBlob method has no corresponding size check.
+ /// </para>
+ /// <para>
+ /// This is useful for storing small amounts of credential-specific data like:
+@@ -33,6 +35,12 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
+ /// </list>
+ /// </para>
+ /// <para>
++/// For PII or other sensitive content, CTAP 2.1 §12.2 requires the RP to request
++/// UserVerificationRequired credential protection with enforcement enabled. ExtensionBuilder currently
++/// does not enforce that policy; check support before creation when prevention is required and inspect
++/// the returned protection policy. Post-creation inspection cannot undo creation.
++/// </para>
++/// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-credBlob-extension
+ /// </para>
+ /// </remarks>
+@@ -44,7 +52,9 @@ public sealed class CredBlobInput
+     /// Gets or sets the blob data to store with the credential.
+     /// </summary>
+     /// <remarks>
+-    /// Must be between 1 and 32 bytes per CTAP2.1.
++    /// This DTO accepts 1–32 bytes; that is an SDK restriction, not the protocol's maximum capacity.
++    /// The memory is borrowed, not copied. Keep it unchanged through encoding and transmission,
++    /// then clear caller-owned sensitive storage when it is no longer needed.
+     /// </remarks>
+     public required ReadOnlyMemory<byte> Blob
+     {
+@@ -74,11 +84,11 @@ public void Encode(CborWriter writer)
+     /// <summary>
+     /// Encodes this credBlob input as a CBOR byte array.
+     /// </summary>
+-    /// <returns>The CBOR-encoded input.</returns>
++    /// <returns>A new caller-owned CBOR copy; clear it after use if the blob is sensitive.</returns>
+     public byte[] Encode()
+     {
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         Encode(writer);
+         return writer.Encode();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/CredProtect/CredProtectPolicy.cs w/src/Ctap2/src/Extensions/CredProtect/CredProtectPolicy.cs
+index 34fa957a..d9f7bd01 100644
+--- i/src/Ctap2/src/Extensions/CredProtect/CredProtectPolicy.cs
++++ w/src/Ctap2/src/Extensions/CredProtect/CredProtectPolicy.cs
+@@ -22,6 +22,9 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
+ /// The credential protection policy specifies when credentials can be used
+ /// in assertions. Higher values provide stronger protection but may limit
+ /// compatibility with some relying parties.
++/// The requested policy is not proof of the effective policy: authenticators may return a stronger
++/// policy. ExtensionBuilder's enforcePolicy parameter currently has no effect. In CTAP 2.1 §12.1.1,
++/// enforcement for levels 2 and 3 is a platform SHOULD NOT creation rule, not an extra CTAP wire flag.
+ /// </para>
+ /// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-credProtect-extension
+@@ -34,7 +37,7 @@ public enum CredProtectPolicy
+     /// </summary>
+     /// <remarks>
+     /// Credentials can be discovered and used without user verification.
+-    /// This is the default for non-discoverable credentials.
++    /// CTAP 2.1 recommends this default when credProtect is omitted, but allows stronger device defaults.
+     /// </remarks>
+     UserVerificationOptional = 1,
+ 
+@@ -45,7 +48,7 @@ public enum CredProtectPolicy
+     /// For discoverable credentials, user verification is required if
+     /// no credential ID is provided (i.e., when listing discoverable credentials).
+     /// When a credential ID is provided in allowList, UV is optional.
+-    /// This is the default for discoverable credentials on most authenticators.
++    /// Do not infer the authenticator's default from the credential being discoverable.
+     /// </remarks>
+     UserVerificationOptionalWithCredentialIdList = 2,
+ 
+@@ -57,4 +60,4 @@ public enum CredProtectPolicy
+     /// without UV will fail. This provides the highest protection level.
+     /// </remarks>
+     UserVerificationRequired = 3
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/HmacSecret/HmacSecretInput.cs w/src/Ctap2/src/Extensions/HmacSecret/HmacSecretInput.cs
+index 8cadf438..6d72593f 100644
+--- i/src/Ctap2/src/Extensions/HmacSecret/HmacSecretInput.cs
++++ w/src/Ctap2/src/Extensions/HmacSecret/HmacSecretInput.cs
+@@ -27,10 +27,21 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
+ /// <list type="bullet">
+ ///   <item><description>Disk encryption keys</description></item>
+ ///   <item><description>Password manager vault keys</description></item>
+-///   <item><description>Any application requiring a stable secret derived from biometrics/PIN</description></item>
++///   <item><description>Credential-scoped symmetric key derivation</description></item>
+ /// </list>
+ /// </para>
+ /// <para>
++/// The authenticator creates random credential secrets, with separate verified and unverified
++/// variants. PINs and biometrics authorize use; they are not the source of those secrets. Repeatable
++/// output requires the same credential, salt and actual UV mode. hmac-secret does not support up:false.
++/// Salt authentication is separate from the ceremony's pinUvAuthParam over clientDataHash.
++/// </para>
++/// <para>
++/// This DTO borrows its dictionary and byte buffers until encoding/transmission completes. It does
++/// not validate capability advertisement, key-agreement coherence or protocol-specific lengths.
++/// Clear caller-owned sensitive inputs and encoded copies after use; the DTO has no cleanup owner.
++/// </para>
++/// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-hmac-secret-extension
+ /// </para>
+ /// </remarks>
+@@ -52,8 +63,8 @@ public sealed class HmacSecretInput
+     /// <para>
+     /// Contains one or two 32-byte salts encrypted with the shared secret:
+     /// <list type="bullet">
+-    ///   <item><description>For one salt: encrypt(sharedSecret, salt1) = 32 bytes</description></item>
+-    ///   <item><description>For two salts: encrypt(sharedSecret, salt1 || salt2) = 64 bytes</description></item>
++    ///   <item><description>Protocol 1: 32 bytes for one salt, 64 bytes for two; no IV prefix.</description></item>
++    ///   <item><description>Protocol 2: 48 bytes for one salt, 80 bytes for two; includes a 16-byte IV.</description></item>
+     /// </list>
+     /// </para>
+     /// <para>
+@@ -114,11 +125,11 @@ public void Encode(CborWriter writer)
+     /// <summary>
+     /// Encodes this hmac-secret input as a CBOR byte array.
+     /// </summary>
+-    /// <returns>The CBOR-encoded input.</returns>
++    /// <returns>A new caller-owned CBOR copy of the encrypted salts and authentication material.</returns>
+     public byte[] Encode()
+     {
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         Encode(writer);
+         return writer.Encode();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/HmacSecret/HmacSecretOutput.cs w/src/Ctap2/src/Extensions/HmacSecret/HmacSecretOutput.cs
+index ed01808f..9dc0234a 100644
+--- i/src/Ctap2/src/Extensions/HmacSecret/HmacSecretOutput.cs
++++ w/src/Ctap2/src/Extensions/HmacSecret/HmacSecretOutput.cs
+@@ -23,6 +23,9 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
+ /// <para>
+ /// Contains the encrypted derived secret(s). The client must decrypt using
+ /// the shared secret established during key agreement.
++/// This byte-string shape is used for assertion output and hmac-secret-mc evaluation output,
++/// not the boolean hmac-secret registration support result. Decrypted output depends on the
++/// credential, salts and actual UV mode. Clear caller-owned shared secrets and plaintext after use.
+ /// </para>
+ /// </remarks>
+ public sealed class HmacSecretOutput
+@@ -34,12 +37,15 @@ public sealed class HmacSecretOutput
+     /// <para>
+     /// Contains one or two 32-byte derived secrets, encrypted:
+     /// <list type="bullet">
+-    ///   <item><description>For one salt: encrypt(sharedSecret, output1) = 32+ bytes</description></item>
+-    ///   <item><description>For two salts: encrypt(sharedSecret, output1 || output2) = 64+ bytes</description></item>
++    ///   <item><description>Protocol 1: 32 bytes for one output, 64 bytes for two; no IV prefix.</description></item>
++    ///   <item><description>Protocol 2: 48 bytes for one output, 80 bytes for two; includes a 16-byte IV.</description></item>
+     /// </list>
+     /// </para>
+     /// <para>
+     /// For PIN protocol 2, includes the IV prefix (16 bytes).
++    /// Direct init borrows supplied storage; keep it stable during use. Decode allocates an independent
++    /// byte-array copy and does not validate these lengths.
++    /// This DTO has no disposal/zeroing boundary; response or session disposal does not clear the copy.
+     /// </para>
+     /// </remarks>
+     public required ReadOnlyMemory<byte> Output { get; init; }
+@@ -69,4 +75,4 @@ public static HmacSecretOutput Decode(CborReader reader)
+ 
+         return new HmacSecretOutput { Output = output };
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/LargeBlob/LargeBlobOutput.cs w/src/Ctap2/src/Extensions/LargeBlob/LargeBlobOutput.cs
+index 14deb908..0182bcdc 100644
+--- i/src/Ctap2/src/Extensions/LargeBlob/LargeBlobOutput.cs
++++ w/src/Ctap2/src/Extensions/LargeBlob/LargeBlobOutput.cs
+@@ -17,12 +17,18 @@
+ namespace Yubico.YubiKit.Ctap2.Extensions;
+ 
+ /// <summary>
+-/// Output from the largeBlob extension during getAssertion.
++/// Legacy convenience container for key, blob and write-result values.
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// Contains the large blob key which can be used to encrypt/decrypt the large blob data
+-/// stored via authenticatorLargeBlobs.
++/// This decoder consumes a synthetic map with largeBlobKey, blob and written members; that combined
++/// shape is not a standard CTAP extension output. The implemented largeBlobKey/storage route returns
++/// keys on MakeCredentialResponse.LargeBlobKey or GetAssertionResponse.LargeBlobKey, outside authData
++/// extensions. CTAP 2.3 §12.4's alternative direct largeBlob route uses unsigned supported/read/write
++/// outputs and compressed blob plus originalSize, not this container or WebAuthn's decompressed result.
++/// This DTO performs no storage read, decompression, decryption or authenticity verification.
++/// Direct init borrows supplied memory; keep it stable during use. Decoded byte strings are
++/// independent copies with no disposal/zeroing boundary.
+ /// </para>
+ /// </remarks>
+ public sealed class LargeBlobOutput
+@@ -32,26 +38,27 @@ public sealed class LargeBlobOutput
+     /// </summary>
+     /// <remarks>
+     /// A 32-byte key used to encrypt/decrypt large blob data for this credential.
+-    /// Derived from the credential's private key.
++    /// A key supplied to this container, not a guarantee about how an authenticator generated it.
++    /// This is secret material, not public metadata; do not log or persist it unprotected.
+     /// </remarks>
+     public ReadOnlyMemory<byte>? LargeBlobKey { get; init; }
+ 
+     /// <summary>
+-    /// Gets the decrypted blob data (if read was requested and data exists).
++    /// Gets blob bytes supplied to this convenience container, without a decryption guarantee.
+     /// </summary>
+     /// <remarks>
+-    /// Only present if the client requested "read" and successfully decrypted
+-    /// the large blob data. At CTAP level, only largeBlobKey is returned;
+-    /// the actual data retrieval is done separately.
++    /// The container does not establish that these bytes were decrypted. Direct CTAP read output
++    /// is compressed and also requires originalSize, which this DTO does not model. Use LargeBlobStorage
++    /// for the implemented key/storage route; callers own plaintext returned by that helper.
+     /// </remarks>
+     public ReadOnlyMemory<byte>? Blob { get; init; }
+ 
+     /// <summary>
+-    /// Gets whether the write operation was successful.
++    /// Gets the supplied written value, without independently establishing a completed storage write.
+     /// </summary>
+     /// <remarks>
+-    /// Only present if write was requested. Indicates whether the large blob
+-    /// was successfully stored.
++    /// Null means no written value was supplied or decoded. True and false reflect the supplied
++    /// boolean, not a tracked request or independently established storage success.
+     /// </remarks>
+     public bool? Written { get; init; }
+ 
+@@ -97,4 +104,4 @@ public static LargeBlobOutput Decode(CborReader reader)
+             Written = written
+         };
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/MinPinLength/MinPinLengthInput.cs w/src/Ctap2/src/Extensions/MinPinLength/MinPinLengthInput.cs
+index 7bca42a0..786a3dff 100644
+--- i/src/Ctap2/src/Extensions/MinPinLength/MinPinLengthInput.cs
++++ w/src/Ctap2/src/Extensions/MinPinLength/MinPinLengthInput.cs
+@@ -22,11 +22,13 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
+ /// <remarks>
+ /// <para>
+ /// The minPinLength extension allows a relying party to request the minimum PIN length
+-/// required by the authenticator. This is useful for RPs that want to ensure
+-/// adequate PIN complexity.
++/// currently required by the authenticator, in Unicode code points. It neither changes policy nor
++/// proves the current PIN's length or all complexity rules.
+ /// </para>
+ /// <para>
+-/// The RP must be in the authenticator's "minPinLengthRPIDList" for this to work.
++/// During credential creation, the RP must be authorized by the authenticator's minPinLengthRPIDs
++/// configuration. An unauthorized RP receives no extension output, not a zero minimum.
++/// Use AuthenticatorConfig to change minimum-PIN policy; this input only requests disclosure.
+ /// </para>
+ /// <para>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-minPinLength-extension
+@@ -50,7 +52,7 @@ public void Encode(CborWriter writer)
+     {
+         ArgumentNullException.ThrowIfNull(writer);
+ 
+-        // minPinLength input is a boolean true
++        // Encode the requested boolean; false is not omission of this value.
+         writer.WriteBoolean(Requested);
+     }
+ 
+@@ -64,4 +66,4 @@ public byte[] Encode()
+         Encode(writer);
+         return writer.Encode();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/MinPinLength/MinPinLengthOutput.cs w/src/Ctap2/src/Extensions/MinPinLength/MinPinLengthOutput.cs
+index 748fb331..b4dbba34 100644
+--- i/src/Ctap2/src/Extensions/MinPinLength/MinPinLengthOutput.cs
++++ w/src/Ctap2/src/Extensions/MinPinLength/MinPinLengthOutput.cs
+@@ -20,7 +20,8 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
+ /// Output from the minPinLength extension.
+ /// </summary>
+ /// <remarks>
+-/// Contains the minimum PIN length required by the authenticator.
++/// Reports the current minimum during credential creation for an authorized RP. Absence of output
++/// is not a zero minimum or proof the extension is unsupported.
+ /// </remarks>
+ public sealed class MinPinLengthOutput
+ {
+@@ -29,7 +30,8 @@ public sealed class MinPinLengthOutput
+     /// </summary>
+     /// <remarks>
+     /// The minimum number of Unicode code points required for a PIN.
+-    /// Default minimum is 4, maximum is 63.
++    /// The preconfigured minimum is at least four code points. The separate 63-byte UTF-8 PIN limit
++    /// is not this field's unit. Decode reads an Int32 without enforcing a 4–63 policy range.
+     /// </remarks>
+     public int MinPinLength { get; init; }
+ 
+@@ -47,4 +49,4 @@ public static MinPinLengthOutput Decode(CborReader reader)
+ 
+         return new MinPinLengthOutput { MinPinLength = minLength };
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs w/src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs
+index 8078b5ad..43dd0176 100644
+--- i/src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs
++++ w/src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs
+@@ -25,9 +25,16 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
+ /// This builder creates the CBOR-encoded extensions map used in makeCredential
+ /// and getAssertion requests. Extensions are added using the fluent API and
+ /// encoded to CBOR when Build() is called.
++/// The builder retains borrowed inputs; keep their storage unchanged through the last Encode/Build
++/// that reads them. Build creates an independent encoded copy; retain that encoded map/request through
++/// awaited transmission. Clearing inputs does not clear the copy, which has no disposable owner.
++/// The builder does not negotiate capabilities or generally validate ceremony/protocol coherence.
++/// Helper-generated salt buffers and authentication copies are not comprehensively cleared by this builder.
+ /// </para>
+ /// <para>
+-/// Example usage:
++/// Composable registration fragment with an existing ReadOnlyMemory&lt;byte&gt; myBlobData within the
++/// authenticator's maxCredBlobLength. For sensitive content, check credProtect support before creation
++/// and enforce level 3 in the application; this builder does not implement enforcement.
+ /// <code>
+ /// var extensions = new ExtensionBuilder()
+ ///     .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
+@@ -54,7 +61,13 @@ public sealed class ExtensionBuilder
+     /// Adds the credProtect extension with the specified policy.
+     /// </summary>
+     /// <param name="policy">The credential protection policy.</param>
+-    /// <param name="enforcePolicy">If true, credential creation fails if policy cannot be honored.</param>
++    /// <param name="enforcePolicy">Currently recorded but not enforced by the SDK; has no effect on encoding or creation.</param>
++    /// <remarks>
++    /// CTAP 2.1 §12.1.1 says the platform SHOULD NOT create a credential without requested level-2/3
++    /// protection when enforcement is requested. This is not an authenticator wire flag. Check support
++    /// before creation if prevention is required and inspect the effective returned policy, which may
++    /// be stronger than requested. Rejecting a result afterward does not undo creation.
++    /// </remarks>
+     /// <returns>This builder for chaining.</returns>
+     public ExtensionBuilder WithCredProtect(
+         CredProtectPolicy policy,
+@@ -72,6 +85,9 @@ public ExtensionBuilder WithCredProtect(
+     /// CTAP 2.1-2.3 §12.2.1: the makeCredential input is a "Byte String containing the credBlob value".
+     /// To read a stored blob back at getAssertion use <see cref="WithGetCredBlob"/>; a byte string is
+     /// not the getAssertion input.
++    /// This builder does not check size or capability. A supporting authenticator advertises
++    /// maxCredBlobLength of at least 32 bytes. For PII/sensitive content the RP MUST request level-3
++    /// credProtect with enforcement; the SDK currently leaves enforcement to the application.
+     /// </remarks>
+     /// <param name="blob">The blob data to store (at most the authenticator's maxCredBlobLength).</param>
+     /// <returns>This builder for chaining.</returns>
+@@ -106,10 +122,13 @@ public ExtensionBuilder WithGetCredBlob()
+     /// </para>
+     /// <para>
+     /// WebAuthn's <c>largeBlob</c> client extension ({support}, read, write; L3 §10.1.5) is built on this
+-    /// key in the WebAuthn package together with <see cref="LargeBlobs.LargeBlobStorage"/> (§6.10); CTAP
+-    /// itself carries no <c>largeBlob: {support}</c>. The direct getAssertion largeBlob read/write
+-    /// extension of CTAP 2.2-2.3 §12.4 is a mutually exclusive alternative to largeBlobKey (§12.4:
++    /// key in the WebAuthn package together with <see cref="LargeBlobs.LargeBlobStorage"/> (§6.10).
++    /// This builder's route sends no <c>largeBlob: {support}</c>. The direct largeBlob registration
++    /// and assertion extension of CTAP 2.2-2.3 §12.4 does define support/read/write inputs and is a
++    /// mutually exclusive alternative to largeBlobKey (§12.4:
+     /// authenticators "MUST NOT support both extensions") and is not offered by this builder.
++    /// Check largeBlobKey advertisement and largeBlobs:true; creation requires a discoverable credential
++    /// (rk:true). Read the key from the credential response envelope, not its signed extensions map.
+     /// </para>
+     /// </remarks>
+     /// <returns>This builder for chaining.</returns>
+@@ -120,7 +139,8 @@ public ExtensionBuilder WithLargeBlobKey()
+     }
+ 
+     /// <summary>
+-    /// Requests hmac-secret at authenticatorMakeCredential: CTAP 2.1-2.3 §12.7 <c>"hmac-secret": true</c>.
++    /// Requests hmac-secret at authenticatorMakeCredential: <c>"hmac-secret": true</c>
++    /// (CTAP 2.1 §12.5; CTAP 2.2-2.3 §12.7).
+     /// WebAuthn's prf extension (L3 §10.1.4) sends this at registration.
+     /// </summary>
+     /// <returns>This builder for chaining.</returns>
+@@ -134,6 +154,7 @@ public ExtensionBuilder WithHmacSecret()
+     /// Adds the hmac-secret extension for getAssertion.
+     /// </summary>
+     /// <param name="input">The hmac-secret input parameters.</param>
++    /// <remarks>Input is borrowed until encoding. Capability and protocol coherence remain caller responsibilities.</remarks>
+     /// <returns>This builder for chaining.</returns>
+     public ExtensionBuilder WithHmacSecret(HmacSecretInput input)
+     {
+@@ -150,6 +171,15 @@ public ExtensionBuilder WithHmacSecret(HmacSecretInput input)
+     /// <param name="keyAgreement">The platform's key agreement public key.</param>
+     /// <param name="salt1">The first salt (32 bytes).</param>
+     /// <param name="salt2">Optional second salt (32 bytes). Pass empty span for no second salt.</param>
++    /// <remarks>
++    /// Use a mutually supported protocol and its matching encapsulated shared secret (32 bytes for
++    /// protocol 1, 64 for protocol 2), not a PIN token. Encrypted salts are 32/64 bytes for protocol 1
++    /// or 48/80 bytes including the IV for protocol 2; saltAuth is 16/32 bytes respectively.
++    /// The helper reads spans during this call, retains the public dictionary and creates encrypted
++    /// copies. It does not clear all plaintext/intermediate copies, including failure paths.
++    /// Keep borrowed dictionary storage stable until encoding and clear caller-owned secrets after use.
++    /// Actual UV mode selects the credential-secret variant; hmac-secret does not support up:false.
++    /// </remarks>
+     /// <returns>This builder for chaining.</returns>
+     public ExtensionBuilder WithHmacSecret(
+         IPinUvAuthProtocol protocol,
+@@ -159,7 +189,7 @@ public ExtensionBuilder WithHmacSecret(
+         ReadOnlySpan<byte> salt2 = default) =>
+         WithHmacSecret(BuildHmacSecretInput(protocol, sharedSecret, keyAgreement, salt1, salt2));
+ 
+-    /// <summary>CTAP §12.7: saltEnc = encrypt(sharedSecret, salt1 || salt2), saltAuth = authenticate(sharedSecret, saltEnc).</summary>
++    /// <summary>CTAP 2.1 §12.5 / 2.2-2.3 §12.7: encrypt salts, then authenticate saltEnc with the same shared secret.</summary>
+     private static HmacSecretInput BuildHmacSecretInput(
+         IPinUvAuthProtocol protocol,
+         ReadOnlySpan<byte> sharedSecret,
+@@ -215,7 +245,9 @@ private static HmacSecretInput BuildHmacSecretInput(
+     /// <remarks>
+     /// §12.8: "This extension input is the same as the hmac secret extension's getAssertion input" and
+     /// "the hmac-secret extension MUST also be present with the value of "hmac-secret" set to true", so
+-    /// this method also emits <c>"hmac-secret": true</c>. Advertised by YubiKey 5.8 and later.
++    /// this method also emits <c>"hmac-secret": true</c>. Check hmac-secret-mc advertisement on the actual
++    /// authenticator; firmware alone is not capability evidence. Use raw hmac-secret-mc output with
++    /// HmacSecretOutput.Decode; TryGetHmacSecret only addresses the hmac-secret key's assertion shape.
+     /// </remarks>
+     /// <param name="input">The encrypted and authenticated salts, as for getAssertion.</param>
+     /// <returns>This builder for chaining.</returns>
+@@ -240,8 +272,9 @@ public ExtensionBuilder WithHmacSecretMakeCredential(
+         WithHmacSecretMakeCredential(BuildHmacSecretInput(protocol, sharedSecret, keyAgreement, salt1, salt2));
+ 
+     /// <summary>
+-    /// Adds the minPinLength extension.
++    /// Requests disclosure of the current minimum PIN length during credential creation.
+     /// </summary>
++    /// <remarks>Only authorized minPinLengthRPIDs receive output, in Unicode code points. This does not set PIN policy.</remarks>
+     /// <returns>This builder for chaining.</returns>
+     public ExtensionBuilder WithMinPinLength()
+     {
+@@ -255,6 +288,11 @@ public ExtensionBuilder WithMinPinLength()
+     /// Adds previewSign extension with key generation parameters for makeCredential.
+     /// </summary>
+     /// <param name="input">The previewSign registration input.</param>
++    /// <remarks>
++    /// Experimental Yubico Labs previewSign v4 Editor's Draft input, not CTAP version 4 or production
++    /// cryptographic guidance. Add only the input for this ceremony. If both overloads are used,
++    /// this builder currently emits registration input and ignores signing input.
++    /// </remarks>
+     /// <returns>This builder for chaining.</returns>
+     public ExtensionBuilder WithPreviewSign(PreviewSignRegistrationInput input)
+     {
+@@ -270,6 +308,9 @@ public ExtensionBuilder WithPreviewSign(PreviewSignRegistrationInput input)
+     /// <remarks>
+     /// CTAP carries exactly one credential's parameters. Choosing among a relying party's per-credential
+     /// map (<c>signByCredential</c>) is the WebAuthn client's job, after it has selected the credential.
++    /// Use a nonempty allow list for the selected credential and only this ceremony's previewSign input.
++    /// The builder does not validate selection or algorithm-specific arguments. The Yubico Labs v4
++    /// Editor's Draft is experimental, not a CTAP version or production cryptographic guidance.
+     /// </remarks>
+     /// <param name="signingParams">The selected credential's signing parameters.</param>
+     /// <returns>This builder for chaining.</returns>
+@@ -283,7 +324,7 @@ public ExtensionBuilder WithPreviewSign(PreviewSignSigningParams signingParams)
+     /// <summary>
+     /// Builds the CBOR-encoded extensions map.
+     /// </summary>
+-    /// <returns>The CBOR-encoded extensions map, or null if no extensions.</returns>
++    /// <returns>An independent encoded copy, or null if no extensions. No disposal/zeroing owner is provided.</returns>
+     public ReadOnlyMemory<byte>? Build()
+     {
+         if (!HasExtensions())
+@@ -307,8 +348,7 @@ public void Encode(CborWriter writer)
+         var count = CountExtensions();
+         writer.WriteStartMap(count);
+ 
+-        // Extensions must be sorted by key for canonical CBOR
+-        // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "previewSign"
++        // Ctap2Canonical sorts encoded keys when the map closes; insertion order is not wire order.
+ 
+         if (_credBlob.HasValue && _getCredBlob)
+         {
+@@ -485,4 +525,4 @@ private int CountExtensions()
+         if (_previewSignRegistration is not null || _previewSignAuthentication is not null) count++;
+         return count;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/Shared/ExtensionIdentifiers.cs w/src/Ctap2/src/Extensions/Shared/ExtensionIdentifiers.cs
+index e3772a4f..3602d1cc 100644
+--- i/src/Ctap2/src/Extensions/Shared/ExtensionIdentifiers.cs
++++ w/src/Ctap2/src/Extensions/Shared/ExtensionIdentifiers.cs
+@@ -15,10 +15,12 @@
+ namespace Yubico.YubiKit.Ctap2.Extensions;
+ 
+ /// <summary>
+-/// CTAP2 extension identifiers as defined in the CTAP2 specification.
++/// Identifiers for modeled CTAP extensions and the experimental Yubico Labs previewSign extension.
+ /// </summary>
+ /// <remarks>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-defined-extensions
++/// That revision defines the base extensions, not hmac-secret-mc or previewSign. hmac-secret-mc is
++/// defined in CTAP 2.2-2.3 §12.8. previewSign uses the separate Yubico Labs v4 Editor's Draft.
+ /// </remarks>
+ public static class ExtensionIdentifiers
+ {
+@@ -35,8 +37,8 @@ public static class ExtensionIdentifiers
+     /// The hmac-secret-mc extension identifier (during makeCredential).
+     /// </summary>
+     /// <remarks>
+-    /// Variant of hmac-secret that allows retrieving the secret during
+-    /// credential creation, not just assertion.
++    /// Evaluates hmac-secret during credential creation (CTAP 2.2-2.3 §12.8), returning encrypted
++    /// output. Requires separate advertisement and hmac-secret:true in the same request.
+     /// </remarks>
+     public const string HmacSecretMakeCredential = "hmac-secret-mc";
+ 
+@@ -62,9 +64,9 @@ public static class ExtensionIdentifiers
+     /// The largeBlob extension identifier.
+     /// </summary>
+     /// <remarks>
+-    /// Allows storing large blobs of data using a separate command.
+-    /// The extension during makeCredential/getAssertion only indicates
+-    /// support; actual data storage uses authenticatorLargeBlobs command.
++    /// CTAP 2.3 §12.4's direct storage alternative: registration requests support; assertion requests
++    /// read/write. Outputs are unsigned, with compressed read data plus originalSize. This route is
++    /// not implemented by ExtensionBuilder/LargeBlobStorage and is distinct from WebAuthn output.
+     /// </remarks>
+     public const string LargeBlob = "largeBlob";
+ 
+@@ -72,8 +74,9 @@ public static class ExtensionIdentifiers
+     /// The largeBlobKey extension identifier.
+     /// </summary>
+     /// <remarks>
+-    /// Retrieved during assertion when largeBlob is supported. Contains
+-    /// the key used to encrypt large blob data for this credential.
++    /// Requests the credential's secret storage key for use with authenticatorLargeBlobs (§6.10).
++    /// Returned at makeCredential key 5 or getAssertion key 7, not in authData extensions (§12.3).
++    /// Check largeBlobKey advertisement and largeBlobs:true; it is mutually exclusive with direct largeBlob.
+     /// </remarks>
+     public const string LargeBlobKey = "largeBlobKey";
+ 
+@@ -82,20 +85,22 @@ public static class ExtensionIdentifiers
+     /// </summary>
+     /// <remarks>
+     /// Returns the minimum PIN length required by the authenticator.
+-    /// Can be requested during makeCredential if the RP needs to know
+-    /// the PIN complexity requirements.
++    /// Requested during makeCredential for an authorized RP; reports Unicode code points without
++    /// changing policy or attesting all PIN complexity rules.
+     /// </remarks>
+     public const string MinPinLength = "minPinLength";
+ 
+ 
+     /// <summary>
+-    /// The previewSign extension identifier (CTAP v4).
++    /// The experimental previewSign identifier (Yubico Labs version 4 Editor's Draft, 26 August 2025).
+     /// </summary>
+     /// <remarks>
+     /// Allows a CTAP2 credential to sign arbitrary data using a separate
+     /// signing key bound to the same authenticator. Registration generates
+     /// a new signing key pair; authentication signs data without clientDataJSON
+     /// or authenticator data wrapping.
++    /// See https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension.
++    /// This is not CTAP version 4. Preview algorithms and identifiers may change; do not use in production.
+     /// </remarks>
+     public const string PreviewSign = "previewSign";
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Extensions/Shared/ExtensionOutput.cs w/src/Ctap2/src/Extensions/Shared/ExtensionOutput.cs
+index 44501014..231ad790 100644
+--- i/src/Ctap2/src/Extensions/Shared/ExtensionOutput.cs
++++ w/src/Ctap2/src/Extensions/Shared/ExtensionOutput.cs
+@@ -21,13 +21,23 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// This parser decodes the CBOR-encoded extensions map returned in makeCredential
+-/// and getAssertion responses. Extension outputs are accessed via property methods.
++/// This convenience parser expects a definite-length authData extensions map, not the complete CTAP response or
++/// unsigned extension outputs. The memory overload reconstructs supported values into new CBOR arrays;
++/// it does not preserve byte-exact original encoding or every valid unknown CBOR value. Supported
++/// values are signed-range integers, byte/text strings, booleans, null, arrays and maps of those values.
++/// Tags, floats and other simple values can be lost or cause reconstruction failure; large unsigned
++/// integers can fail. Duplicate identifiers overwrite earlier values. Retain the source parent raw
++/// response/authenticator-data bytes when exact or unknown data is needed; their guarantees are separate.
+ /// </para>
+ /// <para>
+-/// Example usage:
++/// Reconstructed values and byte-string getters allocate independent copies with no disposal/zeroing
++/// boundary. Session disposal or clearing the source does not clear those copies. Typed Try methods
++/// are shape-specific, may reject present values, and can throw for malformed/wrong-shape input.
++/// </para>
++/// <para>
++/// Composable fragment with existing nonempty ReadOnlyMemory&lt;byte&gt; extensionCbor from authData:
+ /// <code>
+-/// var output = ExtensionOutput.Decode(response.Extensions);
++/// var output = ExtensionOutput.Decode(extensionCbor);
+ /// if (output.TryGetCredProtect(out var policy))
+ /// {
+ ///     Console.WriteLine($"Credential protection: {policy}");
+@@ -58,7 +68,7 @@ private ExtensionOutput(IReadOnlyDictionary<string, ReadOnlyMemory<byte>> extens
+     /// Attempts to get the credProtect extension output.
+     /// </summary>
+     /// <param name="policy">The credential protection policy.</param>
+-    /// <returns>True if the extension was present.</returns>
++    /// <returns>True for a decoded policy in range 1–3; false for absence or an out-of-range integer.</returns>
+     public bool TryGetCredProtect(out CredProtectPolicy policy)
+     {
+         policy = default;
+@@ -84,7 +94,7 @@ public bool TryGetCredProtect(out CredProtectPolicy policy)
+     /// Attempts to get the credBlob extension output (makeCredential response).
+     /// </summary>
+     /// <param name="stored">Whether the blob was successfully stored.</param>
+-    /// <returns>True if the extension was present.</returns>
++    /// <returns>True for a boolean storage result, including false; false for absence or another value shape.</returns>
+     public bool TryGetCredBlobStored(out bool stored)
+     {
+         stored = false;
+@@ -109,8 +119,8 @@ public bool TryGetCredBlobStored(out bool stored)
+     /// <summary>
+     /// Attempts to get the credBlob extension output (getAssertion response).
+     /// </summary>
+-    /// <param name="blob">The stored blob data.</param>
+-    /// <returns>True if the extension was present and contained blob data.</returns>
++    /// <param name="blob">An independent byte-array copy, possibly empty; no cleanup owner is provided.</param>
++    /// <returns>True for a byte-string result, including an empty stored-blob result; false for absence or another shape.</returns>
+     public bool TryGetCredBlob(out ReadOnlyMemory<byte> blob)
+     {
+         blob = default;
+@@ -133,9 +143,14 @@ public bool TryGetCredBlob(out ReadOnlyMemory<byte> blob)
+     }
+ 
+     /// <summary>
+-    /// Attempts to get the hmac-secret extension output.
++    /// Decodes encrypted assertion output at the hmac-secret key.
+     /// </summary>
+     /// <param name="output">The encrypted hmac-secret output.</param>
++    /// <remarks>
++    /// Not a registration-support accessor: hmac-secret's registration boolean causes a decoding error.
++    /// For hmac-secret-mc, use TryGetRawExtension with its identifier and HmacSecretOutput.Decode.
++    /// Decode the registration boolean explicitly from its raw value instead.
++    /// </remarks>
+     /// <returns>True if the extension was present.</returns>
+     public bool TryGetHmacSecret(out HmacSecretOutput? output)
+     {
+@@ -151,9 +166,14 @@ public bool TryGetHmacSecret(out HmacSecretOutput? output)
+     }
+ 
+     /// <summary>
+-    /// Attempts to get the largeBlob extension output.
++    /// Decodes the legacy convenience largeBlob value, not standard direct CTAP output.
+     /// </summary>
+     /// <param name="output">The largeBlob output.</param>
++    /// <remarks>
++    /// A boolean is mapped to Written; a map is passed to LargeBlobOutput.Decode. Neither establishes
++    /// standard registration support or a completed storage write. CTAP direct largeBlob outputs are
++    /// unsigned and require different modeling; the implemented key/storage route uses envelope keys.
++    /// </remarks>
+     /// <returns>True if the extension was present.</returns>
+     public bool TryGetLargeBlob(out LargeBlobOutput? output)
+     {
+@@ -166,7 +186,7 @@ public bool TryGetLargeBlob(out LargeBlobOutput? output)
+ 
+         var reader = new CborReader(data, CborConformanceMode.Lax);
+ 
+-        // During makeCredential, output is just a boolean
++        // Legacy convenience mapping, not the standard unsigned {supported: true} registration output.
+         if (reader.PeekState() == CborReaderState.Boolean)
+         {
+             var supported = reader.ReadBoolean();
+@@ -174,15 +194,19 @@ public bool TryGetLargeBlob(out LargeBlobOutput? output)
+             return true;
+         }
+ 
+-        // During getAssertion, output is a map
++        // Decode the legacy combined map; this is not a direct CTAP read-output decoder.
+         output = LargeBlobOutput.Decode(reader);
+         return true;
+     }
+ 
+     /// <summary>
+-    /// Attempts to get the largeBlobKey from extension output.
++    /// Looks for a largeBlobKey in legacy convenience extension data.
+     /// </summary>
+     /// <param name="key">The large blob key.</param>
++    /// <remarks>
++    /// Standard CTAP largeBlobKey has no authData extension output. Use MakeCredentialResponse.LargeBlobKey
++    /// or GetAssertionResponse.LargeBlobKey instead. This method's copied secret has no cleanup owner.
++    /// </remarks>
+     /// <returns>True if the extension was present and contained the key.</returns>
+     public bool TryGetLargeBlobKey(out ReadOnlyMemory<byte> key)
+     {
+@@ -207,7 +231,7 @@ public bool TryGetLargeBlobKey(out ReadOnlyMemory<byte> key)
+     /// <summary>
+     /// Attempts to get the minPinLength extension output.
+     /// </summary>
+-    /// <param name="minLength">The minimum PIN length.</param>
++    /// <param name="minLength">The reported minimum in Unicode code points; zero on false is only an out-parameter default.</param>
+     /// <returns>True if the extension was present.</returns>
+     public bool TryGetMinPinLength(out int minLength)
+     {
+@@ -227,7 +251,7 @@ public bool TryGetMinPinLength(out int minLength)
+     /// Attempts to get raw extension data by identifier.
+     /// </summary>
+     /// <param name="extensionId">The extension identifier.</param>
+-    /// <param name="data">The raw CBOR-encoded extension data.</param>
++    /// <param name="data">Reconstructed CBOR, or empty data from the identifiers-only reader overload; not an original encoded slice.</param>
+     /// <returns>True if the extension was present.</returns>
+     public bool TryGetRawExtension(string extensionId, out ReadOnlyMemory<byte> data)
+     {
+@@ -235,10 +259,10 @@ public bool TryGetRawExtension(string extensionId, out ReadOnlyMemory<byte> data
+     }
+ 
+     /// <summary>
+-    /// Decodes extension output from CBOR bytes, preserving raw data for each extension.
++    /// Reconstructs supported extension values from CBOR bytes into independent encoded copies.
+     /// </summary>
+     /// <param name="data">The CBOR-encoded extensions map.</param>
+-    /// <returns>The decoded extension output with raw data preserved.</returns>
++    /// <returns>The convenience output, subject to the reconstruction and ownership limits in the class remarks.</returns>
+     public static ExtensionOutput Decode(ReadOnlyMemory<byte> data) =>
+         DecodeWithRawData(data);
+ 
+@@ -248,7 +272,9 @@ public static ExtensionOutput Decode(ReadOnlyMemory<byte> data) =>
+     /// <param name="reader">The CBOR reader positioned at the extensions map.</param>
+     /// <returns>The decoded extension output.</returns>
+     /// <remarks>
+-    /// Note: This method skips values and stores empty data. Use DecodeWithRawData for full data preservation.
++    /// This overload retains identifiers only and stores empty data after skipping each value.
++    /// HasExtensions/ExtensionIds remain usable, but typed value accessors are not usable on its output.
++    /// Use the memory overload for limited value reconstruction, or retain source raw bytes for exact data.
+     /// </remarks>
+     public static ExtensionOutput Decode(CborReader reader)
+     {
+@@ -260,7 +286,7 @@ public static ExtensionOutput Decode(CborReader reader)
+         for (var i = 0; i < mapCount; i++)
+         {
+             var key = reader.ReadTextString();
+-            // Skip the value - use DecodeWithRawData if you need the raw data
++            // This overload intentionally retains only the identifier, not a decodable value.
+             reader.SkipValue();
+             extensions[key] = ReadOnlyMemory<byte>.Empty;
+         }
+@@ -270,10 +296,10 @@ public static ExtensionOutput Decode(CborReader reader)
+     }
+ 
+     /// <summary>
+-    /// Decodes extension output from CBOR bytes, preserving raw data.
++    /// Reconstructs supported extension values from CBOR bytes; the name does not imply byte-exact preservation.
+     /// </summary>
+     /// <param name="data">The CBOR-encoded extensions map.</param>
+-    /// <returns>The decoded extension output with raw data preserved.</returns>
++    /// <returns>Independent reconstructed values with the class-level unknown-data/cleanup limitations.</returns>
+     public static ExtensionOutput DecodeWithRawData(ReadOnlyMemory<byte> data)
+     {
+         if (data.IsEmpty)
+@@ -289,7 +315,7 @@ public static ExtensionOutput DecodeWithRawData(ReadOnlyMemory<byte> data)
+         {
+             var key = reader.ReadTextString();
+ 
+-            // Get the start position and read/encode the value to get its bytes
++            // Re-encode supported values, rather than retaining a slice of the original encoding.
+             var valueWriter = new CborWriter(CborConformanceMode.Lax);
+             CopyCborValue(reader, valueWriter);
+             extensions[key] = valueWriter.Encode();
+@@ -346,4 +372,4 @@ private static void CopyCborValue(CborReader reader, CborWriter writer)
+                 break;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/LargeBlobs/ILargeBlobStorage.cs w/src/Ctap2/src/LargeBlobs/ILargeBlobStorage.cs
+index 12d3edee..aa37800e 100644
+--- i/src/Ctap2/src/LargeBlobs/ILargeBlobStorage.cs
++++ w/src/Ctap2/src/LargeBlobs/ILargeBlobStorage.cs
+@@ -18,20 +18,29 @@ namespace Yubico.YubiKit.Ctap2.LargeBlobs;
+ /// Per-credential large-blob storage over authenticatorLargeBlobs (CTAP 2.1-2.3 §6.10). Implemented by
+ /// <see cref="LargeBlobStorage"/>; an interface so clients built on it can be tested without a device.
+ /// </summary>
++/// <remarks>
++/// LargeBlobStorage uses the largeBlobKey response-envelope route, not direct largeBlob extension
++/// outputs. It borrows its session/protocol/token and caches GetInfo limits per instance. Callers must
++/// coordinate whole multi-command operations on the shared array/session; no transaction, conflict
++/// detection, rollback or resume is provided. Cancellation/failure can follow device changes.
++/// Actual writes require protocol/token configuration in this SDK even where CTAP permits an
++/// unverified write. Keep borrowed key/data storage stable through each await; clear caller-owned
++/// secrets and returned plaintext afterward. SDK internal copies are not comprehensively cleared.
++/// </remarks>
+ public interface ILargeBlobStorage
+ {
+     /// <summary>Reads the whole array; a short or corrupt array is the initial (empty) array (§6.10.2).</summary>
+     Task<LargeBlobArray> ReadLargeBlobArrayAsync(CancellationToken cancellationToken = default);
+ 
+-    /// <summary>Writes the whole array; requires a token with LargeBlobWrite (§6.10.2).</summary>
++    /// <summary>Replaces the whole shared array; this SDK requires a protocol/token with LargeBlobWrite.</summary>
+     Task WriteLargeBlobArrayAsync(LargeBlobArray array, CancellationToken cancellationToken = default);
+ 
+-    /// <summary>Returns the blob stored for the credential with this largeBlobKey, or null (§6.10.4).</summary>
++    /// <summary>Returns caller-owned plaintext to clear after use, or null when no entry decrypts within the SDK read cap.</summary>
+     Task<byte[]?> GetBlobAsync(ReadOnlyMemory<byte> largeBlobKey, CancellationToken cancellationToken = default);
+ 
+-    /// <summary>Stores the blob for the credential with this largeBlobKey, replacing any existing one (§6.10.5).</summary>
++    /// <summary>Reads, modifies and rewrites the full array to replace matching decryptable entries (§6.10.5).</summary>
+     Task SetBlobAsync(ReadOnlyMemory<byte> largeBlobKey, ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default);
+ 
+-    /// <summary>Removes the blob for the credential with this largeBlobKey; false when there was none.</summary>
++    /// <summary>Rewrites the array without matching decryptable entries; false when none matched within the read cap.</summary>
+     Task<bool> DeleteBlobAsync(ReadOnlyMemory<byte> largeBlobKey, CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/LargeBlobs/LargeBlobData.cs w/src/Ctap2/src/LargeBlobs/LargeBlobData.cs
+index eaca7162..d6b367e7 100644
+--- i/src/Ctap2/src/LargeBlobs/LargeBlobData.cs
++++ w/src/Ctap2/src/LargeBlobs/LargeBlobData.cs
+@@ -32,12 +32,15 @@ namespace Yubico.YubiKit.Ctap2.LargeBlobs;
+ /// <para>
+ /// Reading (§6.10.4): an entry that does not decrypt under the key is simply not this credential's
+ /// ("skip this array element"); a decrypted entry whose inflation fails or whose inflated length is
+-/// not origSize is an error. origSize is capped before decryption, as the §6.10.4 note asks.
++/// not origSize is an error. This SDK skips origSize above 1 MiB before decryption: a platform limit
++/// chosen from the §6.10.4 SHOULD note, not a universal protocol maximum. Encrypt has no matching cap.
+ /// </para>
+ /// <para>
+-/// Unknown map elements are kept as raw CBOR so an entry written by another client survives a rewrite
+-/// unchanged (§6.10.3: a conforming map "MAY include unknown elements"), so entries interoperate with
+-/// other WebAuthn clients sharing the same authenticator.
++/// Unknown elements of accepted maps retain their encoded key/value bytes (§6.10.3 permits unknown
++/// elements), while known fields and the enclosing maps are reconstructed. This is not byte-exact
++/// preservation of a foreign entry or the complete array. Nonconforming entries are skipped; origSize
++/// and integer map keys are limited to the signed Int64 range. Unknown values retain encoded slices,
++/// including unsigned values beyond Int64, subject to reader/writer conformance requirements.
+ /// </para>
+ /// </remarks>
+ public sealed class LargeBlobEntry
+@@ -57,10 +60,11 @@ public sealed class LargeBlobEntry
+ 
+     private readonly IReadOnlyList<(ReadOnlyMemory<byte> Key, ReadOnlyMemory<byte> Value)> _unknownElements;
+ 
+-    /// <summary>Creates an entry from its spec fields (for example, from a deserialized array).</summary>
++    /// <summary>Creates an entry by borrowing ciphertext and nonce storage without copying it.</summary>
+     /// <param name="ciphertext">AEAD_AES_256_GCM ciphertext with the 16-byte tag at the end.</param>
+     /// <param name="nonce">The 12-byte AEAD nonce.</param>
+     /// <param name="originalSize">The length of the uncompressed data.</param>
++    /// <remarks>Keep borrowed storage unchanged while this entry is used or serialized. Read-only views are not immutable storage.</remarks>
+     public LargeBlobEntry(ReadOnlyMemory<byte> ciphertext, ReadOnlyMemory<byte> nonce, long originalSize)
+         : this(ciphertext, nonce, originalSize, [])
+     {
+@@ -103,14 +107,14 @@ private LargeBlobEntry(
+     /// Attempts to decrypt this entry with a credential's largeBlobKey.
+     /// </summary>
+     /// <param name="largeBlobKey">The 32-byte largeBlobKey.</param>
+-    /// <returns>A fresh copy of the blob, owned by the caller, or null when the entry is not for this key.</returns>
++    /// <returns>Caller-owned plaintext to clear after use, or null for authentication failure or origSize above the SDK read cap.</returns>
+     /// <exception cref="InvalidDataException">
+     /// The entry decrypted under this key but its content is not valid: inflation failed or the inflated
+     /// length differs from <see cref="OriginalSize"/> (CTAP §6.10.4: "return an error").
+     /// </exception>
+     public byte[]? TryDecrypt(ReadOnlySpan<byte> largeBlobKey) => TryDecrypt(largeBlobKey, temporaryObserver: null);
+ 
+-    /// <summary>Test seam: <paramref name="temporaryObserver"/> sees every SDK-owned temporary after it has been zeroed.</summary>
++    /// <summary>Test seam: observes the allocated compressed plaintext and, if reached, inflation buffer after clearing; not every SDK/provider copy.</summary>
+     internal byte[]? TryDecrypt(ReadOnlySpan<byte> largeBlobKey, Action<byte[]>? temporaryObserver)
+     {
+         if (largeBlobKey.Length != KeyLength)
+@@ -150,6 +154,12 @@ private LargeBlobEntry(
+     /// <summary>
+     /// Creates an entry for <paramref name="data"/> under a credential's largeBlobKey (CTAP §6.10.5).
+     /// </summary>
++    /// <remarks>
++    /// Borrows key/data for this call and returns new ciphertext/nonce arrays. Clear caller-owned
++    /// plaintext/key storage after use. The returned compressed array is cleared, but this does not
++    /// clear the compression stream's backing storage or establish end-to-end provider cleanup.
++    /// Data above MaxOriginalSize is accepted here but cannot be returned by TryDecrypt.
++    /// </remarks>
+     public static LargeBlobEntry Encrypt(ReadOnlySpan<byte> largeBlobKey, ReadOnlySpan<byte> data)
+     {
+         if (largeBlobKey.Length != KeyLength)
+@@ -327,6 +337,12 @@ private static byte[] Inflate(byte[] compressed, long originalSize, Action<byte[
+ /// The large-blob array stored on the authenticator (CTAP 2.1-2.3 §6.10.2): a canonical CBOR array of
+ /// <see cref="LargeBlobEntry"/> maps followed by the first 16 bytes of SHA-256 over the array.
+ /// </summary>
++/// <remarks>
++/// Entries supplied through init are borrowed as a list, not snapshotted. Keep list and entry storage
++/// stable during use. Deserialization retains only accepted modeled entries, not a complete raw array;
++/// rewrites may discard nonconforming entries and reconstruct known fields. No universal foreign-client
++/// interoperability or byte-exact preservation guarantee follows from this representation.
++/// </remarks>
+ public sealed class LargeBlobArray
+ {
+     private const int HashSize = 16;
+@@ -338,9 +354,16 @@ public sealed class LargeBlobArray
+     /// Deserializes a large-blob array, verifying the trailing hash. Elements that are not conforming
+     /// large-blob maps are skipped (§6.10.4).
+     /// </summary>
+-    /// <exception cref="ArgumentException">The data is too short, the hash does not match, or the CBOR is malformed.</exception>
++    /// <param name="data">Serialized array storage; keep it alive and unchanged while retained unknown elements may be used or serialized.</param>
++    /// <exception cref="ArgumentException">The data is too short or the hash does not match.</exception>
++    /// <exception cref="CborContentException">CBOR is malformed or violates the reader's conformance requirements.</exception>
++    /// <exception cref="InvalidOperationException">A typed read encounters the wrong CBOR major type, including a non-array root.</exception>
++    /// <exception cref="OverflowException">An origSize or integer map key is outside the signed Int64 range.</exception>
+     /// <remarks>
+-    /// Strict on purpose for direct callers. <see cref="LargeBlobStorage.ReadLargeBlobArrayAsync"/> applies
++    /// Known ciphertext/nonce byte strings are independently copied, but retained unknown encoded
++    /// keys/values borrow slices of data. The result is therefore not a fully detached snapshot.
++    /// Rejects short/hash-corrupt input for direct callers; this does not validate every complete-envelope
++    /// or unsigned-range condition. <see cref="LargeBlobStorage.ReadLargeBlobArrayAsync"/> applies
+     /// §6.10.2's rule that a short or corrupt array is treated as the initial (empty) array.
+     /// </remarks>
+     public static LargeBlobArray Deserialize(ReadOnlyMemory<byte> data)
+@@ -420,7 +443,7 @@ public LargeBlobArray WithoutEntry(int index)
+         return new LargeBlobArray { Entries = entries };
+     }
+ 
+-    /// <summary>Returns the first entry's blob that decrypts under <paramref name="largeBlobKey"/>, or null.</summary>
++    /// <summary>Returns caller-owned plaintext from the first entry that decrypts within the SDK read cap, or null; clear returned plaintext after use.</summary>
+     public byte[]? FindAndDecrypt(ReadOnlySpan<byte> largeBlobKey)
+     {
+         foreach (var entry in Entries)
+@@ -433,4 +456,4 @@ public LargeBlobArray WithoutEntry(int index)
+ 
+         return null;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs w/src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs
+index d3442018..ee91bbff 100644
+--- i/src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs
++++ w/src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs
+@@ -26,17 +26,40 @@ namespace Yubico.YubiKit.Ctap2.LargeBlobs;
+ /// <para>
+ /// The authenticatorLargeBlobs command allows storing arbitrary data associated with
+ /// discoverable credentials. Data is encrypted using the credential's largeBlobKey,
+-/// which is derived from the credential private key.
++/// returned in the credential response envelope when largeBlobKey is requested. Do not assume the
++/// authenticator derives this random storage key from the credential private key. Check both
++/// largeBlobKey advertisement and largeBlobs:true; this helper does not perform capability preflight.
+ /// </para>
+ /// <para>
+-/// Large blobs are stored in a single array on the authenticator. Reading is always
+-/// allowed; writing requires PIN/UV authentication with the LargeBlobWrite permission.
++/// Large blobs share one serialized array. Reading ciphertext needs no PIN/UV parameter here, but
++/// returning a credential's plaintext requires its key. Actual writes always require a supplied
++/// protocol/token in this SDK, stricter than CTAP 2.3 §6.10.2's conditional device UV rule.
++/// The device checks the opaque token's authorization when configured UV or alwaysUv:true requires it;
++/// this helper does not inspect token permissions, validity or expiry.
+ /// </para>
+ /// <para>
+-/// For credentials created with the largeBlob extension, use
++/// For credentials created with largeBlobKey, use
+ /// <see cref="GetBlobAsync(ReadOnlyMemory{byte}, CancellationToken)"/> and
+ /// <see cref="SetBlobAsync(ReadOnlyMemory{byte}, ReadOnlyMemory{byte}, CancellationToken)"/>
+ /// to read/write blobs for specific credentials.
++/// The alternative direct largeBlob extension is not implemented by this helper.
++/// </para>
++/// <para>
++/// Limits are cached per helper from GetInfo: fragment length is maxMsgSize minus 64 (default 960),
++/// and the reported maximum serialized array size gates writes. Normally these limits remain cached;
++/// a write with no cached maximum array size reloads GetInfo and refreshes the fragment limit too.
++/// Reads continue until a short/empty fragment; writes send sequential chunks with total length only
++/// on the first chunk and authentication on each. Intermediate success is not a complete-array commit.
++/// Coordinate the entire operation with other users of the session/shared array: there is no
++/// sequence-wide lock, conflict detection, rollback or resume. After failure/cancellation, re-read
++/// state rather than assuming no write occurred or blindly resuming at the failed offset.
++/// </para>
++/// <para>
++/// The session, protocol and token are borrowed, not disposed or cleared by this helper. Keep them
++/// usable and token storage unchanged throughout each awaited operation. Returned plaintext arrays
++/// are caller-owned; clear them and caller-owned keys/data when finished, including later failures.
++/// Internal membership probes, compression and authenticated-request copies are not comprehensively
++/// cleared, so this is not an end-to-end sensitive-data cleanup guarantee.
+ /// </para>
+ /// </remarks>
+ public sealed class LargeBlobStorage : ILargeBlobStorage
+@@ -66,7 +89,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
+     private int? _maxSerializedLargeBlobArray;
+ 
+     /// <summary>Creates read-only storage. Fragment sizes come from the authenticator's GetInfo.</summary>
+-    /// <param name="session">The CTAP2 session.</param>
++    /// <param name="session">A borrowed initialized session; keep it open through each operation.</param>
+     public LargeBlobStorage(ICtap2Session session)
+     {
+         ArgumentNullException.ThrowIfNull(session);
+@@ -74,9 +97,9 @@ public LargeBlobStorage(ICtap2Session session)
+     }
+ 
+     /// <summary>Creates read/write storage; writes need a PIN/UV token with the LargeBlobWrite permission.</summary>
+-    /// <param name="session">The CTAP2 session.</param>
+-    /// <param name="protocol">The PIN/UV auth protocol the token was minted with.</param>
+-    /// <param name="pinUvAuthToken">A PIN/UV auth token carrying LargeBlobWrite (CTAP §6.10.2).</param>
++    /// <param name="session">A borrowed initialized session.</param>
++    /// <param name="protocol">A borrowed usable protocol matching the token; this helper does not dispose it.</param>
++    /// <param name="pinUvAuthToken">Borrowed token with LargeBlobWrite authorization; keep storage stable until operations finish, then clear it when no longer needed.</param>
+     public LargeBlobStorage(
+         ICtap2Session session,
+         IPinUvAuthProtocol protocol,
+@@ -90,7 +113,7 @@ public LargeBlobStorage(
+ 
+     /// <summary>
+     /// CTAP §6.10.2: "maxFragmentLength = maxMsgSize − 64" with GetInfo's maxMsgSize (default 1024, §6.4).
+-    /// Read once per instance.
++    /// Cached per instance; LoadLimitsAsync can refresh it when a write has no reported maximum array size.
+     /// </summary>
+     private async ValueTask<int> GetMaxFragmentLengthAsync(CancellationToken cancellationToken)
+     {
+@@ -114,6 +137,11 @@ private async Task LoadLimitsAsync(CancellationToken cancellationToken)
+     /// </summary>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <returns>The large blob array.</returns>
++    /// <remarks>
++    /// Short/hash-corrupt data becomes the initial empty array. The current response parser also treats
++    /// missing config or an empty successful response as an empty fragment; this is a decoding limitation,
++    /// not evidence of a conforming empty device array. Malformed CBOR behind a valid hash can throw.
++    /// </remarks>
+     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
+     public async Task<LargeBlobArray> ReadLargeBlobArrayAsync(CancellationToken cancellationToken = default)
+     {
+@@ -134,6 +162,11 @@ public async Task<LargeBlobArray> ReadLargeBlobArrayAsync(CancellationToken canc
+     /// Writes the entire large blob array to the authenticator.
+     /// </summary>
+     /// <param name="array">The array to write.</param>
++    /// <remarks>
++    /// Replaces the complete shared array, not only one credential's entry. Keep entry/list storage
++    /// unchanged until completion and preserve other clients' entries where possible. A failed call
++    /// can leave changed/torn state; there is no transactional rollback or conflict detection.
++    /// </remarks>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <exception cref="InvalidOperationException">Thrown when PIN/UV auth is not configured.</exception>
+     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
+@@ -173,9 +206,10 @@ public async Task WriteLargeBlobArrayAsync(
+     /// </summary>
+     /// <param name="largeBlobKey">The credential's largeBlobKey (32 bytes).</param>
+     /// <param name="cancellationToken">The cancellation token.</param>
+-    /// <returns>The decrypted blob data, or null if no blob exists for this credential.</returns>
++    /// <returns>Caller-owned plaintext to clear after use, or null if no entry decrypts within the SDK's 1 MiB read cap.</returns>
+     /// <exception cref="ArgumentException">Thrown when largeBlobKey is not 32 bytes.</exception>
+     /// <exception cref="CtapException">Thrown when reading fails.</exception>
++    /// <exception cref="InvalidDataException">A decrypted entry cannot inflate to its declared original size.</exception>
+     public async Task<byte[]?> GetBlobAsync(
+         ReadOnlyMemory<byte> largeBlobKey,
+         CancellationToken cancellationToken = default)
+@@ -197,9 +231,13 @@ public async Task WriteLargeBlobArrayAsync(
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <remarks>
+     /// <para>
+-    /// This operation replaces any existing blob for this credential.
+-    /// It reads the current array, removes any existing entry for this key,
++    /// This operation replaces entries that decrypt with this key within the SDK read cap.
++    /// It reads the current array, removes those matching entries,
+     /// adds the new encrypted entry, and writes the array back.
++    /// This is a full-array read-modify-write, not an atomic per-credential update. Foreign entries are
++    /// preserved only within LargeBlobArray's modeled scope. No 1 MiB plaintext write cap is enforced,
++    /// although larger entries cannot be returned by this SDK's read helper. Inputs are borrowed through
++    /// the completed await. Successful membership probes currently leave discarded plaintext copies.
+     /// </para>
+     /// </remarks>
+     /// <exception cref="ArgumentException">Thrown when largeBlobKey is not 32 bytes.</exception>
+@@ -243,7 +281,13 @@ public async Task SetBlobAsync(
+     /// </summary>
+     /// <param name="largeBlobKey">The credential's largeBlobKey (32 bytes).</param>
+     /// <param name="cancellationToken">The cancellation token.</param>
+-    /// <returns>True if a blob was deleted, false if no blob existed for this key.</returns>
++    /// <returns>True after rewriting the array without matching decryptable entries; false when none matched, including entries above the read cap.</returns>
++    /// <remarks>
++    /// Reads and rewrites the full shared array without a transaction or conflict lock. A read-only
++    /// helper can return false without writing; a matching entry requires configured write authentication.
++    /// Successful membership probes currently leave discarded plaintext copies. Failure/cancellation
++    /// does not establish rollback; re-read storage before deciding how to recover.
++    /// </remarks>
+     /// <exception cref="ArgumentException">Thrown when largeBlobKey is not 32 bytes.</exception>
+     /// <exception cref="InvalidOperationException">Thrown when PIN/UV auth is not configured.</exception>
+     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
+@@ -387,12 +431,12 @@ private async Task WriteFragmentAsync(
+         int totalLength,
+         CancellationToken cancellationToken)
+     {
+-        // Build the message for PIN/UV auth: 32-byte hash of (0xff || offset bytes || SHA-256(data))
++        // Authenticate a 70-byte message: 32*0xff || 0x0c00 || LE32(offset) || SHA-256(fragment).
+         // First, compute SHA-256 of the fragment
+         Span<byte> fragmentHash = stackalloc byte[32];
+         SHA256.HashData(fragment.Span, fragmentHash);
+ 
+-        // Build auth message per CTAP 2.1 spec section 6.10.3:
++        // Build auth message per CTAP 2.1-2.3 §6.10.2:
+         // authenticate(pinUvAuthToken, 32*0xff || 0x0C || 0x00 || uint32LittleEndian(offset) || SHA-256(contents of set byte string))
+         var authMessage = new byte[32 + 2 + 4 + 32];
+         authMessage.AsSpan(0, 32).Fill(0xff);
+@@ -474,4 +518,4 @@ private static ReadOnlyMemory<byte> ParseReadResponse(ReadOnlyMemory<byte> respo
+ 
+         return ReadOnlyMemory<byte>.Empty;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs
+index 4141cdcb..ffd8f09f 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs
+@@ -13,6 +13,12 @@
+ 
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests.AuditV2;
+ 
++/// <summary>Human-coordinated storage-format and manual cross-client fixtures on a dedicated test device.</summary>
++/// <remarks>
++/// Setup normalizes the PIN and cleanup deletes all credentials for this RP. The first fixture expects
++/// a small one-fragment array with three-field entries; it is not multichunk or arbitrary-foreign-entry
++/// coverage. Plaintext/key copies are not comprehensively cleared. No cross-client step runs automatically.
++/// </remarks>
+ public class Ctap2LargeBlobAuditReproTests
+ {
+     [SkippableTheory]
+@@ -99,7 +105,10 @@ await state.WithCtap2SessionAsync(async session =>
+                         }
+                         Assert.True(matched);
+ 
+-                        // Cross-client step: hand the largeBlobKey to python-fido2 (LargeBlobs.get_blob) when asked.
++                        // Explicit opt-in secret export: a nonempty AUDIT_LARGE_BLOB_KEY_OUT makes this
++                        // fixture write the largeBlobKey as immutable hexadecimal text to that file.
++                        // Only use for human-authorized interop on a dedicated device with a protected
++                        // destination and planned file/environment cleanup; this is not safe key storage.
+                         if (Environment.GetEnvironmentVariable("AUDIT_LARGE_BLOB_KEY_OUT") is { Length: > 0 } keyOut)
+                         {
+                             await File.WriteAllTextAsync(keyOut, Convert.ToHexString(response.LargeBlobKey.Value.Span));
+@@ -119,8 +128,11 @@ await state.WithCtap2SessionAsync(async session =>
+     public async Task YESDK1621_ReadsPythonFido2WrittenBlob(YubiKeyTestState state) =>
+         await state.WithCtap2SessionAsync(async session =>
+         {
+-            // Run C-interop.py first with a credential's largeBlobKey from a separate,
+-            // user-authorized getAssertion. Never print or persist that key in this test.
++            // Manual prerequisite: separately authorize a getAssertion/key acquisition and external
++            // python-fido2 write, then provide the same secret as AUDIT_LARGE_BLOB_KEY_HEX.
++            // This test decodes an immutable environment string and clears only its decoded key array,
++            // not the environment text or returned plaintext. The sibling opt-in fixture can export
++            // the key to disk; neither channel is production-safe secret handling.
+             string? keyHex = Environment.GetEnvironmentVariable("AUDIT_LARGE_BLOB_KEY_HEX");
+             Skip.If(string.IsNullOrEmpty(keyHex), "Run C-interop.py and provide AUDIT_LARGE_BLOB_KEY_HEX");
+             byte[] key = Convert.FromHexString(keyHex ?? "");
+@@ -131,4 +143,4 @@ await state.WithCtap2SessionAsync(async session =>
+             }
+             finally { CryptographicOperations.ZeroMemory(key); }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredBlobTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredBlobTests.cs
+index dba6afa4..4165f846 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredBlobTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredBlobTests.cs
+@@ -27,6 +27,13 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// credBlob allows storing a small blob of data (up to maxCredBlobLength bytes)
+ /// alongside a discoverable credential, retrievable during assertions.
+ /// </summary>
++/// <remarks>
++/// Retrieval byte equality is asserted unconditionally; creation/max-length storage results are checked
++/// only if returned. The fixed text/random fixtures are not PII examples: sensitive content requires
++/// level-3 credProtect with platform enforcement, which this builder does not implement.
++/// Setup normalizes the known PIN; cleanup deletes all credentials for the RP and does not comprehensively
++/// clear tokens/output copies. Run only on an explicitly approved dedicated device with a human present.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Extension", "credBlob")]
+ public class Ctap2CredBlobTests
+@@ -48,9 +55,8 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+             try
+             {
+-                // Guard against known SDK HID transport bug where
+-                // FidoHidConnection.ReceiveAsync can throw NullReferenceException
+-                // when the macOS HID RunLoop fails to dequeue a report in time.
++                // The retained catch below skips exceptions matching historical macOS HID stack names.
++                // It does not establish the cause or continued existence of that earlier transport issue.
+                 using var clientPin = await Ctap2TestHelpers.SetOrVerifyPinAsync(session, Ctap2TestData.PinUtf8);
+ 
+                 var rp = Ctap2TestData.CreateRelyingParty();
+@@ -98,7 +104,7 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+                 credentialId = makeResult.GetCredentialId().ToArray();
+ 
+-                // Verify the blob was stored
++                // Check the reported stored flag if present; absence does not fail this creation check.
+                 if (makeResult.ExtensionOutputs.HasValue)
+                 {
+                     var extOutput = ExtensionOutput.DecodeWithRawData(makeResult.ExtensionOutputs.Value);
+@@ -233,7 +239,7 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+                 Assert.NotNull(makeResult);
+ 
+-                // Verify the blob was stored
++                // Conditional max-length stored check; no unconditional output-presence assertion here.
+                 if (makeResult.ExtensionOutputs.HasValue)
+                 {
+                     var extOutput = ExtensionOutput.DecodeWithRawData(makeResult.ExtensionOutputs.Value);
+@@ -258,4 +264,4 @@ await state.WithCtap2SessionAsync(async session =>
+                 await Ctap2TestHelpers.DeleteAllCredentialsForRpAsync(session, Ctap2TestData.RpId, Ctap2TestData.PinUtf8);
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredProtectTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredProtectTests.cs
+index 85281615..9ae24c38 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredProtectTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredProtectTests.cs
+@@ -25,6 +25,12 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// <summary>
+ /// Integration tests for CTAP2 credProtect extension.
+ /// </summary>
++/// <remarks>
++/// Both level-2 assertions carry PIN authorization; they do not test rejection of discovery without UV.
++/// Level 3 checks the positive UV bit, not a no-UV negative case. Policy echoes are conditional.
++/// Setup normalizes the known PIN and cleanup deletes all RP credentials; tokens are not comprehensively
++/// cleared. Use an explicitly approved dedicated test device, not these fixtures as production guidance.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Extension", "credProtect")]
+ public class Ctap2CredProtectTests
+@@ -125,9 +131,9 @@ await state.WithCtap2SessionAsync(async session =>
+                         PinUvAuthProtocol = clientPin.Protocol.Version
+                     });
+ 
+-                // Per CTAP 2.x: a regular pinUvAuthToken must be regenerated for each
+-                // authenticator invocation (PPUAT is the read-only exception, not used here).
+-                // Re-mint the token + auth param before the second GetAssertion call.
++                // Obtain fresh authorization for this second assertion. Ordinary-token reuse depends
++                // on device timers, scope and consumed permissions, not a universal per-invocation rule.
++                // A new token request also invalidates previous ordinary tokens on the authenticator.
+                 byte[] allowListPinToken;
+                 if (supportsPermissions)
+                 {
+@@ -271,4 +277,4 @@ await state.WithCtap2SessionAsync(async session =>
+                 await Ctap2TestHelpers.DeleteAllCredentialsForRpAsync(session, Ctap2TestData.RpId, Ctap2TestData.PinUtf8);
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2HmacSecretTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2HmacSecretTests.cs
+index 560fcd34..91aacce6 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2HmacSecretTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2HmacSecretTests.cs
+@@ -26,6 +26,13 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// <summary>
+ /// Integration tests for CTAP2 hmac-secret extension.
+ /// </summary>
++/// <remarks>
++/// Registration checks are conditional. Assertion fixtures decrypt a nonzero 32-byte result and compare
++/// two same-salt PIN-authorized results; they do not cover both UV variants or every protocol version.
++/// Setup can normalize the PIN even in the GetInfo fixture. Human approval/known device state is required.
++/// Tokens and secret-derived copies are not comprehensively cleared, and some clearing is success-only;
++/// these are not production-safe ownership/constant-time comparison examples.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Extension", "hmac-secret")]
+ public class Ctap2HmacSecretTests
+@@ -409,4 +416,4 @@ await state.WithCtap2SessionAsync(async session =>
+                 await Ctap2TestHelpers.DeleteAllCredentialsForRpAsync(session, Ctap2TestData.RpId, Ctap2TestData.PinUtf8);
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2LargeBlobTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2LargeBlobTests.cs
+index 971e4f1d..0b811f0f 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2LargeBlobTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2LargeBlobTests.cs
+@@ -25,9 +25,16 @@
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+-/// Integration tests for the CTAP2 largeBlob extension and large blob storage.
++/// Integration fixtures for the largeBlobKey response-envelope route and authenticatorLargeBlobs storage.
+ /// Tests credential-associated large blob data storage and retrieval.
+ /// </summary>
++/// <remarks>
++/// The retained largeBlob trait names this feature family, not direct CTAP §12.4 output coverage.
++/// Positive fixtures compare stored plaintext and check deletion; they do not establish multichunk
++/// atomicity, cancellation recovery or foreign-client interoperability. PIN-normalizing setup and broad
++/// RP cleanup require a human-approved dedicated device. Token clearing is success-only and returned
++/// plaintext/key copies are not comprehensively cleared; do not copy this lifetime pattern into production.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Extension", "largeBlob")]
+ public class Ctap2LargeBlobTests
+@@ -231,4 +238,4 @@ await state.WithCtap2SessionAsync(async session =>
+                 await Ctap2TestHelpers.DeleteAllCredentialsForRpAsync(session, Ctap2TestData.RpId, Ctap2TestData.PinUtf8);
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MinPinLengthTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MinPinLengthTests.cs
+index e6d28a7c..c9d15a22 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MinPinLengthTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MinPinLengthTests.cs
+@@ -25,6 +25,12 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// <summary>
+ /// Integration tests for CTAP2 minPinLength extension.
+ /// </summary>
++/// <remarks>
++/// These fixtures do not configure minPinLengthRPIDs or require output presence. They conditionally
++/// inspect a reported code-point minimum, not policy changes, current PIN length or authorized-disclosure
++/// enforcement. Setup can normalize the PIN even for GetInfo; creation cleanup deletes all RP credentials.
++/// Use an explicitly approved dedicated device; token cleanup is not comprehensive.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Extension", "minPinLength")]
+ public class Ctap2MinPinLengthTests
+@@ -125,4 +131,4 @@ await state.WithCtap2SessionAsync(async session =>
+                 Skip.If(true, "YubiKey does not support minPinLength extension");
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PrfTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PrfTests.cs
+index a6e02e68..2e9c66f2 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PrfTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PrfTests.cs
+@@ -23,10 +23,15 @@
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+-/// Integration tests for the CTAP2 PRF (Pseudo-Random Function) extension.
+-/// PRF is the WebAuthn-level interface to hmac-secret, allowing key derivation
+-/// from credentials using arbitrary salt inputs.
++/// Registration and ordinary-assertion fixtures for the hmac-secret substrate of WebAuthn PRF.
+ /// </summary>
++/// <remarks>
++/// There is no CTAP "prf" extension key. These tests do not hash PRF inputs, exchange encrypted salts,
++/// decode a PRF result or compare deterministic outputs, despite the retained test names. The first
++/// checks extension presence only conditionally; the second makes one ordinary assertion.
++/// Setup normalizes the known PIN and cleanup deletes all credentials for this RP. Tokens are not
++/// comprehensively cleared; these are human-approved dedicated-device fixtures, not production examples.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Extension", "prf")]
+ public class Ctap2PrfTests
+@@ -39,8 +44,8 @@ await state.WithCtap2SessionAsync(async session =>
+         {
+             var info = await session.GetInfoAsync();
+ 
+-            // PRF extension requires FIDO 2.1 or later; CTAP 2.0-only authenticators
+-            // return "Invalid CTAP command" for the hmac-secret-mc extension input.
++            // Retained fixture gate, not a universal PRF/hmac-secret protocol floor.
++            // This request emits hmac-secret:true, not hmac-secret-mc.
+             if (!info.Versions.Contains("FIDO_2_1") && !info.Versions.Contains("FIDO_2_1_PRE"))
+             {
+                 Skip.If(true, "PRF extension requires FIDO 2.1 — this authenticator only supports CTAP 2.0");
+@@ -83,7 +88,7 @@ await state.WithCtap2SessionAsync(async session =>
+                 var makePinUvAuthParam = Ctap2TestHelpers.ComputeMakeCredentialAuthParam(
+                     clientPin.Protocol, makePinToken, makeChallenge);
+ 
+-                // Request PRF support during credential creation
++                // Request the underlying hmac-secret credential support, without PRF input processing.
+                 var extensions = new ExtensionBuilder()
+                     .WithHmacSecret()
+                     .Build();
+@@ -104,12 +109,11 @@ await state.WithCtap2SessionAsync(async session =>
+                 credentialId = makeResult.GetCredentialId().ToArray();
+                 Assert.NotNull(makeResult);
+ 
+-                // The authenticator should echo back hmac-secret: true in extensions
+-                // indicating PRF/hmac-secret is supported for this credential
++                // Conditional presence check only; this does not assert the hmac-secret boolean value.
+                 if (makeResult.ExtensionOutputs.HasValue)
+                 {
+                     var extOutput = ExtensionOutput.DecodeWithRawData(makeResult.ExtensionOutputs.Value);
+-                    // hmac-secret output during makeCredential is a boolean true
++                    // The standard registration output is boolean; this assertion only checks any output.
+                     Assert.True(extOutput.HasExtensions, "Extension outputs should be present");
+                 }
+             }
+@@ -127,7 +131,7 @@ await state.WithCtap2SessionAsync(async session =>
+         {
+             var info = await session.GetInfoAsync();
+ 
+-            // PRF extension requires FIDO 2.1 or later
++            // Retained fixture version gate; advertisement, not this gate, identifies hmac-secret support.
+             if (!info.Versions.Contains("FIDO_2_1") && !info.Versions.Contains("FIDO_2_1_PRE"))
+             {
+                 Skip.If(true, "PRF extension requires FIDO 2.1 — this authenticator only supports CTAP 2.0");
+@@ -189,10 +193,9 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+                 credentialId = makeResult.GetCredentialId().ToArray();
+ 
+-                // Perform two assertions with the same PRF salt and verify deterministic output
+-                // Note: actual hmac-secret evaluation during assertion requires the encrypted
+-                // salt exchange via the PIN protocol's key agreement. This test verifies
+-                // the credential was created with PRF support and assertion works.
++                // One ordinary assertion follows registration; no salts or PRF results are supplied.
++                // Deterministic evaluation needs encrypted salts and comparison of actual outputs;
++                // those assertions remain separate unfinished test work.
+                 var assertChallenge = Ctap2TestData.GenerateChallenge();
+                 byte[] assertPinToken;
+                 if (supportsPermissions)
+@@ -228,4 +231,4 @@ await state.WithCtap2SessionAsync(async session =>
+                 await Ctap2TestHelpers.DeleteAllCredentialsForRpAsync(session, Ctap2TestData.RpId, Ctap2TestData.PinUtf8);
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2ExtensionAuditReproTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2ExtensionAuditReproTests.cs
+index b4c43b53..d797ea9a 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2ExtensionAuditReproTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2ExtensionAuditReproTests.cs
+@@ -44,7 +44,7 @@ public void YESDK1609_RegistrationPrfRequestsHmacSecret()
+     }
+ 
+     /// <summary>
+-    ///     The CTAP layer carries one credential's previewSign parameters (draft v4 §10.2.1 key-handle = 2, tbs = 6);
++    ///     The CTAP layer carries one credential's previewSign parameters (Yubico Labs v4 Editor's Draft §10.2.1: key-handle = 2, tbs = 6);
+     ///     choosing among a signByCredential map is the WebAuthn client's job after credential selection.
+     /// </summary>
+     [Fact]
+@@ -62,4 +62,4 @@ public void YESDK1634_PreviewSignBuilderEncodesTheGivenCredentialsParameters()
+         Assert.Equal(2, reader.ReadInt32()); Assert.Equal(new byte[] { 0xA1 }, reader.ReadByteString());
+         Assert.Equal(6, reader.ReadInt32()); Assert.Equal(new byte[] { 0xB1 }, reader.ReadByteString());
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs
+index d900c9bd..e3d14f38 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs
+@@ -92,8 +92,8 @@ public async Task YESDK1622_CorruptChecksumActsAsInitialArray()
+     [Trait("Audit", "YESDK-1624")]
+     public void YESDK1624_DecryptedTemporaryPlaintextIsCleared()
+     {
+-        // Every SDK-owned temporary (the AES-GCM output and the inflate buffer) is zeroed before TryDecrypt returns;
+-        // the caller receives a fresh copy it owns.
++        // The seam observes the allocated AES-GCM compressed output and inflation buffer after clearing
++        // on this successful path. It does not cover every provider/SDK copy or failure path.
+         var entry = LargeBlobEntry.Encrypt(Key, Blob);
+         var temporaries = new List<byte[]>();
+ 
+@@ -104,7 +104,7 @@ public void YESDK1624_DecryptedTemporaryPlaintextIsCleared()
+         Assert.All(temporaries, buffer => Assert.All(buffer, b => Assert.Equal(0, b)));
+     }
+ 
+-    // Equivalent to python-fido2 blob.py _compress, _lb_ad, _lb_pack, write_blob_array.
++    // Handcrafted spec-shaped DEFLATE/GCM/AAD/hash fixture, not an executed python-fido2 exchange.
+     private static byte[] BuildSpecArray(byte[] key, byte[] blob)
+     {
+         using var compressedStream = new MemoryStream();
+@@ -133,4 +133,4 @@ private static byte[] BuildSpecArray(byte[] key, byte[] blob)
+         byte[] array = writer.Encode();
+         return [.. array, .. SHA256.HashData(array).AsSpan(0, 16)];
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretInputTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretInputTests.cs
+index 1804f084..ffeb3e04 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretInputTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretInputTests.cs
+@@ -22,6 +22,8 @@ public class HmacSecretInputTests
+     [Fact]
+     public void HmacSecretInput_EncodesCorrectly()
+     {
++        // Synthetic P-256-shaped dictionary: this fixture asserts only nonempty encoding/map count,
++        // not key-agreement coherence, all nested bytes or protocol cryptography.
+         var keyAgreement = new Dictionary<int, object?>
+         {
+             { 1, 2 },
+@@ -47,4 +49,4 @@ public void HmacSecretInput_EncodesCorrectly()
+         var mapCount = reader.ReadStartMap();
+         Assert.Equal(4, mapCount);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretOutputTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretOutputTests.cs
+index 6a41ba9d..658bcf28 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretOutputTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretOutputTests.cs
+@@ -35,6 +35,7 @@ public void HmacSecretOutput_DecodesCorrectly()
+     [Fact]
+     public void HmacSecretMcOutput_DecodesCorrectly()
+     {
++        // Direct byte-string DTO decode; no hmac-secret-mc identifier/envelope routing is exercised.
+         var outputData = new byte[48];
+         Random.Shared.NextBytes(outputData);
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+@@ -46,4 +47,4 @@ public void HmacSecretMcOutput_DecodesCorrectly()
+         Assert.Equal(48, output.Output.Length);
+         Assert.Equal(outputData, output.Output.ToArray());
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/LargeBlob/LargeBlobOutputTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/LargeBlob/LargeBlobOutputTests.cs
+index 20085a60..4c2035c6 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/LargeBlob/LargeBlobOutputTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/LargeBlob/LargeBlobOutputTests.cs
+@@ -22,6 +22,7 @@ public class LargeBlobOutputTests
+     [Fact]
+     public void LargeBlobOutput_DecodesCorrectly()
+     {
++        // Synthetic legacy {largeBlobKey, written} shape, not a standard direct CTAP output.
+         var key = new byte[32];
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(2);
+@@ -39,4 +40,4 @@ public void LargeBlobOutput_DecodesCorrectly()
+         Assert.Equal(32, output.LargeBlobKey.Value.Length);
+         Assert.True(output.Written);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionBuilderTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionBuilderTests.cs
+index fce3a6d3..79c86381 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionBuilderTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionBuilderTests.cs
+@@ -92,7 +92,7 @@ public void Build_WithMinPinLength_EncodesCorrectly()
+         Assert.True(reader.ReadBoolean());
+     }
+ 
+-    /// <summary>CTAP 2.1-2.3 §12.7 makeCredential input: "hmac-secret": true (the WebAuthn prf registration request).</summary>
++    /// <summary>CTAP 2.1 §12.5 / 2.2-2.3 §12.7: makeCredential sends hmac-secret:true for credential support.</summary>
+     [Fact]
+     public void Build_WithHmacSecretRequested_EncodesBooleanTrue()
+     {
+@@ -125,6 +125,7 @@ public void Build_WithHmacSecretRequested_AndGetAssertionInput_ThrowsAtBuild()
+     /// CTAP 2.2-2.3 §12.8: hmac-secret-mc carries "the same as the hmac secret extension's getAssertion input" and
+     /// "the hmac-secret extension MUST also be present with the value of "hmac-secret" set to true".
+     /// </summary>
++    /// <remarks>The synthetic key/tag values test map/companion presence, not protocol-2 cryptography or complete nested bytes.</remarks>
+     [Fact]
+     public void Build_WithHmacSecretMakeCredential_EncodesHmacSecretTrueAndTheInputMap()
+     {
+@@ -169,7 +170,7 @@ public void Build_WithLargeBlobKey_EncodesCorrectly()
+     public void Build_WithCredBlobOversized_AllowsOversizedInput()
+     {
+         // Arrange
+-        var oversizedBlob = new byte[128]; // Max spec limit is 64 bytes
++        var oversizedBlob = new byte[128]; // Builder has no size gate; maxCredBlobLength is device-specific (at least 32).
+         var builder = new ExtensionBuilder()
+             .WithCredBlob(oversizedBlob);
+ 
+@@ -206,7 +207,7 @@ public void Build_WithMultipleExtensions_EncodesAllCorrectly()
+         var count = reader.ReadStartMap();
+         Assert.Equal(3, count);
+ 
+-        // Keys should be sorted: credBlob < credProtect < minPinLength
++        // For these keys, encoded-length canonical order is credBlob, credProtect, minPinLength.
+         Assert.Equal("credBlob", reader.ReadTextString());
+         reader.SkipValue(); // byte string
+ 
+@@ -384,6 +385,7 @@ public void WithHmacSecret_InvalidSalt2Length_ThrowsArgumentException()
+ /// <summary>
+ /// Mock PIN/UV auth protocol for unit testing.
+ /// </summary>
++/// <remarks>Version 2 with 16-byte tags and XOR is deliberately a fake, not CTAP protocol-2 crypto evidence.</remarks>
+ internal class MockPinProtocol : Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol
+ {
+     public int Version => 2;
+@@ -450,4 +452,4 @@ public void Dispose()
+     {
+         // No resources to dispose in mock
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionOutputTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionOutputTests.cs
+index 18cafc9f..725f02e4 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionOutputTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionOutputTests.cs
+@@ -102,6 +102,7 @@ public void Decode_WithMinPinLength_ParsesCorrectly()
+     [Fact]
+     public void Decode_WithLargeBlobKey_ParsesCorrectly()
+     {
++        // Synthetic convenience map only. Standard CTAP keys are outside authData extensions.
+         var key = new byte[32];
+         Random.Shared.NextBytes(key);
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+@@ -201,6 +202,7 @@ public void Decode_WithMultipleExtensions_ParsesAll()
+     [Fact]
+     public void ExtensionOutput_WithUnsupportedExtension_YieldsEmptyOutputMap()
+     {
++        // Despite the retained name, this supplies empty input, not an unsupported identifier/value.
+         var emptyExtensions = ReadOnlyMemory<byte>.Empty;
+ 
+         var output = ExtensionOutput.Decode(emptyExtensions);
+@@ -210,4 +212,4 @@ public void ExtensionOutput_WithUnsupportedExtension_YieldsEmptyOutputMap()
+         Assert.False(output.TryGetCredProtect(out _));
+         Assert.False(output.TryGetMinPinLength(out _));
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobSpecFormatTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobSpecFormatTests.cs
+index 42af43cb..87ebe17a 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobSpecFormatTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobSpecFormatTests.cs
+@@ -22,9 +22,9 @@
+ namespace Yubico.YubiKit.Ctap2.UnitTests.LargeBlobs;
+ 
+ /// <summary>
+-///     CTAP 2.1-2.3 §6.10 large-blob format and storage rules, written before the rewrite that implements them
+-///     (#13 format, #12 fragment length, #14 corrupt array, #16 zeroing). The reference encoder below is a
+-///     transliteration of python-fido2 blob.py (_compress, _lb_ad, _lb_pack, write_blob_array).
++///     Local CTAP 2.1-2.3 §6.10 format, first-fragment/limit and scoped temporary-clearing fixtures.
++///     The handcrafted encoder follows raw DEFLATE/GCM/AAD/array-hash layout; it does not run python-fido2
++///     or establish arbitrary foreign-client interoperability or end-to-end sensitive-buffer cleanup.
+ /// </summary>
+ public class LargeBlobSpecFormatTests
+ {
+@@ -42,7 +42,7 @@ public class LargeBlobSpecFormatTests
+     private static readonly byte[] BlobA = "hello from credential A"u8.ToArray();
+     private static readonly byte[] BlobB = "a different blob for B"u8.ToArray();
+ 
+-    // ---- reference encoder (python-fido2 blob.py) ----
++    // Local independent format encoder, not an executed sibling-client integration.
+ 
+     private static byte[] Deflate(byte[] data)
+     {
+@@ -97,7 +97,7 @@ private static ICtap2Session SessionWithInfo(int? maxMsgSize = null, int? maxSer
+         return session;
+     }
+ 
+-    // ---- #13 format ----
++    // Format fixtures.
+ 
+     [Fact]
+     [Trait("Audit", "YESDK-1621")]
+@@ -129,7 +129,7 @@ public void Entry_TamperedOrigSize_FailsAuthentication()
+         Assert.Null(tampered.TryDecrypt(KeyA));
+     }
+ 
+-    /// <summary>§6.10.2/§6.10.3: an entry written by another client for another key is carried through byte-for-byte, unknown elements included.</summary>
++    /// <summary>One local canonical foreign-key entry with unknown byte-string element 99 survives this rewrite fixture.</summary>
+     [Fact]
+     [Trait("Audit", "YESDK-1621")]
+     public void Array_RewriteKeepsForeignEntriesByteForByte()
+@@ -177,7 +177,7 @@ public void Entry_OrigSizeAboveTheCap_IsNotDecrypted()
+         Assert.Null(huge.TryDecrypt(KeyA));
+     }
+ 
+-    // ---- #12 fragment length ----
++    // First-fragment length and reported write-capacity fixtures.
+ 
+     [Theory]
+     [Trait("Audit", "YESDK-1620")]
+@@ -212,9 +212,9 @@ public async Task Write_LargerThanMaxSerializedLargeBlobArray_IsRefusedBeforeAny
+         await session.DidNotReceive().SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+     }
+ 
+-    // ---- #16 zeroing ----
++    // Scoped success-path temporary-clearing fixture.
+ 
+-    /// <summary>Encrypt leaves no plaintext or compressed copy behind in SDK-owned buffers (probe via the deflate output the SDK allocates).</summary>
++    /// <summary>Successful TryDecrypt returns plaintext and reports cleared compressed/inflation arrays through its seam; not Encrypt/provider/failure-path cleanup.</summary>
+     [Fact]
+     [Trait("Audit", "YESDK-1624")]
+     public void Decrypt_ReturnsACopyAndZeroesItsTemporaries()
+@@ -241,4 +241,4 @@ private sealed class TestProtocol : Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol
+         public byte[] Kdf(ReadOnlySpan<byte> z) => throw new NotSupportedException();
+         public void Dispose() { }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobStorageTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobStorageTests.cs
+index ef2f0329..fb0f2b99 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobStorageTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobStorageTests.cs
+@@ -38,7 +38,7 @@ public LargeBlobStorageTests()
+     }
+ 
+     /// <summary>
+-    /// Test implementation of PIN/UV auth protocol.
++    /// Mechanical request fake: Version 2 with 16-byte tags is not protocol-2 cryptography.
+     /// </summary>
+     private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
+     {
+@@ -185,7 +185,7 @@ public async Task WriteLargeBlobArrayAsync_SendsCorrectCommand()
+         Assert.NotNull(capturedRequest);
+         Assert.Equal(0x0C, capturedRequest![0]); // LargeBlobs command
+ 
+-        // Verify CBOR structure has set, offset, length, pinUvAuthParam, pinUvAuthProtocol
++        // Check first-fragment map count only; this assertion does not inspect all five fields.
+         var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
+         var mapCount = reader.ReadStartMap();
+         Assert.Equal(5, mapCount); // First fragment includes length
+@@ -364,4 +364,4 @@ private static ReadOnlyMemory<byte> CreateReadResponse(byte[] data)
+         writer.WriteEndMap();
+         return writer.Encode();
+     }
+-}
+\ No newline at end of file
++}

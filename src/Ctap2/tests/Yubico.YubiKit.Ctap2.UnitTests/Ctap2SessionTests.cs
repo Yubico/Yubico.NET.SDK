@@ -12,7 +12,6 @@ using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Ctap2.Backend;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
@@ -50,8 +49,7 @@ public class Ctap2SessionTests
             Ctap2Session.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
         // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // The assertion covers this failed probe's connection lifetime, not device interoperability.
         connection.DidNotReceive().Dispose();
     }
 
@@ -184,7 +182,7 @@ public class Ctap2SessionTests
         Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
     }
 
-    /// <summary>up=false is refused at the session boundary, before any CBOR or prompt.</summary>
+    /// <summary>up=false refuses the makeCredential request and prompt; session initialization I/O occurs first.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1618")]
     public async Task MakeCredentialAsync_FalseUserPresence_ThrowsBeforeSendingOrPrompting()
@@ -497,6 +495,7 @@ public class Ctap2SessionTests
 
     private static byte[] MinimalGetInfoResponse()
     {
+        // Versions-only fake probe; not a conforming GetInfo envelope (required AAGUID is omitted).
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(1);
         writer.WriteInt32(0x01);

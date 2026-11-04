@@ -1,0 +1,33 @@
+<Project>
+  <Import Project="$(RepositoryRoot)/Directory.Build.targets" />
+  <Target Name="ValidateCtap2DocumentationInputs" BeforeTargets="PrepareForBuild">
+    <Exec Command="python3 &quot;$(MSBuildThisFileDirectory)../../prepare-project-context.py&quot; --repo &quot;$(RepositoryRoot)&quot; --manifest &quot;$(MSBuildThisFileDirectory)../contexts-manifest.json&quot; --context consumer-wa-lib --check" />
+  </Target>
+  <Target Name="CaptureCtap2DocumentationInputs" BeforeTargets="CoreCompile">
+    <MakeDir Directories="$(DocumentationWorkspace)" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/compile-inputs.txt" Lines="@(Compile-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/resolved-references.txt" Lines="@(ReferencePathWithRefAssemblies-&gt;'%(FullPath)|%(FusionName)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/analyzers.txt" Lines="@(Analyzer-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/analyzer-configs.txt" Lines="@(EditorConfigFiles-&gt;'%(FullPath)')" Overwrite="true" />
+  </Target>
+  <Target Name="CaptureCtap2DocumentationCompilerPolicy" AfterTargets="CoreCompile">
+    <WriteLinesToFile File="$(DocumentationWorkspace)/csc-command-line.txt" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+    <ItemGroup>
+      <DocumentationPolicy Include="NETCoreSdkVersion=$(NETCoreSdkVersion)" />
+      <DocumentationPolicy Include="TargetFramework=$(TargetFramework)" />
+      <DocumentationPolicy Include="LangVersion=$(LangVersion)" />
+      <DocumentationPolicy Include="WarningLevel=$(WarningLevel)" />
+      <DocumentationPolicy Include="TreatWarningsAsErrors=$(TreatWarningsAsErrors)" />
+      <DocumentationPolicy Include="AnalysisLevel=$(AnalysisLevel)" />
+      <DocumentationPolicy Include="AnalysisMode=$(AnalysisMode)" />
+      <DocumentationPolicy Include="EnableNETAnalyzers=$(EnableNETAnalyzers)" />
+      <DocumentationPolicy Include="RunAnalyzersDuringBuild=$(RunAnalyzersDuringBuild)" />
+      <DocumentationPolicy Include="RunAnalyzers=$(RunAnalyzers)" />
+      <DocumentationPolicy Include="SkipAnalyzers=$(_SkipAnalyzers)" />
+      <DocumentationPolicy Include="SkipCompilerExecution=$(SkipCompilerExecution)" />
+      <DocumentationPolicy Include="GeneratedProgramFile=$(GeneratedProgramFile)" />
+      <DocumentationPolicy Include="NoWarn=$([System.String]::Copy('$(NoWarn)').Replace(';', ','))" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(DocumentationWorkspace)/policy-final.txt" Lines="@(DocumentationPolicy)" Overwrite="true" />
+  </Target>
+</Project>

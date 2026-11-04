@@ -33,8 +33,12 @@ public sealed class CredentialMetadata
     public int ExistingResidentCredentialsCount { get; }
 
     /// <summary>
-    /// Gets the maximum number of remaining discoverable credentials the authenticator can store.
+    /// Gets the authenticator's estimate of how many more discoverable credentials could be stored.
     /// </summary>
+    /// <remarks>
+    /// Actual storage depends on the algorithm and user information (CTAP 2.1,
+    /// 2022-06-21 errata, Section 6.8.2). This is not a capacity reservation.
+    /// </remarks>
     public int MaxPossibleRemainingResidentCredentialsCount { get; }
 
     private CredentialMetadata(ReadOnlyMemory<byte> rawData, int existingCount, int maxRemaining)
@@ -49,6 +53,11 @@ public sealed class CredentialMetadata
     /// </summary>
     /// <param name="data">The CBOR-encoded response data.</param>
     /// <returns>The decoded credential metadata.</returns>
+    /// <remarks>
+    /// Copies the complete response without modifying the borrowed input. Missing count
+    /// fields currently default to zero; required-field and nonnegative-count validation
+    /// is not performed, so defaults are not evidence of empty or full device storage.
+    /// </remarks>
     public static CredentialMetadata Decode(ReadOnlyMemory<byte> data)
     {
         ReadOnlyMemory<byte> rawData = data.ToArray();
@@ -93,15 +102,20 @@ public sealed class RelyingPartyInfo
     /// <summary>
     /// Gets the relying party entity information.
     /// </summary>
+    /// <remarks>
+    /// The returned Id can be truncated for display (CTAP 2.1, 2022-06-21 errata,
+    /// Section 6.8.7). Use RpIdHash, not a new hash of this text, to enumerate credentials.
+    /// </remarks>
     public PublicKeyCredentialRpEntity RelyingParty { get; }
 
     /// <summary>
-    /// Gets the hash of the RP ID.
+    /// Gets the raw SHA-256 hash of the original, untruncated RP ID.
     /// </summary>
+    /// <remarks>Pass it unchanged to credential enumeration. The decoder does not enforce its 32-byte length.</remarks>
     public ReadOnlyMemory<byte> RpIdHash { get; }
 
     /// <summary>
-    /// Gets the total number of RPs (only present in first response).
+    /// Gets the total copied from this response, or null when omitted; the standard supplies it in the begin response.
     /// </summary>
     public int? TotalRpCount { get; }
 

@@ -22,6 +22,9 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// The credential protection policy specifies when credentials can be used
 /// in assertions. Higher values provide stronger protection but may limit
 /// compatibility with some relying parties.
+/// The requested policy is not proof of the effective policy: authenticators may return a stronger
+/// policy. ExtensionBuilder's enforcePolicy parameter currently has no effect. In CTAP 2.1 §12.1.1,
+/// enforcement for levels 2 and 3 is a platform SHOULD NOT creation rule, not an extra CTAP wire flag.
 /// </para>
 /// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-credProtect-extension
@@ -34,7 +37,7 @@ public enum CredProtectPolicy
     /// </summary>
     /// <remarks>
     /// Credentials can be discovered and used without user verification.
-    /// This is the default for non-discoverable credentials.
+    /// CTAP 2.1 recommends this default when credProtect is omitted, but allows stronger device defaults.
     /// </remarks>
     UserVerificationOptional = 1,
 
@@ -45,7 +48,7 @@ public enum CredProtectPolicy
     /// For discoverable credentials, user verification is required if
     /// no credential ID is provided (i.e., when listing discoverable credentials).
     /// When a credential ID is provided in allowList, UV is optional.
-    /// This is the default for discoverable credentials on most authenticators.
+    /// Do not infer the authenticator's default from the credential being discoverable.
     /// </remarks>
     UserVerificationOptionalWithCredentialIdList = 2,
 

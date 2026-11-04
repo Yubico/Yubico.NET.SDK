@@ -45,10 +45,9 @@ public static class Ctap2TestData
     public const string UserDisplayName = "Test User";
 
     /// <summary>
-    /// Known test PIN used for all CTAP2 integration tests. Must match the PIN
-    /// physically set on the test YubiKey. Satisfies 5.7+ complexity requirements
-    /// (8 digits, at least 2 unique characters).
-    /// To set: ykman fido access change-pin --new-pin 11234567
+    /// Known PIN for approved dedicated test devices. Normalization may set or verify this value;
+    /// suitability depends on the product's configured minimum-length and complexity policy, not
+    /// firmware alone. This immutable test constant is not a production secret-input example.
     /// </summary>
     public const string Pin = TestExtensions.Ctap2TestStateExtensions.KnownTestPinString;
 
@@ -68,8 +67,10 @@ public static class Ctap2TestData
     public static byte[] GenerateUserId() => RandomNumberGenerator.GetBytes(16);
 
     /// <summary>
-    /// Generates a random 32-byte challenge (client data hash).
+    /// Generates 32 random bytes as a stand-in clientDataHash for CTAP protocol tests.
     /// </summary>
+    /// <remarks>This does not serialize client data or hash an RP challenge. Complete WebAuthn
+    /// ceremonies must hash the exact serialized client data and have the RP verify it.</remarks>
     public static byte[] GenerateChallenge() => RandomNumberGenerator.GetBytes(32);
 
     /// <summary>

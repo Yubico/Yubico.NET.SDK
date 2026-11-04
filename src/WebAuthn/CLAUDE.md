@@ -541,7 +541,7 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 
 1. **previewSign maps cover the allow list** — require one parameter entry per allowed descriptor and select by the recognized credential, including multi-entry requests
 2. **Extension inputs must reach the backend** — Assert on encoded extension maps because a missing processor call can silently omit an extension
-3. **`flags` optional in previewSign registration output** — Some authenticators return only key 3 (algorithm)
+3. **previewSign registration flags belong to the inner attestation** — The draft's signed registration extension value supplies the selected algorithm at key 3. Policy flags belong inside the generated-key attestation. The CTAP decoder's tolerated outer key 4 is not a standard optional field or evidence of a beta/device variant.
 4. **No LoggingFactory** — Use `YubiKitLogging.CreateLogger<T>()` from Core
 5. **CBOR key constants are context-specific** — key `7` means authentication `additionalArgs` in GetAssertion input and attestation object in MakeCredential unsigned output; keep parsing paths context-specific
 6. **The client never asks for anything except a PIN** — input comes from `pinBytes` or

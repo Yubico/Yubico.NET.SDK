@@ -14,8 +14,6 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 
 namespace Yubico.YubiKit.Ctap2;
@@ -44,11 +42,15 @@ public static class IYubiKeyExtensions
         /// <remarks>
         /// <para>
         /// This is a convenience method that creates a temporary CTAP2 session, retrieves
-        /// the authenticator info, and disposes of the session. For multiple operations,
+        /// the authenticator info, and disposes of the session and its owned connection. Creation
+        /// performs an initial GetInfo probe; this method then sends a second, fresh GetInfo read.
+        /// It needs no PIN or presence for GetInfo itself. For multiple operations,
         /// use <c>CreateCtap2SessionAsync</c> instead to reuse the session.
         /// </para>
         /// </remarks>
         /// <example>
+        /// Composable fragment with an available <see cref="IYubiKey"/> named yubiKey; reported
+        /// version advertisement is not certification or support for every optional feature.
         /// <code>
         /// var info = await yubiKey.GetCtap2InfoAsync();
         /// Console.WriteLine($"AAGUID: {Convert.ToHexString(info.Aaguid.Span)}");
@@ -80,7 +82,7 @@ public static class IYubiKeyExtensions
         /// <exception cref="NotSupportedException">
         /// Thrown if the YubiKey does not expose a FIDO-capable connection
         /// (<see cref="ConnectionType.HidFido"/> or <see cref="ConnectionType.SmartCard"/>), or if an
-        /// an explicitly preferred connection is valid for CTAP2 but not exposed by this device.
+        /// explicitly preferred connection is valid for CTAP2 but not exposed by this device.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// Thrown if the preferred connection is not a single concrete transport or is a
@@ -94,24 +96,38 @@ public static class IYubiKeyExtensions
         /// <item><description>FIDO HID: Uses CTAP HID protocol for USB communication (the default first choice)</description></item>
         /// <item><description>SmartCard (CCID): Uses ISO 7816-4 APDUs over the FIDO AID (NFC, or USB on firmware 5.8.0+)</description></item>
         /// </list>
-        /// When a device exposes both, the default selects HID FIDO; pass
-        /// Set <see cref="SessionCreationOptions.PreferredConnectionType" /> to
+        /// When a device exposes both, the default selects HID FIDO. Set
+        /// <see cref="SessionCreationOptions.PreferredConnectionType" /> to
         /// <see cref="ConnectionType.SmartCard"/> to force SmartCard.
         /// </para>
         /// <para>
         /// SCP (Secure Channel Protocol) is supported only on SmartCard. Supplying
-        /// Secure-channel parameters without an explicit override select SmartCard automatically.
+        /// secure-channel parameters without an explicit preference selects SmartCard automatically.
         /// Explicitly selecting HID FIDO with SCP parameters causes session initialization to throw
-        /// <see cref="NotSupportedException"/> ("SCP is only supported on SmartCard protocols").
+        /// <see cref="NotSupportedException"/> before HID channel initialization or GetInfo.
+        /// </para>
+        /// <para>
+        /// The returned session owns the opened connection; dispose it before opening another session
+        /// on the same physical YubiKey. Connection failures do not trigger another transport attempt.
+        /// Caller-supplied SCP parameters and UserPresencePrompt remain caller-owned. SmartCard
+        /// selection and GetInfo precede the detected-firmware USB gate and SCP establishment;
+        /// FirmwareVersionOverride changes configured session firmware, not that gate's detected value.
+        /// Major == 0 sentinel/missing firmware passes Feature's optimistic check, not a hardware
+        /// firmware qualification. SCP authentication does not grant CTAP PIN/UV token permissions.
         /// </para>
         /// </remarks>
         /// <example>
+        /// Two alternative composable fragments with an available <see cref="IYubiKey"/> named yubiKey.
+        /// The SCP03 alternative requires an authorized SmartCard device provisioned with the supplied
+        /// default keys; the defaults are not a production key-management recommendation.
         /// <code>
-        /// // Create a CTAP2 session and get authenticator info
-        /// await using var session = await yubiKey.CreateCtap2SessionAsync();
-        /// var info = await session.GetInfoAsync();
+        /// // Ordinary session: dispose before opening another connection on this physical key.
+        /// {
+        ///     await using var session = await yubiKey.CreateCtap2SessionAsync();
+        ///     var info = await session.GetInfoAsync();
+        /// }
         /// 
-        /// // Create a session with SCP03 over SmartCard (force the SmartCard transport)
+        /// // Alternative: SCP03 over SmartCard on a device provisioned for these keys.
         /// using var scpKeys = Scp03KeyParameters.Default;
         /// await using var secureSession = await yubiKey.CreateCtap2SessionAsync(
         ///     new SessionCreationOptions

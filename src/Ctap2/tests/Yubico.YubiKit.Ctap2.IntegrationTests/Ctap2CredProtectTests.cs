@@ -25,6 +25,12 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// <summary>
 /// Integration tests for CTAP2 credProtect extension.
 /// </summary>
+/// <remarks>
+/// Both level-2 assertions carry PIN authorization; they do not test rejection of discovery without UV.
+/// Level 3 checks the positive UV bit, not a no-UV negative case. Policy echoes are conditional.
+/// Setup normalizes the known PIN and cleanup deletes all RP credentials; tokens are not comprehensively
+/// cleared. Use an explicitly approved dedicated test device, not these fixtures as production guidance.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Extension", "credProtect")]
 public class Ctap2CredProtectTests
@@ -125,9 +131,9 @@ public class Ctap2CredProtectTests
                         PinUvAuthProtocol = clientPin.Protocol.Version
                     });
 
-                // Per CTAP 2.x: a regular pinUvAuthToken must be regenerated for each
-                // authenticator invocation (PPUAT is the read-only exception, not used here).
-                // Re-mint the token + auth param before the second GetAssertion call.
+                // Obtain fresh authorization for this second assertion. Ordinary-token reuse depends
+                // on device timers, scope and consumed permissions, not a universal per-invocation rule.
+                // A new token request also invalidates previous ordinary tokens on the authenticator.
                 byte[] allowListPinToken;
                 if (supportsPermissions)
                 {

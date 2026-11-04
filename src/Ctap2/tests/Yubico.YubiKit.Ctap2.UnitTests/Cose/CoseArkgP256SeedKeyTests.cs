@@ -20,9 +20,13 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Cose;
 /// <summary>
 /// Tests for <see cref="CoseArkgP256SeedKey"/> CBOR decoding and encoding.
 /// </summary>
+/// <remarks>
+/// Synthetic coordinates test the experimental SDK's wrapped-map profile and label routing, not
+/// valid curve points, draft-wide conformance, production cryptography or device interoperability.
+/// </remarks>
 public class CoseArkgP256SeedKeyTests
 {
-    // Test P-256 coordinates for nested COSE_Key maps
+    // Synthetic 32-byte coordinate patterns for nested maps; not validated P-256 points.
     private static readonly byte[] TestKemX = new byte[32];
     private static readonly byte[] TestKemY = new byte[32];
     private static readonly byte[] TestBlX = new byte[32];
@@ -47,7 +51,7 @@ public class CoseArkgP256SeedKeyTests
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
-        // Canonical order: -3, -2, -1, 1, 3
+        // Numeric insertion order; the canonical writer sorts the map to 1, 3, -1, -2, -3.
         writer.WriteInt32(-3);
         writer.WriteByteString(y);
         writer.WriteInt32(-2);
@@ -65,20 +69,21 @@ public class CoseArkgP256SeedKeyTests
     [Fact]
     public void Decode_WithValidArkgSeedKey_ReturnsCorrectVariant()
     {
-        // Arrange: construct CBOR map with NESTED COSE_Key maps
-        // Wire layout per spec: {1:2, 3:-65700, -3:-9, -2:<KEM nested map>, -1:<BL nested map>}
+        // SDK-profile fixture: kty2/alg-65700, -3 derived alg, -2 bstr(KEM map), -1 bstr(BL map).
+        // ARKG-10 agrees on seed alg=-65700, BL/KEM labels and example derived alg=-9, but uses
+        // kty=-65537/direct maps and permits optional int/tstr dkalg instead of requiring an integer.
         var kemNested = BuildNestedEc2Key(TestKemX, TestKemY);
         var blNested = BuildNestedEc2Key(TestBlX, TestBlY);
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
-        // Canonical order: -3, -2, -1, 1, 3
+        // Numeric insertion order; the canonical writer sorts the map to 1, 3, -1, -2, -3.
         writer.WriteInt32(-3);
         writer.WriteInt32(-9); // Derived key alg (Esp256)
         writer.WriteInt32(-2);
-        writer.WriteByteString(kemNested); // -2 = pkKem (per spec)
+        writer.WriteByteString(kemNested); // -2 = KEM; SDK wrapper contains the encoded map.
         writer.WriteInt32(-1);
-        writer.WriteByteString(blNested);  // -1 = pkBl  (per spec)
+        writer.WriteByteString(blNested);  // -1 = BL; SDK wrapper contains the encoded map.
         writer.WriteInt32(1);  // kty = 2
         writer.WriteInt32(2);
         writer.WriteInt32(3);  // alg = -65700
@@ -143,17 +148,15 @@ public class CoseArkgP256SeedKeyTests
     }
 
     /// <summary>
-    /// Spec contract: per draft-bradleylundberg-cfrg-arkg-10, python-fido2 (cose.py:428-433),
-    /// and the legacy SDK (Yubico.NET.SDK-Legacy/Yubico.YubiKey/src/Yubico/YubiKey/Fido2/PreviewSignExtension.cs:317-323),
-    /// the ARKG-P256 seed-key nested-COSE_Key wire format is:
+    /// Keeps the distinct ARKG-10 §5.1 public-seed derivation roles mapped correctly:
     ///   -1 = pkBl  (blinding public key)
     ///   -2 = pkKem (KEM public key)
-    /// This test builds a seed-key with two visually distinguishable nested EC2 keys
-    /// — one with all-0xAA coordinates at <c>-1</c>, one with all-0xBB at <c>-2</c> —
+    /// This test builds the SDK wrapped-map profile with two distinguishable synthetic EC2 keys
+    /// — BL with X=all-0xAA/Y=all-0xAB at <c>-1</c>, KEM with X=all-0xBB/Y=all-0xBC at <c>-2</c> —
     /// and asserts that the decoder routes them to <c>BlPublicKey</c> and <c>KemPublicKey</c>
-    /// respectively. Regression guard for the modern-vs-legacy/python wire-mapping divergence
-    /// that caused FullCeremony GetAssertion to return CTAP2_ERR_OTHER (0x7F) on YubiKey
-    /// 5.8.0-beta — see Plans/snoopy-strolling-star.md (2026-04-29).
+    /// respectively. Swapping these roles changes downstream derivation inputs. The test does not
+    /// execute previewSign or establish a firmware error, valid points or full Internet-Draft conformance.
+    /// ARKG-10 is work in progress with stated expiry 31 August 2026, not a production standard.
     /// </summary>
     [Fact]
     public void Decode_pkBlAtMinus1_pkKemAtMinus2_PerSpec()
@@ -174,15 +177,15 @@ public class CoseArkgP256SeedKeyTests
         var blNested = BuildNestedEc2Key(blX, blY);
         var kemNested = BuildNestedEc2Key(kemX, kemY);
 
-        // Wire layout per spec: -1 = pkBl, -2 = pkKem
+        // Label routing: -1 = BL, -2 = KEM; the byte-string wrappers are the SDK profile.
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
         writer.WriteInt32(-3);
         writer.WriteInt32(-9); // derived alg
         writer.WriteInt32(-2);
-        writer.WriteByteString(kemNested); // -2 = KEM (per spec)
+        writer.WriteByteString(kemNested); // -2 = KEM, wrapped encoded map
         writer.WriteInt32(-1);
-        writer.WriteByteString(blNested);  // -1 = BL  (per spec)
+        writer.WriteByteString(blNested);  // -1 = BL, wrapped encoded map
         writer.WriteInt32(1);
         writer.WriteInt32(2);   // kty
         writer.WriteInt32(3);

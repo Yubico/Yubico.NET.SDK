@@ -92,8 +92,8 @@ public class Fido2LargeBlobAuditReproTests
     [Trait("Audit", "YESDK-1624")]
     public void YESDK1624_DecryptedTemporaryPlaintextIsCleared()
     {
-        // Every SDK-owned temporary (the AES-GCM output and the inflate buffer) is zeroed before TryDecrypt returns;
-        // the caller receives a fresh copy it owns.
+        // The seam observes the allocated AES-GCM compressed output and inflation buffer after clearing
+        // on this successful path. It does not cover every provider/SDK copy or failure path.
         var entry = LargeBlobEntry.Encrypt(Key, Blob);
         var temporaries = new List<byte[]>();
 
@@ -104,7 +104,7 @@ public class Fido2LargeBlobAuditReproTests
         Assert.All(temporaries, buffer => Assert.All(buffer, b => Assert.Equal(0, b)));
     }
 
-    // Equivalent to python-fido2 blob.py _compress, _lb_ad, _lb_pack, write_blob_array.
+    // Handcrafted spec-shaped DEFLATE/GCM/AAD/hash fixture, not an executed python-fido2 exchange.
     private static byte[] BuildSpecArray(byte[] key, byte[] blob)
     {
         using var compressedStream = new MemoryStream();

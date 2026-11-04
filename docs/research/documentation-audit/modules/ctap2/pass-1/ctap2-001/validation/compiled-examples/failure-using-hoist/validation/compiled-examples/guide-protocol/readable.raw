@@ -1,0 +1,4 @@
+// SOURCE src/Ctap2/CLAUDE.md#f9
+using var protocol = new PinUvAuthProtocolV2();
+// Dispose() only marks the instance disposed; it holds no key material to release.
+

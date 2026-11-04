@@ -1,0 +1,10 @@
+// SOURCE src/Ctap2/README.md#f5
+// Alternative to the allow-list assertion above, not an additional use of its ceremony hash.
+var first = await session.GetAssertionAsync("example.com", authenticationHash, new GetAssertionOptions());
+var assertions = new List<GetAssertionResponse> { first };
+int total = first.NumberOfCredentials ?? 1;
+for (int index = 1; index < total; index++)
+{
+    assertions.Add(await session.GetNextAssertionAsync());
+}
+

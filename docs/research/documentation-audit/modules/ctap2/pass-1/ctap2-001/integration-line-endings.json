@@ -1,0 +1,14 @@
+[
+  {
+    "path": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+    "reviewed_sha256": "24482e538235542bd6d5609c9e6ec06ab1687cc1ada93efe32f4f45a27b25c76",
+    "integrated_sha256": "3afca1e1da61588d000b80f452ace1649cb16b0168aee625f93bed1b43927af0",
+    "difference": "CRLF/LF only under repository attributes"
+  },
+  {
+    "path": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+    "reviewed_sha256": "859c43a9e8e3254af21bd74b46c9174ec2c65a977a489624a0785d1d16ba7344",
+    "integrated_sha256": "9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747",
+    "difference": "CRLF/LF only under repository attributes"
+  }
+]

@@ -1,0 +1,8 @@
+RESULT: FAILED  (dotnet toolchain.cs -- build --project AuditCt001.Examples.consumer-lib --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✗ build                      1.8s  `dotnet build docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-lib/src/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261104-014251-526-build/02-build-AuditCt001.Examples.consumer-lib.log
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-014251-526-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

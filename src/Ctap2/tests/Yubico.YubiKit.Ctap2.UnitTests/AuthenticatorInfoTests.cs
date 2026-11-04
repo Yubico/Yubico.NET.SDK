@@ -4,6 +4,9 @@ using Yubico.YubiKit.Core.Cryptography.Cose;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
+/// <summary>Mechanical decoding checks using synthetic field fixtures.</summary>
+/// <remarks>Several fixtures omit required AAGUID or other protocol conditions. They exercise
+/// selected parser behavior, not minimal conforming GetInfo responses or live feature support.</remarks>
 public class AuthenticatorInfoTests
 {
     [Fact]
@@ -30,7 +33,7 @@ public class AuthenticatorInfoTests
 
         var info = AuthenticatorInfo.Decode(writer.Encode());
 
-        // CTAP preserves the wire list, including unknown names, case, order and duplicates.
+        // This decoder preserves the supplied list; the duplicate is a deliberate nonconforming fixture.
         // WebAuthn performs its own response-side sorting and deduplication.
         Assert.Equal(advertised, info.Transports);
     }
@@ -38,7 +41,7 @@ public class AuthenticatorInfoTests
     [Fact]
     public void Decode_MinimalGetInfoResponse_ParsesVersions()
     {
-        // Arrange - Minimal GetInfo response with just versions
+        // Versions-only parser fixture: omits the protocol-required AAGUID, not a conforming minimum.
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(1);
         writer.WriteInt32(0x01); // versions key
@@ -301,6 +304,7 @@ public class AuthenticatorInfoTests
     [Fact]
     public void Decode_WithEncIdentifier_ParsesByteString()
     {
+        // Arbitrary 16-byte fixture: checks byte retention, not valid IV||ciphertext or decryption.
         // Arrange
         byte[] encIdentifier = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                                 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10];
@@ -445,6 +449,7 @@ public class AuthenticatorInfoTests
     [Fact]
     public void Decode_WithEncCredStoreState_ParsesByteString()
     {
+        // Arbitrary 16-byte fixture: checks byte retention, not valid IV||ciphertext or decryption.
         // Arrange
         byte[] encCredStoreState = [0xCA, 0xFE, 0xBA, 0xBE, 0xDE, 0xAD, 0xBE, 0xEF,
                                      0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];

@@ -20,6 +20,14 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.CredentialManagement;
 /// <summary>
 /// Tests for credential management data model decoding.
 /// </summary>
+/// <remarks>
+/// Synthetic fixtures test parsing and private-response ownership, not authenticator
+/// administration. Ctap2Canonical automatically sorts completed user maps into encoded
+/// key order (id/name/displayName), regardless of the insertion order used below. Empty
+/// or kty-only COSE maps exercise opaque public-key copying, not valid credential keys.
+/// Disposed-view assertions establish private-clone clearing, not transport-buffer cleanup.
+/// The decode-failure test observes borrowed input preservation, not the inaccessible failed clone.
+/// </remarks>
 public class CredentialManagementModelsTests
 {
     [Fact]
@@ -220,7 +228,7 @@ public class CredentialManagementModelsTests
         writer.WriteTextString("public-key");
         writer.WriteEndMap();
 
-        // 0x08: publicKey (minimal COSE key)
+        // 0x08: opaque publicKey fixture with kty only, not a complete valid COSE credential key.
         writer.WriteInt32(8);
         var keyWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
         keyWriter.WriteStartMap(1);
@@ -281,7 +289,7 @@ public class CredentialManagementModelsTests
 
         // 0x0A: credProtect
         writer.WriteInt32(10);
-        writer.WriteInt32(2); // userVerificationRequired
+        writer.WriteInt32(2); // userVerificationOptionalWithCredentialIDList; required UV is policy 3.
 
         writer.WriteEndMap();
 

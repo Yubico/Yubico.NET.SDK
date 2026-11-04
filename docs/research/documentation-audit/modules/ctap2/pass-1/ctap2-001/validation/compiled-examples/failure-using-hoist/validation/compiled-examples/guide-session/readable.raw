@@ -1,0 +1,4 @@
+// SOURCE src/Ctap2/CLAUDE.md#f2
+// With IYubiKey yubiKey in an async method; this factory owns the opened connection.
+await using var session = await yubiKey.CreateCtap2SessionAsync();
+

@@ -23,8 +23,8 @@ public class MakeCredentialResponseTests
     public void Decode_WithUnsignedExtensionOutputs_CapturesExtensionMap()
     {
         // Arrange - Build a minimal MakeCredential response with key 6 (unsignedExtensionOutputs).
-        // Per CTAP 2.2 / WebAuthn L3, key 6 is the canonical position for unsignedExtensionOutputs,
-        // aligned with yubikit-swift, yubikit-android, and yubikit-python.
+        // CTAP 2.3 §6.1 assigns makeCredential unsigned outputs to key 6. This fixture checks map-key
+        // presence and a nonempty encoded value, not valid previewSign attestation or firmware behavior.
         byte[] cbor = BuildMakeCredentialResponseCbor(unsignedExtensionOutputsKey: 6);
 
         // Act
@@ -39,10 +39,8 @@ public class MakeCredentialResponseTests
     [Fact(Timeout = 5000)]
     public void Decode_WithUnsignedExtensionOutputsAtLegacyKey8_IsSilentlyDropped()
     {
-        // Regression guard: an early CTAP v4 draft used key 8 for unsignedExtensionOutputs,
-        // and v2 .NET historically parsed at that key (silent data loss against real firmware
-        // emitting key 6). This test pins the new behavior: a response carrying the legacy
-        // key 8 must NOT populate UnsignedExtensionOutputs (the parser should ignore it).
+        // Pins ignored key 8 in this makeCredential decoder. CTAP 2.3 uses key 8 for getAssertion,
+        // not makeCredential; this is not evidence of a general "CTAP v4" or live-firmware behavior.
         byte[] cbor = BuildMakeCredentialResponseCbor(unsignedExtensionOutputsKey: 8);
 
         var response = MakeCredentialResponse.Decode(cbor);

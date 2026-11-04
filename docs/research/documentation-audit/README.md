@@ -23,10 +23,13 @@ remains the editorial reference. Repository and module instructions still govern
 | Module | Pass 1: documentation | Pass 2: implementation | Start here |
 | --- | --- | --- | --- |
 | OATH | Complete; pilot followed by documentation-impact reviews | Explicitly approved fix waves complete within recorded scope; additional contract/device questions remain deferred | [OATH handoff](oath.md) |
-| WebAuthn | Complete, committed/pushed at `9399b94b` | Not started; 21 implementation/test follow-ups and one CTAP2 documentation dependency recorded | [WebAuthn handoff](webauthn.md) |
+| WebAuthn | Complete, committed/pushed at `9399b94b`; CTAP2 cycle resolves WA-XREF-001 documentation consistency | Not started; 21 implementation/test follow-ups remain deferred | [WebAuthn handoff](webauthn.md) |
 | Management | Complete: cycle `management-001`, committed/pushed at `bac07ee7`; independent review and validation accepted | Deferred until the campaign's second sweep | [Management handoff](management.md) |
-| PIV, Security Domain and other applets | Not started by this campaign | Deferred until the campaign's second sweep | Apply the workflow when a module is selected |
-| Core | Deferred; only narrow dependencies and a WebAuthn example were touched | Discovery/SCP follow-ups retain their existing separate scope | Existing module checkpoints; no Core-wide audit is implied |
+| CTAP2 | Complete: cycle `ctap2-001`, including dedicated CTAP/WebAuthn consistency review and verified gates | Deferred until the campaign's second sweep | [CTAP2 handoff](ctap2.md) |
+| Security Domain, YubiOTP | Next after CTAP2, in that order | Deferred until the campaign's second sweep | Apply the workflow at selection/baseline |
+| PIV | Reserved for the final part of the first sweep | Deferred until the campaign's second sweep | Scope/inventory at selection |
+| Core | Reserved for last; detailed audit scope still to be planned. Narrow dependencies are not a Core-wide audit | Discovery/SCP follow-ups retain their separate scope | Existing module checkpoints and future Core plan |
+| Other remaining applets | Not yet scheduled within the first sweep | Deferred until the campaign's second sweep | Apply the workflow when selected |
 
 ## Retained records
 

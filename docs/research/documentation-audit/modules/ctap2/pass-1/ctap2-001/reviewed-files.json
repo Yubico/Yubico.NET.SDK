@@ -1,0 +1,2214 @@
+{
+  "baseline": "5b09a9b6942ded3913b5c9340c3e126617e61a82",
+  "reviewed_content_count": 165,
+  "csharp_count": 152,
+  "files": [
+    {
+      "path": "docs/TESTING.md",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "1db21b42b4a8b6443a872b2b0be37fcc0ced84202ec49a8c8db1c5210e6af401",
+      "final_sha256": "1db21b42b4a8b6443a872b2b0be37fcc0ced84202ec49a8c8db1c5210e6af401",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "a38fe512d725b2f405796da6fbc7c2535fa4106fc816d333ad7bc306c69e9701",
+      "final_sha256": "a38fe512d725b2f405796da6fbc7c2535fa4106fc816d333ad7bc306c69e9701",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "docs/architecture/webauthn-extension-processing.md",
+      "review_record": "boundary-review-final.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "56ce5bf608fa1452402100b3d6e51af6b8a3b8277d0f3ada1e8b4b342bffe09c",
+      "final_sha256": "56ce5bf608fa1452402100b3d6e51af6b8a3b8277d0f3ada1e8b4b342bffe09c",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "e7f3b5d423bce9affd6f2d68bcd365d27cfdfd17cfa83472d5766f6efc0c3ad2",
+      "final_sha256": "e7f3b5d423bce9affd6f2d68bcd365d27cfdfd17cfa83472d5766f6efc0c3ad2",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "src/Ctap2/CLAUDE.md",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "0bfe308f3dcaf2307bc2e3d463f174bd4a341a85b583c1ac2cb07d0ad65c2dcf",
+      "final_sha256": "0bfe308f3dcaf2307bc2e3d463f174bd4a341a85b583c1ac2cb07d0ad65c2dcf",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "src/Ctap2/PACKAGE_README.md",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "38094b395d2eb392765ea581fb6e0dfe49187a3bbd2905510b6a4be6ae37580b",
+      "final_sha256": "38094b395d2eb392765ea581fb6e0dfe49187a3bbd2905510b6a4be6ae37580b",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "src/Ctap2/README.md",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "2d41ea0fb0c4477355680cc6f271e7277a4f108b6012986a230aadf3d3df1225",
+      "final_sha256": "2d41ea0fb0c4477355680cc6f271e7277a4f108b6012986a230aadf3d3df1225",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/AccessMenu.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "d5a3969a2457e3e7d68802c760bd2899ed6031040594e4846916cb89d08f947f",
+      "final_sha256": "8dc705f7953d2ed15e7197ba7dc6bbc6efad10b77128cc8f186a7fe5fb65eeed",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/ConfigMenu.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "a99f6b0b24b988f8bbdc10cf7ed3768f314317b312d0b74bc9e50b707ed05336",
+      "final_sha256": "be4e1fdb1d0c208b9e89341e059791c2521a4bd060e6e2befeaccf711ffbb8ec",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/CredentialMenu.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b651994c0fd97a1234460590b7f47920176c72a52455de20fa5e5cfa65b48472",
+      "final_sha256": "9a83801c7d1b6170acbce3b012a08b91dfaca5a2420b3dbe20a1994804d0aa9e",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/CredentialsMenu.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "1d39b8c1e374ee9c1c40ecf4734c1cc7d1eb325771577b5b4c9007570d4edb20",
+      "final_sha256": "11b12667ae26b534469dda9e1d78c68433e374ef2eacd14d97ca9e6e5b65af14",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/FingerprintsMenu.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "571d4f707af52a82fdc6af5731f9ca00e0fc3bf3f15734bbe4c44caace7c37bb",
+      "final_sha256": "0fa65b82c9a557860abcfaa8b5bca534b46612f03ffd0934eb1ba8b90fd452fb",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/InfoMenu.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "e413b6d9c272c8b679b682b7bd4f097e7c5dcb03679e3afbe0f7bae3b7ae68f1",
+      "final_sha256": "2dd65cc6eeacb6daf0b43f89db3d15449442652f449461bd3a577c356fe2ba7b",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Menus/ResetMenu.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "441b661cf450ee2a5f9a82132c05f59998ed3fedf3c8927dfeba2e855a9f4e06",
+      "final_sha256": "fc2b2ea7a47195d7220953b2fafddfaefadef370b68d78f7b316c6e157a45edc",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "783d6bc26251ab9ea7a609374601131cc161b37023f3810d28375b90c9eb8558",
+      "final_sha256": "65d3fa4b4b38cd2f8e78577cd2e63e36fd5500d4c7194c7575b563ec0e71f8df",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b516c9c5159b634080a0f792adc07243cc1cf03c353d6d4b63f337dc5f303787",
+      "final_sha256": "a5431235eafe09f02aa72bb3abe477eb28b6bf21c172fb3b1d8954136db63579",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/FidoPinHelper.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3a35d47981b9ab6186108b0c117faac027f21832abf5c9f366830c6d0f1cc41b",
+      "final_sha256": "8d15bb347dee47f8a99b8e0571a6098f4e749bd502807d3e771213fbbff827bf",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/BioEnrollment.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "f3d3ce51362352ab3415bd1efdddfc8e53941b7329b8417882d4b5c2ffa21ca0",
+      "final_sha256": "4de08dc00320c85072401e8f6ecd6d8e587b567db6ed2d966185876708ee4d5c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/ConfigManagement.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "2d23b8461397a110ff8da45db25885f1351a3c3b47bf4dcc670a90f09773dba3",
+      "final_sha256": "090cb2fdff405429081e5e9d20d025f65991b48eb4857887c541a0e2d6ac2afb",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/CredentialManagement.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "236bf3766f0f0630eb7c7096aaddbd25072d5ae04569edbda821e1b21581d706",
+      "final_sha256": "bad6c4c6f528ac73f44b8e938d2ab4e0b5004946887aaa3c11adccaf2e85bb85",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/GetAssertion.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "18a05834d11e196cd6f96570eb9f904a9b3070234b2b9f41f138a25630c796fb",
+      "final_sha256": "41961f00f084b1728e8ef889c44e03ab019209309999b88173c997487a0f5c22",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/GetAuthenticatorInfo.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "247f4f51001b40a21981ea872ce20716862d5fffb8c4d2de464cdcd58f5ffc3e",
+      "final_sha256": "7cca575b6bbe0a6c8cb2bb765954993aacdc216b83a502641c57617c74d16480",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/MakeCredential.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "a4040a8f2617008bc625ee4aaeba52605ad34cdf9750f010fb7e7558c29f9c80",
+      "final_sha256": "a16bdee4e2f9ea0b4cf6207b81ad4760eea96d73e23742572c6952fb10d29fc4",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/PinManagement.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "912e8a09871a83ccb3ac1ec2dc6a35b31ee5cded15d6fc9002e75a6998ce26eb",
+      "final_sha256": "81374d1a87743662b8f80055dbd4be55514c92ddde0d979726eb5e83d93fe15d",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/ResetAuthenticator.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "6e8284576f2fc1a17ca79793849434ced34e14a32962aa92126b4a2ca0105fe8",
+      "final_sha256": "8a85fb4a081aef06b87fe9353c9d0d033e5ca6aa9e5d658421234193d2f4295f",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "24482e538235542bd6d5609c9e6ec06ab1687cc1ada93efe32f4f45a27b25c76",
+      "final_sha256": "3afca1e1da61588d000b80f452ace1649cb16b0168aee625f93bed1b43927af0",
+      "post_review_changes": {
+        "kind": "CRLF/LF only under repository attributes"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Program.cs",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "9ff0ac47971442c115aa7fbed71649c8c55220d08da1526bc65c5646cfb50866",
+      "final_sha256": "146bdb4703a47932ee813a6ac5c478f5e571e31b3c1d90b21fced7abb1642855",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/README.md",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "897c0f2a2775d10d41e6540932f44bed409919520418b93b71cdfe23ced42cea",
+      "final_sha256": "897c0f2a2775d10d41e6540932f44bed409919520418b93b71cdfe23ced42cea",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Arkg/ArkgP256.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "48058d563e404bf5366808f823f5049b8d60b964679efc2213a641610f4c4e85",
+      "final_sha256": "4c3bad64517cf6c52768bbb99d6b2e137b9529b87a76de117a49d36105173356",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/AuthenticatorInfo.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "922322ac1814df72ab9b03d03eb1ad74a65584c7cbf3a55abb90a79f8437f88a",
+      "final_sha256": "699bc772ca085fbfe05e267fc0286e153c57938853bc1dc2790dbb1cb9f56ee3",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Backend/HidBackend.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b8d43bc9167e4f6f2066cfeba1bdf44a9304ea334b82b4603a5fe3670c83c8ea",
+      "final_sha256": "14941f940c60035457b0d3edf6b6f87b2422aba25ad62f28fe900ec4e6ef6c55",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Backend/ICtap2Backend.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "775983b21bc7f6ef1c8e42e640fa2957c12cd26f7aa515d835b635296d9b0d0f",
+      "final_sha256": "383e3d5e0789a6e07eda2d91eeee1958b3ae14014c004ef135767de401486556",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Backend/SmartCardBackend.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "63592ea8add83dc6ed9a6cfce0366272e958f4f2eb2c6d11cd15bbdefe4eb295",
+      "final_sha256": "d684c8aaedfc9c407f6e0830ee088af490b7ea06ab5c3cf597b54bdf88a602fa",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/BioEnrollment/BioEnrollmentModels.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "eb94f6b2cf50b3f8b5d0dca00a2557fbff7cb27c37fe0b34258ac4d0c74fec8c",
+      "final_sha256": "6b7c669fdaaf0bcab43880f5f4f4181fd5fa206524a27d44d1e843812fbf9e33",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/BioEnrollment/BioEnrollmentSubCommand.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "d84e59d47a7a3ed9b620d35421af57281455d8609f166ed3b363d2c1820d0845",
+      "final_sha256": "fed2223e0a67a75bc8cb516c7dca2cd1b4e0e0cbdb183648a4449b06e52de77e",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/BioEnrollment/FingerprintBioEnrollment.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "83c6d85d068f428eedd44b647f412dfe423018cf83c6cd906ad13cf9133c342e",
+      "final_sha256": "299caf5b54124cad5bcc0a04445dc0b2a8d919a8b19f7483889618b529f09202",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/AaguidConverter.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "dfe700e949e12ddadb97bd80cda2a82a78d39256672df2b8474503375f93dd09",
+      "final_sha256": "95a7a228fa33bd7c202ee702aca657ddf5dd1efbde672bb89fc31c74616f4599",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/CoseKeyWriter.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "8cc48d3f05ae9abede8e9f6ed7af26ebbdb9e339dcc6b08802316b6db0911a03",
+      "final_sha256": "5f07ef7d119f023394a401647b74f6837dcf9fafc611aafe10944f402bdc8909",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "7a13e008169055255249c08fea67fb1dd035b2996220a428e299f719dd880b8b",
+      "final_sha256": "1f5a6bc3c290e4c50a03abe5664572f84d968e4f87864b546f2c7ca9596e87de",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/CtapRequestBuilder.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "e5b6de47d3a1e177ba12f8b5a6911d0037f53da1b223fe87d694e0104d40b7b7",
+      "final_sha256": "16de24024b3e27548370c8bb82c6602e1f6d13e4ac811d958756552f8b1f9cc1",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Cbor/CtapResponseParser.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "6de6a26c37a9f429977c886a5a48e1ecf39f9e9c661132296006f0330c84c33f",
+      "final_sha256": "16fa164bba14801b923a8c689c39a042aa7b9ef0ec9ab786fabb2268133cd010",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Config/AuthenticatorConfig.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "1a2d87b21bbd3c44662a7440eb24dff811116e7f4927a0dc6387ee31c770514c",
+      "final_sha256": "8af20970500b79fba1a2cdf79fbbd92db031cb0dde65de8dd63a75db3877b65e",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Config/ConfigSubCommand.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "02ca8401707ec71f6f8e7a8155bb76d08269e9bed2a93a6aafddb87d271497a3",
+      "final_sha256": "64cf36ee7942b60ec266cd249ba9f616d24b0642f39ca73fe0065fe8efea12dc",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Cose/CoseAlgorithm.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "415e84ffd2374e3412d0c82c3b9f3439d311d95991d0650ecdd87431c48b0818",
+      "final_sha256": "17c9556e7dd8fc187bbe6c61b45677d23b9c50a642cfd8d1764477de354bc44f",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "cda6964cd8372bd805274f57f4d3fde51e00b9dd143becc6d87829888bf820ac",
+      "final_sha256": "813ff15a4e2edac8181271a5d627ead8a683990ab0239ca5a58dc8f60cb873a2",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Cose/CoseKey.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "029ae79ac85c717e2ae7b183dbf1f409a400c6cb6e0a49436591c16f8890b2b8",
+      "final_sha256": "dae1a7ed03aeb98523f4ba75295855492017dd464b71e42977d78c3c1a97032e",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/CredManagementSubCommand.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3a371e877214c6e91958288782b5e90092a8fb7a605f3df9d90bbd5267bfe1c2",
+      "final_sha256": "906d8fc2f4591d8b2ecc21198dcccdabc30eddd8f5647ca68e89e2582b82f3cc",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/CredentialEnumerationResult.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "ca0ac675b05e69f0f0aa4f06fb838c48f3db366104519f9e06767fc910cb993e",
+      "final_sha256": "371444b634cb1d3cec10d24cf5f9a7436ef58a0bfa7e9b658afc2b87f14870a7",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/CredentialManagement.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "469dd9c89df16bb08f180ed15b461544bf3641c59e2715b0c047796697771fc4",
+      "final_sha256": "994474858af5ecdcb5a6a01020b66f60db4f7557cb6183ae0dac33d54f823aa7",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/CredentialManagementModels.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "9dcb8d733224c937d22d32952286510af00c422113096dcae4a03ec37dae7262",
+      "final_sha256": "ac41a11d13731df0e1110224113128e30d750cc2c257a22353ed5b28c9f29be6",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/RelyingPartyEnumerationResult.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "d6163edb683e41dd2d4ae6e307bec75d00cb871f2b3992d911d016997d2e7540",
+      "final_sha256": "14f5babee49290976ee4c792d95f6e8a2b9a771e8dbaa93b06b68061655dc31f",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/CredentialManagement/StoredCredentialInfo.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "f8c192db143e2a81f1a48ef130388cc6f101bf7cf8e4808597c3a0444edf8447",
+      "final_sha256": "7ee5b797692cfbe19983ddf7d74e80542c55778030e3db46ed22fb6d55de2753",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/AttestationFormat.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "8616d8f5aca1019068baab89f2cb09ef89dcce087692faacc3a42b71763435ff",
+      "final_sha256": "2fa3e0a1e0e8caee7894dbce37671b5e8cab985503e8ec9857e29a6364622560",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/AttestationStatement.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3324cb868c766b1af7d07d3785aab7c46ba440baa3d6995ed484932dad680a71",
+      "final_sha256": "a5b0cf9ae01d8d59de708415d4ebb20ce4e1cd6f24e405d47a1e5b1e841944e7",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/AttestedCredentialData.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b90ebb9816c2566d96e566f7349879964332f6eb24b9ddeb58fbbb11c5036141",
+      "final_sha256": "483e59000489970914c589ebf5bbb7e44eebe5f14ddf00350bd63acc97bb32bc",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/AuthenticatorData.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b95dbc4f5299aeb0ccaed297b4dd9e2961c50e0ced079eb5c92381bd7e2041d1",
+      "final_sha256": "af166a2b1d54ea46218edf436082619cbaf746ef7a32bfc0febc328785bc96b7",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "79fe7cfe2ed2c19c121ec37d3279b58d15d379462ef3b48be811e5b4f9168899",
+      "final_sha256": "9ef655b1a725752243026f45d85d72e3516dca5c84aa803599d72b4964252901",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/GetAssertionOptions.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b2b52436bc4975c2e25e3b8eab12637a1816062a41dd74ee340fa954dcf4a30a",
+      "final_sha256": "7f326f279fc9048f1e09fc56e28c33eacd58d822921e058a5be8294e6b7fe4d3",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3440938cf36d8db127535daf253e24e4568e2c22480d58205654a7db8369ee99",
+      "final_sha256": "44bceddfd5691092dc76ac757ab486a4509f73f83051a44628a64f9d92bbc0ab",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/MakeCredentialOptions.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "e2230a517910d90f9b82c454f358c706669c146c5c3e11df13dfbb695c076479",
+      "final_sha256": "8e20defd2b96b1c8130c8926ce929be2b38e6bbafd9df6d312a63d920471d755",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/MakeCredentialResponse.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "d3da37b6fd4ba90c003950c984b7ec697e44f4f49fb630bba7fb9c31b6d23bed",
+      "final_sha256": "46de2b3348f861a89d507acde0840f227a609e998c93575ae361cd005aa8e1fb",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Credentials/PublicKeyCredentialTypes.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "ac31b8bb4dbdd1e51723d44512cd1b0a78ff02d42965dffcccf7e0e747aa869a",
+      "final_sha256": "269aab7260dd7e62f00972b5d9662f7fa4eca8578c61c9f3b8ca0a1a11f9b034",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Crypto/EncryptedMetadataDecryptor.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "0b59b00e4f2707db7bd097e767ecdbee0d6f0769f3c1bd3c1a28aa62785e7e31",
+      "final_sha256": "fab860ac2408457483363a61cb1ce44da847c00c18966ea13b8a5f6711fc521c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Ctap/CtapException.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "d00285a610824aeae1407abe96ba1c1dd2592bee072a90b7bcd010429624b6e0",
+      "final_sha256": "113e60d156960efb11a09fde1edce0d9f5122ec2f85cb799a82761aace9503f7",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Ctap/CtapStatus.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "ef56011b3bdca54eaee1149169901158ecc2c9e57bde07ba10ebc0ec01e024c9",
+      "final_sha256": "66367f7d0bd94583188b5ce1ac5ce22ce4c7210beed10aa83c3857a5d0b90c8d",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Ctap2Session.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "23fbfeec9b58730d49638c7557b160102dc01fa233f8e1fd1241778d41056eab",
+      "final_sha256": "870046812fe2802a82ef3c84ab1af7bd118e283a0e2f3ce21934e8c5c8087729",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/CredBlob/CredBlobAssertionOutput.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "ade9525c77e8a68f5b7e987fe195721f79fcd3968db11118301277851d914e0d",
+      "final_sha256": "03bbacddf2192fb70bfc5aea6ded359ab47f65aea78b196853705b6f0630cc47",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/CredBlob/CredBlobInput.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3478e31f215195a7bae5fc64bfa2e01b2dc3f753136f14c823bcb4b7d4dd14af",
+      "final_sha256": "b8e563e15188a97aa5bd364f688ead1b52ffdd7e5e2fdc9169d06a65be6a5a93",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/CredProtect/CredProtectPolicy.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "c8a6bd98a891da4c0cd1c8abc2722c8921f8164fa511a5097d0c689d05b83f36",
+      "final_sha256": "99eea66acd8faf86cd3875cc7f6ef46a06e7a9145b06f2162f4b2874a6d9f5a9",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/HmacSecret/HmacSecretInput.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "97da81eeecafbf1ba3740d17eeec9024da93e2c4229feb9d355f16fa24294db1",
+      "final_sha256": "226fb0ed79cafe7995147b8af9eaf2e79a4225ed926ff3b5ac2ca0a96ec838d5",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/HmacSecret/HmacSecretOutput.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "69f58af004730daed11c3c1230aca3d3fb1d869257dd0b15e65854aebee4afb2",
+      "final_sha256": "6c48b9e51ec8d8cced213eaecc06931042f26ba15bb07c2cd114eb1f72095240",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/LargeBlob/LargeBlobOutput.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "4ecd8e986d54394ecf3d735f464b732ffba985f0a44e5fa636f2ecc5da9d9f96",
+      "final_sha256": "3f83851e43f1df578f1077a1d97f416ef2b4fa58aab39ac534920b14b54762ea",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/MinPinLength/MinPinLengthInput.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "18dab402040c214747974ecf765bf060232aae2a58ac98714eedebeffce84fa8",
+      "final_sha256": "5bf12f812e6886f4effc9a57d868759cd60a6f08e1277113ae4f0f8dfae4a5ab",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/MinPinLength/MinPinLengthOutput.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "394855a32cc005dd4bcf8674983f111e3ccd43ce86411b6ede274ac93947f4ef",
+      "final_sha256": "d1d9dc5b9089563a32abd379ec79c4d908d34224bab5fd75dc257f65312a05aa",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/ArkgP256SignArgs.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "71ac98c97a25c9c00732e637cc30e54e003af41517c96c3ea56e8137c346072b",
+      "final_sha256": "bf80e794252141b6df982ef701ad25b46aa5f4401362db12dc0f5ae40971dc49",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/CoseSignArgs.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "6b21f2e468827e08b4d8628200768dc08f0bcfdc333209fa627afe2194896fa3",
+      "final_sha256": "07b158e91a65553140a61c232d60f886bad3414f4d78b31f3af65623fbd1ac70",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignAuthenticationOutput.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "2602394403964ce6c20b9ab5f6a02469532aa65011d2f26c42d6e3f020d06be9",
+      "final_sha256": "a90b90f9b3b9c4068a93e7de45bb6f0d857c057f601858f2bd75d4dba68eba6c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignCbor.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "30fd5d77ab3f9ed993503f70aa2fa0c1529b161b4e08009435dce0b2865ea78c",
+      "final_sha256": "7fcf8e09f52d62ccc5f2841396c5b672bddc49d52c7f4a12d84f3fa6d911f10f",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignDerivedKey.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "34dbd93accc785097177e1a486e1f148e339b776b7fd2820c832bae1fb83b8a6",
+      "final_sha256": "75b43eaea4ac8c47ead16e077db0a101538b7b3044d1615bee28d55fb79176d4",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignGeneratedKey.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "73aba3e35cf9b57f9a91cc27760da1cc6919d1374fd40d3183444817f4cc315c",
+      "final_sha256": "d4bdf3938e7981106d25a03dc0e9ee7eb246e6809972ad95354a9d35d2fa4d04",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignRegistrationInput.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "1981983ac6fd3229637b48f227c2a65c47dcb55f5b4ee784265d5eafb845a3ee",
+      "final_sha256": "655ffda86d394ef97b6859782dd02622b97901ef06bae35f57b294089b4693b8",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "5aad0e30eab64df67832d6f61b36923b1a0175d73c889bdff0dbd5fb06687caf",
+      "final_sha256": "91ad5e86ed22f9ba2c625f236027094c633c7df9bd1dfb4329a81d45a8cc70e2",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/PreviewSign/PreviewSignSigningParams.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3104b2202b862a8e17f392f0b4eea92bf9d0a599d38c4054e277853c9a182e04",
+      "final_sha256": "5406a0c12b2906a3c40cba5ad41c705389e9a90c392905368a633950906f0542",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b2867e349c5e6232461ac869052dc086947786f5f7baa6da87f5bff14255a345",
+      "final_sha256": "a5f964ca86c800befc5586bbf96e6b24284e250e158e37c1ee8f84caaa98794c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/Shared/ExtensionIdentifiers.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "2a3cae362c92844616a2b9a81a0252e1aa93dbd12c71fa2e63431821bdbea766",
+      "final_sha256": "7b1a4e2320d514105ba09d9b05304d2faf730ca970c8e2beb8634159d6c0605c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Extensions/Shared/ExtensionOutput.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3d55d3de7f110976d4f34b9304e9279114bb326f9ea6f5ae5449ab0ede95f128",
+      "final_sha256": "1dd27dde999d69c083bab76de83e461aea8a4ec349ca2bc17ba7856970cff66e",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/ICtap2Session.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "ec5e8dec71d67e76899d655aa0421f94aeef0d9fbb1a8a0ed0b2c7e17870fcfa",
+      "final_sha256": "1d463a8b64228b2193778ca0f575925aebd79b30ed83801d78ded8235220131b",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/IYubiKeyExtensions.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "141e10279591de25200a5d1a41d9a493326eb12b0f14b3f503ec3b8e5dcb3644",
+      "final_sha256": "4a456736bcb7c35d25cbbee5508dde57a4dfed04a9f039f56740a9ad6c411673",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu",
+          "Yubico.YubiKit.Core.Protocols.SmartCard.Scp"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/LargeBlobs/ILargeBlobStorage.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "df57c7cce57b9c061b8e0188f251ee3974742924f9c565c0b8acebfe1cad8ad4",
+      "final_sha256": "3d50a721f5192316edfe13c1eb110bd985eeeaf58e7b8976572bf711319279b3",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/LargeBlobs/LargeBlobData.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "1e8b6b3c5620246a89f36fd02d533cf7f77189a76dfd079470826ad3f43916f6",
+      "final_sha256": "3efbc371993af0789b73489e87267b01936dad8efe0e5b4adce18d4b83d99a67",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b94c0c18a83700b75d2d122af35a12cc2d2759905c90734613396ee3c8597bfc",
+      "final_sha256": "46d419f3ed536a5cdb31571ac983ca7e3d6d3666af41d4dfca5497afd9051bdf",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Pin/ClientPin.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "5a937547f76796fd6c72b5ff7a01d60c428e10098474fda747928605ce0407c0",
+      "final_sha256": "f05a11468d6adc6bdd732070523cce09c8bccd8e307ce4b85e47f1c2854b5b4f",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Pin/ClientPinSubCommand.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b00e83166447955f42179ea19eac0135a05511ea101e4d142859666b20b4b3ca",
+      "final_sha256": "bf45ddb79c6fd902297c89325c9be0d5bc55cba19fa0550492aee2f3d46e162f",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Pin/IPinUvAuthProtocol.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "207d521fbbcbbb073fc2cf1bc84427d6ad52b4ccb270c59cefcfe3d8abc88fd0",
+      "final_sha256": "9d8046605655262b8c07433526073db814f02011ec0cb57765cfb1441d51c07e",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Pin/PinRetryStatus.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "c30d9bff8dbdfcb3bdef6e9572345744f41f3d5d7028ef4a9775c2b86aefea8d",
+      "final_sha256": "c90dd259fa097f4358ee517de09eec9c5782f7c4a4e148a758cfad6572bba9a2",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Pin/PinUvAuthHelpers.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "a09c413760f942fab7b091f371adc6846a93137c793b9bf3a50bdfe6525c9179",
+      "final_sha256": "47d199377344b2505fa593fbe3ad4f31fb0eeb937b5f63d572ae5f702a617643",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Pin/PinUvAuthProtocolV1.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "77c2a8c7a00f94089d88ec392c6f313a74fe2be98da5e0d40ff0528091ca5c41",
+      "final_sha256": "4b58b0909b1c1d1efd9868ab1fc84e5d778e06c7b666cae378c065cf91123620",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Pin/PinUvAuthProtocolV2.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "fb8a03ce6864b15138e56d91ff401bced6d51dc4aed18afa2e20430b21b752d7",
+      "final_sha256": "44bacb7b55b09b278a26c0972d3dbe381682c3f972697e7f1bc8d2884ee4adbd",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Pin/UserVerificationRetryStatus.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "60d7250eb4d67522b8c131c18c23b195f89188a53a410143774e2c83db3ef461",
+      "final_sha256": "3c5ab454abd7ec444fe8b792b8be08ee529a880e088992d5775992f339876371",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "859c43a9e8e3254af21bd74b46c9174ec2c65a977a489624a0785d1d16ba7344",
+      "final_sha256": "9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747",
+      "post_review_changes": {
+        "kind": "CRLF/LF only under repository attributes"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/CLAUDE.md",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b93c7a963573e93380ef82181baebce2b106b62ea4237d16efad1b0de602d266",
+      "final_sha256": "b93c7a963573e93380ef82181baebce2b106b62ea4237d16efad1b0de602d266",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "1a3fed0d41774a55f0ca2962baeb33332be05e937ba79a96d9dee59cfc2e9ef1",
+      "final_sha256": "07a6cf9aa2e87924a870c3562765ff3cd8b6111785fb45b9af6c4e20fc178c22",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2RequestAuditReproTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3f46fb16918aa97d55a29e58c4dd8a484bd076d6355ab1cadb8d1e1c272f1eac",
+      "final_sha256": "102dc66a8db7cc6ff27cdf5721b5e78d860af7bde6d0a1871725a4a2a56825d3",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AlgorithmSupportTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "50b985d2592082de010d39613ed70aa4cef8e742a7677db46f3f44ba5b8b0307",
+      "final_sha256": "b4306263e979e797a729311cb22c4fbe2b1f0b26b05044a2f249d4666bd7e747",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AuthenticatorConfigTests.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3ed0e895bdbf21c8a6fce12a79f50fb7dcb8826fc0817e22877c8d664a170751",
+      "final_sha256": "f2ea3b85ca48b2413933c00fbbee53a4889aa4ae34f34c6eb2fa43b6915594cc",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2BioEnrollmentTests.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "6b6929d7dca268d8631dddc9b5a87c2ee03466796f34070799eeb9042c9c79cc",
+      "final_sha256": "c0ad78be4e200dff158e236566f6b1d23d195f5d4a127c4477f419aea6e488aa",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredBlobTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "95aa133270dce515f5f978dba281e2c76b41dedbf321a0fdc866a020d9d5884f",
+      "final_sha256": "7154c8fe2b9a01c7cf6caa15d53ec5fc07e29ff87d3602c0e88158642596c419",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredProtectTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "f5851feeaddfb17d0c2e4abed52d02f5cef564a775a743a4b64dd274d093b716",
+      "final_sha256": "bb519203836a6ddd02c10ef43a9a142e3412e39c9046814851f96580e4a1f406",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementExtendedTests.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "77908964a69218454942a89bdf6ac216998e71ce46f4e79e89c9c4abfe3fe390",
+      "final_sha256": "ed7d2f15e5874978d5db3039fc409f97ce48e34755c15a1f011657739ffd760c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementTests.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "bf6200e9519e184ffdea0e7ad9f9f1e213ab5849c9609213626867dfe875e16c",
+      "final_sha256": "652328cdf058dc46619ebe13bfba48b011fd520d35050d2193c3f286e067cf6b",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EncryptedMetadataTests.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "d6923ba8860966b3bd0c5e217046b7a4bfe94663bdc0853f91e21f9d0fc74ec6",
+      "final_sha256": "bb833889b102e68ab0171a7af64a55f9fccffabd0fdc321e0ca7eb232ac65ab8",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnhancedPinTests.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3a310e73455ca375f8352afc8dc6a0ddb4a53d5924b6305a029245db886cd26e",
+      "final_sha256": "a374edb54f961f2944933f772d8934bff7115ecff1678e55808a41b74ab8f886",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnterpriseAttestationTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "49c03604a55b43dcf2765ede7ded2d159881db89ab687a5c58afe326bfd5e588",
+      "final_sha256": "13a8ffeaf97378a6654d2389871bb1c478cfe6c6a2de1415d48f3a2bf1785ee1",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2FipsComplianceTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "c69eeb635d8bc3bea074ce20264926772d9c2d12c865d8c7cfe8c8def4224521",
+      "final_sha256": "f25bc7d5596489c21f741534de8668a098fa64b3d745310ecaec4eba2fd6ca07",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetAssertionTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "0c276eb580767643c1544086614e61693d942e9548e83ab7eb4922bb0f2ac431",
+      "final_sha256": "af5948e4419b24ade09f4937f99899cc7903d3acccbf9c42c1ecfb0b00f64f9f",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetInfoTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "0189a5de09887165dc8f010f0f57f295f751bd0362a7d0655d02aa6ae38bd3b6",
+      "final_sha256": "2f4520568966101a1a0a169af0cb00d6ee1f47d7cf02506bdd92288f45cf7e17",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2HmacSecretTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "a69a1e24a36ca82c648857d98393f80be21eb95cfee1327cfeb64d76b0408791",
+      "final_sha256": "7e2f2ddb44648390d3aee8eab78036cf9d70522a6f8adb7c1e13d130579ca3f0",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2LargeBlobTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "7b083402956725eeb2227708266a19d11258e4b5b7b301fc6173abe101fb87fa",
+      "final_sha256": "4e42c8003d468f295615f022c811894d2aeaa52c93e633139e3598bf9f27fa69",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MakeCredentialTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "213b5d57a5382e7ec470e5e353df853d78ccd55c10f1855bd9217c533be3337e",
+      "final_sha256": "0649c9107777adbf774a87e3fef257c168e331c7b1965e942397ac85f666e2d2",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MinPinLengthTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "a71aeae5892645103619ee801c3652957256198a871b31c5699296f9ed084c8c",
+      "final_sha256": "cd27a0aad7de7d2b6a18217c57d5135870b22a5a059726cc1509177b74852aa1",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PinManagementTests.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "39602d50a59b4ed42d5bd798c4fbc780c5bccb730390997f179276c61d68d5b2",
+      "final_sha256": "0d5794060ed4d4e27aa7dedcd88167e8f4312403376873d88271133c62947c2a",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PreviewSignTests.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "640d7e0b9608ad0528d381f7d4ed117a25caad1184060f0b984738de8f0d00d6",
+      "final_sha256": "eca2bfe872cd15d0ccac81bd32d8a38c7a2b429d0ffa059732e557089b087884",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PrfTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "ba873c8ed3b7bb3b4ddd795b6037b1274c69444a0ea5b431ce13dcaa729e9ba4",
+      "final_sha256": "ce0c3aee338169535132099144012ec6deeb363e5e7c5212bc7bb1281ab313d0",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SessionSimpleTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "8431df6913b1ce29a27524de19d5142591317cca2e5d82c5ad236bb1961aa74a",
+      "final_sha256": "7e281267e2ba4042acdf6d4af72bae9fcfbe4bd6daa2913d74cb2298ba507acd",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SmartCardTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "31d06123090bb82be279aa1fb79788390eedc0abb26940e0cfdf786942212fa1",
+      "final_sha256": "d7fb3b7fba83d647a19de531257e9c883e230482fc2633ff1e94c06104616547",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestData.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "4ee7a26504e3e8d268056646b7dd37717851958728dae8efd0ff13f8edbd8eb6",
+      "final_sha256": "b4e6a59c07353a26144c76af8c2fd3b84028b6c0839eececf0dc9d1e7ae0f7b3",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestHelpers.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "fce6094f3f89cc82158997db5cf3c49f6f90a32efb132c0f1f054d65478d1cda",
+      "final_sha256": "597ac645acd5a6bde8d9b92f807fa0bd321e4b8487f78ba06a4157818924f29d",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TransportTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "01875b75897b3f75898f45a1b26f2ae84fbe7ceb132b7ae17e7328f2cc7b15c0",
+      "final_sha256": "36afce1a5e7314e3ef597d5dbd661c32b3e445c2591c73f0c10df9a733795e63",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/IntegrationTestBase.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "8534fe77acc8606e50d9d67a250ede3ef98d93afe7c5d68e510d6cb263594a1f",
+      "final_sha256": "4d87f512cf056d06f0a49d1be6a6f6115efd6c3db4c7b1d5cb86d5ceebfeaede",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "e9dcfe37200e017ddf6d157e56f1422af4d7a2068752c557715008390b886490",
+      "final_sha256": "5484a5fb10f15f6e60cfb9c3d0f0ce57a6545cdbde153f5dadaac3794aefbe45",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2ExtensionAuditReproTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "3be14804d9f03d61b218f860f732f6ca27eaa2d8fd06e9f7cf879f87ff96b17a",
+      "final_sha256": "d695df452d5c6acca1db9ec25e8e1f5283a69d0e5a351d95371f8bc4af0e497b",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuditV2/Ctap2LargeBlobAuditReproTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "6af977050992913b6117852f863670812a88482c8a9b7dc8a5ab04c40b0c9074",
+      "final_sha256": "06eb91b1a300f40a160269d8d3d02895cee1d8ebfb127fc7459d603fca73ca34",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/AuthenticatorInfoTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "2f87c97f26887c16667165b8d7de65d62eb6fafacb6b507551260ed27da1f21a",
+      "final_sha256": "075d5855b7d8fdede61a31a064564238eacf70a85c9033d571ae12e580d2d96c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/BioEnrollmentModelsTests.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "48c1302cf6d46ec5b21d1e01bfd1e45cca4058fa241c6690ff5bf667028c8eb4",
+      "final_sha256": "41aa07192d6fb0eee3a59eec8cb0c8139faa4da1365e5d65df2bc878823154e0",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/FingerprintBioEnrollmentTests.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "942b123fa87c844f45e41f7719b7b55ae873fefad67f963c91de6e0819dafd8a",
+      "final_sha256": "835b7eed6bab5cd92f4c720624e7232306ce0a8cf603008abda69871aaadb491",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/Ctap2SessionRequestEncodingTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "2c595804a99b7eb5c26a69afdfd656bb4e6d1fe7813aa995add614adbbeb6bce",
+      "final_sha256": "a6f5727d76fb2a9632764cef8a475ee7168c28b3970311a9767df0189c40b972",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Config/AuthenticatorConfigTests.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "80ab3a142170db310cf7864d257c28cf4b5b133d98586f34123732b3de8e363f",
+      "final_sha256": "3e68f08a7b0af3dd7f01a7bc9cb65e5296999c3b85687f9c74b6712edadb74f4",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "0af3c9586c1f0462e0e618e9be4b0acf6b5b24fc3c2118e8fe07195b9c5d5865",
+      "final_sha256": "45111042be2b19802f121bc801a00095f1366edaa8b0848fdd02b98d00ad8566",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementModelsTests.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "ff90f7ff128488ece2a2246161b5650a19b4f782e8662fde5eb6d1ab06661279",
+      "final_sha256": "23c7edb5968e408cc701f8d8f7024c321c7aed45cb2ae11d2c1b59646515cbd7",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementWireTests.cs",
+      "review_record": "review-d-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "ee336f7200f11c5315a6f79f61e5de4acd17cf89f45724f6b43176c9c94cf697",
+      "final_sha256": "6f9c9a085160f538724a8c0a34939a0698e9f62dca80a8ef1e7da2c8cff437b3",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/AuthenticatorDataTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "254f264f9db16fbddefb39702785dd909d23458c5a6ccc6809570791cbb64196",
+      "final_sha256": "6711f69e5e3da453553dc51cf28163d8e62b0ba4b5854917f601d24e8385934c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/CredentialResponseTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "517f930220231eed69c8afbed1afbfece7da405daa7e224f9f6cc20ccc3b0021",
+      "final_sha256": "abd636a445241592cc58dea12e6a8ce459437ca0a704705354307d7b29cff699",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/PublicKeyCredentialTypesTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "06634119b36416adfaad2e93ec3e1170107bd5f88656e787533bdd56de885b77",
+      "final_sha256": "5a2798b32cbe1cb84745dbb96cc87a33d2db5d30f9f24b1880f3ec484a3cd65a",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Crypto/EncryptedMetadataDecryptorTests.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "0d705fac41ebfeaff52fb473b61a7148e626e15fde016a58d8039ffe2a424f4f",
+      "final_sha256": "91c745c020fcf367420393b87fbbd709bfa4fdda834ab8b19ab751c9c46ade8b",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "4b7e32722222c1d6cd2060bfacaaa7ca4a0ba2f63053e46e2d0310cab8b10dff",
+      "final_sha256": "ccc861ce2011bbf3d7ed6ba29628e0c5485e0639685291e0371a8eb10711a63f",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "25ce70917293498541396d32883c8a5edae683442c3f5f0403ed88fd8b1aa7b6",
+      "final_sha256": "fb5b52248c399214dda8df0b4c53b93d693f41235c361ca66610f07c7619c10c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapExceptionTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "88b9aaf518381cc2d383fc1858879b0612291aac24e2e145026e1d369e27b5cd",
+      "final_sha256": "191098345c8f029e53bdbe97c7e01b31ab31bb0231050f64f3d1b15ddd4c9a2f",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CtapRequestBuilderTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "0c084830e84e043e623b6b0b78b9827d498ffa91461d32a650bf9f1054481ad2",
+      "final_sha256": "46f4e5a9e2346273edfdffe4bd19007fbedb9de8ca92776b04eb59cbef061b9e",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretInputTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "4f8e980e0d292ce17d840da6ea098d98de884338b34fb645aa0159266bf193a3",
+      "final_sha256": "52da1a464031af4afb492bc435baab337f497cacec55a46714b1452bf021b30d",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/HmacSecret/HmacSecretOutputTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "621e9a94b32d421609a319ab55bf502723b344a95f088add1d9b80680b95a6e2",
+      "final_sha256": "666a7fa3327053e75836b87031aa1d82b7b2fa9021b154df7643932e94ff40e1",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/LargeBlob/LargeBlobOutputTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "9841152f0eb7778c74c3c06011c07f3def0b48aeb1939439bc326c7cf8aafd0e",
+      "final_sha256": "d3d871ff126d0b436c36853836b7d31d9f746d4cdc8ab1bcadd6be44a695a559",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/PreviewSign/PreviewSignCborTests.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "af081356266582edd129fb54ab98adbdb2d031509a1cf7a91c608e089c6bddbc",
+      "final_sha256": "b3ba5d7d8982f4973448e5c946c01870b9262a0dd7e4aa34a727367d9e0c1d34",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/PreviewSign/PreviewSignGeneratedKeyTests.cs",
+      "review_record": "review-e-crypto.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "ce239eb7d6b68e6b68ef937b196644dfc7db9bfc5d579e88c39acf271ebc4288",
+      "final_sha256": "f6f368efd215b44fe1d072cfeb86a00595f96892280933f5c355c6344a038836",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionBuilderTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "35fd0b52d2868950e8f7f0bef1ede3edebc7eaf3be9ffd5811e99a04373738a3",
+      "final_sha256": "5665645627a7be097f4ac0c158b72bef955afb1ce41941970eb477f927df4749",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Extensions/Shared/ExtensionOutputTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "d0c931ea75d90e8bc6ebae1348688047c000e3c2fa4329d9557af46d3ee95660",
+      "final_sha256": "58a0ffdb31ca8b01afdd091ae5e4acd9e4e2ab6453dbf34d4454f5f9461dceae",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "review_record": "review-a-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "033d6c325a73962d7640e169dfbe7d3074b3dcb815f9faf107fbedeb2bfb3b28",
+      "final_sha256": "68ec9451406be4e5ee3fbbc571d3d59de9bc4681606176c1a03f29ef6cbfaaf8",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobSpecFormatTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "62db01f24e0bdb2d574cab2c74d5ab35ac174b97731c462e48ac5ae2007173f3",
+      "final_sha256": "5a07965a02829dfae50c2926f81d3f4028189c57437fa2668ec214022a4060db",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/LargeBlobs/LargeBlobStorageTests.cs",
+      "review_record": "review-e-core-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "f257127c73d816fe385c1aec8faa6c9c2a47911292e634886c5e67602147812f",
+      "final_sha256": "59aac0d9e4ad7445e0f28aecea21fb4fc3b1258399eba2c080196a2f0789b341",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/MakeCredentialResponseTests.cs",
+      "review_record": "review-c-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "405ecfb6ad36af2d32f7b6ce1312f998ebdbf9323aeb986f514a8d26920f3d78",
+      "final_sha256": "893fbdce04044b915facf4108125ab1388c0e294c280cc6768b4f68764fa408c",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/ClientPinTests.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "83d96f8add7ede53fb09f33de8d7f29f39d6e5a364d85cfafc524064fa688f22",
+      "final_sha256": "67880b4d4ae39e9063e1afa1c8f03775d7735904805fb44ba7652f8399f03a82",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [
+          "Yubico.YubiKit.Ctap2"
+        ],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV1Tests.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "32d3b4edad5ad112979cc086b5130e72c1be92937dcccf54c27e2d3cc0e380f1",
+      "final_sha256": "9f9b07c2e4eb3bf50094e694733dcf1f8c89a10cb0dfe507be4a69717e172e3e",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV2Tests.cs",
+      "review_record": "review-b-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "b1ec8a777138dfdae86eb80487488879ec32ac3c3124495b5f6874a14a676042",
+      "final_sha256": "aab2399ad4a31b37b9d2dcc41a6f477e5b724e2c63dd2da87256422feb5cde96",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    },
+    {
+      "path": "src/WebAuthn/CLAUDE.md",
+      "review_record": "boundary-review-final.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+      "final_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "src/WebAuthn/README.md",
+      "review_record": "review-f-followup.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "cf64612066288c5845cd5d9892038abae2ac0cc17e746ab4fbc7e401069208f7",
+      "final_sha256": "cf64612066288c5845cd5d9892038abae2ac0cc17e746ab4fbc7e401069208f7",
+      "post_review_changes": {
+        "kind": "none"
+      }
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Codec/PreviewSignCodec.cs",
+      "review_record": "boundary-review-final.md",
+      "reviewer": "github-copilot/gpt-6.1-sol",
+      "verdict": "PASS",
+      "reviewed_sha256": "2ed3b03efcb3e82fd58980b91518abe0638b064207e7ccae025e920aa2a30fb7",
+      "final_sha256": "ace27282dae2d6d505174ed6a46e6f3bba4077e0b8f1a2e0dcc0242703766bb9",
+      "post_review_changes": {
+        "kind": "formatter-only: whitespace/import-order and explicitly listed unused namespace imports",
+        "removed_namespaces": [],
+        "manifest": "validation/import-removals.json"
+      }
+    }
+  ],
+  "generated_outputs": [
+    {
+      "path": "docs/architecture/images/L2-layered-stack.svg",
+      "sha256": "ad43de95fbcc62aca2b7c715bdd6f8e526d95d7c745dc81cddd1bd86cf314ec3",
+      "evidence": "validation/diagram-render.log; diagram-render.json; diagram-freshness.log; coordinator visual inspection"
+    },
+    {
+      "path": "docs/architecture/images/L3b-fido2-ctap-sequence.svg",
+      "sha256": "339ab23dd5bb4c84fca35ba937bed79066afe8036956a6be81a85bcc2244d20b",
+      "evidence": "validation/diagram-render.log; diagram-render.json; diagram-freshness.log; coordinator visual inspection"
+    },
+    {
+      "path": "docs/architecture/images/image-manifest.txt",
+      "sha256": "a5b9b595a9b9bbdb5dfd44138e7081dc2428a556e436b0b2bd1d91d14cd2ba71",
+      "evidence": "validation/diagram-render.log; diagram-render.json; diagram-freshness.log; coordinator visual inspection"
+    },
+    {
+      "path": "docs/architecture/images/png/L2-layered-stack.png",
+      "sha256": "0aff328433833ca33445b6411e3e485f4070bc145f07b528a86fb1a127f95f7c",
+      "evidence": "validation/diagram-render.log; diagram-render.json; diagram-freshness.log; coordinator visual inspection"
+    },
+    {
+      "path": "docs/architecture/images/png/L3b-fido2-ctap-sequence.png",
+      "sha256": "259cd79a6503bd6d21222799f746390c436e7e90eda38ea58eb451cb843c9a36",
+      "evidence": "validation/diagram-render.log; diagram-render.json; diagram-freshness.log; coordinator visual inspection"
+    }
+  ]
+}

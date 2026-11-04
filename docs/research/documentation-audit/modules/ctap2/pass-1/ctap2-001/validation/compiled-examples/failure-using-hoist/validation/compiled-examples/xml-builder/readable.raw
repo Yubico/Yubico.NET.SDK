@@ -1,0 +1,6 @@
+// SOURCE src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs#x1
+var extensions = new ExtensionBuilder()
+    .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
+    .WithCredBlob(myBlobData)
+    .Build();
+

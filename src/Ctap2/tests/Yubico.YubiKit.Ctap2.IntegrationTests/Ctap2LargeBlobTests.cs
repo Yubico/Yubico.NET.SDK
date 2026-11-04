@@ -25,9 +25,16 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for the CTAP2 largeBlob extension and large blob storage.
+/// Integration fixtures for the largeBlobKey response-envelope route and authenticatorLargeBlobs storage.
 /// Tests credential-associated large blob data storage and retrieval.
 /// </summary>
+/// <remarks>
+/// The retained largeBlob trait names this feature family, not direct CTAP §12.4 output coverage.
+/// Positive fixtures compare stored plaintext and check deletion; they do not establish multichunk
+/// atomicity, cancellation recovery or foreign-client interoperability. PIN-normalizing setup and broad
+/// RP cleanup require a human-approved dedicated device. Token clearing is success-only and returned
+/// plaintext/key copies are not comprehensively cleared; do not copy this lifetime pattern into production.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Extension", "largeBlob")]
 public class Ctap2LargeBlobTests

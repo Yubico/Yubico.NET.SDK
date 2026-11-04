@@ -15,13 +15,15 @@
 namespace Yubico.YubiKit.Ctap2.Extensions;
 
 /// <summary>
-/// Experimental typed helper for building a <c>COSE_Sign_Args</c> map (CTAP v4 draft).
+/// Experimental typed helper for a <c>COSE_Sign_Args</c> map in the Yubico Labs previewSign v4 Editor's Draft.
 /// </summary>
 /// <remarks>
 /// <para>
 /// <c>COSE_Sign_Args</c> is a CBOR map whose key 3 carries the request algorithm identifier; the
 /// remaining keys are algorithm-specific. Today the only typed helper in this SDK is
 /// <see cref="ArkgP256SignArgs"/> (alg = <c>-65539</c>).
+/// This is not CTAP version 4 or production cryptographic guidance. The helper borrows input buffers;
+/// encoding creates independent copies rather than a no-copy wire path.
 /// </para>
 /// <para>
 /// This helper is not the generic previewSign contract. Generic previewSign signing accepts raw

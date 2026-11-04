@@ -19,6 +19,7 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// </summary>
 /// <remarks>
 /// See: https://www.w3.org/TR/webauthn-2/#sctn-attstn-fmt-ids
+/// Recognizing an identifier does not imply typed decoding or attestation verification support.
 /// </remarks>
 public readonly record struct AttestationFormat(string Value)
 {
@@ -38,7 +39,7 @@ public readonly record struct AttestationFormat(string Value)
     public static readonly AttestationFormat Apple = new("apple");
 
     /// <summary>
-    /// No attestation (self-attestation).
+    /// No attestation information; distinct from signed self attestation.
     /// </summary>
     public static readonly AttestationFormat None = new("none");
 

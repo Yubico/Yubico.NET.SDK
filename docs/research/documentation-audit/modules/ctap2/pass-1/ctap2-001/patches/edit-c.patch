@@ -1,0 +1,1937 @@
+diff --git i/src/Ctap2/src/Cbor/CoseKeyWriter.cs w/src/Ctap2/src/Cbor/CoseKeyWriter.cs
+index ff6ec8a0..ab831e93 100644
+--- i/src/Ctap2/src/Cbor/CoseKeyWriter.cs
++++ w/src/Ctap2/src/Cbor/CoseKeyWriter.cs
+@@ -22,8 +22,12 @@ namespace Yubico.YubiKit.Ctap2.Cbor;
+ internal static class CoseKeyWriter
+ {
+     /// <summary>
+-    /// Writes a COSE_Key dictionary as a CBOR map with numerically sorted keys.
++    /// Writes a COSE_Key dictionary with numerically sorted insertion keys.
+     /// </summary>
++    /// <remarks>
++    /// Numeric order is not canonical encoded-key order. A Ctap2Canonical writer automatically sorts
++    /// the closed map by encoding; this helper's sorting alone does not supply canonicalization.
++    /// </remarks>
+     /// <param name="writer">The CBOR writer.</param>
+     /// <param name="coseKey">The COSE key as a dictionary of integer keys to values.</param>
+     /// <exception cref="InvalidOperationException">If an unsupported value type is encountered.</exception>
+@@ -56,4 +60,4 @@ internal static void WriteCoseKey(CborWriter writer, IReadOnlyDictionary<int, ob
+ 
+         writer.WriteEndMap();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs w/src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs
+index 87efaed0..7c402079 100644
+--- i/src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs
++++ w/src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs
+@@ -19,6 +19,15 @@
+ 
+ namespace Yubico.YubiKit.Ctap2.Cbor;
+ 
++/// <summary>
++/// Encodes credential requests; session validation and client/RP ceremony duties are separate.
++/// </summary>
++/// <remarks>
++/// Nullable booleans preserve omission versus explicit false. Auth bytes and uv are encoded
++/// independently: callers must omit uv with pinUvAuthParam and select a supported matching protocol.
++/// The version-2 fallback is only an encoding default. Inputs are borrowed during synchronous Build;
++/// the returned command-prefixed array is a new copy that its caller must clear when sensitive.
++/// </remarks>
+ internal static class Ctap2SessionRequestEncoding
+ {
+     internal static byte[] BuildMakeCredentialRequest(
+@@ -200,4 +209,4 @@ private static void WriteArray<T>(
+ 
+         writer.WriteEndArray();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Cose/CoseAlgorithm.cs w/src/Ctap2/src/Cose/CoseAlgorithm.cs
+index e455506c..c1b5f47d 100644
+--- i/src/Ctap2/src/Cose/CoseAlgorithm.cs
++++ w/src/Ctap2/src/Cose/CoseAlgorithm.cs
+@@ -26,22 +26,22 @@ namespace Yubico.YubiKit.Ctap2.Cose;
+ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorithm>
+ {
+     /// <summary>
+-    /// ECDSA with SHA-256 (P-256 curve).
++    /// ES256: ECDSA with SHA-256; the WebAuthn credential-key profile uses P-256.
+     /// </summary>
+     public static readonly CoseAlgorithm Es256 = new(-7);
+ 
+     /// <summary>
+-    /// EdDSA (Ed25519 curve).
++    /// Generic EdDSA identifier (-8); the WebAuthn credential-key profile uses Ed25519.
+     /// </summary>
+     public static readonly CoseAlgorithm EdDsa = new(-8);
+ 
+     /// <summary>
+-    /// ECDSA with SHA-256 (secp256k1 curve).
++    /// ESP256: ECDSA using P-256 and SHA-256 (-9), not ES256K/secp256k1 (-47).
+     /// </summary>
+     public static readonly CoseAlgorithm Esp256 = new(-9);
+ 
+     /// <summary>
+-    /// ECDSA with SHA-384 (P-384 curve).
++    /// ES384: ECDSA with SHA-384; the WebAuthn credential-key profile uses P-384.
+     /// </summary>
+     public static readonly CoseAlgorithm Es384 = new(-35);
+ 
+@@ -62,7 +62,7 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
+     /// This is the wire-level COSE algorithm identifier for the ARKG-P256-ESP256 signing operation,
+     /// written under key 3 of a <c>COSE_Sign_Args</c> map (previewSign authentication request).
+     /// Do NOT confuse with the seed-key COSE-key alg identifier <c>-65700</c>
+-    /// (<c>ARKG_P256_PLACEHOLDER.ALGORITHM</c> in python-fido2) which lives at a different protocol layer.
++    /// used by this SDK's experimental seed-key profile, which lives at a different protocol layer.
+     /// </para>
+     /// </remarks>
+     public static readonly CoseAlgorithm Esp256SplitArkgPlaceholder = new(-65539);
+@@ -77,15 +77,14 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
+     /// and must not be treated as production cryptographic guidance.
+     /// </para>
+     /// <para>
+-    /// Stable, intent-revealing alias for the ARKG-P256 signing-operation alg ID. Use this on
+-    /// <c>ArkgP256SignArgs.Algorithm</c> and any caller-facing API that names the request alg.
+-    /// The underlying value is intentionally identical to <see cref="Esp256SplitArkgPlaceholder"/>;
+-    /// when Yubico finalises the alg ID we can rename one without churning consumers of the other.
++    /// Intent-revealing alias for the experimental signing-operation placeholder. Its value is identical
++    /// to <see cref="Esp256SplitArkgPlaceholder"/>; the alias does not make the identifier standardized
++    /// or promise a stable future wire profile.
+     /// </para>
+     /// <para>
+     /// Wire value: <c>-65539</c>. This is the request-side signing algorithm and goes on the wire
+     /// at <c>COSE_Sign_Args</c> key 3. It is NOT the seed-key COSE-key alg (which is <c>-65700</c>
+-    /// in python-fido2's <c>ARKG_P256_PLACEHOLDER</c>).
++    /// in this SDK's experimental seed-key profile).
+     /// </para>
+     /// </remarks>
+     public static readonly CoseAlgorithm ArkgP256 = Esp256SplitArkgPlaceholder;
+@@ -100,9 +99,9 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
+     /// </para>
+     /// <para>
+     /// This is the seed-key COSE-key <c>alg</c> parameter (key 3) identifying an ARKG-P256
+-    /// placeholder key structure, per python-fido2's <c>ARKG_P256_PLACEHOLDER.ALGORITHM</c>.
+-    /// It marks a COSE_Key as containing KEM and blinding public keys (at parameters -1/-2)
+-    /// instead of standard EC2 curve coordinates.
++    /// placeholder key structure emitted by this SDK, not a registered standard seed-key profile.
++    /// It marks a COSE_Key as containing BL at -1 and KEM at -2 instead of ordinary EC2 parameters.
++    /// See <see cref="CoseArkgP256SeedKey"/> for the byte-string-wrapped nested-map encoding and draft differences.
+     /// </para>
+     /// <para>
+     /// Do NOT confuse with the signing-operation algorithm <see cref="ArkgP256"/> (<c>-65539</c>),
+@@ -113,8 +112,9 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
+     public static readonly CoseAlgorithm ArkgP256SeedKey = new(-65700);
+ 
+     /// <summary>
+-    /// Gets a value indicating whether this is a known algorithm.
++    /// Gets whether this SDK recognizes the integer, including its experimental placeholders.
+     /// </summary>
++    /// <remarks>This does not establish registry status, algorithm implementation, device availability or production approval.</remarks>
+     public bool IsKnown => Value switch
+     {
+         -7 or -8 or -9 or -35 or -257 or -65539 or -65700 => true,
+@@ -142,4 +142,4 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
+         -65700 => "ARKG_P256_SEED_KEY",
+         _ => $"COSE({Value})"
+     };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs w/src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs
+index cd796955..0d3f0f82 100644
+--- i/src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs
++++ w/src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs
+@@ -25,29 +25,35 @@ namespace Yubico.YubiKit.Ctap2.Cose;
+ /// must not be treated as production cryptographic guidance.
+ /// </para>
+ /// <para>
+-/// An ARKG-P256 seed-key is a specialized COSE_Key structure encoding two P-256 public keys
+-/// (pkKem and pkBl) used for offline key derivation. Unlike standard EC2 keys where parameter -1
+-/// is the curve identifier, ARKG seed-keys use -1/-2 to carry NESTED COSE_Key maps (not flat
+-/// SEC1 byte strings).
++/// The experimental SDK profile carries blinding and KEM public keys for offline key derivation.
++/// Unlike ordinary EC2 curve/coordinate parameters, -1 and -2 contain byte strings whose contents
++/// are encoded COSE EC2 maps. The decoder also accepts direct nested maps through CoseKey.Decode.
+ /// </para>
+ /// <para>
+-/// Wire format (per draft-bradleylundberg-cfrg-arkg-10, python-fido2 ARKG_P256_PLACEHOLDER
+-/// at fido2/cose.py:428-433, and the legacy SDK's PreviewSignExtension.cs:317-323):
++/// SDK-emitted wire profile (not a claim of draft or vendor conformance):
+ /// - kty (1) = 2 (EC2 family)
+ /// - alg (3) = -65700 (ARKG-P256 seed-key marker)
+-/// - -1 = pkBl  as NESTED COSE_Key map (CoseEc2Key with P-256 coordinates)
+-/// - -2 = pkKem as NESTED COSE_Key map (CoseEc2Key with P-256 coordinates)
++/// - -1 = pkBl as a byte string containing an EC2/P-256 COSE map
++/// - -2 = pkKem as a byte string containing an EC2/P-256 COSE map
+ /// - -3 = derived-key algorithm (e.g., -9 for Esp256)
+ /// </para>
+ /// <para>
+-/// This class stores the reconstructed 65-byte SEC1 uncompressed points for each nested key
+-/// to simplify downstream ARKG derivation logic.
++/// draft-bradleylundberg-cfrg-arkg-10 §5.1 agrees on BL=-1/KEM=-2 and illustrates derived ESP256=-9;
++/// §§5.1/5.2/8.3 explicitly specify the ARKG-P256 seed algorithm placeholder -65700. The SDK's outer
++/// kty=2 and byte-string wrappers differ from the draft's kty placeholder -65537 and direct maps.
++/// The SDK also requires an integer derived algorithm; the draft's dkalg is optional and permits
++/// int/tstr. These agreements do not establish full-profile interoperability. The Internet-Draft is
++/// work in progress, with stated expiry 31 August 2026, not production cryptographic authority.
+ /// </para>
+ /// <para>
+-/// Discriminate this variant from standard EC2 keys by checking alg == -65700.
++/// Decode dispatches on alg=-65700 before outer kty, then requires nested EC2 carriers and coordinates
++/// no longer than 32 bytes. It does not check nested curve=1 or point validity. Coordinates, including
++/// short/empty values, are left-padded into 04 || X[32] || Y[32] for downstream helpers; that SEC1 layout
++/// is not proof of a valid P-256 point. Direct construction borrows both points and does not enforce
++/// the algorithm marker or point shape; keep supplied storage unchanged during use.
+ /// </para>
+ /// </remarks>
+-/// <param name="Algorithm">COSE algorithm identifier (must be ArkgP256SeedKey = -65700).</param>
++/// <param name="Algorithm">Seed marker for this profile (ArkgP256SeedKey=-65700); construction does not enforce it.</param>
+ /// <param name="DerivedKeyAlgorithm">Algorithm for the derived signing key (e.g., Esp256 = -9).</param>
+ /// <param name="KemPublicKey">KEM public key as 65-byte SEC1 uncompressed point.</param>
+ /// <param name="BlPublicKey">Blinding public key as 65-byte SEC1 uncompressed point.</param>
+@@ -63,7 +69,7 @@ public sealed record CoseArkgP256SeedKey(
+     public override int KeyType => 2;
+ 
+     /// <summary>
+-    /// Gets the COSE algorithm identifier (alg = -65700).
++    /// Gets the supplied seed-key algorithm identifier; this profile uses -65700.
+     /// </summary>
+     public override CoseAlgorithm Algorithm { get; } = Algorithm;
+ 
+@@ -74,11 +80,11 @@ public sealed record CoseArkgP256SeedKey(
+     /// <param name="seedKeyAlgorithm">Seed-key COSE algorithm (must be -65700).</param>
+     /// <returns>A <see cref="CoseArkgP256SeedKey"/> instance.</returns>
+     /// <exception cref="InvalidOperationException">
+-    /// Thrown if required parameters are missing or nested keys are invalid.
++    /// A required parameter is missing, a nested key is not an EC2 carrier, or coordinates exceed 32 bytes.
+     /// </exception>
+     internal static CoseArkgP256SeedKey Decode(Dictionary<int, object?> parameters, CoseAlgorithm seedKeyAlgorithm)
+     {
+-        // -1 = pkBl, -2 = pkKem (per draft-bradleylundberg-cfrg-arkg-10 and python-fido2)
++        // Preserve the distinct derivation roles: -1 = BL, -2 = KEM (ARKG-10 §5.1 label mapping).
+         byte[] blKeyCbor = parameters.TryGetValue(-1, out var v1) && v1 is byte[] b1
+             ? b1
+             : throw new InvalidOperationException("ARKG seed key missing -1 (BL public key COSE map)");
+@@ -92,7 +98,7 @@ internal static CoseArkgP256SeedKey Decode(Dictionary<int, object?> parameters,
+             ? a
+             : throw new InvalidOperationException("ARKG seed key missing -3 (derived key algorithm)");
+ 
+-        // Recursively decode each nested COSE_Key — both must be CoseEc2Key (kty=2, P-256)
++        // Require EC2 carriers; generic decoding does not establish curve=1 or valid P-256 points.
+         var kemKey = CoseKey.Decode(kemKeyCbor) as CoseEc2Key
+             ?? throw new InvalidOperationException("ARKG KEM public key is not CoseEc2Key");
+ 
+@@ -118,7 +124,7 @@ internal static CoseArkgP256SeedKey Decode(Dictionary<int, object?> parameters,
+     /// <returns>65-byte array: 0x04 || x (32 bytes) || y (32 bytes).</returns>
+     private static byte[] ReconstructSec1Uncompressed(CoseEc2Key ec2, string keyName)
+     {
+-        // P-256: x and y are each 32 bytes (may be shorter if leading zeros were stripped)
++        // Limit slot width; short/empty coordinates are padded, without proving P-256 point validity.
+         if (ec2.X.Length > 32 || ec2.Y.Length > 32)
+         {
+             throw new InvalidOperationException(
+@@ -142,10 +148,11 @@ private static byte[] ReconstructSec1Uncompressed(CoseEc2Key ec2, string keyName
+     /// <summary>
+     /// Encodes this ARKG-P256 seed-key to CBOR bytes.
+     /// </summary>
+-    /// <returns>CBOR-encoded COSE_Key with nested EC2 keys.</returns>
++    /// <returns>A new byte array containing the encoded COSE map with byte-string-wrapped EC2 key maps.</returns>
+     /// <remarks>
+-    /// Wire format: {1: 2, 3: -65700, -3: derivedAlg, -2: kemKeyMap, -1: blKeyMap}
+-    /// Each nested key is a full COSE_Key EC2 map. Per spec: -1 = pkBl, -2 = pkKem.
++    /// Emits kty=2, the supplied alg, -1=bstr(encoded BL map), -2=bstr(encoded KEM map), and
++    /// -3=derivedAlg. Nested maps use EC2/P-256/ES256 labels; the outer profile expects alg=-65700.
++    /// SEC1 length/prefix are checked during encoding, but mathematical point validity is not.
+     /// </remarks>
+     public override byte[] Encode()
+     {
+@@ -156,7 +163,7 @@ public override byte[] Encode()
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(5);
+ 
+-        // Keys must be in sorted order for canonical CBOR: -3, -2, -1, 1, 3
++        // Numeric insertion order is not canonical encoded order; the writer sorts to 1, 3, -1, -2, -3.
+         writer.WriteInt32(-3);
+         writer.WriteInt32(DerivedKeyAlgorithm.Value);
+ 
+@@ -192,4 +199,4 @@ private static CoseEc2Key Sec1ToCoseEc2(ReadOnlySpan<byte> sec1, CoseAlgorithm a
+ 
+         return new CoseEc2Key(alg, 1 /* P-256 curve ID */, x, y);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Cose/CoseKey.cs w/src/Ctap2/src/Cose/CoseKey.cs
+index 92d01b93..931b467f 100644
+--- i/src/Ctap2/src/Cose/CoseKey.cs
++++ w/src/Ctap2/src/Cose/CoseKey.cs
+@@ -22,6 +22,14 @@ namespace Yubico.YubiKit.Ctap2.Cose;
+ /// <remarks>
+ /// See <see href="https://datatracker.ietf.org/doc/html/rfc8152#section-7">
+ /// COSE Key Objects</see>.
++/// <para>
++/// These are public-key data carriers, not mathematical validators or trusted-algorithm selectors.
++/// Direct construction retains supplied byte memory. Decode materializes modeled byte strings and
++/// copies CoseOtherKey raw input; modeled encoders write new arrays and omit unmodeled parameters.
++/// Unknown identifiers remain representable without implying protocol or cryptographic validity.
++/// PIN/UV key agreement has its own required EC2/P-256/alg=-25 structure; these generic carriers are
++/// not a substitute for that security-critical validation.
++/// </para>
+ /// </remarks>
+ public abstract record CoseKey
+ {
+@@ -39,7 +47,15 @@ public abstract record CoseKey
+     /// Decodes a COSE_Key from CBOR-encoded bytes.
+     /// </summary>
+     /// <param name="coseEncoded">CBOR-encoded COSE_Key.</param>
+-    /// <returns>A <see cref="CoseKey"/> subclass based on the key type.</returns>
++    /// <returns>A modeled key, an algorithm-selected experimental ARKG seed, or an opaque other-key carrier.</returns>
++    /// <remarks>
++    /// Requires int32 kty/alg and the modeled parameter types for EC2, OKP and RSA. Unknown labels are
++    /// skipped for modeled keys; Other preserves a copy of the complete supplied bytes. Canonical CBOR
++    /// checks do not establish curve/algorithm compatibility, coordinate/point validity or complete
++    /// envelope consumption; there is no remaining-byte check after the map.
++    /// </remarks>
++    /// <exception cref="CborContentException">The reader rejects malformed or noncanonical CBOR.</exception>
++    /// <exception cref="InvalidOperationException">A required modeled parameter is missing or has an unsupported representation.</exception>
+     public static CoseKey Decode(ReadOnlyMemory<byte> coseEncoded)
+     {
+         Dictionary<int, object?> parameters = ReadParameters(coseEncoded);
+@@ -228,8 +244,8 @@ private static CoseRsaKey DecodeRsa(Dictionary<int, object?> parameters, CoseAlg
+ /// </summary>
+ /// <param name="Algorithm">COSE algorithm identifier.</param>
+ /// <param name="Curve">Curve identifier (crv, label -1).</param>
+-/// <param name="X">X coordinate (label -2).</param>
+-/// <param name="Y">Y coordinate (label -3).</param>
++/// <param name="X">Borrowed X-coordinate bytes (label -2); construction does not validate points.</param>
++/// <param name="Y">Borrowed Y-coordinate bytes (label -3).</param>
+ public sealed record CoseEc2Key(
+     CoseAlgorithm Algorithm,
+     int Curve,
+@@ -244,7 +260,7 @@ public override byte[] Encode()
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(5);
+ 
+-        // Keys must be in sorted order for canonical CBOR: -3, -2, -1, 1, 3
++        // Numeric insertion order is not canonical encoded order; the writer sorts to 1, 3, -1, -2, -3.
+         writer.WriteInt32(-3);
+         writer.WriteByteString(Y.Span);
+ 
+@@ -270,7 +286,7 @@ public override byte[] Encode()
+ /// </summary>
+ /// <param name="Algorithm">COSE algorithm identifier.</param>
+ /// <param name="Curve">Curve identifier (crv, label -1).</param>
+-/// <param name="X">X coordinate (label -2).</param>
++/// <param name="X">Borrowed public-key bytes (label -2); construction does not validate the key.</param>
+ public sealed record CoseOkpKey(
+     CoseAlgorithm Algorithm,
+     int Curve,
+@@ -284,7 +300,7 @@ public override byte[] Encode()
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(4);
+ 
+-        // Keys must be in sorted order for canonical CBOR: -2, -1, 1, 3
++        // The canonical writer sorts this numeric insertion order to 1, 3, -1, -2.
+         writer.WriteInt32(-2);
+         writer.WriteByteString(X.Span);
+ 
+@@ -306,8 +322,8 @@ public override byte[] Encode()
+ /// RSA COSE key.
+ /// </summary>
+ /// <param name="Algorithm">COSE algorithm identifier.</param>
+-/// <param name="Modulus">RSA modulus (n, label -1).</param>
+-/// <param name="Exponent">RSA public exponent (e, label -2).</param>
++/// <param name="Modulus">Borrowed RSA modulus bytes (n, label -1).</param>
++/// <param name="Exponent">Borrowed RSA public-exponent bytes (e, label -2); construction does not validate RSA parameters.</param>
+ public sealed record CoseRsaKey(
+     CoseAlgorithm Algorithm,
+     ReadOnlyMemory<byte> Modulus,
+@@ -321,7 +337,7 @@ public override byte[] Encode()
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(4);
+ 
+-        // Keys must be in sorted order for canonical CBOR: -2, -1, 1, 3
++        // The canonical writer sorts this numeric insertion order to 1, 3, -1, -2.
+         writer.WriteInt32(-2);
+         writer.WriteByteString(Exponent.Span);
+ 
+@@ -340,11 +356,11 @@ public override byte[] Encode()
+ }
+ 
+ /// <summary>
+-/// Unknown/Other COSE key type.
++/// Opaque COSE key carrier for an unmodeled key type not selected by the ARKG seed algorithm.
+ /// </summary>
+ /// <param name="KeyType">The COSE key type value.</param>
+ /// <param name="Algorithm">COSE algorithm identifier.</param>
+-/// <param name="RawCbor">The original CBOR-encoded bytes.</param>
++/// <param name="RawCbor">Encoded input bytes; direct construction borrows them, while Decode supplies a copy.</param>
+ public sealed record CoseOtherKey(
+     int KeyType,
+     CoseAlgorithm Algorithm,
+@@ -354,4 +370,4 @@ public sealed record CoseOtherKey(
+     public override CoseAlgorithm Algorithm { get; } = Algorithm;
+ 
+     public override byte[] Encode() => RawCbor.ToArray();
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/AttestationFormat.cs w/src/Ctap2/src/Credentials/AttestationFormat.cs
+index 742d2268..1d4ebc16 100644
+--- i/src/Ctap2/src/Credentials/AttestationFormat.cs
++++ w/src/Ctap2/src/Credentials/AttestationFormat.cs
+@@ -19,6 +19,7 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// </summary>
+ /// <remarks>
+ /// See: https://www.w3.org/TR/webauthn-2/#sctn-attstn-fmt-ids
++/// Recognizing an identifier does not imply typed decoding or attestation verification support.
+ /// </remarks>
+ public readonly record struct AttestationFormat(string Value)
+ {
+@@ -38,7 +39,7 @@ public readonly record struct AttestationFormat(string Value)
+     public static readonly AttestationFormat Apple = new("apple");
+ 
+     /// <summary>
+-    /// No attestation (self-attestation).
++    /// No attestation information; distinct from signed self attestation.
+     /// </summary>
+     public static readonly AttestationFormat None = new("none");
+ 
+@@ -63,4 +64,4 @@ public readonly record struct AttestationFormat(string Value)
+     public static AttestationFormat Other(string value) => new(value);
+ 
+     public override string ToString() => Value;
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/AttestationStatement.cs w/src/Ctap2/src/Credentials/AttestationStatement.cs
+index 298bd7cb..0c2b2388 100644
+--- i/src/Ctap2/src/Credentials/AttestationStatement.cs
++++ w/src/Ctap2/src/Credentials/AttestationStatement.cs
+@@ -19,6 +19,13 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// <summary>
+ /// Base class for attestation statements.
+ /// </summary>
++/// <remarks>
++/// Typed decoding is provided for packed, fido-u2f, apple and none; other formats remain opaque.
++/// Decoding does not verify signatures, certificates, trust or RP policy. RawCbor borrows the supplied
++/// statement encoding (or the parent makeCredential buffer); keep it unchanged while referenced.
++/// Typed decoders materialize byte-string fields separately. Direct constructors retain supplied
++/// memory/collections without copying or validation; read-only views are not immutable snapshots.
++/// </remarks>
+ public abstract record AttestationStatement
+ {
+     /// <summary>
+@@ -56,7 +63,7 @@ internal static AttestationStatement Decode(AttestationFormat format, ReadOnlyMe
+             return NoneAttestationStatement.Decode(rawCbor);
+         }
+ 
+-        // Unknown format - capture as opaque
++        // Unmodeled formats, including recognized IDs without a typed decoder, remain opaque.
+         return new UnknownAttestationStatement(format, rawCbor);
+     }
+ }
+@@ -66,13 +73,25 @@ internal static AttestationStatement Decode(AttestationFormat format, ReadOnlyMe
+ /// </summary>
+ public sealed record PackedAttestationStatement : AttestationStatement
+ {
++    /// <summary>Gets the received COSE signature algorithm identifier.</summary>
+     public int Algorithm { get; }
++    /// <summary>Gets the attestation signature bytes, not a verified signature result.</summary>
+     public ReadOnlyMemory<byte> Signature { get; }
++    /// <summary>Gets the optional DER certificate chain, leaf first; trust is not checked here.</summary>
+     public IReadOnlyList<ReadOnlyMemory<byte>>? X5c { get; }
++    /// <summary>Gets the optional ECDAA key identifier.</summary>
+     public ReadOnlyMemory<byte>? EcdaaKeyId { get; }
++    /// <summary>Gets the borrowed encoded statement, not the complete CTAP response.</summary>
+     public override ReadOnlyMemory<byte> RawCbor { get; }
++    /// <summary>Gets the packed format identifier.</summary>
+     public override AttestationFormat Format => AttestationFormat.Packed;
+ 
++    /// <summary>Creates a packed statement carrier without validation or copying.</summary>
++    /// <param name="algorithm">The COSE signature algorithm.</param>
++    /// <param name="signature">Borrowed signature bytes.</param>
++    /// <param name="x5c">Optional borrowed certificate collection and bytes.</param>
++    /// <param name="ecdaaKeyId">Optional borrowed ECDAA identifier.</param>
++    /// <param name="rawCbor">Borrowed encoded statement.</param>
+     public PackedAttestationStatement(
+         int algorithm,
+         ReadOnlyMemory<byte> signature,
+@@ -151,11 +170,19 @@ internal static PackedAttestationStatement Decode(ReadOnlyMemory<byte> rawCbor)
+ /// </summary>
+ public sealed record FidoU2FAttestationStatement : AttestationStatement
+ {
++    /// <summary>Gets the received attestation signature, not a verification result.</summary>
+     public ReadOnlyMemory<byte> Signature { get; }
++    /// <summary>Gets the received DER certificates; decoding does not validate chain trust or format cardinality.</summary>
+     public IReadOnlyList<ReadOnlyMemory<byte>> X5c { get; }
++    /// <summary>Gets the borrowed encoded statement.</summary>
+     public override ReadOnlyMemory<byte> RawCbor { get; }
++    /// <summary>Gets the fido-u2f format identifier.</summary>
+     public override AttestationFormat Format => AttestationFormat.FidoU2F;
+ 
++    /// <summary>Creates a FIDO U2F statement carrier without validation or copying.</summary>
++    /// <param name="signature">Borrowed signature bytes.</param>
++    /// <param name="x5c">Borrowed certificate collection and bytes.</param>
++    /// <param name="rawCbor">Borrowed encoded statement.</param>
+     public FidoU2FAttestationStatement(
+         ReadOnlyMemory<byte> signature,
+         IReadOnlyList<ReadOnlyMemory<byte>> x5c,
+@@ -213,10 +240,16 @@ internal static FidoU2FAttestationStatement Decode(ReadOnlyMemory<byte> rawCbor)
+ /// </summary>
+ public sealed record AppleAttestationStatement : AttestationStatement
+ {
++    /// <summary>Gets the received DER certificate chain; decoding does not verify chain trust or nonce binding.</summary>
+     public IReadOnlyList<ReadOnlyMemory<byte>> X5c { get; }
++    /// <summary>Gets the borrowed encoded statement.</summary>
+     public override ReadOnlyMemory<byte> RawCbor { get; }
++    /// <summary>Gets the apple format identifier.</summary>
+     public override AttestationFormat Format => AttestationFormat.Apple;
+ 
++    /// <summary>Creates an Apple statement carrier without validation or copying.</summary>
++    /// <param name="x5c">Borrowed certificate collection and bytes.</param>
++    /// <param name="rawCbor">Borrowed encoded statement.</param>
+     public AppleAttestationStatement(
+         IReadOnlyList<ReadOnlyMemory<byte>> x5c,
+         ReadOnlyMemory<byte> rawCbor)
+@@ -264,19 +297,23 @@ internal static AppleAttestationStatement Decode(ReadOnlyMemory<byte> rawCbor)
+ }
+ 
+ /// <summary>
+-/// None attestation (self-attestation).
++/// None attestation: no attestation information, not signed self attestation.
+ /// </summary>
+ public sealed record NoneAttestationStatement : AttestationStatement
+ {
+     /// <summary>
+     /// The "none" statement WebAuthn clients substitute for an authenticator's statement: an empty
+-    /// CBOR map (WebAuthn L3 §8.7).
++    /// CBOR map (WebAuthn L2 §8.7).
+     /// </summary>
+     public static NoneAttestationStatement Empty { get; } = new(new byte[] { 0xA0 });
+ 
++    /// <summary>Gets the borrowed encoded statement; construction does not enforce an empty map.</summary>
+     public override ReadOnlyMemory<byte> RawCbor { get; }
++    /// <summary>Gets the none format identifier.</summary>
+     public override AttestationFormat Format => AttestationFormat.None;
+ 
++    /// <summary>Creates a none statement carrier without validating its encoding.</summary>
++    /// <param name="rawCbor">Borrowed statement bytes; the protocol format requires an empty CBOR map.</param>
+     public NoneAttestationStatement(ReadOnlyMemory<byte> rawCbor)
+     {
+         RawCbor = rawCbor;
+@@ -284,22 +321,27 @@ public NoneAttestationStatement(ReadOnlyMemory<byte> rawCbor)
+ 
+     internal static NoneAttestationStatement Decode(ReadOnlyMemory<byte> rawCbor)
+     {
+-        // "none" attestation should be an empty CBOR map
++        // The format requires an empty map; this decoder retains bytes without enforcing that shape.
+         return new NoneAttestationStatement(rawCbor);
+     }
+ }
+ 
+ /// <summary>
+-/// Unknown attestation format (opaque).
++/// Opaque statement for a format without a typed decoder, including recognized unmodeled formats.
+ /// </summary>
+ public sealed record UnknownAttestationStatement : AttestationStatement
+ {
++    /// <summary>Gets the supplied format identifier.</summary>
+     public override AttestationFormat Format { get; }
++    /// <summary>Gets the borrowed encoded statement, not a validated attestation or complete response.</summary>
+     public override ReadOnlyMemory<byte> RawCbor { get; }
+ 
++    /// <summary>Creates an opaque statement carrier without validation or copying.</summary>
++    /// <param name="format">The attestation format.</param>
++    /// <param name="rawCbor">Borrowed encoded statement bytes.</param>
+     public UnknownAttestationStatement(AttestationFormat format, ReadOnlyMemory<byte> rawCbor)
+     {
+         Format = format;
+         RawCbor = rawCbor;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/AttestedCredentialData.cs w/src/Ctap2/src/Credentials/AttestedCredentialData.cs
+index 37aba94d..f8fd7704 100644
+--- i/src/Ctap2/src/Credentials/AttestedCredentialData.cs
++++ w/src/Ctap2/src/Credentials/AttestedCredentialData.cs
+@@ -32,6 +32,11 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// <para>
+ /// See: https://www.w3.org/TR/webauthn-2/#sctn-attested-credential-data
+ /// </para>
++/// <para>
++/// Parse copies the credential ID and encoded key. It extracts one CBOR value for the key without
++/// requiring a COSE map, alg or algorithm-specific parameters. Decode the key separately and apply
++/// RP algorithm/trust policy; extraction is not attestation or mathematical-key verification.
++/// </para>
+ /// </remarks>
+ public sealed class AttestedCredentialData
+ {
+@@ -71,7 +76,9 @@ private AttestedCredentialData(
+     /// <param name="data">The raw data starting at attested credential data.</param>
+     /// <param name="bytesRead">The number of bytes consumed from the input.</param>
+     /// <returns>The parsed AttestedCredentialData.</returns>
+-    /// <exception cref="ArgumentException">If the data is malformed.</exception>
++    /// <remarks>Consumes this structure, not any following authenticator extension suffix.</remarks>
++    /// <exception cref="ArgumentException">The fixed prefix or declared credential ID is too short.</exception>
++    /// <exception cref="CborContentException">The following encoded CBOR value cannot be read.</exception>
+     public static AttestedCredentialData Parse(ReadOnlySpan<byte> data, out int bytesRead)
+     {
+         if (data.Length < MinimumLength)
+@@ -103,7 +110,7 @@ public static AttestedCredentialData Parse(ReadOnlySpan<byte> data, out int byte
+         var credentialId = data.Slice(offset, credentialIdLength).ToArray();
+         offset += credentialIdLength;
+ 
+-        // Parse COSE public key (CBOR-encoded, need to determine length)
++        // Extract one CBOR value for the public key; COSE structure and algorithm policy are separate checks.
+         var coseKeyBytes = data[offset..];
+         var coseKeyLength = GetCborLength(coseKeyBytes);
+         var credentialPublicKey = coseKeyBytes[..coseKeyLength].ToArray();
+@@ -126,4 +133,4 @@ private static int GetCborLength(ReadOnlySpan<byte> data)
+         reader.SkipValue();
+         return data.Length - reader.BytesRemaining;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/AuthenticatorData.cs w/src/Ctap2/src/Credentials/AuthenticatorData.cs
+index ba3629c2..60a5da8a 100644
+--- i/src/Ctap2/src/Credentials/AuthenticatorData.cs
++++ w/src/Ctap2/src/Credentials/AuthenticatorData.cs
+@@ -31,6 +31,18 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// </para>
+ /// <para>
+ /// See: https://www.w3.org/TR/webauthn-2/#sctn-authenticator-data
++/// for the base layout. BE/BS meanings are defined in WebAuthn Level 3, Recommendation 25 August
++/// 2026, §6.1.3 (https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#sctn-credential-backup).
++/// </para>
++/// <para>
++/// Parse copies the full input, RP hash, attested fields and extension suffix into independent storage.
++/// RawData preserves authenticator data, not a surrounding CTAP response. Extension/raw bytes can contain
++/// secret-derived material; this type has no disposal/zeroing API. Do not log that material or assume
++/// clearing the original input or disposing a session clears these copies.
++/// </para>
++/// <para>
++/// Flags report received bits, not independently verified events. Parsing and RP-hash comparison do not
++/// verify a signature, origin/challenge, account binding, requested policy or attestation trust.
+ /// </para>
+ /// </remarks>
+ public sealed class AuthenticatorData
+@@ -53,6 +65,11 @@ public sealed class AuthenticatorData
+     /// <summary>
+     /// Gets the signature counter value.
+     /// </summary>
++    /// <remarks>
++    /// The authenticator can use a per-credential or global counter, or report zero without counter
++    /// support. The RP compares stored state and chooses a risk policy (WebAuthn L2 §6.1.1); this SDK
++    /// enforces no monotonicity. A counter mismatch is not certain proof of cloning.
++    /// </remarks>
+     public uint SignCount { get; }
+ 
+     /// <summary>
+@@ -63,6 +80,7 @@ public sealed class AuthenticatorData
+     /// <summary>
+     /// Gets the CBOR-encoded extensions data, if present (when ED flag is set).
+     /// </summary>
++    /// <remarks>Copies the complete remaining suffix without checking that it is one complete CBOR map.</remarks>
+     public ReadOnlyMemory<byte>? Extensions { get; }
+ 
+     /// <summary>
+@@ -71,22 +89,22 @@ public sealed class AuthenticatorData
+     public ReadOnlyMemory<byte> RawData { get; }
+ 
+     /// <summary>
+-    /// Gets a value indicating whether user presence was verified.
++    /// Gets whether the received UP bit reports user presence.
+     /// </summary>
+     public bool UserPresent => Flags.HasFlag(AuthenticatorDataFlags.UserPresent);
+ 
+     /// <summary>
+-    /// Gets a value indicating whether user verification was performed.
++    /// Gets whether the received UV bit reports user verification.
+     /// </summary>
+     public bool UserVerified => Flags.HasFlag(AuthenticatorDataFlags.UserVerified);
+ 
+     /// <summary>
+-    /// Gets a value indicating whether backup eligibility is supported.
++    /// Gets whether the received BE bit reports that this credential is backup eligible.
+     /// </summary>
+     public bool BackupEligible => Flags.HasFlag(AuthenticatorDataFlags.BackupEligibility);
+ 
+     /// <summary>
+-    /// Gets a value indicating whether the credential has been backed up.
++    /// Gets whether the received BS bit reports that this credential is currently backed up.
+     /// </summary>
+     public bool BackedUp => Flags.HasFlag(AuthenticatorDataFlags.BackupState);
+ 
+@@ -121,7 +139,13 @@ private AuthenticatorData(
+     /// </summary>
+     /// <param name="data">The raw authenticator data bytes.</param>
+     /// <returns>The parsed AuthenticatorData.</returns>
+-    /// <exception cref="ArgumentException">If the data is malformed.</exception>
++    /// <remarks>
++    /// Checks the 37-byte prefix and parses attested data when AT is set. With ED set, the remaining
++    /// bytes are copied without extension-map validation; with ED unset, trailing bytes are retained
++    /// in RawData but otherwise ignored. It does not enforce all flag relationships or ceremony rules.
++    /// </remarks>
++    /// <exception cref="ArgumentException">The fixed prefix or declared attested fields are too short.</exception>
++    /// <exception cref="System.Formats.Cbor.CborContentException">An extracted attested CBOR value cannot be read.</exception>
+     public static AuthenticatorData Parse(ReadOnlySpan<byte> data)
+     {
+         if (data.Length < MinimumLength)
+@@ -159,7 +183,7 @@ public static AuthenticatorData Parse(ReadOnlySpan<byte> data)
+         ReadOnlyMemory<byte>? extensions = null;
+         if (flags.HasFlag(AuthenticatorDataFlags.ExtensionData))
+         {
+-            // Extensions are the remaining bytes (CBOR-encoded)
++            // Preserve the ED suffix; this extraction does not validate its CBOR map or full consumption.
+             extensions = data[offset..].ToArray();
+         }
+ 
+@@ -177,13 +201,15 @@ public static AuthenticatorData Parse(ReadOnlySpan<byte> data)
+     /// </summary>
+     /// <param name="data">The raw authenticator data.</param>
+     /// <returns>The parsed AuthenticatorData.</returns>
++    /// <remarks>Copies storage and applies the same parsing limits as the span overload.</remarks>
+     public static AuthenticatorData Parse(ReadOnlyMemory<byte> data) => Parse(data.Span);
+ 
+     /// <summary>
+-    /// Verifies that the RP ID hash matches the expected RP ID.
++    /// Compares the received RP ID hash with SHA-256 of the UTF-8-encoded expected RP ID.
+     /// </summary>
+     /// <param name="rpId">The expected RP ID string.</param>
+     /// <returns>True if the hash matches, false otherwise.</returns>
++    /// <remarks>A match is only this hash comparison, not origin authorization or complete RP assertion verification.</remarks>
+     public bool VerifyRpIdHash(string rpId)
+     {
+         ArgumentException.ThrowIfNullOrEmpty(rpId);
+@@ -245,4 +271,4 @@ public enum AuthenticatorDataFlags : byte
+     /// Extension data included (ED).
+     /// </summary>
+     ExtensionData = 0x80
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs w/src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs
+index 549b5d96..c1047dd9 100644
+--- i/src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs
++++ w/src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs
+@@ -22,8 +22,15 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ public static class Ctap2CredentialOptions
+ {
+     /// <summary>
+-    /// Creates options configured for FIDO2 PIN input (4-63 bytes UTF-8).
++    /// Creates a FIDO2 PIN prompt preset with console-reader limits of 4–63 UTF-16 characters.
+     /// </summary>
++    /// <remarks>
++    /// ConsoleCredentialReader counts char values before converting with the default UTF-8 encoding,
++    /// not UTF-8 bytes or Unicode code points. Non-ASCII text can exceed 63 encoded bytes. This preset
++    /// does not enforce the authenticator's current minimum or full CTAP PIN rules; the input layer must
++    /// validate NFC UTF-8, code-point/byte limits and no final NUL before submitting PIN bytes.
++    /// Dispose the credential reader's returned memory owner after the awaited operation to clear its secret.
++    /// </remarks>
+     public static CredentialReaderOptions ForCtap2Pin() => new()
+     {
+         Prompt = "Enter FIDO2 PIN: ",
+@@ -31,4 +38,4 @@ public static class Ctap2CredentialOptions
+         MinLength = 4,
+         MaxLength = 63
+     };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/GetAssertionOptions.cs w/src/Ctap2/src/Credentials/GetAssertionOptions.cs
+index f9d22c71..d45a1854 100644
+--- i/src/Ctap2/src/Credentials/GetAssertionOptions.cs
++++ w/src/Ctap2/src/Credentials/GetAssertionOptions.cs
+@@ -26,6 +26,14 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// - pinUvAuthParam (0x06): PIN/UV auth parameter
+ /// - pinUvAuthProtocol (0x07): PIN/UV protocol version
+ /// </para>
++/// <para>
++/// The mutable object retains supplied lists and byte memory. Keep it and borrowed input storage
++/// unchanged through the awaited command; read-only views are not immutable snapshots. The caller
++/// clears auth parameters and secret-bearing inputs after completion, including failure. This type
++/// does not negotiate capabilities, choose RP account policy or verify returned assertions.
++/// Setting auth properties establishes no persistent logged-in state; the authenticator governs token
++/// scope, permission consumption and expiry for the request.
++/// </para>
+ /// </remarks>
+ public sealed class GetAssertionOptions
+ {
+@@ -33,8 +41,9 @@ public sealed class GetAssertionOptions
+     /// Gets or sets the list of allowed credentials.
+     /// </summary>
+     /// <remarks>
+-    /// If provided, only credentials matching these descriptors will be used.
+-    /// If empty or null, discoverable credentials for the RP will be searched.
++    /// A nonempty list restricts the authenticator's credential search to these descriptors for the RP.
++    /// Null/empty lists are omitted and request discovery by RP ID, subject to authorization and
++    /// credential-protection policy. The list and descriptor ID storage are borrowed.
+     /// </remarks>
+     public IReadOnlyList<PublicKeyCredentialDescriptor>? AllowList { get; set; }
+ 
+@@ -42,28 +51,49 @@ public sealed class GetAssertionOptions
+     /// Gets or sets whether user presence is required.
+     /// </summary>
+     /// <remarks>
+-    /// Defaults to true. Setting to false allows silent assertions.
++    /// Null omits up (CTAP defaults to true); false explicitly requests no user-presence check, for
++    /// example a preflight. Authenticator/extension policy can still reject it. This is not a promise
++    /// of successful silent authentication; WebAuthn RP assertions ordinarily require UP.
+     /// </remarks>
+     public bool? UserPresence { get; set; }
+ 
+     /// <summary>
+-    /// Gets or sets whether user verification is required.
++    /// Gets or sets the CTAP uv option requesting built-in user verification.
+     /// </summary>
++    /// <remarks>
++    /// Null omits uv; false still sends the key. CTAP 2.1/2.3 §6.2 prohibit uv alongside PinUvAuthParam,
++    /// even false; omit it for token authorization and when built-in UV is unsupported. This setter
++    /// neither obtains a PIN nor enforces the combination. Check received UV and perform RP verification.
++    /// </remarks>
+     public bool? UserVerification { get; set; }
+ 
+     /// <summary>
+     /// Gets or sets the PIN/UV auth parameter for authorization.
+     /// </summary>
++    /// <remarks>
++    /// Authenticate the exact clientDataHash with a valid token and matching protocol. Permission-bearing
++    /// tokens need GetAssertion permission and RP scope; actual state/lifetime is enforced by the
++    /// authenticator. Omit UserVerification. Null/empty auth bytes are omitted, not encoded as a
++    /// zero-length probe; tag size/permissions are not checked here. The memory remains caller-owned.
++    /// </remarks>
+     public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
+ 
+     /// <summary>
+     /// Gets or sets the PIN/UV auth protocol version.
+     /// </summary>
++    /// <remarks>
++    /// Match the auth parameter's protocol. Null defaults to encoded version 2 only with nonempty auth
++    /// bytes; this is not protocol negotiation. A protocol without auth bytes is omitted.
++    /// </remarks>
+     public int? PinUvAuthProtocol { get; set; }
+ 
+     /// <summary>
+     /// Gets or sets extension inputs as a CBOR-encoded map.
+     /// </summary>
++    /// <remarks>
++    /// Borrowed bytes are emitted without extension capability/policy validation. Null/zero-byte input
++    /// is omitted, whereas an encoded empty CBOR map is present.
++    /// </remarks>
+     public ReadOnlyMemory<byte>? Extensions { get; set; }
+ 
+     /// <summary>
+@@ -76,7 +106,7 @@ public GetAssertionOptions()
+     /// <summary>
+     /// Sets the user verification option.
+     /// </summary>
+-    /// <param name="value">Whether to require user verification.</param>
++    /// <param name="value">The built-in UV request value; this setter does not clear token authentication.</param>
+     /// <returns>This options instance for chaining.</returns>
+     public GetAssertionOptions WithUserVerification(bool value)
+     {
+@@ -87,7 +117,7 @@ public GetAssertionOptions WithUserVerification(bool value)
+     /// <summary>
+     /// Sets the PIN/UV authentication parameters.
+     /// </summary>
+-    /// <param name="param">The PIN/UV auth parameter.</param>
++    /// <param name="param">Caller-owned auth parameter over clientDataHash; keep stable through the awaited command.</param>
+     /// <param name="protocol">The protocol version.</param>
+     /// <returns>This options instance for chaining.</returns>
+     public GetAssertionOptions WithPinUvAuth(ReadOnlyMemory<byte> param, int protocol)
+@@ -111,7 +141,7 @@ public GetAssertionOptions WithAllowList(IReadOnlyList<PublicKeyCredentialDescri
+     /// <summary>
+     /// Sets the allow list from credential IDs.
+     /// </summary>
+-    /// <param name="credentialIds">The allowed credential IDs.</param>
++    /// <param name="credentialIds">The allowed IDs; the new descriptor list still borrows each ID's byte storage.</param>
+     /// <returns>This options instance for chaining.</returns>
+     public GetAssertionOptions WithAllowList(params ReadOnlyMemory<byte>[] credentialIds)
+     {
+@@ -120,4 +150,4 @@ public GetAssertionOptions WithAllowList(params ReadOnlyMemory<byte>[] credentia
+             .ToList();
+         return this;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/GetAssertionResponse.cs w/src/Ctap2/src/Credentials/GetAssertionResponse.cs
+index ac582dff..fa7a483c 100644
+--- i/src/Ctap2/src/Credentials/GetAssertionResponse.cs
++++ w/src/Ctap2/src/Credentials/GetAssertionResponse.cs
+@@ -22,14 +22,29 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// <remarks>
+ /// <para>
+ /// CTAP2 getAssertion response structure:
+-/// - 0x01: credential (map, optional) - selected credential
++/// - 0x01: credential (map) - selected credential; see <see cref="Credential"/> for version conditions
+ /// - 0x02: authData (byte string) - authenticator data
+ /// - 0x03: signature (byte string) - assertion signature
+-/// - 0x04: user (map, optional) - user entity (discoverable credentials only)
++/// - 0x04: user (map, optional) - authenticator-supplied account information
+ /// - 0x05: numberOfCredentials (uint, optional) - total credentials for first response
+ /// - 0x06: userSelected (bool, optional) - user selected this credential
+ /// - 0x07: largeBlobKey (byte string, optional) - large blob key
+ /// </para>
++/// <para>
++/// CTAP 2.3 §6.2.2 also defines unsigned extension outputs at key 0x08. This decoder skips that
++/// field and other unknown outer fields; it does not retain a complete response envelope.
++/// </para>
++/// <para>
++/// Decoding copies byte strings, including the signature, IDs, large-blob key and authenticator data.
++/// Authenticator-data parsing creates further independent copies; <see cref="ExtensionOutputs"/>
++/// refers to its extension copy. Neither this result nor session disposal clears these buffers.
++/// Large-blob keys and secret-derived extension data are sensitive: do not log them or assume that
++/// clearing the original input clears the decoded copies. This type provides no disposal/zeroing API.
++/// </para>
++/// <para>
++/// Parsing is not authentication. The RP must verify the signature and client-data challenge/origin,
++/// credential/account binding, RP ID, required UP/UV and counter policy before accepting the assertion.
++/// </para>
+ /// </remarks>
+ public sealed class GetAssertionResponse
+ {
+@@ -37,8 +52,10 @@ public sealed class GetAssertionResponse
+     /// Gets the credential descriptor for the selected credential.
+     /// </summary>
+     /// <remarks>
+-    /// May be absent if only one credential matches (pre-CTAP2.1) or
+-    /// if using non-discoverable credentials.
++    /// CTAP 2.0 §5.2 permits omission only when the request allowList contains exactly one descriptor,
++    /// not merely when one credential matches. CTAP 2.1/2.3 §6.2.2 require this field. This decoder has
++    /// no request/version context and exposes absence as null; it does not recover the requested ID.
++    /// A caller handling the 2.0 exception must retain the known singleton descriptor for association.
+     /// </remarks>
+     public PublicKeyCredentialDescriptor? Credential { get; }
+ 
+@@ -53,15 +70,19 @@ public sealed class GetAssertionResponse
+     public ReadOnlyMemory<byte> AuthenticatorDataRaw { get; }
+ 
+     /// <summary>
+-    /// Gets the assertion signature.
++    /// Gets the received assertion signature bytes; their encoding depends on the credential algorithm.
+     /// </summary>
+     public ReadOnlyMemory<byte> Signature { get; }
+ 
+     /// <summary>
+-    /// Gets the user entity for discoverable credentials.
++    /// Gets the authenticator-supplied user entity, if present.
+     /// </summary>
+     /// <remarks>
+-    /// Only present for discoverable credentials when user verification is performed.
++    /// CTAP 2.1/2.3 §6.2.2 require at least the opaque user ID for discoverable credentials and permit
++    /// a user entity for server-side credentials. The ID is not conditional on UV. Authenticators MUST
++    /// NOT return identifying name/displayName/icon fields without UV; this decoder passes modeled
++    /// name/displayName through rather than enforcing that privacy rule, and skips icon. Use the ID,
++    /// not display fields, for RP account binding and authorization. Names can be absent even with UV.
+     /// </remarks>
+     public PublicKeyCredentialUserEntity? User { get; }
+ 
+@@ -69,24 +90,30 @@ public sealed class GetAssertionResponse
+     /// Gets the total number of credentials matching the request.
+     /// </summary>
+     /// <remarks>
+-    /// Only present in the first response when multiple credentials match.
+-    /// Use GetNextAssertionAsync to retrieve additional assertions.
++    /// CTAP defaults an absent count to one; authenticator account selection can omit it even when
++    /// multiple accounts exist. When a valid first-response count N exceeds one, collect N−1 next
++    /// assertions promptly, without unrelated authenticator operations between calls. The SDK does
++    /// not reserve the sequence or validate this uint32-to-int conversion against Int32.MaxValue.
++    /// Next-assertion responses omit the count.
+     /// </remarks>
+     public int? NumberOfCredentials { get; }
+ 
+     /// <summary>
+     /// Gets whether the user explicitly selected this credential.
+     /// </summary>
++    /// <remarks>Reports the received field, not an SDK account-picker result. CTAP defaults absence to false.</remarks>
+     public bool? UserSelected { get; }
+ 
+     /// <summary>
+-    /// Gets the large blob key for this credential.
++    /// Gets the secret symmetric large-blob storage key from response key 0x07, if supplied.
+     /// </summary>
++    /// <remarks>Presence does not establish the required key length; the decoder does not check it.</remarks>
+     public ReadOnlyMemory<byte>? LargeBlobKey { get; }
+ 
+     /// <summary>
+-    /// Gets the CBOR-encoded extension outputs, if any.
++    /// Gets the signed authenticator-data extension bytes, if the ED bit is set.
+     /// </summary>
++    /// <remarks>These bytes are not the unsigned output map at response key 0x08, and are not verified here.</remarks>
+     public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
+ 
+     private GetAssertionResponse(
+@@ -116,6 +143,12 @@ private GetAssertionResponse(
+     /// </summary>
+     /// <param name="data">The CBOR-encoded response (excluding status byte).</param>
+     /// <returns>The parsed response.</returns>
++    /// <remarks>
++    /// Uses a lax CBOR reader and checks authData/signature presence, but not signature nonemptiness,
++    /// version-dependent fields, all conditional rules or complete input consumption. CBOR errors can
++    /// raise <see cref="CborContentException"/>; missing required modeled fields raise
++    /// <see cref="InvalidOperationException"/>. Authenticator-data and entity checks can also fail.
++    /// </remarks>
+     public static GetAssertionResponse Decode(ReadOnlyMemory<byte> data)
+     {
+         var reader = new CborReader(data, CborConformanceMode.Lax);
+@@ -127,6 +160,7 @@ public static GetAssertionResponse Decode(ReadOnlyMemory<byte> data)
+     /// </summary>
+     /// <param name="reader">The CBOR reader.</param>
+     /// <returns>The parsed response.</returns>
++    /// <remarks>Consumes one response map using the supplied reader; the same model/verification limits apply.</remarks>
+     public static GetAssertionResponse Decode(CborReader reader)
+     {
+         var mapLength = reader.ReadStartMap();
+@@ -201,10 +235,12 @@ public static GetAssertionResponse Decode(CborReader reader)
+     /// <summary>
+     /// Gets the credential ID from the credential descriptor or returns empty.
+     /// </summary>
++    /// <remarks>Empty reports a missing descriptor, not a recovered request ID or a failed signature verification.</remarks>
+     public ReadOnlyMemory<byte> GetCredentialId() => Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
+ 
+     /// <summary>
+     /// Gets the user handle from the user entity or returns empty.
+     /// </summary>
++    /// <remarks>Empty reports absence of the entity, not proof that no account exists or authentication failed.</remarks>
+     public ReadOnlyMemory<byte> GetUserHandle() => User?.Id ?? ReadOnlyMemory<byte>.Empty;
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/MakeCredentialOptions.cs w/src/Ctap2/src/Credentials/MakeCredentialOptions.cs
+index 653fd139..dcd029fd 100644
+--- i/src/Ctap2/src/Credentials/MakeCredentialOptions.cs
++++ w/src/Ctap2/src/Credentials/MakeCredentialOptions.cs
+@@ -27,6 +27,14 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// - pinUvAuthProtocol (0x09): PIN/UV protocol version
+ /// - enterpriseAttestation (0x0A): Enterprise attestation type
+ /// </para>
++/// <para>
++/// This mutable options object retains supplied lists and byte memory, not immutable snapshots.
++/// Keep it and its borrowed storage unchanged through the awaited command. The caller owns and clears
++/// auth-parameter/secret-bearing input buffers after completion, including failure; request cleanup
++/// does not clear them. These options encode requests, not capability negotiation or RP verification.
++/// Token authorization depends on authenticator state/permissions, not a persistent logged-in state
++/// established by setting these properties.
++/// </para>
+ /// </remarks>
+ public sealed class MakeCredentialOptions
+ {
+@@ -34,8 +42,9 @@ public sealed class MakeCredentialOptions
+     /// Gets or sets the list of credentials to exclude.
+     /// </summary>
+     /// <remarks>
+-    /// If any of these credentials exist, the authenticator will return an error.
+-    /// Used to prevent duplicate credential creation.
++    /// Requests exclusion of these credentials under the authenticator's RP and authorization checks.
++    /// This is not a global duplicate-user guarantee. Null/empty lists are omitted from the request;
++    /// the supplied collection and descriptor IDs are borrowed.
+     /// </remarks>
+     public IReadOnlyList<PublicKeyCredentialDescriptor>? ExcludeList { get; set; }
+ 
+@@ -43,8 +52,9 @@ public sealed class MakeCredentialOptions
+     /// Gets or sets whether to create a discoverable credential (resident key).
+     /// </summary>
+     /// <remarks>
+-    /// When true, the credential is stored on the authenticator and can be
+-    /// discovered without providing a credential ID.
++    /// True requests a credential discoverable by RP ID without supplying its ID. Support, storage
++    /// capacity, authorization and credential-protection policy still apply. Null omits rk and false
++    /// explicitly requests non-discoverable creation; neither describes where all key material is stored.
+     /// </remarks>
+     public bool? ResidentKey { get; set; }
+ 
+@@ -61,10 +71,13 @@ public sealed class MakeCredentialOptions
+     public bool? UserPresence { get; set; }
+ 
+     /// <summary>
+-    /// Gets or sets whether user verification is required.
++    /// Gets or sets the CTAP uv option requesting built-in user verification.
+     /// </summary>
+     /// <remarks>
+-    /// When true, the authenticator must verify the user (e.g., PIN or biometric).
++    /// Null omits the uv key; false still sends it. CTAP 2.1/2.3 §6.1 require platforms to omit uv if
++    /// built-in UV is unsupported and to omit it whenever PinUvAuthParam is supplied, even when false.
++    /// PIN authorization uses a token/auth parameter, not this option. The SDK does not enforce these
++    /// combinations or obtain a PIN here. Inspect the returned UV bit, then apply RP verification policy.
+     /// </remarks>
+     public bool? UserVerification { get; set; }
+ 
+@@ -72,13 +85,21 @@ public sealed class MakeCredentialOptions
+     /// Gets or sets the PIN/UV auth parameter for authorization.
+     /// </summary>
+     /// <remarks>
+-    /// Required when user verification is needed. Computed using ClientPin.
++    /// Authenticate the exact 32-byte clientDataHash with a valid PIN/UV token and the matching protocol.
++    /// Permission-bearing tokens require MakeCredential permission and the RP scope; authenticator
++    /// state/lifetime still govern authorization. Omit UserVerification when using this parameter.
++    /// Null/empty memory is omitted, so this surface does not encode a zero-length auth probe. The SDK
++    /// does not validate tag length or token permissions here. The supplied memory remains caller-owned.
+     /// </remarks>
+     public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
+ 
+     /// <summary>
+     /// Gets or sets the PIN/UV auth protocol version.
+     /// </summary>
++    /// <remarks>
++    /// Match the protocol used for PinUvAuthParam. With nonempty auth bytes, null encodes version 2;
++    /// this is an encoding default, not negotiation. Without auth bytes, this field is omitted.
++    /// </remarks>
+     public int? PinUvAuthProtocol { get; set; }
+ 
+     /// <summary>
+@@ -86,13 +107,18 @@ public sealed class MakeCredentialOptions
+     /// </summary>
+     /// <remarks>
+     /// Values: 1 = vendor-facilitated, 2 = platform-managed.
+-    /// Requires authenticator support for enterprise attestation.
++    /// Requires advertised support, enabled configuration and applicable RP authorization. These
++    /// options do not validate those conditions or the integer range; the response field reports use.
+     /// </remarks>
+     public int? EnterpriseAttestation { get; set; }
+ 
+     /// <summary>
+     /// Gets or sets extension inputs as a CBOR-encoded map.
+     /// </summary>
++    /// <remarks>
++    /// Borrowed encoded bytes are written as supplied, without extension capability/policy validation.
++    /// Null/zero-byte input is omitted; an encoded empty CBOR map is still present on the wire.
++    /// </remarks>
+     public ReadOnlyMemory<byte>? Extensions { get; set; }
+ 
+     /// <summary>
+@@ -116,7 +142,7 @@ public MakeCredentialOptions WithResidentKey(bool value)
+     /// <summary>
+     /// Sets the user verification option.
+     /// </summary>
+-    /// <param name="value">Whether to require user verification.</param>
++    /// <param name="value">The built-in UV request value; this setter does not clear existing token authentication.</param>
+     /// <returns>This options instance for chaining.</returns>
+     public MakeCredentialOptions WithUserVerification(bool value)
+     {
+@@ -127,7 +153,7 @@ public MakeCredentialOptions WithUserVerification(bool value)
+     /// <summary>
+     /// Sets the PIN/UV authentication parameters.
+     /// </summary>
+-    /// <param name="param">The PIN/UV auth parameter.</param>
++    /// <param name="param">Caller-owned auth parameter over clientDataHash; keep stable through the awaited command.</param>
+     /// <param name="protocol">The protocol version.</param>
+     /// <returns>This options instance for chaining.</returns>
+     public MakeCredentialOptions WithPinUvAuth(ReadOnlyMemory<byte> param, int protocol)
+@@ -147,4 +173,4 @@ public MakeCredentialOptions WithExcludeList(IReadOnlyList<PublicKeyCredentialDe
+         ExcludeList = excludeList;
+         return this;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/MakeCredentialResponse.cs w/src/Ctap2/src/Credentials/MakeCredentialResponse.cs
+index df2dedb7..b98f2f1c 100644
+--- i/src/Ctap2/src/Credentials/MakeCredentialResponse.cs
++++ w/src/Ctap2/src/Credentials/MakeCredentialResponse.cs
+@@ -21,8 +21,9 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// Contains the attestation object with the newly created credential's
+-/// public key and attestation statement.
++/// Exposes the received authenticator data and attestation statement for registration processing.
++/// Decoding does not verify the attestation signature, certificate chain, challenge/origin, RP/account
++/// binding, required UP/UV or RP attestation policy. Those checks belong to the RP registration workflow.
+ /// </para>
+ /// <para>
+ /// CTAP2 makeCredential response structure:
+@@ -31,7 +32,18 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// - 0x03: attStmt (map) - attestation statement
+ /// - 0x04: epAtt (bool, optional) - enterprise attestation used
+ /// - 0x05: largeBlobKey (byte string, optional) - large blob key
+-/// - 0x06: unsignedExtensionOutputs (map, optional) - unsigned extension outputs (CTAP 2.2 / WebAuthn L3)
++/// - 0x06: unsignedExtensionOutputs (map, optional) - unsigned outputs (CTAP 2.3 §6.1)
++/// </para>
++/// <para>
++/// Decode borrows attestation-statement and unsigned-output slices from the input buffer. Keep that
++/// buffer unchanged while these views are used. Authenticator-data byte strings, parsed authenticator
++/// fields and largeBlobKey are independent copies. This result has no disposal/zeroing API, and session
++/// disposal does not clear it. Clearing the input cannot clear independent secret-bearing copies;
++/// do not log large-blob keys or secret-derived extension data.
++/// </para>
++/// <para>
++/// Unknown outer fields are skipped, not retained in a complete RawData envelope. Raw authenticator
++/// data and attestation-statement bytes preserve only their respective nested structures.
+ /// </para>
+ /// </remarks>
+ public sealed class MakeCredentialResponse
+@@ -46,7 +58,7 @@ public sealed class MakeCredentialResponse
+     public string Format { get; }
+ 
+     /// <summary>
+-    /// Gets the authenticator data containing the new credential.
++    /// Gets the parsed authenticator data; the decoder does not require the AT bit or new credential data.
+     /// </summary>
+     public AuthenticatorData AuthenticatorData { get; }
+ 
+@@ -56,7 +68,7 @@ public sealed class MakeCredentialResponse
+     public ReadOnlyMemory<byte> AuthenticatorDataRaw { get; }
+ 
+     /// <summary>
+-    /// Gets the attestation statement.
++    /// Gets the parsed or opaque attestation statement, not a verified attestation result.
+     /// </summary>
+     public AttestationStatement AttestationStatement { get; }
+ 
+@@ -66,23 +78,26 @@ public sealed class MakeCredentialResponse
+     public bool? EnterpriseAttestation { get; }
+ 
+     /// <summary>
+-    /// Gets the large blob key if the largeBlobKey extension was requested.
++    /// Gets the secret symmetric large-blob storage key from response key 0x05, if supplied.
+     /// </summary>
++    /// <remarks>The decoder does not validate key length or whether the extension was requested.</remarks>
+     public ReadOnlyMemory<byte>? LargeBlobKey { get; }
+ 
+     /// <summary>
+-    /// Gets the CBOR-encoded extension outputs, if any.
++    /// Gets the signed authenticator-data extension bytes, if the ED bit is set.
+     /// </summary>
+     public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
+ 
+     /// <summary>
+-    /// Gets the unsigned extension outputs map (CTAP 2.2 / WebAuthn L3 key 6).
++    /// Gets the unsigned extension outputs from makeCredential response key 0x06.
+     /// </summary>
+     /// <remarks>
+-    /// Per CTAP 2.2 / WebAuthn L3, unsigned extension outputs is a map keyed by extension
+-    /// identifier (text string) with values as raw CBOR bytes. Used by extensions
+-    /// like previewSign to deliver attestation objects via top-level response.
+-    /// Aligned with yubikit-swift, yubikit-android, yubikit-python.
++    /// CTAP 2.3 §6.1 defines text extension identifiers mapped to unsigned values. Each value here is
++    /// its complete encoded CBOR slice, not necessarily a CBOR byte string, and borrows the input buffer.
++    /// An empty map and an omitted field must be treated equivalently by clients, although this model
++    /// preserves empty versus null. These values are separate from signed authData outputs; extensions
++    /// such as experimental previewSign can carry proof objects that require their own verification.
++    /// WebAuthn client-extension processing is a separate layer, not this integer-key envelope.
+     /// </remarks>
+     public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; }
+ 
+@@ -111,6 +126,12 @@ private MakeCredentialResponse(
+     /// </summary>
+     /// <param name="data">The CBOR-encoded response (excluding status byte).</param>
+     /// <returns>The parsed response.</returns>
++    /// <remarks>
++    /// The input is borrowed as described on this type. Uses lax CBOR parsing and requires fmt,
++    /// authData and attStmt, but does not enforce every attestation shape or complete envelope consumption.
++    /// CBOR failures can raise <see cref="CborContentException"/>; missing modeled required fields raise
++    /// <see cref="InvalidOperationException"/>. Authenticator-data parsing can also reject short input.
++    /// </remarks>
+     public static MakeCredentialResponse Decode(ReadOnlyMemory<byte> data)
+     {
+         var reader = new CborReader(data, CborConformanceMode.Lax);
+@@ -122,7 +143,11 @@ public static MakeCredentialResponse Decode(ReadOnlyMemory<byte> data)
+     /// </summary>
+     /// <param name="reader">The CBOR reader.</param>
+     /// <returns>The parsed response.</returns>
+-    /// <remarks>The returned response may reference the reader's underlying buffer.</remarks>
++    /// <remarks>
++    /// Consumes one encoded value and applies the memory decoder's checks. Attestation and unsigned
++    /// values can reference the reader's underlying buffer; keep it unchanged while those views are used.
++    /// This overload is not a complete-input or cryptographic-verification boundary.
++    /// </remarks>
+     public static MakeCredentialResponse Decode(CborReader reader)
+     {
+         ArgumentNullException.ThrowIfNull(reader);
+@@ -130,7 +155,7 @@ public static MakeCredentialResponse Decode(CborReader reader)
+     }
+ 
+     /// <summary>
+-    /// Core decoder for the owned response bytes.
++    /// Decodes one response map while retaining slices of the borrowed response bytes.
+     /// </summary>
+     private static MakeCredentialResponse DecodeInternal(
+         CborReader reader,
+@@ -185,7 +210,7 @@ private static MakeCredentialResponse DecodeInternal(
+                 case 5: // largeBlobKey
+                     largeBlobKey = reader.ReadByteString();
+                     break;
+-                case 6: // unsignedExtensionOutputs (CTAP 2.2 / WebAuthn L3, aligned with sister SDKs)
++                case 6: // makeCredential unsignedExtensionOutputs (CTAP 2.3 §6.1); values borrow fullCbor.
+                     unsignedExtensionOutputs = new Dictionary<string, ReadOnlyMemory<byte>>();
+                     int? extMapSize = reader.ReadStartMap();
+                     for (int j = 0; j < extMapSize; j++)
+@@ -258,6 +283,7 @@ private static MakeCredentialResponse DecodeInternal(
+     /// Gets the credential ID from the attested credential data.
+     /// </summary>
+     /// <returns>The credential ID, or empty if not present.</returns>
++    /// <remarks>Empty is a helper fallback, not proof that a makeCredential response satisfies the protocol.</remarks>
+     public ReadOnlyMemory<byte> GetCredentialId() =>
+         AuthenticatorData.AttestedCredentialData?.CredentialId ?? ReadOnlyMemory<byte>.Empty;
+ 
+@@ -265,6 +291,7 @@ public ReadOnlyMemory<byte> GetCredentialId() =>
+     /// Gets the credential public key from the attested credential data.
+     /// </summary>
+     /// <returns>The COSE-encoded public key, or empty if not present.</returns>
++    /// <remarks>The attested-data parser extracts the encoding without verifying key structure or mathematical validity.</remarks>
+     public ReadOnlyMemory<byte> GetCredentialPublicKey() =>
+         AuthenticatorData.AttestedCredentialData?.CredentialPublicKey ?? ReadOnlyMemory<byte>.Empty;
+ 
+@@ -272,6 +299,7 @@ public ReadOnlyMemory<byte> GetCredentialPublicKey() =>
+     /// Gets the AAGUID from the attested credential data.
+     /// </summary>
+     /// <returns>The AAGUID, or <see cref="Guid.Empty"/> if not present.</returns>
++    /// <remarks>Guid.Empty can also be received on the wire; inspect AttestedCredentialData to distinguish absence.</remarks>
+     public Guid GetAaguid() =>
+         AuthenticatorData.AttestedCredentialData?.Aaguid ?? Guid.Empty;
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Credentials/PublicKeyCredentialTypes.cs w/src/Ctap2/src/Credentials/PublicKeyCredentialTypes.cs
+index 9fa312b2..c869d90e 100644
+--- i/src/Ctap2/src/Credentials/PublicKeyCredentialTypes.cs
++++ w/src/Ctap2/src/Credentials/PublicKeyCredentialTypes.cs
+@@ -25,6 +25,11 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
+ /// by its type and ID, with optional transport hints.
+ /// </para>
+ /// <para>
++/// Constructors borrow ID memory and the transport collection; keep them stable during use and
++/// through an awaited request. Parse materializes new ID/transport storage. Transport hints are
++/// metadata, not proof that an interface is reachable, and Encode writes only modeled fields.
++/// </para>
++/// <para>
+ /// See: https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialdescriptor
+ /// </para>
+ /// </remarks>
+@@ -53,9 +58,9 @@ public sealed class PublicKeyCredentialDescriptor
+     /// <summary>
+     /// Creates a new credential descriptor.
+     /// </summary>
+-    /// <param name="id">The credential ID.</param>
++    /// <param name="id">The nonempty credential ID; its storage is borrowed without copying.</param>
+     /// <param name="type">The credential type (default: "public-key").</param>
+-    /// <param name="transports">Optional transport hints.</param>
++    /// <param name="transports">Optional borrowed transport hints; no immutable snapshot is made.</param>
+     public PublicKeyCredentialDescriptor(
+         ReadOnlyMemory<byte> id,
+         string type = PublicKeyType,
+@@ -168,6 +173,10 @@ public void Encode(CborWriter writer)
+ /// relying party responsible for the request.
+ /// </para>
+ /// <para>
++/// The constructor checks only nonempty ID text, not domain syntax or authorization against an origin.
++/// The client must establish a valid RP ID and client-data binding; the RP verifies the ceremony.
++/// </para>
++/// <para>
+ /// See: https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialrpentity
+ /// </para>
+ /// </remarks>
+@@ -257,12 +266,21 @@ public void Encode(CborWriter writer)
+ }
+ 
+ /// <summary>
+-/// Represents a user entity for credential creation.
++/// Represents account information for credential creation or an authenticator response.
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// Per WebAuthn/CTAP specification, the user entity describes the user
+-/// account for which the credential is being created.
++/// Id is an opaque RP-scoped account handle, not display text. WebAuthn L2 §5.4.3 requires RP
++/// authentication/authorization decisions to use the ID rather than name/displayName; the handle
++/// must not contain personally identifying information. Response identifying fields can be absent
++/// and are prohibited without authenticator UV under CTAP 2.1/2.3 §6.2.2.
++/// </para>
++/// <para>
++/// The public constructor requires a nonempty ID of at most 64 bytes and nonempty name/displayName.
++/// These are current SDK restrictions: CTAP permits omitted display inputs for privacy and permits
++/// an empty account ID (though it recommends avoiding it); WebAuthn's nonempty handle rule is narrower.
++/// Parse permits absent display fields but still rejects empty/oversized IDs. Constructors borrow ID
++/// memory; Parse creates an independent ID array. Keep borrowed bytes stable during use/transmission.
+ /// </para>
+ /// <para>
+ /// See: https://www.w3.org/TR/webauthn-2/#dictdef-publickeycredentialuserentity
+@@ -271,7 +289,7 @@ public void Encode(CborWriter writer)
+ public sealed class PublicKeyCredentialUserEntity
+ {
+     /// <summary>
+-    /// Gets the user handle (unique identifier for the user).
++    /// Gets the opaque RP-scoped user handle used for account binding, not a human-readable name.
+     /// </summary>
+     public ReadOnlyMemory<byte> Id { get; }
+ 
+@@ -294,9 +312,9 @@ public sealed class PublicKeyCredentialUserEntity
+     /// <summary>
+     /// Creates a new user entity.
+     /// </summary>
+-    /// <param name="id">The user handle (up to 64 bytes).</param>
+-    /// <param name="name">The user name.</param>
+-    /// <param name="displayName">The display name.</param>
++    /// <param name="id">The nonempty user handle (up to 64 bytes); byte storage is borrowed.</param>
++    /// <param name="name">The nonempty name required by this SDK constructor, not an authorization identifier.</param>
++    /// <param name="displayName">The nonempty display name required by this SDK constructor.</param>
+     public PublicKeyCredentialUserEntity(
+         ReadOnlyMemory<byte> id,
+         string name,
+@@ -346,6 +364,10 @@ private PublicKeyCredentialUserEntity(
+     /// </summary>
+     /// <param name="reader">The CBOR reader.</param>
+     /// <returns>The parsed user entity.</returns>
++    /// <remarks>
++    /// Requires an ID and copies its bytes; name/displayName are optional and unknown fields are skipped.
++    /// This parser does not filter identifying fields based on UV or complete RP account verification.
++    /// </remarks>
+     public static PublicKeyCredentialUserEntity Parse(CborReader reader)
+     {
+         var mapLength = reader.ReadStartMap();
+@@ -415,4 +437,4 @@ public void Encode(CborWriter writer)
+ 
+         writer.WriteEndMap();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2RequestAuditReproTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2RequestAuditReproTests.cs
+index ee042b98..4a5478d6 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2RequestAuditReproTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/AuditV2/Ctap2RequestAuditReproTests.cs
+@@ -28,8 +28,9 @@ public sealed class Ctap2RequestAuditReproTests
+     public async Task YESDK1618_MakeCredentialFalseUserPresenceIsRejectedBeforeReachingTheKey(YubiKeyTestState state) =>
+         await state.WithCtap2SessionAsync(async session =>
+         {
+-            // Previously the key answered CTAP2_ERR_INVALID_OPTION (0x2C); the SDK now refuses first, so
+-            // the request never leaves the host and no touch is requested.
++            // The SDK rejects this makeCredential request before encoding/transmission or its touch prompt.
++            // Session creation/GetInfo and default PIN normalization can already have performed device I/O.
++            // This assertion checks ArgumentException/ParamName, not absence of all device traffic.
+             var error = await Assert.ThrowsAsync<ArgumentException>(() =>
+                 session.MakeCredentialAsync(
+                     new byte[32],
+@@ -40,4 +41,4 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+             Assert.Equal("options", error.ParamName);
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AlgorithmSupportTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AlgorithmSupportTests.cs
+index a6649414..7eec9be9 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AlgorithmSupportTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AlgorithmSupportTests.cs
+@@ -28,6 +28,14 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// <summary>
+ /// Integration tests for algorithm support in CTAP2 credentials.
+ /// </summary>
++/// <remarks>
++/// Requests each named algorithm and checks attested-data presence and nonempty credential ID/key,
++/// not the returned COSE algorithm/curve or cryptographic validity. Optional unsupported algorithms
++/// return normally without creating a credential. Requires an approved dedicated device and known
++/// PIN state with human UP/UV coordination; setup can normalize the PIN before the callback.
++/// Credential deletion is best effort, and tokens/auth parameters are not comprehensively cleared.
++/// These fixtures use arbitrary hash-sized test data, not a complete client-data/RP ceremony.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ public class Ctap2AlgorithmSupportTests
+ {
+@@ -141,7 +149,7 @@ private static async Task CleanupCredentialAsync(Ctap2Session session, byte[] cr
+         }
+         catch
+         {
+-            // Cleanup failures should not fail the test
++            // Best-effort deletion preserves the primary result; failure can leave credentials and token bytes.
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnterpriseAttestationTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnterpriseAttestationTests.cs
+index 1d9258a5..7ceb68b4 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnterpriseAttestationTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2EnterpriseAttestationTests.cs
+@@ -27,6 +27,13 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// Enterprise attestation allows an authenticator to return a uniquely identifying
+ /// attestation certificate when requested by an enterprise relying party.
+ /// </summary>
++/// <remarks>
++/// Requires a human-coordinated dedicated device with known PIN state and an approved test RP.
++/// Setup can normalize the PIN, enables persistent enterprise configuration on the selected path,
++/// and cleanup deletes all credentials for this RP, not just this run. Prior configuration is not
++/// restored, and token/auth buffers are not comprehensively cleared. Assertions inspect statement
++/// presence and epAtt only if supplied; they do not qualify a certificate, format or attestation trust.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Feature", "EnterpriseAttestation")]
+ public class Ctap2EnterpriseAttestationTests
+@@ -39,7 +46,8 @@ await state.WithCtap2SessionAsync(async session =>
+         {
+             var info = await session.GetInfoAsync();
+ 
+-            // Check if enterprise attestation is supported (ep option)
++            // This test proceeds only with ep=true. Under CTAP, ep=false means supported but disabled;
++            // the unchanged skip diagnostic below does not distinguish that state from absence.
+             if (!info.Options.TryGetValue("ep", out var epSupported) || !epSupported)
+             {
+                 Skip.If(true, "YubiKey does not support enterprise attestation (ep option)");
+@@ -105,8 +113,7 @@ await state.WithCtap2SessionAsync(async session =>
+                 Assert.NotNull(makeResult);
+                 Assert.NotNull(makeResult.AttestationStatement);
+ 
+-                // With enterprise attestation, the format should be "packed" with a certificate
+-                // (not "none" / self-attestation)
++                // Check epAtt only if returned; no assertion requires packed format or a certificate.
+                 if (makeResult.EnterpriseAttestation.HasValue)
+                 {
+                     Assert.True(makeResult.EnterpriseAttestation.Value,
+@@ -118,4 +125,4 @@ await state.WithCtap2SessionAsync(async session =>
+                 await Ctap2TestHelpers.DeleteAllCredentialsForRpAsync(session, Ctap2TestData.RpId, Ctap2TestData.PinUtf8);
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2FipsComplianceTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2FipsComplianceTests.cs
+index b5678304..c2cc1381 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2FipsComplianceTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2FipsComplianceTests.cs
+@@ -20,8 +20,14 @@
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+-/// Integration tests for FIPS compliance verification.
++/// Inspects advertised GetInfo metadata associated with the existing FIPS-labeled test group.
+ /// </summary>
++/// <remarks>
++/// Names/traits do not establish FIPS validation: no certified-device/certificate qualification gate
++/// is present. Some checks return early or act only when optional fields exist; the clientPin check
++/// observes key presence, not its bool value. Default session setup can normalize the PIN before these
++/// metadata reads, so known PIN/device state and human coordination are needed for that setup path.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Category", "FIPS")]
+ public class Ctap2FipsComplianceTests
+@@ -91,4 +97,4 @@ await state.WithCtap2SessionAsync(async session =>
+                     $"Minimum PIN length should be at least 4, got {info.MinPinLength.Value}");
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetAssertionTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetAssertionTests.cs
+index 89127064..5c87676b 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetAssertionTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2GetAssertionTests.cs
+@@ -27,11 +27,18 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// <summary>
+ /// Integration tests for GetAssertion (authentication) operations.
+ /// </summary>
++/// <remarks>
++/// Requires a human-coordinated dedicated device with known PIN state; setup can normalize the PIN.
++/// Uses synthetic hash-sized inputs without client-data construction or RP verification. The resident
++/// case compares the exact user ID and the no-credential case checks CTAP status; signature checks
++/// establish only nonempty bytes. Deletion is best effort and tokens/auth buffers lack comprehensive
++/// finally-zeroing, so these workflows are not secure application-lifetime examples.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ public class Ctap2GetAssertionTests
+ {
+     /// <summary>
+-    /// Tests that GetAssertion returns a valid signature after creating a credential.
++    /// Checks that GetAssertion returns nonempty signature bytes after credential creation.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -112,7 +119,7 @@ await state.WithCtap2SessionAsync(async session =>
+                         PinUvAuthProtocol = clientPin.Protocol.Version
+                     });
+ 
+-                // Assert
++                // Presence checks only: no signature verification, RP-hash or returned-ID association assertion.
+                 Assert.NotNull(assertionResult);
+                 Assert.NotNull(assertionResult.AuthenticatorData);
+                 Assert.False(assertionResult.Signature.IsEmpty, "Signature should not be empty");
+@@ -289,7 +296,7 @@ private static async Task CleanupCredentialAsync(Ctap2Session session, byte[] cr
+         }
+         catch
+         {
+-            // Cleanup failures should not fail the test
++            // Best-effort deletion preserves the primary result; failure can leave credentials and token bytes.
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MakeCredentialTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MakeCredentialTests.cs
+index d4e7b1c2..5166129f 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MakeCredentialTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2MakeCredentialTests.cs
+@@ -30,12 +30,16 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// <remarks>
+ /// These tests exercise credential creation workflows on real YubiKeys.
+ /// Tests requiring user presence (touch) are marked with the appropriate trait.
++/// Use a human-coordinated dedicated device with known PIN state; setup can normalize the PIN.
++/// Test hashes are synthetic, not serialized-client-data bindings. These assertions inspect parsed
++/// fields/status, not attestation trust. Deletion is best effort and not every test deletes credentials;
++/// token/auth buffers lack comprehensive finally-zeroing, so this is not a secure application template.
+ /// </remarks>
+ [Trait("Category", "Integration")]
+ public class Ctap2MakeCredentialTests
+ {
+     /// <summary>
+-    /// Tests that MakeCredential creates a non-resident credential successfully.
++    /// Requests a non-discoverable credential and checks parsed fields and a nonempty credential ID.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -85,7 +89,7 @@ await state.WithCtap2SessionAsync(async session =>
+                 pubKeyCredParams: Ctap2TestData.ES256Params,
+                 options: options);
+ 
+-            // Assert
++            // No attestation verification. Guid.Empty also encodes to 16 bytes, so length alone does not prove AAGUID presence.
+             Assert.NotNull(result);
+             Assert.NotNull(result.AuthenticatorData);
+             Assert.NotNull(result.Format);
+@@ -94,7 +98,7 @@ await state.WithCtap2SessionAsync(async session =>
+         });
+ 
+     /// <summary>
+-    /// Tests that MakeCredential creates a resident (discoverable) credential.
++    /// Requests discoverable creation and checks attested data and a nonempty ID, not later RP-ID discovery.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+@@ -266,13 +270,14 @@ await session.MakeCredentialAsync(
+     /// </summary>
+     /// <remarks>
+     /// <para>
+-    /// This test verifies the error path when the authenticator requires PIN/UV but the client
+-    /// does not provide pinUvAuthParam. The authenticator should return an error such as
+-    /// CtapStatus.PuatRequired or CtapStatus.PinInvalid depending on firmware version.
++    /// Configures/verifies a PIN, then requests discoverable creation without token authentication.
++    /// The assertion accepts one of four CTAP statuses; it does not establish which status every
++    /// firmware must return or prove rejection for every other operation.
+     /// </para>
+     /// <para>
+-    /// This closes the architectural gap where WebAuthn proved this error path on hardware
+-    /// (MakeCredential_NoPinProvided_ThrowsNotAllowed) but CTAP2 did not have an equivalent test.
++    /// Setup can fail or skip before the target request. PIN_AUTH_BLOCKED is temporary and can require
++    /// a power cycle; PIN_BLOCKED is exhausted and may require reset. The unchanged skip string does
++    /// not distinguish these states or the product-specific reset interaction window.
+     /// </para>
+     /// </remarks>
+     [SkippableTheory]
+@@ -281,7 +286,7 @@ await session.MakeCredentialAsync(
+     public async Task MakeCredential_WhenPinUvAuthRequiredButNotProvided_ThrowsCtapError(YubiKeyTestState state) =>
+         await state.WithCtap2SessionAsync(async session =>
+         {
+-            // Arrange: Ensure PIN is set (this makes the device require PIN for operations)
++            // Establish PIN state for this discoverable-creation request, not a universal PIN requirement.
+             try
+             {
+                 using var _ = await Ctap2TestHelpers.SetOrVerifyPinAsync(session, Ctap2TestData.PinUtf8);
+@@ -316,11 +321,7 @@ await session.MakeCredentialAsync(
+                     options: options);
+             });
+ 
+-            // Different firmware versions may return different status codes:
+-            // - PuatRequired (0x36): Standard CTAP2 response when pinUvAuthToken is needed
+-            // - PinInvalid (0x31): Some firmware versions return this when PIN auth is missing
+-            // - PinAuthInvalid (0x33): Alternative error when pinUvAuthParam is absent
+-            // - MissingParameter (0x14): Another possible response when required param is missing
++            // The accepted four-code set bounds this test; it is not per-firmware status qualification.
+             Assert.True(
+                 ctapEx.Status is CtapStatus.PuatRequired or CtapStatus.PinInvalid or CtapStatus.PinAuthInvalid or CtapStatus.MissingParameter,
+                 $"Expected PuatRequired/PinInvalid/PinAuthInvalid/MissingParameter, got {ctapEx.Status}");
+@@ -344,7 +345,7 @@ private static async Task CleanupCredentialAsync(Ctap2Session session, byte[] cr
+         }
+         catch
+         {
+-            // Cleanup failures should not fail the test
++            // Best-effort deletion preserves the primary result; failure can leave credentials and token bytes.
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/Ctap2SessionRequestEncodingTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/Ctap2SessionRequestEncodingTests.cs
+index 53ba9871..775a48c4 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/Ctap2SessionRequestEncodingTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/Ctap2SessionRequestEncodingTests.cs
+@@ -20,6 +20,12 @@
+ 
+ namespace Yubico.YubiKit.Ctap2.UnitTests.Cbor;
+ 
++/// <summary>Mechanical request-encoding fixtures, not authorized CTAP ceremonies.</summary>
++/// <remarks>
++/// All-options fixtures deliberately combine uv with token auth, use short fake tags and synthetic
++/// extension inputs. CTAP prohibits the uv key beside pinUvAuthParam. These assertions expose current
++/// independent field encoding, not valid capability/permission selection or extension cryptography.
++/// </remarks>
+ public sealed class Ctap2SessionRequestEncodingTests
+ {
+     [Fact]
+@@ -219,4 +225,4 @@ private static void SkipMap(CborReader reader)
+ 
+         reader.ReadEndMap();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs
+index 9bbadd09..6fa5223a 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cose/CoseArkgP256SeedKeyTests.cs
+@@ -20,9 +20,13 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Cose;
+ /// <summary>
+ /// Tests for <see cref="CoseArkgP256SeedKey"/> CBOR decoding and encoding.
+ /// </summary>
++/// <remarks>
++/// Synthetic coordinates test the experimental SDK's wrapped-map profile and label routing, not
++/// valid curve points, draft-wide conformance, production cryptography or device interoperability.
++/// </remarks>
+ public class CoseArkgP256SeedKeyTests
+ {
+-    // Test P-256 coordinates for nested COSE_Key maps
++    // Synthetic 32-byte coordinate patterns for nested maps; not validated P-256 points.
+     private static readonly byte[] TestKemX = new byte[32];
+     private static readonly byte[] TestKemY = new byte[32];
+     private static readonly byte[] TestBlX = new byte[32];
+@@ -47,7 +51,7 @@ private static byte[] BuildNestedEc2Key(byte[] x, byte[] y)
+     {
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(5);
+-        // Canonical order: -3, -2, -1, 1, 3
++        // Numeric insertion order; the canonical writer sorts the map to 1, 3, -1, -2, -3.
+         writer.WriteInt32(-3);
+         writer.WriteByteString(y);
+         writer.WriteInt32(-2);
+@@ -65,20 +69,21 @@ private static byte[] BuildNestedEc2Key(byte[] x, byte[] y)
+     [Fact]
+     public void Decode_WithValidArkgSeedKey_ReturnsCorrectVariant()
+     {
+-        // Arrange: construct CBOR map with NESTED COSE_Key maps
+-        // Wire layout per spec: {1:2, 3:-65700, -3:-9, -2:<KEM nested map>, -1:<BL nested map>}
++        // SDK-profile fixture: kty2/alg-65700, -3 derived alg, -2 bstr(KEM map), -1 bstr(BL map).
++        // ARKG-10 agrees on seed alg=-65700, BL/KEM labels and example derived alg=-9, but uses
++        // kty=-65537/direct maps and permits optional int/tstr dkalg instead of requiring an integer.
+         var kemNested = BuildNestedEc2Key(TestKemX, TestKemY);
+         var blNested = BuildNestedEc2Key(TestBlX, TestBlY);
+ 
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(5);
+-        // Canonical order: -3, -2, -1, 1, 3
++        // Numeric insertion order; the canonical writer sorts the map to 1, 3, -1, -2, -3.
+         writer.WriteInt32(-3);
+         writer.WriteInt32(-9); // Derived key alg (Esp256)
+         writer.WriteInt32(-2);
+-        writer.WriteByteString(kemNested); // -2 = pkKem (per spec)
++        writer.WriteByteString(kemNested); // -2 = KEM; SDK wrapper contains the encoded map.
+         writer.WriteInt32(-1);
+-        writer.WriteByteString(blNested);  // -1 = pkBl  (per spec)
++        writer.WriteByteString(blNested);  // -1 = BL; SDK wrapper contains the encoded map.
+         writer.WriteInt32(1);  // kty = 2
+         writer.WriteInt32(2);
+         writer.WriteInt32(3);  // alg = -65700
+@@ -143,17 +148,15 @@ public void Encode_RoundTrip_ProducesCanonicalCbor()
+     }
+ 
+     /// <summary>
+-    /// Spec contract: per draft-bradleylundberg-cfrg-arkg-10, python-fido2 (cose.py:428-433),
+-    /// and the legacy SDK (Yubico.NET.SDK-Legacy/Yubico.YubiKey/src/Yubico/YubiKey/Fido2/PreviewSignExtension.cs:317-323),
+-    /// the ARKG-P256 seed-key nested-COSE_Key wire format is:
++    /// Keeps the distinct ARKG-10 §5.1 public-seed derivation roles mapped correctly:
+     ///   -1 = pkBl  (blinding public key)
+     ///   -2 = pkKem (KEM public key)
+-    /// This test builds a seed-key with two visually distinguishable nested EC2 keys
+-    /// — one with all-0xAA coordinates at <c>-1</c>, one with all-0xBB at <c>-2</c> —
++    /// This test builds the SDK wrapped-map profile with two distinguishable synthetic EC2 keys
++    /// — BL with X=all-0xAA/Y=all-0xAB at <c>-1</c>, KEM with X=all-0xBB/Y=all-0xBC at <c>-2</c> —
+     /// and asserts that the decoder routes them to <c>BlPublicKey</c> and <c>KemPublicKey</c>
+-    /// respectively. Regression guard for the modern-vs-legacy/python wire-mapping divergence
+-    /// that caused FullCeremony GetAssertion to return CTAP2_ERR_OTHER (0x7F) on YubiKey
+-    /// 5.8.0-beta — see Plans/snoopy-strolling-star.md (2026-04-29).
++    /// respectively. Swapping these roles changes downstream derivation inputs. The test does not
++    /// execute previewSign or establish a firmware error, valid points or full Internet-Draft conformance.
++    /// ARKG-10 is work in progress with stated expiry 31 August 2026, not a production standard.
+     /// </summary>
+     [Fact]
+     public void Decode_pkBlAtMinus1_pkKemAtMinus2_PerSpec()
+@@ -174,15 +177,15 @@ public void Decode_pkBlAtMinus1_pkKemAtMinus2_PerSpec()
+         var blNested = BuildNestedEc2Key(blX, blY);
+         var kemNested = BuildNestedEc2Key(kemX, kemY);
+ 
+-        // Wire layout per spec: -1 = pkBl, -2 = pkKem
++        // Label routing: -1 = BL, -2 = KEM; the byte-string wrappers are the SDK profile.
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(5);
+         writer.WriteInt32(-3);
+         writer.WriteInt32(-9); // derived alg
+         writer.WriteInt32(-2);
+-        writer.WriteByteString(kemNested); // -2 = KEM (per spec)
++        writer.WriteByteString(kemNested); // -2 = KEM, wrapped encoded map
+         writer.WriteInt32(-1);
+-        writer.WriteByteString(blNested);  // -1 = BL  (per spec)
++        writer.WriteByteString(blNested);  // -1 = BL, wrapped encoded map
+         writer.WriteInt32(1);
+         writer.WriteInt32(2);   // kty
+         writer.WriteInt32(3);
+@@ -246,4 +249,4 @@ public void Decode_WithArkgAlgorithmAndNonEc2KeyType_UsesArkgVariant()
+ 
+         Assert.IsType<CoseArkgP256SeedKey>(CoseKey.Decode(writer.Encode()));
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/AuthenticatorDataTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/AuthenticatorDataTests.cs
+index 93545899..81794480 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/AuthenticatorDataTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/AuthenticatorDataTests.cs
+@@ -18,7 +18,7 @@
+ namespace Yubico.YubiKit.Ctap2.UnitTests.Credentials;
+ 
+ /// <summary>
+-/// Unit tests for AuthenticatorData parsing and verification.
++/// Unit tests for authenticator-data parsing, received bits and limited RP-hash comparison.
+ /// </summary>
+ public class AuthenticatorDataTests
+ {
+@@ -131,6 +131,7 @@ public void Parse_AttestedCredentialDataFlag_ReturnsTrue()
+     [Fact]
+     public void Parse_ExtensionDataFlag_ReturnsTrue()
+     {
++        // Enum-bit inspection only; this test does not call Parse or validate an ED extension map.
+         var data = MinimalAuthData.ToArray();
+         data[32] = 0x81; // UP + ED flag
+ 
+@@ -146,4 +147,4 @@ public void RawData_ContainsOriginalBytes()
+         Assert.Equal(MinimalAuthData.Length, authData.RawData.Length);
+         Assert.True(MinimalAuthData.AsSpan().SequenceEqual(authData.RawData.Span));
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/CredentialResponseTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/CredentialResponseTests.cs
+index ad4a516f..5424871d 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/CredentialResponseTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/CredentialResponseTests.cs
+@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Credentials;
+ /// <summary>
+ /// Unit tests for MakeCredentialResponse and GetAssertionResponse decoding.
+ /// </summary>
++/// <remarks>
++/// Signatures and zero-coordinate public keys are synthetic parsing fixtures, not cryptographic proofs.
++/// Missing-descriptor cases pin decoder permissiveness/fallbacks; CTAP 2.0 permits omission only for
++/// an exactly singleton request allowList, while CTAP 2.1/2.3 require the descriptor.
++/// </remarks>
+ public class CredentialResponseTests
+ {
+     /// <summary>
+@@ -36,7 +41,7 @@ private static byte[] CreateMakeCredentialResponse(string format = "none", bool
+         writer.WriteInt32(1);
+         writer.WriteTextString(format);
+ 
+-        // 0x02: authData (minimal: 37 bytes with AT flag)
++        // 0x02: authData (37-byte fixed prefix with AT, followed by complete synthetic attested fields)
+         writer.WriteInt32(2);
+         var authData = CreateAuthDataWithAttestedCredentialData();
+         writer.WriteByteString(authData);
+@@ -45,7 +50,7 @@ private static byte[] CreateMakeCredentialResponse(string format = "none", bool
+         writer.WriteInt32(3);
+         if (format == "packed")
+         {
+-            // Packed attestation requires alg + sig per CTAP 2.1 §8.2.
++            // Packed attestation alg/sig fields are defined by WebAuthn L2 §8.2; signature bytes below are synthetic.
+             writer.WriteStartMap(2);
+             writer.WriteTextString("alg");
+             writer.WriteInt32(-7); // ES256
+@@ -55,7 +60,7 @@ private static byte[] CreateMakeCredentialResponse(string format = "none", bool
+         }
+         else
+         {
+-            // "none" format has empty attStmt per CTAP 2.1 §8.7.
++            // "none" has empty attStmt per WebAuthn L2 §8.7, not signed self attestation.
+             writer.WriteStartMap(0);
+             writer.WriteEndMap();
+         }
+@@ -145,7 +150,7 @@ private static byte[] CreateGetAssertionResponse(
+ 
+         writer.WriteStartMap(mapCount);
+ 
+-        // 0x01: credential (optional)
++        // 0x01: credential (optional in this fixture, not universally optional under CTAP)
+         if (includeCredential)
+         {
+             writer.WriteInt32(1);
+@@ -279,7 +284,7 @@ public void MakeCredentialResponse_GetCredentialPublicKey_ReturnsCoseKey()
+         var publicKey = response.GetCredentialPublicKey();
+         Assert.False(publicKey.IsEmpty);
+ 
+-        // Verify it's valid CBOR
++        // Check a nonempty map header only, not complete CBOR/COSE validity or a valid public point.
+         var reader = new CborReader(publicKey);
+         var mapLength = reader.ReadStartMap();
+         Assert.True(mapLength > 0);
+@@ -388,4 +393,4 @@ public void GetAssertionResponse_GetUserHandle_ReturnsHandleOrEmpty()
+ 
+         Assert.True(responseNoUser.GetUserHandle().IsEmpty);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/PublicKeyCredentialTypesTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/PublicKeyCredentialTypesTests.cs
+index 89adef5d..54702fae 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/PublicKeyCredentialTypesTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/PublicKeyCredentialTypesTests.cs
+@@ -245,6 +245,7 @@ public void GetAssertionOptions_WithAllowList_SetsCredentials()
+     [Fact]
+     public void GetAssertionOptions_FluentApi_ChainsCorrectly()
+     {
++        // Setter-storage fixture only: uv + token auth is prohibited on CTAP wire, and the short tag is synthetic.
+         var authParam = new byte[] { 0xAB, 0xCD };
+ 
+         var options = new GetAssertionOptions()
+@@ -255,4 +256,4 @@ public void GetAssertionOptions_FluentApi_ChainsCorrectly()
+         Assert.Equal(authParam, options.PinUvAuthParam!.Value.ToArray());
+         Assert.Equal(1, options.PinUvAuthProtocol);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/MakeCredentialResponseTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/MakeCredentialResponseTests.cs
+index 801a3046..1310bb5a 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/MakeCredentialResponseTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/MakeCredentialResponseTests.cs
+@@ -23,8 +23,8 @@ public class MakeCredentialResponseTests
+     public void Decode_WithUnsignedExtensionOutputs_CapturesExtensionMap()
+     {
+         // Arrange - Build a minimal MakeCredential response with key 6 (unsignedExtensionOutputs).
+-        // Per CTAP 2.2 / WebAuthn L3, key 6 is the canonical position for unsignedExtensionOutputs,
+-        // aligned with yubikit-swift, yubikit-android, and yubikit-python.
++        // CTAP 2.3 §6.1 assigns makeCredential unsigned outputs to key 6. This fixture checks map-key
++        // presence and a nonempty encoded value, not valid previewSign attestation or firmware behavior.
+         byte[] cbor = BuildMakeCredentialResponseCbor(unsignedExtensionOutputsKey: 6);
+ 
+         // Act
+@@ -39,10 +39,8 @@ public void Decode_WithUnsignedExtensionOutputs_CapturesExtensionMap()
+     [Fact(Timeout = 5000)]
+     public void Decode_WithUnsignedExtensionOutputsAtLegacyKey8_IsSilentlyDropped()
+     {
+-        // Regression guard: an early CTAP v4 draft used key 8 for unsignedExtensionOutputs,
+-        // and v2 .NET historically parsed at that key (silent data loss against real firmware
+-        // emitting key 6). This test pins the new behavior: a response carrying the legacy
+-        // key 8 must NOT populate UnsignedExtensionOutputs (the parser should ignore it).
++        // Pins ignored key 8 in this makeCredential decoder. CTAP 2.3 uses key 8 for getAssertion,
++        // not makeCredential; this is not evidence of a general "CTAP v4" or live-firmware behavior.
+         byte[] cbor = BuildMakeCredentialResponseCbor(unsignedExtensionOutputsKey: 8);
+ 
+         var response = MakeCredentialResponse.Decode(cbor);
+@@ -80,4 +78,4 @@ private static byte[] BuildMakeCredentialResponseCbor(int unsignedExtensionOutpu
+ 
+         return writer.Encode();
+     }
+-}
+\ No newline at end of file
++}

@@ -1,0 +1,17 @@
+[
+  {
+    "context": "consumer-lib",
+    "status": "failed",
+    "command": [
+      "dotnet",
+      "toolchain.cs",
+      "--",
+      "build",
+      "--project",
+      "AuditCt001.Examples.consumer-lib",
+      "--clean"
+    ],
+    "exit_code": 1,
+    "log": "context-runs/consumer-lib.log"
+  }
+]

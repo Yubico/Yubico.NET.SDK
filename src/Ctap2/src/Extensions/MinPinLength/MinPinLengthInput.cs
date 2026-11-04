@@ -22,11 +22,13 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <remarks>
 /// <para>
 /// The minPinLength extension allows a relying party to request the minimum PIN length
-/// required by the authenticator. This is useful for RPs that want to ensure
-/// adequate PIN complexity.
+/// currently required by the authenticator, in Unicode code points. It neither changes policy nor
+/// proves the current PIN's length or all complexity rules.
 /// </para>
 /// <para>
-/// The RP must be in the authenticator's "minPinLengthRPIDList" for this to work.
+/// During credential creation, the RP must be authorized by the authenticator's minPinLengthRPIDs
+/// configuration. An unauthorized RP receives no extension output, not a zero minimum.
+/// Use AuthenticatorConfig to change minimum-PIN policy; this input only requests disclosure.
 /// </para>
 /// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-minPinLength-extension
@@ -50,7 +52,7 @@ public sealed class MinPinLengthInput
     {
         ArgumentNullException.ThrowIfNull(writer);
 
-        // minPinLength input is a boolean true
+        // Encode the requested boolean; false is not omission of this value.
         writer.WriteBoolean(Requested);
     }
 

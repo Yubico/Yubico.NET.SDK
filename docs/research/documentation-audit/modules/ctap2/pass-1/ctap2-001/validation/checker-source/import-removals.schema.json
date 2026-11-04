@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ctap2-001 reviewed formatter-only namespace-import removals",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "baseline", "formatter", "files"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "baseline": { "const": "5b09a9b6942ded3913b5c9340c3e126617e61a82" },
+    "formatter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["diagnostic", "command_log", "command_log_sha256", "log", "log_sha256"],
+      "properties": {
+        "diagnostic": { "const": "IDE0005" },
+        "command_log": { "$ref": "#/$defs/runPath" },
+        "command_log_sha256": { "$ref": "#/$defs/sha256" },
+        "log": { "$ref": "#/$defs/runPath" },
+        "log_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "baseline_sha256", "before", "after", "removals"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^(src|tests|examples|benchmarks|verification)/.+\\.cs$" },
+          "baseline_sha256": { "$ref": "#/$defs/sha256" },
+          "before": { "$ref": "#/$defs/capture" },
+          "after": { "$ref": "#/$defs/capture" },
+          "removals": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["namespace"],
+              "properties": { "namespace": { "type": "string", "minLength": 1 } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-fA-F]{64}$" },
+    "runPath": {
+      "type": "string",
+      "pattern": "^docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/.+"
+    },
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bundle_sha256", "sha256"],
+      "properties": {
+        "path": { "$ref": "#/$defs/runPath" },
+        "bundle_sha256": { "$ref": "#/$defs/sha256" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

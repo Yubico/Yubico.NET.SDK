@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "baseline": "5b09a9b6942ded3913b5c9340c3e126617e61a82",
+  "repo": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "context": {
+    "id": "consumer-wa-demo",
+    "kind": "consumer",
+    "output_type": "Exe",
+    "source_project": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+    "groups": [
+      "webauthn-paired"
+    ],
+    "modules": [
+      "WebAuthn"
+    ],
+    "references": []
+  },
+  "source_project_closure": [
+    "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+    "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+    "src/Core/src/Yubico.YubiKit.Core.csproj"
+  ],
+  "package_origins": {
+    "Microsoft.Extensions.Logging.Abstractions": [
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+    ],
+    "System.Formats.Cbor": [
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+    ],
+    "Microsoft.Extensions.Hosting.Abstractions": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "Microsoft.Extensions.Logging": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "Yubico.NativeShims": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ]
+  },
+  "groups": [
+    {
+      "name": "webauthn-paired",
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-paired/complete.cs"
+    }
+  ],
+  "direct_references": [
+    "src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+    "src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll",
+    "src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll"
+  ],
+  "inputs": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.props",
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.targets",
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Packages.props",
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/global.json",
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "sha256": "9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "sha256": "60705e6469ab458aa47a288fe1b2749e20506dfc006335bdbdb27d82e8668203"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+      "sha256": "d97b6d3fe7463a942975082dda81eea299ff1f436a19024e31cf98d512620511"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/manifest.json",
+      "sha256": "6402578ca65eb04f2f24e3e35d692363c2f4e548458c9d9ceddaf784fa2f7376"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+      "sha256": "6068aa4e5fc1a3c12c0d2e0646a12f432f53d690e5da567a537da2ce3f084a9d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-wa-demo/Directory.Build.props",
+      "sha256": "0d620c2f2358cdd77e872b507c428f05793afd1cac2c65c3b397d4ddea2c1533"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-wa-demo/Context.Packages.props",
+      "sha256": "54dcc129e2d523fff248e0d1b0f4b6ca22cf2333a17e9468e11abded7077220f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-wa-demo/Context.Items.props",
+      "sha256": "8c6e164da2faf61b2284b4775cb6fa9572031636e0bf7da123f15a6c35f17074"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-wa-demo/Directory.Build.targets",
+      "sha256": "670ecd0666492e05fd96730b6f34db8a9b7845c588df3f056d7ed7b397420a1c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-wa-demo/src/Yubico.YubiKit.AuditCt001.Examples.consumer-wa-demo.csproj",
+      "sha256": "70ad424f876693e7791b809250cbaa036f73129e3f8a64cdd2ffbc440f3d6724"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/Directory.Build.props.template",
+      "sha256": "82616bb538b4ec4a0ce6862a9b27627edf438cf8613af206030a28d9ba1f3c4f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/Directory.Build.targets.template",
+      "sha256": "ea70485f6d64bf73ba96ed52324d0f5367ba8f6f6afda2a90a68d4dba7215391"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+      "sha256": "ea7a626a634bb4d025fcebb441ad49a6bc568aff1f3c33f3668720ce45fbd5e2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll",
+      "sha256": "cf707e4c441e7e3502c99482d6362a4cb7c4894d34889f3670dcd0789ccf3a93"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll",
+      "sha256": "94206fa2d91c350cc94f09b4f525e45ab36b37249cbe09124f39575ce8ee112b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-paired/complete.cs",
+      "sha256": "5bbae54bf1f94c814cdbc7be7a2ef64e0c73385a0a26887992caac44413c5387"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-paired/readable.raw",
+      "sha256": "d409c19f31c7ccc4b805a549c70ebc5ae198d6f338f6267564e6ee9eef9cc582"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/README.md",
+      "sha256": "cf64612066288c5845cd5d9892038abae2ac0cc17e746ab4fbc7e401069208f7"
+    }
+  ],
+  "limits": "Prepared inputs only; no restore/build/analyzer/snippet execution. Source-local warning suppressions not copied."
+}

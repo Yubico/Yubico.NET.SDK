@@ -15,55 +15,58 @@
 namespace Yubico.YubiKit.Ctap2.BioEnrollment;
 
 /// <summary>
-/// CTAP2.1 authenticatorBioEnrollment sub-commands.
+/// Local biometric subcommand constants used by the current helper.
 /// </summary>
 /// <remarks>
 /// <para>
-/// See: CTAP 2.1 Section 6.7 - authenticatorBioEnrollment (0x09)
+/// CTAP 2.1 (2022-06-21 errata), Section 6.7, defines begin/next/cancel/enumerate/rename/remove
+/// as 1/2/3/4/5/6 and sensor info as 7. The constants below do not match those standard values.
+/// Their presence is not evidence of an interoperable standard or vendor command profile.
 /// </para>
 /// </remarks>
 internal static class BioEnrollmentSubCommand
 {
     /// <summary>
-    /// Get fingerprint sensor info (0x01).
+    /// Local sensor-info value 0x01; the standard assigns 0x07 (not used by the current sensor request).
     /// </summary>
     public const byte GetFingerprintSensorInfo = 0x01;
 
     /// <summary>
-    /// Begin fingerprint enrollment (0x02).
+    /// Local begin value 0x02; the standard assigns 0x01.
     /// </summary>
     public const byte EnrollBegin = 0x02;
 
     /// <summary>
-    /// Continue fingerprint enrollment (0x03).
+    /// Local continuation value 0x03; the standard assigns 0x02.
     /// </summary>
     public const byte EnrollCaptureNextSample = 0x03;
 
     /// <summary>
-    /// Cancel fingerprint enrollment (0x04).
+    /// Local cancellation value 0x04; the standard assigns 0x03.
     /// </summary>
     public const byte EnrollCancel = 0x04;
 
     /// <summary>
-    /// Begin enumeration of enrolled templates (0x05).
+    /// Local enumeration value 0x05; the standard assigns 0x04.
     /// </summary>
     public const byte EnumerateEnrollments = 0x05;
 
     /// <summary>
-    /// Set friendly name for enrolled template (0x06).
+    /// Local rename value 0x06; the standard assigns 0x05.
     /// </summary>
     public const byte SetFriendlyName = 0x06;
 
     /// <summary>
-    /// Remove enrolled template (0x07).
+    /// Local removal value 0x07; the standard assigns 0x06.
     /// </summary>
     public const byte RemoveEnrollment = 0x07;
 
     /// <summary>
-    /// Get template info - returns sample count for existing template (0x08).
+    /// Unused local template-info value 0x08.
     /// </summary>
     /// <remarks>
-    /// This command is vendor-specific (YubiKey specific).
+    /// No corresponding subcommand is defined in the cited CTAP revision, and no
+    /// original vendor definition establishes this value's meaning or support.
     /// </remarks>
     public const byte GetTemplateInfo = 0x08;
 }

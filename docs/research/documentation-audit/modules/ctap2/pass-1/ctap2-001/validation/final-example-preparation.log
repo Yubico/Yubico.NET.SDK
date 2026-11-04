@@ -1,0 +1,95 @@
+$ python3 docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/extract.py --materialize
+{
+  "status": "generated compile INPUTS only; NOT compiled",
+  "module_fences": 39,
+  "module_xml": 5,
+  "total_blocks": 95,
+  "selected_blocks": 39,
+  "excluded_blocks": 56,
+  "groups": 33
+}
+$ python3 docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/extract.py --check
+{
+  "status": "static-inputs-match; NOT compiled",
+  "module_fences": 39,
+  "module_xml": 5,
+  "total_blocks": 95,
+  "selected_blocks": 39,
+  "excluded_blocks": 56,
+  "groups": 33
+}
+$ python3 docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/verify-inputs.py
+{
+  "status": "STATIC ONLY: exact bodies/hashes/partition/package generation match; NOT compiled",
+  "counts": {
+    "module_fences": 39,
+    "module_xml": 5,
+    "total_blocks": 95,
+    "selected_blocks": 39,
+    "excluded_blocks": 56,
+    "groups": 33
+  },
+  "contexts": 6,
+  "source_evidence_paths": 32,
+  "reference_paths": 66,
+  "literal_url_records": 30,
+  "genuine_package_closure": {
+    "consumer": [
+      "Microsoft.Extensions.Hosting.Abstractions",
+      "Microsoft.Extensions.Logging",
+      "Microsoft.Extensions.Logging.Abstractions",
+      "System.Formats.Cbor",
+      "Yubico.NativeShims"
+    ],
+    "consumer-demo": [
+      "Microsoft.Extensions.Hosting.Abstractions",
+      "Microsoft.Extensions.Logging",
+      "Microsoft.Extensions.Logging.Abstractions",
+      "System.Formats.Cbor",
+      "Yubico.NativeShims"
+    ],
+    "unit-v3": [
+      "FluentAssertions",
+      "Microsoft.Extensions.Hosting.Abstractions",
+      "Microsoft.Extensions.Logging",
+      "Microsoft.Extensions.Logging.Abstractions",
+      "NSubstitute",
+      "System.Formats.Cbor",
+      "Yubico.NativeShims",
+      "xunit.v3"
+    ],
+    "hardware-v2": [
+      "Microsoft.Extensions.Configuration",
+      "Microsoft.Extensions.Configuration.Binder",
+      "Microsoft.Extensions.Configuration.Json",
+      "Microsoft.Extensions.DependencyInjection",
+      "Microsoft.Extensions.Hosting.Abstractions",
+      "Microsoft.Extensions.Logging",
+      "Microsoft.Extensions.Logging.Abstractions",
+      "Microsoft.Extensions.Logging.Console",
+      "Microsoft.NET.Test.Sdk",
+      "System.Formats.Cbor",
+      "Xunit.SkippableFact",
+      "Yubico.NativeShims",
+      "coverlet.collector",
+      "xunit",
+      "xunit.abstractions",
+      "xunit.core",
+      "xunit.runner.visualstudio"
+    ],
+    "consumer-wa-demo": [
+      "Microsoft.Extensions.Hosting.Abstractions",
+      "Microsoft.Extensions.Logging",
+      "Microsoft.Extensions.Logging.Abstractions",
+      "System.Formats.Cbor",
+      "Yubico.NativeShims"
+    ],
+    "consumer-wa-lib": [
+      "Microsoft.Extensions.Hosting.Abstractions",
+      "Microsoft.Extensions.Logging",
+      "Microsoft.Extensions.Logging.Abstractions",
+      "System.Formats.Cbor",
+      "Yubico.NativeShims"
+    ]
+  }
+}

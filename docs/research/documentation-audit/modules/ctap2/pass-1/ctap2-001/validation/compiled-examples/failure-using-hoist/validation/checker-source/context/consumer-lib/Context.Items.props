@@ -1,0 +1,31 @@
+<Project>
+  <ItemGroup>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-session/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-info/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-pin-create/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-extensions/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-admin/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-raw/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-memory/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-protocol/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/guide-threshold/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-discoverable/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-admin/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-prompt-factory/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-info/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-session-alternatives/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-builder/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/xml-output/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-operation-wording/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-intent-callback/complete.cs" />
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/shared-raw-hid/complete.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Yubico.YubiKit.Core">
+      <HintPath>$(RepositoryRoot)/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.Ctap2">
+      <HintPath>$(RepositoryRoot)/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

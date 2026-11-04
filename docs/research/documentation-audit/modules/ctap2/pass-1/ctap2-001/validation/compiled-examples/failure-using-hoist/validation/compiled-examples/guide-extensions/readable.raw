@@ -1,0 +1,20 @@
+// SOURCE src/Ctap2/CLAUDE.md#f5
+// Builder fragment: ReadOnlyMemory<byte> blobData and the hmac-secret inputs below are caller-supplied.
+// Build extensions for MakeCredential
+var extensions = new ExtensionBuilder()
+    .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
+    .WithCredBlob(blobData)
+    .Build();
+
+var options = new MakeCredentialOptions
+{
+    Extensions = extensions,
+    ResidentKey = true
+};
+
+// For GetAssertion: encrypted salts under the shared secret from key agreement
+// protocol/sharedSecret/keyAgreement and 32-byte salt1/salt2 belong to the caller.
+var assertionExtensions = new ExtensionBuilder()
+    .WithHmacSecret(protocol, sharedSecret, keyAgreement, salt1, salt2)
+    .Build();
+

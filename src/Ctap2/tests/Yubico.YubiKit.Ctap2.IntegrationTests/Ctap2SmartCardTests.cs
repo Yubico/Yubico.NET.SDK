@@ -25,12 +25,16 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// </summary>
 /// <remarks>
 /// These tests exercise the SmartCard CTAP2 APDU path when the connected authenticator exposes the FIDO AID.
+/// The helper's default PIN normalization can set/change a PIN or consume retries before GetInfo;
+/// these are approved known-PIN device tests, not read-only smoke. Each assertion covers the named
+/// metadata only. NotSupportedException is skipped, including the backend's broad SELECT-error wrapper;
+/// that skip does not independently establish the precise reason the application was unavailable.
 /// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2SmartCardTests
 {
     /// <summary>
-    /// Tests that creating a Ctap2Session over SmartCard succeeds and returns valid info.
+    /// Checks a returned model, nonempty versions and AAGUID length 16 over the selected SmartCard path.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]

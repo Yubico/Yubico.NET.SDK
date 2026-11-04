@@ -1,0 +1,12 @@
+$ dotnet clean docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-wa-lib/src/Yubico.YubiKit.AuditCt001.Examples.consumer-wa-lib.csproj -c Release
+Build started 11/4/2026 1:49:51 AM.
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-wa-lib/src/Yubico.YubiKit.AuditCt001.Examples.consumer-wa-lib.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Creating directory "/tmp/opencode/ctap2-001-consumer-wa-lib-context/obj/Release/net10.0/".
+     1>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-wa-lib/src/Yubico.YubiKit.AuditCt001.Examples.consumer-wa-lib.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.26

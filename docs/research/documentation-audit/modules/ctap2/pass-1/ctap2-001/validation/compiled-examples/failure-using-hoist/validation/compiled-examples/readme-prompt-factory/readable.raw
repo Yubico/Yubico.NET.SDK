@@ -1,0 +1,12 @@
+// SOURCE src/Ctap2/README.md#f9
+// Replace the original session factory above; do not open a second session while it is live.
+await using var session = await device.CreateCtap2SessionAsync(
+    new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
+
+// SOURCE src/Ctap2/README.md#f8
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
+}
+

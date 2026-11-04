@@ -18,7 +18,7 @@ using Yubico.YubiKit.Ctap2.Credentials;
 namespace Yubico.YubiKit.Ctap2.UnitTests.Credentials;
 
 /// <summary>
-/// Unit tests for AuthenticatorData parsing and verification.
+/// Unit tests for authenticator-data parsing, received bits and limited RP-hash comparison.
 /// </summary>
 public class AuthenticatorDataTests
 {
@@ -131,6 +131,7 @@ public class AuthenticatorDataTests
     [Fact]
     public void Parse_ExtensionDataFlag_ReturnsTrue()
     {
+        // Enum-bit inspection only; this test does not call Parse or validate an ED extension map.
         var data = MinimalAuthData.ToArray();
         data[32] = 0x81; // UP + ED flag
 

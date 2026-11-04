@@ -1,0 +1,655 @@
+{
+  "reason": "Unit-v3 build PASSED/Warnings0; original generic collection refused genuine xUnit package Compile source",
+  "files": [
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/000-prepare-project-context.py.snapshot",
+      "sha256": "6068aa4e5fc1a3c12c0d2e0646a12f432f53d690e5da567a537da2ce3f084a9d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/001-contexts-manifest.json.snapshot",
+      "sha256": "d97b6d3fe7463a942975082dda81eea299ff1f436a19024e31cf98d512620511"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/collect-unit-package-source.py",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/002-collect-unit-package-source.py.snapshot",
+      "sha256": "a305e8c768f70e25d0d5c1cec119fea30d8b79ed26f3aed5cdd04289c25475d5"
+    },
+    {
+      "source": "/home/rupicola/.nuget/packages/xunit.v3.core/3.0.0/_content/DefaultRunnerReporters.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/003-DefaultRunnerReporters.cs.snapshot",
+      "sha256": "e110bb9fe21ca6c3120a00382c773a086d62a008a0b0d2b76d08416f27d92bf2"
+    },
+    {
+      "source": "/home/rupicola/.nuget/packages/xunit.v3.core/3.0.0/buildTransitive/xunit.v3.core.targets",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/004-xunit.v3.core.targets.snapshot",
+      "sha256": "d88447b974e387dfc3ab7b178ce836afa94a253eb1add9d891f4621f3f5fad04"
+    },
+    {
+      "source": "/home/rupicola/.nuget/packages/xunit.v3.core/3.0.0/xunit.v3.core.3.0.0.nupkg",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/005-xunit.v3.core.3.0.0.nupkg.snapshot",
+      "sha256": "8d92dc2239f4d9872c78c291bf46e749685b5282f53822935d37389a3d4eba4c"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/unit-v3/Directory.Build.props",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/006-Directory.Build.props.snapshot",
+      "sha256": "e850bdac5213a9ed21babd87d432569952d595f03694d2ceb518385ac7573cfd"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/unit-v3/Directory.Build.targets",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/007-Directory.Build.targets.snapshot",
+      "sha256": "a184bbc4fbbaad7a1028ccbd81ea4dfc51134b83178c434625e4446fb28bed01"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/unit-v3/Context.Packages.props",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/008-Context.Packages.props.snapshot",
+      "sha256": "11738abbfe9920894b8d2d5e9742b0d2375ecaac6a17782e593e53cc2b89d24d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/unit-v3/Context.Items.props",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/009-Context.Items.props.snapshot",
+      "sha256": "b4d621d853354304db1542c6d04e922e5ea7284a83b1a9ed53798abfcf48fe4a"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/unit-v3/context-manifest.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/010-context-manifest.json.snapshot",
+      "sha256": "30062421070fb33c8466da07cebbaba5a61c308ec80e46044d6191eb5106d83d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/unit-v3/src/Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/011-Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.snapshot",
+      "sha256": "d968c808c667273f1e54405c0b9f184c6bb0e46844dabb77390d919baddceb6f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/policy-final.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/012-policy-final.txt.snapshot",
+      "sha256": "cbc7c254dcf6e611bb9dd907b23f6eda9638b6ced4757968a68206390caaca64"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/csc-command-line.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/013-csc-command-line.txt.snapshot",
+      "sha256": "4179db135bd3143db8c9d21db3d5385fd026bb5121243dac4d7508aa5fd106e1"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/analyzer-configs.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/014-analyzer-configs.txt.snapshot",
+      "sha256": "5531d4904e3a4bfcddaba3cedaa65431471df979017155103bfe4376382059dd"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/analyzers.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/015-analyzers.txt.snapshot",
+      "sha256": "1147b33b2831f8085d883dcf66711ee518ce12ca23e9f5562c2598c2a007d801"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/resolved-references.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/016-resolved-references.txt.snapshot",
+      "sha256": "ce86a92b9b565fe8b3a44579e1779f2a98c476858cd58e25f382618cfe3214d4"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/compile-inputs.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/017-compile-inputs.txt.snapshot",
+      "sha256": "1f669cdcff8388bb6f78968342ac3448184d7319d1446f937f7f20737cc1604b"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.nuget.dgspec.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/018-Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.nuget.dgspec.json.snapshot",
+      "sha256": "e046142000138a920647d4899ced8a09f97a0d82a36cb29a67266605c138ae4b"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/project.nuget.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/019-project.nuget.cache.snapshot",
+      "sha256": "778f21169cc329b17a15102a2fdc6f2db44ff17cb7a9963ee76f33e1b3d1616e"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/project.assets.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/020-project.assets.json.snapshot",
+      "sha256": "51f2c80d3df19abc6b4f992edd09d86341736885a3b21c5810ccc4bc3afa2d76"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.nuget.g.targets",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/021-Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.nuget.g.targets.snapshot",
+      "sha256": "6c3af7b0c1bdbf614348c0e4d393eb9be1be07a4e5c4e9e58b67c801cfb829c8"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.nuget.g.props",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/022-Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.nuget.g.props.snapshot",
+      "sha256": "a7e22a6a5f0c3c52660750e9595181ca5d2f3073474586379b5d2d0943e33c81"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.FileListAbsolute.txt",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/023-Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.FileListAbsolute.txt.snapshot",
+      "sha256": "b1b3ae830003ed03406a6aaadd7c4f1fc8a9f674aa1762a4fd41f3197dfdce84"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.genruntimeconfig.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/024-Yubico.YubiKit.AuditCt001.Examples.unit-v3.genruntimeconfig.cache.snapshot",
+      "sha256": "6275121d6de624c2767add025537bd6697e64d2618138d9b7ee94ced32b6cb6e"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.Y.AABA10CC.Up2Date",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/025-Yubico.Y.AABA10CC.Up2Date.snapshot",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/apphost",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/026-apphost.snapshot",
+      "sha256": "ce792ed96f1d797981333bd125a0a95988f240d07c2d2575bef71d02edc914fd"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.pdb",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/027-Yubico.YubiKit.AuditCt001.Examples.unit-v3.pdb.snapshot",
+      "sha256": "5da0b2b1891aa0e09edec64f485321b8073855a199c6bc114a89f5c74ad9260a"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/028-Yubico.YubiKit.AuditCt001.Examples.unit-v3.dll.snapshot",
+      "sha256": "241ed3d932b70498f4da0bbad155540fab7326dab713d3ea1142660fa177e392"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.sourcelink.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/029-Yubico.YubiKit.AuditCt001.Examples.unit-v3.sourcelink.json.snapshot",
+      "sha256": "128ad8acff0ac29a866b02fed4c4de1b809d5d5a560193c610bc56988f3887f7"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.CoreCompileInputs.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/030-Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.CoreCompileInputs.cache.snapshot",
+      "sha256": "f12feb9271e65fa2a292c67fb84349fce505af85262addfd2224402b555d6ec6"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.AssemblyInfo.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/031-Yubico.YubiKit.AuditCt001.Examples.unit-v3.AssemblyInfo.cs.snapshot",
+      "sha256": "1104168b1b9da17316fb962e60e2d012e6fa8a7c3fe14c7401d2545e2c1d251b"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.AssemblyInfoInputs.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/032-Yubico.YubiKit.AuditCt001.Examples.unit-v3.AssemblyInfoInputs.cache.snapshot",
+      "sha256": "ec78232bb2c0d10701495481eee1c354ea557609307cee219bb6b60b48d14e5e"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/XunitAutoGeneratedEntryPoint.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/033-XunitAutoGeneratedEntryPoint.cs.snapshot",
+      "sha256": "aa41ca5b8c5d78daea2949fe3874f39702432c78e50f4642c5ebe6d394db6269"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.xUnit.v3.EntryPoint.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/034-Yubico.YubiKit.AuditCt001.Examples.unit-v3.xUnit.v3.EntryPoint.cache.snapshot",
+      "sha256": "89f70499f6d9f84052abba756ac5f9f8378eabd195d71c8d73544958c806138f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/SelfRegisteredExtensions.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/035-SelfRegisteredExtensions.cs.snapshot",
+      "sha256": "854dabbe8218ce75ab2828a29f4433915a3714e9605daab14247d912cdab60c6"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.genautoregisteredextensionsinputcache.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/036-Yubico.YubiKit.AuditCt001.Examples.unit-v3.genautoregisteredextensionsinputcache.cache.snapshot",
+      "sha256": "cc4340bb3be1276a177461916510762b1e178ec9d30ec177b3c4a520970b19df"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.gentestingplatformentrypointinputcache.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/037-Yubico.YubiKit.AuditCt001.Examples.unit-v3.gentestingplatformentrypointinputcache.cache.snapshot",
+      "sha256": "2530c7a787e5dac8b32c4c65100d2feb03d816248499b76f9a7f8e6981984525"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/038-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot",
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.GeneratedMSBuildEditorConfig.editorconfig",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/039-Yubico.YubiKit.AuditCt001.Examples.unit-v3.GeneratedMSBuildEditorConfig.editorconfig.snapshot",
+      "sha256": "389021c2cbae5050b40b11af5db56db3bef8104476797f8655a81d5040c0e1fc"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.AssemblyReference.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/040-Yubico.YubiKit.AuditCt001.Examples.unit-v3.csproj.AssemblyReference.cache.snapshot",
+      "sha256": "468a02ed00d0164763a592055145acc098a549d6cc4fefd7da2af1a977ff8dbd"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.GlobalUsings.g.cs",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/041-Yubico.YubiKit.AuditCt001.Examples.unit-v3.GlobalUsings.g.cs.snapshot",
+      "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.assets.cache",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/042-Yubico.YubiKit.AuditCt001.Examples.unit-v3.assets.cache.snapshot",
+      "sha256": "1ade58e4b6ba203f6961dc32950402a075eeb551b3a929b8b5098bbba39e2ca1"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/ref/Yubico.YubiKit.AuditCt001.Examples.unit-v3.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/043-Yubico.YubiKit.AuditCt001.Examples.unit-v3.dll.snapshot",
+      "sha256": "ca642ba03ba8f65275effb88284d7657da378dda34c4be1936fff53c46a71df2"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/obj/Release/net10.0/refint/Yubico.YubiKit.AuditCt001.Examples.unit-v3.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/044-Yubico.YubiKit.AuditCt001.Examples.unit-v3.dll.snapshot",
+      "sha256": "ca642ba03ba8f65275effb88284d7657da378dda34c4be1936fff53c46a71df2"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/xunit.abstractions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/045-xunit.abstractions.dll.snapshot",
+      "sha256": "3166dc70323fb30ccf1cedb0fe86f2ad122c46d254542342d90386efc4c9285c"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Mono.Cecil.Rocks.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/046-Mono.Cecil.Rocks.dll.snapshot",
+      "sha256": "bf992f3dce364ebcc3200fa7832ef07e20b4e2dbc3a8a6213ce44e3d239db984"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/xunit.v3.runner.utility.netcore.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/047-xunit.v3.runner.utility.netcore.dll.snapshot",
+      "sha256": "6cf3c670696b6fa02481368dcbce1c09f2e1cf175f7a783221483528e5779e8c"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Mono.Cecil.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/048-Mono.Cecil.dll.snapshot",
+      "sha256": "831dca77470d85cb6ffbea3072daa7a3df5b7c9fcfd9c3f43674a9be99d4bfcf"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.pdb",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/049-Yubico.YubiKit.AuditCt001.Examples.unit-v3.pdb.snapshot",
+      "sha256": "5da0b2b1891aa0e09edec64f485321b8073855a199c6bc114a89f5c74ad9260a"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/050-Yubico.YubiKit.AuditCt001.Examples.unit-v3.dll.snapshot",
+      "sha256": "241ed3d932b70498f4da0bbad155540fab7326dab713d3ea1142660fa177e392"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.runtimeconfig.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/051-Yubico.YubiKit.AuditCt001.Examples.unit-v3.runtimeconfig.json.snapshot",
+      "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3.deps.json",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/052-Yubico.YubiKit.AuditCt001.Examples.unit-v3.deps.json.snapshot",
+      "sha256": "4dc56a7c5311d6a9ea3cc0c3408a0e2f4404fd2018199e22c01e0ec8069d7d30"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.unit-v3",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/053-Yubico.YubiKit.AuditCt001.Examples.unit-v3.snapshot",
+      "sha256": "ce792ed96f1d797981333bd125a0a95988f240d07c2d2575bef71d02edc914fd"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/054-Yubico.YubiKit.Ctap2.xml.snapshot",
+      "sha256": "e22dca76099eeb9c9340051a1605a08f9168a66ebd68871b8bf798bb46a3b866"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/055-Yubico.YubiKit.Ctap2.pdb.snapshot",
+      "sha256": "4af7a28c756e7877a89533efe0c067a7afe166aafa859d20449cf00343f2fd3f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.Core.xml",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/056-Yubico.YubiKit.Core.xml.snapshot",
+      "sha256": "a2f018d14fd0bfcde0f8ab1c3824e6bfb0f599e9ec4af2067fc1093e2186be94"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.Core.pdb",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/057-Yubico.YubiKit.Core.pdb.snapshot",
+      "sha256": "ac59305fdc74a5d5b02b38fe8201032616ce4a5b7a80c7eb7fb56147745f57dd"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/058-Yubico.YubiKit.Ctap2.dll.snapshot",
+      "sha256": "cf707e4c441e7e3502c99482d6362a4cb7c4894d34889f3670dcd0789ccf3a93"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/059-Yubico.YubiKit.Core.dll.snapshot",
+      "sha256": "ea7a626a634bb4d025fcebb441ad49a6bc568aff1f3c33f3668720ce45fbd5e2"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/xunit.v3.runner.inproc.console.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/060-xunit.v3.runner.inproc.console.dll.snapshot",
+      "sha256": "504ee317669e90bb49b6431cc2d5f17d42b3a9860cad59377b1c74e1bc14b543"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/xunit.v3.runner.common.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/061-xunit.v3.runner.common.dll.snapshot",
+      "sha256": "06cec7b7178f7be9a3dfa31af0f7df5c7e5c795d147cce7f2ff367282c08bcd8"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/xunit.v3.core.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/062-xunit.v3.core.dll.snapshot",
+      "sha256": "e61bda4c4ebe5f7e0112a044bfc3e2b518f76e9870d9b27fcf8ff740aad9981f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/xunit.v3.common.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/063-xunit.v3.common.dll.snapshot",
+      "sha256": "1201b512ecd0b3d89c81cd0822ba73907dbabb7126e526f4777efc3224515af0"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/xunit.v3.assert.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/064-xunit.v3.assert.dll.snapshot",
+      "sha256": "e8d071b3506eb3413a2a4130a613ae604626fc6d5b85c63c430fa2c42da881ae"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/System.Windows.Extensions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/065-System.Windows.Extensions.dll.snapshot",
+      "sha256": "810e8767d02d70af173bc33cc1048ff31a7df015fd46cf423a309cc89c50dc69"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/System.Security.Permissions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/066-System.Security.Permissions.dll.snapshot",
+      "sha256": "62068c0f6bffb0eb4ec1c6a45a16784caee7565f6c5404d8342089f4ff4b3712"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/System.Security.Cryptography.ProtectedData.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/067-System.Security.Cryptography.ProtectedData.dll.snapshot",
+      "sha256": "d186453eebba21e19a90e4fea16c11c3df59ed9610201c5a3c6d636b9864d840"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/System.Formats.Cbor.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/068-System.Formats.Cbor.dll.snapshot",
+      "sha256": "18875c3b5b857ec0426464e25f544c9c15cbbbc85f0a3b6005e6041c1e2861c9"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/System.Drawing.Common.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/069-System.Drawing.Common.dll.snapshot",
+      "sha256": "98d07e6b1e7d3641a8608a360b3dc273fe8a0f78926b6e1e5f679a7a074d491f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/System.Configuration.ConfigurationManager.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/070-System.Configuration.ConfigurationManager.dll.snapshot",
+      "sha256": "4b265c9faf49bbcd7de9b39677a8db013560ab60760515afcb969d34c4f01941"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/System.Diagnostics.EventLog.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/071-System.Diagnostics.EventLog.dll.snapshot",
+      "sha256": "24a02d97c2fc6d56735e196bb7faaae8faf0068c486d0c3c7fa3e3b73b4f12a4"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Win32.SystemEvents.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/072-Microsoft.Win32.SystemEvents.dll.snapshot",
+      "sha256": "ca495bf6c86b7f092d624928101985a941532d149dcd8acfea170f8a53be8850"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/NSubstitute.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/073-NSubstitute.dll.snapshot",
+      "sha256": "132bca6ba791048d4122113d3a79f7d6c4fa04ff017f05953a3e87919eca098d"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Testing.Extensions.MSBuild.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/074-Microsoft.Testing.Extensions.MSBuild.dll.snapshot",
+      "sha256": "00986beed44ac4054abaa625730dbd44b173989a1a7685bbe7c85b6b91723239"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Testing.Platform.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/075-Microsoft.Testing.Platform.dll.snapshot",
+      "sha256": "73b2c867203c178c19265eb23c26a2ab840381ef24d7c70c397269ee3dc8c0a8"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Testing.Extensions.TrxReport.Abstractions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/076-Microsoft.Testing.Extensions.TrxReport.Abstractions.dll.snapshot",
+      "sha256": "cd0eaa3498e4d3136cb63406bf2b09e8a1279a475d280d50b6ccb66042edb469"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.Primitives.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/077-Microsoft.Extensions.Primitives.dll.snapshot",
+      "sha256": "36785e9195be2ddbd3eca11a94bbd6b3f4ac0efc27fb84dbf042fed8e16e5568"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.Options.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/078-Microsoft.Extensions.Options.dll.snapshot",
+      "sha256": "b0a7ca186efe6c6e52779d5f0b5698fd8cf3d81eaee9333a44312f59e6a432eb"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/079-Microsoft.Extensions.Hosting.Abstractions.dll.snapshot",
+      "sha256": "ddb12c9ee77c9ad262f2202808010b727016077d701ddeb4d93cceaea709646d"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/080-Microsoft.Extensions.Logging.Abstractions.dll.snapshot",
+      "sha256": "69642e69c3259e4defee5858bbb9a36260ca2171524f55510110f4c7f86770d4"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.Logging.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/081-Microsoft.Extensions.Logging.dll.snapshot",
+      "sha256": "d24a34bf563fb4589f15d66eb902c8ea6e6919338401d8c1949d523fb9ec087f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/082-Microsoft.Extensions.FileProviders.Abstractions.dll.snapshot",
+      "sha256": "345e29f6887414124b18f67de668c16ff77e20fb195bbba4234e09a2bb1f9f22"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/083-Microsoft.Extensions.Diagnostics.Abstractions.dll.snapshot",
+      "sha256": "f307f2b10163e42593822dd768b530516eb8f7ba24fda3576d18b49a8f0f05f5"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/084-Microsoft.Extensions.DependencyInjection.Abstractions.dll.snapshot",
+      "sha256": "2ed3794ec58972f03ce9377a16fec1c73c7e1ffcc0392890579c05fb789c0f13"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/085-Microsoft.Extensions.DependencyInjection.dll.snapshot",
+      "sha256": "d723a3d85ccff102a2aad1f3fd39bb89aa71bac8d15b1bc56bded67087efb266"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/086-Microsoft.Extensions.Configuration.Abstractions.dll.snapshot",
+      "sha256": "722430c2456c43709a390c3e411f39d1fd32ccb7c820b39d1997e2573cf0a581"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Microsoft.Bcl.AsyncInterfaces.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/087-Microsoft.Bcl.AsyncInterfaces.dll.snapshot",
+      "sha256": "5705d245072d3eb78400547b32147dbb6e2c8b02ba8bda76729798f5efdeaecb"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/FluentAssertions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/088-FluentAssertions.dll.snapshot",
+      "sha256": "c57b75af50206445002b70ee6ea8b8498f2af47a1f986ebb95c79d6dbd52c2ed"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/Castle.Core.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/089-Castle.Core.dll.snapshot",
+      "sha256": "9c5762ae27f2afe0913e8ffa494f705ffe9680699aa4fb79c2613344c918ee28"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/zh-Hant/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/090-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "1355cae4dbb5ce1af3792823a6ab9919142686d12ab21be12d940309b8ea8d47"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/zh-Hant/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/091-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "16ca44e1e5b6b4c93663e1a2fbdd622d127a170ebf6f182122fb76f80df6aac9"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/zh-Hans/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/092-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "ca679dac68b43d6a14c72cc441b340a988137eeb984da70a2853b8b017148514"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/zh-Hans/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/093-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "fb7d196860461ea87ebc7a4544dfdbe11fbd6ab928d2d842fe440cb37120dfe8"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/tr/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/094-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "0e7d94f0cd5f3f036a1130d78cd9fd15196629d9d5214d03afc014a4ab5fd90d"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/tr/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/095-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "7001612b03ef6c25e23f38d309531cffd7a79f4a1cda2004013e206dfc30de10"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/ru/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/096-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "5180bbb0a58cf0a2d021760463cfc428a893026a8816cb9a4b52623d3bb586aa"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/ru/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/097-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "8eac77a481fdbdc01ae4e2f832279d691cc900ca1ef3f06647635ced676a82ad"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/pt-BR/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/098-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "4c4899be143275405c10a78e5a2733d7a89faafabcb4e490e76f2765a79fb8c8"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/pt-BR/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/099-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "cce462ae11f7a09b01b11a7c846ca94eb896bb7f7c4be12ea255b16ab2533c7b"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/pl/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/100-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "1e9f22e59b33c9a1dbd31cd5ccba0a04ce4a64d3f7bd80462a1640d9aa7f550c"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/pl/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/101-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "8f2f74e68166df0330af64475ab1882234a86a7b32a0d765a850dd407a0b9268"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/ko/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/102-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "3bf199c94ea960a73ff0183e2b17f16380d2233f91ee6043cc6bccf19cc0cc89"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/ko/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/103-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "9d36d92fa2bc301028f2a9625ce4974eda511e96fef1175cdd53e4e3d8338585"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/ja/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/104-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "f2bcd6b05b8fce47264d714b563cbd3c713bc319c1e5a6481a21f73cfb6e7296"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/ja/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/105-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "dfb2035a9e0884d6a1174f4b1e98ba0d09a48b08fbf1dc6d076636540f057d47"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/de/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/106-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "9b610bf6bd44062e4e8c924726bb95ea3b60e9a4a7232d2e2e48295485832115"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/de/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/107-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "050ac02c8b042a9e8bb553680e74c53a5acdc1b8ee5723e67ddff70e73e681c3"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/it/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/108-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "ce24bfda867dddda37e19de9765c7673cba3643610a7f935f889b3a44cf9195a"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/it/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/109-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "cf7bf4c176425e67af526e1b833d51c2f65e1ffd753baf5f37a875b2e3e73cb0"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/fr/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/110-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "67995149d41eb62cc0b98ac68ba852e14728085436f9fa41ba02e795d0837f21"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/fr/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/111-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "2d11efedb5f47ead016ce35bb7d9e3a9bbb0df0b765cd145011f89ef48fbd49c"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/es/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/112-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "8c1bb6dd93427fdf04800c8d305978139d2598243c87a93dcf33b69b259cfb6f"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/es/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/113-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "ea612bf26e18730d8b5d3f766ebac2a2c3dd26e80ce1bbd408213dc18a064250"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/cs/Microsoft.Testing.Extensions.MSBuild.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/114-Microsoft.Testing.Extensions.MSBuild.resources.dll.snapshot",
+      "sha256": "09f18291d3b035c57207b8ffbf63be008fa8b234f03c19a0514513418ee92443"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/cs/Microsoft.Testing.Platform.resources.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/115-Microsoft.Testing.Platform.resources.dll.snapshot",
+      "sha256": "7ab1cf8f131ce6d12551cbeb6c9f38339be641a80cb3bcd0fd1b54f300df4985"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/win/lib/net6.0/System.Drawing.Common.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/116-System.Drawing.Common.dll.snapshot",
+      "sha256": "4d3001697df50cca54f32ed2dbbd1f3f415b48d5d756b1bf9500a43ae9b68da0"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/win/lib/net6.0/System.Security.Cryptography.ProtectedData.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/117-System.Security.Cryptography.ProtectedData.dll.snapshot",
+      "sha256": "104cdc6d20406a144abd373ed297ef803217c15012a0f22cacf6c676421d53ee"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/win/lib/net6.0/System.Windows.Extensions.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/118-System.Windows.Extensions.dll.snapshot",
+      "sha256": "e72863f75a5adb5697158f16b00369ad3a95710235647626675a5c070f10ecd9"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/win/lib/net6.0/System.Diagnostics.EventLog.Messages.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/119-System.Diagnostics.EventLog.Messages.dll.snapshot",
+      "sha256": "6444dfa03609248effd398e8562af484ad0163a6c47cee6d3a287ffdef809ad2"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/win/lib/net6.0/Microsoft.Win32.SystemEvents.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/120-Microsoft.Win32.SystemEvents.dll.snapshot",
+      "sha256": "142cce4ed8ac9da22d69c38a6f22738abfb22090dc9313e8b58e6f91978e89af"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/win/lib/net6.0/System.Diagnostics.EventLog.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/121-System.Diagnostics.EventLog.dll.snapshot",
+      "sha256": "644bb3a1afbea6b835422b0987376f04796e38bbbecc08c94023638eebe57f4c"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/unix/lib/net6.0/System.Drawing.Common.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/122-System.Drawing.Common.dll.snapshot",
+      "sha256": "89ea595ccb1fd1384480c1e30bd487c92af5d06d3b06f295323eff601acd9019"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/linux-x64/native/libYubico.NativeShims.so",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/123-libYubico.NativeShims.so.snapshot",
+      "sha256": "e59ad90d6bcca4bd1849d964f7cef276f40d2388b0abde19b3ed8400c4835a3e"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/osx-arm64/native/libYubico.NativeShims.dylib",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/124-libYubico.NativeShims.dylib.snapshot",
+      "sha256": "65499e77151d483d8e04bd793c2d520b4f344478ffcacff91bff8e771ae9d8af"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/linux-arm64/native/libYubico.NativeShims.so",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/125-libYubico.NativeShims.so.snapshot",
+      "sha256": "e38512dde572741853cea1eeb50827807ce8ab5ecaef17f5b2830fb403316e02"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/osx-x64/native/libYubico.NativeShims.dylib",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/126-libYubico.NativeShims.dylib.snapshot",
+      "sha256": "91eb0433ff6ed42480c8766f0fb4e03e73986c1d6c06fb7e6b3068455f7ae02a"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/win-arm64/native/Yubico.NativeShims.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/127-Yubico.NativeShims.dll.snapshot",
+      "sha256": "162ea62d8c46135b7d4a0c7696a061a6caae6d021958bfa4ce98478b0ef468b5"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/win-x64/native/Yubico.NativeShims.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/128-Yubico.NativeShims.dll.snapshot",
+      "sha256": "50e678f99d28b561f9ccb328a7f31c609313f0bf3d0468a8dfd00f93f071a428"
+    },
+    {
+      "source": "/tmp/opencode/ctap2-001-unit-v3-context/bin/Release/net10.0/runtimes/win-x86/native/Yubico.NativeShims.dll",
+      "archived": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/failure-xunit-package-content/files/129-Yubico.NativeShims.dll.snapshot",
+      "sha256": "3ce3a940c23df9c702b3177a0754fe7c86e507cb6013ef95392aa908bd30bfe4"
+    }
+  ]
+}

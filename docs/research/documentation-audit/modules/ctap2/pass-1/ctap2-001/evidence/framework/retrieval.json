@@ -1,0 +1,67 @@
+[
+  {
+    "path": "Guid-v10.0.14.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.14/src/libraries/System.Private.CoreLib/src/System/Guid.cs",
+    "sha256": "8849825055730b57406e92c1851d5d7fd868d0981fed619b658082578ef219a8",
+    "bytes": 73290,
+    "accessDate": "2026-11-03"
+  },
+  {
+    "path": "CborWriter.Map-v10.0.2.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.2/src/libraries/System.Formats.Cbor/src/System/Formats/Cbor/Writer/CborWriter.Map.cs",
+    "sha256": "14549e61adba45feb51295c5313ca251365ceaad93d35c6da282a33d6141be57",
+    "bytes": 12804,
+    "accessDate": "2026-11-03"
+  },
+  {
+    "path": "CborReader.Map-v10.0.2.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.2/src/libraries/System.Formats.Cbor/src/System/Formats/Cbor/Reader/CborReader.Map.cs",
+    "sha256": "4bb627ee7ab85e40d48c4f19d496e1546f8b97eeb7cb1cf2949cf9bf9ee549a5",
+    "bytes": 9627,
+    "accessDate": "2026-11-03"
+  },
+  {
+    "path": "CborReader-v10.0.2.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.2/src/libraries/System.Formats.Cbor/src/System/Formats/Cbor/Reader/CborReader.cs",
+    "sha256": "c7493df311a5f7229a7f59bba256b087b7637dc29a8682c06320447d7a34d0a5",
+    "bytes": 18175,
+    "accessDate": "2026-11-03"
+  },
+  {
+    "path": "Guid-constructor-net10.html",
+    "url": "https://learn.microsoft.com/en-us/dotnet/api/system.guid.-ctor?view=net-10.0",
+    "sha256": "2cdc910562c51826de9bd1e4f7585dbbfa34655f932028f990fe18e8224d4470",
+    "bytes": 129539,
+    "accessDate": "2026-11-03"
+  },
+  {
+    "path": "Guid-ToByteArray-net10.html",
+    "url": "https://learn.microsoft.com/en-us/dotnet/api/system.guid.tobytearray?view=net-10.0",
+    "sha256": "50b2f23ad33dd5b72881b6d68653657cf97c865f6b09bccd9e78fc4628070725",
+    "bytes": 66907,
+    "accessDate": "2026-11-03"
+  },
+  {
+    "path": "CborWriter-v10.0.2.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/44525024595742ebe09023abe709df51de65009b/src/libraries/System.Formats.Cbor/src/System/Formats/Cbor/Writer/CborWriter.cs",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "path": "CborConformanceModeHelpers-v10.0.2.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/44525024595742ebe09023abe709df51de65009b/src/libraries/System.Formats.Cbor/src/System/Formats/Cbor/CborConformanceModeHelpers.cs",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "path": "CborReader.PeekState-v10.0.2.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/44525024595742ebe09023abe709df51de65009b/src/libraries/System.Formats.Cbor/src/System/Formats/Cbor/Reader/CborReader.PeekState.cs",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "path": "CborWriter-v10.0.2.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.2/src/libraries/System.Formats.Cbor/src/System/Formats/Cbor/Writer/CborWriter.cs",
+    "sha256": "0c0d9dd6700e689529a5c70f0ee7e2f1e5475977103221e48e7f8afaa0ee4be2",
+    "bytes": 22198,
+    "accessDate": "2026-11-03",
+    "note": "Corrected source pin: package informational commit is not available in dotnet/runtime; release tag used."
+  }
+]

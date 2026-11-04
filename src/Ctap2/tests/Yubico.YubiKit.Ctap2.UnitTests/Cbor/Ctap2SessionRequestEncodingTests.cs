@@ -16,10 +16,15 @@ using System.Formats.Cbor;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Ctap2.Cbor;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Cbor;
 
+/// <summary>Mechanical request-encoding fixtures, not authorized CTAP ceremonies.</summary>
+/// <remarks>
+/// All-options fixtures deliberately combine uv with token auth, use short fake tags and synthetic
+/// extension inputs. CTAP prohibits the uv key beside pinUvAuthParam. These assertions expose current
+/// independent field encoding, not valid capability/permission selection or extension cryptography.
+/// </remarks>
 public sealed class Ctap2SessionRequestEncodingTests
 {
     [Fact]

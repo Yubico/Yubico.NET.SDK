@@ -1,0 +1,16 @@
+// SOURCE src/WebAuthn/README.md#f4
+// Alternative configuration: insert before the demo's single CreateWebAuthnClientAsync call.
+clientOptions = clientOptions with { CredentialPrompt = new PinPrompt(ReadPinAsync) };
+
+// SOURCE src/WebAuthn/README.md#f3
+internal sealed class PinPrompt(Func<CredentialPromptContext, CancellationToken, Task<byte[]>> readPin) : ICredentialPrompt
+{
+    public async ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(
+        CredentialPromptContext context, CancellationToken cancellationToken)
+    {
+        byte[] pin = await readPin(context, cancellationToken);
+        try { return DisposableArrayPoolBuffer.CreateFromSpan(pin); }   // exactly sized; ownership transfers
+        finally { CryptographicOperations.ZeroMemory(pin); }
+    }
+}
+

@@ -1,0 +1,4 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/webauthn-paired/complete.cs
+/tmp/opencode/ctap2-001-consumer-wa-demo-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-wa-demo.GlobalUsings.g.cs
+/tmp/opencode/ctap2-001-consumer-wa-demo-context/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/ctap2-001-consumer-wa-demo-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-wa-demo.AssemblyInfo.cs

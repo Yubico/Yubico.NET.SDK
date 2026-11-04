@@ -1,0 +1,11 @@
+// SOURCE src/Ctap2/CLAUDE.md#f12
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+public async Task GetInfoAsync_Returns_Aaguid(YubiKeyTestState state)
+{
+    await using var session = await state.Device.CreateCtap2SessionAsync(
+        new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido });
+    var info = await session.GetInfoAsync();
+    Assert.Equal(16, info.Aaguid.Length);
+}
+

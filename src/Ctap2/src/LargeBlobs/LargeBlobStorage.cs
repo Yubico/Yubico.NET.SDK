@@ -14,7 +14,6 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.LargeBlobs;
@@ -26,17 +25,40 @@ namespace Yubico.YubiKit.Ctap2.LargeBlobs;
 /// <para>
 /// The authenticatorLargeBlobs command allows storing arbitrary data associated with
 /// discoverable credentials. Data is encrypted using the credential's largeBlobKey,
-/// which is derived from the credential private key.
+/// returned in the credential response envelope when largeBlobKey is requested. Do not assume the
+/// authenticator derives this random storage key from the credential private key. Check both
+/// largeBlobKey advertisement and largeBlobs:true; this helper does not perform capability preflight.
 /// </para>
 /// <para>
-/// Large blobs are stored in a single array on the authenticator. Reading is always
-/// allowed; writing requires PIN/UV authentication with the LargeBlobWrite permission.
+/// Large blobs share one serialized array. Reading ciphertext needs no PIN/UV parameter here, but
+/// returning a credential's plaintext requires its key. Actual writes always require a supplied
+/// protocol/token in this SDK, stricter than CTAP 2.3 §6.10.2's conditional device UV rule.
+/// The device checks the opaque token's authorization when configured UV or alwaysUv:true requires it;
+/// this helper does not inspect token permissions, validity or expiry.
 /// </para>
 /// <para>
-/// For credentials created with the largeBlob extension, use
+/// For credentials created with largeBlobKey, use
 /// <see cref="GetBlobAsync(ReadOnlyMemory{byte}, CancellationToken)"/> and
 /// <see cref="SetBlobAsync(ReadOnlyMemory{byte}, ReadOnlyMemory{byte}, CancellationToken)"/>
 /// to read/write blobs for specific credentials.
+/// The alternative direct largeBlob extension is not implemented by this helper.
+/// </para>
+/// <para>
+/// Limits are cached per helper from GetInfo: fragment length is maxMsgSize minus 64 (default 960),
+/// and the reported maximum serialized array size gates writes. Normally these limits remain cached;
+/// a write with no cached maximum array size reloads GetInfo and refreshes the fragment limit too.
+/// Reads continue until a short/empty fragment; writes send sequential chunks with total length only
+/// on the first chunk and authentication on each. Intermediate success is not a complete-array commit.
+/// Coordinate the entire operation with other users of the session/shared array: there is no
+/// sequence-wide lock, conflict detection, rollback or resume. After failure/cancellation, re-read
+/// state rather than assuming no write occurred or blindly resuming at the failed offset.
+/// </para>
+/// <para>
+/// The session, protocol and token are borrowed, not disposed or cleared by this helper. Keep them
+/// usable and token storage unchanged throughout each awaited operation. Returned plaintext arrays
+/// are caller-owned; clear them and caller-owned keys/data when finished, including later failures.
+/// Internal membership probes, compression and authenticated-request copies are not comprehensively
+/// cleared, so this is not an end-to-end sensitive-data cleanup guarantee.
 /// </para>
 /// </remarks>
 public sealed class LargeBlobStorage : ILargeBlobStorage
@@ -66,7 +88,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     private int? _maxSerializedLargeBlobArray;
 
     /// <summary>Creates read-only storage. Fragment sizes come from the authenticator's GetInfo.</summary>
-    /// <param name="session">The CTAP2 session.</param>
+    /// <param name="session">A borrowed initialized session; keep it open through each operation.</param>
     public LargeBlobStorage(ICtap2Session session)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -74,9 +96,9 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     }
 
     /// <summary>Creates read/write storage; writes need a PIN/UV token with the LargeBlobWrite permission.</summary>
-    /// <param name="session">The CTAP2 session.</param>
-    /// <param name="protocol">The PIN/UV auth protocol the token was minted with.</param>
-    /// <param name="pinUvAuthToken">A PIN/UV auth token carrying LargeBlobWrite (CTAP §6.10.2).</param>
+    /// <param name="session">A borrowed initialized session.</param>
+    /// <param name="protocol">A borrowed usable protocol matching the token; this helper does not dispose it.</param>
+    /// <param name="pinUvAuthToken">Borrowed token with LargeBlobWrite authorization; keep storage stable until operations finish, then clear it when no longer needed.</param>
     public LargeBlobStorage(
         ICtap2Session session,
         IPinUvAuthProtocol protocol,
@@ -90,7 +112,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
     /// <summary>
     /// CTAP §6.10.2: "maxFragmentLength = maxMsgSize − 64" with GetInfo's maxMsgSize (default 1024, §6.4).
-    /// Read once per instance.
+    /// Cached per instance; LoadLimitsAsync can refresh it when a write has no reported maximum array size.
     /// </summary>
     private async ValueTask<int> GetMaxFragmentLengthAsync(CancellationToken cancellationToken)
     {
@@ -114,6 +136,11 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The large blob array.</returns>
+    /// <remarks>
+    /// Short/hash-corrupt data becomes the initial empty array. The current response parser also treats
+    /// missing config or an empty successful response as an empty fragment; this is a decoding limitation,
+    /// not evidence of a conforming empty device array. Malformed CBOR behind a valid hash can throw.
+    /// </remarks>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
     public async Task<LargeBlobArray> ReadLargeBlobArrayAsync(CancellationToken cancellationToken = default)
     {
@@ -134,6 +161,11 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// Writes the entire large blob array to the authenticator.
     /// </summary>
     /// <param name="array">The array to write.</param>
+    /// <remarks>
+    /// Replaces the complete shared array, not only one credential's entry. Keep entry/list storage
+    /// unchanged until completion and preserve other clients' entries where possible. A failed call
+    /// can leave changed/torn state; there is no transactional rollback or conflict detection.
+    /// </remarks>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <exception cref="InvalidOperationException">Thrown when PIN/UV auth is not configured.</exception>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
@@ -173,9 +205,10 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// </summary>
     /// <param name="largeBlobKey">The credential's largeBlobKey (32 bytes).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The decrypted blob data, or null if no blob exists for this credential.</returns>
+    /// <returns>Caller-owned plaintext to clear after use, or null if no entry decrypts within the SDK's 1 MiB read cap.</returns>
     /// <exception cref="ArgumentException">Thrown when largeBlobKey is not 32 bytes.</exception>
     /// <exception cref="CtapException">Thrown when reading fails.</exception>
+    /// <exception cref="InvalidDataException">A decrypted entry cannot inflate to its declared original size.</exception>
     public async Task<byte[]?> GetBlobAsync(
         ReadOnlyMemory<byte> largeBlobKey,
         CancellationToken cancellationToken = default)
@@ -197,9 +230,13 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <remarks>
     /// <para>
-    /// This operation replaces any existing blob for this credential.
-    /// It reads the current array, removes any existing entry for this key,
+    /// This operation replaces entries that decrypt with this key within the SDK read cap.
+    /// It reads the current array, removes those matching entries,
     /// adds the new encrypted entry, and writes the array back.
+    /// This is a full-array read-modify-write, not an atomic per-credential update. Foreign entries are
+    /// preserved only within LargeBlobArray's modeled scope. No 1 MiB plaintext write cap is enforced,
+    /// although larger entries cannot be returned by this SDK's read helper. Inputs are borrowed through
+    /// the completed await. Successful membership probes currently leave discarded plaintext copies.
     /// </para>
     /// </remarks>
     /// <exception cref="ArgumentException">Thrown when largeBlobKey is not 32 bytes.</exception>
@@ -243,7 +280,13 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// </summary>
     /// <param name="largeBlobKey">The credential's largeBlobKey (32 bytes).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>True if a blob was deleted, false if no blob existed for this key.</returns>
+    /// <returns>True after rewriting the array without matching decryptable entries; false when none matched, including entries above the read cap.</returns>
+    /// <remarks>
+    /// Reads and rewrites the full shared array without a transaction or conflict lock. A read-only
+    /// helper can return false without writing; a matching entry requires configured write authentication.
+    /// Successful membership probes currently leave discarded plaintext copies. Failure/cancellation
+    /// does not establish rollback; re-read storage before deciding how to recover.
+    /// </remarks>
     /// <exception cref="ArgumentException">Thrown when largeBlobKey is not 32 bytes.</exception>
     /// <exception cref="InvalidOperationException">Thrown when PIN/UV auth is not configured.</exception>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
@@ -387,12 +430,12 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         int totalLength,
         CancellationToken cancellationToken)
     {
-        // Build the message for PIN/UV auth: 32-byte hash of (0xff || offset bytes || SHA-256(data))
+        // Authenticate a 70-byte message: 32*0xff || 0x0c00 || LE32(offset) || SHA-256(fragment).
         // First, compute SHA-256 of the fragment
         Span<byte> fragmentHash = stackalloc byte[32];
         SHA256.HashData(fragment.Span, fragmentHash);
 
-        // Build auth message per CTAP 2.1 spec section 6.10.3:
+        // Build auth message per CTAP 2.1-2.3 §6.10.2:
         // authenticate(pinUvAuthToken, 32*0xff || 0x0C || 0x00 || uint32LittleEndian(offset) || SHA-256(contents of set byte string))
         var authMessage = new byte[32 + 2 + 4 + 32];
         authMessage.AsSpan(0, 32).Fill(0xff);

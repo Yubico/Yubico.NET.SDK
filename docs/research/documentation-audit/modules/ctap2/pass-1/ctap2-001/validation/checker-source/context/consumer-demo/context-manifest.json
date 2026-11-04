@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "baseline": "5b09a9b6942ded3913b5c9340c3e126617e61a82",
+  "repo": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "context": {
+    "id": "consumer-demo",
+    "kind": "consumer",
+    "output_type": "Exe",
+    "source_project": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+    "groups": [
+      "readme-paired"
+    ],
+    "modules": [],
+    "references": []
+  },
+  "source_project_closure": [
+    "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+    "src/Core/src/Yubico.YubiKit.Core.csproj"
+  ],
+  "package_origins": {
+    "Microsoft.Extensions.Logging.Abstractions": [
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+    ],
+    "System.Formats.Cbor": [
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+    ],
+    "Microsoft.Extensions.Hosting.Abstractions": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "Microsoft.Extensions.Logging": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "Yubico.NativeShims": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ]
+  },
+  "groups": [
+    {
+      "name": "readme-paired",
+      "source": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-paired/complete.cs"
+    }
+  ],
+  "direct_references": [
+    "src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+    "src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll"
+  ],
+  "inputs": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.props",
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.targets",
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Packages.props",
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/global.json",
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "sha256": "9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "sha256": "60705e6469ab458aa47a288fe1b2749e20506dfc006335bdbdb27d82e8668203"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/contexts-manifest.json",
+      "sha256": "d97b6d3fe7463a942975082dda81eea299ff1f436a19024e31cf98d512620511"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/manifest.json",
+      "sha256": "6402578ca65eb04f2f24e3e35d692363c2f4e548458c9d9ceddaf784fa2f7376"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/prepare-project-context.py",
+      "sha256": "6068aa4e5fc1a3c12c0d2e0646a12f432f53d690e5da567a537da2ce3f084a9d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-demo/Directory.Build.props",
+      "sha256": "70f3a75b9172d15f23b45c12d3e0bc9147d68f05f95b5cb10a0235fd42c50812"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-demo/Context.Packages.props",
+      "sha256": "54dcc129e2d523fff248e0d1b0f4b6ca22cf2333a17e9468e11abded7077220f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-demo/Context.Items.props",
+      "sha256": "944dfb8fa08c4d9b5630f21a0cf69caa1a5f29998be312a51296b98d6a1fd301"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-demo/Directory.Build.targets",
+      "sha256": "b2bb212aeebe6749b96c21f565746c9d2012073f8a7d1c55925b33cb592ac0d2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/consumer-demo/src/Yubico.YubiKit.AuditCt001.Examples.consumer-demo.csproj",
+      "sha256": "70ad424f876693e7791b809250cbaa036f73129e3f8a64cdd2ffbc440f3d6724"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/Directory.Build.props.template",
+      "sha256": "82616bb538b4ec4a0ce6862a9b27627edf438cf8613af206030a28d9ba1f3c4f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/context/Directory.Build.targets.template",
+      "sha256": "ea70485f6d64bf73ba96ed52324d0f5367ba8f6f6afda2a90a68d4dba7215391"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+      "sha256": "ea7a626a634bb4d025fcebb441ad49a6bc568aff1f3c33f3668720ce45fbd5e2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll",
+      "sha256": "cf707e4c441e7e3502c99482d6362a4cb7c4894d34889f3670dcd0789ccf3a93"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-paired/complete.cs",
+      "sha256": "2923136986ba24ee26b6961d90d578ffe3c0b0aeb0052804124d80a45312cc4d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/compiled-examples/readme-paired/readable.raw",
+      "sha256": "79b613c79189f55fdd0a42ddd90e221e3a4f6462616b57f30547436598a6acea"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/README.md",
+      "sha256": "2d41ea0fb0c4477355680cc6f271e7277a4f108b6012986a230aadf3d3df1225"
+    }
+  ],
+  "limits": "Prepared inputs only; no restore/build/analyzer/snippet execution. Source-local warning suppressions not copied."
+}

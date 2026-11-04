@@ -1,0 +1,1823 @@
+diff --git i/src/Ctap2/src/BioEnrollment/BioEnrollmentModels.cs w/src/Ctap2/src/BioEnrollment/BioEnrollmentModels.cs
+index 0ec5e4fb..995ed888 100644
+--- i/src/Ctap2/src/BioEnrollment/BioEnrollmentModels.cs
++++ w/src/Ctap2/src/BioEnrollment/BioEnrollmentModels.cs
+@@ -28,8 +28,13 @@ public static class FingerprintModality
+ }
+ 
+ /// <summary>
+-/// Fingerprint capture sample status codes per CTAP2.1 specification.
++/// Fingerprint capture feedback as currently modeled by the SDK.
+ /// </summary>
++/// <remarks>
++/// Values 0x00-0x0A match CTAP 2.1 (2022-06-21 errata), Section 6.7.
++/// The final three member names do not match that standard table; consult their remarks
++/// rather than treating their names as standardized device feedback.
++/// </remarks>
+ public enum FingerprintSampleStatus
+ {
+     /// <summary>
+@@ -88,18 +93,21 @@ public enum FingerprintSampleStatus
+     MergeFailure = 0x0A,
+ 
+     /// <summary>
+-    /// Data storage full (0x0B).
++    /// Local member for feedback value 0x0B.
+     /// </summary>
++    /// <remarks>The standard means fingerprint already exists, not storage full.</remarks>
+     StorageFull = 0x0B,
+ 
+     /// <summary>
+-    /// No user activity (timeout) (0x0C).
++    /// Local member for feedback value 0x0C.
+     /// </summary>
++    /// <remarks>The cited standard leaves 0x0C unused; no-user-activity is 0x0D.</remarks>
+     NoUserActivity = 0x0C,
+ 
+     /// <summary>
+-    /// No user presence detected (0x0D).
++    /// Local member for feedback value 0x0D.
+     /// </summary>
++    /// <remarks>The standard means no touch/swipe activity. No finger-lift transition is 0x0E.</remarks>
+     NoUserPresence = 0x0D
+ }
+ 
+@@ -107,7 +115,10 @@ public enum FingerprintSampleStatus
+ /// Information about the fingerprint sensor capabilities.
+ /// </summary>
+ /// <remarks>
+-/// Returned by authenticatorBioEnrollment getFingerprintSensorInfo sub-command.
++/// Models selected sensor response fields. CTAP 2.1 (2022-06-21 errata), Section 6.7.3,
++/// also supplies maxTemplateFriendlyName at key 8, which is available only through RawData
++/// here. The current helper's sensor request omits the required subcommand. A decoded
++/// object does not establish complete or valid standard sensor-info exchange.
+ /// </remarks>
+ public sealed class FingerprintSensorInfo
+ {
+@@ -117,7 +128,7 @@ public sealed class FingerprintSensorInfo
+     public ReadOnlyMemory<byte> RawData { get; private init; }
+ 
+     /// <summary>
+-    /// Gets the fingerprint kind (touch or swipe).
++    /// Gets the decoded fingerprint kind, defaulting to Touch when key 2 is missing.
+     /// </summary>
+     public FingerprintKind FingerprintKind { get; private init; }
+ 
+@@ -125,14 +136,17 @@ public sealed class FingerprintSensorInfo
+     /// Gets the maximum number of samples required for enrollment.
+     /// </summary>
+     /// <remarks>
+-    /// This is a hint to the platform about the expected number of captures.
+-    /// Actual enrollment may complete with fewer samples.
++    /// This reports the maximum good samples, not a limit on total capture attempts:
++    /// rejected captures may not count. Missing key 3 currently defaults to zero, so zero
++    /// is not evidence that no samples are required. This decoder does not validate field presence.
+     /// </remarks>
+     public int MaxCaptureSamplesRequiredForEnroll { get; private init; }
+ 
+     /// <summary>
+-    /// Gets the maximum number of templates that can be stored.
++    /// Gets the optional integer this decoder interprets as maximum template count at key 4.
+     /// </summary>
++    /// <remarks>CTAP 2.1 Section 6.7.3 does not define this sensor field. No original vendor
++    /// definition establishes its meaning or availability; it is not qualified capacity information.</remarks>
+     public int? MaxTemplateCount { get; private init; }
+ 
+     /// <summary>
+@@ -165,7 +179,7 @@ public static FingerprintSensorInfo Decode(ReadOnlyMemory<byte> data)
+                     maxSamples = reader.ReadInt32();
+                     break;
+ 
+-                case 4: // maxTemplateCount (0x04) - vendor extension
++                case 4: // Locally modeled maxTemplateCount; not a defined standard sensor-info field.
+                     maxTemplates = reader.ReadInt32();
+                     break;
+ 
+@@ -214,12 +228,14 @@ public sealed class EnrollmentSampleResult
+     public ReadOnlyMemory<byte> RawData { get; private init; }
+ 
+     /// <summary>
+-    /// Gets the current template ID for this enrollment.
++    /// Gets the template ID decoded from key 4, or empty memory if it is absent.
+     /// </summary>
++    /// <remarks>Retain the begin-response ID separately. CTAP 2.1 Section 6.7.4 does not
++    /// require next-sample responses to repeat it; this decoder does not preserve earlier IDs.</remarks>
+     public ReadOnlyMemory<byte> TemplateId { get; internal init; }
+ 
+     /// <summary>
+-    /// Gets the status of the last sample capture.
++    /// Gets decoded sample feedback, defaulting to Good when key 5 is missing.
+     /// </summary>
+     public FingerprintSampleStatus LastSampleStatus { get; internal init; }
+ 
+@@ -227,13 +243,16 @@ public sealed class EnrollmentSampleResult
+     /// Gets the number of remaining samples needed to complete enrollment.
+     /// </summary>
+     /// <remarks>
+-    /// A value of 0 indicates enrollment is complete.
++    /// In a valid sample response, zero reports completion. This decoder also defaults
++    /// missing key 6 to zero and does not validate operation-specific required fields.
++    /// The value is device feedback, not a verified persistence result or an SDK sample budget.
+     /// </remarks>
+     public int RemainingSamples { get; internal init; }
+ 
+     /// <summary>
+-    /// Gets whether the enrollment is complete.
++    /// Gets whether RemainingSamples equals zero, including its missing-field default.
+     /// </summary>
++    /// <remarks>An empty map currently produces true; this property alone is not proof of successful enrollment.</remarks>
+     public bool IsComplete => RemainingSamples == 0;
+ 
+     /// <summary>
+@@ -241,6 +260,11 @@ public sealed class EnrollmentSampleResult
+     /// </summary>
+     /// <param name="data">The CBOR-encoded response data.</param>
+     /// <returns>The decoded enrollment result.</returns>
++    /// <remarks>
++    /// Copies the complete borrowed response and reads keys 4/5/6. Missing fields retain
++    /// empty ID, Good status and zero remaining count; required-field validation is absent.
++    /// These defaults must not be treated as valid standard operation responses.
++    /// </remarks>
+     public static EnrollmentSampleResult Decode(ReadOnlyMemory<byte> data)
+     {
+         ReadOnlyMemory<byte> rawData = data.ToArray();
+@@ -289,8 +313,13 @@ public static EnrollmentSampleResult Decode(ReadOnlyMemory<byte> data)
+ }
+ 
+ /// <summary>
+-/// Information about an enrolled fingerprint template.
++/// Metadata identifying and naming an enrolled fingerprint, not biometric template sample bytes.
+ /// </summary>
++/// <remarks>
++/// The current decoder reads a flat map with ID/name at keys 4/7. CTAP 2.1 (2022-06-21 errata),
++/// Section 6.7, instead defines nested TemplateInfo with required ID key 1 and optional name
++/// key 2, inside the inventory's key-7 array. This decoder does not implement that schema.
++/// </remarks>
+ public sealed class TemplateInfo
+ {
+     /// <summary>
+@@ -304,10 +333,11 @@ public sealed class TemplateInfo
+     public string? FriendlyName { get; internal init; }
+ 
+     /// <summary>
+-    /// Gets the number of samples captured for this template.
++    /// Gets the optional integer locally interpreted as a sample count at key 8.
+     /// </summary>
+     /// <remarks>
+-    /// This is a vendor extension and may not be available on all authenticators.
++    /// No original vendor definition establishes this interpretation. Standard envelope
++    /// key 8 is maxTemplateFriendlyName, not sample count, and nested TemplateInfo has no such field.
+     /// </remarks>
+     public int? SampleCount { get; internal init; }
+ 
+@@ -343,11 +373,11 @@ internal static TemplateInfo DecodeFromReader(CborReader reader)
+                     templateId = reader.ReadByteString();
+                     break;
+ 
+-                case 7: // templateFriendlyName (0x07)
++                case 7: // Local flat-name field, not the standard nested TemplateInfo key 2.
+                     friendlyName = reader.ReadTextString();
+                     break;
+ 
+-                case 8: // sampleCount (0x08) - vendor extension
++                case 8: // Local sampleCount interpretation; no established vendor definition.
+                     sampleCount = reader.ReadInt32();
+                     break;
+ 
+@@ -383,9 +413,13 @@ public sealed class EnrollmentEnumerationResult
+     /// </summary>
+     /// <param name="data">The CBOR-encoded response data.</param>
+     /// <returns>The decoded enumeration result containing the first template.</returns>
++    /// <remarks>
++    /// Wraps one flat decoded TemplateInfo. This does not parse the all-template array
++    /// required by CTAP 2.1 Section 6.7.6, and is not a complete standard inventory decoder.
++    /// </remarks>
+     public static EnrollmentEnumerationResult Decode(ReadOnlyMemory<byte> data)
+     {
+-        // The response contains a single template info
++        // Current flat-template wrapper, not the standard key-7 array of nested TemplateInfo maps.
+         var template = TemplateInfo.Decode(data);
+ 
+         return new EnrollmentEnumerationResult
+@@ -401,4 +435,4 @@ internal static EnrollmentEnumerationResult FromTemplates(IReadOnlyList<Template
+     {
+         return new EnrollmentEnumerationResult { Templates = templates };
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/BioEnrollment/BioEnrollmentSubCommand.cs w/src/Ctap2/src/BioEnrollment/BioEnrollmentSubCommand.cs
+index c39c4196..bfd4cbed 100644
+--- i/src/Ctap2/src/BioEnrollment/BioEnrollmentSubCommand.cs
++++ w/src/Ctap2/src/BioEnrollment/BioEnrollmentSubCommand.cs
+@@ -15,55 +15,58 @@
+ namespace Yubico.YubiKit.Ctap2.BioEnrollment;
+ 
+ /// <summary>
+-/// CTAP2.1 authenticatorBioEnrollment sub-commands.
++/// Local biometric subcommand constants used by the current helper.
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// See: CTAP 2.1 Section 6.7 - authenticatorBioEnrollment (0x09)
++/// CTAP 2.1 (2022-06-21 errata), Section 6.7, defines begin/next/cancel/enumerate/rename/remove
++/// as 1/2/3/4/5/6 and sensor info as 7. The constants below do not match those standard values.
++/// Their presence is not evidence of an interoperable standard or vendor command profile.
+ /// </para>
+ /// </remarks>
+ internal static class BioEnrollmentSubCommand
+ {
+     /// <summary>
+-    /// Get fingerprint sensor info (0x01).
++    /// Local sensor-info value 0x01; the standard assigns 0x07 (not used by the current sensor request).
+     /// </summary>
+     public const byte GetFingerprintSensorInfo = 0x01;
+ 
+     /// <summary>
+-    /// Begin fingerprint enrollment (0x02).
++    /// Local begin value 0x02; the standard assigns 0x01.
+     /// </summary>
+     public const byte EnrollBegin = 0x02;
+ 
+     /// <summary>
+-    /// Continue fingerprint enrollment (0x03).
++    /// Local continuation value 0x03; the standard assigns 0x02.
+     /// </summary>
+     public const byte EnrollCaptureNextSample = 0x03;
+ 
+     /// <summary>
+-    /// Cancel fingerprint enrollment (0x04).
++    /// Local cancellation value 0x04; the standard assigns 0x03.
+     /// </summary>
+     public const byte EnrollCancel = 0x04;
+ 
+     /// <summary>
+-    /// Begin enumeration of enrolled templates (0x05).
++    /// Local enumeration value 0x05; the standard assigns 0x04.
+     /// </summary>
+     public const byte EnumerateEnrollments = 0x05;
+ 
+     /// <summary>
+-    /// Set friendly name for enrolled template (0x06).
++    /// Local rename value 0x06; the standard assigns 0x05.
+     /// </summary>
+     public const byte SetFriendlyName = 0x06;
+ 
+     /// <summary>
+-    /// Remove enrolled template (0x07).
++    /// Local removal value 0x07; the standard assigns 0x06.
+     /// </summary>
+     public const byte RemoveEnrollment = 0x07;
+ 
+     /// <summary>
+-    /// Get template info - returns sample count for existing template (0x08).
++    /// Unused local template-info value 0x08.
+     /// </summary>
+     /// <remarks>
+-    /// This command is vendor-specific (YubiKey specific).
++    /// No corresponding subcommand is defined in the cited CTAP revision, and no
++    /// original vendor definition establishes this value's meaning or support.
+     /// </remarks>
+     public const byte GetTemplateInfo = 0x08;
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/BioEnrollment/FingerprintBioEnrollment.cs w/src/Ctap2/src/BioEnrollment/FingerprintBioEnrollment.cs
+index 23a8a6e1..46247fd8 100644
+--- i/src/Ctap2/src/BioEnrollment/FingerprintBioEnrollment.cs
++++ w/src/Ctap2/src/BioEnrollment/FingerprintBioEnrollment.cs
+@@ -23,17 +23,40 @@ namespace Yubico.YubiKit.Ctap2.BioEnrollment;
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// Bio enrollment requires authenticator support (bioEnroll option) and a
+-/// PIN/UV auth token with the <see cref="PinUvAuthTokenPermissions.BioEnrollment"/>
+-/// permission.
++/// Standard enrollment requires fingerprint hardware, bioEnroll option presence and a
++/// token with <see cref="PinUvAuthTokenPermissions.BioEnrollment"/> permission. A false
++/// bioEnroll value means supported with no templates, not unsupported. Acquiring this
++/// permission through built-in UV additionally requires uvBioEnroll support. The helper
++/// does not negotiate command/protocol support, obtain tokens or check their permissions/expiry.
+ /// </para>
+ /// <para>
+-/// Requires YubiKey firmware 5.2 or later with bio-enabled hardware.
++/// The current standard-command path does not match CTAP 2.1 (2022-06-21 errata),
++/// Section 6.7: its enrollment/administration subcommands are shifted by one, its sensor
++/// request omits subCommand=7, and authenticated messages omit the modality byte. Explicit
++/// timeouts are encoded at top-level key 6 instead of parameter-map key 3. The inventory
++/// decoder also expects a flat template rather than the standard template array. These
++/// limitations prevent treating this helper as a complete interoperable standard enrollment
++/// workflow. Selecting the prototype command is not an established workaround for these defects.
+ /// </para>
+ /// <para>
+-/// IMPORTANT: Fingerprint enrollment operations require physical user interaction
+-/// (placing finger on sensor). These operations will timeout if no user activity
+-/// is detected.
++/// Capture requires the user to place or swipe a finger on the sensor; inventory, rename,
++/// removal and enrollment cancellation do not themselves require a capture. Calls route
++/// through generic CBOR exchange and do not provide operation-specific SDK presence
++/// notifications. No local interaction deadline or automatic enrollment cancellation is
++/// implemented. The SDK's firmware threshold alone does not establish hardware or wire support.
++/// </para>
++/// <para>
++/// This helper borrows the session, protocol and token memory. Keep both objects alive
++/// and the token unchanged through awaited calls, then clear caller-owned token bytes
++/// with CryptographicOperations.ZeroMemory, including on failure. Unlike ClientPin, this
++/// helper does not dispose the protocol. It does not comprehensively clear encoded
++/// requests or authentication-tag copies. Cancellation or failure is not device rollback.
++/// </para>
++/// <para>
++/// For a valid enrollment response, retain the template ID from begin independently
++/// of later results. Continue captures using that same ID until the device reports zero
++/// remaining samples, an unrecoverable error occurs or the user cancels. The current decoder
++/// defaults missing fields, so IsComplete alone is not proof of successful enrollment.
+ /// </para>
+ /// </remarks>
+ public sealed class FingerprintBioEnrollment
+@@ -46,12 +69,16 @@ public sealed class FingerprintBioEnrollment
+     /// <summary>
+     /// Initializes a new instance of the <see cref="FingerprintBioEnrollment"/> class.
+     /// </summary>
+-    /// <param name="session">The CTAP2 session to use for communication.</param>
+-    /// <param name="protocol">The PIN/UV auth protocol to use.</param>
+-    /// <param name="pinUvAuthToken">The PIN/UV auth token with bio enrollment permission.</param>
++    /// <param name="session">The borrowed CTAP2 session to use for communication.</param>
++    /// <param name="protocol">The borrowed, authenticator-supported PIN/UV auth protocol.</param>
++    /// <param name="pinUvAuthToken">Borrowed token bytes with bio enrollment permission for
++    /// the standard command; the caller owns their lifetime and clearing.</param>
+     /// <param name="usePreviewCommand">
+-    /// If true, uses the prototype bio enrollment command (0x40) for older authenticators.
+-    /// Default is false to use the standard command (0x09).
++    /// Selects prototype command 0x40 when true, standard 0x09 otherwise, without negotiation.
++    /// CTAP 2.1 (2022-06-21 errata), Section 6.12, forbids prototype use when bioEnroll is
++    /// present and specifies FIDO_2_1_PRE/preview feature detection. Preview authorization
++    /// differs from permission-based standard authorization; this switch does not validate
++    /// the prototype payload format or make the standard-path limitations disappear.
+     /// </param>
+     public FingerprintBioEnrollment(
+         ICtap2Session session,
+@@ -76,7 +103,9 @@ public FingerprintBioEnrollment(
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <returns>Information about the fingerprint sensor capabilities.</returns>
+     /// <remarks>
+-    /// This command does not require user interaction.
++    /// No capture or token authentication is requested. The current request sends modality
++    /// only, omitting subCommand=7 required by CTAP 2.1 Section 6.7.3. Decoded defaults are
++    /// not proof that a sensor-info response contained the required fields.
+     /// </remarks>
+     public async Task<FingerprintSensorInfo> GetFingerprintSensorInfoAsync(
+         CancellationToken cancellationToken = default)
+@@ -92,22 +121,24 @@ public async Task<FingerprintSensorInfo> GetFingerprintSensorInfoAsync(
+     /// Begins a new fingerprint enrollment.
+     /// </summary>
+     /// <param name="timeout">
+-    /// Optional timeout in milliseconds for user interaction.
+-    /// Default is 10000ms (10 seconds).
++    /// Optional interaction timeout in milliseconds. Null omits it; no SDK ten-second
++    /// default or host deadline is set. Explicit values currently use the wrong standard
++    /// field (top-level key 6), rather than subCommandParams key 3.
+     /// </param>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <returns>The result of the first enrollment capture.</returns>
+     /// <remarks>
+     /// <para>
+-    /// This begins a new fingerprint enrollment. The user must place their finger
+-    /// on the sensor when this method is called. The returned result contains:
+-    /// - TemplateId: The ID of the new template being enrolled
+-    /// - RemainingSamples: Number of additional samples needed
+-    /// - LastSampleStatus: Status of the first capture
++    /// Sends the helper's begin request and decodes the first sample feedback. The
++    /// standard begin operation captures a sample and cancels any unfinished enrollment
++    /// (CTAP 2.1 Section 6.7.4), but the current subcommand/transcript/timeout limitations
++    /// described on this class apply; successful standard enrollment is not guaranteed.
+     /// </para>
+     /// <para>
+-    /// After calling this method, continue calling <see cref="EnrollCaptureNextSampleAsync"/>
+-    /// until <see cref="EnrollmentSampleResult.IsComplete"/> is true.
++    /// Retain the begin TemplateId for every <see cref="EnrollCaptureNextSampleAsync"/> call.
++    /// Standard next responses need not repeat it. Use sample status and remaining count
++    /// as device feedback, not a fixed SDK capture budget. Stop on unrecoverable error or
++    /// user cancellation; missing response fields can currently produce IsComplete=true.
+     /// </para>
+     /// </remarks>
+     public async Task<EnrollmentSampleResult> EnrollBeginAsync(
+@@ -126,15 +157,17 @@ public async Task<EnrollmentSampleResult> EnrollBeginAsync(
+     /// </summary>
+     /// <param name="templateId">The template ID from the EnrollBegin response.</param>
+     /// <param name="timeout">
+-    /// Optional timeout in milliseconds for user interaction.
+-    /// Default is 10000ms (10 seconds).
++    /// Optional interaction timeout in milliseconds. Null omits it; explicit values
++    /// currently use top-level key 6 instead of the standard parameter-map key 3.
+     /// </param>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <returns>The result of this capture, including remaining samples.</returns>
+     /// <remarks>
+     /// <para>
+-    /// Continue calling this method until <see cref="EnrollmentSampleResult.IsComplete"/>
+-    /// is true. Each call requires the user to place their finger on the sensor.
++    /// Retain and reuse the ID from begin, not this result's potentially empty TemplateId.
++    /// A standard capture requires sensor interaction and reports status/remaining count
++    /// (CTAP 2.1 Section 6.7.4). The current subcommand/transcript/timeout limitations apply;
++    /// IsComplete is only a decoded-count projection, not independently verified persistence.
+     /// </para>
+     /// <para>
+     /// If the sample quality is poor (LastSampleStatus != Good), the sample may
+@@ -158,8 +191,10 @@ public async Task<EnrollmentSampleResult> EnrollCaptureNextSampleAsync(
+     /// </summary>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <remarks>
+-    /// Call this method if enrollment needs to be aborted before completion.
+-    /// This does not require user interaction.
++    /// Intended to send cancelCurrentEnrollment without sensor capture or authentication.
++    /// The current helper sends subcommand 4 rather than standard 3 (CTAP 2.1 Section 6.7.5).
++    /// This is distinct from cancelling a .NET wait or CTAPHID exchange. Cancellation tokens
++    /// do not automatically call this method, and its completion is not a rollback guarantee.
+     /// </remarks>
+     public async Task EnrollCancelAsync(CancellationToken cancellationToken = default)
+     {
+@@ -169,12 +204,16 @@ await SendBioEnrollmentCommandAsync(payload, cancellationToken)
+     }
+ 
+     /// <summary>
+-    /// Enumerates all enrolled fingerprint templates.
++    /// Requests enrollment inventory and decodes the helper's current flat-template shape.
+     /// </summary>
+     /// <param name="cancellationToken">The cancellation token.</param>
+-    /// <returns>A list of all enrolled templates.</returns>
++    /// <returns>At most one flat decoded template, or an empty list for InvalidCommand.</returns>
+     /// <remarks>
+-    /// This does not require user interaction.
++    /// No sensor capture is needed. CTAP 2.1 Section 6.7.6 instead returns a key-7 array
++    /// of nested templates (ID key 1, name key 2); this decoder does not handle that shape.
++    /// The standard no-enrollment status is InvalidOption, not InvalidCommand. Because this
++    /// helper converts InvalidCommand to an empty list, emptiness is not evidence of an
++    /// empty device inventory. The class's request/transcript limitations also apply.
+     /// </remarks>
+     public async Task<IReadOnlyList<TemplateInfo>> EnumerateEnrollmentsAsync(
+         CancellationToken cancellationToken = default)
+@@ -189,14 +228,14 @@ public async Task<IReadOnlyList<TemplateInfo>> EnumerateEnrollmentsAsync(
+         }
+         catch (CtapException ex) when (ex.Status == CtapStatus.InvalidCommand)
+         {
+-            // No templates enrolled - return empty list
++            // Unsupported command is currently normalized to empty; standard no-enrollment is InvalidOption.
+             return [];
+         }
+ 
+         var results = new List<TemplateInfo>();
+         var reader = new CborReader(response, CborConformanceMode.Lax);
+ 
+-        // Parse the response which may contain a list or single template
++        // Current flat decoder; Section 6.7.6 instead defines key 7 as an array of nested templates.
+         var mapCount = reader.ReadStartMap() ?? 0;
+         ReadOnlyMemory<byte>? templateId = null;
+         string? friendlyName = null;
+@@ -209,7 +248,7 @@ public async Task<IReadOnlyList<TemplateInfo>> EnumerateEnrollmentsAsync(
+                 case 4: // templateId
+                     templateId = reader.ReadByteString();
+                     break;
+-                case 7: // templateFriendlyName
++                case 7: // Locally treated as a name; standard envelope key 7 is templateInfos array.
+                     friendlyName = reader.ReadTextString();
+                     break;
+                 default:
+@@ -235,11 +274,14 @@ public async Task<IReadOnlyList<TemplateInfo>> EnumerateEnrollmentsAsync(
+     /// <summary>
+     /// Sets a friendly name for an enrolled fingerprint template.
+     /// </summary>
+-    /// <param name="templateId">The template ID to rename.</param>
+-    /// <param name="friendlyName">The friendly name to set.</param>
++    /// <param name="templateId">The opaque template ID to rename, not fingerprint template bytes.</param>
++    /// <param name="friendlyName">The nonblank friendly name to set. The device's advertised
++    /// UTF-8 byte limit applies; CTAP 2.1 Section 6.7.7 recommends at most the lesser of 64
++    /// bytes and maxTemplateFriendlyName. This helper only checks null/blank locally.</param>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <remarks>
+-    /// This does not require user interaction.
++    /// No sensor capture is needed. The current subcommand and missing-modality
++    /// authentication transcript do not match CTAP 2.1 Section 6.7.7; see the class limitations.
+     /// </remarks>
+     public async Task SetFriendlyNameAsync(
+         ReadOnlyMemory<byte> templateId,
+@@ -256,10 +298,13 @@ await SendBioEnrollmentCommandAsync(payload, cancellationToken)
+     /// <summary>
+     /// Removes an enrolled fingerprint template.
+     /// </summary>
+-    /// <param name="templateId">The template ID to remove.</param>
++    /// <param name="templateId">The opaque template ID to remove, not fingerprint template bytes.</param>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <remarks>
+-    /// This does not require user interaction.
++    /// No sensor capture is needed. The standard operation permanently removes the template
++    /// and returns InvalidOption for an unknown ID (CTAP 2.1 Section 6.7.8). This helper's
++    /// subcommand and authentication transcript do not match that operation; see the class
++    /// limitations. A failed call does not establish unchanged device state.
+     /// </remarks>
+     public async Task RemoveEnrollmentAsync(
+         ReadOnlyMemory<byte> templateId,
+@@ -285,7 +330,7 @@ private async Task<ReadOnlyMemory<byte>> SendBioEnrollmentCommandAsync(
+ 
+     private ReadOnlyMemory<byte> BuildGetSensorInfoPayload()
+     {
+-        // Get sensor info uses modality parameter but no auth
++        // No auth; the current request omits subCommand=7 required by CTAP 2.1 Section 6.7.3.
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(1);
+ 
+@@ -302,7 +347,7 @@ private ReadOnlyMemory<byte> BuildEnrollBeginPayload(int? timeout)
+     {
+         const byte subCommand = BioEnrollmentSubCommand.EnrollBegin;
+ 
+-        // Build message to authenticate (subCommand only for enrollBegin)
++        // Current transcript omits modality; Section 6.7.4 requires modality || subCommand || parameters.
+         var subCommandBytes = new byte[] { subCommand };
+         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, subCommandBytes);
+ 
+@@ -329,7 +374,7 @@ private ReadOnlyMemory<byte> BuildEnrollBeginPayload(int? timeout)
+         writer.WriteInt32(5);
+         writer.WriteByteString(pinUvAuthParam.AsSpan());
+ 
+-        // 0x06: timeout (optional)
++        // Current timeout placement is incorrect: standard key 6 is Boolean getModality, not timeout.
+         if (timeout.HasValue)
+         {
+             writer.WriteInt32(6);
+@@ -350,7 +395,7 @@ private ReadOnlyMemory<byte> BuildEnrollCaptureNextPayload(
+         // Build subCommandParams
+         var subCommandParams = BuildTemplateIdParam(templateId);
+ 
+-        // Build message to authenticate: subCommand || subCommandParams
++        // Current transcript: subCommand || parameters; Section 6.7 requires a leading modality byte too.
+         var messageToAuth = new byte[1 + subCommandParams.Length];
+         messageToAuth[0] = subCommand;
+         subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
+@@ -387,7 +432,7 @@ private ReadOnlyMemory<byte> BuildEnrollCaptureNextPayload(
+         writer.WriteInt32(5);
+         writer.WriteByteString(pinUvAuthParam.AsSpan());
+ 
+-        // 0x06: timeout (optional)
++        // Current timeout placement is incorrect: Section 6.7 puts it in parameter-map key 3, authenticated too.
+         if (timeout.HasValue)
+         {
+             writer.WriteInt32(6);
+@@ -423,7 +468,7 @@ private ReadOnlyMemory<byte> BuildEnumerateEnrollmentsPayload()
+     {
+         const byte subCommand = BioEnrollmentSubCommand.EnumerateEnrollments;
+ 
+-        // Build PIN/UV auth param over just the subcommand
++        // Current transcript omits modality required by CTAP 2.1 Section 6.7.6.
+         var subCommandBytes = new byte[] { subCommand };
+         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, subCommandBytes);
+ 
+@@ -460,7 +505,7 @@ private ReadOnlyMemory<byte> BuildSetFriendlyNamePayload(
+         // Build subCommandParams
+         var subCommandParams = BuildSetNameParams(templateId, friendlyName);
+ 
+-        // Build message to authenticate: subCommand || subCommandParams
++        // Current transcript omits the leading modality byte required by CTAP 2.1 Section 6.7.7.
+         var messageToAuth = new byte[1 + subCommandParams.Length];
+         messageToAuth[0] = subCommand;
+         subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
+@@ -507,7 +552,7 @@ private ReadOnlyMemory<byte> BuildRemoveEnrollmentPayload(ReadOnlyMemory<byte> t
+         // Build subCommandParams
+         var subCommandParams = BuildTemplateIdParam(templateId);
+ 
+-        // Build message to authenticate: subCommand || subCommandParams
++        // Current transcript omits the leading modality byte required by CTAP 2.1 Section 6.7.8.
+         var messageToAuth = new byte[1 + subCommandParams.Length];
+         messageToAuth[0] = subCommand;
+         subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
+@@ -568,4 +613,4 @@ private static ReadOnlyMemory<byte> BuildSetNameParams(
+         writer.WriteEndMap();
+         return writer.Encode();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Config/AuthenticatorConfig.cs w/src/Ctap2/src/Config/AuthenticatorConfig.cs
+index 8e8b3d58..a344e97e 100644
+--- i/src/Ctap2/src/Config/AuthenticatorConfig.cs
++++ w/src/Ctap2/src/Config/AuthenticatorConfig.cs
+@@ -28,11 +28,28 @@ namespace Yubico.YubiKit.Ctap2.Config;
+ /// setting minimum PIN length policies.
+ /// </para>
+ /// <para>
+-/// All configuration operations require a PIN/UV auth token with the
+-/// <see cref="PinUvAuthTokenPermissions.AuthenticatorConfig"/> permission.
++/// This helper always sends authentication using the supplied protocol and token with
++/// <see cref="PinUvAuthTokenPermissions.AuthenticatorConfig"/> permission. CTAP 2.1
++/// (2022-06-21 errata), Section 6.11, also permits configuration without authorization
++/// in specified unprotected-device states; this helper does not expose that route.
++/// Acquiring the permission through built-in UV requires configured UV, pinUvAuthToken
++/// and uvAcfg support, not just an authenticatorConfig capability advertisement.
+ /// </para>
+ /// <para>
+-/// Requires YubiKey firmware 5.4 or later.
++/// Read fresh GetInfo before choosing an operation: authnrCfg=true advertises command
++/// support, while individual subcommands can still be unsupported. Check ep, alwaysUv
++/// or setMinPINLength as appropriate. The helper does not query or enforce capabilities
++/// or firmware thresholds. The SDK's firmware feature metadata is not qualified support
++/// for every setting on every model. Read GetInfo again after success to inspect results.
++/// </para>
++/// <para>
++/// The helper borrows the session, protocol and token memory; unlike ClientPin it does
++/// not dispose the protocol. Keep both objects alive and token bytes unchanged through
++/// awaited calls, then clear the caller-owned token with CryptographicOperations.ZeroMemory,
++/// including on failure. No token acquisition, refresh, permission or expiry validation is
++/// performed locally. Request and authentication-tag copies are not comprehensively cleared
++/// by this helper. Device changes persist beyond the helper's lifetime; failure or
++/// cancellation is not rollback, and the helper performs no verification read or restoration.
+ /// </para>
+ /// </remarks>
+ public sealed class AuthenticatorConfig
+@@ -44,9 +61,10 @@ public sealed class AuthenticatorConfig
+     /// <summary>
+     /// Initializes a new instance of the <see cref="AuthenticatorConfig"/> class.
+     /// </summary>
+-    /// <param name="session">The CTAP2 session to use for communication.</param>
+-    /// <param name="protocol">The PIN/UV auth protocol to use.</param>
+-    /// <param name="pinUvAuthToken">The PIN/UV auth token with authenticator config permission.</param>
++    /// <param name="session">The borrowed CTAP2 session to use for communication.</param>
++    /// <param name="protocol">The borrowed, authenticator-supported PIN/UV auth protocol.</param>
++    /// <param name="pinUvAuthToken">Borrowed token bytes with authenticator config permission;
++    /// the caller owns their lifetime and clearing.</param>
+     /// <exception cref="ArgumentNullException">Thrown when session or protocol is null.</exception>
+     public AuthenticatorConfig(
+         ICtap2Session session,
+@@ -66,14 +84,16 @@ public AuthenticatorConfig(
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <remarks>
+     /// <para>
+-    /// Enterprise attestation allows the authenticator to return a uniquely
+-    /// identifying attestation certificate during credential creation when
+-    /// the relying party requests enterprise attestation.
++    /// Enables the device feature; it does not itself create a credential or return a
++    /// certificate. An eligible MakeCredential request must separately request enterprise
++    /// attestation, with the appropriate platform/RP policy and device provisioning.
+     /// </para>
+     /// <para>
+-    /// This operation requires the authenticator to support the ep option.
+-    /// Once enabled, enterprise attestation cannot be disabled without a
+-    /// factory reset.
++    /// Presence of ep advertises support; false means supported but disabled. Enabling is
++    /// idempotent under CTAP 2.1 (2022-06-21 errata), Section 6.11.1. Read fresh GetInfo after
++    /// success to check ep. This helper has no disable method. The standard FIDO reset
++    /// disables enterprise attestation (Section 7.1.3), but also invalidates credentials;
++    /// do not use it as routine configuration rollback.
+     /// </para>
+     /// </remarks>
+     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
+@@ -89,14 +109,17 @@ public async Task EnableEnterpriseAttestationAsync(CancellationToken cancellatio
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <remarks>
+     /// <para>
+-    /// When alwaysUv is enabled, user verification is always performed
+-    /// regardless of the uv option specified in the request. This provides
+-    /// additional security by ensuring every operation requires user
+-    /// verification (typically PIN entry or biometric).
++    /// alwaysUv concerns credential creation and authentication, not every protocol
++    /// operation or metadata query (CTAP 2.1, 2022-06-21 errata, Section 7.2.3). Its
++    /// presence indicates support and its Boolean value is the current enabled state.
+     /// </para>
+     /// <para>
+-    /// This toggles the current state - if alwaysUv is disabled, it becomes
+-    /// enabled, and vice versa.
++    /// This toggles state rather than setting a requested value. Read fresh GetInfo before
++    /// deciding to toggle and again after success. The device can refuse disabling with
++    /// OperationDenied (Section 6.11.2); support does not guarantee both directions work.
++    /// Enabling can also disable makeCredUvNotRqd. If a sent command's outcome is unknown,
++    /// reconcile the current state before another toggle: blindly repeating it can invert
++    /// the intended result. No automatic retry or rollback is provided.
+     /// </para>
+     /// </remarks>
+     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
+@@ -109,9 +132,12 @@ public async Task ToggleAlwaysUvAsync(CancellationToken cancellationToken = defa
+     /// <summary>
+     /// Sets the minimum PIN length required by the authenticator.
+     /// </summary>
+-    /// <param name="newMinPinLength">The new minimum PIN length (4-63 characters).</param>
+-    /// <param name="rpIds">Optional list of RP IDs that can see the current minPinLength via minPinLength extension.</param>
+-    /// <param name="forceChangePin">If true, require PIN change before the next use.</param>
++    /// <param name="newMinPinLength">The new ClientPIN minimum in Unicode code points.
++    /// This helper accepts 4-63; device policy and UTF-8 PIN-byte limits apply separately.</param>
++    /// <param name="rpIds">Optional replacement mutable list of RP IDs allowed to receive
++    /// minPinLength extension output. Null and empty lists are omitted, not requests to clear the list.</param>
++    /// <param name="forceChangePin">If true, request a PIN change before PIN-token acquisition.
++    /// False is omitted, not an explicit request to clear forcePINChange.</param>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <remarks>
+     /// <para>
+@@ -120,14 +146,22 @@ public async Task ToggleAlwaysUvAsync(CancellationToken cancellationToken = defa
+     /// PIN set and PIN change operations.
+     /// </para>
+     /// <para>
+-    /// If <paramref name="forceChangePin"/> is true, the current PIN will
+-    /// be invalidated and the user must change their PIN before the next
+-    /// operation that requires PIN authentication.
++    /// Under CTAP 2.1 (2022-06-21 errata), Section 6.11.4, forceChangePin=true, or an
++    /// existing PIN shorter than the new minimum, sets forcePINChange. This does not
++    /// erase the current PIN: use it for ChangePin to satisfy policy. PIN-token acquisition
++    /// is blocked until a successful change. In this revision, legacy getPinToken (0x05)
++    /// returns PinInvalid (Section 6.5.5.7.1); permission-based PIN-token acquisition (0x09)
++    /// returns PinPolicyViolation (Section 6.5.5.7.2). Forcing a change
++    /// when no PIN is set produces PinNotSet. A false argument does not prevent a higher
++    /// minimum from forcing a change.
+     /// </para>
+     /// <para>
+-    /// The <paramref name="rpIds"/> parameter allows specifying relying
+-    /// parties that can observe the minimum PIN length via the minPinLength
+-    /// extension. This requires setMinPINLength option support.
++    /// Check setMinPINLength support, and minPinLength extension support before supplying
++    /// RP IDs. A nonempty list replaces previously added mutable recipients and is combined
++    /// with any immutable preconfigured list; it is not an append-only grant. Device storage
++    /// limits still apply. This helper always sends a numeric minimum and cannot express
++    /// a policy-only request with the length omitted. It does not change RP account policy
++    /// or verify extension output; read fresh GetInfo after success to inspect minimum/force state.
+     /// </para>
+     /// </remarks>
+     /// <exception cref="ArgumentOutOfRangeException">
+@@ -164,7 +198,7 @@ private async Task SendConfigCommandAsync(
+         ReadOnlyMemory<byte> payload,
+         CancellationToken cancellationToken)
+     {
+-        // Build full request: command byte + payload
++        // Build full request: command byte + payload. This request and auth-tag copies are not cleared here.
+         var request = new byte[1 + payload.Length];
+         request[0] = CtapCommand.Config;
+         payload.CopyTo(request.AsMemory(1));
+@@ -176,7 +210,7 @@ await _session.SendCborRequestAsync(request, cancellationToken)
+     private ReadOnlyMemory<byte> BuildCommandPayload(byte subCommand)
+     {
+         // Build PIN/UV auth param: authenticate(pinUvAuthToken, 32*0xff || 0x0D || subCommand)
+-        // Per CTAP 2.1 spec section 6.8
++        // CTAP 2.1 (2022-06-21 errata), Section 6.11; not the credential-management transcript.
+         Span<byte> message = stackalloc byte[32 + 1 + 1];
+         message[..32].Fill(0xff);
+         message[32] = CtapCommand.Config; // 0x0D
+@@ -221,7 +255,7 @@ private ReadOnlyMemory<byte> BuildSetMinPinLengthPayload(
+         paramsWriter.WriteInt32(1);
+         paramsWriter.WriteInt32(newMinPinLength);
+ 
+-        // 0x02: minPinLengthRPIDs (optional)
++        // 0x02: minPinLengthRPIDs; null/empty omit the field, not a list-clearing request.
+         if (rpIds is { Count: > 0 })
+         {
+             paramsWriter.WriteInt32(2);
+@@ -233,7 +267,7 @@ private ReadOnlyMemory<byte> BuildSetMinPinLengthPayload(
+             paramsWriter.WriteEndArray();
+         }
+ 
+-        // 0x03: forceChangePin (optional)
++        // 0x03: forceChangePin; false omits the field rather than clearing the device flag.
+         if (forceChangePin)
+         {
+             paramsWriter.WriteInt32(3);
+@@ -244,7 +278,7 @@ private ReadOnlyMemory<byte> BuildSetMinPinLengthPayload(
+         var subCommandParams = paramsWriter.Encode();
+ 
+         // Build PIN/UV auth param: authenticate(pinUvAuthToken, 32*0xff || 0x0D || subCommand || subCommandParams)
+-        // Per CTAP 2.1 spec section 6.8
++        // CTAP 2.1 (2022-06-21 errata), Section 6.11; parameters are part of the authenticated bytes.
+         var subCommand = ConfigSubCommand.SetMinPinLength;
+         var messageLength = 32 + 1 + 1 + subCommandParams.Length;
+         var message = new byte[messageLength];
+@@ -279,4 +313,4 @@ private ReadOnlyMemory<byte> BuildSetMinPinLengthPayload(
+ 
+         return writer.Encode();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/Config/ConfigSubCommand.cs w/src/Ctap2/src/Config/ConfigSubCommand.cs
+index 84d6bfed..8e610e6a 100644
+--- i/src/Ctap2/src/Config/ConfigSubCommand.cs
++++ w/src/Ctap2/src/Config/ConfigSubCommand.cs
+@@ -19,7 +19,9 @@ namespace Yubico.YubiKit.Ctap2.Config;
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// See: CTAP 2.1 Section 6.10 - authenticatorConfig (0x0D)
++/// See CTAP 2.1 (2022-06-21 errata), Section 6.11, authenticatorConfig (0x0D).
++/// The active helper uses only subcommands 1-3. The unused constants 4 and 5 below do not
++/// match subcommands defined in that revision and must not be used as standard identifiers.
+ /// </para>
+ /// </remarks>
+ internal static class ConfigSubCommand
+@@ -37,8 +39,8 @@ internal static class ConfigSubCommand
+     /// Toggle always require UV (0x02).
+     /// </summary>
+     /// <remarks>
+-    /// Toggles the alwaysUv option. When enabled, user verification is
+-    /// always required regardless of the uv parameter in requests.
++    /// Toggles the alwaysUv option for credential creation/authentication.
++    /// Disabling can be refused; read fresh GetInfo to reconcile state.
+     /// </remarks>
+     public const byte ToggleAlwaysUv = 0x02;
+ 
+@@ -46,26 +48,26 @@ internal static class ConfigSubCommand
+     /// Set minimum PIN length (0x03).
+     /// </summary>
+     /// <remarks>
+-    /// Sets the minimum PIN length required by the authenticator.
++    /// Sets the ClientPIN minimum in Unicode code points and optionally its RP reporting list/force-change policy.
+     /// The new value must be greater than or equal to the current value.
+     /// </remarks>
+     public const byte SetMinPinLength = 0x03;
+ 
+     /// <summary>
+-    /// Vendor specific prototype command for config (0x04).
++    /// Unused local prototype constant (0x04), not the standard vendorPrototype identifier.
+     /// </summary>
+     /// <remarks>
+-    /// Used by some implementations for vendor-specific configuration.
++    /// CTAP 2.1 (2022-06-21 errata), Section 6.11.3, assigns vendorPrototype=0xFF.
++    /// No vendor wire definition is established for this local value.
+     /// </remarks>
+     public const byte VendorPrototype = 0x04;
+ 
+     /// <summary>
+-    /// Set minimum PIN length with RP IDs list (0x05).
++    /// Unused local minimum-PIN/RP-list constant (0x05).
+     /// </summary>
+     /// <remarks>
+-    /// Sets the minimum PIN length and optionally specifies a list of
+-    /// RP IDs that are allowed to observe the current minimum PIN length.
+-    /// Requires setMinPINLength option support.
++    /// The cited CTAP 2.1 revision defines RP IDs as parameters of subcommand 3,
++    /// not a separate subcommand 5. AuthenticatorConfig uses that standard parameter map.
+     /// </remarks>
+     public const byte SetMinPinLengthRpIds = 0x05;
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/CredentialManagement/CredManagementSubCommand.cs w/src/Ctap2/src/CredentialManagement/CredManagementSubCommand.cs
+index 1f47778c..c97a806b 100644
+--- i/src/Ctap2/src/CredentialManagement/CredManagementSubCommand.cs
++++ w/src/Ctap2/src/CredentialManagement/CredManagementSubCommand.cs
+@@ -15,7 +15,7 @@
+ namespace Yubico.YubiKit.Ctap2.CredentialManagement;
+ 
+ /// <summary>
+-/// CTAP2 authenticatorCredentialManagement sub-command codes.
++/// Standard authenticatorCredentialManagement subcommand codes (CTAP 2.1, 2022-06-21 errata, Section 6.8).
+ /// </summary>
+ /// <remarks>
+ /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#authenticatorCredentialManagement
+@@ -56,4 +56,4 @@ internal static class CredManagementSubCommand
+     /// updateUserInformation (0x07) - Update user information for a credential.
+     /// </summary>
+     public const byte UpdateUserInformation = 0x07;
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/CredentialManagement/CredentialEnumerationResult.cs w/src/Ctap2/src/CredentialManagement/CredentialEnumerationResult.cs
+index 56f83495..89789daf 100644
+--- i/src/Ctap2/src/CredentialManagement/CredentialEnumerationResult.cs
++++ w/src/Ctap2/src/CredentialManagement/CredentialEnumerationResult.cs
+@@ -30,6 +30,8 @@ public sealed class CredentialEnumerationResult : IDisposable
+     /// <summary>
+     /// Gets the total reported by the first authenticator response, if present.
+     /// </summary>
++    /// <remarks>This is copied, not recomputed or checked against Credentials.Count.
++    /// A null total does not establish that the returned collection is complete.</remarks>
+     public int? ReportedTotal { get; }
+ 
+     internal CredentialEnumerationResult(List<StoredCredentialInfo> credentials, int? reportedTotal)
+@@ -41,6 +43,11 @@ internal CredentialEnumerationResult(List<StoredCredentialInfo> credentials, int
+     /// <summary>
+     /// Disposes every credential owned by this result.
+     /// </summary>
++    /// <remarks>
++    /// Clears the entries' owned response copies. Collection and total access remain
++    /// available, but entries' RawData and LargeBlobKey properties reject access after disposal.
++    /// Independently decoded user, descriptor and public-key data are not cleared.
++    /// </remarks>
+     public void Dispose()
+     {
+         if (_disposed)
+@@ -55,4 +62,4 @@ public void Dispose()
+ 
+         _disposed = true;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/CredentialManagement/CredentialManagement.cs w/src/Ctap2/src/CredentialManagement/CredentialManagement.cs
+index 6715341f..77baa771 100644
+--- i/src/Ctap2/src/CredentialManagement/CredentialManagement.cs
++++ w/src/Ctap2/src/CredentialManagement/CredentialManagement.cs
+@@ -30,7 +30,24 @@ namespace Yubico.YubiKit.Ctap2.CredentialManagement;
+ /// permission.
+ /// </para>
+ /// <para>
+-/// Requires YubiKey firmware 5.2 or later.
++/// This helper sends the standard command (0x0A), without prototype-command fallback or
++/// capability checks. Check that a fresh GetInfo response advertises credMgmt=true;
++/// the SDK's firmware feature threshold is not a guarantee of standard-command support.
++/// </para>
++/// <para>
++/// The session, protocol and token memory are borrowed. Keep the session and protocol alive
++/// and the token bytes unchanged through each awaited operation, then clear the caller-owned
++/// token with CryptographicOperations.ZeroMemory when no longer needed, including on failure.
++/// Unlike ClientPin, this helper does not dispose the supplied protocol. It neither acquires
++/// nor refreshes tokens and does not locally validate their permissions, RP scope or expiry.
++/// The authenticator enforces authorization. Disposal does not revoke a device token.
++/// </para>
++/// <para>
++/// Await operations without interleaving other authenticator commands during enumeration.
++/// The session guards individual exchanges, not the complete begin/next sequence. Under
++/// CTAP 2.1 (2022-06-21 errata), Section 6, devices may require globally adjacent stateful
++/// commands with no more than 30 seconds between them; token expiry discards sequence state.
++/// Cancellation, transport failure or a decode error does not roll back device operations.
+ /// </para>
+ /// </remarks>
+ public sealed class CredentialManagement : IDisposable
+@@ -44,9 +61,10 @@ public sealed class CredentialManagement : IDisposable
+     /// <summary>
+     /// Initializes a new instance of the <see cref="CredentialManagement"/> class.
+     /// </summary>
+-    /// <param name="session">The CTAP2 session to use for communication.</param>
+-    /// <param name="protocol">The PIN/UV auth protocol to use.</param>
+-    /// <param name="pinUvAuthToken">The PIN/UV auth token with credential management permission.</param>
++    /// <param name="session">The borrowed CTAP2 session to use for communication.</param>
++    /// <param name="protocol">The borrowed, authenticator-supported PIN/UV auth protocol.</param>
++    /// <param name="pinUvAuthToken">Borrowed token bytes with credential management permission;
++    /// the caller owns their lifetime and clearing.</param>
+     public CredentialManagement(
+         Ctap2Session session,
+         IPinUvAuthProtocol protocol,
+@@ -72,6 +90,11 @@ internal CredentialManagement(
+     /// </summary>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <returns>The credential metadata including counts.</returns>
++    /// <remarks>
++    /// Use a credential-management token with no associated RP ID, as required by
++    /// CTAP 2.1 (2022-06-21 errata), Section 6.8.2. The remaining count is an estimate,
++    /// not reserved storage or a guarantee that the next credential fits.
++    /// </remarks>
+     public async Task<CredentialMetadata> GetCredentialsMetadataAsync(
+         CancellationToken cancellationToken = default)
+     {
+@@ -87,6 +110,15 @@ public async Task<CredentialMetadata> GetCredentialsMetadataAsync(
+     /// </summary>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <returns>The relying parties and the total reported by the authenticator.</returns>
++    /// <remarks>
++    /// Use a token with no associated RP ID (CTAP 2.1, 2022-06-21 errata, Section 6.8.3).
++    /// This eagerly sends begin, then total-1 next requests if the first total exceeds one.
++    /// If the first total is missing, only the first entry is returned; this fallback does
++    /// not establish a complete standard response. Totals are copied, not validated against
++    /// the collection. Begin NoCredentials becomes an empty result with a null total;
++    /// a continuation failure throws rather than returning a partial result. Keep the
++    /// entire sequence free of intervening commands, including GetInfo and token requests.
++    /// </remarks>
+     public async Task<RelyingPartyEnumerationResult> EnumerateRelyingPartiesAsync(
+         CancellationToken cancellationToken = default)
+     {
+@@ -129,12 +161,23 @@ public async Task<RelyingPartyEnumerationResult> EnumerateRelyingPartiesAsync(
+     /// <summary>
+     /// Enumerates all credentials for a specific relying party.
+     /// </summary>
+-    /// <param name="rpIdHash">The SHA-256 hash of the RP ID.</param>
++    /// <param name="rpIdHash">The raw 32-byte SHA-256 hash of the original UTF-8 RP ID, preferably
++    /// the unchanged RelyingPartyInfo.RpIdHash from RP enumeration. Do not hash a possibly
++    /// truncated returned RP identifier. This helper does not validate the hash length.</param>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <returns>
+     /// The credentials and the total reported by the authenticator. The caller must dispose the
+     /// result after using its credential entries.
+     /// </returns>
++    /// <remarks>
++    /// The token must be unbound or bound to this RP (CTAP 2.1, 2022-06-21 errata, Section 6.8.4).
++    /// This eagerly sends begin and, when the first total exceeds one, total-1 next requests.
++    /// A missing total yields one entry and a null ReportedTotal, not proof of complete
++    /// enumeration. The reported total is copied without count or range validation.
++    /// Begin NoCredentials becomes an empty result; a continuation or decode failure
++    /// disposes entries already decoded and throws, with no partial result. Do not interleave
++    /// other authenticator commands before the awaited sequence completes.
++    /// </remarks>
+     public async Task<CredentialEnumerationResult> EnumerateCredentialsAsync(
+         ReadOnlyMemory<byte> rpIdHash,
+         CancellationToken cancellationToken = default)
+@@ -192,6 +235,14 @@ public async Task<CredentialEnumerationResult> EnumerateCredentialsAsync(
+     /// </summary>
+     /// <param name="credentialId">The credential descriptor to delete.</param>
+     /// <param name="cancellationToken">The cancellation token.</param>
++    /// <remarks>
++    /// Permanently deletes the matching discoverable credential; no undo or response model
++    /// is provided. The token must be unbound or scoped to the credential's RP. An unknown
++    /// credential produces NoCredentials, which this method propagates. The helper does
++    /// not delete associated large blobs or update the RP's account records. CTAP 2.1
++    /// (2022-06-21 errata), Section 6.8.5, recommends platform blob cleanup in a Note.
++    /// A failed or cancelled call is not proof that the credential remains on the device.
++    /// </remarks>
+     public async Task DeleteCredentialAsync(
+         PublicKeyCredentialDescriptor credentialId,
+         CancellationToken cancellationToken = default)
+@@ -205,10 +256,16 @@ await SendCredentialManagementCommandAsync(payload, cancellationToken)
+     /// Updates the user information for a discoverable credential.
+     /// </summary>
+     /// <param name="credentialId">The credential descriptor to update.</param>
+-    /// <param name="user">The new user entity information.</param>
++    /// <param name="user">The existing user handle (Id) and replacement Name and DisplayName.</param>
+     /// <param name="cancellationToken">The cancellation token.</param>
+     /// <remarks>
+-    /// Requires CTAP 2.1 support.
++    /// Requires support for the standard updateUserInformation subcommand. Keep the existing
++    /// user Id: CTAP 2.1 (2022-06-21 errata), Section 6.8.6, requires the authenticator to
++    /// reject a different handle. Only Name and DisplayName are replaced. Null or empty
++    /// names are omitted by this encoder and request removal of those stored fields, not
++    /// preservation. This does not create a user, rebind the credential or rename an RP-side
++    /// account. The token must be unbound or scoped to the credential's RP; NoCredentials
++    /// is propagated for an unknown credential. Re-enumerate after success to inspect device state.
+     /// </remarks>
+     public async Task UpdateUserInformationAsync(
+         PublicKeyCredentialDescriptor credentialId,
+@@ -220,13 +277,21 @@ await SendCredentialManagementCommandAsync(payload, cancellationToken)
+             .ConfigureAwait(false);
+     }
+ 
++    /// <summary>
++    /// Marks this helper disposed without releasing its borrowed dependencies.
++    /// </summary>
++    /// <remarks>
++    /// Current operation methods do not check this marker and can still send requests.
++    /// Do not use the helper after disposal or rely on disposal to prevent operations,
++    /// clear token memory, dispose the session/protocol or revoke device authorization.
++    /// </remarks>
+     public void Dispose()
+     {
+         if (_disposed)
+             return;
+ 
+         // _pinUvAuthToken is caller-provided — the caller retains zeroing responsibility.
+-        // Zeroing it here would corrupt the caller's view of the buffer (T12 ownership violation).
++        // Clearing borrowed memory here would invalidate other caller-held views.
+         _disposed = true;
+     }
+ 
+@@ -247,13 +312,15 @@ private async Task<ReadOnlyMemory<byte>> SendCredentialManagementCommandAsync(
+         }
+         finally
+         {
++            // Clears this final request only, not payload/auth-param arrays or session response storage.
+             CryptographicOperations.ZeroMemory(request);
+         }
+     }
+ 
+     private ReadOnlyMemory<byte> BuildCommandPayload(byte subCommand)
+     {
+-        // Build PIN/UV auth param over just the subcommand
++        // This encoder authenticates next requests too; Section 6.8 lists only subCommand for continuation.
++        // Build PIN/UV auth param over just the subcommand.
+         var subCommandBytes = new byte[] { subCommand };
+         var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, subCommandBytes);
+ 
+@@ -446,7 +513,7 @@ private static void WriteCredentialDescriptor(CborWriter writer, PublicKeyCreden
+     {
+         writer.WriteStartMap(2);
+ 
+-        // "id" comes before "type" alphabetically
++        // Canonical text-key order puts the shorter "id" before "type".
+         writer.WriteTextString("id");
+         writer.WriteByteString(descriptor.Id.Span);
+ 
+@@ -465,7 +532,8 @@ private static void WritePublicKeyCredentialUserEntity(CborWriter writer, Public
+ 
+         writer.WriteStartMap(fieldCount);
+ 
+-        // Fields in CTAP2 canonical order (alphabetical for text keys)
++        // Ctap2Canonical sorts the completed map by encoded keys, not alphabetical insertion.
++        // With all fields present, the emitted order is id, name, displayName (CTAP 2.1 Section 8).
+         if (!string.IsNullOrEmpty(user.DisplayName))
+         {
+             writer.WriteTextString("displayName");
+@@ -483,4 +551,4 @@ private static void WritePublicKeyCredentialUserEntity(CborWriter writer, Public
+ 
+         writer.WriteEndMap();
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/CredentialManagement/CredentialManagementModels.cs w/src/Ctap2/src/CredentialManagement/CredentialManagementModels.cs
+index 77351a21..8be4a43e 100644
+--- i/src/Ctap2/src/CredentialManagement/CredentialManagementModels.cs
++++ w/src/Ctap2/src/CredentialManagement/CredentialManagementModels.cs
+@@ -33,8 +33,12 @@ public sealed class CredentialMetadata
+     public int ExistingResidentCredentialsCount { get; }
+ 
+     /// <summary>
+-    /// Gets the maximum number of remaining discoverable credentials the authenticator can store.
++    /// Gets the authenticator's estimate of how many more discoverable credentials could be stored.
+     /// </summary>
++    /// <remarks>
++    /// Actual storage depends on the algorithm and user information (CTAP 2.1,
++    /// 2022-06-21 errata, Section 6.8.2). This is not a capacity reservation.
++    /// </remarks>
+     public int MaxPossibleRemainingResidentCredentialsCount { get; }
+ 
+     private CredentialMetadata(ReadOnlyMemory<byte> rawData, int existingCount, int maxRemaining)
+@@ -49,6 +53,11 @@ private CredentialMetadata(ReadOnlyMemory<byte> rawData, int existingCount, int
+     /// </summary>
+     /// <param name="data">The CBOR-encoded response data.</param>
+     /// <returns>The decoded credential metadata.</returns>
++    /// <remarks>
++    /// Copies the complete response without modifying the borrowed input. Missing count
++    /// fields currently default to zero; required-field and nonnegative-count validation
++    /// is not performed, so defaults are not evidence of empty or full device storage.
++    /// </remarks>
+     public static CredentialMetadata Decode(ReadOnlyMemory<byte> data)
+     {
+         ReadOnlyMemory<byte> rawData = data.ToArray();
+@@ -93,15 +102,20 @@ public sealed class RelyingPartyInfo
+     /// <summary>
+     /// Gets the relying party entity information.
+     /// </summary>
++    /// <remarks>
++    /// The returned Id can be truncated for display (CTAP 2.1, 2022-06-21 errata,
++    /// Section 6.8.7). Use RpIdHash, not a new hash of this text, to enumerate credentials.
++    /// </remarks>
+     public PublicKeyCredentialRpEntity RelyingParty { get; }
+ 
+     /// <summary>
+-    /// Gets the hash of the RP ID.
++    /// Gets the raw SHA-256 hash of the original, untruncated RP ID.
+     /// </summary>
++    /// <remarks>Pass it unchanged to credential enumeration. The decoder does not enforce its 32-byte length.</remarks>
+     public ReadOnlyMemory<byte> RpIdHash { get; }
+ 
+     /// <summary>
+-    /// Gets the total number of RPs (only present in first response).
++    /// Gets the total copied from this response, or null when omitted; the standard supplies it in the begin response.
+     /// </summary>
+     public int? TotalRpCount { get; }
+ 
+@@ -187,4 +201,4 @@ private static PublicKeyCredentialRpEntity DecodeRpEntity(CborReader reader)
+ 
+         return new PublicKeyCredentialRpEntity(id ?? string.Empty, name);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/CredentialManagement/RelyingPartyEnumerationResult.cs w/src/Ctap2/src/CredentialManagement/RelyingPartyEnumerationResult.cs
+index 642565d6..32d9d0bb 100644
+--- i/src/Ctap2/src/CredentialManagement/RelyingPartyEnumerationResult.cs
++++ w/src/Ctap2/src/CredentialManagement/RelyingPartyEnumerationResult.cs
+@@ -27,6 +27,8 @@ public sealed class RelyingPartyEnumerationResult
+     /// <summary>
+     /// Gets the total reported by the first authenticator response, if present.
+     /// </summary>
++    /// <remarks>This is copied, not recomputed or checked against RelyingParties.Count.
++    /// A null total does not establish that the returned collection is complete.</remarks>
+     public int? ReportedTotal { get; }
+ 
+     internal RelyingPartyEnumerationResult(List<RelyingPartyInfo> relyingParties, int? reportedTotal)
+@@ -34,4 +36,4 @@ internal RelyingPartyEnumerationResult(List<RelyingPartyInfo> relyingParties, in
+         RelyingParties = relyingParties.AsReadOnly();
+         ReportedTotal = reportedTotal;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/src/CredentialManagement/StoredCredentialInfo.cs w/src/Ctap2/src/CredentialManagement/StoredCredentialInfo.cs
+index b28fd27b..698afae2 100644
+--- i/src/Ctap2/src/CredentialManagement/StoredCredentialInfo.cs
++++ w/src/Ctap2/src/CredentialManagement/StoredCredentialInfo.cs
+@@ -32,7 +32,8 @@ public sealed class StoredCredentialInfo : IDisposable
+     /// </summary>
+     /// <remarks>
+     /// This view is valid until this instance is disposed. Copy it before disposal if it must be
+-    /// retained. Disposal clears only the private response copy owned by this instance; it does not
++    /// retained; the caller must clear any retained secret-bearing copy when finished, including on failure.
++    /// Disposal clears only the private response copy owned by this instance; it does not
+     /// clear the buffer passed to <see cref="Decode(ReadOnlyMemory{byte})"/> or transport buffers.
+     /// </remarks>
+     /// <exception cref="ObjectDisposedException">The instance has been disposed.</exception>
+@@ -56,12 +57,12 @@ public ReadOnlyMemory<byte> RawData
+     public PublicKeyCredentialDescriptor CredentialId { get; }
+ 
+     /// <summary>
+-    /// Gets the COSE public key.
++    /// Gets an independent copy of the encoded COSE public-key map, not private-key bytes.
+     /// </summary>
+     public ReadOnlyMemory<byte> PublicKey { get; }
+ 
+     /// <summary>
+-    /// Gets the total number of credentials for this RP (only present in first response).
++    /// Gets the total copied from this response, or null when omitted; the standard supplies it in the begin response.
+     /// </summary>
+     public int? TotalCredentials { get; }
+ 
+@@ -75,7 +76,8 @@ public ReadOnlyMemory<byte> RawData
+     /// </summary>
+     /// <remarks>
+     /// This is a view into the owned raw response and is valid until this instance is disposed.
+-    /// Copy it before disposal if it must be retained.
++    /// A retained copy is caller-owned secret key material: clear it with
++    /// CryptographicOperations.ZeroMemory when finished, including on failure.
+     /// </remarks>
+     /// <exception cref="ObjectDisposedException">The instance has been disposed.</exception>
+     public ReadOnlyMemory<byte>? LargeBlobKey
+@@ -192,6 +194,11 @@ public static StoredCredentialInfo Decode(ReadOnlyMemory<byte> data)
+     /// <summary>
+     /// Clears the complete private response copy, including unrecognized fields.
+     /// </summary>
++    /// <remarks>
++    /// Previously captured RawData and LargeBlobKey views refer to the cleared buffer.
++    /// User, CredentialId and PublicKey are independent decoded data and remain usable.
++    /// Borrowed decoder input, transport storage and caller-made copies are not cleared.
++    /// </remarks>
+     public void Dispose()
+     {
+         if (_disposed)
+@@ -202,4 +209,4 @@ public void Dispose()
+         CryptographicOperations.ZeroMemory(_ownedResponse);
+         _disposed = true;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AuthenticatorConfigTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AuthenticatorConfigTests.cs
+index 473058a8..3e8436e5 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AuthenticatorConfigTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2AuthenticatorConfigTests.cs
+@@ -23,10 +23,17 @@
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+-/// Integration tests for CTAP2.1 authenticatorConfig operations.
+-/// Tests AlwaysUV toggle, minimum PIN length, and force PIN change.
+-/// Requires firmware 5.4+ with authenticatorConfig support.
++/// Device tests for alwaysUv state, a minimum-PIN target and force-change behavior.
+ /// </summary>
++/// <remarks>
++/// All callbacks use default known-PIN normalization before their capability checks;
++/// setup can set/change a PIN or consume retries. These require human-approved PIN work
++/// and known device state, not a read-only GetInfo lane. Support is checked per option,
++/// not qualified by a firmware threshold. Restoration is partial/best-effort: a failed
++/// assertion can leave alwaysUv toggled, the minimum is not reduced, and a failed second
++/// PIN change can leave the temporary PIN. The outer finally clears configPinToken but
++/// does not cover all newly allocated token/PIN buffers on exceptional paths.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Feature", "AuthenticatorConfig")]
+ public class Ctap2AuthenticatorConfigTests
+@@ -81,8 +88,8 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+                 Assert.NotEqual(initialAlwaysUv, newAlwaysUv);
+ 
+-                // Toggle back to restore original state
+-                // Need a fresh token since the previous one may have been consumed
++                // Attempt a second toggle only after the assertion; not exception-safe restoration.
++                // A fresh token is requested, but the restored state is not re-read or asserted.
+                 byte[] restorePinToken;
+                 if (supportsPermissions)
+                 {
+@@ -146,14 +153,13 @@ await state.WithCtap2SessionAsync(async session =>
+ 
+             try
+             {
+-                // Fixed target well below our 8-char test PIN. Using a constant
+-                // avoids the old currentMinLength+1 pattern that accumulated
+-                // across runs until it exceeded the test PIN length.
++                // Fixed target below the eight-ASCII-code-point test PIN avoids accumulating increases.
++                // Equality with the current minimum is allowed; this does not always prove an increase.
+                 const int testMinPinLength = 6;
+ 
+                 var currentMinLength = info.MinPinLength ?? 4;
+ 
+-                // setMinPINLength is one-way (increase only, factory reset to undo).
++                // The minimum cannot decrease; FIDO reset restores the preconfigured minimum and invalidates credentials.
+                 // If already above our target, skip with diagnostic.
+                 if (currentMinLength > testMinPinLength)
+                 {
+@@ -170,6 +176,7 @@ await config.SetMinPinLengthAsync(
+                     rpIds: [Ctap2TestData.RpId]);
+ 
+                 var updatedInfo = await session.GetInfoAsync();
++                // Asserts only the minimum bound, not RP-list storage or minPinLength extension output.
+                 Assert.True(updatedInfo.MinPinLength >= testMinPinLength,
+                     $"Min PIN length should be >= {testMinPinLength}, was {updatedInfo.MinPinLength}");
+             }
+@@ -180,10 +187,15 @@ await config.SetMinPinLengthAsync(
+         });
+ 
+     /// <summary>
+-    /// Tests the full forcePinChange lifecycle: set the flag, verify PIN tokens are
+-    /// blocked, change PIN to clear the flag, verify tokens work again.
+-    /// Matches the python-fido2 test_force_pin_change pattern.
++    /// Attempts force-change flag/token/PIN-change checks with best-effort recovery.
+     /// </summary>
++    /// <remarks>
++    /// The token-block assertion uses legacy GetPinTokenAsync (0x05) and expects PinInvalid,
++    /// as specified by CTAP 2.1 (2022-06-21 errata), Section 6.5.5.7.1, for forcePINChange.
++    /// The permission-based 0x09 method instead returns PinPolicyViolation (Section 6.5.5.7.2)
++    /// and is not exercised by that assertion. Later successful steps assert a nonempty
++    /// legacy token and a cleared flag, not every restored setting or permission-token behavior.
++    /// </remarks>
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+@@ -204,7 +216,7 @@ await state.WithCtap2SessionAsync(async session =>
+                 return;
+             }
+ 
+-            // Pre-condition: forcePinChange should not be set (NormalizePinAsync clears it)
++            // Require a clear flag after normalization's attempted recovery; setup can fail before this callback.
+             Assert.True(info.ForcePinChange != true,
+                 "ForcePinChange should not be set before test. NormalizePinAsync should have cleared it.");
+ 
+@@ -238,12 +250,12 @@ await state.WithCtap2SessionAsync(async session =>
+                 Assert.True(flaggedInfo.ForcePinChange,
+                     "ForcePinChange should be true after SetMinPinLength with forceChangePin=true");
+ 
+-                // Step 3: Verify PIN token requests are blocked
++                // Step 3: Legacy 0x05 returns PinInvalid for forcePINChange in CTAP 2.1 Section 6.5.5.7.1.
+                 var ex = await Assert.ThrowsAsync<CtapException>(
+                     () => clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8));
+                 Assert.Equal(CtapStatus.PinInvalid, ex.Status);
+ 
+-                // Step 4: Clear flag via PIN change (reverse then restore, matching python-fido2 pattern)
++                // Step 4: Attempt two PIN changes; second-change failure can leave the reversed PIN and uncleared bytes.
+                 byte[] reversedPin = Ctap2TestData.PinUtf8.Reverse().ToArray();
+                 await clientPin.ChangePinAsync(Ctap2TestData.PinUtf8, reversedPin);
+                 await clientPin.ChangePinAsync(reversedPin, Ctap2TestData.PinUtf8);
+@@ -263,8 +275,8 @@ await state.WithCtap2SessionAsync(async session =>
+             {
+                 CryptographicOperations.ZeroMemory(configPinToken);
+ 
+-                // Safety net: if test failed before step 4, clear forcePinChange.
+-                // Uses reversed-PIN pattern because Enhanced PIN keys reject same-PIN changes.
++                // Best-effort recovery only if the flag still appears set. This is not rollback:
++                // it assumes the known PIN remains current and does not cover a failed second change.
+                 try
+                 {
+                     var checkInfo = await session.GetInfoAsync();
+@@ -278,8 +290,8 @@ await state.WithCtap2SessionAsync(async session =>
+                 }
+                 catch
+                 {
+-                    // Best-effort — NormalizePinAsync will also attempt recovery
++                    // Recovery errors are ignored; later normalization may also fail. State is not guaranteed restored.
+                 }
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2BioEnrollmentTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2BioEnrollmentTests.cs
+index 12a96449..ea996c06 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2BioEnrollmentTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2BioEnrollmentTests.cs
+@@ -23,9 +23,16 @@
+ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+-/// Integration tests for CTAP2 biometric (fingerprint) enrollment.
+-/// Requires a YubiKey Bio series device with fingerprint sensor.
++/// Device sensor-info checks for a fingerprint-capable authenticator.
+ /// </summary>
++/// <remarks>
++/// The sole test asserts a positive decoded sample hint and Touch/Swipe kind; it never
++/// enrolls, captures, cancels, renames or removes a fingerprint. Default known-PIN
++/// normalization runs before callback capability checks and may set/change PIN state or
++/// consume retries. This remains human-approved PIN work, not read-only setup. Sensor
++/// metadata alone does not qualify biometric interoperability or fix the helper's standard
++/// request/schema limitations. The explicitly acquired bio token is cleared in finally.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Feature", "BioEnrollment")]
+ public class Ctap2BioEnrollmentTests
+@@ -38,7 +45,7 @@ await state.WithCtap2SessionAsync(async session =>
+         {
+             var info = await session.GetInfoAsync();
+ 
+-            // Check for bio enrollment support
++            // Option presence indicates support; false means no templates provisioned, not unsupported.
+             var hasBioEnroll = info.Options.TryGetValue("bioEnroll", out var bioEnrollValue);
+             var hasPrototypeBioEnroll = info.Options.TryGetValue("userVerificationMgmtPreview", out var previewValue);
+ 
+@@ -86,4 +93,4 @@ await state.WithCtap2SessionAsync(async session =>
+                 CryptographicOperations.ZeroMemory(bioToken);
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementExtendedTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementExtendedTests.cs
+index 968eb35b..8feadae9 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementExtendedTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementExtendedTests.cs
+@@ -26,8 +26,16 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ 
+ /// <summary>
+ /// Extended integration tests for CTAP2 credential management operations.
+-/// Tests user info updates and multiple users per RP enumeration.
++/// Checks updated display name and presence of two created IDs in credential enumeration for one RP.
+ /// </summary>
++/// <remarks>
++/// Default known-PIN normalization precedes capability checks and can set/change the PIN
++/// or consume retries. These are human-approved PIN/credential operations on a known-state
++/// test device. The update assertion does not check Name, user-handle/public-key preservation
++/// or all stored fields. Cleanup deletes all discoverable credentials for the shared test RP,
++/// not only the IDs created here. Finally schedules that cleanup but does not guarantee success;
++/// make tokens are not cleared and management tokens are cleared only on successful paths.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ [Trait("Feature", "CredentialManagement")]
+ public class Ctap2CredentialManagementExtendedTests
+@@ -45,7 +53,7 @@ await state.WithCtap2SessionAsync(async session =>
+                 return;
+             }
+ 
+-            // UpdateUserInformation requires CTAP 2.1
++            // This test's version gate permits FIDO_2_1/FIDO_2_1_PRE only; it is not complete subcommand negotiation.
+             var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
+                                        info.Versions.Contains("FIDO_2_1_PRE");
+             if (!supportsPermissions)
+@@ -103,7 +111,7 @@ await state.WithCtap2SessionAsync(async session =>
+                     var descriptor = new PublicKeyCredentialDescriptor(credentialId);
+                     await credMan.UpdateUserInformationAsync(descriptor, updatedUser);
+ 
+-                    // Verify the update by enumerating credentials
++                    // Re-enumerate and assert the matching ID's display name only; other updated/preserved fields are unchecked.
+                     var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(Ctap2TestData.RpId));
+                     using var result = await credMan.EnumerateCredentialsAsync(rpIdHash);
+ 
+@@ -217,4 +225,4 @@ await state.WithCtap2SessionAsync(async session =>
+                 await Ctap2TestHelpers.DeleteAllCredentialsForRpAsync(session, Ctap2TestData.RpId, Ctap2TestData.PinUtf8);
+             }
+         });
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementTests.cs
+index 03256558..be5e33f6 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2CredentialManagementTests.cs
+@@ -27,6 +27,15 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+ /// <summary>
+ /// Integration tests for credential management operations.
+ /// </summary>
++/// <remarks>
++/// Default known-PIN normalization runs before callback capability checks; it can set/change
++/// a PIN or consume retries and requires approved PIN work with known device state. Unsupported
++/// credMgmt callbacks return normally, not as an explicit skip. Enumeration asserts the created
++/// ID is present; metadata asserts only nonnegative counts, not exact capacity or a count delta.
++/// The deletion test also permits a successful GetAssertion, so it does not prove deletion.
++/// Cleanup is best effort and several token/auth-param arrays are not cleared, or are cleared
++/// only after success. These paths are not complete restoration or secret-cleanup guarantees.
++/// </remarks>
+ [Trait("Category", "Integration")]
+ public class Ctap2CredentialManagementTests
+ {
+@@ -142,7 +151,7 @@ await state.WithCtap2SessionAsync(async session =>
+                 }
+                 catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
+                 {
+-                    // Expected behavior
++                    // This test permits NoCredentials too, although the helper normalizes it at begin to empty.
+                 }
+             }
+ 
+@@ -229,6 +238,8 @@ await state.WithCtap2SessionAsync(async session =>
+             var assertPinUvAuthParam = Ctap2TestHelpers.ComputeGetAssertionAuthParam(
+                 clientPin.Protocol, assertPinToken, assertChallenge);
+ 
++            // Missing proof: a successful assertion here does not fail this test.
++            // Strengthening the deletion assertion is separate from this explanatory comment.
+             try
+             {
+                 await session.GetAssertionAsync(
+@@ -243,7 +254,7 @@ await session.GetAssertionAsync(
+             }
+             catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
+             {
+-                // Expected - credential was deleted
++                // NoCredentials is accepted, but the successful-call branch above also passes without an assertion.
+             }
+         });
+ 
+@@ -297,7 +308,7 @@ private static async Task CleanupCredentialAsync(Ctap2Session session, byte[] cr
+         }
+         catch
+         {
+-            // Cleanup failures should not fail the test
++            // Cleanup errors are swallowed; the created credential can remain and token clearing can be bypassed.
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/BioEnrollmentModelsTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/BioEnrollmentModelsTests.cs
+index 5866dcae..22ad8500 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/BioEnrollmentModelsTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/BioEnrollmentModelsTests.cs
+@@ -20,6 +20,13 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.BioEnrollment;
+ /// <summary>
+ /// Tests for BioEnrollment model parsing.
+ /// </summary>
++/// <remarks>
++/// Synthetic fixtures check decoded values and selected raw-copy behavior, not sensor
++/// enrollment. Flat template maps below reflect the current decoder, not CTAP 2.1's
++/// key-7 template array with nested keys 1/2. Status-value assertions preserve current
++/// enum mappings, including 0x0B-0x0D names that differ from the standard table. No test
++/// here establishes rejection of missing sample fields or independent enrollment completion.
++/// </remarks>
+ public class BioEnrollmentModelsTests
+ {
+     [Fact]
+@@ -68,14 +75,14 @@ public void FingerprintSensorInfo_Decode_ParsesSwipeSensor()
+     [Fact]
+     public void FingerprintSensorInfo_Decode_ParsesMaxTemplateCount()
+     {
+-        // Arrange - CBOR map with vendor extension for max templates
++        // Arrange - locally interpreted key 4; no original vendor definition establishes this sensor field.
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(3);
+         writer.WriteInt32(2); // fingerprintKind key
+         writer.WriteInt32(1); // Touch
+         writer.WriteInt32(3); // maxCaptureSamplesRequiredForEnroll key
+         writer.WriteInt32(5);
+-        writer.WriteInt32(4); // maxTemplateCount key (vendor extension)
++        writer.WriteInt32(4); // Local maxTemplateCount interpretation, not standard sensor-info schema.
+         writer.WriteInt32(3);
+         writer.WriteEndMap();
+         var cbor = writer.Encode();
+@@ -153,7 +160,7 @@ public void EnrollmentSampleResult_Decode_WithUnknownField_PreservesOwnedRawData
+     [Fact]
+     public void EnrollmentSampleResult_Decode_ParsesCompletedEnrollment()
+     {
+-        // Arrange - CBOR response with remainingSamples = 0
++        // Arrange - supplied zero count exercises IsComplete equality, not actual enrolled-template persistence.
+         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         writer.WriteStartMap(3);
+@@ -186,7 +193,7 @@ public void EnrollmentSampleResult_Decode_ParsesPoorQualitySample()
+         writer.WriteInt32(5); // lastEnrollSampleStatus key
+         writer.WriteInt32(7); // PoorQuality = 0x07
+         writer.WriteInt32(6); // remainingSamples key
+-        writer.WriteInt32(3); // May not decrement on poor quality
++        writer.WriteInt32(3); // Supplied count; this single fixture does not compare successive samples.
+         writer.WriteEndMap();
+         var cbor = writer.Encode();
+ 
+@@ -291,7 +298,7 @@ public void TemplateInfo_Decode_ParsesWithSampleCount()
+         writer.WriteByteString(templateId);
+         writer.WriteInt32(7); // templateFriendlyName key
+         writer.WriteTextString("Left Thumb");
+-        writer.WriteInt32(8); // sampleCount key (vendor extension)
++        writer.WriteInt32(8); // Local sampleCount interpretation; standard envelope key 8 is maxTemplateFriendlyName.
+         writer.WriteInt32(5);
+         writer.WriteEndMap();
+         var cbor = writer.Encode();
+@@ -361,4 +368,4 @@ public void FingerprintModality_HasCorrectValue()
+         // Assert
+         Assert.Equal(1, FingerprintModality.Fingerprint);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/FingerprintBioEnrollmentTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/FingerprintBioEnrollmentTests.cs
+index 18751497..c40eff54 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/FingerprintBioEnrollmentTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/FingerprintBioEnrollmentTests.cs
+@@ -23,6 +23,14 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.BioEnrollment;
+ /// <summary>
+ /// Tests for FingerprintBioEnrollment operations.
+ /// </summary>
++/// <remarks>
++/// Mock replies and all-zero authentication tags exercise current encoding/decoding and
++/// call counts, not a fingerprint sensor or standard transcript interoperability. Sensor
++/// and timeout assertions preserve the helper's known nonstandard fields. Flat inventory
++/// replies and InvalidCommand-as-empty likewise model current limitations, not the standard
++/// array/InvalidOption behavior. Cancel/rename/remove tests count one send without inspecting
++/// its payload. Required-field failures, real timeout and cancellation recovery are not covered.
++/// </remarks>
+ public class FingerprintBioEnrollmentTests
+ {
+     private readonly ICtap2Session _mockSession;
+@@ -97,8 +105,8 @@ public async Task GetFingerprintSensorInfoAsync_SendsCorrectPayload()
+         // Act
+         await bioEnroll.GetFingerprintSensorInfoAsync(TestContext.Current.CancellationToken);
+ 
+-        // Assert - request format is [command][cbor_payload]
+-        // First byte is command, rest is CBOR
++        // Assert the current modality-only map; Section 6.7.3 requires subCommand=7 too.
++        // The prefix is skipped, not asserted to equal a particular command byte here.
+         Assert.True(capturedRequest.Length > 1, "Request should have command + payload");
+         var payload = capturedRequest.Slice(1); // Skip command byte
+         var reader = new CborReader(payload, CborConformanceMode.Lax);
+@@ -159,7 +167,7 @@ public async Task EnrollBeginAsync_WithTimeout_IncludesTimeoutInPayload()
+         for (var i = 0; i < mapCount; i++)
+         {
+             var key = reader.ReadInt32();
+-            if (key == 6) // timeout key
++            if (key == 6) // Current nonstandard timeout field; standard top-level key 6 is Boolean getModality.
+             {
+                 hasTimeout = true;
+                 Assert.Equal(15000, reader.ReadInt32());
+@@ -202,7 +210,7 @@ public async Task EnrollCaptureNextSampleAsync_WithPoorQuality_ReturnsStatus()
+         var enrollResponse = CreateEnrollmentResponse(
+             templateId,
+             FingerprintSampleStatus.TooFast,
+-            3); // Remaining doesn't decrease
++            3); // Supplied count; this test asserts only the decoded TooFast status.
+ 
+         _mockSession.SendCborRequestAsync(
+                 Arg.Any<ReadOnlyMemory<byte>>(),
+@@ -264,7 +272,7 @@ public async Task EnumerateEnrollmentsAsync_ReturnsTemplateList()
+     [Fact]
+     public async Task EnumerateEnrollmentsAsync_WhenNoTemplates_ReturnsEmptyList()
+     {
+-        // Arrange
++        // Arrange unsupported InvalidCommand, not the standard no-enrollment InvalidOption status.
+         _mockSession.SendCborRequestAsync(
+                 Arg.Any<ReadOnlyMemory<byte>>(),
+                 Arg.Any<CancellationToken>())
+@@ -374,14 +382,14 @@ public async Task AllOperations_UseCorrectPinUvAuthProtocol()
+         // Act
+         await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
+ 
+-        // Assert - FakePinUvAuthProtocol records calls
++        // Assert only that begin called Authenticate; neither all operations nor authenticated bytes are checked.
+         Assert.True(_fakeProtocol.AuthenticateWasCalled);
+     }
+ 
+     [Fact]
+     public async Task EnrollmentWorkflow_CompletesSuccessfully()
+     {
+-        // Arrange - simulate a complete enrollment workflow
++        // Arrange a queue-driven simulation; every next reply repeats the ID, so standard-permitted omission is untested.
+         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+ 
+         var responses = new Queue<byte[]>(
+@@ -391,7 +399,7 @@ public async Task EnrollmentWorkflow_CompletesSuccessfully()
+             CreateEnrollmentResponse(templateId, FingerprintSampleStatus.TooFast, 3), // Rejected sample
+             CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 2),
+             CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 1),
+-            CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 0) // Complete!
++            CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 0) // Decoded zero, not sensor persistence proof.
+         ]);
+ 
+         _mockSession.SendCborRequestAsync(
+@@ -401,7 +409,8 @@ public async Task EnrollmentWorkflow_CompletesSuccessfully()
+ 
+         var bioEnroll = CreateBioEnrollment();
+ 
+-        // Act - simulate enrollment loop
++        // Simulated loop reuses each reply's ID. Real callers must retain begin's ID separately:
++        // standard next replies need not repeat it, a case this fixture does not cover.
+         var result = await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
+         Assert.False(result.IsComplete);
+         Assert.Equal(4, result.RemainingSamples);
+@@ -416,7 +425,7 @@ public async Task EnrollmentWorkflow_CompletesSuccessfully()
+         Assert.Equal(0, result.RemainingSamples);
+     }
+ 
+-    // Helper methods to create CBOR responses
++    // Synthetic selected-field replies; the template helper emits the current flat, nonstandard inventory shape.
+ 
+     private static byte[] CreateSensorInfoResponse(FingerprintKind kind, int maxSamples)
+     {
+@@ -464,7 +473,7 @@ private static byte[] CreateTemplateInfoResponse(byte[] templateId, string? frie
+ }
+ 
+ /// <summary>
+-/// Fake implementation of IPinUvAuthProtocol for testing.
++/// Call-recording fake with zero tags and identity encryption/decryption; not a protocol-conformance implementation.
+ /// </summary>
+ internal sealed class FakeBioPinUvAuthProtocol : IPinUvAuthProtocol
+ {
+@@ -509,4 +518,4 @@ public void Dispose()
+     {
+         IsDisposed = true;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Config/AuthenticatorConfigTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Config/AuthenticatorConfigTests.cs
+index 30858106..8b342b9d 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Config/AuthenticatorConfigTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Config/AuthenticatorConfigTests.cs
+@@ -22,6 +22,13 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Config;
+ /// <summary>
+ /// Unit tests for <see cref="AuthenticatorConfig"/>.
+ /// </summary>
++/// <remarks>
++/// Mock exchanges check selected fields and the enterprise/toggle authentication prefix,
++/// not device policy, state restoration or real protocol-2 MACs. The fake advertises version
++/// 2 but returns 16-byte tags rather than protocol 2's 32 bytes. RP-list/force tests check
++/// parameter-map size, not the actual RP strings or force Boolean. Numeric 4/63 acceptance
++/// here is local validation with mocked success, not proof that any device accepts that policy.
++/// </remarks>
+ public class AuthenticatorConfigTests
+ {
+     private readonly ICtap2Session _mockSession;
+@@ -39,7 +46,7 @@ public AuthenticatorConfigTests()
+     }
+ 
+     /// <summary>
+-    /// Test implementation of PIN/UV auth protocol that captures authenticate calls.
++    /// Captures authentication inputs and supplies artificial 16-byte tags; not real protocol 2.
+     /// </summary>
+     private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
+     {
+@@ -194,7 +201,7 @@ public async Task SetMinPinLengthAsync_WithRpIds_IncludesRpIdsInParams()
+         reader.ReadInt32(); // key 0x02
+ 
+         var paramsCount = reader.ReadStartMap();
+-        Assert.True(paramsCount >= 2); // newMinPINLength + minPinLengthRPIDs
++        Assert.True(paramsCount >= 2); // Checks map size only, not RP-list key/strings or persisted recipients.
+     }
+ 
+     [Fact]
+@@ -222,7 +229,7 @@ public async Task SetMinPinLengthAsync_WithForceChangePin_IncludesForceChangePin
+         reader.ReadInt32(); // key 0x02
+ 
+         var paramsCount = reader.ReadStartMap();
+-        Assert.Equal(2, paramsCount); // newMinPINLength + forceChangePin
++        Assert.Equal(2, paramsCount); // Checks map size only, not the force-change key/Boolean or device flag.
+     }
+ 
+     [Fact]
+@@ -380,4 +387,4 @@ public async Task AuthenticatesOverCorrectMessage_ToggleAlwaysUv()
+         Assert.Equal(0x0D, capturedMessage[32]); // CtapCommand.Config
+         Assert.Equal(0x02, capturedMessage[33]); // ToggleAlwaysUv
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementModelsTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementModelsTests.cs
+index 5d62f56d..bb37a136 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementModelsTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementModelsTests.cs
+@@ -20,6 +20,14 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.CredentialManagement;
+ /// <summary>
+ /// Tests for credential management data model decoding.
+ /// </summary>
++/// <remarks>
++/// Synthetic fixtures test parsing and private-response ownership, not authenticator
++/// administration. Ctap2Canonical automatically sorts completed user maps into encoded
++/// key order (id/name/displayName), regardless of the insertion order used below. Empty
++/// or kty-only COSE maps exercise opaque public-key copying, not valid credential keys.
++/// Disposed-view assertions establish private-clone clearing, not transport-buffer cleanup.
++/// The decode-failure test observes borrowed input preservation, not the inaccessible failed clone.
++/// </remarks>
+ public class CredentialManagementModelsTests
+ {
+     [Fact]
+@@ -220,7 +228,7 @@ public void StoredCredentialInfo_Decode_ParsesBasicFields()
+         writer.WriteTextString("public-key");
+         writer.WriteEndMap();
+ 
+-        // 0x08: publicKey (minimal COSE key)
++        // 0x08: opaque publicKey fixture with kty only, not a complete valid COSE credential key.
+         writer.WriteInt32(8);
+         var keyWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
+         keyWriter.WriteStartMap(1);
+@@ -281,7 +289,7 @@ public void StoredCredentialInfo_Decode_ParsesCredProtect()
+ 
+         // 0x0A: credProtect
+         writer.WriteInt32(10);
+-        writer.WriteInt32(2); // userVerificationRequired
++        writer.WriteInt32(2); // userVerificationOptionalWithCredentialIDList; required UV is policy 3.
+ 
+         writer.WriteEndMap();
+ 
+@@ -534,4 +542,4 @@ private static byte[] CreateStoredCredentialResponse(
+         return writer.Encode();
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementWireTests.cs w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementWireTests.cs
+index f1753db2..e05b433d 100644
+--- i/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementWireTests.cs
++++ w/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/CredentialManagement/CredentialManagementWireTests.cs
+@@ -21,6 +21,16 @@
+ 
+ namespace Yubico.YubiKit.Ctap2.UnitTests.CredentialManagement;
+ 
++/// <summary>
++/// Mock-wire checks for selected credential-management request fields, enumeration and owned views.
++/// </summary>
++/// <remarks>
++/// Metadata/delete tests inspect their encoded fields; enumeration tests check first totals,
++/// order and read-only storage, not continuation request bytes or global command adjacency.
++/// Cancellation/decode failures assert propagation and unchanged supplied responses, not
++/// observed clearing of inaccessible local entries or device recovery. Update-user transcripts
++/// are not covered. The fake's version-2/16-byte tags are artificial and do not qualify protocol 2.
++/// </remarks>
+ public sealed class CredentialManagementWireTests
+ {
+     private readonly ICtap2Session _session = Substitute.For<ICtap2Session>();
+@@ -352,4 +362,4 @@ public void Dispose()
+         {
+         }
+     }
+-}
+\ No newline at end of file
++}

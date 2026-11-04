@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <BaseIntermediateOutputPath>/tmp/opencode/ctap2-001-framework-probe/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>/tmp/opencode/ctap2-001-framework-probe/bin/</BaseOutputPath>
+    <NuGetAudit>false</NuGetAudit>
+    <RestoreSources>/home/rupicola/.nuget/packages</RestoreSources>
+  </PropertyGroup>
+</Project>

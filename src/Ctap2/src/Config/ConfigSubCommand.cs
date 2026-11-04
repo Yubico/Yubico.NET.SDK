@@ -19,7 +19,9 @@ namespace Yubico.YubiKit.Ctap2.Config;
 /// </summary>
 /// <remarks>
 /// <para>
-/// See: CTAP 2.1 Section 6.10 - authenticatorConfig (0x0D)
+/// See CTAP 2.1 (2022-06-21 errata), Section 6.11, authenticatorConfig (0x0D).
+/// The active helper uses only subcommands 1-3. The unused constants 4 and 5 below do not
+/// match subcommands defined in that revision and must not be used as standard identifiers.
 /// </para>
 /// </remarks>
 internal static class ConfigSubCommand
@@ -37,8 +39,8 @@ internal static class ConfigSubCommand
     /// Toggle always require UV (0x02).
     /// </summary>
     /// <remarks>
-    /// Toggles the alwaysUv option. When enabled, user verification is
-    /// always required regardless of the uv parameter in requests.
+    /// Toggles the alwaysUv option for credential creation/authentication.
+    /// Disabling can be refused; read fresh GetInfo to reconcile state.
     /// </remarks>
     public const byte ToggleAlwaysUv = 0x02;
 
@@ -46,26 +48,26 @@ internal static class ConfigSubCommand
     /// Set minimum PIN length (0x03).
     /// </summary>
     /// <remarks>
-    /// Sets the minimum PIN length required by the authenticator.
+    /// Sets the ClientPIN minimum in Unicode code points and optionally its RP reporting list/force-change policy.
     /// The new value must be greater than or equal to the current value.
     /// </remarks>
     public const byte SetMinPinLength = 0x03;
 
     /// <summary>
-    /// Vendor specific prototype command for config (0x04).
+    /// Unused local prototype constant (0x04), not the standard vendorPrototype identifier.
     /// </summary>
     /// <remarks>
-    /// Used by some implementations for vendor-specific configuration.
+    /// CTAP 2.1 (2022-06-21 errata), Section 6.11.3, assigns vendorPrototype=0xFF.
+    /// No vendor wire definition is established for this local value.
     /// </remarks>
     public const byte VendorPrototype = 0x04;
 
     /// <summary>
-    /// Set minimum PIN length with RP IDs list (0x05).
+    /// Unused local minimum-PIN/RP-list constant (0x05).
     /// </summary>
     /// <remarks>
-    /// Sets the minimum PIN length and optionally specifies a list of
-    /// RP IDs that are allowed to observe the current minimum PIN length.
-    /// Requires setMinPINLength option support.
+    /// The cited CTAP 2.1 revision defines RP IDs as parameters of subcommand 3,
+    /// not a separate subcommand 5. AuthenticatorConfig uses that standard parameter map.
     /// </remarks>
     public const byte SetMinPinLengthRpIds = 0x05;
 }

@@ -1,0 +1,13 @@
+// SOURCE src/Ctap2/CLAUDE.md#f3
+// Get authenticator capabilities
+var info = await session.GetInfoAsync();
+
+// Check versions
+bool ctap2_1 = info.Versions.Contains("FIDO_2_1");
+
+// Check supported extensions
+bool hasHmacSecret = info.Extensions.Contains("hmac-secret");
+
+// Check options
+bool hasRk = info.Options.TryGetValue("rk", out var rk) && rk;
+

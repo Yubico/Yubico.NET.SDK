@@ -1,0 +1,6 @@
+/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.AssemblyReference.cache
+/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.GeneratedMSBuildEditorConfig.editorconfig
+/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.AssemblyInfoInputs.cache
+/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.AssemblyInfo.cs
+/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.csproj.CoreCompileInputs.cache
+/tmp/opencode/ctap2-001-consumer-lib-context/obj/Release/net10.0/Yubico.YubiKit.AuditCt001.Examples.consumer-lib.sourcelink.json

@@ -113,10 +113,11 @@ even when their serials match. Coordinate them explicitly; do not treat them as 
 one key. A scan can also probe unclaimed sibling interfaces while a scoped connection is live. See
 [connection ownership](../architecture/connection-ownership-and-contention.md#grouping-bound).
 
-Cancellation is checked before constructing the finder. Read budgets and cancellation bound the caller's
-wait, not already-dispatched native calls. On scan exit, queued identity reads are retired so they cannot
-open later; already-open reads keep their registry claim and worker admission until background teardown.
-Native enumeration can also continue after cancellation; cancellation is not proof of native drain.
+Cancellation is checked before constructing the finder. Read budgets and cancellation bound identity/metadata
+waits, not already-dispatched native calls. Dispatched native enumeration is still awaited: the public scan
+task can remain pending after cancellation until enumeration returns. There is no end-to-end scan timeout
+guarantee. On scan exit, queued identity reads are retired so they cannot open later; already-open reads keep
+their registry claim and worker admission until background teardown. Cancellation is not proof of native drain.
 
 ## Cached Device Metadata
 
@@ -303,9 +304,10 @@ interface protocol probes.
 
 Metadata readiness is retried up to three scans with 250 ms backoff; live connection acquisition retries only
 `ConnectionInUseException`, up to three attempts. The existing finite worker-saturation scan retry also applies.
-Each case has a 60-second cancellation budget, not a native-drain guarantee. Missing expected interfaces or
-metadata remain failures, with diagnostic output; no fixture or no supported authorized interface can skip a
-case. Check executed/skipped totals and resolve external contention before treating a failure as an SDK bug.
+Each case requests cancellation after 60 seconds; this is neither a hard completion bound nor a native-drain
+guarantee. Missing expected interfaces or metadata remain failures, with diagnostic output; no fixture or
+no supported authorized interface can skip a case. Check executed/skipped totals and resolve external
+contention before treating a failure as an SDK bug.
 For detailed firmware/count/retry output, temporarily enable xUnit's `showLiveOutput` in that project's runner
 configuration. Do not commit machine-specific serials or hardware logs.
 

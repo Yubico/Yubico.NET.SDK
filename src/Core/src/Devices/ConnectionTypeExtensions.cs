@@ -55,20 +55,8 @@ internal static class ConnectionTypeExtensions
     ///     connect bit; <see cref="ConnectionType.Hid"/> in the filter expands to <c>HidFido|HidOtp</c> and
     ///     <see cref="ConnectionType.All"/> matches any non-empty capability set.
     /// </summary>
-    public static bool Matches(this ConnectionType filter, ConnectionType available)
-    {
-        if (filter == ConnectionType.Unknown || available == ConnectionType.Unknown)
-            return false;
-
-        if (filter == ConnectionType.All)
-            return (available & ConcreteConnections) != 0;
-
-        var wanted = filter;
-        if ((filter & ConnectionType.Hid) != 0)
-            wanted |= ConnectionType.HidFido | ConnectionType.HidOtp;
-
-        return (wanted & available & ConcreteConnections) != 0;
-    }
+    public static bool Matches(this ConnectionType filter, ConnectionType available) =>
+        (filter.ToConcreteScope() & available & ConcreteConnections) != 0;
 
     /// <summary>
     ///     Returns the single concrete connection in <paramref name="available"/>, or <see cref="ConnectionType.Unknown"/>

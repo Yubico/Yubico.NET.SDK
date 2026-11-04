@@ -70,7 +70,8 @@ enumeration, but excluded interfaces are not probed. Existing monitors run uncha
 
 Partial views can split one physical key. Connection exclusion covers overlapping known interface IDs,
 not disjoint scoped views, even if serials match; coordinate those views rather than opening them in
-parallel. Cancellation does not prove native work drained. See
+parallel. Dispatched native enumeration can delay cancellation completion; there is no end-to-end scan
+timeout guarantee, and cancellation does not prove native work drained. See
 [independent scoped scans](../../docs/usage/device-discovery.md#independent-scoped-scans) for scope,
 metadata, identity, and lifetime bounds.
 

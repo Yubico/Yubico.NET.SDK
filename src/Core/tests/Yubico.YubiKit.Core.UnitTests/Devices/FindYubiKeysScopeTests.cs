@@ -261,6 +261,41 @@ public class FindYubiKeysScopeTests
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
+    public async Task ScanAsync_CancellationDuringEnumeration_WaitsForEnumerationThenSkipsSlotsAndProbes()
+    {
+        var rig = new ScopeRig();
+        var enumeration = new TaskCompletionSource<IReadOnlyList<IPcscDevice>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        rig.Pcsc.PendingEnumeration = enumeration.Task;
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var scan = YubiKeyManager.ScanAsync(ConnectionType.SmartCard, cancellation.Token, rig.CreateFinder);
+        try
+        {
+            Assert.Equal(1, rig.Pcsc.Calls); // Enumeration has entered and is held behind the gate.
+            Assert.NotEmpty(rig.Pcsc.Devices);
+            await cancellation.CancelAsync();
+
+            // Dispatched enumeration does not observe cancellation. Its caller still awaits it, rather
+            // than abandoning this wait as identity/metadata reads do. Keep the gate closed throughout.
+            await Assert.ThrowsAsync<TimeoutException>(() =>
+                scan.WaitAsync(TimeSpan.FromMilliseconds(100), TestContext.Current.CancellationToken));
+        }
+        finally
+        {
+            await cancellation.CancelAsync();
+            enumeration.TrySetResult(rig.Pcsc.Devices);
+            // Release and drain the fake even if the runner canceled; no task may outlive this test.
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                scan.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None));
+        }
+
+        Assert.Empty(rig.CreatedSlots);
+        Assert.Empty(rig.TopologyCalls);
+        Assert.Empty(rig.OpenCalls);
+        Assert.Equal(0, rig.Hid.Calls);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
     public async Task ScanAsync_CancellationRetainsOpenedReadOwnershipUntilBackgroundTeardown()
     {
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
@@ -452,10 +487,11 @@ public class FindYubiKeysScopeTests
     {
         internal int Calls { get; private set; }
         internal IReadOnlyList<IPcscDevice> Devices { get; set; } = [];
+        internal Task<IReadOnlyList<IPcscDevice>>? PendingEnumeration { get; set; }
         public Task<IReadOnlyList<IPcscDevice>> FindAllAsync(CancellationToken cancellationToken = default)
         {
             Calls++;
-            return Task.FromResult(Devices);
+            return PendingEnumeration ?? Task.FromResult(Devices);
         }
     }
 

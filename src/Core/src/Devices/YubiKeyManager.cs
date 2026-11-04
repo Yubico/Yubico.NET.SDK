@@ -354,7 +354,7 @@ public static class YubiKeyManager
     /// Interfaces to enumerate and probe. <see cref="ConnectionType.Hid"/> includes FIDO and OTP;
     /// <see cref="ConnectionType.Unknown"/> scans nothing. Undefined bits are ignored.
     /// </param>
-    /// <param name="cancellationToken">Cancellation token to cancel the scan's wait.</param>
+    /// <param name="cancellationToken">Requests scan cancellation; completion can be delayed by dispatched native enumeration.</param>
     /// <returns>New device views containing only observed in-scope interfaces.</returns>
     /// <exception cref="OperationCanceledException">The cancellation token is canceled.</exception>
     /// <exception cref="PlatformInteropException">A requested platform API fails.</exception>
@@ -370,8 +370,10 @@ public static class YubiKeyManager
     /// <para>Connection exclusion is in-process and based on known member interface IDs. Overlapping
     /// views exclude each other; disjoint scoped views cannot guarantee physical-key exclusion, even
     /// with matching serials. Coordinate such views rather than opening them concurrently.</para>
-    /// <para>Cancellation and read budgets bound waits, not already-dispatched native work. On exit,
-    /// queued identity reads are retired; already-open reads retain ownership until background teardown.
+    /// <para>Cancellation and read budgets bound identity/metadata waits, not already-dispatched native work.
+    /// Dispatched native enumeration is still awaited and can delay cancellation completion; there is no
+    /// end-to-end scan timeout guarantee. On exit, queued identity reads are retired; already-open reads
+    /// retain ownership until background teardown.
     /// Independently obtained objects and their identifiers are not durable physical-identity records.</para>
     /// </remarks>
     public static Task<IReadOnlyList<IYubiKey>> ScanAsync(

@@ -204,6 +204,26 @@ public class SessionConsistencyTests
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task UnknownAlgorithm_ParsedMetadataExtraction_ReportsUnsupportedAlgorithm(bool extractRsa)
+    {
+        byte[] raw = [0x01, 0x01, 0xF1, 0x02, 0x02, 0x02, 0x01, 0x03, 0x01, 0x01, 0x04, 0x00];
+        var connection = Connection([.. raw, 0x90, 0x00]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        var metadata = Assert.IsType<PivSlotMetadata>(await session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken));
+
+        var exception = Assert.Throws<NotSupportedException>(() =>
+        {
+            using AsymmetricAlgorithm key = extractRsa ? metadata.GetRsaPublicKey() : metadata.GetECDsaPublicKey();
+        });
+
+        Assert.Contains("0xF1", exception.Message);
+        Assert.Equal(raw, metadata.RawData.ToArray());
+        Assert.Equal(4, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
     [InlineData(new byte[] { 0x02, 0x02, 0x02, 0x01 })]
     [InlineData(new byte[] { 0x01, 0x02, 0x11, 0x00 })]
     [InlineData(new byte[] { 0x01, 0x01, 0x11, 0x02, 0x01, 0x02 })]

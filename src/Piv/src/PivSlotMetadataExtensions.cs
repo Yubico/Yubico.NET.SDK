@@ -29,6 +29,7 @@ public static class PivSlotMetadataExtensions
     /// <param name="metadata">The slot metadata containing the public key.</param>
     /// <returns>An <see cref="RSA"/> instance with the public key imported.</returns>
     /// <exception cref="InvalidOperationException">The slot does not contain an RSA key.</exception>
+    /// <exception cref="NotSupportedException">The metadata reports an algorithm not recognized by this SDK.</exception>
     /// <remarks>
     /// <para>
     /// The returned RSA instance can be used with <c>CertificateRequest</c> to generate
@@ -44,7 +45,8 @@ public static class PivSlotMetadataExtensions
     /// </example>
     public static RSA GetRsaPublicKey(this PivSlotMetadata metadata)
     {
-        if (metadata.KeyType is not { } keyType || !keyType.IsRSA())
+        var keyType = metadata.RequireKeyType();
+        if (!keyType.IsRSA())
         {
             throw new InvalidOperationException(
                 $"Slot contains PIV algorithm 0x{metadata.RawAlgorithmId:X2}, not a known RSA key.");
@@ -83,6 +85,7 @@ public static class PivSlotMetadataExtensions
     /// <param name="metadata">The slot metadata containing the public key.</param>
     /// <returns>An <see cref="ECDsa"/> instance with the public key imported.</returns>
     /// <exception cref="InvalidOperationException">The slot does not contain an ECC key supported by ECDsa.</exception>
+    /// <exception cref="NotSupportedException">The metadata reports an algorithm not recognized by this SDK.</exception>
     /// <remarks>
     /// <para>
     /// This method supports P-256 and P-384 curves. Ed25519 and X25519 keys are not supported
@@ -102,7 +105,8 @@ public static class PivSlotMetadataExtensions
     /// </example>
     public static ECDsa GetECDsaPublicKey(this PivSlotMetadata metadata)
     {
-        if (metadata.KeyType is not { } keyType || !keyType.IsEllipticCurve())
+        var keyType = metadata.RequireKeyType();
+        if (!keyType.IsEllipticCurve())
         {
             throw new InvalidOperationException(
                 $"Slot contains PIV algorithm 0x{metadata.RawAlgorithmId:X2}, not a known ECC key.");

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -72,13 +73,20 @@ public class PivMetadataTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
+        KeyType[] keyTypes = [KeyType.ECP256, KeyType.RSA2048];
+        foreach (var keyType in keyTypes)
+        {
+            var generated = await session.GenerateKeyAsync(Slot.Authentication, keyType);
+            var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
 
-        var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
-
-        Assert.NotNull(metadata);
-        Assert.Equal(KeyType.ECP256, metadata.Value.KeyType);
-        Assert.True(metadata.Value.IsGenerated);
+            Assert.NotNull(metadata);
+            Assert.Equal(keyType, metadata.Value.KeyType);
+            Assert.True(metadata.Value.IsGenerated);
+            using AsymmetricAlgorithm extracted = keyType.IsRSA()
+                ? metadata.Value.GetRsaPublicKey()
+                : metadata.Value.GetECDsaPublicKey();
+            Assert.Equal(generated.ExportSubjectPublicKeyInfo(), extracted.ExportSubjectPublicKeyInfo());
+        }
     }
 
     [SkippableTheory]

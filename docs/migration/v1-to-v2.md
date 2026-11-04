@@ -325,8 +325,8 @@ using var piv = new PivSession(device);
 piv.KeyCollector = keyCollector;
 
 var publicKey = piv.GenerateKeyPair(
-    Slot.Authentication,
-    KeyType.ECP256,
+    PivSlot.Authentication,
+    PivAlgorithm.EccP256,
     PivPinPolicy.Default,
     PivTouchPolicy.Default);
 ```
@@ -335,6 +335,7 @@ V2 uses async PIV operations and explicit caller-owned sensitive buffers:
 
 ```csharp
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Piv;
 
 await using var piv = await device.CreatePivSessionAsync(
@@ -541,7 +542,7 @@ using Yubico.YubiKey.Piv;
 using var piv = new PivSession(device);
 piv.KeyCollector = keyCollector;
 
-piv.SetPinOnlyMode(PivPinOnlyMode.PinProtected, KeyType.Aes192);
+piv.SetPinOnlyMode(PivPinOnlyMode.PinProtected, PivAlgorithm.Aes192);
 ```
 
 V2 requires the management key to already be authenticated, and takes the PIN and management key explicitly:

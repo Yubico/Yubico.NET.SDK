@@ -1,0 +1,145 @@
+{
+  "captured_utc": "2026-11-04T12:05:14.951769+00:00",
+  "accepted_product_paths": 35,
+  "product_hash_mismatches": [],
+  "pinned_source_byte_matches": {
+    "S4": true,
+    "crypto-python-initial": true,
+    "crypto-c": true,
+    "crypto-c-header": true
+  },
+  "six_csharp_snippet_hashes_stable": true,
+  "review_artifact_identities": [
+    {
+      "run_relative_path": "evidence/review-citations.md",
+      "sha256": "8c3289d93701b773691884a432717f194c570420ef1b81e7fe9d47ee51b4d9d1",
+      "bytes": 7580
+    },
+    {
+      "run_relative_path": "evidence/review-input-manifest.json",
+      "sha256": "19d3ffc1056b7f04a44c759290da2e58da43e5c658b19d4e183a2dba42a93715",
+      "bytes": 5134
+    },
+    {
+      "run_relative_path": "evidence/review-link-check.json",
+      "sha256": "55afa86435d0d3d7819ddd7bb67b5f912d0029a3219bcce06cbdb779e3d9020f",
+      "bytes": 3390
+    },
+    {
+      "run_relative_path": "evidence/review-path-manifest.json",
+      "sha256": "2bcc374bb844a268008671873f6568aea05a868905e5ab0e59b71b65719ad927",
+      "bytes": 31160
+    },
+    {
+      "run_relative_path": "evidence/review-product.diff",
+      "sha256": "83fa26a92b6390a3036bceb98c78fbcc9eb99f04952985af7c63628d0842c4ba",
+      "bytes": 130274
+    },
+    {
+      "run_relative_path": "evidence/review-snippet-manifest.json",
+      "sha256": "f42fd051edf577a19b900a3febc90cbc5bf5e5ca6423b956d2faf5bb1b08f1f4",
+      "bytes": 2483
+    },
+    {
+      "run_relative_path": "evidence/review-source-S1.txt",
+      "sha256": "d0c1016df2d7ed78358189adcf11550e137d19e960ece62df2dc9649637d9f15",
+      "bytes": 24830
+    },
+    {
+      "run_relative_path": "evidence/review-source-S2.txt",
+      "sha256": "c82a0b4bde3603bead75b2c5c34ac261cab007646bff148931eac391b1464fa4",
+      "bytes": 7916
+    },
+    {
+      "run_relative_path": "evidence/review-source-S3.txt",
+      "sha256": "0da1c6759542cd39cff7f288f9dcefc00cc68b6e58cb2fd04d9ad24be577acd2",
+      "bytes": 9060
+    },
+    {
+      "run_relative_path": "evidence/review-source-S4-commit.txt",
+      "sha256": "fdbedad0f11c9a25bce9fc2a2c282da8404004527e1f98b5e20b64e2ed192e54",
+      "bytes": 15494
+    },
+    {
+      "run_relative_path": "evidence/review-source-S4-current.txt",
+      "sha256": "e3573d5580928b84818939b6eb1ae0083c7d01793589746eace80db32fe2cab3",
+      "bytes": 22901
+    },
+    {
+      "run_relative_path": "evidence/review-source-S4.txt",
+      "sha256": "e3573d5580928b84818939b6eb1ae0083c7d01793589746eace80db32fe2cab3",
+      "bytes": 22901
+    },
+    {
+      "run_relative_path": "evidence/review-source-S5-commit.txt",
+      "sha256": "1ddf397510f172f8b2e2f8412c2e6f534f941646779c4d10652b1e204d17c0bc",
+      "bytes": 21079
+    },
+    {
+      "run_relative_path": "evidence/review-source-S5-oracle.txt",
+      "sha256": "00257ee2e85f1dafde5d5978aecdac6ec23e42aa7d2ef464bdc54f90e6fbbb7f",
+      "bytes": 35280
+    },
+    {
+      "run_relative_path": "evidence/review-source-S5.txt",
+      "sha256": "00257ee2e85f1dafde5d5978aecdac6ec23e42aa7d2ef464bdc54f90e6fbbb7f",
+      "bytes": 35280
+    },
+    {
+      "run_relative_path": "evidence/review-source-crypto-c-header.txt",
+      "sha256": "823212991500d2a17379d3639d284de5c1d11847d28488abaaefd8eb3b42ed17",
+      "bytes": 7264
+    },
+    {
+      "run_relative_path": "evidence/review-source-crypto-c-history.txt",
+      "sha256": "f0df38aa48c48a53aeab71b5bf01710bad5b7e4273111dbdd1e4b9c6b47d2827",
+      "bytes": 260817
+    },
+    {
+      "run_relative_path": "evidence/review-source-crypto-c.txt",
+      "sha256": "e34324f4716340f867ab112c1cc4e1ac11006e21d758a3f98dcb2b6220431b14",
+      "bytes": 26341
+    },
+    {
+      "run_relative_path": "evidence/review-source-crypto-initial-commit.txt",
+      "sha256": "cf4963e832d122eb61c3e34579c5c3b223296b71580931bc0fa47a55351e760b",
+      "bytes": 21785
+    },
+    {
+      "run_relative_path": "evidence/review-source-crypto-python-initial.txt",
+      "sha256": "cc294104b018add0035544b889bd049a12911ee1a0962fd668aa2748aadfed68",
+      "bytes": 15429
+    },
+    {
+      "run_relative_path": "evidence/review-source-crypto-python-remove.txt",
+      "sha256": "cd0c33e07bcdb84c688fbaed9ee714680055253df1ef204d906fcfbef34a3506",
+      "bytes": 1018
+    },
+    {
+      "run_relative_path": "evidence/review-source-crypto-version.txt",
+      "sha256": "6294a10c9e2a7fb64d9640e9eeba25f34e5a491c9fc339d3752ade75b1311747",
+      "bytes": 15514
+    },
+    {
+      "run_relative_path": "evidence/review-source-followup-manifest.json",
+      "sha256": "81910c9c68ac134338238138c7c4cc572498a3fc5d5ded9ff3b488345bffa119",
+      "bytes": 2582
+    },
+    {
+      "run_relative_path": "evidence/review-source-manifest.json",
+      "sha256": "8cf3578cd02f8c9d7620eab42b53b70ed59d4b5f52445cec61a80b2d5d55c277",
+      "bytes": 4496
+    },
+    {
+      "run_relative_path": "evidence/review-xunit-exception-asserts.txt",
+      "sha256": "f26ecd46698ac3af5606acd96a3b82034113d725f0c2b14875bd2ccfe5e56f8e",
+      "bytes": 20343
+    },
+    {
+      "run_relative_path": "review.md",
+      "sha256": "e12d06b46f4d8ed60dfa332b5b1867f1b650d8cf1fb23e8d5a7771b177db4890",
+      "bytes": 14698
+    }
+  ],
+  "validation_scope": "Identity/link/citation/content review only; coordinator compilation/tests/preservation gates remain separate."
+}

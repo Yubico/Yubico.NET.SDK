@@ -1,0 +1,18 @@
+static async Task RotateManagementKeyAsync(
+    IYubiKey device, ReadOnlyMemory<byte> currentManagementKey,
+    Func<ReadOnlyMemory<byte>, CancellationToken, Task> persistRecoverableKeyAsync,
+    CancellationToken cancellationToken)
+{
+    byte[] replacement = RandomNumberGenerator.GetBytes(16);
+    try
+    {
+        await persistRecoverableKeyAsync(replacement, cancellationToken);
+        await using var session = await device.CreateHsmAuthSessionAsync(
+            cancellationToken: cancellationToken);
+        await session.PutManagementKeyAsync(currentManagementKey, replacement, cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(replacement);
+    }
+}

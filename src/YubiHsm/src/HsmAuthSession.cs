@@ -33,15 +33,20 @@ namespace Yubico.YubiKit.YubiHsm;
 /// </summary>
 public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 {
-    // Feature detection constants
+    /// <summary>Describes the base applet firmware floor, 5.4.3.</summary>
     public static readonly Feature FeatureHsmAuth = new("YubiHSM Auth", 5, 4, 3);
+    /// <summary>Gates asymmetric credential operations at version 5.6.0.</summary>
     public static readonly Feature FeatureAsymmetric = new("Asymmetric credentials", 5, 6, 0);
+    /// <summary>Gates challenge retrieval at version 5.6.0.</summary>
     public static readonly Feature FeatureGetChallenge = new("Get challenge", 5, 6, 0);
+    /// <summary>Gates user and administrator credential-password changes at version 5.8.0.</summary>
     public static readonly Feature FeaturePasswordChange = new("Credential password change", 5, 8, 0);
+    /// <summary>Controls transmission of a supplied challenge password from version 5.7.1.</summary>
     public static readonly Feature FeatureGetChallengeWithPassword = new("Get challenge with password", 5, 7, 1);
 
     /// <summary>
-    /// Compatibility alias for <see cref="FeatureGetChallengeWithPassword"/>.
+    ///     Obsolete alias for <see cref="FeatureGetChallengeWithPassword" />. Use that field to test
+    ///     password transmission and <see cref="FeatureGetChallenge" /> to test challenge availability.
     /// </summary>
     [Obsolete("Use FeatureGetChallengeWithPassword. Firmware 5.7.1 added password support; earlier firmware already allowed GetChallenge without a password.")]
     public static readonly Feature FeatureGetChallengeNoPassword = FeatureGetChallengeWithPassword;
@@ -112,8 +117,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <summary>
     ///     Factory helper that creates and initializes a YubiHSM Auth session.
     /// </summary>
-    /// <param name="connection">The SmartCard connection to use.</param>
-    /// <param name="options">Optional cross-cutting session creation settings.</param>
+    /// <param name="connection">The borrowed SmartCard connection. The caller closes it after disposing the session.</param>
+    /// <param name="options">
+    ///     Optional session settings. A firmware override supplies feature policy; otherwise initialization
+    ///     uses the applet SELECT version, falling back to 5.4.3 when its three-byte version value is absent.
+    ///     An override changes SDK policy; select an override supported by the actual applet.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An initialized <see cref="HsmAuthSession" />.</returns>
     public static Task<HsmAuthSession> CreateAsync(
@@ -503,14 +512,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        // Re-SELECT the applet using the existing protocol to refresh cached state.
-        // Do NOT create a new protocol here — that would abandon the current one without
-        // disposing it, leaking the PCSC transaction and causing SW=0x6985 on next operation.
-        //
-        // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet
-        // state, not caller policy, so a SessionCreationOptions.FirmwareVersionOverride supplied at
-        // creation must survive it; otherwise the override would silently lapse mid-session and
-        // later feature gates would disagree with earlier ones.
+        // Reuse the current protocol so its PC/SC transaction remains owned and disposable.
+        // Reselect after reset while retaining the resolved feature-version policy. Discarding the
+        // returned version keeps caller overrides and later feature gates consistent within this session.
         _ = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -537,8 +541,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
 
-            // APDU payload order matches Python canonical SDK:
-            // TAG_LABEL, TAG_CONTEXT, TAG_PUBLIC_KEY, TAG_RESPONSE, TAG_CREDENTIAL_PASSWORD
+            // Keep the handshake inputs in wire order: label, context, HSM static public key,
+            // HSM cryptogram, then credential password.
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagContext, context.Span),
@@ -680,7 +684,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
 
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
-            // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
@@ -813,7 +816,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// </returns>
     /// <remarks>
     ///     The caller owns <paramref name="derivationPassword" /> and is responsible for
-    ///     zeroing it; this method makes no copy of the input.
+    ///     zeroing it. This helper passes its span directly to PBKDF2 and creates no explicit input copy;
+    ///     the returned derived-key array has its own clearing obligation.
     /// </remarks>
     internal static byte[] DeriveKeys(ReadOnlyMemory<byte> derivationPassword) =>
         Rfc2898DeriveBytes.Pbkdf2(
@@ -947,7 +951,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     /// <summary>
     ///     Checks an APDU response for the 0x63Cx retry failure pattern and throws
-    ///     <see cref="ApduException" /> with retry information if detected.
+    ///     <see cref="HsmAuthRetryException" /> with retry information if detected.
     /// </summary>
     private static void ThrowOnRetryFailure(ApduResponse response, ApduCommand command, string errorContext)
     {
@@ -969,15 +973,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     /// <summary>
     ///     Checks an APDU response for the 0x63Cx management key verification failure pattern.
-    ///     Throws <see cref="ApduException" /> with retry information if detected.
+    ///     Throws <see cref="HsmAuthRetryException" /> with retry information if detected.
     /// </summary>
     private static void ThrowOnManagementKeyFailure(ApduResponse response, ApduCommand command) =>
         ThrowOnRetryFailure(response, command, "Management key verification failed");
 
     /// <summary>
     ///     Checks an APDU response for the 0x63Cx credential password verification failure pattern.
-    ///     Throws <see cref="ApduException" /> with retry information if detected.
-    ///     Matches the Python SDK behavior in <c>_calculate_session_keys</c>.
+    ///     Throws <see cref="HsmAuthRetryException" /> with retry information if detected.
     /// </summary>
     private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command) =>
         ThrowOnRetryFailure(response, command, "Invalid credential password");

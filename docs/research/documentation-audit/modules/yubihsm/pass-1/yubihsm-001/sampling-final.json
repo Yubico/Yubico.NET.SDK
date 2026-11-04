@@ -1,0 +1,271 @@
+{
+  "baseline": "a74792facb657413e98223e059876d8b213ffff3",
+  "eligible": 17,
+  "samples": [
+    "U08",
+    "U14",
+    "U18"
+  ],
+  "units": [
+    {
+      "id": "U01",
+      "category": "api",
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "range": [
+        25,
+        31
+      ],
+      "unit": "LIST contract and cancellation/result",
+      "body": "    /// <summary>\n    ///     Lists all credentials stored in the YubiHSM Auth applet.\n    /// </summary>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    /// <returns>A read-only list of stored credentials.</returns>\n    Task<IReadOnlyList<HsmAuthCredential>> ListCredentialsAsync(\n        CancellationToken cancellationToken = default);",
+      "body_sha256": "fa27bae49ef968328fce0ae163337dc6d3f470512c99603833794fb88d816ff3",
+      "eligible": false
+    },
+    {
+      "id": "U02",
+      "category": "api",
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "range": [
+        86,
+        99
+      ],
+      "unit": "DELETE borrowed management key/typed retry contract",
+      "body": "    /// <summary>\n    ///     Deletes a credential from the YubiHSM Auth applet.\n    /// </summary>\n    /// <param name=\"managementKey\">The borrowed 16-byte management key. The caller must clear it after use.</param>\n    /// <param name=\"label\">The label of the credential to delete.</param>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    /// <exception cref=\"HsmAuthRetryException\">\n    ///     The management key is incorrect. <see cref=\"HsmAuthRetryException.RetriesRemaining\" />\n    ///     reports the remaining management key attempts.\n    /// </exception>\n    Task DeleteCredentialAsync(\n        ReadOnlyMemory<byte> managementKey,\n        string label,\n        CancellationToken cancellationToken = default);",
+      "body_sha256": "2e60418b9e2933041587bed88b5625978eec07772d22ba428a764003cab2a7ce",
+      "eligible": true
+    },
+    {
+      "id": "U03",
+      "category": "api",
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "range": [
+        130,
+        135
+      ],
+      "unit": "management retry read contract",
+      "body": "    /// <summary>\n    ///     Gets the number of remaining management key retries.\n    /// </summary>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    /// <returns>The number of remaining retries.</returns>\n    Task<int> GetManagementKeyRetriesAsync(CancellationToken cancellationToken = default);",
+      "body_sha256": "c4d07e1807c3cb0d60b6f29bf6532f9ac5b46b5682db50cf7b06e2b916a0995c",
+      "eligible": true
+    },
+    {
+      "id": "U04",
+      "category": "api",
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "range": [
+        137,
+        150
+      ],
+      "unit": "management-key change borrowed buffers/typed retry",
+      "body": "    /// <summary>\n    ///     Changes the management key.\n    /// </summary>\n    /// <param name=\"currentManagementKey\">The borrowed current 16-byte management key. The caller must clear it after use.</param>\n    /// <param name=\"newManagementKey\">The borrowed new 16-byte management key. The caller must clear it after use.</param>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    /// <exception cref=\"HsmAuthRetryException\">\n    ///     The current management key is incorrect. <see cref=\"HsmAuthRetryException.RetriesRemaining\" />\n    ///     reports the remaining management key attempts.\n    /// </exception>\n    Task PutManagementKeyAsync(\n        ReadOnlyMemory<byte> currentManagementKey,\n        ReadOnlyMemory<byte> newManagementKey,\n        CancellationToken cancellationToken = default);",
+      "body_sha256": "781f6df7573152721b2d569d0d887375c101d4bb4b807fdef4f47e17d27b03b4",
+      "eligible": false
+    },
+    {
+      "id": "U05",
+      "category": "api",
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "range": [
+        213,
+        236
+      ],
+      "unit": "explicit asymmetric import contract (conditions/ownership already present)",
+      "body": "    /// <summary>\n    ///     Stores an asymmetric (EC P256) credential with an explicit private key.\n    ///     Requires firmware 5.6.0+.\n    /// </summary>\n    /// <param name=\"managementKey\">The borrowed 16-byte management key. The caller must clear it after use.</param>\n    /// <param name=\"label\">The credential label (1-64 UTF-8 bytes).</param>\n    /// <param name=\"privateKey\">The borrowed 32-byte EC P256 private key. The caller must clear it after use.</param>\n    /// <param name=\"credentialPassword\">\n    ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are\n    ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.\n    /// </param>\n    /// <param name=\"touchRequired\">Whether touch is required to use this credential.</param>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    /// <exception cref=\"HsmAuthRetryException\">\n    ///     The management key is incorrect. <see cref=\"HsmAuthRetryException.RetriesRemaining\" />\n    ///     reports the remaining management key attempts.\n    /// </exception>\n    Task PutCredentialAsymmetricAsync(\n        ReadOnlyMemory<byte> managementKey,\n        string label,\n        ReadOnlyMemory<byte> privateKey,\n        ReadOnlyMemory<byte> credentialPassword,\n        bool touchRequired = false,\n        CancellationToken cancellationToken = default);",
+      "body_sha256": "abf09b8b8f43a0eb3739fd3b38991df9d6b29d499d8b927b03ec1d9e09a6f148",
+      "eligible": true
+    },
+    {
+      "id": "U06",
+      "category": "api",
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "range": [
+        238,
+        260
+      ],
+      "unit": "on-device asymmetric generation contract",
+      "body": "    /// <summary>\n    ///     Generates an asymmetric (EC P256) credential on-device.\n    ///     The private key is generated by the YubiKey and never leaves the device.\n    ///     Requires firmware 5.6.0+.\n    /// </summary>\n    /// <param name=\"managementKey\">The borrowed 16-byte management key. The caller must clear it after use.</param>\n    /// <param name=\"label\">The credential label (1-64 UTF-8 bytes).</param>\n    /// <param name=\"credentialPassword\">\n    ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are\n    ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.\n    /// </param>\n    /// <param name=\"touchRequired\">Whether touch is required to use this credential.</param>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    /// <exception cref=\"HsmAuthRetryException\">\n    ///     The management key is incorrect. <see cref=\"HsmAuthRetryException.RetriesRemaining\" />\n    ///     reports the remaining management key attempts.\n    /// </exception>\n    Task GenerateCredentialAsymmetricAsync(\n        ReadOnlyMemory<byte> managementKey,\n        string label,\n        ReadOnlyMemory<byte> credentialPassword,\n        bool touchRequired = false,\n        CancellationToken cancellationToken = default);",
+      "body_sha256": "da61c58349c8b146d31326cc97afb6cc03082fe697dd0ea09d35e8476aa82172",
+      "eligible": true
+    },
+    {
+      "id": "U07",
+      "category": "api",
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "range": [
+        262,
+        271
+      ],
+      "unit": "credential long-lived public key response length/format",
+      "body": "    /// <summary>\n    ///     Retrieves the public key for an asymmetric credential.\n    ///     Requires firmware 5.6.0+.\n    /// </summary>\n    /// <param name=\"label\">The credential label.</param>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    /// <returns>The 65-byte uncompressed EC point (0x04 + x[32] + y[32]).</returns>\n    Task<ReadOnlyMemory<byte>> GetPublicKeyAsync(\n        string label,\n        CancellationToken cancellationToken = default);",
+      "body_sha256": "497ef686445ad64a3529ab24eeebf5b537a9d968d2153fde3f81223e52c91cb6",
+      "eligible": false
+    },
+    {
+      "id": "U08",
+      "category": "api",
+      "path": "src/YubiHsm/src/IYubiKeyExtensions.cs",
+      "range": [
+        69,
+        86
+      ],
+      "unit": "one-shot LIST creates/disposes owned session",
+      "body": "        /// <summary>\n        ///     Lists all YubiHSM Auth credentials stored on the YubiKey.\n        ///     Creates and disposes a session automatically.\n        /// </summary>\n        /// <param name=\"options\">Optional cross-cutting session creation settings.</param>\n        /// <param name=\"cancellationToken\">Cancellation token.</param>\n        /// <returns>A read-only list of stored credentials.</returns>\n        public async Task<IReadOnlyList<HsmAuthCredential>> ListHsmAuthCredentialsAsync(\n            SessionCreationOptions? options = null,\n            CancellationToken cancellationToken = default)\n        {\n            await using var session = await yubiKey.CreateHsmAuthSessionAsync(\n                    options,\n                    cancellationToken: cancellationToken)\n                .ConfigureAwait(false);\n\n            return await session.ListCredentialsAsync(cancellationToken).ConfigureAwait(false);\n        }",
+      "body_sha256": "7058cc2497a4b6c9f932cb9da25b333a1b14464a1aaa7cd5345dc075c288e647",
+      "eligible": true
+    },
+    {
+      "id": "U09",
+      "category": "example",
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/CredentialMenu.cs",
+      "range": [
+        12,
+        24
+      ],
+      "unit": "LIST selection and await-using resource scope",
+      "body": "    public static async Task ListAsync(CancellationToken cancellationToken = default)\n    {\n        OutputHelpers.WriteHeader(\"List Credentials\");\n\n        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);\n        if (selection is null) return;\n\n        OutputHelpers.WriteActiveDevice(selection.DisplayName);\n\n        await using var session = await selection.Device.CreateHsmAuthSessionAsync(\n            cancellationToken: cancellationToken);\n        await ListCredentials.RunAsync(session, cancellationToken);\n    }",
+      "body_sha256": "5e322e53fab1424d70ea0a278f3817bd8a8b9e496f842fa3912a0a798b25f983",
+      "eligible": true
+    },
+    {
+      "id": "U10",
+      "category": "example",
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/ResetMenu.cs",
+      "range": [
+        12,
+        24
+      ],
+      "unit": "applet reset menu selected session scope",
+      "body": "    public static async Task RunAsync(CancellationToken cancellationToken = default)\n    {\n        OutputHelpers.WriteHeader(\"Factory Reset - YubiHSM Auth\");\n\n        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);\n        if (selection is null) return;\n\n        OutputHelpers.WriteActiveDevice(selection.DisplayName);\n\n        await using var session = await selection.Device.CreateHsmAuthSessionAsync(\n            cancellationToken: cancellationToken);\n        await ResetHsmAuth.RunAsync(session, cancellationToken);\n    }",
+      "body_sha256": "ff8f0e24872a492bc24d99ca95222b3a6b57e74574212d8ae0d46c34f3fbd40f",
+      "eligible": true
+    },
+    {
+      "id": "U11",
+      "category": "example",
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ListCredentials.cs",
+      "range": [
+        10,
+        29
+      ],
+      "unit": "empty/nonempty LIST table path",
+      "body": "public static class ListCredentials\n{\n    public static async Task RunAsync(\n        HsmAuthSession session,\n        CancellationToken cancellationToken = default)\n    {\n        var credentials = await session.ListCredentialsAsync(cancellationToken);\n\n        if (credentials.Count == 0)\n        {\n            OutputHelpers.WriteInfo(\"No credentials stored.\");\n            return;\n        }\n\n        var table = HsmAuthHelpers.BuildCredentialsTable(credentials);\n\n        AnsiConsole.Write(table);\n        OutputHelpers.WriteInfo($\"{credentials.Count} credential(s) found.\");\n    }\n}",
+      "body_sha256": "8acdc0237a63925c2e0e3b35828e409f7a3ec63f1fea0cadc61cadea4aab7c40",
+      "eligible": true
+    },
+    {
+      "id": "U12",
+      "category": "example",
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GetManagementKeyRetries.cs",
+      "range": [
+        8,
+        23
+      ],
+      "unit": "retry read and low-count warning",
+      "body": "public static class GetManagementKeyRetries\n{\n    public static async Task RunAsync(\n        HsmAuthSession session,\n        CancellationToken cancellationToken = default)\n    {\n        var retries = await session.GetManagementKeyRetriesAsync(cancellationToken);\n\n        OutputHelpers.WriteKeyValue(\"Management key retries remaining\", retries.ToString());\n\n        if (retries <= 3)\n        {\n            OutputHelpers.WriteWarning(\"Low retry count! Incorrect attempts will reduce this further.\");\n        }\n    }\n}",
+      "body_sha256": "9cc50a48c6773dc0b3dce051590ca27d3b739c555ddc27b9ef310bc45b5af043",
+      "eligible": true
+    },
+    {
+      "id": "U13",
+      "category": "example",
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/HsmAuthDeviceSelector.cs",
+      "range": [
+        21,
+        48
+      ],
+      "unit": "SmartCard discovery and noninteractive first choice",
+      "body": "/// <summary>\n/// Device selector for HsmAuth operations.\n/// HsmAuth only supports SmartCard (CCID) transport.\n/// In non-interactive mode, auto-selects the first available device.\n/// </summary>\npublic sealed class HsmAuthDeviceSelector : DeviceSelectorBase\n{\n    /// <summary>\n    /// Shared singleton instance.\n    /// </summary>\n    public static HsmAuthDeviceSelector Instance { get; } = new();\n\n    /// <inheritdoc />\n    protected override ConnectionType[] SupportedConnectionTypes { get; } =\n    [\n        ConnectionType.SmartCard\n    ];\n\n    /// <inheritdoc />\n    protected override string SupportedTransportsDescription => \"SmartCard (CCID)\";\n\n    /// <inheritdoc />\n    protected override ConnectionType FindAllConnectionTypeFilter => ConnectionType.SmartCard;\n\n    /// <inheritdoc />\n    protected override IYubiKey? AutoSelectDevice(IReadOnlyList<IYubiKey> devices) =>\n        devices[0];\n}",
+      "body_sha256": "dff7538969bb0444fd5f0822eef75d8e00dc871b94515e9fd03efa17e96394e9",
+      "eligible": true
+    },
+    {
+      "id": "U14",
+      "category": "example",
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ResetHsmAuth.cs",
+      "range": [
+        8,
+        27
+      ],
+      "unit": "destructive applet-only reset explanation and call",
+      "body": "public static class ResetHsmAuth\n{\n    public static async Task RunAsync(\n        HsmAuthSession session,\n        CancellationToken cancellationToken = default)\n    {\n        if (!OutputHelpers.ConfirmDestructive(\n                \"factory reset the YubiHSM Auth applet, deleting ALL stored credentials and resetting the management key\"))\n        {\n            OutputHelpers.WriteInfo(\"Factory reset cancelled.\");\n            return;\n        }\n\n        await session.ResetAsync(cancellationToken);\n\n        OutputHelpers.WriteSuccess(\"YubiHSM Auth applet reset to factory defaults.\");\n        OutputHelpers.WriteInfo(\"Management key has been reset to the default (all zeros).\");\n        OutputHelpers.WriteInfo(\"All credentials have been deleted.\");\n    }\n}",
+      "body_sha256": "a16a7278a7f3198981636bca3776a0ce0280b7b1dc6d239e6c9bdb7efd87e93c",
+      "eligible": true
+    },
+    {
+      "id": "U15",
+      "category": "internal-test",
+      "path": "src/YubiHsm/src/HsmAuthSession.cs",
+      "range": [
+        210,
+        228
+      ],
+      "unit": "UTF8 label helper documentation and length validation",
+      "body": "    /// <summary>\n    ///     Validates and encodes a credential label to UTF-8 bytes.\n    /// </summary>\n    /// <param name=\"label\">The label string.</param>\n    /// <returns>The UTF-8 encoded label bytes.</returns>\n    /// <exception cref=\"ArgumentException\">Thrown when the label is empty or exceeds 64 UTF-8 bytes.</exception>\n    internal static byte[] ValidateAndEncodeLabel(string label)\n    {\n        ArgumentException.ThrowIfNullOrEmpty(label);\n\n        var encoded = Encoding.UTF8.GetBytes(label);\n\n        if (encoded.Length > MaxLabelLength)\n            throw new ArgumentException(\n                $\"Label UTF-8 encoding ({encoded.Length} bytes) exceeds maximum of {MaxLabelLength} bytes.\",\n                nameof(label));\n\n        return encoded;\n    }",
+      "body_sha256": "0fabf5e48c8aebd577e28772453c379ae09b09a21a3a715fe5a5126165691ad7",
+      "eligible": true
+    },
+    {
+      "id": "U16",
+      "category": "internal-test",
+      "path": "src/YubiHsm/src/HsmAuthSession.cs",
+      "range": [
+        230,
+        236
+      ],
+      "unit": "retry extraction helper returns count or null",
+      "body": "    /// <summary>\n    ///     Extracts the remaining management key retries from a 0x63Cx status word.\n    /// </summary>\n    /// <param name=\"sw\">The status word from an APDU response.</param>\n    /// <returns>The number of remaining retries, or <c>null</c> if the SW is not a retry indicator.</returns>\n    internal static int? ExtractRetries(short sw) =>\n        SWConstants.ExtractRetryCount(sw);",
+      "body_sha256": "00562e4a0f29777609f0feabb55e5a46f665c6390bb30466148012b29d5ea13f",
+      "eligible": true
+    },
+    {
+      "id": "U17",
+      "category": "internal-test",
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/LabelValidationTests.cs",
+      "range": [
+        60,
+        86
+      ],
+      "unit": "ASCII and multibyte byte-limit commentary/assertions",
+      "body": "    public void ValidateAndEncodeLabel_Exceeds64Bytes_ThrowsArgumentException()\n    {\n        // 65 ASCII characters = 65 UTF-8 bytes\n        var label = new string('a', 65);\n\n        Assert.Throws<ArgumentException>(() => HsmAuthSession.ValidateAndEncodeLabel(label));\n    }\n\n    [Fact]\n    public void ValidateAndEncodeLabel_MultiByteUtf8_CountsByteLength()\n    {\n        // Each CJK character is 3 UTF-8 bytes\n        // 22 CJK chars = 66 bytes, exceeds 64\n        var label = new string('\\u4e00', 22);\n\n        Assert.Throws<ArgumentException>(() => HsmAuthSession.ValidateAndEncodeLabel(label));\n    }\n\n    [Fact]\n    public void ValidateAndEncodeLabel_MultiByteUtf8Within64_Succeeds()\n    {\n        // 21 CJK chars = 63 bytes, within limit\n        var label = new string('\\u4e00', 21);\n        var result = HsmAuthSession.ValidateAndEncodeLabel(label);\n\n        Assert.Equal(63, result.Length);\n    }",
+      "body_sha256": "fad7f9e80ecee5749649af269cbe9ca953c12628f0a8f794fcaf8a6120ce5c6d",
+      "eligible": true
+    },
+    {
+      "id": "U18",
+      "category": "internal-test",
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/RetryExtractionTests.cs",
+      "range": [
+        17,
+        44
+      ],
+      "unit": "63Cx positive/negative mask partition",
+      "body": "public class RetryExtractionTests\n{\n    [Theory]\n    [InlineData(unchecked((short)0x63C0), 0)]\n    [InlineData(unchecked((short)0x63C1), 1)]\n    [InlineData(unchecked((short)0x63C5), 5)]\n    [InlineData(unchecked((short)0x63C8), 8)]\n    [InlineData(unchecked((short)0x63CF), 15)]\n    public void ExtractRetries_ValidRetrySw_ReturnsCount(short sw, int expectedRetries)\n    {\n        var result = HsmAuthSession.ExtractRetries(sw);\n\n        Assert.Equal(expectedRetries, result);\n    }\n\n    [Theory]\n    [InlineData(unchecked((short)0x9000))]\n    [InlineData(unchecked((short)0x6982))]\n    [InlineData(unchecked((short)0x6300))]\n    [InlineData(unchecked((short)0x6400))]\n    [InlineData(unchecked((short)0x63D0))]\n    public void ExtractRetries_NonRetrySw_ReturnsNull(short sw)\n    {\n        var result = HsmAuthSession.ExtractRetries(sw);\n\n        Assert.Null(result);\n    }\n}",
+      "body_sha256": "40a05ab84dcdbccbed591d2e114f9865dda5a73a4ead9e371e9acb6a9689328f",
+      "eligible": true
+    },
+    {
+      "id": "U19",
+      "category": "internal-test",
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/SessionKeysTests.cs",
+      "range": [
+        61,
+        91
+      ],
+      "unit": "owned arrays observed zero after disposal and accessors reject disposed state",
+      "body": "    [Fact]\n    public void Dispose_ZerosAllKeyMaterial()\n    {\n        // Arrange\n        var response = new byte[48];\n        for (var i = 0; i < 48; i++)\n            response[i] = 0xFF;\n\n        var keys = SessionKeys.Parse(response);\n\n        // Capture the arrays owned by the parsed result so disposal zeroing is directly observable.\n        byte[] sEnc = GetOwnedKeyBuffer(keys, \"_sEnc\");\n        byte[] sMac = GetOwnedKeyBuffer(keys, \"_sMac\");\n        byte[] sRmac = GetOwnedKeyBuffer(keys, \"_sRmac\");\n\n        // Verify keys are non-zero before disposal\n        Assert.Contains(sEnc, b => b != 0);\n        Assert.Contains(sMac, b => b != 0);\n        Assert.Contains(sRmac, b => b != 0);\n\n        // Act\n        keys.Dispose();\n\n        // Assert - accessing after disposal should throw\n        Assert.Throws<ObjectDisposedException>(() => _ = keys.SEnc);\n        Assert.Throws<ObjectDisposedException>(() => _ = keys.SMac);\n        Assert.Throws<ObjectDisposedException>(() => _ = keys.SRmac);\n        Assert.All(sEnc, b => Assert.Equal(0, b));\n        Assert.All(sMac, b => Assert.Equal(0, b));\n        Assert.All(sRmac, b => Assert.Equal(0, b));\n    }",
+      "body_sha256": "9b9cf839d65837618ac03b532277d0f38b4f3bdd29cfb4d41efdfcdd11493ee8",
+      "eligible": true
+    },
+    {
+      "id": "U20",
+      "category": "internal-test",
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/TouchNotificationTests.cs",
+      "range": [
+        98,
+        137
+      ],
+      "unit": "unknown/missing/LIST-failure policy tests with synthetic responses",
+      "body": "    [Fact]\n    public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialTouchPolicyIsUnknown_RequestsConservatively()\n    {\n        var connection = CreateInitializedConnection(\n            ListResponse(\"cred\", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x02, counter: 8),\n            SessionKeyResponse());\n        var prompt = new RecordingUserPresencePrompt();\n        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));\n\n        using var keys = await CalculateSymmetricAsync(session, TestContext.Current.CancellationToken);\n\n        AssertNotification(prompt, UserPresenceBasis.PolicyMayRequire, UserPresenceOutcome.Completed);\n    }\n\n    [Fact]\n    public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialIsMissing_RemainsSilent()\n    {\n        var connection = CreateInitializedConnection(\n            ListResponse(\"other\", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8),\n            SessionKeyResponse());\n        var prompt = new RecordingUserPresencePrompt();\n        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));\n\n        using var keys = await CalculateSymmetricAsync(session, TestContext.Current.CancellationToken);\n\n        Assert.Empty(prompt.Requests);\n        Assert.Empty(prompt.Resolutions);\n    }\n\n    [Fact]\n    public async Task CalculateSessionKeysSymmetricAsync_WhenListFails_RequestsConservatively()\n    {\n        var connection = CreateInitializedConnection([0x6A, 0x80], SessionKeyResponse());\n        var prompt = new RecordingUserPresencePrompt();\n        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));\n\n        using var keys = await CalculateSymmetricAsync(session, TestContext.Current.CancellationToken);\n\n        AssertNotification(prompt, UserPresenceBasis.PolicyMayRequire, UserPresenceOutcome.Completed);\n    }",
+      "body_sha256": "4186b09aa99772469708987e34705b172e422415e0d1c39ff3b4922c3a1574d8",
+      "eligible": true
+    }
+  ]
+}

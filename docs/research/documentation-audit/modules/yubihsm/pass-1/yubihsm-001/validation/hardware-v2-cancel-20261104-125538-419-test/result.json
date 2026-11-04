@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditHsm001.Hardware.IntegrationTests --filter FullyQualifiedName~NoTouch_CancelAfterPolicyOpportunity",
+  "started": "2026-11-04T12:55:38.4192127+01:00",
+  "durationSeconds": 20.2,
+  "runDirectory": "artifacts/toolchain/runs/20261104-125538-419-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 20.1,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditHsm001.Hardware.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter))",
+          "message": "Expected a drained OperationCanceledException or CALCULATE SW=0x6985 after deliberate cancellation; inspect retained type/status."
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261104-125538-419-test/01-test-AuditHsm001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project AuditHsm001.Hardware.IntegrationTests --filter \"FullyQualifiedName~Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession\""
+  ]
+}

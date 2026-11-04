@@ -1,0 +1,28 @@
+<Project>
+  <Import Project="$(RepositoryRoot)/Directory.Build.targets" />
+  <Target Name="CaptureAuditHsm001HardwareInputs" BeforeTargets="CoreCompile">
+    <MakeDir Directories="$(ProbeWorkspace)" />
+    <WriteLinesToFile File="$(ProbeWorkspace)/compile-inputs.txt" Lines="@(Compile-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(ProbeWorkspace)/resolved-references.txt" Lines="@(ReferencePathWithRefAssemblies-&gt;'%(FullPath)|%(FusionName)')" Overwrite="true" />
+    <WriteLinesToFile File="$(ProbeWorkspace)/analyzers.txt" Lines="@(Analyzer-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(ProbeWorkspace)/analyzer-configs.txt" Lines="@(EditorConfigFiles-&gt;'%(FullPath)')" Overwrite="true" />
+  </Target>
+  <Target Name="CaptureAuditHsm001HardwarePolicy" AfterTargets="CoreCompile">
+    <WriteLinesToFile File="$(ProbeWorkspace)/csc-command-line.txt" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+    <ItemGroup>
+      <ProbePolicy Include="NETCoreSdkVersion=$(NETCoreSdkVersion)" />
+      <ProbePolicy Include="TargetFramework=$(TargetFramework)" />
+      <ProbePolicy Include="LangVersion=$(LangVersion)" />
+      <ProbePolicy Include="TreatWarningsAsErrors=$(TreatWarningsAsErrors)" />
+      <ProbePolicy Include="AnalysisLevel=$(AnalysisLevel)" />
+      <ProbePolicy Include="AnalysisMode=$(AnalysisMode)" />
+      <ProbePolicy Include="EnableNETAnalyzers=$(EnableNETAnalyzers)" />
+      <ProbePolicy Include="RunAnalyzersDuringBuild=$(RunAnalyzersDuringBuild)" />
+      <ProbePolicy Include="SkipCompilerExecution=$(SkipCompilerExecution)" />
+      <ProbePolicy Include="RunSettingsFilePath=$(RunSettingsFilePath)" />
+      <ProbePolicy Include="OutputPath=$(OutputPath)" />
+      <ProbePolicy Include="NoWarn=$([System.String]::Copy('$(NoWarn)').Replace(';', ','))" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(ProbeWorkspace)/policy-final.txt" Lines="@(ProbePolicy)" Overwrite="true" />
+  </Target>
+</Project>

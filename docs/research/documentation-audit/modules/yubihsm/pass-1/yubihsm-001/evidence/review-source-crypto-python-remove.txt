@@ -1,0 +1,36 @@
+From 47c801e2f4d4b64ac6931e39d962bdbee72c7553 Mon Sep 17 00:00:00 2001
+From: Elias Bonnici <elias.bonnici@yubico.com>
+Date: Tue, 1 Aug 2023 11:30:51 +0200
+Subject: [PATCH] HSMAUTH: remove card_crypto from SessionKeys class
+
+---
+ yubikit/hsmauth.py | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/yubikit/hsmauth.py b/yubikit/hsmauth.py
+index d8eb0142a..8688d9997 100644
+--- a/yubikit/hsmauth.py
++++ b/yubikit/hsmauth.py
+@@ -183,22 +183,17 @@ class SessionKeys:
+     key_senc: bytes
+     key_smac: bytes
+     key_srmac: bytes
+-    card_crypto: Optional[bytes]
+ 
+     @classmethod
+     def parse(cls, response) -> "SessionKeys":
+         key_senc = response[:16]
+         key_smac = response[16:32]
+         key_srmac = response[32:48]
+-        card_crypto = None
+-        if len(response) == 56:
+-            card_crypto = response[48:]
+ 
+         return cls(
+             key_senc=key_senc,
+             key_smac=key_smac,
+             key_srmac=key_srmac,
+-            card_crypto=card_crypto,
+         )
+ 
+ 

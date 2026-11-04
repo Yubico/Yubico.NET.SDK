@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YubiHSM Auth Specifics &mdash; YubiKey Technical Manual  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/dist.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/gtm.js"></script>
+        <script src="https://kit.fontawesome.com/ea7c27f2b7.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="YubiKey Firmware" href="yk5-firmware-index.html" />
+    <link rel="prev" title="Secure Channel Protocol (SCP03 and SCP11) Specifics" href="yk5-apps-scp.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            YubiKey Technical Manual
+              <img src="https://resources.yubico.com/XEG5TAAH/at/8kq7984j7ffgq82qvfgqvbnh/logo.svg?auto=webp&format=svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="yk5-intro.html">Introduction to the YubiKey Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-physical-attributes.html">Physical Attributes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="yk5-apps-index.html">Protocols and Applications</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-fido.html">FIDO Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-piv.html">Smart Card - PIV Compatible Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-oath.html">OATH Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-openpgp.html">OpenPGP Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-otp.html">OTP Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-scp.html">Secure Channel Protocol (SCP03 and SCP11) Specifics</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">YubiHSM Auth Specifics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#credentials-and-pin-codes">Credentials and PIN Codes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#yubihsm-2-secure-channel">YubiHSM 2 Secure Channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#architecture-overview">Architecture Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#yubihsm-auth-flowchart">YubiHSM Auth Flowchart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#yubihsm-auth-software-tool">YubiHSM-Auth Software Tool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-yubihsm-auth-with-yubihsm-shell">Using YubiHSM-Auth with YubiHSM Shell</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-firmware-index.html">YubiKey Firmware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-fips-index.html">YubiKey 5 FIPS Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-bio-specifics.html">YubiKey Bio Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-nfc-id-tech-desc.html">NFC ID Calculation Technical Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-tools.html">Tools and Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-cspn-specifics.html">YubiKey 5 CSPN Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acronyms.html">Acronyms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyright</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">YubiKey Technical Manual</a>
+      </nav>
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="yk5-apps-index.html">Protocols and Applications</a></li>
+      <li class="breadcrumb-item active">YubiHSM Auth Specifics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/yk5-apps-yubihsm-auth.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="yubihsm-auth-specifics">
+<span id="apps-yubihsm-auth-label"></span><h1>YubiHSM Auth Specifics<a class="headerlink" href="#yubihsm-auth-specifics" title="Permalink to this heading"></a></h1>
+<p>YubiHSM Auth is supported by YubiKey firmware version 5.4.3 and above.</p>
+<p>YubiHSM Auth is a YubiKey CCID application that stores the long-lived credentials used to establish secure sessions to a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3 (SCP03), see <a class="reference internal" href="yk5-apps-scp.html#yk5-secure-channel-tech-desc-label"><span class="std std-ref">Yubico Secure Channel Technical Description</span></a>.</p>
+<p>YubiHSM Auth is supported on YubiKey firmware versions, as listed:</p>
+<ul class="simple">
+<li>5.4.3 or later firmware requires using ykman or Yubico Authenticator to enable it.</li>
+<li>5.7.x or later firmware is enabled (on) by default.</li>
+</ul>
+<p>YubiHSM Auth uses hardware to protect the long-lived credentials for accessing a YubiHSM 2. This increases the security of the authentication credentials, as compared to the authentication solution for the YubiHSM 2 based on software credentials derived from the Password-Based Key Derivation Function 2 (PBKDF2) algorithm with a password as input.</p>
+<div class="section" id="credentials-and-pin-codes">
+<h2>Credentials and PIN Codes<a class="headerlink" href="#credentials-and-pin-codes" title="Permalink to this heading"></a></h2>
+<p>Each YubiHSM Auth credential is comprised of two AES-128 keys which are used to derive the three session-specific AES-128 keys. The YubiHSM Auth application can store up to 32 YubiHSM Auth credentials in the YubiKey.</p>
+<p>Each YubiHSM Auth credential is protected by a 16-byte user access code provided to the YubiKey for each YubiHSM Auth operation. The access code is used to access the YubiHSM Auth Credential to derive the session-specific AES-128 keys.</p>
+<p>Storing or deleting YubiHSM Auth credentials requires a separate 16-byte admin access code.</p>
+<p>Each access code has a limit of eight retries and optionally, verification of user presence (touch).</p>
+</div>
+<div class="section" id="yubihsm-2-secure-channel">
+<h2>YubiHSM 2 Secure Channel<a class="headerlink" href="#yubihsm-2-secure-channel" title="Permalink to this heading"></a></h2>
+<p>Use the YubiKey YubiHSM Auth application to establish an encrypted and authenticated session to a YubiHSM 2. Although the YubiHSM 2 secure channel is based on the protocol Global Platform Secure Channel Protocol ‘03’ (SCP03),  there are two important differences:</p>
+<ul class="simple">
+<li>The YubiHSM 2 secure channel protocol does not use APDUs, so the commands and possible options are not those of the complete SCP03 specification.</li>
+<li>SCP03 uses key sets with three long-lived AES keys, while the YubiHSM 2 secure channel uses key sets with two long-lived AES keys.</li>
+</ul>
+<p>The YubiHSM 2 authentication protocol uses a set of static credentials called a long-lived key set. This consists of two AES-128 keys:</p>
+<ul class="simple">
+<li>ENC: Used for deriving keys for command and response encryption, as specified in SCP03.</li>
+<li>MAC: Used for deriving keys for command and response authentication, as specified in SCP03.</li>
+</ul>
+<p>The identical long-lived keyset is protected in the YubiHSM 2 and in the YubiKey YubiHSM Auth application.</p>
+<p>Those long-lived key sets are used by the YubiHSM Auth application to derive a set of three session-specific AES-128 keys using the challenge-response protocol as defined in SCP03:</p>
+<ul class="simple">
+<li>Session Secure Channel Encryption Key (S-ENC): Used for data confidentiality.</li>
+<li>Secure Channel Message Authentication Code Key for Command (S-MAC): Used for data and protocol integrity.</li>
+<li>Secure Channel Message Authentication Code Key for Response (S-RMAC): Used for data and protocol integrity.</li>
+</ul>
+<p>The YubiHSM Auth session-specific keys are output from the YubiKey to the calling library, which uses the session keys to encrypt and authenticate commands and responses during a single session. The session keys are discarded afterwards.</p>
+</div>
+<div class="section" id="architecture-overview">
+<h2>Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permalink to this heading"></a></h2>
+<p>The figure below shows how the YubiHSM Auth application fits in to the YubiHSM 2 architecture.</p>
+<img alt="_images/yubihsm-auth-architecture.png" src="_images/yubihsm-auth-architecture.png" />
+<p>The identical long-lived credentials (key sets) are protected in both the YubiKey YubiHSM Auth application and in the YubiHSM 2. The YubiHSM-Shell software tool can be used for generating the key sets in the YubiHSM 2, and the YubiHSM-Auth software tool can be used for importing the same key sets to the YubiKey YubiHSM Auth application.</p>
+<p>At the client, the YubiHSM authentication protocol is implemented in the <code class="docutils literal notranslate"><span class="pre">libykhsmauth</span></code> library, which derives the three session AES-keys by calling the YubiKey YubiHSM Auth CCID application. The session objects that are created can be used by the <code class="docutils literal notranslate"><span class="pre">libyubihsm</span></code> in the communication with YubiHSM.</p>
+<p>The YubiHSM session keys are therefore generated on the basis of the long-lived credentials that are protected in the YubiHSM 2 and YubiKey YubiHSM Auth in conjunction with the SCP03 derivation scheme.</p>
+</div>
+<div class="section" id="yubihsm-auth-flowchart">
+<h2>YubiHSM Auth Flowchart<a class="headerlink" href="#yubihsm-auth-flowchart" title="Permalink to this heading"></a></h2>
+<p>The flowchart below illustrates the authentication protocol communication with YubiHSM using the static keys on YubiHSM Auth. It is assumed that the YubiHSM and YubiHSM Auth application share the same static keyset. The steps are explained below.</p>
+<img alt="_images/yubihsm-auth-flowchart.png" src="_images/yubihsm-auth-flowchart.png" />
+<ol class="arabic simple">
+<li>The user launches YubiHSM-Shell and enters the commands <code class="docutils literal notranslate"><span class="pre">connect</span></code> and <code class="docutils literal notranslate"><span class="pre">session</span> <span class="pre">open</span></code>, with the flag <code class="docutils literal notranslate"><span class="pre">ykopen</span></code> that indicates that the YubiKey with YubiHSM Auth shall be used.</li>
+<li>The YubiHSM-Shell invokes the <code class="docutils literal notranslate"><span class="pre">libyubihsm</span></code> library, with a request to open a session to the YubiHSM 2.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">libyubihsm</span></code> library generates a host challenge, and opens a session to the YubiHSM 2 device.</li>
+<li>The YubiHSM 2 device generates an HSM challenge, and generates the session keys based on the HSM challenge, the host challenge, and the static key set in the YubiHSM 2 device. The YubiHSM 2 returns the HSM challenge in an HSM response to the <code class="docutils literal notranslate"><span class="pre">libyubihsm</span></code> library.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">libyubihsm</span></code> library propagates the host challenge and HSM challenge to the YubiHSM Shell.</li>
+<li>The user enters the Credential password for unlocking the static keyset in the YubiHSM Auth application in the YubiKey. The YubiHSM Shell invokes the <code class="docutils literal notranslate"><span class="pre">libykhsmauth</span></code> library, with a request to generate session keys.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">libykhsmauth</span></code> library invokes the YubiHSM Auth application in the YubiKey with the Credential password, the HSM challenge and host challenge are used as input parameters.</li>
+<li>The Credential password unlocks the static keyset in the YubiHSM Auth application, and the YubiHSM Auth application generates the session keys based on the static keys, HSM challenge, and host challenge.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">libykhsmauth</span></code> library returns the session keys to YubiHSM Shell.</li>
+<li>The YubiHSM Shell acknowledges the protocol handshake to <code class="docutils literal notranslate"><span class="pre">libyubihsm</span></code>.</li>
+<li>The <code class="docutils literal notranslate"><span class="pre">libyubihsm</span></code> sends the host response to the YubiHSM 2 device. The session keys can now be used for secure channel communication between <code class="docutils literal notranslate"><span class="pre">YubiHSM-Shell/libyubihsm</span></code> in the host and the YubiHSM device.</li>
+</ol>
+</div>
+<div class="section" id="yubihsm-auth-software-tool">
+<h2>YubiHSM-Auth Software Tool<a class="headerlink" href="#yubihsm-auth-software-tool" title="Permalink to this heading"></a></h2>
+<p>The YubiHSM-Auth software tool is part of the <a class="reference external" href="https://developers.yubico.com/YubiHSM2/Component_Reference/yubihsm-shell/" target="_blank">YubiHSM Shell</a>, which is installed with the <a class="reference external" href="https://developers.yubico.com/YubiHSM2/Releases/" target="_blank">YubiHSM SDK</a>. YubiHSM-Auth tool can be used for:</p>
+<ul class="simple">
+<li>Storing the YubiHSM Auth credentials on a YubiKey</li>
+<li>Deleting the YubiHSM Auth credentials on a YubiKey</li>
+<li>Listing the YubiHSM Auth credentials on a YubiKey</li>
+<li>Changing the YubiHSM Auth management key on a YubiKey</li>
+<li>Checking the number of retries of the YubiHSM Auth credential password</li>
+<li>Checking the version of the YubiHSM Auth application</li>
+<li>Calculating session keys, mainly for debugging and test purposes</li>
+<li>Resetting the YubiHSM Auth application on a YubiKey</li>
+</ul>
+<p>First, the YubiHSM 2 device needs to be configured with an authentication key. The default authentication key password on <code class="docutils literal notranslate"><span class="pre">KeyID=1</span></code> is set to <code class="docutils literal notranslate"><span class="pre">password</span></code>, and this should be changed or replaced with other authentication keys. For the examples in this section, however, it is assumed that the default authentication key is still present on the YubiHSM 2.</p>
+<p>To generate and store the equivalent YubiHSM Auth credentials on the YubiKey, use the <code class="docutils literal notranslate"><span class="pre">yubihsm-auth</span></code> command line tool. To invoke YubiHSM-Auth, simply run <code class="docutils literal notranslate"><span class="pre">yubihsm-auth</span></code> with the required commands and parameters.</p>
+<p>To get a list of available commands, parameters and their syntax, run: <code class="docutils literal notranslate"><span class="pre">yubihsm-auth</span> <span class="pre">--help</span></code>.</p>
+<p>An example of how to use <code class="docutils literal notranslate"><span class="pre">yubihsm-auth</span></code> for storing YubiHSM Auth credentials on a YubiKey is shown below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ yubihsm-auth -a put --label=&quot;default key&quot; --derivation-password=&quot;password&quot; --credpwd=&quot;MyPassword&quot; --touch=on --mgmkey=&quot;00000000000000000000000000000000&quot; --verbose=5
+Credential successfully stored
+</pre></div>
+</div>
+<p>Where:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">put</span></code> is the action to insert a YubiHSM Auth credential on the YubiKey</li>
+<li><code class="docutils literal notranslate"><span class="pre">--label</span></code> is the label of the YubiHSM Auth credential on the YubiKey</li>
+<li><code class="docutils literal notranslate"><span class="pre">--derivation-password</span></code> is used as input to the PBKDF2 algorithm, which is used for generating the two AES-128 keys that constitute the YubiHSM Auth credentials to be stored on the YubiKey</li>
+<li><code class="docutils literal notranslate"><span class="pre">--credpwd</span></code> is the password protecting the YubiHSM Auth credentials on the YubiKey</li>
+<li><code class="docutils literal notranslate"><span class="pre">--touch</span></code> is set to <code class="docutils literal notranslate"><span class="pre">on</span></code>. This requires the user touch the YubiKey when accessing the YubiHSM Auth credential</li>
+<li><code class="docutils literal notranslate"><span class="pre">--mgmkey</span></code> is the management key that is needed for writing the YubiHSM Auth credentials on the YubiKey</li>
+<li><code class="docutils literal notranslate"><span class="pre">--verbose</span></code> is used to print more information as output</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We recommend using an offline air-gapped computer when storing the YubiHSM Auth credentials on the YubiKey.</p>
+</div>
+<p>Now, the YubiKey YubiHSM Auth application can be used with <a class="reference external" href="https://docs.yubico.com/hardware/yubihsm-2/hsm-2-user-guide/hsm2-tools-shell.html" target="_blank">YubiHSM 2 Shell</a> for authentication to the YubiHSM 2.</p>
+</div>
+<div class="section" id="using-yubihsm-auth-with-yubihsm-shell">
+<h2>Using YubiHSM-Auth with YubiHSM Shell<a class="headerlink" href="#using-yubihsm-auth-with-yubihsm-shell" title="Permalink to this heading"></a></h2>
+<p>It is possible to authenticate to the YubiHSM 2 device with static credentials that are protected in the YubiKey application called YubiHSM Auth. For more information on this YubiKey feature and how to configure it, see the YubiHSM  User Guide, section <a class="reference external" href="https://docs.yubico.com/hardware/yubihsm-2/hsm-2-user-guide/hsm2-tools-auth.html" target="_blank">YubiHSM 2 Auth</a>.</p>
+<p>The YubiHSM Shell tool supports authentication with YubiHSM Auth credentials in both interactive mode and command-line mode.</p>
+<p>To use yubihsm-shell with the YubiHSM Auth-enabled YubiKey in interactive mode, open a session by executing the following yubihsm-shell command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yubihsm</span><span class="o">&gt;</span> <span class="n">session</span> <span class="n">ykopen</span> <span class="o">&lt;</span><span class="n">authkey</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">label</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">password</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Where, in the context of using YubiHSM-Shell with the YubiHSM Auth application, the following parameters are used:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">authkey</span></code> is the identifier of the authentication key in the YubiHSM 2</li>
+<li><code class="docutils literal notranslate"><span class="pre">label</span></code> is the label of the YubiHSM-Auth credentials stored in the YubiKey</li>
+<li><code class="docutils literal notranslate"><span class="pre">password</span></code> is the password that protects the YubiHSM-Auth credentials stored in the YubiKey.</li>
+</ul>
+<p>Below is an example of an interactive command with YubiHSM Shell:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yubihsm</span><span class="o">&gt;</span> <span class="n">session</span> <span class="n">ykopen</span> <span class="mi">1</span> <span class="s2">&quot;default key&quot;</span> <span class="s2">&quot;MyPassword&quot;</span>
+<span class="n">trying</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">reader</span> <span class="s1">&#39;Yubico YubiKey OTP+FIDO+CCID 0&#39;</span>
+<span class="n">Created</span> <span class="n">session</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>To use yubihsm-shell with YubiHSM Auth in command-line mode, add the parameter <code class="docutils literal notranslate"><span class="pre">--ykhsmauth-label</span></code> that implicitly invokes the YubiHSM Auth application at the YubiKey. Below is an example of how to use YubiHSM Shell in command-line mode:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ yubihsm-shell --ykhsmauth-label &quot;default key&quot; -p &quot;MyPassword&quot; -a generate-asymmetric -A rsa2048 -i 11 -c sign-pss -l Signature_Key
+</pre></div>
+</div>
+<p>If the YubiKey is configured to require touch when accessing the YubiHSM-Auth credentials, the user needs to touch the YubiKey sensor in addition to entering the credential password.</p>
+<p>Once the user is authenticated with YubiHSM Auth, all YubiHSM-Shell commands can be used.</p>
+<hr class="docutils" />
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="yk5-apps-scp.html" class="btn btn-neutral float-left" title="Secure Channel Protocol (SCP03 and SCP11) Specifics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="yk5-firmware-index.html" class="btn btn-neutral float-right" title="YubiKey Firmware" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="copyright.html">Copyright</a> 2026, Yubico AB.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+<noscript>
+  <iframe
+    title="Blank"
+    aria-hidden="true"
+    src="https://sgtm.yubico.com/ns.html?id=GTM-TCVFSSSJ"
+    height="0"
+    width="0"
+    style="display: none; visibility: hidden"
+  ></iframe>
+</noscript>
+<div>
+  <a
+    href="https://www.yubico.com/support/terms-conditions/cookie-notice/"
+    target="_blank"
+    >Cookies</a
+  >
+  |
+  <a
+    href="https://www.yubico.com/support/terms-conditions/privacy-notice/"
+    target="_blank"
+    >Privacy Policy</a
+  >
+</div>
+
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -7,6 +7,9 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Menus;
 
+// Diagnostic evaluation tool: generated long-lived keys and calculated session keys reach the terminal.
+// Use disposable test material. Argument/visible-input strings and terminal history have separate
+// lifetimes from cleared byte buffers; adapt input, output and failure-safe cleanup for valuable keys.
 // ── Non-interactive CLI mode ─────────────────────────────────────────────────
 if (args.Length > 0)
 {

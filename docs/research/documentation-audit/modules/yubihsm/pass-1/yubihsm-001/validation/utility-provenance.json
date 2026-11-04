@@ -1,0 +1,71 @@
+{
+  "source_archive": {
+    "manifest": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/record-manifest.json",
+    "manifest_sha256": "d310ba77bb04a0b0052baa6afd32a0355510018267cef391a02963fcdd555d0d",
+    "checked": 433
+  },
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/run-command.py",
+      "source_sha256": "a145213edeed6a236ac2fa109fd801bfc924475ea8d55f325e6f6f641b7a93c6",
+      "target": "run-command.py",
+      "target_sha256": "d3bcebc73f3543b5bdaeaec4928ff3daec72003b774f57fb5eb077e116514300",
+      "replacements": {
+        "Adapted from frozen Security Domain validation/run-command.py.": "Reused from frozen YubiOTP validation/run-command.py."
+      },
+      "substitution_counts": {
+        "Adapted from frozen Security Domain validation/run-command.py.": 1
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/check-preserved.py",
+      "source_sha256": "c4fe73887f74c7a1b2e61d163e8d97ccff95c42fc8e56d18d6e4cde363ced259",
+      "target": "check-preserved.py",
+      "target_sha256": "34f882a66fd8953f262a4e7256e9046fb41a9f761744d6fde83b8c0cb0853efd",
+      "replacements": {
+        "[784, 402, 534, 164]": "[784, 402, 534, 164, 433]"
+      },
+      "substitution_counts": {
+        "[784, 402, 534, 164]": 1
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/check-records.py",
+      "source_sha256": "68132bb297be13519f196739dfc754953025755511f2baa262c6ae1ff49bc137",
+      "target": "check-records.py",
+      "target_sha256": "68132bb297be13519f196739dfc754953025755511f2baa262c6ae1ff49bc137",
+      "replacements": {},
+      "substitution_counts": {}
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/manifest.py",
+      "source_sha256": "8cc7d4920eed535e83943e7766708d4bb9fe5720ce8dda6d60caccc57ffa4602",
+      "target": "manifest.py",
+      "target_sha256": "556c28a58f635e684ea62b55ecb44478745c7327ba1259735ef8969655ac2b8a",
+      "replacements": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": "a74792facb657413e98223e059876d8b213ffff3",
+        "'yubiotp-001'": "'yubihsm-001'",
+        "text sources/configuration/provenance/results and three exact registered primary-source PDFs retained": "text sources/configuration/provenance/results and explicitly registered primary-source PDFs retained (allowlist initially empty)"
+      },
+      "substitution_counts": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": 1,
+        "'yubiotp-001'": 2,
+        "text sources/configuration/provenance/results and three exact registered primary-source PDFs retained": 1
+      }
+    }
+  ],
+  "baselines": [
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/prior-archive-baseline.json",
+      "sha256": "cae171245f4fb47e26c9fd3da2e3e0ba4724705a832523ba975fddbdf534c1df"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/user-work-baseline.json",
+      "sha256": "8515cd743225e2c74b1249d0b7dc41226575f8a4d006835bafab3c25b0c95dc8"
+    }
+  ],
+  "generator": {
+    "path": "prepare-tools.py",
+    "sha256": "2329f29cac470ca7988ec8b4b188166636588d8c8ab3f60d6ac269da51585032"
+  }
+}

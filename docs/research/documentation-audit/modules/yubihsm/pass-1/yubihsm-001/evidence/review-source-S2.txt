@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+      <title>YubiHSM Auth overview </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="YubiHSM Auth overview ">
+      
+      
+      <link rel="icon" href="../.././images/favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/Yubico/Yubico.NET.SDK/blob/develop/docs/users-manual/application-yubihsm-auth/yubihsm-auth-overview.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-WLE96T8XZ3"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-WLE96T8XZ3');
+      </script>
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../.././images/yubico-circle-y-mark-white.png" alt="Yubico">
+            Yubico
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="YubiHsmAuthOverview">
+<h1 id="yubihsm-auth-overview">YubiHSM Auth overview</h1>
+<!-- Copyright 2022 Yubico AB
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<p>YubiHSM Auth is a YubiKey CCID application that stores the long-lived <a class="xref" href="objects/credential.html">credentials</a> used to
+establish secure sessions with a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3 (SCP03).
+YubiHSM Auth is supported by YubiKey firmware version 5.4.3.</p>
+<p>YubiHSM Auth uses hardware to protect these credentials. In addition to providing robust security for the YubiHSM Auth
+application itself, this hardware protection subsequently increases the security of the default password-based solution
+for YubiHSM 2's authentication.</p>
+<p>For a guide on establishing a secure connection and performing operations on a YubiHSM 2, please refer
+to <a class="xref" href="interacting-yubihsm-2.html">Interacting with a YubiHSM 2</a>.</p>
+<h2 id="management-key">Management key</h2>
+<p>A 16-byte management key is required when adding or deleting credentials from the YubiHSM Auth application. The default
+value of the management key is all zeros, and should be changed before using the application.</p>
+<p>There is a limit of 8 attempts to authenticate with the management key before the management key is blocked. Once it is
+blocked, the application itself must be reset before authentication can be attempted again. Supplying the correct
+management key before the key is blocked will reset the retry counter to 8.</p>
+<h2 id="credential">Credential</h2>
+<p>Each credential contains a cryptographic key set which is used to establish secure sessions with a YubiHSM 2. Once a
+credential is added, it cannot be changed or modified in any way.</p>
+<p>Each credential has a 16-byte password which is required when calculating session keys. There is a limit of 8 retries,
+after which the credential will be permanently deleted. Supplying the correct password before the credential is deleted
+will reset the retry counter to 8.</p>
+<p>Optionally, the credential may be configured to also require touch when calculating session keys. This proof of user
+presence provides an additional layer of security.</p>
+<p>For more information, see the <a class="xref" href="objects/credential.html">credential overview</a>.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/Yubico/Yubico.NET.SDK/blob/develop/docs/users-manual/application-yubihsm-auth/yubihsm-auth-overview.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

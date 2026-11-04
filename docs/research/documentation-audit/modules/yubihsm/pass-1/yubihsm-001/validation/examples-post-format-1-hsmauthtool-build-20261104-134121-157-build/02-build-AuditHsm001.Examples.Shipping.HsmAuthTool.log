@@ -1,0 +1,20 @@
+$ dotnet build docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/dispatch/src/Yubico.YubiKit.AuditHsm001.Examples.Shipping.HsmAuthTool.csproj -c Release --no-incremental
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.YubiOtp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll
+  Yubico.YubiKit.Piv -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.YubiHsm -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.Oath -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Cli.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll
+  Yubico.YubiKit.Ctap2 -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Cli.Commands -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll
+  HsmAuthTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.45

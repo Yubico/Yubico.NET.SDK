@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(RepositoryRoot)/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" />
+    <Compile Include="Examples.cs" />
+  </ItemGroup>
+</Project>

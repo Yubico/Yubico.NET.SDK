@@ -1,0 +1,149 @@
+{
+  "records": [
+    {
+      "kind": "analyzer-configs.txt",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "retained": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3-.editorconfig.snapshot"
+    },
+    {
+      "kind": "analyzer-configs.txt",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig",
+      "bytes": 15007,
+      "sha256": "f23ec2c89e959e21eb6135674b3108b5cb78601b9e5e14de4252fd7fffaaffb9",
+      "retained": "f23ec2c89e959e21eb6135674b3108b5cb78601b9e5e14de4252fd7fffaaffb9-analysislevelstyle_recommended.globalconfig.snapshot"
+    },
+    {
+      "kind": "analyzer-configs.txt",
+      "path": "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+      "bytes": 869,
+      "sha256": "10545da61c8ab724561cc74d47b232863fae803849c332381c65145afb7fe18b",
+      "retained": "10545da61c8ab724561cc74d47b232863fae803849c332381c65145afb7fe18b-Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "bytes": 14548,
+      "sha256": "4b8b9c36f5e2d9124cf2fa32e0dc9cc3922b4c3a249c378bb9a73b222ffab84a",
+      "retained": "4b8b9c36f5e2d9124cf2fa32e0dc9cc3922b4c3a249c378bb9a73b222ffab84a-HardwareProbeTests.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs",
+      "bytes": 9445,
+      "sha256": "aa755afc5971d522fe204fc424c4964d018dc61d8fc6d660fa7f97a24a1b0726",
+      "retained": "aa755afc5971d522fe204fc424c4964d018dc61d8fc6d660fa7f97a24a1b0726-ProbeScope.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/SymmetricOracle.cs",
+      "bytes": 7073,
+      "sha256": "0fa4f481ee971468449d2efa64ddf1812eb8e526523e497408287034e30ef2bd",
+      "retained": "0fa4f481ee971468449d2efa64ddf1812eb8e526523e497408287034e30ef2bd-SymmetricOracle.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+      "bytes": 218,
+      "sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a",
+      "retained": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a-Microsoft.NET.Test.Sdk.Program.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.GlobalUsings.g.cs",
+      "bytes": 251,
+      "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f",
+      "retained": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f-Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.GlobalUsings.g.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb",
+      "retained": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.AssemblyInfo.cs",
+      "bytes": 1266,
+      "sha256": "967afaec8abd29195b3b5e580b20358b7f5679d378b029615eb5c3588337e537",
+      "retained": "967afaec8abd29195b3b5e580b20358b7f5679d378b029615eb5c3588337e537-Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.AssemblyInfo.cs.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.props",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "retained": "Directory.Build.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.targets",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "retained": "Directory.Build.targets.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Packages.props",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3",
+      "retained": "Directory.Packages.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/global.json",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "retained": "global.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "retained": ".editorconfig.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/Directory.Build.props",
+      "bytes": 628,
+      "sha256": "52e24e900ba1d587262699581784a6de1bdf4ef3d3b83bbaff20b48fc215a023",
+      "retained": "52e24e900ba1d587262699581784a6de1bdf4ef3d3b83bbaff20b48fc215a023-Directory.Build.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/Directory.Build.targets",
+      "bytes": 1977,
+      "sha256": "adc3e16f49a9d20a5a4e73b3754a367a3f34b9ede91f25acc17479add4f652e4",
+      "retained": "adc3e16f49a9d20a5a4e73b3754a367a3f34b9ede91f25acc17479add4f652e4-Directory.Build.targets.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj",
+      "bytes": 2038,
+      "sha256": "a1ea3afda541ed9d0bdeeb2f7f78bc9dd33f7e48d7e6e0b610509632465ce845",
+      "retained": "a1ea3afda541ed9d0bdeeb2f7f78bc9dd33f7e48d7e6e0b610509632465ce845-Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/xunit.runner.json",
+      "bytes": 201,
+      "sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4",
+      "retained": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4-xunit.runner.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/probe.runsettings",
+      "bytes": 493,
+      "sha256": "6e6eab6f41e09de0d69d3dd02e80ace7129e44eb3cbc75792e715624f9b21417",
+      "retained": "6e6eab6f41e09de0d69d3dd02e80ace7129e44eb3cbc75792e715624f9b21417-probe.runsettings.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/appsettings.json",
+      "bytes": 1016,
+      "sha256": "6500728c3ad148f7231b52db4a33c22a3c274b5e7ff8612aa5c1e61ecd04c414",
+      "retained": "6500728c3ad148f7231b52db4a33c22a3c274b5e7ff8612aa5c1e61ecd04c414-appsettings.json.snapshot"
+    },
+    {
+      "path": "/tmp/opencode/yubihsm-001-hardware/obj/project.assets.json",
+      "bytes": 192443,
+      "sha256": "9e90208e2c7e2f3ecde5ecf3070dc4c6f614db575bb9725d6f635a0ca88362b7",
+      "retained": "project.assets.json.snapshot"
+    }
+  ],
+  "checked_dependencies": 227,
+  "capture": "v1-rebuild",
+  "evidence": "Actual Csc source/reference/analyzer/config sets reconcile; compiler/analyzers enabled; full dependency identities match at late capture; source/config/assets text retained; no binary copies or test execution."
+}

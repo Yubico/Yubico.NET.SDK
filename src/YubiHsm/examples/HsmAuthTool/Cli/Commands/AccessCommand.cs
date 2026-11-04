@@ -30,7 +30,10 @@ internal static class AccessCommand
         var currentKeyHex = CommandArgs.GetOption(args, "--management-key");
         var newKeyHex = CommandArgs.GetOption(args, "--new-management-key");
 
-        // Prompt for missing values
+        // These visible strings are diagnostic inputs. Persist the replacement recoverably before
+        // installing it; the tool reports success but delegates secure storage to the operator.
+        // Parsing and selection below precede the clearing scope, so early exits require a separate
+        // cleanup design when adapting this sample for valuable keys.
         currentKeyHex ??= AnsiConsole.Prompt(
             new TextPrompt<string>("Current management key (hex, 16 bytes):")
                 .DefaultValue("00000000000000000000000000000000"));

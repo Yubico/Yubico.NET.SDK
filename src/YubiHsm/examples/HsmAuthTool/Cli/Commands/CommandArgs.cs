@@ -25,9 +25,8 @@ internal static class CommandArgs
     }
 
     /// <summary>
-    /// Gets the remaining positional arguments after consuming known subcommands.
-    /// For example, in "credentials add MyLabel --touch", after consuming ["credentials", "add"],
-    /// the first positional arg is "MyLabel".
+    /// Gets the argument at the index immediately following the known subcommands, when it is present
+    /// and starts with a character other than '-'. Place the label before options when using this parser.
     /// </summary>
     public static string? GetPositional(string[] args, int subcommandCount)
     {

@@ -1,0 +1,6 @@
+$ ykman --device 103 hsmauth info
+UTC 2026-11-04T11:40:38.327094+00:00
+YubiHSM Auth version:             5.8.0
+Management key retries remaining: 8/8
+
+EXIT=0

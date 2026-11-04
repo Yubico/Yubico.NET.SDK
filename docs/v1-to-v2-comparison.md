@@ -132,12 +132,13 @@ The gaps table above already accounts for these:
 - The cross-applet `IUserPresencePrompt` touch contract, replacing the alpha-only
   PIV and YubiHSM Auth `OnTouchRequired` callbacks and covering FIDO2/WebAuthn,
   OATH, OpenPGP, and YubiOTP as well.
-- YubiHSM Auth's `HsmAuthRetryException` and
-  the hardware-verified `Counter` → `RetriesRemaining` rename.
+- YubiHSM Auth's `HsmAuthRetryException` for enrollment, deletion, management-key changes, CALCULATE and
+  password changes, plus the `Counter` → `RetriesRemaining` rename. `GetChallengeAsync` uses general APDU
+  errors; applications own retry decisions for both paths.
 - YubiHSM Auth password inputs are back to UTF-8 `ReadOnlyMemory<byte>`, as in
   v1, so callers can clear them after use. Its parameters are named plainly
   (`credentialPassword`, `derivationPassword`, `currentPassword`,
-  `newPassword`, and `password`). FIDO2, OpenPGP, and OATH secret parameters
+  and `newPassword`). FIDO2, OpenPGP, and OATH secret parameters
   were renamed the same way, which breaks named-argument call sites; PIV still
   uses the `...Utf8` suffix.
 - YubiOTP keyboard-layout-aware static passwords and Yubico-OTP-algorithm
@@ -174,6 +175,8 @@ Windows/macOS/Linux platform interop; PIV key management and algorithms
 the FIDO2 CTAP2 surface (GetInfo, PIN protocols, bio enrollment, credential
 management, config, largeBlob, extensions); SCP03/SCP11 core protocol and key
 management; Management device-info read and device-config write; OATH
-credential types and PBKDF2 handling; and YubiHSM Auth's new capabilities
-(password change, on-device EC key generation, derived credentials, and
-zeroizing `SessionKeys`).
+credential types and PBKDF2 handling. YubiHSM Auth adds SDK surfaces for password change (5.8.0 gate),
+on-device EC key generation, derived credentials, and `SessionKeys` owned-array clearing. Use the
+[module guide](../src/YubiHsm/README.md) for applet-version policy, enrollment on both devices and external
+HSM handshake responsibilities; these additions describe SDK capability rather than every development
+applet's behavior or authenticated HSM interoperability.

@@ -13,6 +13,9 @@ public static class ChangeManagementKey
         HsmAuthSession session,
         CancellationToken cancellationToken = default)
     {
+        // Arrange protected, recoverable storage of the replacement before this diagnostic operation.
+        // Visible strings persist separately from byte buffers. Both parses below precede the clearing
+        // scope; an application should cover acquisition failures in its cleanup design as well.
         var currentKeyHex = AnsiConsole.Prompt(
             new TextPrompt<string>("Current management key ([grey]hex, 16 bytes[/]):")
                 .DefaultValue("00000000000000000000000000000000"));

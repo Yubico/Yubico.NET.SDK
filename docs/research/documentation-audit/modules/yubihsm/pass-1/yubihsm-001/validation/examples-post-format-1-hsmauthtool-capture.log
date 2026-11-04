@@ -1,0 +1,15 @@
+$ python3 -B docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format.py capture hsmauthtool first
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format.py", line 177, in <module>
+    exec(compile(text, str(HERE / tool) + ':post-format-1', 'exec'),
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+         dict(__name__='__main__', __file__=str(HERE / tool), OVERLAY=OVERLAY,
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              updated_dependencies=updated, overlay_sha=sha((OVERLAY / 'manifest.json').read_bytes()), binding_sha=binding_sha))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/capture.py:post-format-1", line 73, in <module>
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/inventory.py", line 19, in require
+    raise ValueError(message)
+ValueError: Remove early common-props hook from the shipping command
+
+EXIT=1

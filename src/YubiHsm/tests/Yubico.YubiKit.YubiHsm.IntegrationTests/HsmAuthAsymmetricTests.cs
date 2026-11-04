@@ -79,7 +79,7 @@ public class HsmAuthAsymmetricTests
                     TestPassword,
                     NewToken());
 
-                // Challenge should be a non-empty value
+                // This assertion checks only nonempty response data; point shape requires another check.
                 Assert.True(challenge.Length > 0);
             },
             resetBeforeUse: true,
@@ -111,8 +111,8 @@ public class HsmAuthAsymmetricTests
                     NewToken());
                 Assert.Equal(65, epkOce.Length);
 
-                // This protocol-shape test generates EPK-SD locally. A real connector flow supplies
-                // EPK-SD and the card cryptogram from the YubiHSM 2 handshake.
+                // This rejection exercise generates a synthetic HSM ephemeral point locally.
+                // A live flow uses the HSM's own EPK-SD and cryptogram, relayed by its connector.
                 using var ephemeral = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
                 var ephemeralParams = ephemeral.ExportParameters(includePrivateParameters: false);
                 var epkSd = new byte[65];
@@ -125,24 +125,17 @@ public class HsmAuthAsymmetricTests
                 epkOce.Span.CopyTo(context.AsSpan(0));
                 epkSd.CopyTo(context.AsSpan(65));
 
-                // Card cryptogram is required for asymmetric CALCULATE. In a real flow,
-                // this comes from the YubiHSM 2 device. Without one, we use a dummy value.
-                // The YubiKey will reject the dummy data — the exact status word depends on
-                // firmware version and how far the firmware gets before detecting the error.
+                // Supply synthetic cryptogram bytes for rejection. The publicKey variable also
+                // holds the credential's PK-OCE; a genuine handshake supplies the trusted HSM
+                // static key in that argument. Multiple inputs therefore differ from a valid flow.
                 var dummyCardCryptogram = new byte[8];
                 RandomNumberGenerator.Fill(dummyCardCryptogram);
 
                 try
                 {
-                    // We expect the operation to fail because the card cryptogram is dummy
-                    // data and the ephemeral keys don't match a real YubiHSM 2 handshake.
-                    // The YubiKey may reject with various status words:
-                    //   0x6A80 — incorrect data (firmware validates cryptographic content)
-                    //   0x6300 — wrong cryptogram verification
-                    //   0x63Cx — credential password retry decrement
-                    //   0x6982 — security status not satisfied
-                    // All of these are acceptable — they confirm the APDU was received
-                    // and processed (not rejected at the transport/framing level).
+                    // Assert the exact general APDU exception type for these combined invalid inputs.
+                    // A retry-specific subclass fails this exact-type assertion. The result alone
+                    // neither isolates cryptogram verification nor proves a valid handshake encoding.
                     var ex = await Assert.ThrowsAsync<ApduException>(async () =>
                     {
                         using var keys = await session.CalculateSessionKeysAsymmetricAsync(
@@ -154,9 +147,8 @@ public class HsmAuthAsymmetricTests
                             NewToken());
                     });
 
-                    // Any APDU-level error is acceptable with dummy cryptographic data.
-                    // The key validation is that we get a proper ApduException (not a
-                    // serialization error, NullReferenceException, or other internal failure).
+                    // A nonzero status is the only status-word constraint asserted here; an absent
+                    // instruction or another invalid input could also account for the rejection.
                     Assert.NotEqual((short)0, ex.SW);
                 }
                 finally
@@ -170,6 +162,7 @@ public class HsmAuthAsymmetricTests
             cancellationToken: NewToken());
 
     // ─── Put Asymmetric with Touch ──────────────────────────────────────────────
+    // This case asserts stored touch metadata; physical CALCULATE/touch enforcement is a separate task.
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.0")]

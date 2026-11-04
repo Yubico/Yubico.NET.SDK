@@ -1,0 +1,42 @@
+interface ISymmetricHsmExchange : IAsyncDisposable
+{
+    Task<(byte[] HsmChallenge, byte[] CardCryptogram)> BeginAsync(
+        ushort authenticationKeyId, ReadOnlyMemory<byte> hostChallenge, CancellationToken cancellationToken);
+    Task AuthenticateAndUseAsync(SessionKeys keys, CancellationToken cancellationToken);
+}
+
+static async Task UseSymmetricHsmAsync(
+    IYubiKey device, string label, ushort hsmAuthenticationKeyId,
+    ReadOnlyMemory<byte> credentialPassword,
+    Func<CancellationToken, Task<ISymmetricHsmExchange>> openExchangeAsync,
+    CancellationToken cancellationToken)
+{
+    byte[] hostChallenge = RandomNumberGenerator.GetBytes(8);
+    byte[]? context = null;
+    byte[]? hsmChallenge = null;
+    byte[]? cardCryptogram = null;
+    try
+    {
+        context = new byte[16];
+        await using var exchange = await openExchangeAsync(cancellationToken);
+        (hsmChallenge, cardCryptogram) = await exchange.BeginAsync(
+            hsmAuthenticationKeyId, hostChallenge, cancellationToken);
+        if (hsmChallenge.Length != 8 || cardCryptogram.Length != 8)
+            throw new InvalidOperationException("Unexpected symmetric HSM handshake response.");
+
+        hostChallenge.CopyTo(context, 0);
+        hsmChallenge.CopyTo(context, 8);
+        await using var session = await device.CreateHsmAuthSessionAsync(
+            cancellationToken: cancellationToken);
+        using var keys = await session.CalculateSessionKeysSymmetricAsync(
+            label, context, credentialPassword, cardCryptogram, cancellationToken);
+        await exchange.AuthenticateAndUseAsync(keys, cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(hostChallenge);
+        if (context is not null) CryptographicOperations.ZeroMemory(context);
+        if (hsmChallenge is not null) CryptographicOperations.ZeroMemory(hsmChallenge);
+        if (cardCryptogram is not null) CryptographicOperations.ZeroMemory(cardCryptogram);
+    }
+}

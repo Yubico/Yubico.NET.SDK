@@ -1,0 +1,37 @@
+$ dotnet test src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "Category!=RequiresUserPresence"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.YubiHsm -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.YubiHsm.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.IntegrationTests.dll
+Test run for /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.YubiHsm.IntegrationTests
+[xUnit.net 00:00:00.11]   Discovered:  Yubico.YubiKit.YubiHsm.IntegrationTests
+[xUnit.net 00:00:00.13]   Starting:    Yubico.YubiKit.YubiHsm.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthSessionTests.CalculateSessionKeysSymmetric_Returns48Bytes(state: YubiKey(Placeholder #0: FW>=5.4.3,Conn=SmartCard)) [609 ms]
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthSessionTests.GenerateAsymmetric_GetPublicKey_Returns65Bytes(state: YubiKey(Placeholder #0: FW>=5.6.0,Conn=SmartCard)) [668 ms]
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthSessionTests.PutDerived_VerifyAlgorithm_IsAes128(state: YubiKey(Placeholder #0: FW>=5.4.3,Conn=SmartCard)) [333 ms]
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthSessionTests.ChangeCredentialPassword_ThenCalculate_Succeeds(state: YubiKey(Placeholder #0: FW>=5.8.0,Conn=SmartCard)) [283 ms]
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthSessionTests.GetManagementKeyRetries_AfterReset_Returns8(state: YubiKey(Placeholder #0: FW>=5.4.3,Conn=SmartCard)) [229 ms]
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthSessionTests.ResetAsync_ThenList_ReturnsEmptyList(state: YubiKey(Placeholder #0: FW>=5.4.3,Conn=SmartCard)) [229 ms]
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthSessionTests.PutManagementKey_RoundTrip_CanUseNewKey(state: YubiKey(Placeholder #0: FW>=5.4.3,Conn=SmartCard)) [269 ms]
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthSessionTests.PutSymmetric_ListDeleteList_RoundTrip(state: YubiKey(Placeholder #0: FW>=5.4.3,Conn=SmartCard)) [259 ms]
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthAsymmetricTests.PutCredentialAsymmetric_ThenList_ShowsEcP256(state: YubiKey(Placeholder #0: FW>=5.6.0,Conn=SmartCard)) [243 ms]
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthAsymmetricTests.GetChallenge_WithAsymmetricCredential_ReturnsEpk(state: YubiKey(Placeholder #0: FW>=5.6.0,Conn=SmartCard)) [752 ms]
+[xUnit.net 00:00:04.91]   Finished:    Yubico.YubiKit.YubiHsm.IntegrationTests
+  Passed Yubico.YubiKit.YubiHsm.IntegrationTests.HsmAuthAsymmetricTests.CalculateSessionKeysAsymmetric_WithDummyCryptogram_ThrowsApduException(state: YubiKey(Placeholder #0: FW>=5.6.0,Conn=SmartCard)) [821 ms]
+
+Test Run Successful.
+Total tests: 11
+     Passed: 11
+ Total time: 5.2374 Seconds

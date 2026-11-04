@@ -1,0 +1,15 @@
+<Project>
+  <!-- Isolated utility: outputs are not retained inside the source tree. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <ValidationWorkspace Condition="'$(ValidationWorkspace)' == ''">/tmp/opencode/yubihsm-001-doccheck</ValidationWorkspace>
+    <BaseIntermediateOutputPath>$(ValidationWorkspace)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(ValidationWorkspace)/obj/</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(ValidationWorkspace)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

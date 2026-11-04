@@ -1,0 +1,2036 @@
+diff --git c/docs/migration/v1-to-v2-gaps.md w/docs/migration/v1-to-v2-gaps.md
+index ba2c6cc7..3de6e706 100644
+--- c/docs/migration/v1-to-v2-gaps.md
++++ w/docs/migration/v1-to-v2-gaps.md
+@@ -286,6 +286,15 @@ v2 location: `src/YubiHsm/src/**`
+ 
+ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations only (credential put/delete/list, management-key ops, session-key derivation) — not full HSM connector/object management.
+ 
++**Current reading of this historical section:** enrollment, deletion, management-key changes, CALCULATE
++and password changes translate retry-count status words to `HsmAuthRetryException`. `GetChallengeAsync`
++uses general `ApduException` errors, including password failures. Retry loops belong to the application.
++Initialization resolves the SELECT applet version or a caller override; `ResetAsync` reselects while
++retaining that policy. The SDK exposes password change behind its 5.8.0 gate. Development-build metadata
++alone provides no operation-level qualification; use the actual applet response and operation evidence.
++`SessionKeys` disposal clears its owned arrays; callers clear input buffers and additional copies separately.
++The entries below retain the earlier analysis and subsequent remediation history.
++
+ - **Feature/API**: Interactive `KeyCollector` + auto-retrying `Try*` overloads (`TryAddCredential`, `TryDeleteCredential`, `TryChangeManagementKey`, `TryGetAes128SessionKeys`, `TryGetEccP256SessionKeys`)
+   **v2 status**: Missing — every operation in v2 is single-attempt with no retry loop.
+   **Severity**: Major | **Confidence**: High
+@@ -304,7 +313,7 @@ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations onl
+   **Severity**: No remaining gap | **Confidence**: High
+ 
+ - **Feature/API**: Explicit live application-version query (`GetApplicationVersion()`)
+-  **v2 status**: Missing as public method — version is cached from SELECT response, refreshed only on `ResetAsync`; functionally equivalent for normal use via `FirmwareVersion`, but no on-demand re-check.
++  **v2 status**: Missing as public method — `FirmwareVersion` exposes the session's resolved SELECT/override policy. Reset reselects the applet and retains that policy; create a new session to resolve it again.
+   **Severity**: Cosmetic | **Confidence**: Medium
+ 
+ - **Feature/API**: Strongly-typed reusable credential value objects (`Credential`, `CredentialWithSecrets`, `Aes128CredentialWithSecrets`, `EccP256CredentialWithSecret`)
+@@ -315,7 +324,11 @@ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations onl
+   **v2 status**: **Regressed, now fixed (2026-08-31).** v2 originally shipped these as `string`, which callers cannot wipe — the only module in the SDK still doing so after the `75353fd1` Fido2/OpenPgp/Oath sweep, which missed `src/YubiHsm/` because it landed seven days earlier. Nine members now take UTF-8 `ReadOnlyMemory<byte>`, restoring v1 parity. Padding and PBKDF2 behavior are unchanged. The parameters are named plainly (`credentialPassword` and friends), with the UTF-8 and ownership contracts documented on each `<param>`.
+   **Severity**: Major (while it lasted) | **Confidence**: High
+ 
+-**Verified improvement, no gap**: `ChangeCredentialPasswordAsync`/`ChangeCredentialPasswordAdminAsync` (fw 5.8.0+), `GenerateCredentialAsymmetricAsync` (on-device EC keygen), `PutCredentialDerivedAsync` (PBKDF2-derived symmetric credential), `SessionKeys` as `IDisposable` with zeroization — all new capabilities beyond v1.
++**Implemented SDK additions beyond v1**: `ChangeCredentialPasswordAsync`/`ChangeCredentialPasswordAdminAsync`
++(5.8.0 SDK gate), `GenerateCredentialAsymmetricAsync` (on-device EC keygen), `PutCredentialDerivedAsync`
++(PBKDF2-derived symmetric credential), and disposable `SessionKeys` with owned-array clearing. These surface
++additions have their documented version and ownership conditions; qualify interoperability through the
++intended HSM enrollment and handshake workflow.
+ 
+ ---
+ 
+diff --git c/docs/migration/v1-to-v2-map.yml w/docs/migration/v1-to-v2-map.yml
+index 8c952ea5..26dff860 100644
+--- c/docs/migration/v1-to-v2-map.yml
++++ w/docs/migration/v1-to-v2-map.yml
+@@ -240,7 +240,7 @@ mappings:
+     evidence:
+       - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiHsmAuth/YubiHsmAuthSession.cs
+       - yubikit:src/YubiHsm/
+-    notes: Authentication, connector, object, and command behavior require manual review.
++    notes: The package manages the YubiKey YubiHSM Auth applet and calculates session keys. The application uses an HSM library for connector sessions, HSM object enrollment and protected commands. Manually preserve the YubiKey label/HSM authentication-key ID mapping and provision matching long-lived keys on both devices; see the module README enrollment guide.
+     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+   - id: low-level-commands
+     status: manual
+@@ -466,7 +466,7 @@ mappings:
+     evidence:
+       - yubikit:src/YubiHsm/src/HsmAuthRetryException.cs
+       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+-    notes: The initial v2 snapshot had no `Try*` retry-loop family and embedded the retry count only in an exception's string message (historical gap 13). The `yubikit-gaps` remediation effort added `HsmAuthRetryException` (derives from `ApduException`, so existing `catch (ApduException)` still observes it), thrown uniformly by every retry-counted management-key- or credential-password-gated operation with a typed `RetriesRemaining` property. There is still no automatic retry loop; callers must catch `HsmAuthRetryException` and decide whether to prompt and retry themselves.
++    notes: The initial v2 snapshot embedded retry counts in exception messages (historical gap 13). Current enrollment, deletion, management-key changes, both CALCULATE methods and both password-change methods translate retry-count statuses into HsmAuthRetryException.RetriesRemaining. The type derives from ApduException. GetChallengeAsync uses general ApduException errors, including with a password; inspect its status word when applying retry policy. Each SDK call makes one attempt; the application decides whether to prompt and retry.
+     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+   - id: yubihsm-touch-notify
+     status: assisted
+@@ -490,7 +490,7 @@ mappings:
+     evidence:
+       - yubikit:src/YubiHsm/src/HsmAuthCredential.cs
+       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
+-    notes: An earlier v2-only `HsmAuthCredential.Counter` member was documented as a usage counter, the opposite meaning from v1's "retries remaining before deletion" for the same wire byte (historical gap 13, flagged as needing hardware verification). The `yubikit-gaps` remediation effort hardware-verified against a live YubiKey 5.8 that the byte decrements on failed credential-password authentication (observed 8 to 7 after one deliberate failure) and renamed the member to `RetriesRemaining` to match v1's semantics and the verified behavior. Behavior on successful authentication was not separately hardware-verified.
++    notes: An earlier v2-only Counter member described this byte as a usage counter (historical gap 13). The rename to RetriesRemaining followed a recorded 8-to-7 failed-authentication observation. Current LIST results are snapshots. Yubico's descriptive YubiHSM Auth overview says successful authentication before exhaustion restores retries to eight; exhaustion deletes the credential. Management-key exhaustion instead blocks management operations until destructive applet reset. Refresh LIST or the management retry query to observe current state; historical observation scope remains in the remediation records.
+     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+   - id: securitydomain-exception
+     status: assisted
+@@ -534,7 +534,7 @@ mappings:
+     confidence: high
+     migration_kind: member
+     v1: YubiHsmAuthSession credential-password parameters (ReadOnlyMemory<byte> in Symmetric.cs; string in Aes128CredentialWithSecrets.cs and related asymmetric/admin members)
+-    v2: IHsmAuthSession/HsmAuthSession credential-password parameters as plainly-named UTF-8 ReadOnlyMemory<byte> (credentialPassword, derivationPassword, currentPassword, newPassword, password)
++    v2: IHsmAuthSession/HsmAuthSession password parameters as UTF-8 ReadOnlyMemory<byte> (credentialPassword, derivationPassword, currentPassword, newPassword)
+     evidence:
+       - yubikit:src/YubiHsm/src/HsmAuthSession.cs
+       - yubikit:src/YubiHsm/src/IHsmAuthSession.cs
+diff --git c/docs/migration/v1-to-v2.md w/docs/migration/v1-to-v2.md
+index 03b9b518..8020cf4f 100644
+--- c/docs/migration/v1-to-v2.md
++++ w/docs/migration/v1-to-v2.md
+@@ -766,9 +766,16 @@ With SCP parameters supplied, session creation and post-reset reinitialization w
+ 
+ ### YubiHSM
+ 
+-Use `Yubico.YubiKit.YubiHsm` for YubiHSM 2 workflows. Review connector/session creation, authentication, object identifiers, capabilities, and command behavior manually.
++Use `Yubico.YubiKit.YubiHsm` to manage the YubiKey's YubiHSM Auth applet and calculate HSM session keys.
++Your HSM library handles connector sessions, HSM authentication objects and protected commands. Enroll
++matching keys on both devices and retain the mapping between the YubiKey label and HSM object ID; see the
++[module enrollment and handshake guide](../../src/YubiHsm/README.md#common-operations).
+ 
+-A dedicated `HsmAuthRetryException.RetriesRemaining` was restored after an initial v2 gap. Migrate v1 touch
++A dedicated `HsmAuthRetryException.RetriesRemaining` was restored after an initial v2 gap. Enrollment,
++deletion, management-key changes, CALCULATE and password changes translate retry-count statuses to this
++type. `GetChallengeAsync` follows the general `ApduException` path, including with a password; inspect its
++status before deciding on another attempt. Each call makes one attempt, with retry policy owned by your
++application. Migrate v1 touch
+ notification, or the removed alpha `HsmAuthSession.OnTouchRequired` callback, to
+ `SessionCreationOptions.UserPresencePrompt`; known touch-required credentials produce a required policy
+ notification, an unknown touch value or LIST failure is advisory, and a credential absent from a successful
+@@ -777,7 +784,11 @@ LIST remains silent. See `yubihsm-retry-exception`,
+ hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics;
+ see `yubihsm-credential-retries-remaining-rename`.
+ 
+-Credential passwords moved from `string` to UTF-8 `ReadOnlyMemory<byte>` across nine `IHsmAuthSession`/`HsmAuthSession` members, closing a v1 regression rather than introducing one, since v1's equivalent path already used byte-based passwords; see `yubihsm-credential-password-bytes` in `v1-to-v2-map.yml`. The parameters are named plainly — `credentialPassword`, `derivationPassword`, `currentPassword`, `newPassword`, and `password` — with no `Utf8` suffix; `refactor(fido2,openpgp,oath)!: drop Utf8 param suffix from secret parameters` (`5af953f6`) applied the same convention to FIDO2, OpenPGP, and OATH. PIV is the exception and still uses `pinUtf8`, `pukUtf8`, and friends.
++Pass UTF-8 `ReadOnlyMemory<byte>` to the nine password-taking `IHsmAuthSession`/`HsmAuthSession` members.
++The parameters are named `credentialPassword`, `derivationPassword`, `currentPassword` and `newPassword`.
++Clear caller-owned byte buffers in `finally`; an owning disposable buffer can provide the same lifetime
++boundary. Keep derivation and credential passwords separate: one derives the HSM's long-lived key pair,
++the other protects use of the YubiKey credential. See `yubihsm-credential-password-bytes` in the map.
+ 
+ ## Manual Low-Level Command Cases
+ 
+diff --git c/docs/usage/user-interaction.md w/docs/usage/user-interaction.md
+index bb71ae50..dfc2b42f 100644
+--- c/docs/usage/user-interaction.md
++++ w/docs/usage/user-interaction.md
+@@ -190,6 +190,14 @@ The source of that certainty differs by applet and transport:
+   unknown touch value on a found YubiHSM Auth credential produce `PolicyMayRequire`. A missing YubiHSM
+   Auth credential remains silent. No smart-card timeout is inferred from these notifications.
+ 
++For YubiHSM Auth, a configured prompt causes a LIST policy lookup before CALCULATE. Cancellation of that
++lookup propagates; other lookup failures produce the advisory notification. With no prompt, the session
++sends CALCULATE directly. See the [module guide](../../src/YubiHsm/README.md#user-interaction) for its
++credential and calculation workflow.
++After requesting cancellation, await the YubiHSM Auth operation's terminal result and cleanup. An
++in-flight SmartCard command can continue until its response arrives and end with an APDU failure;
++follow that outcome when deciding recovery rather than assuming the device has stopped.
++
+ Applications should tolerate additional applications, scopes, and notification sites in later
+ versions. Do not use a presence notification to authorize an operation or infer that a touch
+ occurred.
+diff --git c/docs/v1-to-v2-comparison.md w/docs/v1-to-v2-comparison.md
+index 197dd19a..2ab4d9ac 100644
+--- c/docs/v1-to-v2-comparison.md
++++ w/docs/v1-to-v2-comparison.md
+@@ -132,12 +132,13 @@ The gaps table above already accounts for these:
+ - The cross-applet `IUserPresencePrompt` touch contract, replacing the alpha-only
+   PIV and YubiHSM Auth `OnTouchRequired` callbacks and covering FIDO2/WebAuthn,
+   OATH, OpenPGP, and YubiOTP as well.
+-- YubiHSM Auth's `HsmAuthRetryException` and
+-  the hardware-verified `Counter` → `RetriesRemaining` rename.
++- YubiHSM Auth's `HsmAuthRetryException` for enrollment, deletion, management-key changes, CALCULATE and
++  password changes, plus the `Counter` → `RetriesRemaining` rename. `GetChallengeAsync` uses general APDU
++  errors; applications own retry decisions for both paths.
+ - YubiHSM Auth password inputs are back to UTF-8 `ReadOnlyMemory<byte>`, as in
+   v1, so callers can clear them after use. Its parameters are named plainly
+   (`credentialPassword`, `derivationPassword`, `currentPassword`,
+-  `newPassword`, and `password`). FIDO2, OpenPGP, and OATH secret parameters
++  and `newPassword`). FIDO2, OpenPGP, and OATH secret parameters
+   were renamed the same way, which breaks named-argument call sites; PIV still
+   uses the `...Utf8` suffix.
+ - YubiOTP keyboard-layout-aware static passwords and Yubico-OTP-algorithm
+@@ -174,6 +175,8 @@ Windows/macOS/Linux platform interop; PIV key management and algorithms
+ the FIDO2 CTAP2 surface (GetInfo, PIN protocols, bio enrollment, credential
+ management, config, largeBlob, extensions); SCP03/SCP11 core protocol and key
+ management; Management device-info read and device-config write; OATH
+-credential types and PBKDF2 handling; and YubiHSM Auth's new capabilities
+-(password change, on-device EC key generation, derived credentials, and
+-zeroizing `SessionKeys`).
++credential types and PBKDF2 handling. YubiHSM Auth adds SDK surfaces for password change (5.8.0 gate),
++on-device EC key generation, derived credentials, and `SessionKeys` owned-array clearing. Use the
++[module guide](../src/YubiHsm/README.md) for applet-version policy, enrollment on both devices and external
++HSM handshake responsibilities; these additions describe SDK capability rather than every development
++applet's behavior or authenticated HSM interoperability.
+diff --git c/src/YubiHsm/CLAUDE.md w/src/YubiHsm/CLAUDE.md
+index ee8d59d1..e8f54e5a 100644
+--- c/src/YubiHsm/CLAUDE.md
++++ w/src/YubiHsm/CLAUDE.md
+@@ -12,14 +12,17 @@ This file provides Claude-specific guidance for working with the YubiHSM Auth mo
+ 
+ ## Module Context
+ 
+-The YubiHSM Auth module implements the **YubiHSM Auth applet** for authenticating to YubiHSM 2 hardware security modules. This is the **most security-sensitive applet** in the SDK — every operation involves management keys, session keys, credential passwords, or EC private keys.
++The YubiHSM Auth module manages the **YubiHSM Auth applet** on a YubiKey. It enrolls credentials and
++calculates session keys used to authenticate to a YubiHSM 2. The application owns matching HSM object
++enrollment, connector communication and handshake completion. LIST and retry reads return public metadata;
++enrollment and calculation paths handle management keys, credential passwords and cryptographic material.
+ 
+ **Key characteristics:**
+ 1. **SmartCard-only** — No HID or OTP transport; `HsmAuthBackend` owns applet select/send mechanics over `ISmartCardProtocol`
+ 2. **Applet-owned backend** — Session code keeps APDU construction, retry extraction, and sensitive-buffer lifecycle; backend remains a thin SmartCard transport wrapper
+ 3. **Two credential types** — Symmetric (AES-128, all firmware) and Asymmetric (EC P256, firmware 5.6.0+)
+-4. **Strict security** — All sensitive buffers zeroed in `finally` blocks; `SessionKeys` is `IDisposable`
+-5. **User presence** — Session-key calculations retain `SessionCreationOptions.UserPresencePrompt`; the removed alpha `OnTouchRequired` callback has no compatibility adapter
++4. **Owned-buffer cleanup** — Session methods clear their padded passwords, encoded request buffers and derived keys in `finally`; `SessionKeys` clears its three owned arrays on disposal. Caller-owned inputs and additional copies have separate lifetimes.
++5. **User presence** — Session-key calculations retain the caller-owned `SessionCreationOptions.UserPresencePrompt` for notifications around CALCULATE.
+ 
+ **Key Files:**
+ - [`HsmAuthSession.cs`](src/HsmAuthSession.cs) - Main session class (all APDU operations)
+@@ -32,7 +35,11 @@ The YubiHSM Auth module implements the **YubiHSM Auth applet** for authenticatin
+ 
+ ## Firmware Feature Gates
+ 
+-All firmware-gated operations use `EnsureSupports(Feature)` at method entry:
++Asymmetric, challenge and password-change operations use feature gates; base operations rely on successful
++applet selection. Initialization uses the caller's firmware override or the SELECT applet version. The
++backend falls back to 5.4.3 when a three-byte version value is unavailable. Reset reselects over the existing
++protocol and retains resolved version policy. Device metadata and development-build labels alone establish
++neither an operation's availability nor a suitable override.
+ 
+ | Feature | Version | Methods |
+ |---------|---------|---------|
+@@ -42,6 +49,9 @@ All firmware-gated operations use `EnsureSupports(Feature)` at method entry:
+ | `FeatureGetChallengeWithPassword` | 5.7.1 | `GetChallengeAsync` with credential password |
+ | `FeaturePasswordChange` | 5.8.0 | `ChangeCredentialPasswordAsync`, `ChangeCredentialPasswordAdminAsync` |
+ 
++`FeatureGetChallengeNoPassword` is an obsolete alias of `FeatureGetChallengeWithPassword`; test basic
++challenge availability with `FeatureGetChallenge` and password transmission with the correctly named field.
++
+ ## Wire Protocol
+ 
+ All communication uses ISO 7816-4 APDUs with CLA=0x00.
+@@ -56,7 +66,7 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
+ | 0x04 | GET_CHALLENGE | 0 | 0 | Get host challenge / EPK-OCE |
+ | 0x05 | LIST | 0 | 0 | List credentials |
+ | 0x06 | RESET | 0xDE | 0xAD | Factory reset |
+-| 0x07 | GET_VERSION | 0 | 0 | Get applet version |
++| 0x07 | GET_VERSION | 0 | 0 | Protocol instruction; this SDK resolves version from SELECT instead |
+ | 0x08 | PUT_MANAGEMENT_KEY | 0 | 0 | Change management key |
+ | 0x09 | GET_MANAGEMENT_KEY_RETRIES | 0 | 0 | Get retry counter |
+ | 0x0A | GET_PUBLIC_KEY | 0 | 0 | Get EC public key |
+@@ -68,9 +78,8 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
+ 
+ ### Credential Password Handling
+ 
+-Credential passwords cross the public API as **UTF-8 `ReadOnlyMemory<byte>`**, never `string`.
+-.NET strings are immutable and cannot be wiped, so a `string` parameter makes it impossible for
+-the caller to zero the secret. Parameters are named plainly (`credentialPassword`,
++Credential passwords cross the public API as **UTF-8 `ReadOnlyMemory<byte>`**. Mutable byte storage lets
++the caller clear its secret; .NET strings retain immutable storage. Parameters are named plainly (`credentialPassword`,
+ `derivationPassword`, `currentPassword`, `newPassword`) with no `Utf8` suffix; the UTF-8 encoding
+ contract lives in the XML documentation for each parameter, not in its name.
+ 
+@@ -82,34 +91,33 @@ contract lives in the XML documentation for each parameter, not in its name.
+ - The padded copy is always zeroed in a `finally` block.
+ - Never log password values — log operation metadata only.
+ 
+-```csharp
+-// Caller side: own the bytes, zero them.
+-var credentialPassword = Encoding.UTF8.GetBytes(password);
+-try
+-{
+-    await session.PutCredentialSymmetricAsync(
+-        managementKey, label, keyEnc, keyMac, credentialPassword);
+-}
+-finally
+-{
+-    CryptographicOperations.ZeroMemory(credentialPassword);
+-}
+-```
++Keep acquisition and all later failures inside the caller's clearing scope. The README's typed enrollment
++sketch borrows management/password inputs while owning the generated K-ENC/K-MAC buffer. Its provisioning
++callback completes matching HSM enrollment and recovery storage before that buffer is cleared.
+ 
+-`label` is **not** a secret — it is echoed back verbatim by the LIST command — and stays `string`.
++`label` is public LIST metadata and stays `string`.
+ 
+ ### Management Key Verification
+ - Failed management key attempts return SW 0x63Cx (x = remaining retries)
+-- `ThrowOnManagementKeyFailure()` extracts retry count and throws `ApduException`
++- `ThrowOnManagementKeyFailure()` extracts retry count and throws `HsmAuthRetryException`, an `ApduException`
+ - Always call with `throwOnError: false` to allow retry extraction
++- Enrollment, DELETE, management-key/password changes and CALCULATE use the retry helper.
++  GET_CHALLENGE uses ordinary backend error handling, including when a password is transmitted.
++- Yubico's descriptive applet overview says successful authentication before exhaustion restores the
++  corresponding counter to eight. Exhausted credential retries delete that credential; exhausted
++  management retries block management operations until destructive applet reset.
+ 
+ ### Session Keys Lifecycle
+-```csharp
+-using var keys = await session.CalculateSessionKeysSymmetricAsync(
+-    label, context, credentialPassword, cardCryptogram);
+-// Use keys.SEnc, keys.SMac, keys.SRmac
+-// All key material zeroed automatically on dispose
+-```
++Keep the returned `SessionKeys` in a `using` scope through the host's HSM task. `Parse` copies three
++16-byte slices into owned arrays. Disposal clears those arrays, including storage viewed by existing spans,
++and rejects later property access. The Parse input and any additional caller/connector copies require
++separate clearing. Calculation returns key material; the HSM library completes host authentication.
++The session passes the full CALCULATE response to the strict 48-byte key parser. A supplied symmetric
++cryptogram can yield 56 bytes and fail parsing, as observed on a development key. Vendor Python has
++handled 56-byte input since 2023 and now ignores the suffix; vendor C withholds an 8-byte symmetric
++cryptogram and keeps strict 48-byte parsing. Preserve this request/response distinction without assigning
++the extra bytes a meaning or firmware boundary. Qualify supplied-cryptogram examples until the response
++contract is verified; omitted-cryptogram KDF checks establish no authenticated HSM handshake.
+ 
+ For symmetric and asymmetric CALCULATE operations, a listed credential with
+ `TouchRequired=true` maps to `PolicyRequires`; `false` is silent. A missing credential is also silent;
+@@ -117,15 +125,21 @@ unknown touch values on a found credential and LIST failures map conservatively
+ `Application="YubiHSM Auth"` and the credential label as scope, occur immediately before the
+ CALCULATE APDU, and are resolved once with `CancellationToken.None`. Do not report `TimedOut`
+ without a hardware status that confirms a touch timeout.
++LIST cancellation propagates. A session without a prompt skips this notification lookup. Keep callbacks
++prompt and non-reentrant. After cancellation is requested, await the operation's terminal result and
++cleanup; an admitted SmartCard exchange can drain until a device response and end with an APDU failure.
++Follow that outcome for recovery rather than promising native device interruption.
+ 
+ The symmetric context is `hostChallenge[8] || hsmChallenge[8]`; the HSM challenge and optional
+-card cryptogram come from the YubiHSM connector. The asymmetric context is
+-`epkOce[65] || epkSd[65]`. Validate these exact lengths before any device I/O, and never generate
+-the connector-owned half locally.
++card cryptogram are generated by the HSM and relayed by its connector. The asymmetric context is
++`epkOce[65] || epkSd[65]`. Validate exact context lengths before calculation I/O and use the actual HSM
++half for a live handshake. The asymmetric static public-key input identifies the trusted HSM; GET_PUBLIC_KEY
++exports the YubiKey credential's PK-OCE for enrollment. Optional symmetric cryptogram omission skips that
++applet verification step. GET_CHALLENGE response shape and asymmetric point/cryptogram validation remain
++partly delegated to the integration layer/device; preserve that distinction in public contracts.
+ 
+ ### EC Private Key Handling
+-- Private keys are never generated or stored in managed memory longer than necessary
+-- `PutCredentialAsymmetricAsync` zeros credential password but relies on caller to manage private key memory
++- `PutCredentialAsymmetricAsync` clears its padded password/request copies; the caller clears imported private-key storage
+ - `GenerateCredentialAsymmetricAsync` generates on-device — private key never leaves the YubiKey
+ 
+ ## PBKDF2 Key Derivation
+@@ -136,50 +150,46 @@ the connector-owned half locally.
+ - Iterations: 10,000
+ - Output: 32 bytes → K-ENC[0..16], K-MAC[16..32]
+ - Derived key buffer zeroed in `finally`
+-- `DeriveKeys(ReadOnlyMemory<byte>)` makes **no copy** of the derivation password — the caller
+-  owns and zeros it. These constants are pinned by `Pbkdf2DerivationTests`, which recomputes the
+-  known-answer vector independently; do not change them.
++- `DeriveKeys(ReadOnlyMemory<byte>)` passes the password span to PBKDF2 without an explicit helper-owned
++  input copy. The caller clears the input. `Pbkdf2DerivationTests` recomputes expected output through the
++  same .NET primitive using independently stated constants; it checks parameters rather than an external KAT.
+ 
+ ## Test Infrastructure
+ 
+ ### Unit Tests
+-Located in `tests/Yubico.YubiKit.YubiHsm.UnitTests/`. Test pure logic that doesn't require APDU transmission:
++Located in `tests/Yubico.YubiKit.YubiHsm.UnitTests/`. Pure helpers and recording-connection tests run without hardware:
+ 
+ - `SessionKeysTests` — Parse/dispose/zeroing behavior
+ - `CredentialPasswordTests` — UTF-8 encoding, padding, validation
+ - `LabelValidationTests` — Label length and encoding constraints
+ - `RetryExtractionTests` — Status word 0x63Cx parsing
+-- `HsmAuthCredentialTests` — Record equality and sorting
+-- `Pbkdf2DerivationTests` — Known-answer PBKDF2 derivation
++- `HsmAuthCredentialTests` — Label ordering and all-property record equality
++- `Pbkdf2DerivationTests` — Derivation parameters, split shape and repeatability
++- `HsmAuthSessionByteLevelTests` — Headers, selected TLV bytes/order, context guards and reset override policy
++- `HsmAuthRetryExceptionTests` — Typed retry translation for nine operation paths, excluding GET_CHALLENGE
+ - `TouchNotificationTests` — Recording-prompt policy mapping, request/resolution lifecycle, and no-hardware CALCULATE ordering
+ 
+ **Run tests:** `dotnet toolchain.cs test` (never `dotnet test` directly)
+ 
+ ### Integration Tests
+ Located in `tests/Yubico.YubiKit.YubiHsm.IntegrationTests/`. Require a physical YubiKey with firmware 5.4.3+.
++Read each assertion for its scope: symmetric calculation checks key lengths, derived enrollment checks
++algorithm metadata, and the two touch-tagged cases check stored policy only. The asymmetric dummy flow
++contains several invalid handshake inputs and checks an exact general APDU exception with nonzero status.
++These are applet tests; use a real HSM handshake to establish authenticated interoperability. The helper
++resets before the body by default and disposes resources afterward; arrange explicit post-run applet
++cleanup/readback when persistent credentials or a replacement management key remain.
+ 
+-## Common Anti-Patterns
++## Maintenance constraints
+ 
+-**❌ Don't skip `finally` blocks for password/key zeroing**
+-```csharp
+-// BAD — password leaks on exception
+-var pw = ParseCredentialPassword(password);
+-await SendApdu(pw);
+-CryptographicOperations.ZeroMemory(pw); // Never reached on exception
+-```
++Place secret acquisition and cleanup in one failure-safe scope; clearing after an awaited send alone
++leaves exception paths uncovered. The diagnostic example has pre-cleanup parsing/early-return paths, so
++qualify its cleanup claims and preserve its evaluation warning. It prints long-lived/session keys and
++accepts some secrets as visible strings. Its calculation menu always dispatches to the symmetric API.
+ 
+-**❌ Don't use `throwOnError: true` with management-key-gated operations**
+-```csharp
+-// BAD — 0x63Cx is treated as generic error, retry count lost
+-var response = await _backend.SendAsync(command, cancellationToken: ct);
+-```
++Use the retry-checking send helper for operations whose public contract exposes typed retry failures.
++Ordinary backend error throwing bypasses the helper's status parsing, as the current GET_CHALLENGE path
++illustrates. Keep feature gates aligned with the actual operation and resolved applet policy.
+ 
+-**❌ Don't forget firmware gates on asymmetric/password-change operations**
+-```csharp
+-// BAD — crashes on firmware < 5.6.0 with confusing APDU error
+-await PutCredentialAsymmetricAsync(...);
+-
+-// GOOD — clear error message
+-EnsureSupports(FeatureAsymmetric);
+-await PutCredentialAsymmetricAsync(...);
+-```
++Vendor manuals describe product behavior and pinned vendor encoders corroborate wire choices. Preserve
++that source strength: neither establishes conformance to a versioned normative applet specification.
+diff --git c/src/YubiHsm/PACKAGE_README.md w/src/YubiHsm/PACKAGE_README.md
+index 67056522..e39287c3 100644
+--- c/src/YubiHsm/PACKAGE_README.md
++++ w/src/YubiHsm/PACKAGE_README.md
+@@ -1,8 +1,8 @@
+ # Yubico.YubiKit.YubiHsm
+ 
+-YubiHSM Auth applet support for YubiKey devices. This is **not** a YubiHSM 2 client: the applet stores the
+-credentials used to authenticate to a YubiHSM 2 and derives the session keys your own code then uses.
+-This package never contacts the HSM itself.
++YubiHSM Auth applet support for YubiKey devices. The applet stores credentials used to authenticate to a
++YubiHSM 2 and derives session keys. Your application provisions the matching HSM authentication object
++and uses an HSM library to complete the handshake and exchange protected commands with the HSM.
+ 
+ > ## Alpha - not for production
+ >
+diff --git c/src/YubiHsm/README.md w/src/YubiHsm/README.md
+index 96a45290..3772f43d 100644
+--- c/src/YubiHsm/README.md
++++ w/src/YubiHsm/README.md
+@@ -2,7 +2,8 @@
+ 
+ The YubiHSM Auth applet stores the credentials used to authenticate to a YubiHSM 2 hardware security module, so
+ the long-lived HSM authentication keys live on a YubiKey instead of on the host. This package manages those
+-credentials and derives the S-ENC, S-MAC, and S-RMAC keys for an HSM session; it does not speak to a connector.
++credentials and derives the S-ENC, S-MAC, and S-RMAC keys for an HSM session. Your application uses an HSM
++library to provision the HSM, complete authentication, and exchange protected commands through its connector.
+ 
+ > The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+ > constraints.
+@@ -10,18 +11,31 @@ credentials and derives the S-ENC, S-MAC, and S-RMAC keys for an HSM session; it
+ ## Requirements
+ 
+ - .NET 10 on Windows, macOS, or Linux; Linux also needs PC/SC and udev rules ([Linux setup](../../docs/linux-setup.md)).
+-- SmartCard transport only, over USB CCID or NFC. There is no HID or OTP path.
++- SmartCard transport, over USB CCID or NFC, with the YubiHSM Auth application enabled. See Yubico's
++  [enablement guidance](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-yubihsm-auth.html).
+ 
+-| Feature | Minimum firmware |
++| Feature | SDK version gate |
+ | --- | --- |
+ | YubiHSM Auth applet | 5.4.3 |
+ | Asymmetric credentials, `GetChallengeAsync` | 5.6.0 |
+ | `GetChallengeAsync` with a credential password | 5.7.1 |
+ | Credential password change | 5.8.0 |
+ 
+-A credential is identified by a label of 1 to 64 UTF-8 bytes, which is not a secret and stays a plain `string`. A
++A session normally resolves feature support from the applet's three-byte SELECT version, falling back to
++5.4.3 when that value is absent or has another length. `FirmwareVersionOverride` supplies caller-selected
++policy instead. Choose an override that the actual applet supports: device metadata, a development-build
++label, and an override alone provide different evidence from successfully executing an operation.
++`ResetAsync` reselects the applet and retains the session's resolved version policy.
++
++A credential is identified by a public label of 1 to 64 UTF-8 bytes, represented as a plain `string`. A
+ symmetric credential holds an AES-128 K-ENC and K-MAC pair, an asymmetric one an EC P-256 private key, and each is
+-protected by a credential password of at most 16 UTF-8 bytes. The 16-byte management key authorizes add and delete.
++protected by a credential password of at most 16 UTF-8 bytes. Keep these three secret roles separate:
++
++| Secret | Purpose |
++| --- | --- |
++| 16-byte management key | Authorizes credential enrollment/deletion, management-key rotation and administrator password changes. |
++| Credential password, at most 16 UTF-8 bytes | Authorizes use of a stored YubiKey credential; the SDK pads shorter values to 16 bytes. |
++| Derivation password | Supplies PBKDF2 input when deriving the long-lived K-ENC/K-MAC pair for symmetric HSM authentication. |
+ 
+ ## Installation
+ 
+@@ -36,7 +50,6 @@ dotnet add package Yubico.YubiKit.YubiHsm --prerelease
+ 
+ ```csharp
+ using System.Security.Cryptography;
+-using System.Text;
+ using Yubico.YubiKit.Core.Abstractions;
+ using Yubico.YubiKit.Core.Credentials;
+ using Yubico.YubiKit.Core.Devices;
+@@ -51,78 +64,185 @@ foreach (var credential in await session.ListCredentialsAsync())
+ }
+ ```
+ 
+-Listing credentials needs no password, management key, or touch. `device.ListHsmAuthCredentialsAsync()` does
+-the same in one shot. Later snippets assume these directives and a `device` obtained the same way.
++This complete listing example needs no password, management key, or touch.
++`device.ListHsmAuthCredentialsAsync()` performs the same task with automatic session disposal. LIST returns
++snapshots; unknown algorithm identifiers remain available as enum values and unknown touch values appear as
++`null`. Check the algorithm before choosing a calculation method. Record equality compares all properties;
++sorting compares only labels using ordinal, case-insensitive ordering.
++
++Later C# blocks use the directives above. Methods take a selected `IYubiKey` explicitly, and own only the
++resources they create. Obtain secret bytes through your application's secure input/storage layer and clear
++them in its enclosing `finally` block. Literal passwords are suitable only for disposable test credentials.
+ 
+ ## Common operations
+ 
+-### Store a symmetric credential
++### Enroll a symmetric credential on both devices
++
++1. Select an authorized HSM authentication-key object ID and a YubiKey credential label. Record their
++   mapping in your application; these identifiers serve different devices.
++2. Provision identical K-ENC and K-MAC values in the HSM object and the YubiKey credential. Configure the
++   HSM object's domains/capabilities through your HSM library and authorized provisioning workflow.
++3. Keep any required recovery copy in protected storage before clearing the enrollment buffers. If the
++   second device fails enrollment, reconcile the partial state before using or retrying the credential.
++
++This **application-dependent sketch** accepts a typed provisioning callback. Implement it with your HSM
++library: it must install the supplied keys in the selected object, persist the label/object mapping and
++any required recovery material, and complete before returning. It borrows the key memories only for the
++call; the caller owns the management-key and credential-password inputs for this method's full duration.
+ 
+ ```csharp
+-await using var session = await device.CreateHsmAuthSessionAsync();
+-byte[] managementKey = new byte[16]; // The factory default is 16 zero bytes; rotate it before production use.
+-byte[] credentialPassword = Encoding.UTF8.GetBytes("hsm-password");
+-byte[] keyMaterial = RandomNumberGenerator.GetBytes(32); // K-ENC || K-MAC; escrow it before sending.
+-try
++static async Task EnrollSymmetricAsync(
++    IYubiKey device,
++    ReadOnlyMemory<byte> managementKey,
++    ReadOnlyMemory<byte> credentialPassword,
++    string label,
++    ushort hsmAuthenticationKeyId,
++    Func<ushort, string, ReadOnlyMemory<byte>, ReadOnlyMemory<byte>, CancellationToken, Task> provisionHsmAsync,
++    CancellationToken cancellationToken)
+ {
+-    await session.PutCredentialSymmetricAsync(managementKey, "hsm-prod", keyMaterial.AsMemory(0, 16),
+-        keyMaterial.AsMemory(16, 16), credentialPassword, touchRequired: true);
+-}
+-finally
+-{
+-    CryptographicOperations.ZeroMemory(keyMaterial);
+-    CryptographicOperations.ZeroMemory(credentialPassword);
++    byte[] keyMaterial = RandomNumberGenerator.GetBytes(32);
++    try
++    {
++        await provisionHsmAsync(hsmAuthenticationKeyId, label,
++            keyMaterial.AsMemory(0, 16), keyMaterial.AsMemory(16, 16), cancellationToken);
++        await using var session = await device.CreateHsmAuthSessionAsync(
++            cancellationToken: cancellationToken);
++        await session.PutCredentialSymmetricAsync(managementKey, label,
++            keyMaterial.AsMemory(0, 16), keyMaterial.AsMemory(16, 16), credentialPassword,
++            touchRequired: true, cancellationToken: cancellationToken);
++    }
++    finally
++    {
++        CryptographicOperations.ZeroMemory(keyMaterial);
++    }
+ }
+ ```
+ 
+-`PutCredentialDerivedAsync` takes a derivation password instead of explicit K-ENC and K-MAC values, while
+-`GenerateCredentialAsymmetricAsync` stores an EC P-256 credential whose private key never leaves the device.
++`PutCredentialDerivedAsync` derives the pair using PBKDF2-HMAC-SHA256, salt `"Yubico"`, 10,000 iterations
++and a 32-byte result split into K-ENC then K-MAC. Enroll the same derived pair in the HSM using its supported
++derivation/provisioning facility; the credential password remains a separate YubiKey access secret.
++
++For asymmetric enrollment, call `GenerateCredentialAsymmetricAsync`, export the credential's long-lived
++public key (PK-OCE) with `GetPublicKeyAsync`, and enroll that public key in the matching HSM authentication
++object. The YubiKey keeps the generated private key on-device. Your provisioning process must also obtain
++and authenticate the **HSM's static public key** for later calculations. `GetPublicKeyAsync` identifies the
++YubiKey credential, so use your HSM library/trust process to obtain the HSM key.
+ 
+ ### Calculate session keys
+ 
+-The symmetric context is the 8-byte host challenge followed by the 8-byte HSM challenge. Send the host challenge
+-to the connector and pass back that exact value plus the HSM challenge and card cryptogram it returned.
++The host starts the HSM handshake using the enrolled HSM authentication-key ID. For symmetric credentials,
++the context is `hostChallenge[8] || hsmChallenge[8]`, in that order. The HSM generates its challenge and card
++cryptogram; the connector relays them. Supply the actual HSM response to CALCULATE. The optional card
++cryptogram asks the applet to verify the HSM cryptogram; omitting it yields keys without that verification.
++Your HSM library still completes host authentication and manages protected command/response state.
++
++The current calculation path passes the full applet response to a parser that accepts exactly 48 bytes.
++A supplied symmetric cryptogram can produce a 56-byte response and fail with `ArgumentException` during
++`SessionKeys.Parse`, as observed on a tested development YubiKey. This is a response-format compatibility
++gap: [vendor Python code](https://github.com/Yubico/yubikey-manager/commit/31d39f64b73e534787382dab4675c0274616627b)
++already handled 56-byte input in July 2023, and its
++[current parser](https://github.com/Yubico/yubikey-manager/blob/296cb587ba15f57672356d8445393a96b41803fb/yubikit/hsmauth.py#L203-L220)
++takes three 16-byte key slices while ignoring any suffix. The
++[vendor C implementation](https://github.com/Yubico/yubihsm-shell/blob/6195c1b687aab56308e9598a0d66941813c94ae5/ykhsmauth/ykhsmauth.c#L561-L631)
++instead withholds an 8-byte symmetric cryptogram and requires a 48-byte response. These host-code choices
++establish neither the extra bytes' meaning nor an
++affected firmware range. Verify the complete HSM authentication flow on your target applet before relying
++on the supplied-cryptogram path. Omitting the cryptogram supports isolated key-calculation tests, rather
++than a safe workaround for authenticated HSM use; your HSM integration must verify its peer and complete
++the handshake.
++
++The following **application-dependent sketch** declares the application adapter contract explicitly.
++Implement `ISymmetricHsmExchange` against your HSM library. `BeginAsync` opens the intended enrolled
++HSM object and transfers ownership of its returned arrays to this method. `AuthenticateAndUseAsync` completes
++host authentication and performs your HSM task while borrowing the keys; the adapter owns and clears any
++copies it retains. Its asynchronous disposal closes the HSM session/connector even on failure. The factory
++creates a fresh owned adapter and cleans up partial construction if it throws. The input password is borrowed.
+ 
+ ```csharp
+-await using var session = await device.CreateHsmAuthSessionAsync();
+-ReadOnlyMemory<byte> hostChallenge = await session.GetChallengeAsync("hsm-prod");
+-// Your connector exchange: send hostChallenge, receive the HSM challenge and card cryptogram.
+-(ReadOnlyMemory<byte> hsmChallenge, ReadOnlyMemory<byte> cardCryptogram) = await ExchangeWithConnectorAsync(hostChallenge);
+-byte[] context = new byte[16];
+-byte[] credentialPassword = Encoding.UTF8.GetBytes("hsm-password");
+-try
++interface ISymmetricHsmExchange : IAsyncDisposable
+ {
+-    hostChallenge.CopyTo(context);
+-    hsmChallenge.CopyTo(context.AsMemory(8));
+-    // sessionKeys.SEnc, sessionKeys.SMac, and sessionKeys.SRmac drive the connector session.
+-    using var sessionKeys = await session.CalculateSessionKeysSymmetricAsync("hsm-prod", context, credentialPassword, cardCryptogram);
++    Task<(byte[] HsmChallenge, byte[] CardCryptogram)> BeginAsync(
++        ushort authenticationKeyId, ReadOnlyMemory<byte> hostChallenge, CancellationToken cancellationToken);
++    Task AuthenticateAndUseAsync(SessionKeys keys, CancellationToken cancellationToken);
+ }
+-finally
++
++static async Task UseSymmetricHsmAsync(
++    IYubiKey device, string label, ushort hsmAuthenticationKeyId,
++    ReadOnlyMemory<byte> credentialPassword,
++    Func<CancellationToken, Task<ISymmetricHsmExchange>> openExchangeAsync,
++    CancellationToken cancellationToken)
+ {
+-    CryptographicOperations.ZeroMemory(context);
+-    CryptographicOperations.ZeroMemory(credentialPassword);
++    byte[] hostChallenge = RandomNumberGenerator.GetBytes(8);
++    byte[]? context = null;
++    byte[]? hsmChallenge = null;
++    byte[]? cardCryptogram = null;
++    try
++    {
++        context = new byte[16];
++        await using var exchange = await openExchangeAsync(cancellationToken);
++        (hsmChallenge, cardCryptogram) = await exchange.BeginAsync(
++            hsmAuthenticationKeyId, hostChallenge, cancellationToken);
++        if (hsmChallenge.Length != 8 || cardCryptogram.Length != 8)
++            throw new InvalidOperationException("Unexpected symmetric HSM handshake response.");
++
++        hostChallenge.CopyTo(context, 0);
++        hsmChallenge.CopyTo(context, 8);
++        await using var session = await device.CreateHsmAuthSessionAsync(
++            cancellationToken: cancellationToken);
++        using var keys = await session.CalculateSessionKeysSymmetricAsync(
++            label, context, credentialPassword, cardCryptogram, cancellationToken);
++        await exchange.AuthenticateAndUseAsync(keys, cancellationToken);
++    }
++    finally
++    {
++        CryptographicOperations.ZeroMemory(hostChallenge);
++        if (context is not null) CryptographicOperations.ZeroMemory(context);
++        if (hsmChallenge is not null) CryptographicOperations.ZeroMemory(hsmChallenge);
++        if (cardCryptogram is not null) CryptographicOperations.ZeroMemory(cardCryptogram);
++    }
+ }
+ ```
+ 
+-`ExchangeWithConnectorAsync` is your code against the YubiHSM connector; the SDK does not implement that handshake.
+-`GetChallengeAsync` needs firmware 5.6.0; on older keys use `RandomNumberGenerator.GetBytes(8)`. The asymmetric
+-counterpart takes a 130-byte context of EPK-OCE then EPK-SD, the device public key, and a required cryptogram.
++The sketch uses a fresh host-generated challenge, including on base-app supported firmware. From 5.6.0,
++`GetChallengeAsync` can obtain a symmetric host challenge from the applet. For asymmetric authentication,
++obtain EPK-OCE from `GetChallengeAsync` and pass the credential password when the session supports the 5.7.1
++password gate. On 5.6.0–5.7.0 the SDK omits a supplied password. Check the returned shape before proceeding;
++the SDK returns GET_CHALLENGE bytes without validating their length or point encoding.
++
++The asymmetric CALCULATE context is `EPK-OCE[65] || EPK-SD[65]`, using uncompressed points. Obtain EPK-SD
++and the required cryptogram from the HSM handshake, and supply the separately trusted HSM static public key.
++The ephemeral EPK-OCE and the credential's long-lived PK-OCE serve different protocol steps. Locally generated
++HSM inputs are useful for isolated applet tests; a live HSM exchange needs the HSM's own inputs.
+ 
+ ### Rotate the management key
+ 
++Persist a recoverable replacement in protected storage **before** installing it. Retain the current key
++until the outcome is established; a communication failure can leave the result uncertain, so reconcile it
++without repeated guesses. Losing the active management key requires a destructive applet reset to recover
++management access. The factory key is 16 zero bytes; replace it for any deployment beyond evaluation.
++
++This **application-dependent sketch** accepts a persistence callback that durably stores the candidate key
++with the device identity/recovery information and returns only after success. The callback borrows the
++memory for the call; its storage layer owns any retained copy. The method borrows the current key.
++
+ ```csharp
+-await using var session = await device.CreateHsmAuthSessionAsync();
+-Console.WriteLine($"Management key retries: {await session.GetManagementKeyRetriesAsync()}");
+-byte[] currentManagementKey = new byte[16];
+-byte[] newManagementKey = RandomNumberGenerator.GetBytes(16);
+-try
++static async Task RotateManagementKeyAsync(
++    IYubiKey device, ReadOnlyMemory<byte> currentManagementKey,
++    Func<ReadOnlyMemory<byte>, CancellationToken, Task> persistRecoverableKeyAsync,
++    CancellationToken cancellationToken)
+ {
+-    await session.PutManagementKeyAsync(currentManagementKey, newManagementKey);
+-}
+-finally
+-{
+-    CryptographicOperations.ZeroMemory(currentManagementKey);
+-    CryptographicOperations.ZeroMemory(newManagementKey);
++    byte[] replacement = RandomNumberGenerator.GetBytes(16);
++    try
++    {
++        await persistRecoverableKeyAsync(replacement, cancellationToken);
++        await using var session = await device.CreateHsmAuthSessionAsync(
++            cancellationToken: cancellationToken);
++        await session.PutManagementKeyAsync(currentManagementKey, replacement, cancellationToken);
++    }
++    finally
++    {
++        CryptographicOperations.ZeroMemory(replacement);
++    }
+ }
+ ```
+ 
+@@ -144,9 +264,17 @@ var options = new SessionCreationOptions { UserPresencePrompt = new TouchPrompt(
+ await using var session = await device.CreateHsmAuthSessionAsync(options);
+ ```
+ 
+-`TouchRequired = true` maps to `UserPresenceBasis.PolicyRequires`; `false` and a missing credential are silent;
+-an unknown touch value or a failed LIST maps to `PolicyMayRequire`. Without a prompt the calculation does not
+-issue LIST just to notify. Pass a `CancellationToken` to abandon a wait.
++The prompt type and session-options block above are **composable fragments**; the latter borrows the
++previously selected `device`. `TouchRequired = true` maps to `UserPresenceBasis.PolicyRequires`; `false` and
++a missing credential are silent. An unknown touch value or a LIST failure maps to `PolicyMayRequire`, while
++LIST cancellation propagates. A configured prompt causes this policy lookup before CALCULATE; with no prompt
++the session sends CALCULATE directly. Prompt callbacks should return promptly and avoid reentering the session.
++The caller owns the prompt. Pass cancellation tokens to cancellable operations, and follow the shared
++[cancellation guidance](../../docs/usage/user-interaction.md#request-and-resolution-contract). After requesting
++cancellation, await the operation's terminal result and disposal/cleanup before opening another operation.
++An in-flight SmartCard exchange may continue until the device responds; its terminal result can be an APDU
++failure rather than `OperationCanceledException`. Use that result to decide recovery instead of treating
++the cancellation request as a device-interruption guarantee.
+ 
+ ## Constraints
+ 
+@@ -154,22 +282,40 @@ issue LIST just to notify. Pass a `CancellationToken` to abandon a wait.
+ - One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
+   disposes it with `await using`; a session from `CreateHsmAuthSessionAsync` owns the one it opened.
+ - `ResetAsync` (no undo), `DeleteCredentialAsync`, and `PutManagementKeyAsync` change persistent applet state.
+-- Firmware gates throw `NotSupportedException`; below 5.7.1 `GetChallengeAsync` silently drops a supplied password.
+-- A wrong management key or credential password throws `HsmAuthRetryException` (an `ApduException`) carrying
+-  `RetriesRemaining`; a context of the wrong length throws `ArgumentException` before any device I/O.
+-- A credential starts at 8 attempts, and the device permanently deletes it once the counter reaches zero.
++- Unsupported feature gates throw `NotSupportedException`; on versions 5.6.0–5.7.0 `GetChallengeAsync`
++  omits a supplied password.
++- Enrollment, deletion, management-key changes, both CALCULATE methods and both password-change methods
++  translate retry-count status words into `HsmAuthRetryException` (an `ApduException`) with `RetriesRemaining`.
++  `GetChallengeAsync` uses general `ApduException` errors, including with a password; inspect the status word
++  before deciding on another attempt. The SDK performs one attempt per call.
++- A context of the wrong length throws `ArgumentException` before calculation device I/O.
++- Yubico's [YubiHSM Auth overview](https://docs.yubico.com/yesdk/users-manual/application-yubihsm-auth/yubihsm-auth-overview.html)
++  describes eight initial retries and restoration to eight after successful authentication before exhaustion.
++  Exhausting a credential's password retries permanently deletes that credential. Exhausting management-key
++  retries blocks management operations until an applet reset, which erases all credentials and restores defaults.
+ 
+ ## Security notes
+ 
+-- Credential passwords, management keys, and EC private keys cross the API as `ReadOnlyMemory<byte>`, never
+-  `string`. The SDK zeroes its padded copies, never yours; use `CryptographicOperations.ZeroMemory` in a `finally`.
+-- `SessionKeys` is `IDisposable` and zeroes S-ENC, S-MAC, and S-RMAC on disposal. Always wrap it in `using`.
++- Credential passwords, management keys, and EC private keys cross the API as borrowed `ReadOnlyMemory<byte>`.
++  The SDK clears its owned padded/request copies. Clear your input buffers with
++  `CryptographicOperations.ZeroMemory` in a `finally`, including when acquisition or a later operation fails.
++- `SessionKeys.Parse` copies the response into three owned arrays; disposal clears those arrays and later
++  property access throws. Existing spans view the cleared storage. Clear the Parse source and any caller-made
++  copies separately, and keep `SessionKeys` in a `using` scope through the HSM task.
+ - `PutCredentialDerivedAsync` derives K-ENC and K-MAC with PBKDF2-HMAC-SHA256, salt `"Yubico"`, 10,000 iterations.
+ - Never log passwords, key material, challenges, or cryptograms. Log labels, algorithms, and status words only.
+ 
+ ## Example
+ 
+-The interactive HsmAuthTool sample lives at `src/YubiHsm/examples/HsmAuthTool/`.
++HsmAuthTool is a **diagnostic evaluation sample**. Run it with disposable test credentials: generated symmetric
++keys and calculated session keys are printed, and command-line secrets/visible management-key input can remain
++in process listings, shell history, terminal capture and immutable strings. Its cleanup blocks cover selected
++buffers; some parsing/early-return paths precede those blocks. Use your own secure input/output and total
++cleanup scopes for an application handling valuable keys.
++
++The calculation menu lists all algorithms but always calls the symmetric calculation API; select a symmetric
++credential. It supplies no `IUserPresencePrompt`, and it leaves HSM enrollment and handshake completion to the
++operator's external HSM workflow. The sample lives at `src/YubiHsm/examples/HsmAuthTool/`. From the repository root:
+ 
+ ```bash
+ dotnet run --project src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj
+diff --git c/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs w/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs
+index fe720b76..e2df4128 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs
+@@ -30,7 +30,10 @@ private static async Task<int> ChangeManagementKeyAsync(string[] args, Cancellat
+         var currentKeyHex = CommandArgs.GetOption(args, "--management-key");
+         var newKeyHex = CommandArgs.GetOption(args, "--new-management-key");
+ 
+-        // Prompt for missing values
++        // These visible strings are diagnostic inputs. Persist the replacement recoverably before
++        // installing it; the tool reports success but delegates secure storage to the operator.
++        // Parsing and selection below precede the clearing scope, so early exits require a separate
++        // cleanup design when adapting this sample for valuable keys.
+         currentKeyHex ??= AnsiConsole.Prompt(
+             new TextPrompt<string>("Current management key (hex, 16 bytes):")
+                 .DefaultValue("00000000000000000000000000000000"));
+@@ -83,4 +86,4 @@ private static void PrintUsage()
+         AnsiConsole.MarkupLine("  --management-key HEX       Current management key (hex, 16 bytes)");
+         AnsiConsole.MarkupLine("  --new-management-key HEX   New management key (hex, 16 bytes)");
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs w/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs
+index 637b8dbe..1abebc17 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs
+@@ -25,9 +25,8 @@ public static bool HasFlag(string[] args, params string[] flags) =>
+     }
+ 
+     /// <summary>
+-    /// Gets the remaining positional arguments after consuming known subcommands.
+-    /// For example, in "credentials add MyLabel --touch", after consuming ["credentials", "add"],
+-    /// the first positional arg is "MyLabel".
++    /// Gets the argument at the index immediately following the known subcommands, when it is present
++    /// and starts with a character other than '-'. Place the label before options when using this parser.
+     /// </summary>
+     public static string? GetPositional(string[] args, int subcommandCount)
+     {
+@@ -64,4 +63,4 @@ public static bool HasFlag(string[] args, params string[] flags) =>
+     /// Gets the default management key (16 bytes of zeros).
+     /// </summary>
+     public static byte[] DefaultManagementKey => new byte[16];
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs w/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs
+index c9b6fb56..efbce5d7 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs
+@@ -15,6 +15,11 @@ namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
+ /// Implements: hsmauth credentials {list|add|delete|generate}
+ /// Manages credentials stored in the YubiHSM Auth applet.
+ /// </summary>
++/// <remarks>
++///     This diagnostic command prints generated symmetric keys. The operator provisions matching HSM
++///     authentication objects separately and protects terminal/process history. Some parsing failures
++///     occur before byte-buffer clearing scopes; use total acquisition/cleanup scopes in an application.
++/// </remarks>
+ internal static class CredentialsCommand
+ {
+     public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken)
+@@ -356,7 +361,8 @@ await session.GenerateCredentialAsymmetricAsync(
+                 $"Asymmetric credential '{label}' generated on device.");
+             OutputHelpers.WriteInfo("Private key was generated on-device and never leaves the YubiKey.");
+ 
+-            // Retrieve and display the public key
++            // Export credential PK-OCE for enrollment in the matching HSM authentication object.
++            // The HSM's own trusted static public key is obtained separately through HSM provisioning.
+             var publicKey = await session.GetPublicKeyAsync(label, cancellationToken);
+             OutputHelpers.WriteHex("Public key", publicKey.Span);
+ 
+@@ -436,4 +442,4 @@ private static void PrintUsage()
+         AnsiConsole.MarkupLine("  --management-key HEX        Management key (hex, 16 bytes)");
+         AnsiConsole.MarkupLine("  --touch                     Require touch for credential use");
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs w/src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs
+index 42c24572..21e6ec94 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs
+@@ -18,8 +18,10 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+ 
+         OutputHelpers.WriteActiveDevice(selection.DisplayName);
+ 
++        // The diagnostic calculation is symmetric-only and this session supplies no presence prompt.
++        // A touch-required credential still follows device policy; applications can configure the prompt.
+         await using var session = await selection.Device.CreateHsmAuthSessionAsync(
+             cancellationToken: cancellationToken);
+         await CalculateSessionKeys.RunAsync(session, cancellationToken);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs w/src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs
+index 049ca2b3..d27c842b 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs
+@@ -24,6 +24,10 @@ namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Prompts;
+ /// Handles YubiKey device discovery and selection for HsmAuth operations.
+ /// HsmAuth only supports SmartCard (CCID) transport.
+ /// </summary>
++/// <remarks>
++///     Discovery filters for SmartCard access; opening an HsmAuth session subsequently selects the
++///     applet and establishes its availability on the selected key.
++/// </remarks>
+ public static class DeviceSelector
+ {
+     /// <summary>
+@@ -181,4 +185,4 @@ private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
+ 
+         return $"YubiKey {FormFactorFormatter.Format(info.Value.FormFactor)} - Serial: {info.Value.SerialNumber?.ToString() ?? "N/A"}, Firmware: {info.Value.FirmwareVersion} ({transport})";
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs
+index 08827c1a..b3941b27 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs
+@@ -8,6 +8,10 @@
+ 
+ namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
+ 
++/// <summary>
++///     Derives and stores a symmetric YubiKey credential for evaluation. Enroll the same derived
++///     K-ENC/K-MAC pair in the HSM; the derivation password and YubiKey credential password serve separate roles.
++/// </summary>
+ public static class AddDerivedCredential
+ {
+     public static async Task RunAsync(
+@@ -54,4 +58,4 @@ await session.PutCredentialDerivedAsync(
+             CryptographicOperations.ZeroMemory(managementKey);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs
+index e43a8f84..43512574 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs
+@@ -8,6 +8,10 @@
+ 
+ namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
+ 
++/// <summary>
++///     Stores keys on the YubiKey for diagnostic evaluation. Enroll the identical K-ENC/K-MAC pair
++///     in the intended HSM authentication object through the separate provisioning workflow.
++/// </summary>
+ public static class AddSymmetricCredential
+ {
+     public static async Task RunAsync(
+@@ -36,8 +40,8 @@ public static async Task RunAsync(
+             keyEnc = RandomNumberGenerator.GetBytes(16);
+             keyMac = RandomNumberGenerator.GetBytes(16);
+ 
+-            // SECURITY NOTE: Keys displayed for developer diagnostics only.
+-            // Never display key material in production applications.
++            // Diagnostic output exposes long-lived authentication keys. Use disposable test material;
++            // a deployed application's provisioning layer should protect any retained recovery copy.
+             OutputHelpers.WriteHex("K-ENC (generated)", keyEnc);
+             OutputHelpers.WriteHex("K-MAC (generated)", keyMac);
+         }
+@@ -49,6 +53,8 @@ public static async Task RunAsync(
+             keyMac = Convert.FromHexString(keyMacHex);
+         }
+ 
++        // Earlier allocation/parsing and this prompt precede the clearing scope. When adapting the
++        // sample, include those failure paths in the key owner's acquisition/cleanup scope.
+         var touchRequired = AnsiConsole.Confirm("Require touch?", defaultValue: false);
+ 
+         var managementKey = Convert.FromHexString(mgmtKeyHex);
+@@ -73,4 +79,4 @@ await session.PutCredentialSymmetricAsync(
+             CryptographicOperations.ZeroMemory(keyMac);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs
+index 0647113d..096e18f8 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs
+@@ -14,7 +14,8 @@ public static async Task RunAsync(
+         HsmAuthSession session,
+         CancellationToken cancellationToken = default)
+     {
+-        // Show existing credentials first
++        // The chooser lists every algorithm, but this operation always calls symmetric CALCULATE.
++        // Select a symmetric credential; asymmetric handshake dispatch requires separate application code.
+         var credentials = await session.ListCredentialsAsync(cancellationToken);
+         if (credentials.Count == 0)
+         {
+@@ -65,6 +66,11 @@ public static async Task RunAsync(
+                 return;
+             }
+ 
++            // Use the host value sent to the HSM followed by its actual returned challenge.
++            // Omitting the optional cryptogram skips applet verification; the external HSM library
++            // remains responsible for peer verification, host authentication and protected commands.
++            // Supplied symmetric cryptograms can yield 56 response bytes; the SDK currently requires
++            // 48 and rejects that shape. Verify the complete target-app handshake before relying on it.
+             hostChallenge.CopyTo(context, 0);
+             hsmChallenge.CopyTo(context, 8);
+             ReadOnlyMemory<byte>? cardCryptogramMemory = cardCryptogram is null
+@@ -81,8 +87,8 @@ public static async Task RunAsync(
+             AnsiConsole.WriteLine();
+             OutputHelpers.WriteSuccess("Session keys calculated successfully.");
+ 
+-            // SECURITY NOTE: Session keys displayed for developer diagnostics only.
+-            // Never display session key material in production applications.
++            // Diagnostic output exposes session secrets. Use disposable test material and keep key
++            // output out of an application's terminal/logging path.
+             OutputHelpers.WriteHex("S-ENC", keys.SEnc);
+             OutputHelpers.WriteHex("S-MAC", keys.SMac);
+             OutputHelpers.WriteHex("S-RMAC", keys.SRmac);
+@@ -98,4 +104,4 @@ public static async Task RunAsync(
+             CryptographicOperations.ZeroMemory(context);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs
+index 566326a8..c1673393 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs
+@@ -13,6 +13,9 @@ public static async Task RunAsync(
+         HsmAuthSession session,
+         CancellationToken cancellationToken = default)
+     {
++        // Arrange protected, recoverable storage of the replacement before this diagnostic operation.
++        // Visible strings persist separately from byte buffers. Both parses below precede the clearing
++        // scope; an application should cover acquisition failures in its cleanup design as well.
+         var currentKeyHex = AnsiConsole.Prompt(
+             new TextPrompt<string>("Current management key ([grey]hex, 16 bytes[/]):")
+                 .DefaultValue("00000000000000000000000000000000"));
+@@ -34,4 +37,4 @@ public static async Task RunAsync(
+             CryptographicOperations.ZeroMemory(newKey);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs
+index 2cf6c273..e4df88ce 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs
+@@ -41,6 +41,8 @@ await session.GenerateCredentialAsymmetricAsync(
+             OutputHelpers.WriteSuccess($"Asymmetric credential '{label}' generated on device.");
+             OutputHelpers.WriteInfo("Private key was generated on-device and never leaves the YubiKey.");
+ 
++            // Export the credential's PK-OCE for enrollment in the HSM authentication object.
++            // Obtain the HSM's trusted static public key separately for asymmetric calculation.
+             var publicKey = await session.GetPublicKeyAsync(label, cancellationToken);
+             OutputHelpers.WriteHex("Public key", publicKey.Span);
+         }
+@@ -49,4 +51,4 @@ await session.GenerateCredentialAsymmetricAsync(
+             CryptographicOperations.ZeroMemory(managementKey);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/examples/HsmAuthTool/Program.cs w/src/YubiHsm/examples/HsmAuthTool/Program.cs
+index 5f37a7e1..f84cdde3 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/Program.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/Program.cs
+@@ -7,6 +7,9 @@
+ using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
+ using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Menus;
+ 
++// Diagnostic evaluation tool: generated long-lived keys and calculated session keys reach the terminal.
++// Use disposable test material. Argument/visible-input strings and terminal history have separate
++// lifetimes from cleared byte buffers; adapt input, output and failure-safe cleanup for valuable keys.
+ // ── Non-interactive CLI mode ─────────────────────────────────────────────────
+ if (args.Length > 0)
+ {
+@@ -112,4 +115,4 @@ static void PrintUsage()
+     AnsiConsole.MarkupLine("  -h, --help                            Show this help message");
+     AnsiConsole.WriteLine();
+     AnsiConsole.MarkupLine("[grey]Run without arguments for interactive mode.[/]");
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/Backend/HsmAuthBackend.cs w/src/YubiHsm/src/Backend/HsmAuthBackend.cs
+index c2f5238b..f2886b52 100644
+--- c/src/YubiHsm/src/Backend/HsmAuthBackend.cs
++++ w/src/YubiHsm/src/Backend/HsmAuthBackend.cs
+@@ -27,6 +27,8 @@ internal sealed class HsmAuthBackend(ISmartCardProtocol protocol) : IHsmAuthBack
+     public async Task<FirmwareVersion> ReadInitialStateAsync(CancellationToken cancellationToken = default)
+     {
+         var selectResponse = await SelectAsync(cancellationToken).ConfigureAwait(false);
++        // Use the applet's three-byte version when available; the session applies any caller override.
++        // The base floor supplies policy when SELECT omits a usable version value.
+         return ParseVersionFromSelectResponse(selectResponse) ?? HsmAuthSession.FeatureHsmAuth.Version;
+     }
+ 
+@@ -53,4 +55,4 @@ public Task<ApduResponse> SendAsync(
+         var span = versionData.Span;
+         return new FirmwareVersion(span[0], span[1], span[2]);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/HsmAuthAlgorithm.cs w/src/YubiHsm/src/HsmAuthAlgorithm.cs
+index d949bdc0..2c639159 100644
+--- c/src/YubiHsm/src/HsmAuthAlgorithm.cs
++++ w/src/YubiHsm/src/HsmAuthAlgorithm.cs
+@@ -17,6 +17,10 @@ namespace Yubico.YubiKit.YubiHsm;
+ /// <summary>
+ ///     Algorithms supported by the YubiHSM Auth applet for credential storage.
+ /// </summary>
++/// <remarks>
++///     LIST responses can carry additional numeric identifiers. Check for a recognized member before
++///     using algorithm-specific properties or selecting an enrollment/calculation operation.
++/// </remarks>
+ public enum HsmAuthAlgorithm : byte
+ {
+     /// <summary>
+@@ -42,6 +46,7 @@ public static class HsmAuthAlgorithmExtensions
+         /// <summary>
+         ///     Gets the key length in bytes for this algorithm.
+         /// </summary>
++        /// <exception cref="ArgumentOutOfRangeException">The algorithm identifier is unknown.</exception>
+         public int KeyLength => algorithm switch
+         {
+             HsmAuthAlgorithm.Aes128YubicoAuthentication => 16,
+@@ -52,6 +57,7 @@ public static class HsmAuthAlgorithmExtensions
+         /// <summary>
+         ///     Gets the public key length in bytes for this algorithm, or <c>null</c> for symmetric algorithms.
+         /// </summary>
++        /// <exception cref="ArgumentOutOfRangeException">The algorithm identifier is unknown.</exception>
+         public int? PublicKeyLength => algorithm switch
+         {
+             HsmAuthAlgorithm.Aes128YubicoAuthentication => null,
+@@ -59,4 +65,4 @@ public static class HsmAuthAlgorithmExtensions
+             _ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, "Unknown algorithm.")
+         };
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/HsmAuthCredential.cs w/src/YubiHsm/src/HsmAuthCredential.cs
+index a6be0a59..bfe8baea 100644
+--- c/src/YubiHsm/src/HsmAuthCredential.cs
++++ w/src/YubiHsm/src/HsmAuthCredential.cs
+@@ -15,17 +15,22 @@
+ namespace Yubico.YubiKit.YubiHsm;
+ 
+ /// <summary>
+-///     Represents a credential stored in the YubiHSM Auth applet.
+-///     Parsed from the LIST command response (TAG_LABEL_LIST).
++///     Describes a credential at the time of a YubiHSM Auth LIST response.
+ /// </summary>
++/// <remarks>
++///     LIST preserves unknown algorithm identifiers and represents unknown touch values as <c>null</c>.
++///     The constructor and init properties accept supplied metadata without enrollment validation.
++///     Record equality compares all four properties, including the case-sensitive label.
++///     Sorting compares labels using ordinal, case-insensitive ordering, so two unequal records can
++///     have a comparison result of zero.
++/// </remarks>
+ /// <param name="Label">The credential label (1-64 UTF-8 bytes).</param>
+ /// <param name="Algorithm">The algorithm used by this credential.</param>
+ /// <param name="RetriesRemaining">
+-///     The number of authentication attempts remaining before this credential is permanently deleted by
+-///     the device. Hardware-verified: decrements on each failed credential-password authentication
+-///     attempt (observed 8 to 7 after one failed <see cref="IHsmAuthSession.CalculateSessionKeysSymmetricAsync"/>
+-///     attempt). Behavior on successful authentication was not separately hardware-verified; per the
+-///     YubiHSM Auth applet's design it is not expected to change on success. A fresh credential starts at 8.
++///     A snapshot of the attempts remaining before the applet permanently deletes this credential.
++///     A fresh credential starts at eight. Yubico's YubiHSM Auth overview describes failed password
++///     authentication as decrementing the counter and successful authentication before deletion as
++///     restoring it to eight. Refresh the list to observe later changes.
+ /// </param>
+ /// <param name="TouchRequired">Whether touch is required to use this credential, or <c>null</c> if unknown.</param>
+ public sealed record HsmAuthCredential(
+@@ -34,7 +39,9 @@ public sealed record HsmAuthCredential(
+     int RetriesRemaining,
+     bool? TouchRequired) : IComparable<HsmAuthCredential>
+ {
+-    /// <inheritdoc />
++    /// <summary>
++    ///     Compares labels using ordinal, case-insensitive ordering. A non-null credential sorts after null.
++    /// </summary>
+     public int CompareTo(HsmAuthCredential? other)
+     {
+         if (other is null)
+@@ -42,4 +49,4 @@ public int CompareTo(HsmAuthCredential? other)
+ 
+         return string.Compare(Label, other.Label, StringComparison.OrdinalIgnoreCase);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/HsmAuthRetryException.cs w/src/YubiHsm/src/HsmAuthRetryException.cs
+index bfaa5c63..4164f8d2 100644
+--- c/src/YubiHsm/src/HsmAuthRetryException.cs
++++ w/src/YubiHsm/src/HsmAuthRetryException.cs
+@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.YubiHsm;
+ /// </summary>
+ /// <remarks>
+ ///     <para>
+-///         This exception is thrown uniformly for every retry-counted YubiHSM Auth operation:
++///         The session checks retry-count status words for these operations:
+ ///         management-key-gated credential operations (<c>PutCredential*Async</c>,
+ ///         <c>DeleteCredentialAsync</c>, <c>GenerateCredentialAsymmetricAsync</c>,
+ ///         <c>PutManagementKeyAsync</c>, <c>ChangeCredentialPasswordAdminAsync</c>) and
+@@ -31,9 +31,13 @@ namespace Yubico.YubiKit.YubiHsm;
+ ///         <c>ChangeCredentialPasswordAsync</c>).
+ ///     </para>
+ ///     <para>
++///         <c>GetChallengeAsync</c> uses the general <see cref="ApduException" /> error path, including
++///         when a password is transmitted. Inspect its status word when applying a retry policy.
++///         Each SDK call makes one authentication attempt; the application decides whether to retry.
++///     </para>
++///     <para>
+ ///         <see cref="RetriesRemaining" /> exposes the parsed retry count as a typed value so
+-///         callers do not need to parse <see cref="Exception.Message" /> or separately call
+-///         <see cref="SWConstants.ExtractRetryCount" />.
++///         callers can apply retry policy directly from the property.
+ ///     </para>
+ ///     <para>
+ ///         This type derives from <see cref="ApduException" /> so existing code that catches
+@@ -44,9 +48,14 @@ namespace Yubico.YubiKit.YubiHsm;
+ public sealed class HsmAuthRetryException : ApduException
+ {
+     /// <summary>
+-    ///     Gets the number of verification attempts remaining before the credential or
+-    ///     management key is locked out.
++    ///     Gets the attempts remaining before credential deletion or management-key blocking.
+     /// </summary>
++    /// <remarks>
++    ///     Yubico's YubiHSM Auth overview describes successful authentication before exhaustion as
++    ///     resetting the corresponding counter to eight. Exhausting credential retries deletes that
++    ///     credential; exhausting management-key retries blocks management operations until an applet
++    ///     reset. Reset erases every credential and restores the factory management key.
++    /// </remarks>
+     public int RetriesRemaining { get; }
+ 
+     /// <summary>
+@@ -59,4 +68,4 @@ public HsmAuthRetryException(int retriesRemaining, string message)
+     {
+         RetriesRemaining = retriesRemaining;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/HsmAuthSession.cs w/src/YubiHsm/src/HsmAuthSession.cs
+index b9ef9847..301f42a3 100644
+--- c/src/YubiHsm/src/HsmAuthSession.cs
++++ w/src/YubiHsm/src/HsmAuthSession.cs
+@@ -33,15 +33,20 @@ namespace Yubico.YubiKit.YubiHsm;
+ /// </summary>
+ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
+ {
+-    // Feature detection constants
++    /// <summary>Describes the base applet firmware floor, 5.4.3.</summary>
+     public static readonly Feature FeatureHsmAuth = new("YubiHSM Auth", 5, 4, 3);
++    /// <summary>Gates asymmetric credential operations at version 5.6.0.</summary>
+     public static readonly Feature FeatureAsymmetric = new("Asymmetric credentials", 5, 6, 0);
++    /// <summary>Gates challenge retrieval at version 5.6.0.</summary>
+     public static readonly Feature FeatureGetChallenge = new("Get challenge", 5, 6, 0);
++    /// <summary>Gates user and administrator credential-password changes at version 5.8.0.</summary>
+     public static readonly Feature FeaturePasswordChange = new("Credential password change", 5, 8, 0);
++    /// <summary>Controls transmission of a supplied challenge password from version 5.7.1.</summary>
+     public static readonly Feature FeatureGetChallengeWithPassword = new("Get challenge with password", 5, 7, 1);
+ 
+     /// <summary>
+-    /// Compatibility alias for <see cref="FeatureGetChallengeWithPassword"/>.
++    ///     Obsolete alias for <see cref="FeatureGetChallengeWithPassword" />. Use that field to test
++    ///     password transmission and <see cref="FeatureGetChallenge" /> to test challenge availability.
+     /// </summary>
+     [Obsolete("Use FeatureGetChallengeWithPassword. Firmware 5.7.1 added password support; earlier firmware already allowed GetChallenge without a password.")]
+     public static readonly Feature FeatureGetChallengeNoPassword = FeatureGetChallengeWithPassword;
+@@ -112,8 +117,12 @@ private HsmAuthSession(
+     /// <summary>
+     ///     Factory helper that creates and initializes a YubiHSM Auth session.
+     /// </summary>
+-    /// <param name="connection">The SmartCard connection to use.</param>
+-    /// <param name="options">Optional cross-cutting session creation settings.</param>
++    /// <param name="connection">The borrowed SmartCard connection. The caller closes it after disposing the session.</param>
++    /// <param name="options">
++    ///     Optional session settings. A firmware override supplies feature policy; otherwise initialization
++    ///     uses the applet SELECT version, falling back to 5.4.3 when its three-byte version value is absent.
++    ///     An override changes SDK policy; select an override supported by the actual applet.
++    /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>An initialized <see cref="HsmAuthSession" />.</returns>
+     public static Task<HsmAuthSession> CreateAsync(
+@@ -503,14 +512,9 @@ public async Task ResetAsync(CancellationToken cancellationToken = default)
+         await _backend.SendAsync(command, cancellationToken: cancellationToken)
+             .ConfigureAwait(false);
+ 
+-        // Re-SELECT the applet using the existing protocol to refresh cached state.
+-        // Do NOT create a new protocol here — that would abandon the current one without
+-        // disposing it, leaking the PCSC transaction and causing SW=0x6985 on next operation.
+-        //
+-        // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet
+-        // state, not caller policy, so a SessionCreationOptions.FirmwareVersionOverride supplied at
+-        // creation must survive it; otherwise the override would silently lapse mid-session and
+-        // later feature gates would disagree with earlier ones.
++        // Reuse the current protocol so its PC/SC transaction remains owned and disposable.
++        // Reselect after reset while retaining the resolved feature-version policy. Discarding the
++        // returned version keeps caller overrides and later feature gates consistent within this session.
+         _ = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+     }
+ 
+@@ -537,8 +541,8 @@ public async Task<SessionKeys> CalculateSessionKeysAsymmetricAsync(
+         {
+             credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
+ 
+-            // APDU payload order matches Python canonical SDK:
+-            // TAG_LABEL, TAG_CONTEXT, TAG_PUBLIC_KEY, TAG_RESPONSE, TAG_CREDENTIAL_PASSWORD
++            // Keep the handshake inputs in wire order: label, context, HSM static public key,
++            // HSM cryptogram, then credential password.
+             data = TlvHelper.EncodeAndDisposeList(
+                 new Tlv(TagLabel, labelBytes),
+                 new Tlv(TagContext, context.Span),
+@@ -680,7 +684,6 @@ public async Task GenerateCredentialAsymmetricAsync(
+             credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
+ 
+             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
+-            // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
+             data = TlvHelper.EncodeAndDisposeList(
+                 new Tlv(TagManagementKey, managementKey.Span),
+                 new Tlv(TagLabel, labelBytes),
+@@ -813,7 +816,8 @@ await TransmitWithRetryCheckAsync(
+     /// </returns>
+     /// <remarks>
+     ///     The caller owns <paramref name="derivationPassword" /> and is responsible for
+-    ///     zeroing it; this method makes no copy of the input.
++    ///     zeroing it. This helper passes its span directly to PBKDF2 and creates no explicit input copy;
++    ///     the returned derived-key array has its own clearing obligation.
+     /// </remarks>
+     internal static byte[] DeriveKeys(ReadOnlyMemory<byte> derivationPassword) =>
+         Rfc2898DeriveBytes.Pbkdf2(
+@@ -947,7 +951,7 @@ internal static void ZeroApduResponse(ApduResponse response)
+ 
+     /// <summary>
+     ///     Checks an APDU response for the 0x63Cx retry failure pattern and throws
+-    ///     <see cref="ApduException" /> with retry information if detected.
++    ///     <see cref="HsmAuthRetryException" /> with retry information if detected.
+     /// </summary>
+     private static void ThrowOnRetryFailure(ApduResponse response, ApduCommand command, string errorContext)
+     {
+@@ -969,16 +973,15 @@ private static void ThrowOnRetryFailure(ApduResponse response, ApduCommand comma
+ 
+     /// <summary>
+     ///     Checks an APDU response for the 0x63Cx management key verification failure pattern.
+-    ///     Throws <see cref="ApduException" /> with retry information if detected.
++    ///     Throws <see cref="HsmAuthRetryException" /> with retry information if detected.
+     /// </summary>
+     private static void ThrowOnManagementKeyFailure(ApduResponse response, ApduCommand command) =>
+         ThrowOnRetryFailure(response, command, "Management key verification failed");
+ 
+     /// <summary>
+     ///     Checks an APDU response for the 0x63Cx credential password verification failure pattern.
+-    ///     Throws <see cref="ApduException" /> with retry information if detected.
+-    ///     Matches the Python SDK behavior in <c>_calculate_session_keys</c>.
++    ///     Throws <see cref="HsmAuthRetryException" /> with retry information if detected.
+     /// </summary>
+     private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command) =>
+         ThrowOnRetryFailure(response, command, "Invalid credential password");
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/IHsmAuthSession.cs w/src/YubiHsm/src/IHsmAuthSession.cs
+index 0b036b05..8316eb6b 100644
+--- c/src/YubiHsm/src/IHsmAuthSession.cs
++++ w/src/YubiHsm/src/IHsmAuthSession.cs
+@@ -27,6 +27,11 @@ public interface IHsmAuthSession : IApplicationSession
+     /// </summary>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>A read-only list of stored credentials.</returns>
++    /// <remarks>
++    ///     Listing requires no authentication or touch. Results are metadata snapshots: unknown algorithm
++    ///     identifiers are preserved and unknown touch values become <c>null</c>. Select a supported
++    ///     algorithm explicitly before using a credential.
++    /// </remarks>
+     Task<IReadOnlyList<HsmAuthCredential>> ListCredentialsAsync(
+         CancellationToken cancellationToken = default);
+ 
+@@ -35,14 +40,19 @@ Task<IReadOnlyList<HsmAuthCredential>> ListCredentialsAsync(
+     /// </summary>
+     /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
+     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
+-    /// <param name="keyEnc">The 16-byte encryption key (K-ENC).</param>
+-    /// <param name="keyMac">The 16-byte MAC key (K-MAC).</param>
++    /// <param name="keyEnc">The borrowed 16-byte encryption key (K-ENC). The caller must clear it after enrollment.</param>
++    /// <param name="keyMac">The borrowed 16-byte MAC key (K-MAC). The caller must clear it after enrollment.</param>
+     /// <param name="credentialPassword">
+     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+     ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
+     /// </param>
+     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
++    /// <remarks>
++    ///     Provision the same K-ENC and K-MAC in the intended YubiHSM 2 authentication-key object through
++    ///     your HSM library. The YubiKey label and HSM object identifier are separate application mappings.
++    ///     The credential password protects use on the YubiKey; the management key authorizes enrollment.
++    /// </remarks>
+     /// <exception cref="HsmAuthRetryException">
+     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+     ///     reports the remaining management key attempts.
+@@ -59,6 +69,12 @@ Task PutCredentialSymmetricAsync(
+     /// <summary>
+     ///     Stores a symmetric credential derived from a password via PBKDF2-HMAC-SHA256.
+     /// </summary>
++    /// <remarks>
++    ///     Derivation uses salt <c>Yubico</c>, 10,000 iterations and a 32-byte result split into K-ENC
++    ///     then K-MAC. Provision the matching HSM authentication-key object with the same derived keys.
++    ///     The derivation password supplies the long-lived HSM keys; the separate credential password
++    ///     protects their use on the YubiKey.
++    /// </remarks>
+     /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
+     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
+     /// <param name="derivationPassword">
+@@ -105,17 +121,33 @@ Task DeleteCredentialAsync(
+     /// <param name="context">
+     ///     The borrowed 16-byte context: the 8-byte host challenge obtained from
+     ///     <see cref="GetChallengeAsync" /> on firmware 5.6.0 and later, or freshly generated by
+-    ///     the caller on older supported firmware, followed by the actual 8-byte HSM challenge
++    ///     the caller on supported firmware, followed by the actual 8-byte HSM challenge
+     ///     returned by the YubiHSM connector. The caller must clear it after use.
+     /// </param>
+     /// <param name="credentialPassword">
+     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+     ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
+     /// </param>
+-    /// <param name="cardCryptogram">The optional borrowed card cryptogram returned by the YubiHSM connector.</param>
++    /// <param name="cardCryptogram">
++    ///     The optional borrowed card cryptogram generated by the HSM and relayed by the connector.
++    ///     Supply it to have the applet verify the HSM's cryptogram during calculation. Omitting it
++    ///     derives keys without that verification; complete and authenticate the HSM handshake through
++    ///     your HSM library before sending application commands.
++    /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>Session keys that must be disposed after use.</returns>
++    /// <remarks>
++    ///     Successful result parsing requires exactly 48 response bytes. Supplying a symmetric card
++    ///     cryptogram can produce a 56-byte response that this calculation path rejects with
++    ///     <see cref="ArgumentException" />. Vendor host code has handled 56-byte responses since 2023;
++    ///     the affected firmware range and additional bytes' meaning remain unqualified here. The
++    ///     rejection was observed on a development YubiKey. Verify the complete HSM authentication flow
++    ///     on your target applet before relying on this path. Omitting the cryptogram skips applet
++    ///     verification and is not an authenticated HSM workaround; the HSM integration must verify
++    ///     its peer and complete the handshake.
++    /// </remarks>
+     /// <exception cref="ArgumentException"><paramref name="context" /> is not exactly 16 bytes.</exception>
++    /// <exception cref="ArgumentException">The CALCULATE response is not exactly 48 bytes.</exception>
+     /// <exception cref="HsmAuthRetryException">
+     ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+     ///     reports the remaining credential password attempts.
+@@ -137,6 +169,11 @@ Task<SessionKeys> CalculateSessionKeysSymmetricAsync(
+     /// <summary>
+     ///     Changes the management key.
+     /// </summary>
++    /// <remarks>
++    ///     Persist a recoverable copy of the replacement in protected storage before installing it.
++    ///     Keep the current key until the result is established. If communication fails, reconcile
++    ///     the active key without repeated guesses; losing it requires a reset that erases credentials.
++    /// </remarks>
+     /// <param name="currentManagementKey">The borrowed current 16-byte management key. The caller must clear it after use.</param>
+     /// <param name="newManagementKey">The borrowed new 16-byte management key. The caller must clear it after use.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -152,6 +189,11 @@ Task PutManagementKeyAsync(
+     /// <summary>
+     ///     Resets the YubiHSM Auth applet to factory defaults.
+     /// </summary>
++    /// <remarks>
++    ///     Reset permanently erases all credentials, restores the 16-zero-byte management key and resets
++    ///     retry counters. The session reselects the applet over its existing protocol and retains its
++    ///     resolved feature-version policy, including any caller-supplied firmware override.
++    /// </remarks>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     Task ResetAsync(CancellationToken cancellationToken = default);
+ 
+@@ -166,8 +208,10 @@ Task PutManagementKeyAsync(
+     ///     returned by the YubiHSM connector. The caller must clear it after use.
+     /// </param>
+     /// <param name="publicKey">
+-    ///     The borrowed uncompressed EC P256 public key of the YubiHSM 2 device (65 bytes:
+-    ///     0x04 || X || Y).
++    ///     The borrowed, trusted static EC P256 public key of the YubiHSM 2 device (65 bytes:
++    ///     0x04 || X || Y), obtained and authenticated through your HSM provisioning process.
++    ///     <see cref="GetPublicKeyAsync" /> returns the YubiKey credential's public key instead;
++    ///     use that key for enrollment in the HSM.
+     /// </param>
+     /// <param name="credentialPassword">
+     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+@@ -180,6 +224,7 @@ Task PutManagementKeyAsync(
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>Session keys that must be disposed after use.</returns>
+     /// <exception cref="ArgumentException"><paramref name="context" /> is not exactly 130 bytes.</exception>
++    /// <exception cref="ArgumentException">The CALCULATE response is not exactly 48 bytes.</exception>
+     /// <exception cref="HsmAuthRetryException">
+     ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
+     ///     reports the remaining credential password attempts.
+@@ -199,12 +244,23 @@ Task<SessionKeys> CalculateSessionKeysAsymmetricAsync(
+     /// <param name="label">The credential label.</param>
+     /// <param name="credentialPassword">
+     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+-    ///     null-padded to 16 bytes before transmission on firmware 5.7.1 and later. The SDK does not
+-    ///     transmit this value on earlier firmware because the command did not yet support password
+-    ///     authentication. The caller must clear the input after use.
++    ///     null-padded to 16 bytes before transmission when the session supports the 5.7.1 password
++    ///     feature gate. Supply this password for an asymmetric challenge on supported firmware.
++    ///     On versions 5.6.0 through 5.7.0 the SDK omits a supplied password, so that argument provides
++    ///     no password authentication. The caller must clear the input after use.
+     /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+-    /// <returns>The 8-byte host challenge or 65-byte uncompressed EPK-OCE.</returns>
++    /// <returns>The applet response, expected to be an 8-byte host challenge or 65-byte uncompressed EPK-OCE.</returns>
++    /// <remarks>
++    ///     The session returns response bytes without validating their length or EC point encoding.
++    ///     Check the shape required by your HSM handshake before constructing its context.
++    ///     Protocol failures follow the general APDU error path, including password failures.
++    /// </remarks>
++    /// <exception cref="Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException">
++    ///     The applet rejects the command. Inspect the status word for retry information before
++    ///     deciding on another attempt; this operation uses the general exception rather than
++    ///     <see cref="HsmAuthRetryException" />.
++    /// </exception>
+     Task<ReadOnlyMemory<byte>> GetChallengeAsync(
+         string label,
+         ReadOnlyMemory<byte>? credentialPassword = null,
+@@ -266,6 +322,11 @@ Task GenerateCredentialAsymmetricAsync(
+     /// <param name="label">The credential label.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The 65-byte uncompressed EC point (0x04 + x[32] + y[32]).</returns>
++    /// <remarks>
++    ///     This is the credential's long-lived PK-OCE for enrollment in the HSM authentication object.
++    ///     The session checks response length; the integration layer validates point encoding as needed.
++    ///     Obtain the HSM's own trusted static public key separately for asymmetric calculation.
++    /// </remarks>
+     Task<ReadOnlyMemory<byte>> GetPublicKeyAsync(
+         string label,
+         CancellationToken cancellationToken = default);
+@@ -314,4 +375,4 @@ Task ChangeCredentialPasswordAdminAsync(
+         string label,
+         ReadOnlyMemory<byte> newPassword,
+         CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/IYubiKeyExtensions.cs w/src/YubiHsm/src/IYubiKeyExtensions.cs
+index a06d9d8c..d9e714ce 100644
+--- c/src/YubiHsm/src/IYubiKeyExtensions.cs
++++ w/src/YubiHsm/src/IYubiKeyExtensions.cs
+@@ -36,7 +36,8 @@ public static class IYubiKeyExtensions
+         /// <returns>A new <see cref="HsmAuthSession" /> instance.</returns>
+         /// <remarks>
+         ///     The returned session owns the underlying connection and will dispose it when the session is disposed.
+-        ///     Always use a <c>using</c> statement or call <c>Dispose</c> when finished.
++        ///     Use <c>await using</c> to close the session and its connection when finished.
++        ///     The applet uses SmartCard transport; an explicitly requested incompatible transport is rejected.
+         /// </remarks>
+         public async Task<HsmAuthSession> CreateHsmAuthSessionAsync(
+             SessionCreationOptions? options = null,
+@@ -85,4 +86,4 @@ public async Task<IReadOnlyList<HsmAuthCredential>> ListHsmAuthCredentialsAsync(
+             return await session.ListCredentialsAsync(cancellationToken).ConfigureAwait(false);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/SessionKeys.cs w/src/YubiHsm/src/SessionKeys.cs
+index 310d3621..b63c15ea 100644
+--- c/src/YubiHsm/src/SessionKeys.cs
++++ w/src/YubiHsm/src/SessionKeys.cs
+@@ -18,12 +18,23 @@ namespace Yubico.YubiKit.YubiHsm;
+ 
+ /// <summary>
+ ///     Holds the three 16-byte session keys (S-ENC, S-MAC, S-RMAC) derived from
+-///     a YubiHSM Auth CALCULATE response. All key material is zeroed on disposal.
++///     a YubiHSM Auth CALCULATE response. Disposal clears the three arrays owned by this instance.
+ /// </summary>
++/// <remarks>
++///     Key properties expose spans over the owned arrays. Use these views within the instance's lifetime;
++///     disposal also clears the storage seen by previously obtained spans. Accessing a key property
++///     after disposal throws <see cref="ObjectDisposedException" />. The caller clears the original
++///     <see cref="Parse" /> input and any additional copies it makes separately.
++///     Parsing accepts exactly the 48-byte key region. A full applet CALCULATE response can contain
++///     additional bytes: vendor host code has handled 56-byte responses since 2023, and a supplied
++///     symmetric cryptogram produced that length on a tested development YubiKey. The session currently
++///     passes the full response here, so that path raises <see cref="ArgumentException" />. This parser
++///     leaves the additional bytes' meaning and firmware applicability to a separately verified response contract.
++/// </remarks>
+ public sealed class SessionKeys : IDisposable
+ {
+     /// <summary>
+-    ///     The expected length of the raw CALCULATE response (3 x 16 bytes).
++    ///     The length accepted by this key parser: S-ENC, S-MAC and S-RMAC (3 x 16 bytes).
+     /// </summary>
+     public const int ExpectedResponseLength = 48;
+ 
+@@ -78,9 +89,9 @@ public ReadOnlySpan<byte> SRmac
+     }
+ 
+     /// <summary>
+-    ///     Parses a 48-byte CALCULATE response into session keys.
++    ///     Copies a 48-byte CALCULATE response into three independently owned key arrays.
+     /// </summary>
+-    /// <param name="response">The 48-byte response from the CALCULATE command.</param>
++    /// <param name="response">The borrowed 48-byte key region. The caller retains responsibility for clearing its storage.</param>
+     /// <returns>A new <see cref="SessionKeys" /> instance. The caller must dispose it.</returns>
+     /// <exception cref="ArgumentException">Thrown when the response is not exactly 48 bytes.</exception>
+     public static SessionKeys Parse(ReadOnlySpan<byte> response)
+@@ -97,7 +108,9 @@ public static SessionKeys Parse(ReadOnlySpan<byte> response)
+         return new SessionKeys(sEnc, sMac, sRmac);
+     }
+ 
+-    /// <inheritdoc />
++    /// <summary>
++    ///     Clears the owned key arrays and rejects subsequent key-property access. Repeated disposal is safe.
++    /// </summary>
+     public void Dispose()
+     {
+         if (_disposed)
+@@ -113,4 +126,4 @@ private void ThrowIfDisposed()
+     {
+         ObjectDisposedException.ThrowIf(_disposed, this);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/tests/CLAUDE.md w/src/YubiHsm/tests/CLAUDE.md
+index cbe15fe7..1d8da8f6 100644
+--- c/src/YubiHsm/tests/CLAUDE.md
++++ w/src/YubiHsm/tests/CLAUDE.md
+@@ -4,9 +4,20 @@ This file provides guidance for the YubiHSM module test infrastructure.
+ 
+ ## Required Reading
+ 
+-**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
++Read [`docs/TESTING.md`](../../../docs/TESTING.md) for runner requirements. Use `dotnet toolchain.cs test`
++to select the appropriate xUnit runner.
+ 
+ ## Test Projects
+ 
+ - `Yubico.YubiKit.YubiHsm.UnitTests` - Unit tests for YubiHSM module
+ - `Yubico.YubiKit.YubiHsm.IntegrationTests` - Integration tests requiring a YubiKey with the YubiHSM Auth applet and firmware 5.4.3+
++
++`WithHsmAuthSessionAsync` resets the applet before the body by default and closes its sessions/connection
++afterward. The body can leave credentials or a rotated management key in persistent state; arrange explicit
++final reset/readback for a hardware run. Its SCP parameters apply to the body session, while the initial
++reset session uses the supplied protocol configuration alone.
++
++Keep comments tied to assertions. Length/metadata checks establish their stated shape only. The two
++touch-tagged cases inspect the stored flag; physical CALCULATE/touch/cancellation needs separate evidence.
++The asymmetric dummy-input case checks exact `ApduException` and nonzero status with several invalid
++inputs. Use independently checked handshake material and a real HSM for interoperability qualification.
+diff --git c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs
+index c4aeefe8..a438a8b0 100644
+--- c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs
++++ w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs
+@@ -79,7 +79,7 @@ await session.GenerateCredentialAsymmetricAsync(
+                     TestPassword,
+                     NewToken());
+ 
+-                // Challenge should be a non-empty value
++                // This assertion checks only nonempty response data; point shape requires another check.
+                 Assert.True(challenge.Length > 0);
+             },
+             resetBeforeUse: true,
+@@ -111,8 +111,8 @@ await session.GenerateCredentialAsymmetricAsync(
+                     NewToken());
+                 Assert.Equal(65, epkOce.Length);
+ 
+-                // This protocol-shape test generates EPK-SD locally. A real connector flow supplies
+-                // EPK-SD and the card cryptogram from the YubiHSM 2 handshake.
++                // This rejection exercise generates a synthetic HSM ephemeral point locally.
++                // A live flow uses the HSM's own EPK-SD and cryptogram, relayed by its connector.
+                 using var ephemeral = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+                 var ephemeralParams = ephemeral.ExportParameters(includePrivateParameters: false);
+                 var epkSd = new byte[65];
+@@ -125,24 +125,17 @@ await session.GenerateCredentialAsymmetricAsync(
+                 epkOce.Span.CopyTo(context.AsSpan(0));
+                 epkSd.CopyTo(context.AsSpan(65));
+ 
+-                // Card cryptogram is required for asymmetric CALCULATE. In a real flow,
+-                // this comes from the YubiHSM 2 device. Without one, we use a dummy value.
+-                // The YubiKey will reject the dummy data — the exact status word depends on
+-                // firmware version and how far the firmware gets before detecting the error.
++                // Supply synthetic cryptogram bytes for rejection. The publicKey variable also
++                // holds the credential's PK-OCE; a genuine handshake supplies the trusted HSM
++                // static key in that argument. Multiple inputs therefore differ from a valid flow.
+                 var dummyCardCryptogram = new byte[8];
+                 RandomNumberGenerator.Fill(dummyCardCryptogram);
+ 
+                 try
+                 {
+-                    // We expect the operation to fail because the card cryptogram is dummy
+-                    // data and the ephemeral keys don't match a real YubiHSM 2 handshake.
+-                    // The YubiKey may reject with various status words:
+-                    //   0x6A80 — incorrect data (firmware validates cryptographic content)
+-                    //   0x6300 — wrong cryptogram verification
+-                    //   0x63Cx — credential password retry decrement
+-                    //   0x6982 — security status not satisfied
+-                    // All of these are acceptable — they confirm the APDU was received
+-                    // and processed (not rejected at the transport/framing level).
++                    // Assert the exact general APDU exception type for these combined invalid inputs.
++                    // A retry-specific subclass fails this exact-type assertion. The result alone
++                    // neither isolates cryptogram verification nor proves a valid handshake encoding.
+                     var ex = await Assert.ThrowsAsync<ApduException>(async () =>
+                     {
+                         using var keys = await session.CalculateSessionKeysAsymmetricAsync(
+@@ -154,9 +147,8 @@ await session.GenerateCredentialAsymmetricAsync(
+                             NewToken());
+                     });
+ 
+-                    // Any APDU-level error is acceptable with dummy cryptographic data.
+-                    // The key validation is that we get a proper ApduException (not a
+-                    // serialization error, NullReferenceException, or other internal failure).
++                    // A nonzero status is the only status-word constraint asserted here; an absent
++                    // instruction or another invalid input could also account for the rejection.
+                     Assert.NotEqual((short)0, ex.SW);
+                 }
+                 finally
+@@ -170,6 +162,7 @@ await session.GenerateCredentialAsymmetricAsync(
+             cancellationToken: NewToken());
+ 
+     // ─── Put Asymmetric with Touch ──────────────────────────────────────────────
++    // This case asserts stored touch metadata; physical CALCULATE/touch enforcement is a separate task.
+ 
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.0")]
+@@ -203,4 +196,4 @@ await session.PutCredentialAsymmetricAsync(
+             },
+             resetBeforeUse: true,
+             cancellationToken: NewToken());
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs
+index a897750f..17061425 100644
+--- c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs
++++ w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs
+@@ -16,18 +16,15 @@ namespace Yubico.YubiKit.YubiHsm.IntegrationTests;
+ /// </summary>
+ public class HsmAuthSessionTests
+ {
+-    // Per-test CancellationToken — do not use a static CTS (shared state causes
+-    // cancellation after cumulative timeout, breaking later tests in the suite).
++    // Each call creates an independent timeout so later operations start with their own deadline.
+     private static CancellationToken NewToken(int timeoutSeconds = 30) =>
+         new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds)).Token;
+ 
+     // Default management key (all zeros after reset)
+     private static ReadOnlyMemory<byte> DefaultManagementKey => new byte[16];
+ 
+-    // A management key that passes complexity requirements on Enhanced PIN devices.
+-    // Note: alpha/beta firmware has non-standard complexity checks — this specific
+-    // value is known to pass on 5.8.0-alpha YubiKeys. On production firmware,
+-    // any 16-byte non-zero key should work.
++    // Fixed test fixture for management-key rotation. Device acceptance is established by the
++    // operation in this test; firmware labels alone provide no key-complexity guarantee.
+     private static ReadOnlyMemory<byte> ComplexManagementKey => new byte[]
+     {
+         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+@@ -125,8 +122,7 @@ public async Task PutManagementKey_RoundTrip_CanUseNewKey(YubiKeyTestState state
+         await state.WithHsmAuthSessionAsync(
+             async session =>
+             {
+-                // Use ComplexManagementKey — random bytes may fail PIN complexity
+-                // on Enhanced PIN devices that enforce entropy requirements.
++                // Use the fixed rotation fixture and verify that it authorizes the following PUT.
+                 var newKey = ComplexManagementKey.ToArray();
+                 try
+                 {
+@@ -185,7 +181,8 @@ public async Task CalculateSessionKeysSymmetric_Returns48Bytes(YubiKeyTestState
+         await state.WithHsmAuthSessionAsync(
+             async session =>
+             {
+-                // Store a symmetric credential first
++                // Use synthetic context to exercise applet calculation and returned key lengths.
++                // A live authenticated HSM flow additionally supplies its challenge and cryptogram.
+                 var keyEnc = RandomNumberGenerator.GetBytes(16);
+                 var keyMac = RandomNumberGenerator.GetBytes(16);
+                 var context = RandomNumberGenerator.GetBytes(16);
+@@ -200,7 +197,7 @@ await session.PutCredentialSymmetricAsync(
+                         TestPassword,
+                         cancellationToken: NewToken());
+ 
+-                    // Calculate session keys
++                    // Omit the optional card cryptogram for this isolated applet calculation.
+                     using var keys = await session.CalculateSessionKeysSymmetricAsync(
+                         TestLabel,
+                         context,
+@@ -271,9 +268,9 @@ await session.PutCredentialSymmetricAsync(
+                         TestPassword,
+                         cancellationToken: NewToken());
+ 
+-                    // Change the password. Requires YubiHSM Auth applet 5.8.0+ (INS 0x0B). An
+-                    // alpha/beta applet is assumed to have it; a device that answers SW=0x6D00 is
+-                    // missing the instruction and should fail here rather than be worked around.
++                    // Device selection uses metadata; the operation also checks the session's
++                    // resolved 5.8.0 feature policy. Preserve an applet rejection for diagnosis
++                    // against the transmitted command and actual applet version.
+                     ReadOnlyMemory<byte> newPassword = "new-password"u8.ToArray();
+                     await session.ChangeCredentialPasswordAsync(
+                         TestLabel,
+@@ -281,7 +278,8 @@ await session.ChangeCredentialPasswordAsync(
+                         newPassword,
+                         NewToken());
+ 
+-                    // Calculate session keys with the new password should succeed
++                    // Assert that calculation with the replacement password returns a 16-byte S-ENC.
++                    // The synthetic context and omitted cryptogram keep this an applet-only check.
+                     using var keys = await session.CalculateSessionKeysSymmetricAsync(
+                         TestLabel,
+                         context,
+@@ -301,6 +299,7 @@ await session.ChangeCredentialPasswordAsync(
+             cancellationToken: NewToken());
+ 
+     // ─── Touch-Required Tests ────────────────────────────────────────────────────
++    // This case reads the stored touch flag. Physical CALCULATE/touch enforcement needs a separate flow.
+ 
+     [SkippableTheory]
+     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
+@@ -335,4 +334,4 @@ await session.PutCredentialSymmetricAsync(
+             },
+             resetBeforeUse: true,
+             cancellationToken: NewToken());
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs
+index 7f6b76ae..c3ace387 100644
+--- c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs
++++ w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs
+@@ -29,6 +29,11 @@ public static class HsmAuthTestStateExtensions
+         /// <param name="configuration">Optional protocol configuration.</param>
+         /// <param name="scpKeyParams">Optional SCP key parameters for authentication.</param>
+         /// <param name="cancellationToken">Cancellation token.</param>
++        /// <remarks>
++        ///     The reset session uses the supplied protocol configuration; SCP parameters apply to the
++        ///     action session. Scoped disposal closes session/connection resources. Persistent changes
++        ///     made by the body remain afterward, so the hardware-run owner arranges final applet cleanup.
++        /// </remarks>
+         public Task WithHsmAuthSessionAsync(
+             Func<HsmAuthSession, Task> action,
+             bool resetBeforeUse = true,
+diff --git c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs
+index bcdb716b..ba251bb5 100644
+--- c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs
++++ w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs
+@@ -200,12 +200,12 @@ public async Task GetChallengeAsync_PasswordTooLong_ParamNameIsCredentialPasswor
+ 
+     /// <summary>
+     ///     A session on a recorded connection reporting firmware new enough for every password-taking
+-    ///     command. All the tests above throw before any APDU is transmitted, so one OK response for
+-    ///     the applet SELECT is all the connection needs to supply.
++    ///     command. The factory transmits SELECT; the operation-level length checks then throw before
++    ///     their command APDU, so a single OK SELECT response supplies the required device traffic.
+     /// </summary>
+     private static Task<HsmAuthSession> CreateSessionAsync() =>
+         HsmAuthSession.CreateAsync(
+             new RecordingSmartCardConnection([0x90, 0x00]),
+             new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
+             cancellationToken: TestContext.Current.CancellationToken);
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs
+index f0184c30..97e815f2 100644
+--- c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs
++++ w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs
+@@ -20,11 +20,9 @@
+ namespace Yubico.YubiKit.YubiHsm.UnitTests;
+ 
+ /// <summary>
+-///     Proves ISC-31/31.1/31.2: every retry-counted YubiHSM Auth operation (credential
+-///     management-key operations, the management-key change operation, and credential-password
+-///     session-key operations) surfaces retry information through the typed
+-///     <see cref="HsmAuthRetryException.RetriesRemaining" /> property, not through parsing
+-///     <see cref="Exception.Message" />.
++///     Checks typed retry-count translation for nine enrollment, deletion, management-key,
++///     password-change and calculation paths using recorded 0x63Cx responses.
++///     GET_CHALLENGE uses the general APDU error path and is outside this suite's operation coverage.
+ /// </summary>
+ public class HsmAuthRetryExceptionTests
+ {
+@@ -39,7 +37,7 @@ public void HsmAuthRetryException_IsApduException_ForBackwardCompatibleCatchSite
+     [Fact]
+     public async Task PutCredentialSymmetricAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemainingWithoutMessageParsing()
+     {
+-        // SW 63C4: management-key verification failed for a credential-operation (ISC-31.1),
++        // SW 63C4: management-key verification failed for a credential operation,
+         // 4 attempts remaining.
+         var connection = CreateInitializedConnection([0x63, 0xC4]);
+         await using var session = await HsmAuthSession.CreateAsync(
+@@ -62,7 +60,7 @@ public async Task PutCredentialSymmetricAsync_WhenManagementKeyRetryFailure_Expo
+     [Fact]
+     public async Task PutManagementKeyAsync_WhenCurrentManagementKeyRetryFailure_ExposesRetriesRemaining()
+     {
+-        // SW 63C1: management-key operation itself (ISC-31.1's other named case), 1 attempt left.
++        // SW 63C1: management-key rotation failed, 1 attempt left.
+         var connection = CreateInitializedConnection([0x63, 0xC1]);
+         await using var session = await HsmAuthSession.CreateAsync(
+             connection,
+@@ -81,7 +79,7 @@ public async Task PutManagementKeyAsync_WhenCurrentManagementKeyRetryFailure_Exp
+     [Fact]
+     public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialPasswordRetryFailure_ExposesRetriesRemaining()
+     {
+-        // SW 63C6: credential-password verification failed calculating session keys (ISC-31.2),
++        // SW 63C6: credential-password verification failed calculating session keys,
+         // 6 attempts remaining.
+         var connection = CreateInitializedConnection([0x63, 0xC6]);
+         await using var session = await HsmAuthSession.CreateAsync(
+@@ -102,7 +100,7 @@ public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialPasswordRetry
+     [Fact]
+     public async Task ChangeCredentialPasswordAsync_WhenCurrentPasswordRetryFailure_ExposesRetriesRemaining()
+     {
+-        // SW 63C0: credential-operation password change (ISC-31), 0 attempts remaining.
++        // SW 63C0: credential password change failed, 0 attempts remaining.
+         var connection = CreateInitializedConnection([0x63, 0xC0]);
+         await using var session = await HsmAuthSession.CreateAsync(
+             connection,
+@@ -122,7 +120,7 @@ public async Task ChangeCredentialPasswordAsync_WhenCurrentPasswordRetryFailure_
+     [Fact]
+     public async Task PutCredentialAsymmetricAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemaining()
+     {
+-        // SW 63C3: management-key verification failed for an asymmetric PUT (ISC-31.1), 3 attempts remaining.
++        // SW 63C3: management-key verification failed for an asymmetric PUT, 3 attempts remaining.
+         var connection = CreateInitializedConnection([0x63, 0xC3]);
+         await using var session = await HsmAuthSession.CreateAsync(
+             connection,
+@@ -144,7 +142,7 @@ public async Task PutCredentialAsymmetricAsync_WhenManagementKeyRetryFailure_Exp
+     [Fact]
+     public async Task GenerateCredentialAsymmetricAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemaining()
+     {
+-        // SW 63C7: management-key verification failed for asymmetric GENERATE (ISC-31.1), 7 attempts remaining.
++        // SW 63C7: management-key verification failed for asymmetric GENERATE, 7 attempts remaining.
+         var connection = CreateInitializedConnection([0x63, 0xC7]);
+         await using var session = await HsmAuthSession.CreateAsync(
+             connection,
+@@ -165,7 +163,7 @@ public async Task GenerateCredentialAsymmetricAsync_WhenManagementKeyRetryFailur
+     [Fact]
+     public async Task ChangeCredentialPasswordAdminAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemaining()
+     {
+-        // SW 63C2: management-key verification failed for admin password change (ISC-31.1), 2 attempts remaining.
++        // SW 63C2: management-key verification failed for admin password change, 2 attempts remaining.
+         var connection = CreateInitializedConnection([0x63, 0xC2]);
+         await using var session = await HsmAuthSession.CreateAsync(
+             connection,
+@@ -187,7 +185,7 @@ public async Task ChangeCredentialPasswordAdminAsync_WhenManagementKeyRetryFailu
+     public async Task CalculateSessionKeysAsymmetricAsync_WhenCredentialPasswordRetryFailure_ExposesRetriesRemaining()
+     {
+         // SW 63C5: credential-password verification failed calculating asymmetric session keys
+-        // (ISC-31.2), 5 attempts remaining.
++        // with 5 attempts remaining.
+         var connection = CreateInitializedConnection([0x63, 0xC5]);
+         await using var session = await HsmAuthSession.CreateAsync(
+             connection,
+@@ -210,10 +208,9 @@ public async Task CalculateSessionKeysAsymmetricAsync_WhenCredentialPasswordRetr
+     [Fact]
+     public async Task PutCredentialDerivedAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemaining()
+     {
+-        // SW 63C9: management-key verification failed for a derived-key PUT (ISC-31.1), 9 attempts
+-        // remaining. PutCredentialDerivedAsync delegates to PutCredentialSymmetricAsync's PUT
+-        // command after deriving keys, rather than having its own TransmitWithRetryCheckAsync call
+-        // site; this test guards that delegation continuing to surface retry information.
++        // Synthetic SW 63C9 exercises nibble extraction beyond the applet's documented eight initial
++        // retries. The derived operation delegates to the symmetric PUT path after deriving keys;
++        // this assertion checks that the delegation preserves typed retry information.
+         var connection = CreateInitializedConnection([0x63, 0xC9]);
+         await using var session = await HsmAuthSession.CreateAsync(
+             connection,
+@@ -243,4 +240,4 @@ private static byte[] Sequence(byte start, int length)
+ 
+         return bytes;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs
+index f222f0cf..7e2ea626 100644
+--- c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs
++++ w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs
+@@ -28,9 +28,7 @@ public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnec
+         await Assert.ThrowsAsync<InvalidOperationException>(() =>
+             HsmAuthSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+ 
+-        // Borrowed: the session did not create this connection, so disposal is the caller's.
+-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
++        // The direct factory borrows this connection. Initialization failure leaves disposal to its caller.
+         Assert.Equal(0, connection.DisposeCount);
+     }
+ 
+@@ -239,11 +237,10 @@ public async Task DeleteCredentialAsync_WhenManagementKeyRetryFailure_ThrowsHsmA
+     ///     Pins the CHANGE credential password APDU for the password-authenticated path.
+     /// </summary>
+     /// <remarks>
+-    ///     The hardware test for this operation fails with SW=0x6D00 on applet builds that omit the
+-    ///     instruction, and an SDK regression in the instruction byte would produce that identical
+-    ///     status word. The two cannot be told apart on hardware, so the instruction byte, P1
+-    ///     selector, and TLV order are pinned here: if these pass and the hardware test fails, the
+-    ///     applet lacks the instruction; if these fail, the SDK is at fault.
++    ///     The recorder checks the instruction, selector, header and selected TLV tag order. These
++    ///     assertions help separate command-encoding regressions from device rejections. Diagnose a
++    ///     hardware status such as 0x6D00 using the actual command, applet version and device evidence;
++    ///     passing these checks alone does not establish why a device rejected a command.
+     /// </remarks>
+     [Fact]
+     public async Task ChangeCredentialPasswordAsync_TransmitsChangeInstructionWithPasswordSelector()
+@@ -276,8 +273,8 @@ await session.ChangeCredentialPasswordAsync(
+     }
+ 
+     /// <summary>
+-    ///     Pins the CHANGE credential password APDU for the management-key path, which differs only
+-    ///     by its P1 selector and by carrying the management key instead of the current password.
++    ///     Checks the CHANGE instruction, management-key selector, initial label tag and following
++    ///     management-key tag for the administrator path.
+     /// </summary>
+     [Fact]
+     public async Task ChangeCredentialPasswordAdminAsync_TransmitsChangeInstructionWithManagementKeySelector()
+@@ -308,10 +305,8 @@ await session.ChangeCredentialPasswordAdminAsync(
+     ///     A caller-supplied firmware override survives <c>ResetAsync</c>.
+     /// </summary>
+     /// <remarks>
+-    ///     Reset re-SELECTs the applet to refresh cached state, and the SELECT response carries the
+-    ///     applet's own version. Adopting that version would silently drop an override supplied through
+-    ///     <c>SessionCreationOptions</c>, so feature gates evaluated after a reset would disagree with
+-    ///     the ones evaluated before it. Reset refreshes applet state, not caller policy.
++    ///     Reset reselects the applet using the existing protocol. Retaining the resolved override
++    ///     keeps feature policy consistent across reset, even when SELECT reports a lower applet version.
+     /// </remarks>
+     [Fact]
+     public async Task ResetAsync_PreservesCallerSuppliedFirmwareVersionOverride()
+@@ -361,4 +356,4 @@ .. Sequence(0xB0, 16),
+         .. Sequence(0xC0, 16),
+         0x90, 0x00
+     ];
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs
+index d6cab6ce..551e7da1 100644
+--- c/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs
++++ w/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs
+@@ -22,7 +22,8 @@ public class Pbkdf2DerivationTests
+     [Fact]
+     public void DeriveKeys_KnownVector_MatchesExpected()
+     {
+-        // Independently compute PBKDF2-HMAC-SHA256("password", "Yubico", 10000, 32)
++        // Recompute through the same .NET PBKDF2 primitive with independently stated parameters.
++        // This checks the helper's parameters rather than comparing against an external fixed vector.
+         var expected = Rfc2898DeriveBytes.Pbkdf2(
+             Encoding.UTF8.GetBytes("password"),
+             "Yubico"u8,
+@@ -78,4 +79,4 @@ public void DeriveKeys_UsesCorrectConstants()
+         Assert.Equal(32, HsmAuthSession.Pbkdf2DerivedKeyLength);
+         Assert.True(HsmAuthSession.Pbkdf2Salt.SequenceEqual("Yubico"u8));
+     }
+-}
+\ No newline at end of file
++}

@@ -41,6 +41,8 @@ public static class GenerateAsymmetricCredential
             OutputHelpers.WriteSuccess($"Asymmetric credential '{label}' generated on device.");
             OutputHelpers.WriteInfo("Private key was generated on-device and never leaves the YubiKey.");
 
+            // Export the credential's PK-OCE for enrollment in the HSM authentication object.
+            // Obtain the HSM's trusted static public key separately for asymmetric calculation.
             var publicKey = await session.GetPublicKeyAsync(label, cancellationToken);
             OutputHelpers.WriteHex("Public key", publicKey.Span);
         }

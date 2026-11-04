@@ -1,0 +1,189 @@
+{
+  "captured_utc": "2026-11-04T12:40:09.179076+00:00",
+  "original_review_manifest_unchanged": true,
+  "pre_and_final_Roslyn_logs_exactly_bind_26_hashes": true,
+  "recorder_correction_preserves_all_original_transform_facts": true,
+  "import_exception_paths_removals_and_source_identities_preserved": true,
+  "failed_and_corrected_checker_runs_bound_to_distinct_retained_manifests": true,
+  "final_public_metadata_equals_initial_excluding_capture_time": true,
+  "api_log_reports_files": 20,
+  "api_log_reports_failures": 0,
+  "pending_excluded_gates": [
+    "repository final run completion",
+    "six full README bodies compilation",
+    "actual 22-source example project compilation",
+    "overall closeout/publication"
+  ],
+  "inputs": [
+    {
+      "run_relative_path": "reviewed-files.json",
+      "sha256": "2d44dd52249640a34f659bfec9a421008ba8be4c8013126fae54af103da4c284",
+      "bytes": 10894
+    },
+    {
+      "run_relative_path": "findings.md",
+      "sha256": "634cec0e60644d5d287da17a31a6298000fdfdd5ebf99a50888801b3e3e758fc",
+      "bytes": 8145
+    },
+    {
+      "run_relative_path": "coverage.json",
+      "sha256": "86062b789a40ba2c5ea23b7dd538143a23f136dd35359e45919e01835b010a31",
+      "bytes": 22144
+    },
+    {
+      "run_relative_path": "status.md",
+      "sha256": "d11a8d7e15a5a28da59dc435a42cf8e736f1da6b4d4748abaa9a26c9c108b277",
+      "bytes": 4472
+    },
+    {
+      "run_relative_path": "corrections.md",
+      "sha256": "6709b489cdaaf6728428ccf0ff5e6f035ffb14750f3da92d86e29cf374045fb1",
+      "bytes": 3782
+    },
+    {
+      "run_relative_path": "hardware/results.md",
+      "sha256": "8331a7ef2e1a89e079667669a400880dad70615c8bb6c006f7ae912ba88b32d1",
+      "bytes": 6271
+    },
+    {
+      "run_relative_path": "hardware/coordinator-review.md",
+      "sha256": "139058a5ff6b960ee119c9f57bc2671b7d4c1c8b3096922b697ec0c9d7240a74",
+      "bytes": 2859
+    },
+    {
+      "run_relative_path": "hardware/initial-info.log",
+      "sha256": "ed8abf5c1d7a6b63fe48af572280b7893012d0c05236c7814875e8eeb2816104",
+      "bytes": 518
+    },
+    {
+      "run_relative_path": "hardware/final-info.log",
+      "sha256": "c861ada6cf4a74a7c1881fa5d659759b6f00d11b1a8b5a8c04c6c4f3290d34b1",
+      "bytes": 518
+    },
+    {
+      "run_relative_path": "hardware/final-cleanup.py",
+      "sha256": "9efa3ab79ca5f9318912430eb4d74d0a9390c3a0c6aeaf40b9205bbf525adec0",
+      "bytes": 1953
+    },
+    {
+      "run_relative_path": "hardware/final-cleanup.v1.snapshot",
+      "sha256": "bc3038d546d05a066b536024681bd02d3adb8373e6639b057c14b88b3c8bbe21",
+      "bytes": 1936
+    },
+    {
+      "run_relative_path": "hardware/final-cleanup.log",
+      "sha256": "be82acfec17007689717a477b33f3f16466d6bffaaa5fba73d2c06e37a24e862",
+      "bytes": 1472
+    },
+    {
+      "run_relative_path": "hardware/final-cleanup-corrected.log",
+      "sha256": "0a50d43eb94d0a866effd8c5e617afb596ae0a9ced1065a3452c085bc364b3fc",
+      "bytes": 401
+    },
+    {
+      "run_relative_path": "validation/pre-format-content.json",
+      "sha256": "8d9b4caf416e5181d5b8ee4528c42bcf454ab08794d0665d68bd340949c3f41a",
+      "bytes": 210045
+    },
+    {
+      "run_relative_path": "validation/pre-format-tokens.log",
+      "sha256": "76cdc21e556540c2ecdc91804211452d89bd301a6b17a13e2ecec144ad650095",
+      "bytes": 4433
+    },
+    {
+      "run_relative_path": "validation/format-transform.json",
+      "sha256": "839d1203f3451c5baad5313111ecf7775491d5844187a87a88bfed46a72b1c41",
+      "bytes": 12380
+    },
+    {
+      "run_relative_path": "validation/format-transform.json.initial.snapshot",
+      "sha256": "e5b16dc81e6de42b24ea777083945e808b389b25c30b7234e0399bef57fabb8b",
+      "bytes": 10277
+    },
+    {
+      "run_relative_path": "validation/import-removals.json",
+      "sha256": "3a40286bc977433bdf18b825d546bb64e77f99f7da45dca6dc3e89c9a550c5c7",
+      "bytes": 3537
+    },
+    {
+      "run_relative_path": "validation/import-removals.json.initial.snapshot",
+      "sha256": "272527ee40bd68cdc769f8b512536bb644beb7fdbfeebd9078f33dc3fd6cab5c",
+      "bytes": 3537
+    },
+    {
+      "run_relative_path": "validation/format-apply.log",
+      "sha256": "bb62367c6c5a92d6a9e712866aabc08a19c0386a54dbbb0cc7d8bf56b2de9e38",
+      "bytes": 1810
+    },
+    {
+      "run_relative_path": "validation/format-initial.log",
+      "sha256": "ad45ee6976c1320514d9ed985b1fb96056b6d088483e8015de2a65ac6dfae658",
+      "bytes": 43242
+    },
+    {
+      "run_relative_path": "validation/format-final.log",
+      "sha256": "c4f4bef1dca6fa7a84c5ea05553e7e75a7586151ae6019cec20b2ba541603c7b",
+      "bytes": 1830
+    },
+    {
+      "run_relative_path": "validation/final-tokens.log",
+      "sha256": "5cef28ac8b0888fec664686a03004427081778c5a1bdde91e713306d0cbeadab",
+      "bytes": 4790
+    },
+    {
+      "run_relative_path": "validation/final-tokens-corrected.log",
+      "sha256": "b5655b093dd7ac0a346de37401ba042e193f6541b20b4c91f73730db67672944",
+      "bytes": 6653
+    },
+    {
+      "run_relative_path": "validation/final-api.log",
+      "sha256": "f2b9355f2c2f19c57f827eadca92b70af5c34e2136a74542b00c4b82b6f6666b",
+      "bytes": 2870
+    },
+    {
+      "run_relative_path": "validation/reconcile-content.py",
+      "sha256": "f495f37dc164c0ab401c46a44f5fb09d71ad90955202c36ede9f26ac2e55a95e",
+      "bytes": 6071
+    },
+    {
+      "run_relative_path": "validation/reconcile-content.py.initial.snapshot",
+      "sha256": "66f51811713739fab492095de0dea70c591fc1f73a89f576bd14ab8fbcc0fb96",
+      "bytes": 5915
+    },
+    {
+      "run_relative_path": "validation/reconcile-content.log",
+      "sha256": "646ff516daf0a86cb0c0de331d2584ea252b73a03b8c8f8f00214ee8896a124a",
+      "bytes": 315
+    },
+    {
+      "run_relative_path": "validation/reconcile-content-corrected.log",
+      "sha256": "646ff516daf0a86cb0c0de331d2584ea252b73a03b8c8f8f00214ee8896a124a",
+      "bytes": 315
+    },
+    {
+      "run_relative_path": "validation/hardware-v3-touch-20261104-133147-709-test/01-test-AuditHsm001.Hardware.IntegrationTests.log",
+      "sha256": "4ff10cb99e7ab0bc202202d0d340a0e5c7c64a4c631acde1ba38fbf28fff9b94",
+      "bytes": 7944
+    },
+    {
+      "run_relative_path": "validation/integration-touch-metadata-20261104-133206-476-test/01-test-YubiHsm.IntegrationTests.log",
+      "sha256": "5315fb99259bd94e18f35fbdb39efb445d69738a4024349c4af682096801e7db",
+      "bytes": 2574
+    },
+    {
+      "run_relative_path": "validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "sha256": "735bfccb75564cab8ed17226149f78489c57cb6851aadcf556ef61107570d930",
+      "bytes": 14721
+    },
+    {
+      "run_relative_path": "validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs",
+      "sha256": "aa755afc5971d522fe204fc424c4964d018dc61d8fc6d660fa7f97a24a1b0726",
+      "bytes": 9445
+    },
+    {
+      "run_relative_path": "validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/SymmetricOracle.cs",
+      "sha256": "0fa4f481ee971468449d2efa64ddf1812eb8e526523e497408287034e30ef2bd",
+      "bytes": 7073
+    }
+  ]
+}

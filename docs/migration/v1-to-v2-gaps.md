@@ -286,6 +286,15 @@ v2 location: `src/YubiHsm/src/**`
 
 Scope confirmed identical on both branches: YubiHSM Auth *applet* operations only (credential put/delete/list, management-key ops, session-key derivation) — not full HSM connector/object management.
 
+**Current reading of this historical section:** enrollment, deletion, management-key changes, CALCULATE
+and password changes translate retry-count status words to `HsmAuthRetryException`. `GetChallengeAsync`
+uses general `ApduException` errors, including password failures. Retry loops belong to the application.
+Initialization resolves the SELECT applet version or a caller override; `ResetAsync` reselects while
+retaining that policy. The SDK exposes password change behind its 5.8.0 gate. Development-build metadata
+alone provides no operation-level qualification; use the actual applet response and operation evidence.
+`SessionKeys` disposal clears its owned arrays; callers clear input buffers and additional copies separately.
+The entries below retain the earlier analysis and subsequent remediation history.
+
 - **Feature/API**: Interactive `KeyCollector` + auto-retrying `Try*` overloads (`TryAddCredential`, `TryDeleteCredential`, `TryChangeManagementKey`, `TryGetAes128SessionKeys`, `TryGetEccP256SessionKeys`)
   **v2 status**: Missing — every operation in v2 is single-attempt with no retry loop.
   **Severity**: Major | **Confidence**: High
@@ -304,7 +313,7 @@ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations onl
   **Severity**: No remaining gap | **Confidence**: High
 
 - **Feature/API**: Explicit live application-version query (`GetApplicationVersion()`)
-  **v2 status**: Missing as public method — version is cached from SELECT response, refreshed only on `ResetAsync`; functionally equivalent for normal use via `FirmwareVersion`, but no on-demand re-check.
+  **v2 status**: Missing as public method — `FirmwareVersion` exposes the session's resolved SELECT/override policy. Reset reselects the applet and retains that policy; create a new session to resolve it again.
   **Severity**: Cosmetic | **Confidence**: Medium
 
 - **Feature/API**: Strongly-typed reusable credential value objects (`Credential`, `CredentialWithSecrets`, `Aes128CredentialWithSecrets`, `EccP256CredentialWithSecret`)
@@ -315,7 +324,11 @@ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations onl
   **v2 status**: **Regressed, now fixed (2026-08-31).** v2 originally shipped these as `string`, which callers cannot wipe — the only module in the SDK still doing so after the `75353fd1` Fido2/OpenPgp/Oath sweep, which missed `src/YubiHsm/` because it landed seven days earlier. Nine members now take UTF-8 `ReadOnlyMemory<byte>`, restoring v1 parity. Padding and PBKDF2 behavior are unchanged. The parameters are named plainly (`credentialPassword` and friends), with the UTF-8 and ownership contracts documented on each `<param>`.
   **Severity**: Major (while it lasted) | **Confidence**: High
 
-**Verified improvement, no gap**: `ChangeCredentialPasswordAsync`/`ChangeCredentialPasswordAdminAsync` (fw 5.8.0+), `GenerateCredentialAsymmetricAsync` (on-device EC keygen), `PutCredentialDerivedAsync` (PBKDF2-derived symmetric credential), `SessionKeys` as `IDisposable` with zeroization — all new capabilities beyond v1.
+**Implemented SDK additions beyond v1**: `ChangeCredentialPasswordAsync`/`ChangeCredentialPasswordAdminAsync`
+(5.8.0 SDK gate), `GenerateCredentialAsymmetricAsync` (on-device EC keygen), `PutCredentialDerivedAsync`
+(PBKDF2-derived symmetric credential), and disposable `SessionKeys` with owned-array clearing. These surface
+additions have their documented version and ownership conditions; qualify interoperability through the
+intended HSM enrollment and handshake workflow.
 
 ---
 

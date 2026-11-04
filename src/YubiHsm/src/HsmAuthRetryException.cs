@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.YubiHsm;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This exception is thrown uniformly for every retry-counted YubiHSM Auth operation:
+///         The session checks retry-count status words for these operations:
 ///         management-key-gated credential operations (<c>PutCredential*Async</c>,
 ///         <c>DeleteCredentialAsync</c>, <c>GenerateCredentialAsymmetricAsync</c>,
 ///         <c>PutManagementKeyAsync</c>, <c>ChangeCredentialPasswordAdminAsync</c>) and
@@ -31,9 +31,13 @@ namespace Yubico.YubiKit.YubiHsm;
 ///         <c>ChangeCredentialPasswordAsync</c>).
 ///     </para>
 ///     <para>
+///         <c>GetChallengeAsync</c> uses the general <see cref="ApduException" /> error path, including
+///         when a password is transmitted. Inspect its status word when applying a retry policy.
+///         Each SDK call makes one authentication attempt; the application decides whether to retry.
+///     </para>
+///     <para>
 ///         <see cref="RetriesRemaining" /> exposes the parsed retry count as a typed value so
-///         callers do not need to parse <see cref="Exception.Message" /> or separately call
-///         <see cref="SWConstants.ExtractRetryCount" />.
+///         callers can apply retry policy directly from the property.
 ///     </para>
 ///     <para>
 ///         This type derives from <see cref="ApduException" /> so existing code that catches
@@ -44,9 +48,14 @@ namespace Yubico.YubiKit.YubiHsm;
 public sealed class HsmAuthRetryException : ApduException
 {
     /// <summary>
-    ///     Gets the number of verification attempts remaining before the credential or
-    ///     management key is locked out.
+    ///     Gets the attempts remaining before credential deletion or management-key blocking.
     /// </summary>
+    /// <remarks>
+    ///     Yubico's YubiHSM Auth overview describes successful authentication before exhaustion as
+    ///     resetting the corresponding counter to eight. Exhausting credential retries deletes that
+    ///     credential; exhausting management-key retries blocks management operations until an applet
+    ///     reset. Reset erases every credential and restores the factory management key.
+    /// </remarks>
     public int RetriesRemaining { get; }
 
     /// <summary>

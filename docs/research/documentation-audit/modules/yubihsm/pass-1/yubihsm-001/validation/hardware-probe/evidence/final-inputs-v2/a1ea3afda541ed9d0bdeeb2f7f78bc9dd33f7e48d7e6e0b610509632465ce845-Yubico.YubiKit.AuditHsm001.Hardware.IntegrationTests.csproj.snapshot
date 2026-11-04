@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+    <AssemblyName>Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests</AssemblyName>
+    <RootNamespace>Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests</RootNamespace>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)/probe.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Canonical xUnit-v2/VSTest integration packages, centrally versioned. -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="Xunit.SkippableFact" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(RepositoryRoot)/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" />
+    <ProjectReference Include="$(RepositoryRoot)/src/Core/src/Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="$(RepositoryRoot)/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj" />
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Reuse the canonical allow-list, not a second authorization mechanism. -->
+    <None Include="$(RepositoryRoot)/src/Tests.Shared/appsettings.json" Link="appsettings.json" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+</Project>

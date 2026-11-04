@@ -1,0 +1,4 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/consumer/src/Examples.cs
+/tmp/opencode/yubihsm-001-examples-v1-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Examples.v1.consumer.GlobalUsings.g.cs
+/tmp/opencode/yubihsm-001-examples-v1-consumer/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/yubihsm-001-examples-v1-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Examples.v1.consumer.AssemblyInfo.cs

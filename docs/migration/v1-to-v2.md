@@ -766,9 +766,16 @@ With SCP parameters supplied, session creation and post-reset reinitialization w
 
 ### YubiHSM
 
-Use `Yubico.YubiKit.YubiHsm` for YubiHSM 2 workflows. Review connector/session creation, authentication, object identifiers, capabilities, and command behavior manually.
+Use `Yubico.YubiKit.YubiHsm` to manage the YubiKey's YubiHSM Auth applet and calculate HSM session keys.
+Your HSM library handles connector sessions, HSM authentication objects and protected commands. Enroll
+matching keys on both devices and retain the mapping between the YubiKey label and HSM object ID; see the
+[module enrollment and handshake guide](../../src/YubiHsm/README.md#common-operations).
 
-A dedicated `HsmAuthRetryException.RetriesRemaining` was restored after an initial v2 gap. Migrate v1 touch
+A dedicated `HsmAuthRetryException.RetriesRemaining` was restored after an initial v2 gap. Enrollment,
+deletion, management-key changes, CALCULATE and password changes translate retry-count statuses to this
+type. `GetChallengeAsync` follows the general `ApduException` path, including with a password; inspect its
+status before deciding on another attempt. Each call makes one attempt, with retry policy owned by your
+application. Migrate v1 touch
 notification, or the removed alpha `HsmAuthSession.OnTouchRequired` callback, to
 `SessionCreationOptions.UserPresencePrompt`; known touch-required credentials produce a required policy
 notification, an unknown touch value or LIST failure is advisory, and a credential absent from a successful
@@ -777,7 +784,11 @@ LIST remains silent. See `yubihsm-retry-exception`,
 hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics;
 see `yubihsm-credential-retries-remaining-rename`.
 
-Credential passwords moved from `string` to UTF-8 `ReadOnlyMemory<byte>` across nine `IHsmAuthSession`/`HsmAuthSession` members, closing a v1 regression rather than introducing one, since v1's equivalent path already used byte-based passwords; see `yubihsm-credential-password-bytes` in `v1-to-v2-map.yml`. The parameters are named plainly — `credentialPassword`, `derivationPassword`, `currentPassword`, `newPassword`, and `password` — with no `Utf8` suffix; `refactor(fido2,openpgp,oath)!: drop Utf8 param suffix from secret parameters` (`5af953f6`) applied the same convention to FIDO2, OpenPGP, and OATH. PIV is the exception and still uses `pinUtf8`, `pukUtf8`, and friends.
+Pass UTF-8 `ReadOnlyMemory<byte>` to the nine password-taking `IHsmAuthSession`/`HsmAuthSession` members.
+The parameters are named `credentialPassword`, `derivationPassword`, `currentPassword` and `newPassword`.
+Clear caller-owned byte buffers in `finally`; an owning disposable buffer can provide the same lifetime
+boundary. Keep derivation and credential passwords separate: one derives the HSM's long-lived key pair,
+the other protects use of the YubiKey credential. See `yubihsm-credential-password-bytes` in the map.
 
 ## Manual Low-Level Command Cases
 

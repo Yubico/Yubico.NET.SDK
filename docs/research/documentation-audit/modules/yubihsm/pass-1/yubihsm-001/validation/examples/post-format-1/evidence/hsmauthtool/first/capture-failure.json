@@ -1,0 +1,5 @@
+{
+  "type": "ValueError",
+  "error": "Remove early common-props hook from the shipping command",
+  "scope": "Capture/provenance failure; classify separately from matching compiler diagnostics. Earlier text captures retained."
+}

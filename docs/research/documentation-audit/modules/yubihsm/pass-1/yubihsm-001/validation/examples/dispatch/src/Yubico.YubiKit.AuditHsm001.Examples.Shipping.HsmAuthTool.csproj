@@ -1,0 +1,25 @@
+<Project DefaultTargets="Build">
+  <!-- Build traversal only, not a C# host. The unmodified shipping SDK project
+       imports its own canonical props/targets and compiles all real sample files.
+       This prefix-qualified filename makes the toolchain's HsmAuthTool selector work
+       without editing toolchain discovery or adding a reduced sample project. -->
+  <PropertyGroup>
+    <RepositoryRoot>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)', 'toolchain.cs'))</RepositoryRoot>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+    <ShippingHsmAuthToolProject>$(RepositoryRoot)/src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj</ShippingHsmAuthToolProject>
+  </PropertyGroup>
+  <Target Name="Restore">
+    <MSBuild Projects="$(ShippingHsmAuthToolProject)" Targets="Restore" BuildInParallel="false" Properties="Configuration=$(Configuration)" />
+  </Target>
+  <Target Name="Clean">
+    <MSBuild Projects="$(ShippingHsmAuthToolProject)" Targets="Clean" BuildInParallel="false" Properties="Configuration=$(Configuration)" />
+  </Target>
+  <Target Name="Build">
+    <MSBuild Projects="$(ShippingHsmAuthToolProject)" Targets="Build" BuildInParallel="false" Properties="Configuration=$(Configuration)" />
+  </Target>
+  <Target Name="Rebuild">
+    <MSBuild Projects="$(ShippingHsmAuthToolProject)" Targets="Rebuild" BuildInParallel="false" Properties="Configuration=$(Configuration)" />
+  </Target>
+</Project>

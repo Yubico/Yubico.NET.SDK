@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format.py capture consumer first
+PASS: consumer/first: 4 actual Csc sources, 179 references, 10 analyzers; source/config/assets text retained.
+
+EXIT=0

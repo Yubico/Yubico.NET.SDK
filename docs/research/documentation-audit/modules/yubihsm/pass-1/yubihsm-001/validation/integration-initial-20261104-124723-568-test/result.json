@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project YubiHsm.IntegrationTests --filter \"Category!=RequiresUserPresence\"",
+  "started": "2026-11-04T12:47:23.5680618+01:00",
+  "durationSeconds": 12.4,
+  "runDirectory": "artifacts/toolchain/runs/20261104-124723-568-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 12.3,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "YubiHsm.IntegrationTests",
+      "outcome": "passed",
+      "reason": "11 executed, 0 skipped",
+      "executed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261104-124723-568-test/01-test-YubiHsm.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

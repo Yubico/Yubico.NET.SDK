@@ -17,6 +17,10 @@ namespace Yubico.YubiKit.YubiHsm;
 /// <summary>
 ///     Algorithms supported by the YubiHSM Auth applet for credential storage.
 /// </summary>
+/// <remarks>
+///     LIST responses can carry additional numeric identifiers. Check for a recognized member before
+///     using algorithm-specific properties or selecting an enrollment/calculation operation.
+/// </remarks>
 public enum HsmAuthAlgorithm : byte
 {
     /// <summary>
@@ -42,6 +46,7 @@ public static class HsmAuthAlgorithmExtensions
         /// <summary>
         ///     Gets the key length in bytes for this algorithm.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">The algorithm identifier is unknown.</exception>
         public int KeyLength => algorithm switch
         {
             HsmAuthAlgorithm.Aes128YubicoAuthentication => 16,
@@ -52,6 +57,7 @@ public static class HsmAuthAlgorithmExtensions
         /// <summary>
         ///     Gets the public key length in bytes for this algorithm, or <c>null</c> for symmetric algorithms.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">The algorithm identifier is unknown.</exception>
         public int? PublicKeyLength => algorithm switch
         {
             HsmAuthAlgorithm.Aes128YubicoAuthentication => null,

@@ -1,0 +1,9 @@
+$ python3 docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/verify-preparation.py
+PASS: syntax parsed for 5 Python tools; zero imports of prepared tools or cache writes.
+PASS: 6 exact frozen-source copies, retain-input adaptation and authored/canonical preparation hashes reconcile.
+PASS: pinned vendor derivation/key/cryptogram mapping and RFC 4493 algorithm/vector excerpt hashes reconcile.
+PASS: 4 XML files parse; one unique probe project; canonical v2/TestShared references, serial runner and 120-second host bound configured.
+PASS: source/configuration/provenance-only preparation; prior hardware results and binaries/caches remain separate.
+PENDING: C# compilation/analyzers, actual Csc capture, RFC-vector execution, device binding, all four hardware lanes and cleanup execution.
+
+EXIT=0

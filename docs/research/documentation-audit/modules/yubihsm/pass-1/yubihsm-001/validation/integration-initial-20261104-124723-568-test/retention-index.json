@@ -1,0 +1,33 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-124723-568-test",
+  "files": [
+    {
+      "path": "01-test-YubiHsm.IntegrationTests.log",
+      "bytes": 4198,
+      "sha256": "87eda6d3122258a199494ccbc5d0c81edb208b6f9a8260507db27b6a8b9ae8a6",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 979,
+      "sha256": "82bcfcf6254ce95b3f52dab7e3d8a5c4cf19e9a0ab62407a073aa1d58eb83fd6",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 635,
+      "sha256": "9db6f869ca580d798f572da55f1fc897491617ae9ce56777639f943a8fc55f37",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 1977,
+      "sha256": "3ead97f8a4b61bb6bdb218f1754298fd4817d756e98817f98be87ad96d9387b1",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

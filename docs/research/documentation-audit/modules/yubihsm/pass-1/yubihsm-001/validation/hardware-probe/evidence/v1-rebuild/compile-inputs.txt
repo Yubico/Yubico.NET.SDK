@@ -1,0 +1,7 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/SymmetricOracle.cs
+/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
+/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.GlobalUsings.g.cs
+/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.AssemblyInfo.cs

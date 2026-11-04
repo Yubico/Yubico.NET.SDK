@@ -1,0 +1,104 @@
+[
+  {
+    "source": "src/YubiHsm/CLAUDE.md",
+    "target": "../../CLAUDE.md",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/CLAUDE.md",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/CLAUDE.md",
+    "target": "src/HsmAuthSession.cs",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/HsmAuthSession.cs",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/CLAUDE.md",
+    "target": "src/Backend/HsmAuthBackend.cs",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Backend/HsmAuthBackend.cs",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/CLAUDE.md",
+    "target": "src/IHsmAuthSession.cs",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/IHsmAuthSession.cs",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/CLAUDE.md",
+    "target": "src/SessionKeys.cs",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/SessionKeys.cs",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/CLAUDE.md",
+    "target": "src/HsmAuthAlgorithm.cs",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/HsmAuthAlgorithm.cs",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/CLAUDE.md",
+    "target": "src/HsmAuthCredential.cs",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/HsmAuthCredential.cs",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/CLAUDE.md",
+    "target": "src/IYubiKeyExtensions.cs",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/IYubiKeyExtensions.cs",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/README.md",
+    "target": "../../README.md",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/README.md",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/README.md",
+    "target": "../../docs/linux-setup.md",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/linux-setup.md",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/README.md",
+    "target": "../../docs/usage/user-interaction.md#request-and-resolution-contract",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/usage/user-interaction.md",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/README.md",
+    "target": "../Core/README.md",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/README.md",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/README.md",
+    "target": "../SecurityDomain/README.md",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/README.md",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/README.md",
+    "target": "../../docs/usage/user-interaction.md",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/usage/user-interaction.md",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/README.md",
+    "target": "../../docs/usage/device-discovery.md",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/usage/device-discovery.md",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/README.md",
+    "target": "../../docs/DEV-GUIDE.md",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/DEV-GUIDE.md",
+    "exists": true
+  },
+  {
+    "source": "src/YubiHsm/tests/CLAUDE.md",
+    "target": "../../../docs/TESTING.md",
+    "resolved": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/TESTING.md",
+    "exists": true
+  }
+]

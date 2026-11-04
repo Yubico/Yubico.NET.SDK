@@ -1,0 +1,5 @@
+$ python3 -B docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format.py verify prepared
+PASS: 476 explicit unit dispositions, 8 complete groups, 22 shipping source paths; current bodies, typed wrappers and source/configuration identities reconcile.
+PENDING: builds, C# binding/analyzers and actual compiler captures. Example/sample/test/hardware execution remains separately scoped.
+
+EXIT=0

@@ -1,0 +1,83 @@
+{
+  "baseline": "a74792facb657413e98223e059876d8b213ffff3",
+  "source_archive": {
+    "manifest": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/record-manifest.json",
+    "manifest_sha256": "d310ba77bb04a0b0052baa6afd32a0355510018267cef391a02963fcdd555d0d",
+    "checked": 433
+  },
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/checker/src/Program.cs",
+      "source_sha256": "93978bc908189099ee1423357623ca389bc0c7bb4930846cf1e0d68dffdd13d2",
+      "target": "checker/src/Program.cs",
+      "target_sha256": "60b8867f4fba83a18b4154651484cc6bd5c998940abb4c77aa7cf787f0e402dc",
+      "replacements": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": "a74792facb657413e98223e059876d8b213ffff3",
+        "modules/yubiotp/pass-1/yubiotp-001/": "modules/yubihsm/pass-1/yubihsm-001/",
+        "/tmp/opencode/yubiotp-001-doccheck": "/tmp/opencode/yubihsm-001-doccheck",
+        "Yubico.YubiKit.AuditOtp001.Checker": "Yubico.YubiKit.AuditHsm001.Checker"
+      },
+      "substitution_counts": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": 4,
+        "modules/yubiotp/pass-1/yubiotp-001/": 1,
+        "/tmp/opencode/yubiotp-001-doccheck": 0,
+        "Yubico.YubiKit.AuditOtp001.Checker": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/checker/Directory.Build.props",
+      "source_sha256": "346893c3e402f56bbc99fcc36bf6174dcb735a613b31abfd8d3215ac3fbc6fdc",
+      "target": "checker/Directory.Build.props",
+      "target_sha256": "8afde3a37736e810277b345a75b5b4075cc6d98614882d06b81abade0848ee1a",
+      "replacements": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": "a74792facb657413e98223e059876d8b213ffff3",
+        "modules/yubiotp/pass-1/yubiotp-001/": "modules/yubihsm/pass-1/yubihsm-001/",
+        "/tmp/opencode/yubiotp-001-doccheck": "/tmp/opencode/yubihsm-001-doccheck",
+        "Yubico.YubiKit.AuditOtp001.Checker": "Yubico.YubiKit.AuditHsm001.Checker"
+      },
+      "substitution_counts": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": 0,
+        "modules/yubiotp/pass-1/yubiotp-001/": 0,
+        "/tmp/opencode/yubiotp-001-doccheck": 1,
+        "Yubico.YubiKit.AuditOtp001.Checker": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/checker/Directory.Build.targets",
+      "source_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a",
+      "target": "checker/Directory.Build.targets",
+      "target_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a",
+      "replacements": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": "a74792facb657413e98223e059876d8b213ffff3",
+        "modules/yubiotp/pass-1/yubiotp-001/": "modules/yubihsm/pass-1/yubihsm-001/",
+        "/tmp/opencode/yubiotp-001-doccheck": "/tmp/opencode/yubihsm-001-doccheck",
+        "Yubico.YubiKit.AuditOtp001.Checker": "Yubico.YubiKit.AuditHsm001.Checker"
+      },
+      "substitution_counts": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": 0,
+        "modules/yubiotp/pass-1/yubiotp-001/": 0,
+        "/tmp/opencode/yubiotp-001-doccheck": 0,
+        "Yubico.YubiKit.AuditOtp001.Checker": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/checker/src/Yubico.YubiKit.AuditOtp001.Checker.csproj",
+      "source_sha256": "cb9880b13e80c29958a0e623b044145d270125c6eb0fb602e96d1e9e98d4350d",
+      "target": "checker/src/Yubico.YubiKit.AuditHsm001.Checker.csproj",
+      "target_sha256": "c4e7414b46ceed2a821ab49663ee2557d3672e1f2f5cc0b9c8ca6c7a3e0aedb5",
+      "replacements": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": "a74792facb657413e98223e059876d8b213ffff3",
+        "modules/yubiotp/pass-1/yubiotp-001/": "modules/yubihsm/pass-1/yubihsm-001/",
+        "/tmp/opencode/yubiotp-001-doccheck": "/tmp/opencode/yubihsm-001-doccheck",
+        "Yubico.YubiKit.AuditOtp001.Checker": "Yubico.YubiKit.AuditHsm001.Checker"
+      },
+      "substitution_counts": {
+        "95e5ccaeda33954c21f2a38058d4f66b5f208787": 0,
+        "modules/yubiotp/pass-1/yubiotp-001/": 0,
+        "/tmp/opencode/yubiotp-001-doccheck": 0,
+        "Yubico.YubiKit.AuditOtp001.Checker": 1
+      }
+    }
+  ],
+  "policy": "Roslyn token/directive/API algorithms and compile subcommand unchanged; only baseline/run-path/output-path/checker-identity substitutions. No examples or import-removal approvals copied."
+}

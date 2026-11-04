@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/retain-inputs.py v1-build final-inputs-v1
+Actual Csc membership mismatch: resolved-references.txt
+
+EXIT=1

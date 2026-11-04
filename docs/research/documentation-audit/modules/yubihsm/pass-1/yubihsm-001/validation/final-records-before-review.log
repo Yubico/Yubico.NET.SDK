@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/check-records.py --reviewed --markdown docs/research/documentation-audit/yubihsm.md --markdown docs/research/documentation-audit/README.md
+PASS: 18 record Markdown files / 38 local links, balanced fences; 475 UTF-8 artifacts and 0 pinned primary-source PDFs; 35 reviewed hashes checked.
+
+EXIT=0

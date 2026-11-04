@@ -15,6 +15,11 @@ namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 /// Implements: hsmauth credentials {list|add|delete|generate}
 /// Manages credentials stored in the YubiHSM Auth applet.
 /// </summary>
+/// <remarks>
+///     This diagnostic command prints generated symmetric keys. The operator provisions matching HSM
+///     authentication objects separately and protects terminal/process history. Some parsing failures
+///     occur before byte-buffer clearing scopes; use total acquisition/cleanup scopes in an application.
+/// </remarks>
 internal static class CredentialsCommand
 {
     public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken)
@@ -356,7 +361,8 @@ internal static class CredentialsCommand
                 $"Asymmetric credential '{label}' generated on device.");
             OutputHelpers.WriteInfo("Private key was generated on-device and never leaves the YubiKey.");
 
-            // Retrieve and display the public key
+            // Export credential PK-OCE for enrollment in the matching HSM authentication object.
+            // The HSM's own trusted static public key is obtained separately through HSM provisioning.
             var publicKey = await session.GetPublicKeyAsync(label, cancellationToken);
             OutputHelpers.WriteHex("Public key", publicKey.Span);
 

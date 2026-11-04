@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/capture-compiler.py v1-rebuild
+Retained compiler evidence and 227 dependency identities at /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/evidence/v1-rebuild; no binaries copied.
+
+EXIT=0

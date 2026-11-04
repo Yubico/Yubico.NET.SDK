@@ -190,6 +190,14 @@ The source of that certainty differs by applet and transport:
   unknown touch value on a found YubiHSM Auth credential produce `PolicyMayRequire`. A missing YubiHSM
   Auth credential remains silent. No smart-card timeout is inferred from these notifications.
 
+For YubiHSM Auth, a configured prompt causes a LIST policy lookup before CALCULATE. Cancellation of that
+lookup propagates; other lookup failures produce the advisory notification. With no prompt, the session
+sends CALCULATE directly. See the [module guide](../../src/YubiHsm/README.md#user-interaction) for its
+credential and calculation workflow.
+After requesting cancellation, await the YubiHSM Auth operation's terminal result and cleanup. An
+in-flight SmartCard command can continue until its response arrives and end with an APDU failure;
+follow that outcome when deciding recovery rather than assuming the device has stopped.
+
 Applications should tolerate additional applications, scopes, and notification sites in later
 versions. Do not use a presence notification to authorize an operation or infer that a touch
 occurred.

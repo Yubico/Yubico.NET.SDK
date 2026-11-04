@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <RepositoryRoot>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)', 'toolchain.cs'))</RepositoryRoot>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <Import Project="$(RepositoryRoot)/Directory.Build.props" />
+  <PropertyGroup>
+    <DocumentationWorkspace>/tmp/opencode/yubihsm-001-examples-v1-annotations</DocumentationWorkspace>
+    <BaseIntermediateOutputPath>$(DocumentationWorkspace)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(DocumentationWorkspace)/obj/</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(DocumentationWorkspace)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

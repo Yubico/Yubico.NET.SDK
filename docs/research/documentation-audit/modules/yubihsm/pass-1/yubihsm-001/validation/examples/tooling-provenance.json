@@ -1,0 +1,271 @@
+{
+  "baseline": "a74792facb657413e98223e059876d8b213ffff3",
+  "status": "skeleton-awaiting-editor-completion",
+  "source_manifest": {
+    "manifest": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/record-manifest.json",
+    "manifest_sha256": "d310ba77bb04a0b0052baa6afd32a0355510018267cef391a02963fcdd555d0d",
+    "checked": 433,
+    "result": "pass"
+  },
+  "copies": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/Directory.Build.props",
+      "source_sha256": "88dd182574d089671ec1c91ca3ac5d3ab1690c09c3caf222087bf6d9202c6403",
+      "target": "v1/consumer/Directory.Build.props",
+      "target_sha256": "f75c2018505cd0bed3a9d7a0dd0ac84b40123004e25d3c5160f32370d8fee20d",
+      "substitutions": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool",
+        "/tmp/opencode/yubiotp-001-examples-v2-": "/tmp/opencode/yubihsm-001-examples-v1-",
+        "AuditOtp001": "AuditHsm001",
+        "yubiotp-001": "yubihsm-001",
+        "YubiOtp": "YubiHsm",
+        "OtpTool": "HsmAuthTool",
+        "otptool": "hsmauthtool"
+      },
+      "substitution_counts": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": 0,
+        "/tmp/opencode/yubiotp-001-examples-v2-": 1,
+        "AuditOtp001": 0,
+        "yubiotp-001": 0,
+        "YubiOtp": 0,
+        "OtpTool": 0,
+        "otptool": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/Directory.Build.targets",
+      "source_sha256": "cb9084c93c78f037ec90ffd0fd3e292ee02e99341dbbe5be346d12d520a023f8",
+      "target": "v1/consumer/Directory.Build.targets",
+      "target_sha256": "41ef951234b88058602931df2b284191fdf5e72491555296ef407746b0ceba02",
+      "substitutions": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool",
+        "/tmp/opencode/yubiotp-001-examples-v2-": "/tmp/opencode/yubihsm-001-examples-v1-",
+        "AuditOtp001": "AuditHsm001",
+        "yubiotp-001": "yubihsm-001",
+        "YubiOtp": "YubiHsm",
+        "OtpTool": "HsmAuthTool",
+        "otptool": "hsmauthtool"
+      },
+      "substitution_counts": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": 0,
+        "/tmp/opencode/yubiotp-001-examples-v2-": 0,
+        "AuditOtp001": 2,
+        "yubiotp-001": 0,
+        "YubiOtp": 0,
+        "OtpTool": 0,
+        "otptool": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditOtp001.Examples.v2.consumer.csproj",
+      "source_sha256": "395edcf7a6efe96f42c752965c47ee05e535b7ebfebce236ae81ab86ad2e7e49",
+      "target": "v1/consumer/src/Yubico.YubiKit.AuditHsm001.Examples.v1.consumer.csproj",
+      "target_sha256": "5b102850a5e1591d96bd18d2067f2d8c77401c19644f48185604d6eafddcb32c",
+      "substitutions": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool",
+        "/tmp/opencode/yubiotp-001-examples-v2-": "/tmp/opencode/yubihsm-001-examples-v1-",
+        "AuditOtp001": "AuditHsm001",
+        "yubiotp-001": "yubihsm-001",
+        "YubiOtp": "YubiHsm",
+        "OtpTool": "HsmAuthTool",
+        "otptool": "hsmauthtool",
+        "Examples.v2.": "Examples.v1."
+      },
+      "substitution_counts": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": 0,
+        "/tmp/opencode/yubiotp-001-examples-v2-": 0,
+        "AuditOtp001": 0,
+        "yubiotp-001": 0,
+        "YubiOtp": 2,
+        "OtpTool": 0,
+        "otptool": 0,
+        "Examples.v2.": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/Directory.Build.props",
+      "source_sha256": "8ebe278f77623c1d886a7a54ef6d66e0815a94f143b202f780699fffc395d870",
+      "target": "v1/annotations/Directory.Build.props",
+      "target_sha256": "699e23d9f27da09e23038b310f616aa9df303e24ab1f106d54acf7597207f5c1",
+      "substitutions": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool",
+        "/tmp/opencode/yubiotp-001-examples-v2-": "/tmp/opencode/yubihsm-001-examples-v1-",
+        "AuditOtp001": "AuditHsm001",
+        "yubiotp-001": "yubihsm-001",
+        "YubiOtp": "YubiHsm",
+        "OtpTool": "HsmAuthTool",
+        "otptool": "hsmauthtool"
+      },
+      "substitution_counts": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": 0,
+        "/tmp/opencode/yubiotp-001-examples-v2-": 1,
+        "AuditOtp001": 0,
+        "yubiotp-001": 0,
+        "YubiOtp": 0,
+        "OtpTool": 0,
+        "otptool": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/Directory.Build.targets",
+      "source_sha256": "cb9084c93c78f037ec90ffd0fd3e292ee02e99341dbbe5be346d12d520a023f8",
+      "target": "v1/annotations/Directory.Build.targets",
+      "target_sha256": "41ef951234b88058602931df2b284191fdf5e72491555296ef407746b0ceba02",
+      "substitutions": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool",
+        "/tmp/opencode/yubiotp-001-examples-v2-": "/tmp/opencode/yubihsm-001-examples-v1-",
+        "AuditOtp001": "AuditHsm001",
+        "yubiotp-001": "yubihsm-001",
+        "YubiOtp": "YubiHsm",
+        "OtpTool": "HsmAuthTool",
+        "otptool": "hsmauthtool"
+      },
+      "substitution_counts": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": 0,
+        "/tmp/opencode/yubiotp-001-examples-v2-": 0,
+        "AuditOtp001": 2,
+        "yubiotp-001": 0,
+        "YubiOtp": 0,
+        "OtpTool": 0,
+        "otptool": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/src/Yubico.YubiKit.AuditOtp001.Examples.v2.annotations.csproj",
+      "source_sha256": "9f6bd3a51a40ec89ca27c02d8f476cb536a9ec09066887e973ae05da1ef358d9",
+      "target": "v1/annotations/src/Yubico.YubiKit.AuditHsm001.Examples.v1.annotations.csproj",
+      "target_sha256": "a1e5e60006092c79cc7f52da486a70e8fe11a63249e50a63163c539e002de152",
+      "substitutions": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool",
+        "/tmp/opencode/yubiotp-001-examples-v2-": "/tmp/opencode/yubihsm-001-examples-v1-",
+        "AuditOtp001": "AuditHsm001",
+        "yubiotp-001": "yubihsm-001",
+        "YubiOtp": "YubiHsm",
+        "OtpTool": "HsmAuthTool",
+        "otptool": "hsmauthtool",
+        "Examples.v2.": "Examples.v1."
+      },
+      "substitution_counts": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": 0,
+        "/tmp/opencode/yubiotp-001-examples-v2-": 0,
+        "AuditOtp001": 0,
+        "yubiotp-001": 0,
+        "YubiOtp": 2,
+        "OtpTool": 0,
+        "otptool": 0,
+        "Examples.v2.": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/OtpTool.Capture.targets",
+      "source_sha256": "862231b870eba9de6a4c48d2eb87ec0887c4385227196158d012293f3cacd882",
+      "target": "v1/hsmauthtool/HsmAuthTool.Capture.targets",
+      "target_sha256": "6a43237f56d009de0c12ce70a515471a21b05ffb3b97c799363e6f838622378d",
+      "substitutions": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool",
+        "/tmp/opencode/yubiotp-001-examples-v2-": "/tmp/opencode/yubihsm-001-examples-v1-",
+        "AuditOtp001": "AuditHsm001",
+        "yubiotp-001": "yubihsm-001",
+        "YubiOtp": "YubiHsm",
+        "OtpTool": "HsmAuthTool",
+        "otptool": "hsmauthtool"
+      },
+      "substitution_counts": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": 1,
+        "/tmp/opencode/yubiotp-001-examples-v2-": 0,
+        "AuditOtp001": 2,
+        "yubiotp-001": 0,
+        "YubiOtp": 0,
+        "OtpTool": 3,
+        "otptool": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/dispatch/src/Yubico.YubiKit.AuditOtp001.Examples.Shipping.OtpTool.csproj",
+      "source_sha256": "752dd93de5c87604eac9aa503e62841e641658c09ed1d88c45897359e0ee3b6b",
+      "target": "dispatch/src/Yubico.YubiKit.AuditHsm001.Examples.Shipping.HsmAuthTool.csproj",
+      "target_sha256": "b59b0bda16d921a35348c51ef59820f28d61b0ce52e24635349949690b2ffb1a",
+      "substitutions": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool",
+        "/tmp/opencode/yubiotp-001-examples-v2-": "/tmp/opencode/yubihsm-001-examples-v1-",
+        "AuditOtp001": "AuditHsm001",
+        "yubiotp-001": "yubihsm-001",
+        "YubiOtp": "YubiHsm",
+        "OtpTool": "HsmAuthTool",
+        "otptool": "hsmauthtool"
+      },
+      "substitution_counts": {
+        "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1": 0,
+        "/tmp/opencode/yubiotp-001-examples-v2-": 0,
+        "AuditOtp001": 0,
+        "yubiotp-001": 0,
+        "YubiOtp": 1,
+        "OtpTool": 9,
+        "otptool": 0
+      }
+    }
+  ],
+  "adaptations": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/inventory.py",
+      "source_sha256": "4b10e856a273ea068149c87ad05507a1eb044c1076ee2c572f7bbeef4bb99334",
+      "target": "inventory.py",
+      "target_sha256": "7de1bde9fe0f40958edf114b27347752eed8b5b177c764a6c227b829e554e564",
+      "adaptation": "Keep bounded fence/inline/XML identity algorithms; use explicit post-editor scope marker/report hash, dynamic edited paths and HSM-only shared-section classifications. Guard final document reads until accepted scope exists."
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/capture.py",
+      "source_sha256": "56629dd0404f8be6e9ea6601dc700f0e7f2a6a5141e5e272fd0156e93c4fce1f",
+      "target": "capture.py",
+      "target_sha256": "89bcb6bde430c7a81c5f7d15e2129c403566b4905f5b7b6fb87fadd43066ead5",
+      "adaptation": "Keep actual Csc/source/reference/analyzer/config/assets retention; require final extraction manifest; use HSM identities, all 22 shipping sources, and corrected native bin/obj/initial-extensions checks from the final OTP overlay. Observe shipping compilation through a late-only hook."
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/verify.py",
+      "source_sha256": "79572ac86d8b844fe40d7556cacc57b9f8e0054b81061b93ccf026952752b6da",
+      "target": "verify.py",
+      "target_sha256": "a3cd6bb5557ac28ee04388ea2e907580818ed14cb22e645c7d4764a5c8bc1d52",
+      "adaptation": "Keep current-body/source/config and optional live dependency checks; use HSM identities, explicit per-item dispositions and native-output sample capture; require all selected compiler contexts and final extraction-manifest identity."
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/capture.py",
+      "source_sha256": "71de8c38ecfd614c6164a7e639123b5cb1d34bf113904562236e2df5be1dbed0",
+      "target": "capture.py",
+      "target_sha256": "89bcb6bde430c7a81c5f7d15e2129c403566b4905f5b7b6fb87fadd43066ead5",
+      "adaptation": "Carry the proven final native-output assertions into the initial HSM capture; omit historical overlay reuse and original OTP evidence bindings."
+    }
+  ],
+  "tools": [
+    {
+      "path": "capture.py",
+      "bytes": 9159,
+      "sha256": "89bcb6bde430c7a81c5f7d15e2129c403566b4905f5b7b6fb87fadd43066ead5"
+    },
+    {
+      "path": "inventory.py",
+      "bytes": 8373,
+      "sha256": "7de1bde9fe0f40958edf114b27347752eed8b5b177c764a6c227b829e554e564"
+    },
+    {
+      "path": "prepare-tools.py",
+      "bytes": 6266,
+      "sha256": "f38b27ecb3f101081c6c1700e6a157e47d027495ab4f9ed8d5333de00a213370"
+    },
+    {
+      "path": "verify-skeleton.py",
+      "bytes": 4986,
+      "sha256": "2a0e842cc31e3319c5e44def1bef03908abf7ec3056e461e3910b1c1c05770ab"
+    },
+    {
+      "path": "verify.py",
+      "bytes": 8680,
+      "sha256": "a3cd6bb5557ac28ee04388ea2e907580818ed14cb22e645c7d4764a5c8bc1d52"
+    }
+  ],
+  "sample_context": {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+    "bytes": 1027,
+    "sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed"
+  },
+  "policy": "Fresh tooling/configuration only. Final OTP results/bodies/old early-output hook are excluded. Consumer/annotation Examples.cs files and final extraction manifest await coordinator editor-complete notification."
+}

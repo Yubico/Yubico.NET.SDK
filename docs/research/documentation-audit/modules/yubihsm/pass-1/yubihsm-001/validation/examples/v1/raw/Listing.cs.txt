@@ -1,0 +1,13 @@
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.YubiHsm;
+
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+await using var session = await device.CreateHsmAuthSessionAsync();
+foreach (var credential in await session.ListCredentialsAsync())
+{
+    Console.WriteLine($"{credential.Label}: {credential.Algorithm}, {credential.RetriesRemaining} retries");
+}

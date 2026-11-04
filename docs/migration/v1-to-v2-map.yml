@@ -240,7 +240,7 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiHsmAuth/YubiHsmAuthSession.cs
       - yubikit:src/YubiHsm/
-    notes: Authentication, connector, object, and command behavior require manual review.
+    notes: The package manages the YubiKey YubiHSM Auth applet and calculates session keys. The application uses an HSM library for connector sessions, HSM object enrollment and protected commands. Manually preserve the YubiKey label/HSM authentication-key ID mapping and provision matching long-lived keys on both devices; see the module README enrollment guide.
     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
   - id: low-level-commands
     status: manual
@@ -466,7 +466,7 @@ mappings:
     evidence:
       - yubikit:src/YubiHsm/src/HsmAuthRetryException.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot had no `Try*` retry-loop family and embedded the retry count only in an exception's string message (historical gap 13). The `yubikit-gaps` remediation effort added `HsmAuthRetryException` (derives from `ApduException`, so existing `catch (ApduException)` still observes it), thrown uniformly by every retry-counted management-key- or credential-password-gated operation with a typed `RetriesRemaining` property. There is still no automatic retry loop; callers must catch `HsmAuthRetryException` and decide whether to prompt and retry themselves.
+    notes: The initial v2 snapshot embedded retry counts in exception messages (historical gap 13). Current enrollment, deletion, management-key changes, both CALCULATE methods and both password-change methods translate retry-count statuses into HsmAuthRetryException.RetriesRemaining. The type derives from ApduException. GetChallengeAsync uses general ApduException errors, including with a password; inspect its status word when applying retry policy. Each SDK call makes one attempt; the application decides whether to prompt and retry.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: yubihsm-touch-notify
     status: assisted
@@ -490,7 +490,7 @@ mappings:
     evidence:
       - yubikit:src/YubiHsm/src/HsmAuthCredential.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: An earlier v2-only `HsmAuthCredential.Counter` member was documented as a usage counter, the opposite meaning from v1's "retries remaining before deletion" for the same wire byte (historical gap 13, flagged as needing hardware verification). The `yubikit-gaps` remediation effort hardware-verified against a live YubiKey 5.8 that the byte decrements on failed credential-password authentication (observed 8 to 7 after one deliberate failure) and renamed the member to `RetriesRemaining` to match v1's semantics and the verified behavior. Behavior on successful authentication was not separately hardware-verified.
+    notes: An earlier v2-only Counter member described this byte as a usage counter (historical gap 13). The rename to RetriesRemaining followed a recorded 8-to-7 failed-authentication observation. Current LIST results are snapshots. Yubico's descriptive YubiHSM Auth overview says successful authentication before exhaustion restores retries to eight; exhaustion deletes the credential. Management-key exhaustion instead blocks management operations until destructive applet reset. Refresh LIST or the management retry query to observe current state; historical observation scope remains in the remediation records.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: securitydomain-exception
     status: assisted
@@ -534,7 +534,7 @@ mappings:
     confidence: high
     migration_kind: member
     v1: YubiHsmAuthSession credential-password parameters (ReadOnlyMemory<byte> in Symmetric.cs; string in Aes128CredentialWithSecrets.cs and related asymmetric/admin members)
-    v2: IHsmAuthSession/HsmAuthSession credential-password parameters as plainly-named UTF-8 ReadOnlyMemory<byte> (credentialPassword, derivationPassword, currentPassword, newPassword, password)
+    v2: IHsmAuthSession/HsmAuthSession password parameters as UTF-8 ReadOnlyMemory<byte> (credentialPassword, derivationPassword, currentPassword, newPassword)
     evidence:
       - yubikit:src/YubiHsm/src/HsmAuthSession.cs
       - yubikit:src/YubiHsm/src/IHsmAuthSession.cs

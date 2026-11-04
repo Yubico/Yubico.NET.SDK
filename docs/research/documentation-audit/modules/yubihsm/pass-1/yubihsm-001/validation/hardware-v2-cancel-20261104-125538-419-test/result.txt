@@ -1,0 +1,13 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project AuditHsm001.Hardware.IntegrationTests --filter FullyQualifiedName~NoTouch_CancelAfterPolicyOpportunity)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                      20.1s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      AuditHsm001.Hardware.IntegrationTests  1 test(s) failed
+      - Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)): Expected a drained OperationCanceledException or CALCULATE SW=0x6985 after deliberate cancellation; inspect retained type/status.
+      output: artifacts/toolchain/runs/20261104-125538-419-test/01-test-AuditHsm001.Hardware.IntegrationTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 1 executed, 1 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --integration --project AuditHsm001.Hardware.IntegrationTests --filter "FullyQualifiedName~Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession"
+Run log: artifacts/toolchain/runs/20261104-125538-419-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

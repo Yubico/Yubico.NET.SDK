@@ -1,0 +1,8 @@
+$ /usr/bin/python3 docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/hardware/final-cleanup.py
+UTC 2026-11-04T12:33:18.627682+00:00
+CLIENT=vendor-python; serial=103; metadata-version=5.8.0
+BEFORE credentials=0; retries=8
+DEFAULT-KEY usable=true; PUT/LIST/DELETE succeeded; credentials=0; retries=8
+FINAL fresh-connection=true; applet-version=0.0.1; credentials=0; retries=8
+
+EXIT=0

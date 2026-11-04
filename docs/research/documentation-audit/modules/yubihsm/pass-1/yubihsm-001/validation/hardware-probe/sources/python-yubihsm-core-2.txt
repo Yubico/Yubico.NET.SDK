@@ -1,0 +1,96 @@
+class SymmetricAuth:
+    """A negotiation of an authenticated Session with a YubiHSM.
+
+    This class is used to begin the mutual authentication process
+    for establishing an authenticated session with the YubiHSM,
+    using symmetric authentication. Typically you get an instance
+    of this class by calling :func:`~YubiHsm.init_session`.
+    """
+
+    def __init__(self, hsm: YubiHsm, sid: int, context: bytes, card_crypto: bytes):
+        self._hsm = hsm
+        self._sid = sid
+        self._context = context
+        self._card_crypto = card_crypto
+
+    @property
+    def context(self) -> bytes:
+        """The authentication context (host challenge + card challenge)."""
+        return self._context
+
+    @property
+    def card_crypto(self) -> bytes:
+        """The card cryptogram."""
+        return self._card_crypto
+
+    @classmethod
+    def init_session(
+        cls,
+        hsm: YubiHsm,
+        auth_key_id: int,
+    ) -> "SymmetricAuth":
+        """Initiate the mutual symmetric session authentication process.
+
+        :param hsm: The YubiHSM connection.
+        :param auth_key_id: The ID of the Authentication key used to
+            authenticate the session.
+        """
+        context = os.urandom(8)
+
+        data = hsm.send_cmd(
+            COMMAND.CREATE_SESSION, struct.pack("!H", auth_key_id) + context
+        )
+
+        sid = data[0]
+        context += data[1 : 1 + 8]
+        card_crypto = data[9 : 9 + 8]
+
+        return cls(hsm, sid, context, card_crypto)
+
+    @classmethod
+    def create_session(
+        cls, hsm: YubiHsm, auth_key_id: int, key_enc: bytes, key_mac: bytes
+    ) -> "AuthSession":
+        """Construct an authenticated session.
+
+        :param hsm: The YubiHSM connection.
+        :param auth_key_id: The ID of the Authentication key used to
+            authenticate the session.
+        :param key_enc: Static `K-ENC` used to establish the session.
+        :param key_mac: Static `K-MAC` used to establish the session.
+        """
+
+        symmetric_auth = cls.init_session(hsm, auth_key_id)
+
+        key_senc = _derive(key_enc, KEY_ENC, symmetric_auth.context)
+        key_smac = _derive(key_mac, KEY_MAC, symmetric_auth.context)
+        key_srmac = _derive(key_mac, KEY_RMAC, symmetric_auth.context)
+
+        return symmetric_auth.authenticate(key_senc, key_smac, key_srmac)
+
+    def authenticate(
+        self, key_senc: bytes, key_smac: bytes, key_srmac: bytes
+    ) -> "AuthSession":
+        """Construct an authenticated session.
+
+        :param key_senc: `S-ENC` used for data confidentiality.
+        :param key_smac: `S-MAC` used for data and protocol integrity.
+        :param key_srmac: `S-RMAC` used for data and protocol integrity.
+        :return: An authenticated session.
+        """
+
+        gen_card_crypto = _derive(key_smac, CARD_CRYPTOGRAM, self._context, 0x40)
+
+        if not constant_time.bytes_eq(gen_card_crypto, self._card_crypto):
+            raise YubiHsmAuthenticationError()
+
+        msg = struct.pack("!BHB", COMMAND.AUTHENTICATE_SESSION, 1 + 8 + 8, self._sid)
+        msg += _derive(key_smac, HOST_CRYPTOGRAM, self._context, 0x40)
+        mac_chain, mac = _calculate_mac(key_smac, b"\0" * 16, msg)
+        msg += mac
+        if _unpad_resp(self._hsm._transceive(msg), COMMAND.AUTHENTICATE_SESSION) != b"":
+            raise YubiHsmInvalidResponseError("Non-empty response")
+
+        return AuthSession(
+            self._hsm, self._sid, key_senc, key_smac, key_srmac, mac_chain
+        )

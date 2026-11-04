@@ -1,0 +1,28 @@
+$ /usr/bin/python3 docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/hardware/final-cleanup.py
+UTC 2026-11-04T12:32:56.147978+00:00
+CLIENT=vendor-python; serial=103; metadata-version=5.8.0
+BEFORE credentials=1; retries=8
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/hardware/final-cleanup.py", line 21, in <module>
+    session.put_credential_symmetric(bytes(16), label, bytes(range(16)), bytes(range(16, 32)), b'Cleanup1!')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/yubikit/hsmauth.py", line 343, in put_credential_symmetric
+    return self._put_credential(
+           ~~~~~~~~~~~~~~~~~~~~^
+        management_key,
+        ^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        touch_required,
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/lib/python3.14/site-packages/yubikit/hsmauth.py", line 291, in _put_credential
+    TAG_CREDENTIAL_PASSWORD, _parse_credential_password(credential_password)
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/yubikit/hsmauth.py", line 132, in _parse_credential_password
+    raise ValueError(
+        "Credential password must be %d bytes long" % CREDENTIAL_PASSWORD_LEN
+    )
+ValueError: Credential password must be 16 bytes long
+
+EXIT=1

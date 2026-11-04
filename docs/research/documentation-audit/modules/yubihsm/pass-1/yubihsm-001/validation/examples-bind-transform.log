@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format.py bind-transform docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/format-transform.json
+PASS: coordinator formatter transform bound exactly; post-format compilation/capture input identity ready.
+
+EXIT=0

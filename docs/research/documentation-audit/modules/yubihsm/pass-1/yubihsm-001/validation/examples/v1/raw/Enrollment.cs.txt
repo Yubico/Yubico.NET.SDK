@@ -1,0 +1,25 @@
+static async Task EnrollSymmetricAsync(
+    IYubiKey device,
+    ReadOnlyMemory<byte> managementKey,
+    ReadOnlyMemory<byte> credentialPassword,
+    string label,
+    ushort hsmAuthenticationKeyId,
+    Func<ushort, string, ReadOnlyMemory<byte>, ReadOnlyMemory<byte>, CancellationToken, Task> provisionHsmAsync,
+    CancellationToken cancellationToken)
+{
+    byte[] keyMaterial = RandomNumberGenerator.GetBytes(32);
+    try
+    {
+        await provisionHsmAsync(hsmAuthenticationKeyId, label,
+            keyMaterial.AsMemory(0, 16), keyMaterial.AsMemory(16, 16), cancellationToken);
+        await using var session = await device.CreateHsmAuthSessionAsync(
+            cancellationToken: cancellationToken);
+        await session.PutCredentialSymmetricAsync(managementKey, label,
+            keyMaterial.AsMemory(0, 16), keyMaterial.AsMemory(16, 16), credentialPassword,
+            touchRequired: true, cancellationToken: cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(keyMaterial);
+    }
+}

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "baseline": "a74792facb657413e98223e059876d8b213ffff3",
+  "formatter": {
+    "diagnostic": "IDE0005",
+    "command_log": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/format-apply.log",
+    "command_log_sha256": "bb62367c6c5a92d6a9e712866aabc08a19c0386a54dbbb0cc7d8bf56b2de9e38",
+    "log": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/format-initial.log",
+    "log_sha256": "ad45ee6976c1320514d9ed985b1fb96056b6d088483e8015de2a65ac6dfae658"
+  },
+  "files": [
+    {
+      "path": "src/YubiHsm/src/IYubiKeyExtensions.cs",
+      "baseline_sha256": "bed06af6df164d3bdf3735e2ba330bc0131824e11059888294298782b4010eae",
+      "before": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/pre-format-content.json",
+        "bundle_sha256": "8d9b4caf416e5181d5b8ee4528c42bcf454ab08794d0665d68bd340949c3f41a",
+        "sha256": "1f776f28c68a665fd62a7b72ea1ea3febf795f35613f97f27004020d46130cae"
+      },
+      "after": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/format-transform.json",
+        "bundle_sha256": "839d1203f3451c5baad5313111ecf7775491d5844187a87a88bfed46a72b1c41",
+        "sha256": "93df1799760d8b4bf52e0f652d7da89462a48a61f29fc4310e73f0458f7b1d9f"
+      },
+      "removals": [
+        {
+          "namespace": "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu"
+        },
+        {
+          "namespace": "Yubico.YubiKit.Core.Protocols.SmartCard.Scp"
+        }
+      ]
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs",
+      "baseline_sha256": "b7ad594f830b21ccc7828d116b51bc6f011e829569d1ab046158312b9c7358a6",
+      "before": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/pre-format-content.json",
+        "bundle_sha256": "8d9b4caf416e5181d5b8ee4528c42bcf454ab08794d0665d68bd340949c3f41a",
+        "sha256": "b6ebdbfa680fb584362406f54233e765dc67f7c60111cc9dae3632c0e11dae72"
+      },
+      "after": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/format-transform.json",
+        "bundle_sha256": "839d1203f3451c5baad5313111ecf7775491d5844187a87a88bfed46a72b1c41",
+        "sha256": "1307a5c79bda1829be76784d1d070f79858fbdae6db2f33f691f2a32f0e56c20"
+      },
+      "removals": [
+        {
+          "namespace": "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu"
+        }
+      ]
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs",
+      "baseline_sha256": "015cdafa7a1bd846682bb01688d5173f26fd0c87b0e9f9a254fee4f398311b3f",
+      "before": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/pre-format-content.json",
+        "bundle_sha256": "8d9b4caf416e5181d5b8ee4528c42bcf454ab08794d0665d68bd340949c3f41a",
+        "sha256": "ff05e66130cf172ee174b3c55d41545b0432dd6297f145184eed386af1a31b0e"
+      },
+      "after": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/format-transform.json",
+        "bundle_sha256": "839d1203f3451c5baad5313111ecf7775491d5844187a87a88bfed46a72b1c41",
+        "sha256": "144fe0367dc9d52efb0c5290274cf6708c6403361d968730e39271cd0cd9d89e"
+      },
+      "removals": [
+        {
+          "namespace": "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu"
+        }
+      ]
+    }
+  ]
+}

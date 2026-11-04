@@ -1,0 +1,248 @@
+using System.Diagnostics;
+using System.Runtime.ExceptionServices;
+using Xunit.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
+using Yubico.YubiKit.YubiHsm;
+
+[assembly: CollectionBehavior(DisableTestParallelization = true, MaxParallelThreads = 1)]
+
+namespace Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests;
+
+public sealed class Serial103Filter : IYubiKeyFilter
+{
+    public bool Matches(YubiKeyTestState device) => device.SerialNumber == 103;
+    public string GetDescription() => "Only the authorized YubiHSM Auth probe key, serial 103";
+}
+
+[Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+[Trait(TestCategories.Category, TestCategories.Slow)]
+public sealed class HardwareProbeTests(ITestOutputHelper output)
+{
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.4.3", CustomFilter = typeof(Serial103Filter))]
+    public async Task KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(YubiKeyTestState state)
+    {
+        using var fixture = new SymmetricFixture();
+        fixture.InitializeOracle();
+        await ProbeScope.ExecuteAsync(state, output, "known-answer-and-retries", async (probe, token) =>
+        {
+            const string label = "audit-hsm001-kat";
+            var prompt = new RecordingPrompt(output);
+            await using HsmAuthSession session = await probe.OpenAsync(prompt, token);
+            await PutAsync(session, fixture, label, false, token);
+            await ProbeScope.AssertCredentialAsync(session, label, 8, false, token);
+            using (SessionKeys keys = await session.CalculateSessionKeysSymmetricAsync(
+                label, fixture.Context, fixture.Password, cancellationToken: token))
+            {
+                fixture.AssertKeys(keys);
+            }
+            output.WriteLine("KAT optional-card-cryptogram=omitted; three-keys=independent-match.");
+            HsmAuthRetryException failure = await Assert.ThrowsAsync<HsmAuthRetryException>(async () =>
+            {
+                using SessionKeys unexpected = await session.CalculateSessionKeysSymmetricAsync(
+                    label, fixture.Context, fixture.WrongPassword, cancellationToken: token);
+            });
+            ProbeScope.LogError(output, "single-controlled-wrong-calculate", failure);
+            Assert.Equal(7, failure.RetriesRemaining);
+            Assert.Equal((short)0x63C7, failure.SW);
+            Assert.Equal((byte)0x03, failure.Ins);
+            await ProbeScope.AssertCredentialAsync(session, label, 7, false, token);
+            using (SessionKeys keys = await session.CalculateSessionKeysSymmetricAsync(
+                label, fixture.Context, fixture.Password, cancellationToken: token))
+            {
+                fixture.AssertKeys(keys);
+            }
+            await ProbeScope.AssertCredentialAsync(session, label, 8, false, token);
+            Assert.Empty(prompt.Requests);
+            Assert.Empty(prompt.Resolutions);
+            output.WriteLine("KAT v2 optional-card-cryptogram=omitted; three-keys=independent-match; LIST credential-retries=8->7->8; management-retries=8; scope=YubiKey-host-calculation-only. Original v1 supplied-cryptogram parser failure remains HSM-IMP-008.");
+        });
+    }
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.8.0", CustomFilter = typeof(Serial103Filter))]
+    public async Task PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(YubiKeyTestState state)
+    {
+        using var fixture = new SymmetricFixture();
+        fixture.InitializeOracle();
+        var blocked = new List<string>();
+        await ProbeScope.ExecuteAsync(state, output, "password-transitions", async (probe, token) =>
+        {
+            bool[] actors = [false, true];
+            foreach (bool admin in actors)
+            {
+                string actor = admin ? "admin" : "user";
+                string label = $"audit-hsm001-{actor}";
+                await using HsmAuthSession session = await probe.OpenAsync(null, token);
+                await PutAsync(session, fixture, label, false, token);
+                await ProbeScope.AssertCredentialAsync(session, label, 8, false, token);
+                bool changed = false;
+                try
+                {
+                    if (admin)
+                    {
+                        await session.ChangeCredentialPasswordAdminAsync(fixture.Management, label, fixture.NewPassword, token);
+                    }
+                    else
+                    {
+                        await session.ChangeCredentialPasswordAsync(label, fixture.Password, fixture.NewPassword, token);
+                    }
+                    changed = true;
+                    output.WriteLine($"CAPABILITY actor={actor}; password-change=command-succeeded; key-answer-check=pending.");
+                }
+                catch (ApduException exception) when (exception.SW is short sw && unchecked((ushort)sw) == 0x6D00)
+                {
+                    ProbeScope.LogError(output, $"password-change-{actor}", exception);
+                    Assert.Equal((byte)0x0B, exception.Ins);
+                    Assert.Equal((byte)(admin ? 1 : 0), exception.P1);
+                    blocked.Add(actor);
+                    output.WriteLine($"CAPABILITY actor={actor}; password-change=blocked; measured-SW=0x6D00; new-password-use=not-executed; old-password-recovery-check=pending.");
+                }
+                using (SessionKeys keys = await session.CalculateSessionKeysSymmetricAsync(
+                    label, fixture.Context, changed ? fixture.NewPassword : fixture.Password, cancellationToken: token))
+                {
+                    fixture.AssertKeys(keys);
+                }
+                await ProbeScope.AssertCredentialAsync(session, label, 8, false, token);
+                output.WriteLine($"CAPABILITY actor={actor}; measured-result={(changed ? "new-password-three-key-match" : "old-password-still-usable-after-6D00")}; credential-retries=8; management-retries=8.");
+                await session.DeleteCredentialAsync(fixture.Management, label, token);
+                Assert.Empty(await session.ListCredentialsAsync(token));
+            }
+        });
+        // Classify a measured instruction absence after both actors and finally cleanup.
+        // A skip records the capability block; it never becomes a successful transition.
+        Skip.If(blocked.Count > 0, $"Measured SW=0x6D00: password transitions blocked for {string.Join(",", blocked)}; see retained actor-specific observations and cleanup.");
+    }
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.4.3", CustomFilter = typeof(Serial103Filter))]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    public async Task HumanTouch_Calculate_ResolvesCompletedOnce_AndMatchesThreeKeys(YubiKeyTestState state)
+    {
+        using var fixture = new SymmetricFixture();
+        fixture.InitializeOracle();
+        await ProbeScope.ExecuteAsync(state, output, "human-touch-calculate", async (probe, token) =>
+        {
+            const string label = "audit-hsm001-touch";
+            var prompt = new RecordingPrompt(output, inviteTouch: true);
+            await using HsmAuthSession session = await probe.OpenAsync(prompt, token);
+            await PutAsync(session, fixture, label, true, token);
+            await ProbeScope.AssertCredentialAsync(session, label, 8, true, token);
+            using var operationBudget = CancellationTokenSource.CreateLinkedTokenSource(token);
+            operationBudget.CancelAfter(TimeSpan.FromSeconds(35));
+            var elapsed = Stopwatch.StartNew();
+            using SessionKeys keys = await session.CalculateSessionKeysSymmetricAsync(
+                label, fixture.Context, fixture.Password, cancellationToken: operationBudget.Token);
+            fixture.AssertKeys(keys);
+            Assert.False(operationBudget.IsCancellationRequested, "Cooperative operation watchdog expired.");
+            prompt.AssertTerminal(label, UserPresenceOutcome.Completed);
+            await ProbeScope.AssertCredentialAsync(session, label, 8, true, token);
+            output.WriteLine($"TOUCH elapsed-ms={elapsed.Elapsed.TotalMilliseconds:F0}; policy=PolicyRequires; terminal=Completed; request-count=1; resolution-count=1; three-keys=independent-match. Physical-touch timing is supplied by the coordinator's human record.");
+        });
+    }
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.4.3", CustomFilter = typeof(Serial103Filter))]
+    public async Task NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(YubiKeyTestState state)
+    {
+        using var fixture = new SymmetricFixture();
+        fixture.InitializeOracle();
+        await ProbeScope.ExecuteAsync(state, output, "no-touch-cancellation", async (probe, token) =>
+        {
+            const string label = "audit-hsm001-cancel";
+            var prompt = new RecordingPrompt(output);
+            await using (HsmAuthSession session = await probe.OpenAsync(prompt, token))
+            {
+                await PutAsync(session, fixture, label, true, token);
+                await ProbeScope.AssertCredentialAsync(session, label, 8, true, token);
+                await ObserveCancellationAsync(session, fixture, prompt, label, token);
+            }
+            // Recovery uses a new owned connection, without a healing reset between
+            // cancellation and the first LIST/DELETE/PUT on that fresh session.
+            await using HsmAuthSession recovery = await probe.OpenAsync(null, token);
+            await ProbeScope.AssertCredentialAsync(recovery, label, 8, true, token);
+            await recovery.DeleteCredentialAsync(fixture.Management, label, token);
+            await PutAsync(recovery, fixture, label, false, token);
+            using SessionKeys keys = await recovery.CalculateSessionKeysSymmetricAsync(
+                label, fixture.Context, fixture.Password, cancellationToken: token);
+            fixture.AssertKeys(keys);
+            await ProbeScope.AssertCredentialAsync(recovery, label, 8, false, token);
+            output.WriteLine("RECOVERY fresh-owned-SmartCard-session=true; intervening-reset=false; non-touch-three-keys=independent-match; final-reset-readback=pending-finally.");
+        });
+    }
+
+    private static Task PutAsync(HsmAuthSession session, SymmetricFixture fixture, string label,
+        bool touch, CancellationToken token) => session.PutCredentialSymmetricAsync(
+            fixture.Management, label, fixture.Kenc, fixture.Kmac, fixture.Password,
+            touchRequired: touch, cancellationToken: token);
+
+    private async Task ObserveCancellationAsync(HsmAuthSession session, SymmetricFixture fixture,
+        RecordingPrompt prompt, string label, CancellationToken token)
+    {
+        using var cancel = CancellationTokenSource.CreateLinkedTokenSource(token);
+        cancel.CancelAfter(TimeSpan.FromSeconds(35));
+        var elapsed = Stopwatch.StartNew();
+        // A separate worker permits cancellation even if native admission initially
+        // blocks a synchronous portion of CALCULATE. The same task is always drained.
+        Task<SessionKeys> operation = Task.Run(() => session.CalculateSessionKeysSymmetricAsync(
+            label, fixture.Context, fixture.Password, cancellationToken: cancel.Token), CancellationToken.None);
+        Exception? controllerError = null;
+        Exception? operationError = null;
+        double cancelAt = 0;
+        try
+        {
+            UserPresenceContext request = await prompt.Requested.Task.WaitAsync(TimeSpan.FromSeconds(5), token);
+            Assert.Equal(UserPresenceBasis.PolicyRequires, request.Basis);
+            await Task.Delay(TimeSpan.FromSeconds(1), token);
+            Assert.False(operation.IsCompleted, "CALCULATE completed before the deliberate no-touch cancellation opportunity.");
+            cancelAt = elapsed.Elapsed.TotalMilliseconds;
+            output.WriteLine($"CANCEL at-ms={cancelAt:F0}; policy-to-cancel-delay>=1000ms; basis=PolicyRequires-pre-APDU; native-admission=unobserved; device-waiting-status=unobserved; DO NOT TOUCH.");
+        }
+        catch (Exception exception)
+        {
+            controllerError = exception;
+        }
+        finally
+        {
+            cancel.Cancel();
+        }
+        try
+        {
+            using SessionKeys unexpected = await operation;
+        }
+        catch (Exception exception)
+        {
+            operationError = exception;
+            ProbeScope.LogError(output, "cancel-drained-operation", exception);
+        }
+        output.WriteLine($"CANCEL drained-ms={elapsed.Elapsed.TotalMilliseconds:F0}; after-cancel-ms={elapsed.Elapsed.TotalMilliseconds - cancelAt:F0}; body-token-cancelled={token.IsCancellationRequested}; operation-error={operationError?.GetType().Name ?? "none"}.");
+        if (controllerError is not null)
+        {
+            if (operationError is not null)
+            {
+                throw new AggregateException("Controller and drained-operation evidence retained.", controllerError, operationError);
+            }
+            ExceptionDispatchInfo.Capture(controllerError).Throw();
+        }
+        Assert.False(token.IsCancellationRequested, "The body watchdog, rather than the deliberate cancellation lane, expired.");
+        if (operationError is OperationCanceledException)
+        {
+            prompt.AssertTerminal(label, UserPresenceOutcome.Cancelled);
+            output.WriteLine("CANCEL classification=caller-cancellation-observed; terminal=Cancelled; device-abort-timing=unverified.");
+        }
+        else if (operationError is ApduException apdu && apdu.SW is short sw && unchecked((ushort)sw) == 0x6985)
+        {
+            Assert.Equal((byte)0x03, apdu.Ins);
+            prompt.AssertTerminal(label, UserPresenceOutcome.Failed);
+            output.WriteLine("CANCEL classification=device-conditions-not-satisfied-after-cancel; measured-SW=0x6985; terminal=Failed; caller-cancellation-effect=unverified; touch-timeout=unproven.");
+        }
+        else
+        {
+            Assert.Fail("Expected a drained OperationCanceledException or CALCULATE SW=0x6985 after deliberate cancellation; inspect retained type/status.");
+        }
+    }
+}

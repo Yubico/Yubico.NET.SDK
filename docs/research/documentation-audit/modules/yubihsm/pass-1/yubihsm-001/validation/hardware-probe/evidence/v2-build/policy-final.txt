@@ -1,0 +1,12 @@
+NETCoreSdkVersion=10.0.403
+TargetFramework=net10.0
+LangVersion=14
+TreatWarningsAsErrors=true
+AnalysisLevel=preview
+AnalysisMode=Recommended
+EnableNETAnalyzers=false
+RunAnalyzersDuringBuild=true
+SkipCompilerExecution=
+RunSettingsFilePath=/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/probe.runsettings
+OutputPath=/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/
+NoWarn=,CS1591,CA1848,CA1707,CA1716,CA1873,CA1001,CA1513,CA1852,CA1859,CA1826,CS8892,1701,1702,8002

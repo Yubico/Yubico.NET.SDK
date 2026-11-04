@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/sdk-default.py capture hsmauthtool second
+PASS: hsmauthtool/second: 25 actual Csc sources, 208 references, 10 analyzers; source/config/assets text retained.
+
+EXIT=0

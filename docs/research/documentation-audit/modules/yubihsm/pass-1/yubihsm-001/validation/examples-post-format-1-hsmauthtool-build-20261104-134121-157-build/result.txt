@@ -1,0 +1,8 @@
+RESULT: PASSED  (dotnet toolchain.cs -- build --project AuditHsm001.Examples.Shipping.HsmAuthTool --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      3.3s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-134121-157-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

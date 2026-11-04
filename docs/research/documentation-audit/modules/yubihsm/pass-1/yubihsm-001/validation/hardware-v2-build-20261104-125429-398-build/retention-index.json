@@ -1,0 +1,40 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-125429-398-build",
+  "files": [
+    {
+      "path": "01-clean-AuditHsm001.Hardware.IntegrationTests.log",
+      "bytes": 17172,
+      "sha256": "7d88569d44a618b60732d2cb3ffa244a3b94027eac0274d684b56dbbaeaf7c3b",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "02-build-AuditHsm001.Hardware.IntegrationTests.log",
+      "bytes": 1126,
+      "sha256": "1c01020e2af6f1cc06fd0a93349511647b3d48c31480cabed53d314633c0e57d",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 729,
+      "sha256": "519ab9b226b6138009214fb35bc3d20e06fea8eb3fa35871581becb38397ba0c",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 454,
+      "sha256": "1112fdcd549428faf1268d1fa647cbfe448f68f2bf1dc564154c8f091658e9d0",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2351,
+      "sha256": "5b77669ee5fd918555a4e7213b0a74cc5d200206dc1b3d16dc3fc818a04d6b07",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

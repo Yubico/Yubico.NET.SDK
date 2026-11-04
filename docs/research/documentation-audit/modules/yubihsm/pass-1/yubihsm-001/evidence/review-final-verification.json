@@ -1,0 +1,42 @@
+{
+  "captured_utc": "2026-11-04T12:41:20.910580+00:00",
+  "verdict": "PASS for bounded final-content/late-evidence follow-up",
+  "required_product_corrections": 0,
+  "required_record_corrections": 0,
+  "R1": "resolved",
+  "R2": "resolved",
+  "final_product_hashes_rechecked": 35,
+  "final_product_hash_mismatches": [],
+  "focused_evidence_inputs_rechecked": 34,
+  "focused_evidence_input_mismatches": [],
+  "cleanup_correction_only_explicit_16_byte_padding": true,
+  "touch_probe_source_matches_previously_reviewed_v3_source": true,
+  "excluded_from_verdict": [
+    "final repository run completion",
+    "six full README C# bodies compilation",
+    "actual 22-source example compilation",
+    "publication/overall closeout"
+  ],
+  "artifacts": [
+    {
+      "run_relative_path": "review-followup.md",
+      "sha256": "4d64aeb2afe6c30f99a7d34d237ccf10cee03568aad942dd4d8c4eafbc21c90f",
+      "bytes": 9823
+    },
+    {
+      "run_relative_path": "evidence/review-final-bindings.json",
+      "sha256": "3676ffe6226187734b86cf5778cd8ad810c5d3f0565ac1844a40eae3362c0a97",
+      "bytes": 23149
+    },
+    {
+      "run_relative_path": "evidence/review-final-format.diff",
+      "sha256": "2375e056deef9d5ee69684afc309c4da66c64c3a62826a17305a9e8e267ebcd9",
+      "bytes": 9432
+    },
+    {
+      "run_relative_path": "evidence/review-final-evidence.json",
+      "sha256": "236a95e03ad1d6122d41d8f955fff1732acdf35406565eee310130628595d267",
+      "bytes": 7136
+    }
+  ]
+}

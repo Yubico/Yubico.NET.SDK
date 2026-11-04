@@ -1,0 +1,551 @@
+{
+  "schema": "yubihsm-independent-review-1",
+  "actor": "GPT-6.1 Sol independent reviewer",
+  "captured_utc": "2026-11-04T12:01:35.414660+00:00",
+  "baseline": "a74792facb657413e98223e059876d8b213ffff3",
+  "counts": {
+    "accepted_paths": 35,
+    "comment_only_cs": 26,
+    "module_markdown": 4,
+    "shared_yubihsm_only": 5,
+    "excluded_unchanged_git_text_module_paths": 26
+  },
+  "accepted": [
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "sha256": "c95f5b2659b37bfaa5a4ff7e70ea0a87d983aac15675d5a41e8ad476097a3dd9",
+      "baseline_sha256": "7756ff4b87c1a44182b4e4524b00ecbf4fcb9fc3f013d23dfb6bdd455173e134",
+      "editor_manifest_sha256": "c95f5b2659b37bfaa5a4ff7e70ea0a87d983aac15675d5a41e8ad476097a3dd9",
+      "matches_editor_manifest": true,
+      "scope": "YubiHSM sections only; enclosing context where needed",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "sha256": "9d39813ce3424d633c6ae52c33a30e6b353fa8ec77c4d2bfbc74c09e390dc77c",
+      "baseline_sha256": "bb2c6af2cf957fb1f72fbe9d2c9fd8f6a740df1211f4487c4fea47392fc75055",
+      "editor_manifest_sha256": "9d39813ce3424d633c6ae52c33a30e6b353fa8ec77c4d2bfbc74c09e390dc77c",
+      "matches_editor_manifest": true,
+      "scope": "YubiHSM sections only; enclosing context where needed",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "sha256": "a6947200550db0711a05c24b94f6859c2d083df75fbce06f25a1077ab41f2b78",
+      "baseline_sha256": "436d43e2c25c3a0238167f1f547a83adc930823aeda22c6324b42e7cd91a72b3",
+      "editor_manifest_sha256": "a6947200550db0711a05c24b94f6859c2d083df75fbce06f25a1077ab41f2b78",
+      "matches_editor_manifest": true,
+      "scope": "YubiHSM sections only; enclosing context where needed",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "sha256": "11992cbcd4a23b2bc339d920f82c0ef659aefaffcfbcf24888da3d229fff22c0",
+      "baseline_sha256": "6fc82b3d75b3fe35a33334b8d574986943fbab08597288afa7cc42f6533cf40b",
+      "editor_manifest_sha256": "11992cbcd4a23b2bc339d920f82c0ef659aefaffcfbcf24888da3d229fff22c0",
+      "matches_editor_manifest": true,
+      "scope": "YubiHSM sections only; enclosing context where needed",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "sha256": "a77eedd2b55ac4585194c24a25e20702d572e9dc07575ece055df770ee8693d3",
+      "baseline_sha256": "a07bb434dc71d2217cd9c1f50646012e2161c767dad69dcb63392eed53e59d16",
+      "editor_manifest_sha256": "a77eedd2b55ac4585194c24a25e20702d572e9dc07575ece055df770ee8693d3",
+      "matches_editor_manifest": true,
+      "scope": "YubiHSM sections only; enclosing context where needed",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/CLAUDE.md",
+      "sha256": "4208d45ec534c31d80024fa09e60a717bbee272c5d1bd71bea8661c0f4b1b68d",
+      "baseline_sha256": "eaf520bca7d3601b0b4701f701468ea025d02373e7f9502380355ebca0e4f7a0",
+      "editor_manifest_sha256": "4208d45ec534c31d80024fa09e60a717bbee272c5d1bd71bea8661c0f4b1b68d",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/PACKAGE_README.md",
+      "sha256": "541a09f386cf4040d2062a18634c50c8c9a4559f2f58536bac2f806b9b89cdb4",
+      "baseline_sha256": "67b84d9fb6d70c782c9c7bb4440153005aca469ec94c6aa7bde69e64492c682f",
+      "editor_manifest_sha256": "541a09f386cf4040d2062a18634c50c8c9a4559f2f58536bac2f806b9b89cdb4",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/README.md",
+      "sha256": "50d40f99913862a997f51394feddfc07236ad639df2a456f9103cd57ee3ff1b1",
+      "baseline_sha256": "df29673bec75e7676104a7d2d37b3a898408a6f9a8105b3fe9d8bd1f654174e7",
+      "editor_manifest_sha256": "50d40f99913862a997f51394feddfc07236ad639df2a456f9103cd57ee3ff1b1",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs",
+      "sha256": "c5730f84f59f2cb848babd7847c83560fedbea47c9e495d23bb9df0f128471fe",
+      "baseline_sha256": "0516b01176e2d8481c613e0aba773372a067cba660febdc4e1310f30f95c19f0",
+      "editor_manifest_sha256": "c5730f84f59f2cb848babd7847c83560fedbea47c9e495d23bb9df0f128471fe",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs",
+      "sha256": "da561a1838312ec57f803941c78db8036686f165d96d394b0f5953c6b1565a16",
+      "baseline_sha256": "8baa400b89e1ec9d9b727ee1af4e8fa9b0c3ce1a71aaf7e92e789eebf137185e",
+      "editor_manifest_sha256": "da561a1838312ec57f803941c78db8036686f165d96d394b0f5953c6b1565a16",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs",
+      "sha256": "334cc747a83caa5a261f8d658ea79557a13f50f62538a6755d89213b7b85b63b",
+      "baseline_sha256": "ead517047c3cd6ec531096ea03e03c9028391904fe0396678ce0293212d16de2",
+      "editor_manifest_sha256": "334cc747a83caa5a261f8d658ea79557a13f50f62538a6755d89213b7b85b63b",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs",
+      "sha256": "d8b0905ac49fb945cea844a260853f9aea8d55fada6c414ca2018c25ff8e6bb3",
+      "baseline_sha256": "0c3a6597d34e5e1af289ca38068d91a94e49c7e97f7c4d0de88bd170ecc16e19",
+      "editor_manifest_sha256": "d8b0905ac49fb945cea844a260853f9aea8d55fada6c414ca2018c25ff8e6bb3",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+      "sha256": "7749db37bffd28e2407c7f716a43e0cfaefb5ddb920d41658be184dd8bfb4413",
+      "baseline_sha256": "ea44fb48243ebd3a6d48254cda2d3e098f0d24d53732238529e0e40183dc859a",
+      "editor_manifest_sha256": "7749db37bffd28e2407c7f716a43e0cfaefb5ddb920d41658be184dd8bfb4413",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs",
+      "sha256": "ce43fb6ed4d475c76e037b16c416e342a743957109bc415f8d9cef78e6eb1c32",
+      "baseline_sha256": "bfd3063be1b78a62260c9205bb5581f19fea6b9aba3dec60371b0378a6ff3d57",
+      "editor_manifest_sha256": "ce43fb6ed4d475c76e037b16c416e342a743957109bc415f8d9cef78e6eb1c32",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs",
+      "sha256": "3468e77a58f59a8b8e0c22cdc37a64c9ef05fda75dbc5b17e9f4e82512a941d8",
+      "baseline_sha256": "09324c792c28e1fd9ce7161b1495f9d10ec789677c3ebe93f123d42f5303c6ca",
+      "editor_manifest_sha256": "3468e77a58f59a8b8e0c22cdc37a64c9ef05fda75dbc5b17e9f4e82512a941d8",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs",
+      "sha256": "33d6b9d76eb7e1505b15959ab0f95dbd383fee5623e51664a0af9b9cecb568a9",
+      "baseline_sha256": "716478374a91b1acf33be394c66dc2b52904b8c918dc9a54a8e9635fec4fe99a",
+      "editor_manifest_sha256": "33d6b9d76eb7e1505b15959ab0f95dbd383fee5623e51664a0af9b9cecb568a9",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs",
+      "sha256": "0e2a356ca3c26c903351d6b7f24961c31f6fba69a8c555e7bd5542473c1dee5e",
+      "baseline_sha256": "1687d1cb975bc09685264e6fd91a492ed5ae57d4aac48270ed4b7f65ff41399d",
+      "editor_manifest_sha256": "0e2a356ca3c26c903351d6b7f24961c31f6fba69a8c555e7bd5542473c1dee5e",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs",
+      "sha256": "9113eb7309913fab613375215bbb8910f52feb2659d8b6898a45f8693f0e29aa",
+      "baseline_sha256": "50efbeb222a22e20eb021f2fe35159a54fbaff6adc8f2e09c414f2cf42d6e8a6",
+      "editor_manifest_sha256": "9113eb7309913fab613375215bbb8910f52feb2659d8b6898a45f8693f0e29aa",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+      "sha256": "c3f123c7d7f752bf2a608a967e8e191cc6b33f6ee9c1d63ee8c38ce634f4b382",
+      "baseline_sha256": "25e17a7c103ad241659fdd5206023cb92781783c576495583215ded6c24261bc",
+      "editor_manifest_sha256": "c3f123c7d7f752bf2a608a967e8e191cc6b33f6ee9c1d63ee8c38ce634f4b382",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/src/Backend/HsmAuthBackend.cs",
+      "sha256": "3d3d276a6c524e40565af5cd4ac8cd88fd8b60b9eafd14ac5b4b08d371057b6e",
+      "baseline_sha256": "7065dfa87b83c01ebb40bb38a9e0bd6af2138560f8a804e2d311126794dc68cc",
+      "editor_manifest_sha256": "3d3d276a6c524e40565af5cd4ac8cd88fd8b60b9eafd14ac5b4b08d371057b6e",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthAlgorithm.cs",
+      "sha256": "a4069db87262908b57d3c61cdac00e2b8e9e041e0f056ef76d010f753a174ab6",
+      "baseline_sha256": "daf5297cb20ccada00a441fcfd1d0f2222f891e65729d31bd6d59747f55de820",
+      "editor_manifest_sha256": "a4069db87262908b57d3c61cdac00e2b8e9e041e0f056ef76d010f753a174ab6",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthCredential.cs",
+      "sha256": "7e98e102e58f49c3635ae808cd86bcc8ffed3e2bf257e716c39357578c5a793e",
+      "baseline_sha256": "36be484ed48bb4cba2186a8c6ffa3231d3d67c29c7846abea6251813a631754d",
+      "editor_manifest_sha256": "7e98e102e58f49c3635ae808cd86bcc8ffed3e2bf257e716c39357578c5a793e",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthRetryException.cs",
+      "sha256": "cf6a40f241abab64646bd590ea0d1f6b723b1d0c825000b53bc6be1e463c4372",
+      "baseline_sha256": "66363f4dc0912e816a68586f548e009e7e10b52dd816b3d4182844d3606dac70",
+      "editor_manifest_sha256": "cf6a40f241abab64646bd590ea0d1f6b723b1d0c825000b53bc6be1e463c4372",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthSession.cs",
+      "sha256": "683e2b71f220bd783ab3bfea78ec57383e095f4275c298c84b541e08ca1b1bf4",
+      "baseline_sha256": "9c31a1bf302bc8214aee9a9438863eab7e12cfd56b43e6bdd200f8c1285136c7",
+      "editor_manifest_sha256": "683e2b71f220bd783ab3bfea78ec57383e095f4275c298c84b541e08ca1b1bf4",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "sha256": "1d29d612f9737fdadcef209d727d7dc3ce7528e3d30a3af81c8d61a0b60ace7d",
+      "baseline_sha256": "a1432ec384e355253b87fd17ed7d7a91579ea0898cd644227c6873732ae97f99",
+      "editor_manifest_sha256": "1d29d612f9737fdadcef209d727d7dc3ce7528e3d30a3af81c8d61a0b60ace7d",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/src/IYubiKeyExtensions.cs",
+      "sha256": "1f776f28c68a665fd62a7b72ea1ea3febf795f35613f97f27004020d46130cae",
+      "baseline_sha256": "bed06af6df164d3bdf3735e2ba330bc0131824e11059888294298782b4010eae",
+      "editor_manifest_sha256": "1f776f28c68a665fd62a7b72ea1ea3febf795f35613f97f27004020d46130cae",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/src/SessionKeys.cs",
+      "sha256": "63f45c4a8640be5ac857993433744feca6f08b0962defc62dc6ff8d088e76bd6",
+      "baseline_sha256": "db932a789c08e414408fd1893f67ecd667e1945bd3b34057dc88f5eed6f4f3f6",
+      "editor_manifest_sha256": "63f45c4a8640be5ac857993433744feca6f08b0962defc62dc6ff8d088e76bd6",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/tests/CLAUDE.md",
+      "sha256": "c65163bce092d689e9d88a08839a99a40fb3d9c08220df10bc61b55358f5b1c9",
+      "baseline_sha256": "f34a68be94a8ce1bebd5b35ae433e45c8a578d60d898f9d5072fdadb9fd88f15",
+      "editor_manifest_sha256": "c65163bce092d689e9d88a08839a99a40fb3d9c08220df10bc61b55358f5b1c9",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs",
+      "sha256": "e51edb16dde78133f385c9d873ea979700af349276b3854b759767fcb50aaf92",
+      "baseline_sha256": "8c69ca0f50f7e6a2e1d32df3ff61c57783b4cfcb13b6b527c17ca2afbe3b29a1",
+      "editor_manifest_sha256": "e51edb16dde78133f385c9d873ea979700af349276b3854b759767fcb50aaf92",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs",
+      "sha256": "b6ebdbfa680fb584362406f54233e765dc67f7c60111cc9dae3632c0e11dae72",
+      "baseline_sha256": "b7ad594f830b21ccc7828d116b51bc6f011e829569d1ab046158312b9c7358a6",
+      "editor_manifest_sha256": "b6ebdbfa680fb584362406f54233e765dc67f7c60111cc9dae3632c0e11dae72",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs",
+      "sha256": "30a1b138942b0c7d2424752b9f7efbd93f0fbae13d9fec54fd6f6c080754aa25",
+      "baseline_sha256": "b28800c14a09c42724a2b00c3c12e05b3a06038b5e09b493e7449ecbe03cd322",
+      "editor_manifest_sha256": "30a1b138942b0c7d2424752b9f7efbd93f0fbae13d9fec54fd6f6c080754aa25",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs",
+      "sha256": "bc040900d1e337b72bfdaf3ebe16e8386393e86c8f833e329cc53dc22fd56e0b",
+      "baseline_sha256": "3e27f1c714806c9fe0837bc16169666cb6b4190dbe6b8b487b3c2a56ec12853b",
+      "editor_manifest_sha256": "bc040900d1e337b72bfdaf3ebe16e8386393e86c8f833e329cc53dc22fd56e0b",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs",
+      "sha256": "e31ef994f355f0b2d6bd8c22510b00a3beb6df8f494d725948b93e6b17bb4e2a",
+      "baseline_sha256": "d8b7f0cf0d1949924f7eb3701598a05a7202c191dbd252869f1567db00d89787",
+      "editor_manifest_sha256": "e31ef994f355f0b2d6bd8c22510b00a3beb6df8f494d725948b93e6b17bb4e2a",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs",
+      "sha256": "ff05e66130cf172ee174b3c55d41545b0432dd6297f145184eed386af1a31b0e",
+      "baseline_sha256": "015cdafa7a1bd846682bb01688d5173f26fd0c87b0e9f9a254fee4f398311b3f",
+      "editor_manifest_sha256": "ff05e66130cf172ee174b3c55d41545b0432dd6297f145184eed386af1a31b0e",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs",
+      "sha256": "7da09206e1e3fa80b471c5fad97ab74c01420a0a325a1e2349a74b7bf871c66f",
+      "baseline_sha256": "acab6692410fbdef70a791be4697f137374d3ba211aee4b4cc28be01076500b8",
+      "editor_manifest_sha256": "7da09206e1e3fa80b471c5fad97ab74c01420a0a325a1e2349a74b7bf871c66f",
+      "matches_editor_manifest": true,
+      "scope": "complete module file",
+      "disposition": "accepted-semantic-content; coordinator validation separate"
+    }
+  ],
+  "excluded": [
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+      "sha256": "f33b6b0a21f4cc8c2cd28c1b7471f5b89cfb4754af2d4e3c06df2b6617dad950",
+      "baseline_sha256": "f33b6b0a21f4cc8c2cd28c1b7471f5b89cfb4754af2d4e3c06df2b6617dad950",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/ResetCommand.cs",
+      "sha256": "396a257b3636c4cde077da1657b56180eabbc2d2631cfef989e26854e9c88c2d",
+      "baseline_sha256": "396a257b3636c4cde077da1657b56180eabbc2d2631cfef989e26854e9c88c2d",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/CredentialMenu.cs",
+      "sha256": "742e51544c3f0fcc6ff700638551398f519550a6a79b618c8e649ebc42bea8d2",
+      "baseline_sha256": "742e51544c3f0fcc6ff700638551398f519550a6a79b618c8e649ebc42bea8d2",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/ManagementKeyMenu.cs",
+      "sha256": "b0b6d782cf4f4b6a8ec7492974a9301ebdf4b006b17d164556784628ddcd1f4f",
+      "baseline_sha256": "b0b6d782cf4f4b6a8ec7492974a9301ebdf4b006b17d164556784628ddcd1f4f",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/ResetMenu.cs",
+      "sha256": "3f32158d78eaf39daeefe0dc29133578fa8b54492d3257710fef72aaeaae7073",
+      "baseline_sha256": "3f32158d78eaf39daeefe0dc29133578fa8b54492d3257710fef72aaeaae7073",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Output/OutputHelpers.cs",
+      "sha256": "4cb86e464499056014e0c51955f7574d210bdea339d550da13274d54f2a405f0",
+      "baseline_sha256": "4cb86e464499056014e0c51955f7574d210bdea339d550da13274d54f2a405f0",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/HsmAuthDeviceSelector.cs",
+      "sha256": "6f8afbdeb0bbf9c5f41fc10c367d9764f8082e058c00112101cc3e8c8c5ba317",
+      "baseline_sha256": "6f8afbdeb0bbf9c5f41fc10c367d9764f8082e058c00112101cc3e8c8c5ba317",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/DeleteCredential.cs",
+      "sha256": "9b96c5632834104bfdfdfed8010b7ad71ad26e2ad3033f0448f467656ae06f24",
+      "baseline_sha256": "9b96c5632834104bfdfdfed8010b7ad71ad26e2ad3033f0448f467656ae06f24",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GetManagementKeyRetries.cs",
+      "sha256": "97db46e3c19e7b40311bb78bff57171a9705f39f57be5228e02e38b02aad7950",
+      "baseline_sha256": "97db46e3c19e7b40311bb78bff57171a9705f39f57be5228e02e38b02aad7950",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ListCredentials.cs",
+      "sha256": "24d9a6d1f184c0904db90a472584462a000503e52f6f58744108905f2ed7cbb3",
+      "baseline_sha256": "24d9a6d1f184c0904db90a472584462a000503e52f6f58744108905f2ed7cbb3",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ResetHsmAuth.cs",
+      "sha256": "01a72079c10452aca742b09dddaf5ccd6bc7d9d9ebd76a4863e347971ef74369",
+      "baseline_sha256": "01a72079c10452aca742b09dddaf5ccd6bc7d9d9ebd76a4863e347971ef74369",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+      "baseline_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+      "unchanged": false,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true,
+      "byte_difference": "CRLF/LF working-tree normalization only"
+    },
+    {
+      "path": "src/YubiHsm/src/Backend/IHsmAuthBackend.cs",
+      "sha256": "dcfcbafe1f2608de40eb72a80efc4cc88da231083aeacde8c71c1b08dc5bdfea",
+      "baseline_sha256": "dcfcbafe1f2608de40eb72a80efc4cc88da231083aeacde8c71c1b08dc5bdfea",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/src/Properties/AssemblyInfo.cs",
+      "sha256": "c19b164f86e1356e2f573b8737a16de31a87bb450d6a1f60dfea7618cca17572",
+      "baseline_sha256": "c19b164f86e1356e2f573b8737a16de31a87bb450d6a1f60dfea7618cca17572",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "baseline_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/src/PublicAPI.Unshipped.txt",
+      "sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+      "baseline_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+      "sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed",
+      "baseline_sha256": "abc45db95fa758e433c10e7fdbdef18bd61611fabafd9fcd560c079b3ceea29e",
+      "unchanged": false,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true,
+      "byte_difference": "CRLF/LF working-tree normalization only"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+      "sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+      "baseline_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+      "unchanged": false,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true,
+      "byte_difference": "CRLF/LF working-tree normalization only"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/xunit.runner.json",
+      "sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c",
+      "baseline_sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthCredentialTests.cs",
+      "sha256": "e9ae98ee40ca3fbd4ec19d1117903273dcd8b7e74da8ef62bfeeff619c480957",
+      "baseline_sha256": "e9ae98ee40ca3fbd4ec19d1117903273dcd8b7e74da8ef62bfeeff619c480957",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/LabelValidationTests.cs",
+      "sha256": "4e82f4a9fc4f575a15b1260dc8cb44f8c4675c6903defb11a0f92cebde34b1e3",
+      "baseline_sha256": "4e82f4a9fc4f575a15b1260dc8cb44f8c4675c6903defb11a0f92cebde34b1e3",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/RetryExtractionTests.cs",
+      "sha256": "89af879e4f779bbee997d24e7655c5f0a47e1dbc8187af0e51dc8bd6d5c3be5b",
+      "baseline_sha256": "89af879e4f779bbee997d24e7655c5f0a47e1dbc8187af0e51dc8bd6d5c3be5b",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/SessionKeysTests.cs",
+      "sha256": "ee6f54eb0ef5613d29aa97940ab433b52a3dc32c5110026bcc050fae23919516",
+      "baseline_sha256": "ee6f54eb0ef5613d29aa97940ab433b52a3dc32c5110026bcc050fae23919516",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/TouchNotificationTests.cs",
+      "sha256": "2c5e3e7cccdae1ef9e357913826e86ead06632e8be236d21b9e99bcc0c92bd45",
+      "baseline_sha256": "2c5e3e7cccdae1ef9e357913826e86ead06632e8be236d21b9e99bcc0c92bd45",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+      "sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+      "baseline_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+      "unchanged": false,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true,
+      "byte_difference": "CRLF/LF working-tree normalization only"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/xunit.runner.json",
+      "sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+      "baseline_sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+      "unchanged": true,
+      "reason": "outside 35-path authored review; unchanged Git text; no independent clean-unit sampling verdict",
+      "git_text_unchanged": true
+    }
+  ],
+  "excluded_shared_scope": "All portions of the five shared files outside YubiHSM semantic units are excluded from acceptance, even though their bytes participate in full-file identities. Core/other module source/docs excluded; external targets existence only.",
+  "validation_limits": [
+    "semantic review only",
+    "six README C# bodies compilation pending separately",
+    "no reviewer builds/tests/hardware/formatter/commits/agents",
+    "coordinator gates and final evidence review remain separate"
+  ]
+}

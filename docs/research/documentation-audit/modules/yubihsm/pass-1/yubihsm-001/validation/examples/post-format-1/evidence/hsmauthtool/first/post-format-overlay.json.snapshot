@@ -1,0 +1,378 @@
+{
+  "id": "post-format-1",
+  "base_extraction": {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/manifest.json",
+    "bytes": 444011,
+    "sha256": "916fdba909347f8e13503adfff9fdd2bf27a26b10a4dafae5482d75f3ce5d300"
+  },
+  "pre_format": {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/pre-format-content.json",
+    "bytes": 210045,
+    "sha256": "8d9b4caf416e5181d5b8ee4528c42bcf454ab08794d0665d68bd340949c3f41a"
+  },
+  "accepted_review": {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-path-manifest.json",
+    "bytes": 31160,
+    "sha256": "2bcc374bb844a268008671873f6568aea05a868905e5ab0e59b71b65719ad927"
+  },
+  "formatter_command": {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/format-apply.log",
+    "bytes": 1810,
+    "sha256": "bb62367c6c5a92d6a9e712866aabc08a19c0386a54dbbb0cc7d8bf56b2de9e38"
+  },
+  "runner": {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format.py",
+    "bytes": 12359,
+    "sha256": "7fd645b5bbeefbfc06393b27a722b449809b4c7bc2e7c29edd6d5fe1ea5f0e67"
+  },
+  "files": [
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs",
+      "before_sha256": "c5730f84f59f2cb848babd7847c83560fedbea47c9e495d23bb9df0f128471fe",
+      "after_sha256": "ef92af96bf576ececa9a95ae003eacd2b3e8875d026812c94e6c1cbcf8d0c4fe",
+      "bytes": 3566,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs",
+      "before_sha256": "da561a1838312ec57f803941c78db8036686f165d96d394b0f5953c6b1565a16",
+      "after_sha256": "d1dba03820a9377c806561de170e118d8ee6aee6017ed669198ac9791556db4d",
+      "bytes": 1932,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 1,
+      "header_blank_lines_after": 1,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs",
+      "before_sha256": "334cc747a83caa5a261f8d658ea79557a13f50f62538a6755d89213b7b85b63b",
+      "after_sha256": "1cfc353d4f49a87f1ec49c3d2df0d2b0afa5f880447351451aede31d7f35b49f",
+      "bytes": 17502,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs",
+      "before_sha256": "d8b0905ac49fb945cea844a260853f9aea8d55fada6c414ca2018c25ff8e6bb3",
+      "after_sha256": "4357b3325337d10056caa63afa370efe407ff35eaa3ec5335be2244a92ab0655",
+      "bytes": 1141,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+      "before_sha256": "7749db37bffd28e2407c7f716a43e0cfaefb5ddb920d41658be184dd8bfb4413",
+      "after_sha256": "c62ac460a3aa27285dfebfd76740630d3f2f3e9ceec021462ed13ca390e7ddb5",
+      "bytes": 6905,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs",
+      "before_sha256": "ce43fb6ed4d475c76e037b16c416e342a743957109bc415f8d9cef78e6eb1c32",
+      "after_sha256": "68b9f8b0648a4d6efdc847ffc53145b134865f102f0a53000f7f0d133ac70ae1",
+      "bytes": 2336,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs",
+      "before_sha256": "3468e77a58f59a8b8e0c22cdc37a64c9ef05fda75dbc5b17e9f4e82512a941d8",
+      "after_sha256": "7ac1545e8212629bed1b9d8e07c3ae2830faec2dbd9ae06a8327f5051949fb15",
+      "bytes": 3191,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs",
+      "before_sha256": "33d6b9d76eb7e1505b15959ab0f95dbd383fee5623e51664a0af9b9cecb568a9",
+      "after_sha256": "4347572bb2427884a7b0b1eb08939a2480c13536a497a2b487f55b938a7e655a",
+      "bytes": 4617,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs",
+      "before_sha256": "0e2a356ca3c26c903351d6b7f24961c31f6fba69a8c555e7bd5542473c1dee5e",
+      "after_sha256": "67e60cd6caf5eeacefc04e512a1caa2b89f1cc4fd1b43941d9e4f6369e6707bc",
+      "bytes": 1644,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs",
+      "before_sha256": "9113eb7309913fab613375215bbb8910f52feb2659d8b6898a45f8693f0e29aa",
+      "after_sha256": "daaaacd1b89810eb7753633cf97f600eb0144a4659080ef1c4137814c3fcd636",
+      "bytes": 2109,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+      "before_sha256": "c3f123c7d7f752bf2a608a967e8e191cc6b33f6ee9c1d63ee8c38ce634f4b382",
+      "after_sha256": "352cbe36851f136cfbe6e30e40808893330b5fe801ab677727c8027682ca59f6",
+      "bytes": 4903,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/src/Backend/HsmAuthBackend.cs",
+      "before_sha256": "3d3d276a6c524e40565af5cd4ac8cd88fd8b60b9eafd14ac5b4b08d371057b6e",
+      "after_sha256": "62a705c289a8a731da02805921aa1bcad3216b526dd1bf5d7334b81649a31e9e",
+      "bytes": 2386,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthAlgorithm.cs",
+      "before_sha256": "a4069db87262908b57d3c61cdac00e2b8e9e041e0f056ef76d010f753a174ab6",
+      "after_sha256": "4aab021e674bf5c082a53b916bb1112a49e99d1565e5546f177001263e8d4cec",
+      "bytes": 2778,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 1,
+      "header_blank_lines_after": 1,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthCredential.cs",
+      "before_sha256": "7e98e102e58f49c3635ae808cd86bcc8ffed3e2bf257e716c39357578c5a793e",
+      "after_sha256": "19a4c51f32e7c4f4c03a20bd94825c8a4c09cf4698b6de889cb799491cc28df4",
+      "bytes": 2407,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 1,
+      "header_blank_lines_after": 1,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthRetryException.cs",
+      "before_sha256": "cf6a40f241abab64646bd590ea0d1f6b723b1d0c825000b53bc6be1e463c4372",
+      "after_sha256": "5ddb414865deeacb71c80247e0f79fd7674bdb36aecaaefe549fdbbdbfdb2e71",
+      "bytes": 3397,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthSession.cs",
+      "before_sha256": "683e2b71f220bd783ab3bfea78ec57383e095f4275c298c84b541e08ca1b1bf4",
+      "after_sha256": "cff7ce2e4b3d7e6da16277503257705767d2e1b9b014ccfccd136a1a8e630240",
+      "bytes": 39798,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "before_sha256": "1d29d612f9737fdadcef209d727d7dc3ce7528e3d30a3af81c8d61a0b60ace7d",
+      "after_sha256": "af98ffeb0449789dac2a185d9e7b467ce30838e835413c4b1fa05e8e8ec8eeac",
+      "bytes": 21008,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/src/IYubiKeyExtensions.cs",
+      "before_sha256": "1f776f28c68a665fd62a7b72ea1ea3febf795f35613f97f27004020d46130cae",
+      "after_sha256": "93df1799760d8b4bf52e0f652d7da89462a48a61f29fc4310e73f0458f7b1d9f",
+      "bytes": 3881,
+      "removed_namespaces": [
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu",
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Scp"
+      ],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/src/SessionKeys.cs",
+      "before_sha256": "63f45c4a8640be5ac857993433744feca6f08b0962defc62dc6ff8d088e76bd6",
+      "after_sha256": "8a220c1c4984f39b2029edee3b175e58bd5ac7db063a593bd3d36b3462fd7d26",
+      "bytes": 4573,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs",
+      "before_sha256": "e51edb16dde78133f385c9d873ea979700af349276b3854b759767fcb50aaf92",
+      "after_sha256": "ae95aaad9ae3dd0c00ec180bb8d88f54845385ced12fae96a1257abeb2dadf34",
+      "bytes": 9450,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs",
+      "before_sha256": "b6ebdbfa680fb584362406f54233e765dc67f7c60111cc9dae3632c0e11dae72",
+      "after_sha256": "1307a5c79bda1829be76784d1d070f79858fbdae6db2f33f691f2a32f0e56c20",
+      "bytes": 15368,
+      "removed_namespaces": [
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu"
+      ],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs",
+      "before_sha256": "30a1b138942b0c7d2424752b9f7efbd93f0fbae13d9fec54fd6f6c080754aa25",
+      "after_sha256": "4ef2ec945701a8f79c9c8536a1b9a39877de5c33dbf612460f1ebbf7c36d6aee",
+      "bytes": 3126,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs",
+      "before_sha256": "bc040900d1e337b72bfdaf3ebe16e8386393e86c8f833e329cc53dc22fd56e0b",
+      "after_sha256": "99b992e228671021c6f07f140576ba5f0f84dd54735244bbd8dce9c1176a0563",
+      "bytes": 7925,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs",
+      "before_sha256": "e31ef994f355f0b2d6bd8c22510b00a3beb6df8f494d725948b93e6b17bb4e2a",
+      "after_sha256": "a9f10ae1a4a9e63236d3d102c7166114123239901fff73013b73706cfce1add9",
+      "bytes": 11187,
+      "removed_namespaces": [],
+      "using_order_changed": true,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 1,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs",
+      "before_sha256": "ff05e66130cf172ee174b3c55d41545b0432dd6297f145184eed386af1a31b0e",
+      "after_sha256": "144fe0367dc9d52efb0c5290274cf6708c6403361d968730e39271cd0cd9d89e",
+      "bytes": 15645,
+      "removed_namespaces": [
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu"
+      ],
+      "using_order_changed": false,
+      "header_blank_lines_before": 1,
+      "header_blank_lines_after": 1,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs",
+      "before_sha256": "7da09206e1e3fa80b471c5fad97ab74c01420a0a325a1e2349a74b7bf871c66f",
+      "after_sha256": "3e4881e977fceebc79658924f31705531dfe19c99df5bd8684d105780884bf3f",
+      "bytes": 2879,
+      "removed_namespaces": [],
+      "using_order_changed": false,
+      "header_blank_lines_before": 2,
+      "header_blank_lines_after": 2,
+      "terminal_lf_removed": true,
+      "other_header_and_body_bytes_identical": true
+    }
+  ],
+  "runtime_adaptations": {
+    "verify.py": {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/verify.py",
+        "bytes": 8680,
+        "sha256": "a3cd6bb5557ac28ee04388ea2e907580818ed14cb22e645c7d4764a5c8bc1d52"
+      },
+      "substitutions": {
+        "manifest = json.loads(manifest_path.read_text())": "manifest = json.loads(manifest_path.read_text())\nmanifest['dependencies'] = [updated_dependencies.get(row['path'], row) for row in manifest['dependencies']]",
+        "evidence = folder / context / 'evidence' / attempt": "evidence = OVERLAY / 'evidence' / context / attempt",
+        "require(data['extraction_manifest_sha256'] == sha(manifest_path.read_bytes()), 'Capture binds another extraction manifest')": "require(data['extraction_manifest_sha256'] == sha(manifest_path.read_bytes()), 'Capture binds another extraction manifest')\n        require(data['post_format_overlay_sha256'] == overlay_sha and data['transform_binding_sha256'] == binding_sha, 'Post-format overlay/binding capture mismatch')"
+      },
+      "virtual_target_sha256": "68c2a26487b8491449a58a132d881ad4d30bfd7e435f6f455c5f2bd393d985a5"
+    },
+    "capture.py": {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/capture.py",
+        "bytes": 9159,
+        "sha256": "89bcb6bde430c7a81c5f7d15e2129c403566b4905f5b7b6fb87fadd43066ead5"
+      },
+      "substitutions": {
+        "dest = folder / 'evidence' / attempt": "dest = OVERLAY / 'evidence' / context / attempt",
+        "retained = [retain(work / name, name) for name in names]": "retained = [retain(work / name, name) for name in names]\n    retained.append(retain(OVERLAY / 'manifest.json', 'post-format-overlay.json.snapshot'))\n    retained.append(retain(OVERLAY / 'transform-binding.json', 'post-format-binding.json.snapshot'))",
+        "native_shipping_capture=context == 'hsmauthtool',": "post_format_overlay_sha256=overlay_sha, transform_binding_sha256=binding_sha, native_shipping_capture=context == 'hsmauthtool',"
+      },
+      "virtual_target_sha256": "9326f9fbe6b31605cb8a3c354d590efb1830859c80f180ed947d50838397e535"
+    }
+  },
+  "policy": "Reuse immutable v1 bodies/hosts/tools by reference; update only 26 proven source input hashes. Exact non-import/header/body bytes survive, except one final LF; four named ordinary imports removed and one directive-free import/header group reordered. Coordinator Roslyn proof remains separate."
+}

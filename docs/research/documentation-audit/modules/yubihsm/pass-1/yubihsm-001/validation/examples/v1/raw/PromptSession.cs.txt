@@ -1,0 +1,8 @@
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
+}
+
+var options = new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() };
+await using var session = await device.CreateHsmAuthSessionAsync(options);

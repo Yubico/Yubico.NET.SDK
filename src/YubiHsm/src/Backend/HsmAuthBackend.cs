@@ -27,6 +27,8 @@ internal sealed class HsmAuthBackend(ISmartCardProtocol protocol) : IHsmAuthBack
     public async Task<FirmwareVersion> ReadInitialStateAsync(CancellationToken cancellationToken = default)
     {
         var selectResponse = await SelectAsync(cancellationToken).ConfigureAwait(false);
+        // Use the applet's three-byte version when available; the session applies any caller override.
+        // The base floor supplies policy when SELECT omits a usable version value.
         return ParseVersionFromSelectResponse(selectResponse) ?? HsmAuthSession.FeatureHsmAuth.Version;
     }
 

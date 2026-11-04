@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/sdk-default.py static
+PASS: SDK 10.0.403 default expression/Exists import/absent target and exact source snapshots; original failed first plus accepted consumer/first unchanged; compiler workspace text intact; both narrow layered after-programs parse. No build/capture/device execution.
+
+EXIT=0

@@ -1,0 +1,8 @@
+{
+  "reason": "Isolate retry/password/touch lanes using optional-cryptogram omission after original v1 56-byte parser failure; retain failed cryptogram test as HSM-IMP-008, no SDK fix",
+  "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+  "before_sha256": "4b8b9c36f5e2d9124cf2fa32e0dc9cc3922b4c3a249c378bb9a73b222ffab84a",
+  "after_sha256": "2803d517ec115dae72e0b1ef87e64a0352f5843afa1617ed7f723743203048e1",
+  "before_snapshot": "evidence/final-inputs-v1/4b8b9c36f5e2d9124cf2fa32e0dc9cc3922b4c3a249c378bb9a73b222ffab84a-HardwareProbeTests.cs.snapshot",
+  "changes": "Five supplied-card arguments replaced by omitted card; one KAT result message updated"
+}

@@ -1,0 +1,40 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-134121-157-build",
+  "files": [
+    {
+      "path": "01-clean-AuditHsm001.Examples.Shipping.HsmAuthTool.log",
+      "bytes": 50667,
+      "sha256": "9cb6694000ebdab91f2b9d4ff3d6e90a45811b8fec06222a7e7d24320aa16a53",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "02-build-AuditHsm001.Examples.Shipping.HsmAuthTool.log",
+      "bytes": 1809,
+      "sha256": "34cd312886d232cf75768b3908f8475dd165d7fcce682b4fefa79f2c7312da9f",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 733,
+      "sha256": "2a15ca9f18fa2810d9ff011e1b97b3235c4f2561ec34bad9898ffb8240f39ae8",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 458,
+      "sha256": "6aca4f82de9b3214745697afae3a9f2d0e76bb36fbf9be030de9c77a6cc3d727",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2271,
+      "sha256": "8b3518ffcb57a515a2642504056703c85e2a6eb06c0332df28b7c26dfd9d1bef",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

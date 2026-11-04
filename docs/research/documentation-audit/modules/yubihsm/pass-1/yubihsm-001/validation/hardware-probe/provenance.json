@@ -1,0 +1,228 @@
+{
+  "baseline": "a74792facb657413e98223e059876d8b213ffff3",
+  "source_manifest": {
+    "manifest": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/record-manifest.json",
+    "manifest_sha256": "d310ba77bb04a0b0052baa6afd32a0355510018267cef391a02963fcdd555d0d",
+    "checked": 433,
+    "result": "pass"
+  },
+  "copies": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/Directory.Build.props",
+      "source_sha256": "3961fe692d93f8a56e7f78f96ab27e245acbb9cfce31319c62b46f173b4d29e5",
+      "target": "Directory.Build.props",
+      "target_sha256": "52e24e900ba1d587262699581784a6de1bdf4ef3d3b83bbaff20b48fc215a023",
+      "substitutions": {
+        "AuditOtp001": "AuditHsm001",
+        "/tmp/opencode/yubiotp-001-hardware-probe": "/tmp/opencode/yubihsm-001-hardware",
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+        "<TestSessionTimeout>90000</TestSessionTimeout>": "<TestSessionTimeout>120000</TestSessionTimeout>"
+      },
+      "substitution_counts": {
+        "AuditOtp001": 0,
+        "/tmp/opencode/yubiotp-001-hardware-probe": 1,
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": 0,
+        "<TestSessionTimeout>90000</TestSessionTimeout>": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/Directory.Build.targets",
+      "source_sha256": "265565f49cd6fb556fc144d7b786edd93f7746b4f38b54cccf24c054ea749ef8",
+      "target": "Directory.Build.targets",
+      "target_sha256": "adc3e16f49a9d20a5a4e73b3754a367a3f34b9ede91f25acc17479add4f652e4",
+      "substitutions": {
+        "AuditOtp001": "AuditHsm001",
+        "/tmp/opencode/yubiotp-001-hardware-probe": "/tmp/opencode/yubihsm-001-hardware",
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+        "<TestSessionTimeout>90000</TestSessionTimeout>": "<TestSessionTimeout>120000</TestSessionTimeout>"
+      },
+      "substitution_counts": {
+        "AuditOtp001": 2,
+        "/tmp/opencode/yubiotp-001-hardware-probe": 0,
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": 0,
+        "<TestSessionTimeout>90000</TestSessionTimeout>": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/capture-compiler.py",
+      "source_sha256": "ae4a8fcb76b1fb619b71bde068bbf0eff54a831259126c0f5f869f2d72c6fba0",
+      "target": "capture-compiler.py",
+      "target_sha256": "38b85e81824d93a7da41284b35254afecc0896cec19da9e76b0a1e5e242892bc",
+      "substitutions": {
+        "AuditOtp001": "AuditHsm001",
+        "/tmp/opencode/yubiotp-001-hardware-probe": "/tmp/opencode/yubihsm-001-hardware",
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+        "<TestSessionTimeout>90000</TestSessionTimeout>": "<TestSessionTimeout>120000</TestSessionTimeout>"
+      },
+      "substitution_counts": {
+        "AuditOtp001": 0,
+        "/tmp/opencode/yubiotp-001-hardware-probe": 1,
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": 0,
+        "<TestSessionTimeout>90000</TestSessionTimeout>": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests.csproj",
+      "source_sha256": "d75336af5b00ffd7ad48f12e70b0d8ea81304740328b0bdea89ce8748e8aced9",
+      "target": "tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj",
+      "target_sha256": "a1ea3afda541ed9d0bdeeb2f7f78bc9dd33f7e48d7e6e0b610509632465ce845",
+      "substitutions": {
+        "AuditOtp001": "AuditHsm001",
+        "/tmp/opencode/yubiotp-001-hardware-probe": "/tmp/opencode/yubihsm-001-hardware",
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+        "<TestSessionTimeout>90000</TestSessionTimeout>": "<TestSessionTimeout>120000</TestSessionTimeout>"
+      },
+      "substitution_counts": {
+        "AuditOtp001": 2,
+        "/tmp/opencode/yubiotp-001-hardware-probe": 0,
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": 1,
+        "<TestSessionTimeout>90000</TestSessionTimeout>": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/xunit.runner.json",
+      "source_sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4",
+      "target": "tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/xunit.runner.json",
+      "target_sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4",
+      "substitutions": {
+        "AuditOtp001": "AuditHsm001",
+        "/tmp/opencode/yubiotp-001-hardware-probe": "/tmp/opencode/yubihsm-001-hardware",
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+        "<TestSessionTimeout>90000</TestSessionTimeout>": "<TestSessionTimeout>120000</TestSessionTimeout>"
+      },
+      "substitution_counts": {
+        "AuditOtp001": 0,
+        "/tmp/opencode/yubiotp-001-hardware-probe": 0,
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": 0,
+        "<TestSessionTimeout>90000</TestSessionTimeout>": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/probe.runsettings",
+      "source_sha256": "15c3eb32ebbc3109c9a3ed353284b9538ca6e83c12b378d67e32b5946dfe01c1",
+      "target": "tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/probe.runsettings",
+      "target_sha256": "6e6eab6f41e09de0d69d3dd02e80ace7129e44eb3cbc75792e715624f9b21417",
+      "substitutions": {
+        "AuditOtp001": "AuditHsm001",
+        "/tmp/opencode/yubiotp-001-hardware-probe": "/tmp/opencode/yubihsm-001-hardware",
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+        "<TestSessionTimeout>90000</TestSessionTimeout>": "<TestSessionTimeout>120000</TestSessionTimeout>"
+      },
+      "substitution_counts": {
+        "AuditOtp001": 0,
+        "/tmp/opencode/yubiotp-001-hardware-probe": 1,
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": 0,
+        "<TestSessionTimeout>90000</TestSessionTimeout>": 1
+      }
+    }
+  ],
+  "preparation_inputs": [
+    {
+      "path": "Directory.Build.props",
+      "bytes": 628,
+      "sha256": "52e24e900ba1d587262699581784a6de1bdf4ef3d3b83bbaff20b48fc215a023"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "bytes": 1977,
+      "sha256": "adc3e16f49a9d20a5a4e73b3754a367a3f34b9ede91f25acc17479add4f652e4"
+    },
+    {
+      "path": "capture-compiler.py",
+      "bytes": 1747,
+      "sha256": "38b85e81824d93a7da41284b35254afecc0896cec19da9e76b0a1e5e242892bc"
+    },
+    {
+      "path": "fetch-sources.py",
+      "bytes": 2617,
+      "sha256": "7c09543b82bb2d087132e5964c3fc2f5d7c34ce9b2a45d12ae5025892f741559"
+    },
+    {
+      "path": "prepare-provenance.py",
+      "bytes": 5131,
+      "sha256": "3d2a2d4d5b21f123d470f7b58ab3e69342a3cb88b56505bce6313b39930408a6"
+    },
+    {
+      "path": "retain-inputs.py",
+      "bytes": 5285,
+      "sha256": "08970dc5d76411833b6d54232a2064448e1709603a19479627c3b8cb97fe5628"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "bytes": 14548,
+      "sha256": "4b8b9c36f5e2d9124cf2fa32e0dc9cc3922b4c3a249c378bb9a73b222ffab84a"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs",
+      "bytes": 9445,
+      "sha256": "aa755afc5971d522fe204fc424c4964d018dc61d8fc6d660fa7f97a24a1b0726"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/SymmetricOracle.cs",
+      "bytes": 7073,
+      "sha256": "0fa4f481ee971468449d2efa64ddf1812eb8e526523e497408287034e30ef2bd"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj",
+      "bytes": 2038,
+      "sha256": "a1ea3afda541ed9d0bdeeb2f7f78bc9dd33f7e48d7e6e0b610509632465ce845"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/probe.runsettings",
+      "bytes": 493,
+      "sha256": "6e6eab6f41e09de0d69d3dd02e80ace7129e44eb3cbc75792e715624f9b21417"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/xunit.runner.json",
+      "bytes": 201,
+      "sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4"
+    },
+    {
+      "path": "verify-preparation.py",
+      "bytes": 5675,
+      "sha256": "588a79a994135d0c239e5916750613b725e8bd42c39c1868ab0d6e3b007aff33"
+    }
+  ],
+  "canonical_preparation_identities": [
+    {
+      "path": "Directory.Build.props",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "Directory.Packages.props",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "global.json",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": ".editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+      "bytes": 1708,
+      "sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4"
+    }
+  ],
+  "adaptations": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/retain-inputs.py",
+      "source_sha256": "d7537e4fc5b4a50a1a701b9b31374db30ca3b5d2a3c0f3c8d810b7e35c74a98d",
+      "target": "retain-inputs.py",
+      "target_sha256": "08970dc5d76411833b6d54232a2064448e1709603a19479627c3b8cb97fe5628",
+      "changes": "Parameterize capture and final-input names; fail closed with explicit checks; reconcile actual Csc sets; retain full text input snapshots with exclusive creation and dynamic counts."
+    }
+  ],
+  "policy": "Host uses genuine central xUnit-v2/VSTest/TestShared references and canonical root analyzer policy. Probes/oracle are newly authored. Late Csc capture and final source/dependency reconciliation remain coordinator-owned."
+}

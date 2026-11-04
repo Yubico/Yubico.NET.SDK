@@ -1,0 +1,50 @@
+[
+  {
+    "tool": "capture.py",
+    "base_post_format_adaptation": {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/capture.py",
+        "bytes": 9159,
+        "sha256": "89bcb6bde430c7a81c5f7d15e2129c403566b4905f5b7b6fb87fadd43066ead5"
+      },
+      "substitutions": {
+        "dest = folder / 'evidence' / attempt": "dest = OVERLAY / 'evidence' / context / attempt",
+        "retained = [retain(work / name, name) for name in names]": "retained = [retain(work / name, name) for name in names]\n    retained.append(retain(OVERLAY / 'manifest.json', 'post-format-overlay.json.snapshot'))\n    retained.append(retain(OVERLAY / 'transform-binding.json', 'post-format-binding.json.snapshot'))",
+        "native_shipping_capture=context == 'hsmauthtool',": "post_format_overlay_sha256=overlay_sha, transform_binding_sha256=binding_sha, native_shipping_capture=context == 'hsmauthtool',"
+      },
+      "virtual_target_sha256": "9326f9fbe6b31605cb8a3c354d590efb1830859c80f180ed947d50838397e535"
+    },
+    "before_program_sha256": "9326f9fbe6b31605cb8a3c354d590efb1830859c80f180ed947d50838397e535",
+    "after_program_sha256": "594450c32bdb9fc3ecc6caaa920d9b74a281838dce3145e34a6e9e9657cf3572",
+    "correction_runner": {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/sdk-default.py",
+      "bytes": 11673,
+      "sha256": "3f14ff6eeb87854f48e591fd35b0930faed0a06d74be0cfbb8b73904d7f9ef14"
+    },
+    "scope": "After-program reproduced by the pinned correction runner; exact SDK guard, correction-manifest retention/provenance and HsmAuthTool-only verifier binding. Originals remain referenced, never overwritten."
+  },
+  {
+    "tool": "verify.py",
+    "base_post_format_adaptation": {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/verify.py",
+        "bytes": 8680,
+        "sha256": "a3cd6bb5557ac28ee04388ea2e907580818ed14cb22e645c7d4764a5c8bc1d52"
+      },
+      "substitutions": {
+        "manifest = json.loads(manifest_path.read_text())": "manifest = json.loads(manifest_path.read_text())\nmanifest['dependencies'] = [updated_dependencies.get(row['path'], row) for row in manifest['dependencies']]",
+        "evidence = folder / context / 'evidence' / attempt": "evidence = OVERLAY / 'evidence' / context / attempt",
+        "require(data['extraction_manifest_sha256'] == sha(manifest_path.read_bytes()), 'Capture binds another extraction manifest')": "require(data['extraction_manifest_sha256'] == sha(manifest_path.read_bytes()), 'Capture binds another extraction manifest')\n        require(data['post_format_overlay_sha256'] == overlay_sha and data['transform_binding_sha256'] == binding_sha, 'Post-format overlay/binding capture mismatch')"
+      },
+      "virtual_target_sha256": "68c2a26487b8491449a58a132d881ad4d30bfd7e435f6f455c5f2bd393d985a5"
+    },
+    "before_program_sha256": "68c2a26487b8491449a58a132d881ad4d30bfd7e435f6f455c5f2bd393d985a5",
+    "after_program_sha256": "791828f3e827f6d0ce842149b939f4dec8094f11fb77ae4ffdc93b81ba6df8a3",
+    "correction_runner": {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/sdk-default.py",
+      "bytes": 11673,
+      "sha256": "3f14ff6eeb87854f48e591fd35b0930faed0a06d74be0cfbb8b73904d7f9ef14"
+    },
+    "scope": "After-program reproduced by the pinned correction runner; exact SDK guard, correction-manifest retention/provenance and HsmAuthTool-only verifier binding. Originals remain referenced, never overwritten."
+  }
+]

@@ -24,6 +24,10 @@ namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Prompts;
 /// Handles YubiKey device discovery and selection for HsmAuth operations.
 /// HsmAuth only supports SmartCard (CCID) transport.
 /// </summary>
+/// <remarks>
+///     Discovery filters for SmartCard access; opening an HsmAuth session subsequently selects the
+///     applet and establishes its availability on the selected key.
+/// </remarks>
 public static class DeviceSelector
 {
     /// <summary>

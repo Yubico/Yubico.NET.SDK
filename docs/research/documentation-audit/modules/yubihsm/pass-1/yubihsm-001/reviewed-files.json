@@ -1,0 +1,215 @@
+{
+  "baseline": "a74792facb657413e98223e059876d8b213ffff3",
+  "files": [
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "reviewed_sha256": "c95f5b2659b37bfaa5a4ff7e70ea0a87d983aac15675d5a41e8ad476097a3dd9",
+      "final_sha256": "c95f5b2659b37bfaa5a4ff7e70ea0a87d983aac15675d5a41e8ad476097a3dd9",
+      "scope": "YubiHSM sections only; enclosing context where needed"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "reviewed_sha256": "9d39813ce3424d633c6ae52c33a30e6b353fa8ec77c4d2bfbc74c09e390dc77c",
+      "final_sha256": "9d39813ce3424d633c6ae52c33a30e6b353fa8ec77c4d2bfbc74c09e390dc77c",
+      "scope": "YubiHSM sections only; enclosing context where needed"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "reviewed_sha256": "a6947200550db0711a05c24b94f6859c2d083df75fbce06f25a1077ab41f2b78",
+      "final_sha256": "a6947200550db0711a05c24b94f6859c2d083df75fbce06f25a1077ab41f2b78",
+      "scope": "YubiHSM sections only; enclosing context where needed"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "reviewed_sha256": "11992cbcd4a23b2bc339d920f82c0ef659aefaffcfbcf24888da3d229fff22c0",
+      "final_sha256": "11992cbcd4a23b2bc339d920f82c0ef659aefaffcfbcf24888da3d229fff22c0",
+      "scope": "YubiHSM sections only; enclosing context where needed"
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "reviewed_sha256": "a77eedd2b55ac4585194c24a25e20702d572e9dc07575ece055df770ee8693d3",
+      "final_sha256": "a77eedd2b55ac4585194c24a25e20702d572e9dc07575ece055df770ee8693d3",
+      "scope": "YubiHSM sections only; enclosing context where needed"
+    },
+    {
+      "path": "src/YubiHsm/CLAUDE.md",
+      "reviewed_sha256": "4208d45ec534c31d80024fa09e60a717bbee272c5d1bd71bea8661c0f4b1b68d",
+      "final_sha256": "4208d45ec534c31d80024fa09e60a717bbee272c5d1bd71bea8661c0f4b1b68d",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/PACKAGE_README.md",
+      "reviewed_sha256": "541a09f386cf4040d2062a18634c50c8c9a4559f2f58536bac2f806b9b89cdb4",
+      "final_sha256": "541a09f386cf4040d2062a18634c50c8c9a4559f2f58536bac2f806b9b89cdb4",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/README.md",
+      "reviewed_sha256": "50d40f99913862a997f51394feddfc07236ad639df2a456f9103cd57ee3ff1b1",
+      "final_sha256": "50d40f99913862a997f51394feddfc07236ad639df2a456f9103cd57ee3ff1b1",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs",
+      "reviewed_sha256": "c5730f84f59f2cb848babd7847c83560fedbea47c9e495d23bb9df0f128471fe",
+      "final_sha256": "ef92af96bf576ececa9a95ae003eacd2b3e8875d026812c94e6c1cbcf8d0c4fe",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs",
+      "reviewed_sha256": "da561a1838312ec57f803941c78db8036686f165d96d394b0f5953c6b1565a16",
+      "final_sha256": "d1dba03820a9377c806561de170e118d8ee6aee6017ed669198ac9791556db4d",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs",
+      "reviewed_sha256": "334cc747a83caa5a261f8d658ea79557a13f50f62538a6755d89213b7b85b63b",
+      "final_sha256": "1cfc353d4f49a87f1ec49c3d2df0d2b0afa5f880447351451aede31d7f35b49f",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs",
+      "reviewed_sha256": "d8b0905ac49fb945cea844a260853f9aea8d55fada6c414ca2018c25ff8e6bb3",
+      "final_sha256": "4357b3325337d10056caa63afa370efe407ff35eaa3ec5335be2244a92ab0655",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+      "reviewed_sha256": "7749db37bffd28e2407c7f716a43e0cfaefb5ddb920d41658be184dd8bfb4413",
+      "final_sha256": "c62ac460a3aa27285dfebfd76740630d3f2f3e9ceec021462ed13ca390e7ddb5",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs",
+      "reviewed_sha256": "ce43fb6ed4d475c76e037b16c416e342a743957109bc415f8d9cef78e6eb1c32",
+      "final_sha256": "68b9f8b0648a4d6efdc847ffc53145b134865f102f0a53000f7f0d133ac70ae1",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs",
+      "reviewed_sha256": "3468e77a58f59a8b8e0c22cdc37a64c9ef05fda75dbc5b17e9f4e82512a941d8",
+      "final_sha256": "7ac1545e8212629bed1b9d8e07c3ae2830faec2dbd9ae06a8327f5051949fb15",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs",
+      "reviewed_sha256": "33d6b9d76eb7e1505b15959ab0f95dbd383fee5623e51664a0af9b9cecb568a9",
+      "final_sha256": "4347572bb2427884a7b0b1eb08939a2480c13536a497a2b487f55b938a7e655a",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs",
+      "reviewed_sha256": "0e2a356ca3c26c903351d6b7f24961c31f6fba69a8c555e7bd5542473c1dee5e",
+      "final_sha256": "67e60cd6caf5eeacefc04e512a1caa2b89f1cc4fd1b43941d9e4f6369e6707bc",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs",
+      "reviewed_sha256": "9113eb7309913fab613375215bbb8910f52feb2659d8b6898a45f8693f0e29aa",
+      "final_sha256": "daaaacd1b89810eb7753633cf97f600eb0144a4659080ef1c4137814c3fcd636",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+      "reviewed_sha256": "c3f123c7d7f752bf2a608a967e8e191cc6b33f6ee9c1d63ee8c38ce634f4b382",
+      "final_sha256": "352cbe36851f136cfbe6e30e40808893330b5fe801ab677727c8027682ca59f6",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/src/Backend/HsmAuthBackend.cs",
+      "reviewed_sha256": "3d3d276a6c524e40565af5cd4ac8cd88fd8b60b9eafd14ac5b4b08d371057b6e",
+      "final_sha256": "62a705c289a8a731da02805921aa1bcad3216b526dd1bf5d7334b81649a31e9e",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthAlgorithm.cs",
+      "reviewed_sha256": "a4069db87262908b57d3c61cdac00e2b8e9e041e0f056ef76d010f753a174ab6",
+      "final_sha256": "4aab021e674bf5c082a53b916bb1112a49e99d1565e5546f177001263e8d4cec",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthCredential.cs",
+      "reviewed_sha256": "7e98e102e58f49c3635ae808cd86bcc8ffed3e2bf257e716c39357578c5a793e",
+      "final_sha256": "19a4c51f32e7c4f4c03a20bd94825c8a4c09cf4698b6de889cb799491cc28df4",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthRetryException.cs",
+      "reviewed_sha256": "cf6a40f241abab64646bd590ea0d1f6b723b1d0c825000b53bc6be1e463c4372",
+      "final_sha256": "5ddb414865deeacb71c80247e0f79fd7674bdb36aecaaefe549fdbbdbfdb2e71",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthSession.cs",
+      "reviewed_sha256": "683e2b71f220bd783ab3bfea78ec57383e095f4275c298c84b541e08ca1b1bf4",
+      "final_sha256": "cff7ce2e4b3d7e6da16277503257705767d2e1b9b014ccfccd136a1a8e630240",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "reviewed_sha256": "1d29d612f9737fdadcef209d727d7dc3ce7528e3d30a3af81c8d61a0b60ace7d",
+      "final_sha256": "af98ffeb0449789dac2a185d9e7b467ce30838e835413c4b1fa05e8e8ec8eeac",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/src/IYubiKeyExtensions.cs",
+      "reviewed_sha256": "1f776f28c68a665fd62a7b72ea1ea3febf795f35613f97f27004020d46130cae",
+      "final_sha256": "93df1799760d8b4bf52e0f652d7da89462a48a61f29fc4310e73f0458f7b1d9f",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/src/SessionKeys.cs",
+      "reviewed_sha256": "63f45c4a8640be5ac857993433744feca6f08b0962defc62dc6ff8d088e76bd6",
+      "final_sha256": "8a220c1c4984f39b2029edee3b175e58bd5ac7db063a593bd3d36b3462fd7d26",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/tests/CLAUDE.md",
+      "reviewed_sha256": "c65163bce092d689e9d88a08839a99a40fb3d9c08220df10bc61b55358f5b1c9",
+      "final_sha256": "c65163bce092d689e9d88a08839a99a40fb3d9c08220df10bc61b55358f5b1c9",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs",
+      "reviewed_sha256": "e51edb16dde78133f385c9d873ea979700af349276b3854b759767fcb50aaf92",
+      "final_sha256": "ae95aaad9ae3dd0c00ec180bb8d88f54845385ced12fae96a1257abeb2dadf34",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs",
+      "reviewed_sha256": "b6ebdbfa680fb584362406f54233e765dc67f7c60111cc9dae3632c0e11dae72",
+      "final_sha256": "1307a5c79bda1829be76784d1d070f79858fbdae6db2f33f691f2a32f0e56c20",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs",
+      "reviewed_sha256": "30a1b138942b0c7d2424752b9f7efbd93f0fbae13d9fec54fd6f6c080754aa25",
+      "final_sha256": "4ef2ec945701a8f79c9c8536a1b9a39877de5c33dbf612460f1ebbf7c36d6aee",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs",
+      "reviewed_sha256": "bc040900d1e337b72bfdaf3ebe16e8386393e86c8f833e329cc53dc22fd56e0b",
+      "final_sha256": "99b992e228671021c6f07f140576ba5f0f84dd54735244bbd8dce9c1176a0563",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs",
+      "reviewed_sha256": "e31ef994f355f0b2d6bd8c22510b00a3beb6df8f494d725948b93e6b17bb4e2a",
+      "final_sha256": "a9f10ae1a4a9e63236d3d102c7166114123239901fff73013b73706cfce1add9",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs",
+      "reviewed_sha256": "ff05e66130cf172ee174b3c55d41545b0432dd6297f145184eed386af1a31b0e",
+      "final_sha256": "144fe0367dc9d52efb0c5290274cf6708c6403361d968730e39271cd0cd9d89e",
+      "scope": "complete module file"
+    },
+    {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs",
+      "reviewed_sha256": "7da09206e1e3fa80b471c5fad97ab74c01420a0a325a1e2349a74b7bf871c66f",
+      "final_sha256": "3e4881e977fceebc79658924f31705531dfe19c99df5bd8684d105780884bf3f",
+      "scope": "complete module file"
+    }
+  ]
+}

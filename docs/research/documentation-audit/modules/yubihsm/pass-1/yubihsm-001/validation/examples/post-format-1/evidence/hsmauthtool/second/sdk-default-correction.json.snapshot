@@ -1,0 +1,273 @@
+{
+  "id": "sdk-default-1",
+  "runner": {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/sdk-default.py",
+    "bytes": 11673,
+    "sha256": "3f14ff6eeb87854f48e591fd35b0930faed0a06d74be0cfbb8b73904d7f9ef14"
+  },
+  "sdk": {
+    "sdk_version": "10.0.403",
+    "sdk_root": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403",
+    "default_target": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/vCurrent/Custom.Before.Microsoft.Common.props",
+    "target_exists": false,
+    "default_expression": "$(MSBuildExtensionsPath)\\v$(MSBuildToolsVersion)\\Custom.Before.$(MSBuildThisFile)",
+    "import_condition": "'$(CustomBeforeMicrosoftCommonProps)' != '' and Exists('$(CustomBeforeMicrosoftCommonProps)')",
+    "observed_policy": {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/policy-final.txt",
+      "bytes": 1318,
+      "sha256": "d45e9fd9f109e373931dcc7cb110a6dc0d6912d19313fa22a246d1793a9fd5cd"
+    },
+    "conclusion": "The nonempty property matches the installed SDK default. The target directory/file is absent at inspection; Exists makes this a dormant import path, not imported hook bytes."
+  },
+  "sdk_sources": [
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.props",
+      "bytes": 11765,
+      "sha256": "87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/Sdk/Sdk.props",
+      "bytes": 2487,
+      "sha256": "41dc552e294cd1f0c6e640c302c112b0788fa8776ecac73e7fa013382a3bf713"
+    }
+  ],
+  "failed_first": [
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/analyzer-configs.txt",
+      "bytes": 346,
+      "sha256": "668e063e8c2921b71dbe309b41cd08f8c5d699de4d8a6e86a126ed0ecd38a8cf"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/analyzers.txt",
+      "bytes": 1466,
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/capture-failure.json",
+      "bytes": 228,
+      "sha256": "1c381ae55405565abb998beb504a341a9e7821cb20dffd375bee5b7f77d506b2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/compile-inputs.txt",
+      "bytes": 2737,
+      "sha256": "85ee0dd0a3eaa5b4790c7ce99bea7f1b8190be67a69d0c75b794b3bb44e0695d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/csc-command-line.txt",
+      "bytes": 32474,
+      "sha256": "c5096ef1f2be3a816ebac1f42f38c08ba6507ae082d145def27e45255d6abcfb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/policy-final.txt",
+      "bytes": 1318,
+      "sha256": "d45e9fd9f109e373931dcc7cb110a6dc0d6912d19313fa22a246d1793a9fd5cd"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/post-format-binding.json.snapshot",
+      "bytes": 487,
+      "sha256": "74b17ca199d77ef29c2e2d88ab2b4be1be02684fc3b4cf2ee6ef07328895d4af"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/post-format-overlay.json.snapshot",
+      "bytes": 17684,
+      "sha256": "19fe74d9d35d812d11fc884ed703b76f5789541c9662ba5d6b72262ff6abe15c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/hsmauthtool/first/resolved-references.txt",
+      "bytes": 45998,
+      "sha256": "723289595db3e2809034df0626ce51a06f23194dba80b7645492c588c53a90fe"
+    }
+  ],
+  "accepted_consumer_first": [
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/Directory.Packages.props.snapshot",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/analyzer-config/630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3-.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/analyzer-config/9a6021d98d0af0c08c9e87255599caa5a4b9b2be04b4ef3d26fed05096f6d237-Yubico.YubiKit.AuditHsm001.Examples.v1.consumer.GeneratedMSBuildEditorConfig.editorconfig.snapshot",
+      "bytes": 811,
+      "sha256": "9a6021d98d0af0c08c9e87255599caa5a4b9b2be04b4ef3d26fed05096f6d237"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/analyzer-config/eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d-analysislevelstyle_all.globalconfig.snapshot",
+      "bytes": 19880,
+      "sha256": "eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/analyzer-configs.txt",
+      "bytes": 355,
+      "sha256": "34189761bfe21d55226dfcacef123d354ae842ef6262811f723fa32cc5f2741d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/analyzers.txt",
+      "bytes": 1466,
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/compile-inputs.txt",
+      "bytes": 537,
+      "sha256": "264f00372bfb2892fc36f8e4e6a02429737bcc1304cb53b9620aeec0088212a0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/compiled-project.csproj.snapshot",
+      "bytes": 490,
+      "sha256": "5b102850a5e1591d96bd18d2067f2d8c77401c19644f48185604d6eafddcb32c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/csc-command-line.txt",
+      "bytes": 28696,
+      "sha256": "7286ef5535425853d41788007b67c1d47282931fb78116a87a93b62aa8b5b620"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/global.json.snapshot",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/manifest.json",
+      "bytes": 82066,
+      "sha256": "a4b400d467c81597d1bef84d09a060a987586ded306b54f27e51c31bcac1a917"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/policy-final.txt",
+      "bytes": 786,
+      "sha256": "cbc67b310bbc2c4d16e61b02848c224034da25a3365af79f128197a59d24606b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/post-format-binding.json.snapshot",
+      "bytes": 487,
+      "sha256": "74b17ca199d77ef29c2e2d88ab2b4be1be02684fc3b4cf2ee6ef07328895d4af"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/post-format-overlay.json.snapshot",
+      "bytes": 17684,
+      "sha256": "19fe74d9d35d812d11fc884ed703b76f5789541c9662ba5d6b72262ff6abe15c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/project.assets.json.snapshot",
+      "bytes": 119121,
+      "sha256": "4d8b3e90ed2df93d0b94502d54f01ec2467b6e9d3af24ed0ce7d6043b6a728cb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/resolved-references.txt",
+      "bytes": 39588,
+      "sha256": "5ffaccf6da5d368ad8b64c4b01f7f9ca0f5db1370d7486eaf47f931dedca0585"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/source/2643c12a90a216f5cdaadc1f48a2855b64253164104fee8d69bc1b6d83ee4f78-Yubico.YubiKit.AuditHsm001.Examples.v1.consumer.AssemblyInfo.cs.snapshot",
+      "bytes": 1700,
+      "sha256": "2643c12a90a216f5cdaadc1f48a2855b64253164104fee8d69bc1b6d83ee4f78"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/source/8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592-Yubico.YubiKit.AuditHsm001.Examples.v1.consumer.GlobalUsings.g.cs.snapshot",
+      "bytes": 231,
+      "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/source/9b48ba54825b382debb3cfccb18b20f4cb6936925d4e60e39ccad1c638aa96ed-Examples.cs.snapshot",
+      "bytes": 6254,
+      "sha256": "9b48ba54825b382debb3cfccb18b20f4cb6936925d4e60e39ccad1c638aa96ed"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/source/f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/evidence/consumer/first/source-context.csproj.snapshot",
+      "bytes": 888,
+      "sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed"
+    }
+  ],
+  "workspace": [
+    {
+      "path": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool/compile-inputs.txt",
+      "sha256": "85ee0dd0a3eaa5b4790c7ce99bea7f1b8190be67a69d0c75b794b3bb44e0695d"
+    },
+    {
+      "path": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool/resolved-references.txt",
+      "sha256": "723289595db3e2809034df0626ce51a06f23194dba80b7645492c588c53a90fe"
+    },
+    {
+      "path": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool/analyzers.txt",
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "path": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool/analyzer-configs.txt",
+      "sha256": "668e063e8c2921b71dbe309b41cd08f8c5d699de4d8a6e86a126ed0ecd38a8cf"
+    },
+    {
+      "path": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool/policy-final.txt",
+      "sha256": "d45e9fd9f109e373931dcc7cb110a6dc0d6912d19313fa22a246d1793a9fd5cd"
+    },
+    {
+      "path": "/tmp/opencode/yubihsm-001-examples-v1-hsmauthtool/csc-command-line.txt",
+      "sha256": "c5096ef1f2be3a816ebac1f42f38c08ba6507ae082d145def27e45255d6abcfb"
+    }
+  ],
+  "immutable_inputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/manifest.json",
+      "bytes": 17684,
+      "sha256": "19fe74d9d35d812d11fc884ed703b76f5789541c9662ba5d6b72262ff6abe15c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format-1/transform-binding.json",
+      "bytes": 487,
+      "sha256": "74b17ca199d77ef29c2e2d88ab2b4be1be02684fc3b4cf2ee6ef07328895d4af"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/manifest.json",
+      "bytes": 444011,
+      "sha256": "916fdba909347f8e13503adfff9fdd2bf27a26b10a4dafae5482d75f3ce5d300"
+    }
+  ],
+  "tool_adaptations": {
+    "dispatcher_source": {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format.py",
+      "bytes": 12359,
+      "sha256": "7fd645b5bbeefbfc06393b27a722b449809b4c7bc2e7c29edd6d5fe1ea5f0e67"
+    },
+    "virtual_dispatcher_sha256": "89e977589dfadee974ea34836526442afbff5d497277530f2872e070254f0709",
+    "capture_source": {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/capture.py",
+      "bytes": 9159,
+      "sha256": "89bcb6bde430c7a81c5f7d15e2129c403566b4905f5b7b6fb87fadd43066ead5"
+    },
+    "verifier_source": {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/verify.py",
+      "bytes": 8680,
+      "sha256": "a3cd6bb5557ac28ee04388ea2e907580818ed14cb22e645c7d4764a5c8bc1d52"
+    },
+    "replacements": {
+      "dispatcher": {
+        "require(adaptation == record['runtime_adaptations'][tool], 'Pinned runtime tool substitution changed')": "require(adaptation == record['runtime_adaptations'][tool], 'Pinned runtime tool substitution changed')\ntext = _sdk_adjust(tool, text)"
+      },
+      "capture_guard": {
+        "require(not policy['CustomBeforeMicrosoftCommonProps'].strip(), 'Remove early common-props hook from the shipping command')": "require(not policy['CustomBeforeMicrosoftCommonProps'].strip() or (policy['NETCoreSdkVersion'] == '10.0.403' and policy['CustomBeforeMicrosoftCommonProps'] == '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/vCurrent/Custom.Before.Microsoft.Common.props' and not Path('/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/vCurrent/Custom.Before.Microsoft.Common.props').exists() and not Path('/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/vCurrent/Custom.Before.Microsoft.Common.props').is_symlink()), 'Require empty hook or the exact pinned, absent SDK 10.0.403 default; external hooks remain rejected')"
+      }
+    }
+  },
+  "policy": "Capture-only preparation-assumption correction. Pin original tools and reproduce narrow after-program substitutions in memory; preserve consumer/first and failed HsmAuthTool/first. Empty hook or exact absent SDK default only; all native output, compiler membership, analyzer/assets and current-body checks remain active. No rebuild or execution."
+}

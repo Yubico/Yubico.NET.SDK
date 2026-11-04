@@ -1,0 +1,61 @@
+{
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/Yubico/python-yubihsm/44a5ab52e0697c67b36c6dec953db08a6b7b183a/yubihsm/core.py",
+      "resolved_url": "https://raw.githubusercontent.com/Yubico/python-yubihsm/44a5ab52e0697c67b36c6dec953db08a6b7b183a/yubihsm/core.py",
+      "revision": "44a5ab52e0697c67b36c6dec953db08a6b7b183a",
+      "accessed_utc": "2026-11-04T11:47:06.446247+00:00",
+      "response_bytes": 35280,
+      "response_sha256": "00257ee2e85f1dafde5d5978aecdac6ec23e42aa7d2ef464bdc54f90e6fbbb7f",
+      "excerpts": [
+        {
+          "path": "python-yubihsm-core-1.txt",
+          "bytes": 465,
+          "sha256": "474821d5938cdc21077a3ac5999d8058f79f83fa91532400fbaeda6c623492f4",
+          "start_line": 52,
+          "end_line": 70,
+          "start_marker": "KEY_ENC =",
+          "exclusive_end_marker": "\ndef _unpad_resp("
+        },
+        {
+          "path": "python-yubihsm-core-2.txt",
+          "bytes": 3471,
+          "sha256": "a9f1484d642a811ab4bbc148dab3105f612e0dcf4c97493286c77a3757d40fb4",
+          "start_line": 425,
+          "end_line": 521,
+          "start_marker": "class SymmetricAuth:",
+          "exclusive_end_marker": "\n\nclass AsymmetricAuth:"
+        }
+      ]
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc4493.txt",
+      "resolved_url": "https://www.rfc-editor.org/rfc/rfc4493.txt",
+      "revision": "RFC 4493, June 2006, Informational",
+      "accessed_utc": "2026-11-04T11:47:06.633547+00:00",
+      "response_bytes": 38751,
+      "response_sha256": "252850ac038a44e931fdce6cb02b444a18ed1da0c9e212bfdd1da0ed3366fc1c",
+      "excerpts": [
+        {
+          "path": "rfc4493-1.txt",
+          "bytes": 10036,
+          "sha256": "162e1fbcceba877e15c6d66053cc07c3aed96b7da5c0c3060405d25ff7ba94e8",
+          "start_line": 264,
+          "end_line": 482,
+          "start_marker": "2.3.  Subkey Generation Algorithm\n",
+          "exclusive_end_marker": "\n2.5.  MAC Verification Algorithm"
+        },
+        {
+          "path": "rfc4493-2.txt",
+          "bytes": 1702,
+          "sha256": "ba4ac38fb442b3d75cf0e46ba8e8d9df9ecfdb5da9696018ad79fe2ad5c2d0a3",
+          "start_line": 570,
+          "end_line": 622,
+          "start_marker": "4.  Test Vectors\n",
+          "exclusive_end_marker": "\n5.  Acknowledgement"
+        }
+      ]
+    }
+  ],
+  "policy": "Original-source excerpts only; full response hashes identify fetches. Vendor implementation corroborates the local test KDF; RFC supplies independent CMAC primitive vectors. No HSM conformance claim."
+}

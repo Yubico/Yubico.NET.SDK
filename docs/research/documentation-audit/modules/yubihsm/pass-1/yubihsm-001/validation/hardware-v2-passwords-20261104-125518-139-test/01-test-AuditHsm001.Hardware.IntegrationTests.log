@@ -1,0 +1,44 @@
+$ dotnet test docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~PasswordTransitions_UserAndAdmin"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.YubiHsm -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests -> /tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+[xUnit.net 00:00:00.11]   Starting:    Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+[xUnit.net 00:00:00.15]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ORACLE RFC4493 vectors=4; primitive=self-tested; no device operation yet.
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.42]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] LANE=password-transitions; serial=103; cached-firmware=5.8.0; version-name=5.8.0.beta.0; qualifier=5.8.0.beta.0; OS=Omarchy; UTC=2026-11-04T11:55:23.2311861+00:00.
+[xUnit.net 00:00:00.44]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.45]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RESET phase=start; before-count=0; management-retries=8; mutation=authorized-applet-reset.
+[xUnit.net 00:00:00.68]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.68]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RESET phase=start; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:00.70]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.74]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] CAPABILITY actor=user; password-change=command-succeeded; key-answer-check=pending.
+[xUnit.net 00:00:00.77]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] CAPABILITY actor=user; measured-result=new-password-three-key-match; credential-retries=8; management-retries=8.
+[xUnit.net 00:00:00.80]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.84]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] CAPABILITY actor=admin; password-change=command-succeeded; key-answer-check=pending.
+[xUnit.net 00:00:00.86]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] CAPABILITY actor=admin; measured-result=new-password-three-key-match; credential-retries=8; management-retries=8.
+[xUnit.net 00:00:00.89]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:01.12]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:01.13]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RESET phase=finally-attempt-1; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:01.13]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] CLEANUP verified=true; earlier-attempt-errors=0.
+[xUnit.net 00:00:01.13]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] LANE=password-transitions; elapsed-ms=708; failures=0; cleanup-scope=YubiHSM-Auth-applet-only.
+[xUnit.net 00:00:01.15]   Finished:    Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+  Passed Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.PasswordTransitions_UserAndAdmin_NewPasswordHasIndependentThreeKeyAnswer(state: YubiKey(Placeholder #0: FW>=5.8.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [993 ms]
+
+Test Run Successful.
+Total tests: 1
+     Passed: 1
+ Total time: 1.5074 Seconds

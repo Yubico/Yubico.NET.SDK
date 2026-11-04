@@ -1,0 +1,5 @@
+$ ykman --device 103 hsmauth credentials list
+UTC 2026-11-04T11:48:56.001998+00:00
+No items found
+
+EXIT=0

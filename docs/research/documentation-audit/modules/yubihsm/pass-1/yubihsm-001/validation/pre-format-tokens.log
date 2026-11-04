@@ -1,0 +1,30 @@
+$ dotnet /tmp/opencode/yubihsm-001-doccheck/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Checker.dll tokens /home/rupicola/Code/y/Yubico.Yubikit.NET
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs; SHA256=C5730F84F59F2CB848BABD7847C83560FEDBEA47C9E495D23BB9DF0F128471FE
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs; SHA256=DA561A1838312EC57F803941C78DB8036686F165D96D394B0F5953C6B1565A16
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs; SHA256=334CC747A83CAA5A261F8D658EA79557A13F50F62538A6755D89213B7B85B63B
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs; SHA256=D8B0905AC49FB945CEA844A260853F9AEA8D55FADA6C414CA2018C25FF8E6BB3
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs; SHA256=7749DB37BFFD28E2407C7F716A43E0CFAEFB5DDB920D41658BE184DD8BFB4413
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs; SHA256=CE43FB6ED4D475C76E037B16C416E342A743957109BC415F8D9CEF78E6EB1C32
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs; SHA256=3468E77A58F59A8B8E0C22CDC37A64C9EF05FDA75DBC5B17E9F4E82512A941D8
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs; SHA256=33D6B9D76EB7E1505B15959AB0F95DBD383FEE5623E51664A0AF9B9CECB568A9
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs; SHA256=0E2A356CA3C26C903351D6B7F24961C31F6FBA69A8C555E7BD5542473C1DEE5E
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs; SHA256=9113EB7309913FAB613375215BBB8910F52FEB2659D8B6898A45F8693F0E29AA
+PASS: tokens/directives src/YubiHsm/examples/HsmAuthTool/Program.cs; SHA256=C3F123C7D7F752BF2A608A967E8E191CC6B33F6EE9C1D63EE8C38CE634F4B382
+PASS: tokens/directives src/YubiHsm/src/Backend/HsmAuthBackend.cs; SHA256=3D3D276A6C524E40565AF5CD4AC8CD88FD8B60B9EAFD14AC5B4B08D371057B6E
+PASS: tokens/directives src/YubiHsm/src/HsmAuthAlgorithm.cs; SHA256=A4069DB87262908B57D3C61CDAC00E2B8E9E041E0F056EF76D010F753A174AB6
+PASS: tokens/directives src/YubiHsm/src/HsmAuthCredential.cs; SHA256=7E98E102E58F49C3635AE808CD86BCC8FFED3E2BF257E716C39357578C5A793E
+PASS: tokens/directives src/YubiHsm/src/HsmAuthRetryException.cs; SHA256=CF6A40F241ABAB64646BD590EA0D1F6B723B1D0C825000B53BC6BE1E463C4372
+PASS: tokens/directives src/YubiHsm/src/HsmAuthSession.cs; SHA256=683E2B71F220BD783AB3BFEA78EC57383E095F4275C298C84B541E08CA1B1BF4
+PASS: tokens/directives src/YubiHsm/src/IHsmAuthSession.cs; SHA256=1D29D612F9737FDADCEF209D727D7DC3CE7528E3D30A3AF81C8D61A0B60ACE7D
+PASS: tokens/directives src/YubiHsm/src/IYubiKeyExtensions.cs; SHA256=1F776F28C68A665FD62A7B72EA1EA3FEBF795F35613F97F27004020D46130CAE
+PASS: tokens/directives src/YubiHsm/src/SessionKeys.cs; SHA256=63F45C4A8640BE5AC857993433744FECA6F08B0962DEFC62DC6FF8D088E76BD6
+PASS: tokens/directives src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs; SHA256=E51EDB16DDE78133F385C9D873EA979700AF349276B3854B759767FCB50AAF92
+PASS: tokens/directives src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs; SHA256=B6EBDBFA680FB584362406F54233E765DC67F7C60111CC9DAE3632C0E11DAE72
+PASS: tokens/directives src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs; SHA256=30A1B138942B0C7D2424752B9F7EFBD93F0FBAE13D9FEC54FD6F6C080754AA25
+PASS: tokens/directives src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs; SHA256=BC040900D1E337B72BFDAF3EBE16E8386393E86C8F833E329CC53DC22FD56E0B
+PASS: tokens/directives src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs; SHA256=E31EF994F355F0B2D6BD8C22510B00A3BEB6DF8F494D725948B93E6B17BB4E2A
+PASS: tokens/directives src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs; SHA256=FF05E66130CF172EE174B3C55D41545B0432DD6297F145184EED386AF1A31B0E
+PASS: tokens/directives src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs; SHA256=7DA09206E1E3FA80B471C5FAD97AB74C01420A0A325A1E2349A74B7BF871C66F
+Token comparison against a74792facb657413e98223e059876d8b213ffff3: files=26, failures=0; only directive-free using-list order normalized.
+
+EXIT=0

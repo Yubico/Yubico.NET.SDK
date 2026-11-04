@@ -1,0 +1,270 @@
+--- accepted/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs
+@@ -86,4 +86,4 @@
+         AnsiConsole.MarkupLine("  --management-key HEX       Current management key (hex, 16 bytes)");
+         AnsiConsole.MarkupLine("  --new-management-key HEX   New management key (hex, 16 bytes)");
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs
+@@ -63,4 +63,4 @@
+     /// Gets the default management key (16 bytes of zeros).
+     /// </summary>
+     public static byte[] DefaultManagementKey => new byte[16];
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs
+@@ -442,4 +442,4 @@
+         AnsiConsole.MarkupLine("  --management-key HEX        Management key (hex, 16 bytes)");
+         AnsiConsole.MarkupLine("  --touch                     Require touch for credential use");
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs
+@@ -24,4 +24,4 @@
+             cancellationToken: cancellationToken);
+         await CalculateSessionKeys.RunAsync(session, cancellationToken);
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs
+@@ -185,4 +185,4 @@
+ 
+         return $"YubiKey {FormFactorFormatter.Format(info.Value.FormFactor)} - Serial: {info.Value.SerialNumber?.ToString() ?? "N/A"}, Firmware: {info.Value.FirmwareVersion} ({transport})";
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs
+@@ -58,4 +58,4 @@
+             CryptographicOperations.ZeroMemory(managementKey);
+         }
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs
+@@ -79,4 +79,4 @@
+             CryptographicOperations.ZeroMemory(keyMac);
+         }
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs
+@@ -104,4 +104,4 @@
+             CryptographicOperations.ZeroMemory(context);
+         }
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs
+@@ -37,4 +37,4 @@
+             CryptographicOperations.ZeroMemory(newKey);
+         }
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs
+@@ -51,4 +51,4 @@
+             CryptographicOperations.ZeroMemory(managementKey);
+         }
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/examples/HsmAuthTool/Program.cs
++++ final/src/YubiHsm/examples/HsmAuthTool/Program.cs
+@@ -115,4 +115,4 @@
+     AnsiConsole.MarkupLine("  -h, --help                            Show this help message");
+     AnsiConsole.WriteLine();
+     AnsiConsole.MarkupLine("[grey]Run without arguments for interactive mode.[/]");
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/src/Backend/HsmAuthBackend.cs
++++ final/src/YubiHsm/src/Backend/HsmAuthBackend.cs
+@@ -55,4 +55,4 @@
+         var span = versionData.Span;
+         return new FirmwareVersion(span[0], span[1], span[2]);
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/src/HsmAuthAlgorithm.cs
++++ final/src/YubiHsm/src/HsmAuthAlgorithm.cs
+@@ -65,4 +65,4 @@
+             _ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, "Unknown algorithm.")
+         };
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/src/HsmAuthCredential.cs
++++ final/src/YubiHsm/src/HsmAuthCredential.cs
+@@ -49,4 +49,4 @@
+ 
+         return string.Compare(Label, other.Label, StringComparison.OrdinalIgnoreCase);
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/src/HsmAuthRetryException.cs
++++ final/src/YubiHsm/src/HsmAuthRetryException.cs
+@@ -68,4 +68,4 @@
+     {
+         RetriesRemaining = retriesRemaining;
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/src/HsmAuthSession.cs
++++ final/src/YubiHsm/src/HsmAuthSession.cs
+@@ -984,4 +984,4 @@
+     /// </summary>
+     private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command) =>
+         ThrowOnRetryFailure(response, command, "Invalid credential password");
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/src/IHsmAuthSession.cs
++++ final/src/YubiHsm/src/IHsmAuthSession.cs
+@@ -375,4 +375,4 @@
+         string label,
+         ReadOnlyMemory<byte> newPassword,
+         CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/src/IYubiKeyExtensions.cs
++++ final/src/YubiHsm/src/IYubiKeyExtensions.cs
+@@ -14,8 +14,6 @@
+ 
+ using Yubico.YubiKit.Core.Abstractions;
+ using Yubico.YubiKit.Core.Devices;
+-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ using Yubico.YubiKit.Core.Sessions;
+ using Yubico.YubiKit.Core.Transports.SmartCard;
+ 
+@@ -86,4 +84,4 @@
+             return await session.ListCredentialsAsync(cancellationToken).ConfigureAwait(false);
+         }
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/src/SessionKeys.cs
++++ final/src/YubiHsm/src/SessionKeys.cs
+@@ -126,4 +126,4 @@
+     {
+         ObjectDisposedException.ThrowIf(_disposed, this);
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs
++++ final/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs
+@@ -196,4 +196,4 @@
+             },
+             resetBeforeUse: true,
+             cancellationToken: NewToken());
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs
++++ final/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs
+@@ -2,7 +2,6 @@
+ // Licensed under the Apache License, Version 2.0.
+ 
+ using System.Security.Cryptography;
+-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ using Yubico.YubiKit.Core.Devices;
+ using Yubico.YubiKit.Tests.Shared;
+ using Yubico.YubiKit.Tests.Shared.Infrastructure;
+@@ -334,4 +333,4 @@
+             },
+             resetBeforeUse: true,
+             cancellationToken: NewToken());
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs
++++ final/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs
+@@ -67,4 +67,4 @@
+             }, cancellationToken);
+     }
+ 
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs
++++ final/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs
+@@ -208,4 +208,4 @@
+             new RecordingSmartCardConnection([0x90, 0x00]),
+             new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
+             cancellationToken: TestContext.Current.CancellationToken);
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs
++++ final/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs
+@@ -14,9 +14,8 @@
+ 
+ using Yubico.YubiKit.Core.Devices;
+ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
++using Yubico.YubiKit.Core.Sessions;
+ using Yubico.YubiKit.Tests.Shared;
+-
+-using Yubico.YubiKit.Core.Sessions;
+ namespace Yubico.YubiKit.YubiHsm.UnitTests;
+ 
+ /// <summary>
+@@ -240,4 +239,4 @@
+ 
+         return bytes;
+     }
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs
++++ final/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs
+@@ -13,7 +13,6 @@
+ // limitations under the License.
+ 
+ using Yubico.YubiKit.Core.Devices;
+-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ using Yubico.YubiKit.Core.Sessions;
+ using Yubico.YubiKit.Tests.Shared;
+ namespace Yubico.YubiKit.YubiHsm.UnitTests;
+@@ -356,4 +355,4 @@
+         .. Sequence(0xC0, 16),
+         0x90, 0x00
+     ];
+-}
++}
+\ No newline at end of file
+--- accepted/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs
++++ final/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs
+@@ -79,4 +79,4 @@
+         Assert.Equal(32, HsmAuthSession.Pbkdf2DerivedKeyLength);
+         Assert.True(HsmAuthSession.Pbkdf2Salt.SequenceEqual("Yubico"u8));
+     }
+-}
++}
+\ No newline at end of file

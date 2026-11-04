@@ -1,0 +1,124 @@
+$ dotnet test docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~KnownAnswer_OneWrongPassword"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.YubiHsm -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests -> /tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+[xUnit.net 00:00:00.15]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ORACLE RFC4493 vectors=4; primitive=self-tested; no device operation yet.
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.45]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] LANE=known-answer-and-retries; serial=103; cached-firmware=5.8.0; version-name=5.8.0.beta.0; qualifier=5.8.0.beta.0; OS=Omarchy; UTC=2026-11-04T11:51:25.0836289+00:00.
+[xUnit.net 00:00:00.47]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.47]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RESET phase=start; before-count=0; management-retries=8; mutation=authorized-applet-reset.
+[xUnit.net 00:00:00.70]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.70]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RESET phase=start; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:00.72]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.78]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] KAT optional-card-cryptogram=omitted; three-keys=independent-match.
+[xUnit.net 00:00:00.79]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ERROR phase=single-controlled-wrong-calculate; type=Yubico.YubiKit.YubiHsm.HsmAuthRetryException; HResult=0x80131500.
+[xUnit.net 00:00:00.80]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] APDU phase=single-controlled-wrong-calculate; SW=0x63C7; CLA=00; INS=03; P1=00; P2=00.
+[xUnit.net 00:00:00.80]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RETRY phase=single-controlled-wrong-calculate; typed-retries=7.
+[xUnit.net 00:00:00.83]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ERROR phase=body; type=System.ArgumentException; HResult=0x80070057.
+[xUnit.net 00:00:00.84]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:01.15]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:01.15]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RESET phase=finally-attempt-1; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:01.16]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] CLEANUP verified=true; earlier-attempt-errors=0.
+[xUnit.net 00:00:01.16]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] LANE=known-answer-and-retries; elapsed-ms=710; failures=1; cleanup-scope=YubiHSM-Auth-applet-only.
+[xUnit.net 00:00:01.17]       System.ArgumentException : CALCULATE response must be exactly 48 bytes, got 56. (Parameter 'response')
+[xUnit.net 00:00:01.17]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [FAIL]
+[xUnit.net 00:00:01.17]       Stack Trace:
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/SessionKeys.cs(95,0): at Yubico.YubiKit.YubiHsm.SessionKeys.Parse(ReadOnlySpan`1 response)
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/HsmAuthSession.cs(916,0): at Yubico.YubiKit.YubiHsm.HsmAuthSession.<>c__DisplayClass71_0.<<CalculateSessionKeysAsync>b__0>d.MoveNext()
+[xUnit.net 00:00:01.17]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs(146,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.<>c__DisplayClass37_0`1.<<RunWithUserPresenceNotificationAsync>b__0>d.MoveNext()
+[xUnit.net 00:00:01.17]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs(181,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceResolutionAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken)
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs(198,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceResolutionAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken)
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs(141,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceNotificationAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken)
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/HsmAuthSession.cs(903,0): at Yubico.YubiKit.YubiHsm.HsmAuthSession.CalculateSessionKeysAsync(ApduCommand command, UserPresenceNotification userPresenceNotification, String operationName, CancellationToken cancellationToken)
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/HsmAuthSession.cs(443,0): at Yubico.YubiKit.YubiHsm.HsmAuthSession.CalculateSessionKeysSymmetricAsync(String label, ReadOnlyMemory`1 context, ReadOnlyMemory`1 credentialPassword, Nullable`1 cardCryptogram, CancellationToken cancellationToken)
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(54,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.<>c__DisplayClass2_0.<<KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration>b__0>d.MoveNext()
+[xUnit.net 00:00:01.17]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(62,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.<>c__DisplayClass2_0.<<KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration>b__0>d.MoveNext()
+[xUnit.net 00:00:01.17]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs(38,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.ProbeScope.ExecuteAsync(YubiKeyTestState state, ITestOutputHelper output, String lane, Func`3 action)
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs(63,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.ProbeScope.ExecuteAsync(YubiKeyTestState state, ITestOutputHelper output, String lane, Func`3 action)
+[xUnit.net 00:00:01.17]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(31,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(YubiKeyTestState state)
+[xUnit.net 00:00:01.17]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:01.17]       Output:
+[xUnit.net 00:00:01.17]         ORACLE RFC4493 vectors=4; primitive=self-tested; no device operation yet.
+[xUnit.net 00:00:01.17]         LANE=known-answer-and-retries; serial=103; cached-firmware=5.8.0; version-name=5.8.0.beta.0; qualifier=5.8.0.beta.0; OS=Omarchy; UTC=2026-11-04T11:51:25.0836289+00:00.
+[xUnit.net 00:00:01.17]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:01.17]         RESET phase=start; before-count=0; management-retries=8; mutation=authorized-applet-reset.
+[xUnit.net 00:00:01.17]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:01.17]         RESET phase=start; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:01.17]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:01.17]         KAT optional-card-cryptogram=omitted; three-keys=independent-match.
+[xUnit.net 00:00:01.17]         ERROR phase=single-controlled-wrong-calculate; type=Yubico.YubiKit.YubiHsm.HsmAuthRetryException; HResult=0x80131500.
+[xUnit.net 00:00:01.17]         APDU phase=single-controlled-wrong-calculate; SW=0x63C7; CLA=00; INS=03; P1=00; P2=00.
+[xUnit.net 00:00:01.17]         RETRY phase=single-controlled-wrong-calculate; typed-retries=7.
+[xUnit.net 00:00:01.17]         ERROR phase=body; type=System.ArgumentException; HResult=0x80070057.
+[xUnit.net 00:00:01.17]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:01.17]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:01.17]         RESET phase=finally-attempt-1; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:01.17]         CLEANUP verified=true; earlier-attempt-errors=0.
+[xUnit.net 00:00:01.17]         LANE=known-answer-and-retries; elapsed-ms=710; failures=1; cleanup-scope=YubiHSM-Auth-applet-only.
+[xUnit.net 00:00:01.18]   Finished:    Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+  Failed Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [1 s]
+  Error Message:
+   System.ArgumentException : CALCULATE response must be exactly 48 bytes, got 56. (Parameter 'response')
+  Stack Trace:
+     at Yubico.YubiKit.YubiHsm.SessionKeys.Parse(ReadOnlySpan`1 response) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/SessionKeys.cs:line 95
+   at Yubico.YubiKit.YubiHsm.HsmAuthSession.<>c__DisplayClass71_0.<<CalculateSessionKeysAsync>b__0>d.MoveNext() in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/HsmAuthSession.cs:line 916
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.<>c__DisplayClass37_0`1.<<RunWithUserPresenceNotificationAsync>b__0>d.MoveNext() in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs:line 146
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceResolutionAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs:line 181
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceResolutionAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs:line 198
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceNotificationAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs:line 141
+   at Yubico.YubiKit.YubiHsm.HsmAuthSession.CalculateSessionKeysAsync(ApduCommand command, UserPresenceNotification userPresenceNotification, String operationName, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/HsmAuthSession.cs:line 903
+   at Yubico.YubiKit.YubiHsm.HsmAuthSession.CalculateSessionKeysSymmetricAsync(String label, ReadOnlyMemory`1 context, ReadOnlyMemory`1 credentialPassword, Nullable`1 cardCryptogram, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/HsmAuthSession.cs:line 443
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.<>c__DisplayClass2_0.<<KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration>b__0>d.MoveNext() in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 54
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.<>c__DisplayClass2_0.<<KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration>b__0>d.MoveNext() in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 62
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.ProbeScope.ExecuteAsync(YubiKeyTestState state, ITestOutputHelper output, String lane, Func`3 action) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs:line 38
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.ProbeScope.ExecuteAsync(YubiKeyTestState state, ITestOutputHelper output, String lane, Func`3 action) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs:line 63
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.KnownAnswer_OneWrongPassword_ThenThreeKeysAndRetryRestoration(YubiKeyTestState state) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 31
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ ORACLE RFC4493 vectors=4; primitive=self-tested; no device operation yet.
+ LANE=known-answer-and-retries; serial=103; cached-firmware=5.8.0; version-name=5.8.0.beta.0; qualifier=5.8.0.beta.0; OS=Omarchy; UTC=2026-11-04T11:51:25.0836289+00:00.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ RESET phase=start; before-count=0; management-retries=8; mutation=authorized-applet-reset.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ RESET phase=start; fresh-readback-empty=true; management-retries=8.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ KAT optional-card-cryptogram=omitted; three-keys=independent-match.
+ ERROR phase=single-controlled-wrong-calculate; type=Yubico.YubiKit.YubiHsm.HsmAuthRetryException; HResult=0x80131500.
+ APDU phase=single-controlled-wrong-calculate; SW=0x63C7; CLA=00; INS=03; P1=00; P2=00.
+ RETRY phase=single-controlled-wrong-calculate; typed-retries=7.
+ ERROR phase=body; type=System.ArgumentException; HResult=0x80070057.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ RESET phase=finally-attempt-1; fresh-readback-empty=true; management-retries=8.
+ CLEANUP verified=true; earlier-attempt-errors=0.
+ LANE=known-answer-and-retries; elapsed-ms=710; failures=1; cleanup-scope=YubiHSM-Auth-applet-only.
+
+
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 1.5513 Seconds

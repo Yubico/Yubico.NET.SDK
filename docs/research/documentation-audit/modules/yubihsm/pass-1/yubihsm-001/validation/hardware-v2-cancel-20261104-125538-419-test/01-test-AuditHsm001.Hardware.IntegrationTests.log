@@ -1,0 +1,112 @@
+$ dotnet test docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~NoTouch_CancelAfterPolicyOpportunity"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.YubiHsm -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests -> /tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+[xUnit.net 00:00:00.15]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ORACLE RFC4493 vectors=4; primitive=self-tested; no device operation yet.
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.43]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] LANE=no-touch-cancellation; serial=103; cached-firmware=5.8.0; version-name=5.8.0.beta.0; qualifier=5.8.0.beta.0; OS=Omarchy; UTC=2026-11-04T11:55:43.5113827+00:00.
+[xUnit.net 00:00:00.45]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.45]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RESET phase=start; before-count=0; management-retries=8; mutation=authorized-applet-reset.
+[xUnit.net 00:00:00.77]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.77]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RESET phase=start; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:00.79]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:00.82]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PROMPT request basis=PolicyRequires; application=YubiHSM Auth; operation=YubiHsmAuth.CalculateSessionKeysSymmetric; scope=audit-hsm001-cancel; pre-command-policy=true; UTC=2026-11-04T11:55:43.9083395+00:00; action=DO NOT TOUCH.
+[xUnit.net 00:00:01.83]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] CANCEL at-ms=1009; policy-to-cancel-delay>=1000ms; basis=PolicyRequires-pre-APDU; native-admission=unobserved; device-waiting-status=unobserved; DO NOT TOUCH.
+[xUnit.net 00:00:15.12]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PROMPT resolution outcome=Failed; token-is-none=True; UTC=2026-11-04T11:55:58.2081731+00:00.
+[xUnit.net 00:00:15.12]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ERROR phase=cancel-drained-operation; type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException; HResult=0x80131500.
+[xUnit.net 00:00:15.12]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] APDU phase=cancel-drained-operation; SW=0x6982; CLA=00; INS=03; P1=00; P2=00.
+[xUnit.net 00:00:15.12]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] CANCEL drained-ms=14308; after-cancel-ms=13298; body-token-cancelled=False; operation-error=ApduException.
+[xUnit.net 00:00:15.13]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ERROR phase=body; type=Xunit.Sdk.FailException; HResult=0x80131500.
+[xUnit.net 00:00:15.14]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:15.36]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:15.37]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RESET phase=finally-attempt-1; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:15.37]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] CLEANUP verified=true; earlier-attempt-errors=0.
+[xUnit.net 00:00:15.37]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] LANE=no-touch-cancellation; elapsed-ms=14947; failures=1; cleanup-scope=YubiHSM-Auth-applet-only.
+[xUnit.net 00:00:15.39]       Expected a drained OperationCanceledException or CALCULATE SW=0x6985 after deliberate cancellation; inspect retained type/status.
+[xUnit.net 00:00:15.39]       Stack Trace:
+[xUnit.net 00:00:15.38]     Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [FAIL]
+[xUnit.net 00:00:15.39]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(245,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.ObserveCancellationAsync(HsmAuthSession session, SymmetricFixture fixture, RecordingPrompt prompt, String label, CancellationToken token)
+[xUnit.net 00:00:15.39]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(162,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.<>c__DisplayClass5_0.<<NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession>b__0>d.MoveNext()
+[xUnit.net 00:00:15.39]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:15.39]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(162,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.<>c__DisplayClass5_0.<<NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession>b__0>d.MoveNext()
+[xUnit.net 00:00:15.39]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:15.39]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs(38,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.ProbeScope.ExecuteAsync(YubiKeyTestState state, ITestOutputHelper output, String lane, Func`3 action)
+[xUnit.net 00:00:15.39]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs(63,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.ProbeScope.ExecuteAsync(YubiKeyTestState state, ITestOutputHelper output, String lane, Func`3 action)
+[xUnit.net 00:00:15.39]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(154,0): at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(YubiKeyTestState state)
+[xUnit.net 00:00:15.39]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:15.39]       Output:
+[xUnit.net 00:00:15.39]         ORACLE RFC4493 vectors=4; primitive=self-tested; no device operation yet.
+[xUnit.net 00:00:15.39]         LANE=no-touch-cancellation; serial=103; cached-firmware=5.8.0; version-name=5.8.0.beta.0; qualifier=5.8.0.beta.0; OS=Omarchy; UTC=2026-11-04T11:55:43.5113827+00:00.
+[xUnit.net 00:00:15.39]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:15.39]         RESET phase=start; before-count=0; management-retries=8; mutation=authorized-applet-reset.
+[xUnit.net 00:00:15.39]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:15.39]         RESET phase=start; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:15.39]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:15.39]         PROMPT request basis=PolicyRequires; application=YubiHSM Auth; operation=YubiHsmAuth.CalculateSessionKeysSymmetric; scope=audit-hsm001-cancel; pre-command-policy=true; UTC=2026-11-04T11:55:43.9083395+00:00; action=DO NOT TOUCH.
+[xUnit.net 00:00:15.39]         CANCEL at-ms=1009; policy-to-cancel-delay>=1000ms; basis=PolicyRequires-pre-APDU; native-admission=unobserved; device-waiting-status=unobserved; DO NOT TOUCH.
+[xUnit.net 00:00:15.39]         PROMPT resolution outcome=Failed; token-is-none=True; UTC=2026-11-04T11:55:58.2081731+00:00.
+[xUnit.net 00:00:15.39]         ERROR phase=cancel-drained-operation; type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException; HResult=0x80131500.
+[xUnit.net 00:00:15.39]         APDU phase=cancel-drained-operation; SW=0x6982; CLA=00; INS=03; P1=00; P2=00.
+[xUnit.net 00:00:15.39]         CANCEL drained-ms=14308; after-cancel-ms=13298; body-token-cancelled=False; operation-error=ApduException.
+[xUnit.net 00:00:15.39]         ERROR phase=body; type=Xunit.Sdk.FailException; HResult=0x80131500.
+[xUnit.net 00:00:15.39]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:15.39]         OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+[xUnit.net 00:00:15.39]         RESET phase=finally-attempt-1; fresh-readback-empty=true; management-retries=8.
+[xUnit.net 00:00:15.39]         CLEANUP verified=true; earlier-attempt-errors=0.
+[xUnit.net 00:00:15.39]         LANE=no-touch-cancellation; elapsed-ms=14947; failures=1; cleanup-scope=YubiHSM-Auth-applet-only.
+[xUnit.net 00:00:15.40]   Finished:    Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests
+  Failed Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(state: YubiKey(Placeholder #0: FW>=5.4.3,USB,Conn=SmartCard,Filter=Serial103Filter)) [15 s]
+  Error Message:
+   Expected a drained OperationCanceledException or CALCULATE SW=0x6985 after deliberate cancellation; inspect retained type/status.
+  Stack Trace:
+     at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.ObserveCancellationAsync(HsmAuthSession session, SymmetricFixture fixture, RecordingPrompt prompt, String label, CancellationToken token) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 245
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.<>c__DisplayClass5_0.<<NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession>b__0>d.MoveNext() in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 162
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.<>c__DisplayClass5_0.<<NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession>b__0>d.MoveNext() in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 162
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.ProbeScope.ExecuteAsync(YubiKeyTestState state, ITestOutputHelper output, String lane, Func`3 action) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs:line 38
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.ProbeScope.ExecuteAsync(YubiKeyTestState state, ITestOutputHelper output, String lane, Func`3 action) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/ProbeScope.cs:line 63
+   at Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.HardwareProbeTests.NoTouch_CancelAfterPolicyOpportunity_DrainsAndRecoversFreshSession(YubiKeyTestState state) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 154
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ ORACLE RFC4493 vectors=4; primitive=self-tested; no device operation yet.
+ LANE=no-touch-cancellation; serial=103; cached-firmware=5.8.0; version-name=5.8.0.beta.0; qualifier=5.8.0.beta.0; OS=Omarchy; UTC=2026-11-04T11:55:43.5113827+00:00.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ RESET phase=start; before-count=0; management-retries=8; mutation=authorized-applet-reset.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ RESET phase=start; fresh-readback-empty=true; management-retries=8.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ PROMPT request basis=PolicyRequires; application=YubiHSM Auth; operation=YubiHsmAuth.CalculateSessionKeysSymmetric; scope=audit-hsm001-cancel; pre-command-policy=true; UTC=2026-11-04T11:55:43.9083395+00:00; action=DO NOT TOUCH.
+ CANCEL at-ms=1009; policy-to-cancel-delay>=1000ms; basis=PolicyRequires-pre-APDU; native-admission=unobserved; device-waiting-status=unobserved; DO NOT TOUCH.
+ PROMPT resolution outcome=Failed; token-is-none=True; UTC=2026-11-04T11:55:58.2081731+00:00.
+ ERROR phase=cancel-drained-operation; type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException; HResult=0x80131500.
+ APDU phase=cancel-drained-operation; SW=0x6982; CLA=00; INS=03; P1=00; P2=00.
+ CANCEL drained-ms=14308; after-cancel-ms=13298; body-token-cancelled=False; operation-error=ApduException.
+ ERROR phase=body; type=Xunit.Sdk.FailException; HResult=0x80131500.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ OPEN serial=103; transport=SmartCard; session-effective-version=0.0.1.
+ RESET phase=finally-attempt-1; fresh-readback-empty=true; management-retries=8.
+ CLEANUP verified=true; earlier-attempt-errors=0.
+ LANE=no-touch-cancellation; elapsed-ms=14947; failures=1; cleanup-scope=YubiHSM-Auth-applet-only.
+
+
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 15.7168 Seconds

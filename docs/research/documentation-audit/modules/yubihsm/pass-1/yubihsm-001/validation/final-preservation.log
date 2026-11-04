@@ -1,0 +1,9 @@
+$ python3 docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/check-preserved.py
+PASS: 784 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/record-manifest.json
+PASS: 402 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/management/pass-1/management-001/record-manifest.json
+PASS: 534 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/record-manifest.json
+PASS: 164 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/record-manifest.json
+PASS: 433 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/record-manifest.json
+PASS: all four original user files unchanged; prior archives were read only.
+
+EXIT=0

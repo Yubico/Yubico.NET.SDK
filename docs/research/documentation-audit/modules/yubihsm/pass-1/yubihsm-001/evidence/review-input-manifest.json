@@ -1,0 +1,121 @@
+{
+  "captured_utc": "2026-11-04T12:03:15.699532+00:00",
+  "note": "Identities of read records/logs. Coordinator compiler/provenance/final-evidence qualification remains separate. Current mutable probe source supplies assertion interpretation, while v1 retained snapshot binds the failed cryptogram call.",
+  "inputs": [
+    {
+      "run_relative_path": "plan.md",
+      "bytes": 6608,
+      "sha256": "dc03c8ca577b50bf1ae63d29be70d96e0789b9c9b1618895cbf3aa502548a100"
+    },
+    {
+      "run_relative_path": "findings.md",
+      "bytes": 7881,
+      "sha256": "1e3bea074e597a7f7e65f6fae8de579d0521705c35d8b1c4c7af614fc494dbb6"
+    },
+    {
+      "run_relative_path": "investigation.md",
+      "bytes": 22861,
+      "sha256": "c9a32c80f520d9e78f6f20945ef6e33eea7ccd311f9d07b9a7ead22b82528b8d"
+    },
+    {
+      "run_relative_path": "coverage.json",
+      "bytes": 22015,
+      "sha256": "50d4fa85e9280c37784c2e2e137065214041036c9ee5ba768ba92a97416814f2"
+    },
+    {
+      "run_relative_path": "edit-report.md",
+      "bytes": 22104,
+      "sha256": "9bd8eb03321ccc20ea004cdf4cd0dc108f6787ae233529c514bbbce61202ed9d"
+    },
+    {
+      "run_relative_path": "cryptogram-investigation.md",
+      "bytes": 13221,
+      "sha256": "b592493e2bfc2613093b394ea691ede532601fde65ab022eec389b93635b5adb"
+    },
+    {
+      "run_relative_path": "corrections.md",
+      "bytes": 2295,
+      "sha256": "4f636953af4b51507a35b767113bc652fbd302d95ddd10a2c867aadf19c9a052"
+    },
+    {
+      "run_relative_path": "status.md",
+      "bytes": 3234,
+      "sha256": "0a956a22ad4e15a93b9aafa0cb08d46fdbd380d3cf51959aa492790687a3a361"
+    },
+    {
+      "run_relative_path": "evidence/sources.md",
+      "bytes": 10823,
+      "sha256": "85622737a1d1491ec2be6ec4af59de3533847e96a06f188698c3beebd5e1cf24"
+    },
+    {
+      "run_relative_path": "evidence/cryptogram-sources.md",
+      "bytes": 11223,
+      "sha256": "711ac53f3f5c88a0126af5a0547621ca91d589c6380ee0fc10c78eb76d5a1beb"
+    },
+    {
+      "run_relative_path": "evidence/cryptogram-inputs.md",
+      "bytes": 1916,
+      "sha256": "24725761d8e50df25c3c290ca2e99dfa9b0c42e172c061bee1595308f4b33694"
+    },
+    {
+      "run_relative_path": "validation/integration-initial-20261104-124723-568-test/01-test-YubiHsm.IntegrationTests.log",
+      "bytes": 4198,
+      "sha256": "87eda6d3122258a199494ccbc5d0c81edb208b6f9a8260507db27b6a8b9ae8a6"
+    },
+    {
+      "run_relative_path": "validation/hardware-v1-kat-20261104-125119-840-test/01-test-AuditHsm001.Hardware.IntegrationTests.log",
+      "bytes": 21304,
+      "sha256": "5de41071c077e10db426ec7c9f533af13a4efcf660f832be95a77b6958d8319c"
+    },
+    {
+      "run_relative_path": "validation/hardware-v2-kat-20261104-125500-766-test/01-test-AuditHsm001.Hardware.IntegrationTests.log",
+      "bytes": 8425,
+      "sha256": "924619a666c4924ee53555dbaaba1484dfa3a77aa4d1b82a52d918e3ca3a7338"
+    },
+    {
+      "run_relative_path": "validation/hardware-v2-passwords-20261104-125518-139-test/01-test-AuditHsm001.Hardware.IntegrationTests.log",
+      "bytes": 8518,
+      "sha256": "f56e4f2cce16d8c8f828e4177b9a3d00b1316979d3eddf9e5779a2a1701c62b6"
+    },
+    {
+      "run_relative_path": "validation/hardware-v2-cancel-20261104-125538-419-test/01-test-AuditHsm001.Hardware.IntegrationTests.log",
+      "bytes": 19784,
+      "sha256": "7e258a7dbad02237b873c06feaf4f6e266cf36793730b1908c7e0aa800c8bdd6"
+    },
+    {
+      "run_relative_path": "validation/hardware-v3-cancel-recovery-20261104-125659-443-test/01-test-AuditHsm001.Hardware.IntegrationTests.log",
+      "bytes": 10123,
+      "sha256": "fc656f8bd9338cb95d6f7af3fdd4d1a255e98112bd1f532e2a7567202b465fda"
+    },
+    {
+      "run_relative_path": "validation/hardware-probe/evidence/final-inputs-v1/4b8b9c36f5e2d9124cf2fa32e0dc9cc3922b4c3a249c378bb9a73b222ffab84a-HardwareProbeTests.cs.snapshot",
+      "bytes": 14548,
+      "sha256": "4b8b9c36f5e2d9124cf2fa32e0dc9cc3922b4c3a249c378bb9a73b222ffab84a"
+    },
+    {
+      "run_relative_path": "validation/hardware-probe/evidence/final-inputs-v1/0fa4f481ee971468449d2efa64ddf1812eb8e526523e497408287034e30ef2bd-SymmetricOracle.cs.snapshot",
+      "bytes": 7073,
+      "sha256": "0fa4f481ee971468449d2efa64ddf1812eb8e526523e497408287034e30ef2bd"
+    },
+    {
+      "run_relative_path": "validation/hardware-probe/evidence/final-inputs-v1/aa755afc5971d522fe204fc424c4964d018dc61d8fc6d660fa7f97a24a1b0726-ProbeScope.cs.snapshot",
+      "bytes": 9445,
+      "sha256": "aa755afc5971d522fe204fc424c4964d018dc61d8fc6d660fa7f97a24a1b0726"
+    },
+    {
+      "run_relative_path": "validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "bytes": 14721,
+      "sha256": "735bfccb75564cab8ed17226149f78489c57cb6851aadcf556ef61107570d930"
+    },
+    {
+      "run_relative_path": "hardware/initial-info.log",
+      "bytes": 518,
+      "sha256": "ed8abf5c1d7a6b63fe48af572280b7893012d0c05236c7814875e8eeb2816104"
+    },
+    {
+      "run_relative_path": "hardware/initial-applet.log",
+      "bytes": 157,
+      "sha256": "ea331a0ef062585fa107696cbbc539579562a60fd2fb8d0a0d6d93b59ce90663"
+    }
+  ]
+}

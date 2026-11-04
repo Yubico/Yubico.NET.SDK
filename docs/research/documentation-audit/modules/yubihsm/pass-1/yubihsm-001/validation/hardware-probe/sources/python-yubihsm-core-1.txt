@@ -1,0 +1,18 @@
+KEY_ENC = 0x04
+KEY_MAC = 0x06
+KEY_RMAC = 0x07
+CARD_CRYPTOGRAM = 0x00
+HOST_CRYPTOGRAM = 0x01
+
+
+def _derive(key: bytes, t: int, context: bytes, L: int = 0x80) -> bytes:
+    # this only supports aes128
+    if L != 0x80 and L != 0x40:
+        raise ValueError("L must be 0x40 or 0x80")
+
+    i = b"\0" * 11 + struct.pack("!BBHB", t, 0, L, 1) + context
+
+    c = cmac.CMAC(algorithms.AES(key), backend=default_backend())
+    c.update(i)
+    return c.finalize()[: L // 8]
+

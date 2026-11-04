@@ -1,0 +1,7 @@
+$ python3 -B docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/sdk-default.py verify compiled --capture consumer=first --capture hsmauthtool=second --live
+PASS: 476 explicit unit dispositions, 8 complete groups, 22 shipping source paths; current bodies, typed wrappers and source/configuration identities reconcile.
+PASS: exact consumer/first actual Csc/source/reference/analyzer/config/assets evidence; current complete compiler bodies match.
+PASS: exact hsmauthtool/second actual Csc/source/reference/analyzer/config/assets evidence; current complete compiler bodies match.
+PASS: live binary/analyzer/assets identities checked.
+
+EXIT=0

@@ -1,0 +1,121 @@
+$ dotnet clean docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj -c Release
+Build started 11/4/2026 12:56:33 PM.
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/.msCoverageSourceRootsMapping_Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/CoverletSourceRootsMapping_Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/xunit.abstractions.dll".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/xunit.runner.json".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/xunit.runner.visualstudio.testadapter.dll".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/appsettings.json".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.deps.json".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.runtimeconfig.json".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.pdb".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj.AssemblyReference.cache".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.AssemblyInfoInputs.cache".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.AssemblyInfo.cs".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj.CoreCompileInputs.cache".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.sourcelink.json".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.Y.6550319A.Up2Date".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/refint/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.pdb".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.genruntimeconfig.cache".
+         Deleting file "/tmp/opencode/yubihsm-001-hardware/obj/Release/net10.0/ref/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.dll".
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj" (3:2) on node 3 (Clean target(s)).
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/appsettings.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.runtimeconfig.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.YubiKit.Tests.Shared.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.YubiKit.Tests.Shared.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.YubiKit.Tests.Shared.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.YubiKit.Tests.Shared.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.YubiKit.Tests.Shared.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.YubiKit.Tests.Shared.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.Y.DAC95A48.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/refint/Yubico.YubiKit.Tests.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.YubiKit.Tests.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/Yubico.YubiKit.Tests.Shared.genruntimeconfig.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll".
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj" (5:2) on node 2 (Clean target(s)).
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/refint/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll".
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj" (4:2) on node 4 (Clean target(s)).
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.Y.4CE3D1A9.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/refint/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll".
+     5>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj" (Clean target(s)).
+     4>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (2:2) on node 1 (Clean target(s)).
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.Y.AA6D3182.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/refint/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiHsm.dll".
+     3>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj" (Clean target(s)).
+     2>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (Clean target(s)).
+     1>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditHsm001.Hardware.IntegrationTests.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.38

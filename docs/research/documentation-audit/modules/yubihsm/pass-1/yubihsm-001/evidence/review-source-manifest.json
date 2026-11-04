@@ -1,0 +1,90 @@
+[
+  {
+    "id": "S1",
+    "url": "https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-yubihsm-auth.html",
+    "sha256": "d0c1016df2d7ed78358189adcf11550e137d19e960ece62df2dc9649637d9f15",
+    "bytes": 24830,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-S1.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "S2",
+    "url": "https://docs.yubico.com/yesdk/users-manual/application-yubihsm-auth/yubihsm-auth-overview.html",
+    "sha256": "c82a0b4bde3603bead75b2c5c34ac261cab007646bff148931eac391b1464fa4",
+    "bytes": 7916,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-S2.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "S3",
+    "url": "https://docs.yubico.com/yesdk/users-manual/application-yubihsm-auth/interacting-yubihsm-2.html",
+    "sha256": "0da1c6759542cd39cff7f288f9dcefc00cc68b6e58cb2fd04d9ad24be577acd2",
+    "bytes": 9060,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-S3.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "S4",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/296cb587ba15f57672356d8445393a96b41803fb/yubikit/hsmauth.py",
+    "sha256": "e3573d5580928b84818939b6eb1ae0083c7d01793589746eace80db32fe2cab3",
+    "bytes": 22901,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-S4.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "S5",
+    "url": "https://raw.githubusercontent.com/Yubico/python-yubihsm/055f85fcff0a1d3c0ec779dc28cb21e2762cef3c/yubihsm/core.py",
+    "sha256": "00257ee2e85f1dafde5d5978aecdac6ec23e42aa7d2ef464bdc54f90e6fbbb7f",
+    "bytes": 35280,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-S5.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "crypto-python-initial",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/31d39f64b73e534787382dab4675c0274616627b/yubikit/hsmauth.py",
+    "sha256": "cc294104b018add0035544b889bd049a12911ee1a0962fd668aa2748aadfed68",
+    "bytes": 15429,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-crypto-python-initial.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "crypto-python-remove",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/47c801e2f4d4b64ac6931e39d962bdbee72c7553.patch",
+    "sha256": "cd0c33e07bcdb84c688fbaed9ee714680055253df1ef204d906fcfbef34a3506",
+    "bytes": 1018,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-crypto-python-remove.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "crypto-c",
+    "url": "https://raw.githubusercontent.com/Yubico/yubihsm-shell/6195c1b687aab56308e9598a0d66941813c94ae5/ykhsmauth/ykhsmauth.c",
+    "sha256": "e34324f4716340f867ab112c1cc4e1ac11006e21d758a3f98dcb2b6220431b14",
+    "bytes": 26341,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-crypto-c.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "crypto-c-header",
+    "url": "https://raw.githubusercontent.com/Yubico/yubihsm-shell/6195c1b687aab56308e9598a0d66941813c94ae5/ykhsmauth/ykhsmauth.h",
+    "sha256": "823212991500d2a17379d3639d284de5c1d11847d28488abaaefd8eb3b42ed17",
+    "bytes": 7264,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-crypto-c-header.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "crypto-c-history",
+    "url": "https://github.com/Yubico/yubihsm-shell/commit/08937b47458a9e0f30ea94a16885d7a82fb4dabb.patch",
+    "sha256": "f0df38aa48c48a53aeab71b5bf01710bad5b7e4273111dbdd1e4b9c6b47d2827",
+    "bytes": 260817,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-crypto-c-history.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "crypto-version",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/c910e5d25ba675ac2bfc97d35f14a4cc0314864f.patch",
+    "sha256": "6294a10c9e2a7fb64d9640e9eeba25f34e5a491c9fc339d3752ade75b1311747",
+    "bytes": 15514,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-crypto-version.txt",
+    "access_date": "2026-11-04"
+  }
+]

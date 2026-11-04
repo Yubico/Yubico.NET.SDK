@@ -1,0 +1,89 @@
+"""Bind accepted content through exact formatter transforms and reconcile module coverage/sampling."""
+from pathlib import Path
+import hashlib
+import json
+import re
+import subprocess
+
+HERE = Path(__file__).resolve().parent
+RUN = HERE.parent
+ROOT = next(p for p in HERE.parents if (p / 'toolchain.cs').exists())
+BASE = 'a74792facb657413e98223e059876d8b213ffff3'
+def sha(raw): return hashlib.sha256(raw).hexdigest()
+def write(path, value): path.write_text(json.dumps(value, indent=2) + '\n')
+def rel(path): return str(path.relative_to(ROOT))
+before_path = HERE / 'pre-format-content.json'
+before = json.loads(before_path.read_text())
+accepted = json.loads((RUN / 'evidence/review-path-manifest.json').read_text())['accepted']
+expected = {
+    'src/YubiHsm/src/IYubiKeyExtensions.cs': ['Yubico.YubiKit.Core.Protocols.SmartCard.Apdu', 'Yubico.YubiKit.Core.Protocols.SmartCard.Scp'],
+    'src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs': ['Yubico.YubiKit.Core.Protocols.SmartCard.Apdu'],
+    'src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs': ['Yubico.YubiKit.Core.Protocols.SmartCard.Apdu']}
+pattern = r'^using ([A-Za-z0-9_.]+);\n'
+transforms = []
+for row in before['files']:
+    old = row['content']; raw = (ROOT / row['path']).read_bytes(); new = raw.decode()
+    assert sha(old.encode()) == row['sha256']
+    a = re.findall(pattern, old, re.M); b = re.findall(pattern, new, re.M)
+    removed = sorted(set(a) - set(b))
+    assert removed == expected.get(row['path'], []) and not set(b) - set(a), row['path']
+    comparison = old
+    group_blank = row['path'].endswith('/HsmAuthRetryExceptionTests.cs')
+    if group_blank:
+        assert comparison.count('\n\nusing Yubico.YubiKit.Core.Sessions;\n') == 1
+        comparison = comparison.replace('\n\nusing Yubico.YubiKit.Core.Sessions;\n', '\nusing Yubico.YubiKit.Core.Sessions;\n')
+    assert re.sub(pattern, '', comparison, flags=re.M).rstrip('\n') == re.sub(pattern, '', new, flags=re.M).rstrip('\n'), row['path']
+    transforms.append(dict(path=row['path'], before_sha256=row['sha256'], after_sha256=sha(raw),
+        removed_namespaces=removed, import_group_blank_removed=group_blank, using_order_changed=[n for n in a if n not in removed] != b))
+assert len(transforms) == 26
+transform_path = HERE / 'format-transform.json'
+write(transform_path, dict(baseline=BASE, files=transforms))
+exception = dict(schema_version=1, baseline=BASE, formatter=dict(diagnostic='IDE0005',
+    command_log=rel(HERE / 'format-apply.log'), command_log_sha256=sha((HERE / 'format-apply.log').read_bytes()),
+    log=rel(HERE / 'format-initial.log'), log_sha256=sha((HERE / 'format-initial.log').read_bytes())), files=[])
+for r in transforms:
+    if r['removed_namespaces']:
+        exception['files'].append(dict(path=r['path'], baseline_sha256=sha(subprocess.check_output(['git','show',BASE+':'+r['path']], cwd=ROOT)),
+            before=dict(path=rel(before_path), bundle_sha256=sha(before_path.read_bytes()), sha256=r['before_sha256']),
+            after=dict(path=rel(transform_path), bundle_sha256=sha(transform_path.read_bytes()), sha256=r['after_sha256']),
+            removals=[dict(namespace=n) for n in r['removed_namespaces']]))
+write(HERE / 'import-removals.json', exception)
+by_path = {r['path']: r for r in transforms}
+reviewed = []
+for r in accepted:
+    current = sha((ROOT / r['path']).read_bytes())
+    if r['path'] in by_path:
+        t = by_path[r['path']]
+        assert t['before_sha256'] == r['sha256'] and t['after_sha256'] == current
+    else: assert current == r['sha256'], r['path']
+    reviewed.append(dict(path=r['path'], reviewed_sha256=r['sha256'], final_sha256=current, scope=r['scope']))
+assert len(reviewed) == 35
+write(RUN / 'reviewed-files.json', dict(baseline=BASE, files=reviewed))
+inventory = json.loads((RUN / 'inventory.json').read_text())['files']
+coverage = json.loads((RUN / 'coverage.json').read_text())
+dispositions = {'src/YubiHsm/' + r['path']: r for r in coverage['files']}
+assert set(dispositions) == {r['path'] for r in inventory}
+authored = {r['path'] for r in reviewed}
+changed = set(subprocess.check_output(['git','diff','--name-only',BASE,'--','src'],cwd=ROOT,text=True).splitlines())
+assert changed == {p for p in authored if p.startswith('src/')}
+paths = []
+for r in inventory:
+    current = sha((ROOT / r['path']).read_bytes()); edited = r['path'] in authored
+    if not edited: assert current == r['sha256'], r['path']
+    paths.append(dict(path=r['path'], baseline_sha256=r['sha256'], final_sha256=current, edited=edited,
+                      disposition=dispositions[r['path']]['disposition']))
+units = []
+for r in coverage['clean_units']:
+    path = 'src/YubiHsm/' + r['path']; lo, hi = r['range']
+    old = subprocess.check_output(['git','show',BASE+':'+path],cwd=ROOT,text=True)
+    body = '\n'.join(old.splitlines()[lo-1:hi])
+    eligible = body in (ROOT / path).read_text()
+    units.append(dict(r, path=path, body=body, body_sha256=sha(body.encode()), eligible=eligible))
+samples = ['U08','U14','U18']; eligible = sum(r['eligible'] for r in units)
+assert all(r['eligible'] for r in units if r['id'] in samples)
+assert len(samples) >= max(3, (eligible + 9) // 10)
+write(RUN / 'sampling-final.json', dict(baseline=BASE, eligible=eligible, samples=samples, units=units))
+write(RUN / 'coverage-final.json', dict(baseline=BASE, module_paths=56, public_types=8, api_entries=83,
+    authored_paths=35, edited_module_paths=sum(r['edited'] for r in paths), unchanged_module_paths=sum(not r['edited'] for r in paths),
+    clean_eligible=eligible, sampled=samples, files=paths, shared=[r for r in reviewed if not r['path'].startswith('src/')]))
+print(f'PASS: 35 accepted-to-final hashes, 26 exact formatter transforms, four named imports removed in three files, all 56 module dispositions, clean sampling 3/{eligible}; strict Roslyn comparison is separate.')

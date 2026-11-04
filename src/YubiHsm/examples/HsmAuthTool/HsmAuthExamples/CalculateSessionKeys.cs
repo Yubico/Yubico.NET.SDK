@@ -14,7 +14,8 @@ public static class CalculateSessionKeys
         HsmAuthSession session,
         CancellationToken cancellationToken = default)
     {
-        // Show existing credentials first
+        // The chooser lists every algorithm, but this operation always calls symmetric CALCULATE.
+        // Select a symmetric credential; asymmetric handshake dispatch requires separate application code.
         var credentials = await session.ListCredentialsAsync(cancellationToken);
         if (credentials.Count == 0)
         {
@@ -65,6 +66,11 @@ public static class CalculateSessionKeys
                 return;
             }
 
+            // Use the host value sent to the HSM followed by its actual returned challenge.
+            // Omitting the optional cryptogram skips applet verification; the external HSM library
+            // remains responsible for peer verification, host authentication and protected commands.
+            // Supplied symmetric cryptograms can yield 56 response bytes; the SDK currently requires
+            // 48 and rejects that shape. Verify the complete target-app handshake before relying on it.
             hostChallenge.CopyTo(context, 0);
             hsmChallenge.CopyTo(context, 8);
             ReadOnlyMemory<byte>? cardCryptogramMemory = cardCryptogram is null
@@ -81,8 +87,8 @@ public static class CalculateSessionKeys
             AnsiConsole.WriteLine();
             OutputHelpers.WriteSuccess("Session keys calculated successfully.");
 
-            // SECURITY NOTE: Session keys displayed for developer diagnostics only.
-            // Never display session key material in production applications.
+            // Diagnostic output exposes session secrets. Use disposable test material and keep key
+            // output out of an application's terminal/logging path.
             OutputHelpers.WriteHex("S-ENC", keys.SEnc);
             OutputHelpers.WriteHex("S-MAC", keys.SMac);
             OutputHelpers.WriteHex("S-RMAC", keys.SRmac);

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "S4-current",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/main/yubikit/hsmauth.py",
+    "sha256": "e3573d5580928b84818939b6eb1ae0083c7d01793589746eace80db32fe2cab3",
+    "bytes": 22901,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-S4-current.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "S5-oracle",
+    "url": "https://raw.githubusercontent.com/Yubico/python-yubihsm/44a5ab52e0697c67b36c6dec953db08a6b7b183a/yubihsm/core.py",
+    "sha256": "00257ee2e85f1dafde5d5978aecdac6ec23e42aa7d2ef464bdc54f90e6fbbb7f",
+    "bytes": 35280,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-S5-oracle.txt",
+    "access_date": "2026-11-04"
+  },
+  {
+    "id": "S4-commit",
+    "url": "https://api.github.com/repos/Yubico/yubikey-manager/commits/296cb587ba15f57672356d8445393a96b41803fb",
+    "sha256": "fdbedad0f11c9a25bce9fc2a2c282da8404004527e1f98b5e20b64e2ed192e54",
+    "bytes": 15494,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-S4-commit.txt",
+    "access_date": "2026-11-04",
+    "commit": "296cb587ba15f57672356d8445393a96b41803fb",
+    "date": "2025-09-23T12:03:30Z",
+    "message": "HSMAUTH: add change credential password"
+  },
+  {
+    "id": "S5-commit",
+    "url": "https://api.github.com/repos/Yubico/python-yubihsm/commits/055f85fcff0a1d3c0ec779dc28cb21e2762cef3c",
+    "sha256": "1ddf397510f172f8b2e2f8412c2e6f534f941646779c4d10652b1e204d17c0bc",
+    "bytes": 21079,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-S5-commit.txt",
+    "access_date": "2026-11-04",
+    "commit": "055f85fcff0a1d3c0ec779dc28cb21e2762cef3c",
+    "date": "2025-06-19T07:03:25Z",
+    "message": "Add support for uv and use ruff linter"
+  },
+  {
+    "id": "crypto-initial-commit",
+    "url": "https://api.github.com/repos/Yubico/yubikey-manager/commits/31d39f64b73e534787382dab4675c0274616627b",
+    "sha256": "cf4963e832d122eb61c3e34579c5c3b223296b71580931bc0fa47a55351e760b",
+    "bytes": 21785,
+    "capture": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/review-source-crypto-initial-commit.txt",
+    "access_date": "2026-11-04",
+    "commit": "31d39f64b73e534787382dab4675c0274616627b",
+    "date": "2023-07-13T14:58:37Z",
+    "message": "HSMAUTH: Add lib for the YubiHSM Auth application\n\nThis adds commands to communicate with the YubiHSM Auth application."
+  }
+]

@@ -1,0 +1,71 @@
+{
+  "path": "src/YubiHsm/README.md",
+  "fences": [
+    {
+      "ordinal": 1,
+      "language": "bash",
+      "opening_line": 42,
+      "sha256": "d5e1680d7f53cb9cdbbf5ba0a8c6c227f735743774b216ab0c211c02de631365",
+      "bytes": 153,
+      "compile_status": "shell reference, excluded from C# compilation"
+    },
+    {
+      "ordinal": 2,
+      "language": "csharp",
+      "opening_line": 51,
+      "sha256": "d9a185c971a74c028c30d3cc1a00690ceac728061d3df90639c365183c3427ca",
+      "bytes": 520,
+      "compile_status": "pending coordinator full-body compilation"
+    },
+    {
+      "ordinal": 3,
+      "language": "csharp",
+      "opening_line": 93,
+      "sha256": "263e9cc392690567965a610b78ff289a458b2c6636a55ca86aadce7b285ea966",
+      "bytes": 1033,
+      "compile_status": "pending coordinator full-body compilation"
+    },
+    {
+      "ordinal": 4,
+      "language": "csharp",
+      "opening_line": 161,
+      "sha256": "46dc3d75c653f2771c2e6d0178730837745a36cb2d4a4b4435483acb27bc0f4d",
+      "bytes": 1969,
+      "compile_status": "pending coordinator full-body compilation"
+    },
+    {
+      "ordinal": 5,
+      "language": "csharp",
+      "opening_line": 228,
+      "sha256": "9506ec8f0799d0158cc43f44bd71346633c9d3137929142c351253c00e8c4ea5",
+      "bytes": 697,
+      "compile_status": "pending coordinator full-body compilation"
+    },
+    {
+      "ordinal": 6,
+      "language": "csharp",
+      "opening_line": 254,
+      "sha256": "ca8fe727d322c778aabf304fd3260fb21de2c9619067f783b11892536be2b6ae",
+      "bytes": 277,
+      "compile_status": "pending coordinator full-body compilation"
+    },
+    {
+      "ordinal": 7,
+      "language": "csharp",
+      "opening_line": 262,
+      "sha256": "5f0eed8fc3440b3370f6a7f6b8404655799311da3fa836f044e7a34e7df35fe5",
+      "bytes": 160,
+      "compile_status": "pending coordinator full-body compilation"
+    },
+    {
+      "ordinal": 8,
+      "language": "bash",
+      "opening_line": 320,
+      "sha256": "3299ad33beb2e77daab8913c4396bc46384a893af10a6fc8315de6937da8005d",
+      "bytes": 73,
+      "compile_status": "shell reference, excluded from C# compilation"
+    }
+  ],
+  "classification": "listing; typed enrollment method; full exchange interface plus complete handshake method; typed persistence/rotation method; prompt class; session-options fragment",
+  "compile_scope": "Use actual SDK references/analyzers and all stated directives, nested-type/member wrapper where needed, and retain every cleanup block."
+}

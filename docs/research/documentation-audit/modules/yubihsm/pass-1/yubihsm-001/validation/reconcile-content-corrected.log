@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/reconcile-content.py
+PASS: 35 accepted-to-final hashes, 26 exact formatter transforms, four named imports removed in three files, all 56 module dispositions, clean sampling 3/17; strict Roslyn comparison is separate.
+
+EXIT=0

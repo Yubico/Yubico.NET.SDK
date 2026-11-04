@@ -1,0 +1,14 @@
+$ ykman hsmauth reset --help
+UTC 2026-11-04T11:48:43.049898+00:00
+Usage: ykman hsmauth reset [OPTIONS]
+
+  Reset all YubiHSM Auth data.
+
+  This action will wipe all data and restore factory setting for the YubiHSM
+  Auth application on the YubiKey.
+
+Options:
+  -f, --force  confirm the action without prompting
+  -h, --help   show this message and exit
+
+EXIT=0

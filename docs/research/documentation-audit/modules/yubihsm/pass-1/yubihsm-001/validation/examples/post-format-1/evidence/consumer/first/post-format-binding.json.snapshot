@@ -1,0 +1,9 @@
+{
+  "overlay_sha256": "19fe74d9d35d812d11fc884ed703b76f5789541c9662ba5d6b72262ff6abe15c",
+  "transform": {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/format-transform.json",
+    "bytes": 12380,
+    "sha256": "839d1203f3451c5baad5313111ecf7775491d5844187a87a88bfed46a72b1c41"
+  },
+  "scope": "Coordinator exact formatter transform agrees with independent byte-preserving proof; separate Roslyn token/API evidence retains its own gate."
+}

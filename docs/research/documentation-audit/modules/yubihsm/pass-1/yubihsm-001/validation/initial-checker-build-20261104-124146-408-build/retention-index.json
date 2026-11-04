@@ -1,0 +1,40 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-124146-408-build",
+  "files": [
+    {
+      "path": "01-clean-AuditHsm001.Checker.log",
+      "bytes": 826,
+      "sha256": "111f302a033ad13fcc2f69957e0308247d5e67bbee22d026a1975cc1c4e21f0e",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "02-build-AuditHsm001.Checker.log",
+      "bytes": 622,
+      "sha256": "39648156998882c1e3ed77ccb75e0ca6c7da4681482f5a6e7fca754e90aef3fc",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 711,
+      "sha256": "14cf9838be45933c4bcc8322f4c04f225e2051e8db1ad6947b021e80a0fc2c32",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 436,
+      "sha256": "50d81e38571700f4810d361c80f04da5f78337943eb18c394fac16d9640f696d",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2075,
+      "sha256": "fb53af23fa4056cd616b9642c1e252643343a56db355385b8c041240562545aa",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

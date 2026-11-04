@@ -30,12 +30,11 @@ internal static class AsnPublicKeyEncoder
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
     public static byte[] EncodeToSubjectPublicKeyInfo(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
     {
-        return keyType switch
+        var keyInfo = keyType.GetKeyInfo();
+        return keyInfo.Asn1 switch
         {
-            KeyType.ECP256 => EncodeECDsaPublicKey(publicPoint, Oids.ECP256),
-            KeyType.ECP384 => EncodeECDsaPublicKey(publicPoint, Oids.ECP384),
-            KeyType.ECP521 => EncodeECDsaPublicKey(publicPoint, Oids.ECP521),
-            KeyType.X25519 or KeyType.Ed25519 => EncodeCurve25519PublicKey(publicPoint, keyType),
+            { ParameterKind: Asn1ParameterKind.NamedCurve, NamedCurveOid: { } curveOid } when keyInfo.IsShortWeierstrass => EncodeEcPublicKey(publicPoint, curveOid),
+            { ParameterKind: Asn1ParameterKind.Absent } when keyType.IsCurve25519() => EncodeCurve25519PublicKey(publicPoint, keyInfo),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
     }
@@ -79,7 +78,7 @@ internal static class AsnPublicKeyEncoder
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(Oids.RSA);
+        writer.WriteObjectIdentifier(Oids.Rsa);
         writer.WriteNull();
         writer.PopSequence();
 
@@ -132,23 +131,13 @@ internal static class AsnPublicKeyEncoder
             curveOid,
             nameof(parameters));
 
-        return EncodeECDsaPublicKey(uncompressedPoint, curveOid);
+        return EncodeEcPublicKey(uncompressedPoint, curveOid);
     }
 
-    private static byte[] EncodeCurve25519PublicKey(ReadOnlyMemory<byte> publicKey, KeyType keyType)
+    private static byte[] EncodeCurve25519PublicKey(ReadOnlyMemory<byte> publicKey, KeyInfo keyInfo)
     {
-        var keyDefinition = keyType.GetKeyDefinition();
-        if (keyDefinition.AlgorithmOid is null)
-        {
-            throw new ArgumentException("Curve OID is null.");
-        }
-
-        if (!Oids.IsCurve25519Algorithm(keyDefinition.AlgorithmOid))
-        {
-            throw new ArgumentException("Invalid curve OID.");
-        }
-
-        if (publicKey.Length != 32)
+        var asn1 = keyInfo.Asn1 ?? throw new ArgumentException("The key has no ASN.1 representation.", nameof(keyInfo));
+        if (publicKey.Length != keyInfo.PublicValueLengthBytes)
         {
             throw new ArgumentException("Curve25519 public key must be 32 bytes.");
         }
@@ -159,11 +148,11 @@ internal static class AsnPublicKeyEncoder
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(keyDefinition.AlgorithmOid);
+        writer.WriteObjectIdentifier(asn1.AlgorithmOid);
         writer.PopSequence();
 
         // Write subject public key as BIT STRING
-        writer.WriteBitString(publicKey.ToArray());
+        writer.WriteBitString(publicKey.Span);
 
         // End SubjectPublicKeyInfo SEQUENCE
         writer.PopSequence();
@@ -171,7 +160,7 @@ internal static class AsnPublicKeyEncoder
         return writer.Encode();
     }
 
-    private static byte[] EncodeECDsaPublicKey(ReadOnlyMemory<byte> publicPoint, string curveOid)
+    private static byte[] EncodeEcPublicKey(ReadOnlyMemory<byte> publicPoint, string curveOid)
     {
         AsnUtilities.ValidateEcPointArgument(publicPoint.Span, curveOid, nameof(publicPoint));
 
@@ -183,12 +172,12 @@ internal static class AsnPublicKeyEncoder
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(Oids.ECDSA);
+        writer.WriteObjectIdentifier(Oids.EcPublicKey);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
         // Write subject public key as BIT STRING
-        writer.WriteBitString(publicPoint.ToArray());
+        writer.WriteBitString(publicPoint.Span);
 
         // End SubjectPublicKeyInfo SEQUENCE
         writer.PopSequence();

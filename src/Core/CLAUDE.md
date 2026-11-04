@@ -18,7 +18,7 @@ Core is the **foundational library** for the entire SDK. It provides:
 - **Connection Layer**: SmartCard (PC/SC) and HID connection abstractions
 - **Protocol Layer**: ISO 7816-4 APDU processing, SCP (Secure Channel Protocol) support
 - **Platform Interop**: Cross-platform native library loading (Windows, macOS, Linux)
-- **Cryptography**: Key types, COSE encoding, ASN.1 utilities
+- **Cryptography**: Concrete key identities, shared metadata and COSE registry identifiers, ASN.1 utilities
 - **TLV Processing**: Tag-Length-Value parsing and construction
 
 **Key Directories:**
@@ -36,7 +36,7 @@ src/
 │   ├── Fido/Hid/        # FIDO/CTAP HID protocol binding
 │   └── Otp/Hid/         # OTP HID protocol binding
 ├── Cryptography/        # Key types, COSE, ASN.1
-│   └── Cose/            # COSE key representations
+│   └── Cose/            # COSE registry metadata; active codecs live in Ctap2
 ├── Native/              # Native interop per platform
 │   ├── Desktop/SCard/   # PC/SC interop
 │   ├── Windows/         # Windows-specific (HidD, Cfgmgr32)
@@ -68,6 +68,52 @@ YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
 If using DI, configure logging explicitly from the DI-provided `ILoggerFactory` once during startup: `YubiKitLogging.Configure(serviceProvider.GetRequiredService<ILoggerFactory>())`.
 
 ## Critical Patterns
+
+### Cryptographic catalog
+
+`CryptographicDefinitions` is the single entry point: `.Curves`, `.Keys`, `.Algorithms`. Each nested route
+publishes named immutable records, an ordered immutable `All`, and frozen indexes with deliberate duplicate
+identity rejection. `Get`/`GetBy` return one entry or a contextual exception, `TryGet`/`TryGetBy` annotate
+nullable flow, and `Find` returns an immutable collection (possibly empty). There is no registration or DI.
+Curve relationships are one-to-many: `Keys.FindByCurve` preserves catalog order; `GetByCurve` requires
+exactly one construction and fails ambiguity. Ordinary EC parameter callers select `id-ecPublicKey`
+explicitly through `GetNamedEcByCurve`, never an arbitrary first construction sharing the curve.
+Initialization is curves → keys; algorithms reference structural constraints, never the keys initializer.
+
+Keep concrete `KeyType`, mathematical `CurveInfo`, operation `AlgorithmInfo` and protocol numeric IDs distinct.
+`KeyInfo` navigates to optional `.Curve`, `.Asn1`, `.Cose`. Classification is data-driven; `None` and invalid
+key types are not asymmetric. `KeySizeBits`/`KeySizeBytes` retain nominal/stored-width meanings, not security
+strength. In particular 25519 has 32 stored bytes, a 255-bit field and a 253-bit subgroup order. Scalar/seed,
+coordinate and encoded point widths are separate. See README for caller examples.
+
+`Asn1KeyInfo.AlgorithmOid` identifies a key representation: id-ecPublicKey plus named-curve parameters,
+RFC 8410 X25519/Ed25519 with absent parameters, or RSA with NULL parameters. Decoders fully consume the
+AlgorithmIdentifier: one curve OID for EC, no parameters for Ed/X, and absent or single NULL for RSA input
+compatibility (encoding remains NULL). Check before allocating decoded private data. A shared key algorithm
+OID cannot identify a curve or RSA modulus size. Only `.Curves.GetByOid` resolves named curves. Operation OIDs
+belong to `AlgorithmInfo`, including the named AES/Triple DES CBC constants. `Oids` contains constants only.
+Never size an ordinary EC coordinate from a key/operation OID. EC constructors, ASN encoders and decoders
+all use the same short-Weierstrass/named-curve boundary. Host providers can still reject modeled curves;
+private/public consistency and owned-secret cleanup must never be bypassed to make a catalog test pass.
+
+`AlgorithmInfo` includes generic and parameterized operations; `FindForKey` means structurally applicable,
+not supported by a provider, device, applet, slot, or profile, and not recommended/default. COSE ES256 does
+not itself require P-256; EdDSA is Edwards, not ECDSA or intrinsically Ed25519-only. RSA-PSS parameters
+include the hash, MGF1 hash, salt width and trailer. Its OID lookup deliberately returns multiple entries.
+Nested record equality/hash are value-based, including algorithm applicability collections.
+Within `KeyApplicability`, all fields are AND constraints; `AlgorithmInfo.Applicability` is OR alternatives.
+Fully specified Ed25519/X25519 constrain concrete `KeyType`; generic families/forms stay generic.
+An absent `HashAlgorithm` is not proof of a generic operation: Ed25519 has intrinsic hashing.
+
+`CoseKeyInfo` in `Core.Cryptography.Cose` contains kty/crv, never an intrinsic alg. Only verified IANA mappings
+are present (secp256k1 = 8; Brainpool P256/P384/P512 = 256/258/259). Active `Ctap2.Cose.CoseKey` remains open-valued and preserves
+unknown wire metadata/opaque bytes; PIN/UV profile checks remain strict. OpenPGP-specific legacy 25519 OIDs,
+RSA sizes and slot choices live in OpenPgp; Core must never depend on that module.
+
+To add a variant, append an explicit `KeyType` ID, add curve/key data and relationships, and registered COSE
+metadata only when authoritative. Do not edit stable lookup/classification switches. Add independent exact
+ASN/key vectors and provider-backed private consistency checks. Add protocol representation/capability support
+in its owning module separately. New operation definitions change algorithm data/applicability, not key defaults.
 
 ### Applet session initialization
 
@@ -181,6 +227,12 @@ var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oce
 - `Protocols/SmartCard/Scp/ScpKid.cs` - Key identifiers
 
 ### TLV Processing
+
+`ApduResponse` owns a private copied byte array in a sealed reference type. Consumers clear sensitive
+response bytes through `response.Clear()` after parsing, never by casting a read-only view writable.
+Clear invalidates `Data`/`RawData` aliases and status bytes, so inspect status first. Caller constructor
+buffers are not owned by the response and remain unchanged. Do not reintroduce a struct owning cloned
+sensitive arrays: copied structs cannot provide a single clear/lifetime owner.
 
 The canonical usage examples for `DecodeList`, `TryFindValue`, `Tlv`, `EncodeList`, nested encoding, and
 `EncodeAndDisposeList` are in [docs/usage/tlv-processing.md](../../docs/usage/tlv-processing.md). Keep the full examples there rather
@@ -440,7 +492,10 @@ before creating the next session over the same connection; sequential reuse is s
 only after teardown completes. `IsAuthenticated` describes application-protocol authentication (for
 example, SCP); applet-specific authentication is exposed by the concrete applet session.
 
-Prefer using `IsSupported(feature)` / `EnsureSupports(feature)` on `IApplicationSession` rather than duplicating firmware gates in each module.
+`IApplicationSession.IsSupported(feature)` is a public known-firmware compatibility query, not a runtime
+success guarantee. `ApplicationSession.EnsureSupports(feature)` is protected enforcement machinery for
+derived session operations and is not on the public interface. Operations enforce their own prerequisites;
+consumers do not need to preflight them. Major-zero development versions retain permissive feature checks.
 
 Applet factories snapshot `SessionCreationOptions` without retaining the options object. Secure-channel parameters
 remain borrowed. A session retains the caller-owned `UserPresencePrompt` service reference for its lifetime but

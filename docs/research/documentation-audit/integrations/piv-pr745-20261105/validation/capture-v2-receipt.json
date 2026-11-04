@@ -1,0 +1,472 @@
+{
+  "status": "captured-current-compiler-membership-v2",
+  "original_capture_sha256": "7a8a4327642048a1e121a37ce02891d25ddff25227ec8232aba2b3949e63374f",
+  "original_manifest_sha256": "6fa660fa570161a5d3035c2492b27651aea306bd9a882f858bdd2ace6f7a37d1",
+  "adapter": {
+    "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v2.py",
+    "bytes": 9231,
+    "sha256": "d90813c10acb7803fa4931cfd8d57d60387b198aa97a90397fbd10ae076fd55e"
+  },
+  "adapted_source_sha256": "d09ae1a5dc68fc5e015d08494ac0bc3e778b2dff2c5b80cb58f4173f53ad8c93",
+  "adaptations": [
+    {
+      "old": "assert policy['Version'] == policy['YubiKitVersion'] and policy['Version']",
+      "new": "assert policy['Version'] and policy['YubiKitVersion']  # Separate observed host/catalog properties; adapter verifies project versions."
+    },
+    {
+      "old": "compiler-evidence",
+      "new": "compiler-evidence-v2"
+    }
+  ],
+  "explanation": "Host Version and catalog YubiKitVersion are separate evaluated properties. Real restored project versions, actual reference paths/FusionName versions and generated SDK assembly attributes are recorded independently; no equality with catalog version is inferred.",
+  "sdk_project_references": [
+    {
+      "project": {
+        "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+        "bytes": 3024,
+        "sha256": "60705e6469ab458aa47a288fe1b2749e20506dfc006335bdbdb27d82e8668203"
+      },
+      "restore_identity": "Yubico.YubiKit.Core/1.0.0",
+      "compiler_reference": {
+        "path": "src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 268288,
+        "sha256": "050916a354519e3db87724b7fee94163e33469fdc32a0469cf5ee6d0dc3d0915"
+      },
+      "fusion_identity": "Yubico.YubiKit.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+      "assembly_source": {
+        "path": "src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfo.cs",
+        "bytes": 3509,
+        "sha256": "c3c17f13eed272dc56b2c90f966a8735f9a39f2faf01465a8526bf32a6a8bddb"
+      },
+      "versions": {
+        "AssemblyVersion": "1.0.0.0",
+        "AssemblyFileVersion": "1.0.0.0",
+        "AssemblyInformationalVersion": "1.0.0+0c301252d7e8abfd1e84cb0cbc0ce17925f0b963"
+      }
+    },
+    {
+      "project": {
+        "path": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+        "bytes": 864,
+        "sha256": "d150bc39c7c4545e4cf9b87ed2ad25e967c6116211d66f6026638306a0ac68af"
+      },
+      "restore_identity": "Yubico.YubiKit.OpenPgp/1.0.0",
+      "compiler_reference": {
+        "path": "src/OpenPgp/src/obj/Release/net10.0/ref/Yubico.YubiKit.OpenPgp.dll",
+        "bytes": 49664,
+        "sha256": "f0e15f2764fbf32b257f0d49f1b08c13c8b787676a6d7ea760d99a7d380892aa"
+      },
+      "fusion_identity": "Yubico.YubiKit.OpenPgp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+      "assembly_source": {
+        "path": "src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.AssemblyInfo.cs",
+        "bytes": 1991,
+        "sha256": "ef071f080e7ccd2c81b567538a76618dcaff5680bdf5931b3f6999666eb10503"
+      },
+      "versions": {
+        "AssemblyVersion": "1.0.0.0",
+        "AssemblyFileVersion": "1.0.0.0",
+        "AssemblyInformationalVersion": "1.0.0+0c301252d7e8abfd1e84cb0cbc0ce17925f0b963"
+      }
+    },
+    {
+      "project": {
+        "path": "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+        "bytes": 856,
+        "sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0"
+      },
+      "restore_identity": "Yubico.YubiKit.SecurityDomain/1.0.0",
+      "compiler_reference": {
+        "path": "src/SecurityDomain/src/obj/Release/net10.0/ref/Yubico.YubiKit.SecurityDomain.dll",
+        "bytes": 22016,
+        "sha256": "c5ea1533081587061e587a46074c288de812fe0ab56144eaf7cbd0875453530a"
+      },
+      "fusion_identity": "Yubico.YubiKit.SecurityDomain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+      "assembly_source": {
+        "path": "src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.AssemblyInfo.cs",
+        "bytes": 1976,
+        "sha256": "9a4b716a05e1e1621917fa4262803aa3932618a210593a05d16176feca95eb59"
+      },
+      "versions": {
+        "AssemblyVersion": "1.0.0.0",
+        "AssemblyFileVersion": "1.0.0.0",
+        "AssemblyInformationalVersion": "1.0.0+0c301252d7e8abfd1e84cb0cbc0ce17925f0b963"
+      }
+    }
+  ],
+  "host_assembly_versions": {
+    "AssemblyVersion": "1.0.0.0",
+    "AssemblyFileVersion": "1.0.0.0",
+    "AssemblyInformationalVersion": "1.0.0+0c301252d7e8abfd1e84cb0cbc0ce17925f0b963"
+  },
+  "host_version": "1.0.0",
+  "catalog_version": "2.0.0-alpha.2",
+  "language_and_target": {
+    "LangVersion": "14",
+    "TargetFramework": "net10.0"
+  },
+  "compiler_workspace_files": [
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/analyzer-configs.txt",
+      "bytes": 349,
+      "sha256": "a20d1556ac0726473c2cb235a2cc58044c00ce61f1c6bc65ae84d8e607cc2b1b"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/analyzers.txt",
+      "bytes": 1466,
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.deps.json",
+      "bytes": 11527,
+      "sha256": "f8a25b3b288d0f9443fcaf6e0d9ca33b8e7110a3238d01f2ec4ee0f740d0044b"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.dll",
+      "bytes": 40960,
+      "sha256": "260940525c14a6a94619d68c93165ceacffbf5baa36b3572fe02655bb7922ed7"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.pdb",
+      "bytes": 18100,
+      "sha256": "691fe99ef7ae91ccfa18f4ad8819e84e4495b75cd52d9eecd28f3433a126434c"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.xml",
+      "bytes": 163,
+      "sha256": "d9b31dcc3b5b931a0910455069708997d9acadbe16b344edc7d3c4a3c6afaac9"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+      "bytes": 753152,
+      "sha256": "1a9db6871d2482ba4a71203ec9d99758634462b51b7ca86afd7ccfc1ba5fcce6"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.Core.pdb",
+      "bytes": 218068,
+      "sha256": "cb5359d18a6c83d4a3575b7c6d90ed080c90a505811b7a9913b06db5f84ac808"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.Core.xml",
+      "bytes": 652773,
+      "sha256": "e88440e740a6106eb6aa088caada2181b2e43ed033df028c14c475b7a44f2c60"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll",
+      "bytes": 127488,
+      "sha256": "ca7bba78da9dddf4a7c53bac81c47b83dd018be7c5200c459fae41f95655377c"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb",
+      "bytes": 41592,
+      "sha256": "3e90022f7605318cd602068da1302bef565577f92ba15e2ac279b8dc6bb8a97d"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml",
+      "bytes": 124857,
+      "sha256": "194ec5a3e7ca8a067a9575c1ff1829cdc75733762edc1a7c97495c2a08cca317"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll",
+      "bytes": 57856,
+      "sha256": "15bb951c91068f1154b4a60d74e9117aecca2d3ae7363e6dc48306d6da629cfd"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.pdb",
+      "bytes": 23116,
+      "sha256": "f1187bc8e1470d2eff793c0dc6fbec7c4789b83b17364e3271e903509ed759de"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.xml",
+      "bytes": 43350,
+      "sha256": "dfb9fd46d7ed0827cd02ac1f18c4ca279531bc786a7afed099925d31a60d5773"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/compile-inputs.txt",
+      "bytes": 651,
+      "sha256": "1d7e458bc7f6b9dd0632f88142ffa735575bc948a84f3a4c099e260465908e09"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/csc-command-line.txt",
+      "bytes": 28798,
+      "sha256": "b7e44784f742421767d1b2d9f96024a800cdc6addaa5fcae111c3d97c5ae8803"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.Y.5899B2A3.Up2Date",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.AssemblyInfo.cs",
+      "bytes": 1696,
+      "sha256": "149fcfce59947f3ac739e8ee3169e8b2858b7e6e9cb0b78d9986f3ca53fb2502"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.AssemblyInfoInputs.cache",
+      "bytes": 65,
+      "sha256": "03ddcb2faa1e95d9df72b9dc677a66bf5ef8f9f4587efa7dce595b4843c8b136"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.GeneratedMSBuildEditorConfig.editorconfig",
+      "bytes": 786,
+      "sha256": "749b21d56304e54d886b786bd4eacbf8011832dd56abfbc722b24a120efe547e"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.GlobalUsings.g.cs",
+      "bytes": 231,
+      "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.assets.cache",
+      "bytes": 10138,
+      "sha256": "1dbb3612dcc205ff6bfb84d4be5ee1cc1805a98ee8332ea4133043a53d87f8c0"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj.AssemblyReference.cache",
+      "bytes": 9358,
+      "sha256": "a95933b6edb827c5f8bebebf0b593c132c68062419c456a161bd40dc3fd5c1d0"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj.CoreCompileInputs.cache",
+      "bytes": 65,
+      "sha256": "8d32a1af5334bc9d70742f539bf1f787af61d0eb11ba9be8e54a89307c4c2140"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj.FileListAbsolute.txt",
+      "bytes": 1937,
+      "sha256": "b1fc632df77ceed59de1be5988fe7b41cf004dbb30e3fbd3c4d0648821d4ef31"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.dll",
+      "bytes": 40960,
+      "sha256": "260940525c14a6a94619d68c93165ceacffbf5baa36b3572fe02655bb7922ed7"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.pdb",
+      "bytes": 18100,
+      "sha256": "691fe99ef7ae91ccfa18f4ad8819e84e4495b75cd52d9eecd28f3433a126434c"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.sourcelink.json",
+      "bytes": 161,
+      "sha256": "2495930b28c95277a052e075e0df253072544d066f0f0af246f2f5d687f0beb3"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.xml",
+      "bytes": 163,
+      "sha256": "d9b31dcc3b5b931a0910455069708997d9acadbe16b344edc7d3c4a3c6afaac9"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/ref/Yubico.YubiKit.AuditPiv745Integration.Examples.dll",
+      "bytes": 13312,
+      "sha256": "75f0a9a7c0ead5e6404256f7bed4e535670dfa69dc88ada5a438b64714ec7c2e"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/refint/Yubico.YubiKit.AuditPiv745Integration.Examples.dll",
+      "bytes": 13312,
+      "sha256": "75f0a9a7c0ead5e6404256f7bed4e535670dfa69dc88ada5a438b64714ec7c2e"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj.nuget.dgspec.json",
+      "bytes": 97302,
+      "sha256": "caddf8b880612b9533447c94af66092123affe42dba0f97cbf40f2e8d9144757"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj.nuget.g.props",
+      "bytes": 1814,
+      "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj.nuget.g.targets",
+      "bytes": 1367,
+      "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/project.assets.json",
+      "bytes": 120269,
+      "sha256": "cc687e8a5e7b29b8c289c6ce8f875681fd4353c99507a3cf096a3442df84fba0"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/obj/project.nuget.cache",
+      "bytes": 2025,
+      "sha256": "517bc84bbc49e8aadf2708a7dad0f6bde39124a5f6f7a2e6d22fcf3fd84b3234"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/policy-final.txt",
+      "bytes": 352,
+      "sha256": "ef072cb30326126d990698ef12c8beb1ded11e8e55222abc8c098b5acdbc7404"
+    },
+    {
+      "path": "/tmp/opencode/piv-pr745-20261105-examples/resolved-references.txt",
+      "bytes": 39795,
+      "sha256": "3d30326d82d51ad8295830a649bcbebe33a577dcf66f396115f7a68a1f6c1ee4"
+    }
+  ],
+  "preserved": [
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/examples.py.snapshot",
+      "bytes": 14626,
+      "sha256": "7a8a4327642048a1e121a37ce02891d25ddff25227ec8232aba2b3949e63374f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/invocation.json",
+      "bytes": 676,
+      "sha256": "c7d29a21a965521a9442bc178b95b8e44ec1c8b8fd54160cd57c48d943549b77"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/invocation.stderr.txt",
+      "bytes": 559,
+      "sha256": "21dc587a318bcbb3fc6e682537554d49f59f84ebec5ce6d0d7b93369122268dc"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/invocation.stdout.txt",
+      "bytes": 170,
+      "sha256": "309bca494a22b5eefb69a2f19e7629d0e48293a3605f3be812a063a33c62dd96"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/manifest.json.snapshot",
+      "bytes": 55236,
+      "sha256": "6fa660fa570161a5d3035c2492b27651aea306bd9a882f858bdd2ace6f7a37d1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/policy-final.txt.snapshot",
+      "bytes": 352,
+      "sha256": "ef072cb30326126d990698ef12c8beb1ded11e8e55222abc8c098b5acdbc7404"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/Directory.Packages.props.snapshot",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/adapted-capture-source.py.snapshot",
+      "bytes": 14689,
+      "sha256": "d09ae1a5dc68fc5e015d08494ac0bc3e778b2dff2c5b80cb58f4173f53ad8c93"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzer-config/630a8659fc5b-.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzer-config/749b21d56304-Yubico.YubiKit.AuditPiv745Integration.Examples.GeneratedMSBuildEditorConfig.editorconfig.snapshot",
+      "bytes": 786,
+      "sha256": "749b21d56304e54d886b786bd4eacbf8011832dd56abfbc722b24a120efe547e"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzer-config/eac2678eed1c-analysislevelstyle_all.globalconfig.snapshot",
+      "bytes": 19880,
+      "sha256": "eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzer-configs.txt",
+      "bytes": 349,
+      "sha256": "a20d1556ac0726473c2cb235a2cc58044c00ce61f1c6bc65ae84d8e607cc2b1b"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzers.txt",
+      "bytes": 1466,
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/compile-inputs.txt",
+      "bytes": 651,
+      "sha256": "1d7e458bc7f6b9dd0632f88142ffa735575bc948a84f3a4c099e260465908e09"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/csc-command-line.txt",
+      "bytes": 28798,
+      "sha256": "b7e44784f742421767d1b2d9f96024a800cdc6addaa5fcae111c3d97c5ae8803"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/global.json.snapshot",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/host.csproj.snapshot",
+      "bytes": 755,
+      "sha256": "6285a6de09ff22ecddec398d48b30c01af5cece3d9b063233c4b6b05cc16ec68"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/manifest.json",
+      "bytes": 64604,
+      "sha256": "7a3488479387a8f08f2cae9ceae4bc3fad294fe083d2c49e21cda57936ac6ea1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/policy-final.txt",
+      "bytes": 352,
+      "sha256": "ef072cb30326126d990698ef12c8beb1ded11e8e55222abc8c098b5acdbc7404"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/project.assets.json",
+      "bytes": 120269,
+      "sha256": "cc687e8a5e7b29b8c289c6ce8f875681fd4353c99507a3cf096a3442df84fba0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/resolved-references.txt",
+      "bytes": 39795,
+      "sha256": "3d30326d82d51ad8295830a649bcbebe33a577dcf66f396115f7a68a1f6c1ee4"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/sdk-projects/Yubico.YubiKit.Core.AssemblyInfo.cs.snapshot",
+      "bytes": 3509,
+      "sha256": "c3c17f13eed272dc56b2c90f966a8735f9a39f2faf01465a8526bf32a6a8bddb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/sdk-projects/Yubico.YubiKit.OpenPgp.AssemblyInfo.cs.snapshot",
+      "bytes": 1991,
+      "sha256": "ef071f080e7ccd2c81b567538a76618dcaff5680bdf5931b3f6999666eb10503"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/sdk-projects/Yubico.YubiKit.SecurityDomain.AssemblyInfo.cs.snapshot",
+      "bytes": 1976,
+      "sha256": "9a4b716a05e1e1621917fa4262803aa3932618a210593a05d16176feca95eb59"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/149fcfce5994-Yubico.YubiKit.AuditPiv745Integration.Examples.AssemblyInfo.cs.snapshot",
+      "bytes": 1696,
+      "sha256": "149fcfce59947f3ac739e8ee3169e8b2858b7e6e9cb0b78d9986f3ca53fb2502"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/5923a9e63643-OpenPgpExamples.cs.snapshot",
+      "bytes": 10527,
+      "sha256": "5923a9e63643f13480fa16dbdc9cda461a28b4c904f28cc319fa900dd56360db"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/8f86a2cbf00f-Yubico.YubiKit.AuditPiv745Integration.Examples.GlobalUsings.g.cs.snapshot",
+      "bytes": 231,
+      "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/f79c1ad9a9fc-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/ff8620114a43-SecurityDomainExamples.cs.snapshot",
+      "bytes": 2858,
+      "sha256": "ff8620114a43604b6b0dfa49a0526e46ec319dda10b2f20bf8222f0ee620007f"
+    }
+  ],
+  "limits": "No build/test/example/hardware execution. Compiler capture and source membership verified against the held completed build; the coordinator owns the separate passing build RESULT. SDK reference FusionName/assembly-source versions are recorded as observed, not changed to catalog/package intent."
+}

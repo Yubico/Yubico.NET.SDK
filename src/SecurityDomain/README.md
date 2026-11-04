@@ -80,7 +80,7 @@ using var scpKeyParameters = Scp03KeyParameters.Default;
 await using var session = await device.CreateSecurityDomainSessionAsync(
     new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });
 
-IReadOnlyList<KeyInfo> keys = await session.ListKeyInformationAsync();
+IReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo> keys = await session.ListKeyInformationAsync();
 ```
 
 `Scp03KeyParameters.Default` wraps the publicly documented factory key set. Use it only on a device you are
@@ -190,6 +190,10 @@ Cancellation is not rollback: a device may already have accepted a persistent ch
 longer than other operations because it makes repeated authentication attempts.
 
 ## Constraints
+
+Shared Core [cryptographic metadata](../Core/README.md#cryptographic-metadata) uses `KeyType` concrete
+identities and `KeyInfo` on key objects. Catalog representation/applicability and COSE mappings do not
+expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
 
 - SmartCard transport only. Requesting another transport through
   `SessionCreationOptions { PreferredConnectionType = ... }` throws.

@@ -46,7 +46,7 @@ public static class Decryption
     /// 
     /// var result = await Decryption.DecryptDataAsync(
     ///     session,
-    ///     PivSlot.KeyManagement,
+    ///     Slot.KeyManagement,
     ///     encryptedBytes,
     ///     ct);
     /// 
@@ -58,7 +58,7 @@ public static class Decryption
     /// </example>
     public static async Task<DecryptionResult> DecryptDataAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         ReadOnlyMemory<byte> encryptedData,
         RSAEncryptionPadding? padding = null,
         CancellationToken cancellationToken = default)

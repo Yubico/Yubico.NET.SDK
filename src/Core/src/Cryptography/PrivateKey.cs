@@ -27,6 +27,9 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// </remarks>
 public abstract class PrivateKey : IPrivateKey, IDisposable
 {
+    /// <inheritdoc />
+    public abstract KeyInfo KeyInfo { get; }
+
     private bool _disposed;
 
     /// <inheritdoc /> 

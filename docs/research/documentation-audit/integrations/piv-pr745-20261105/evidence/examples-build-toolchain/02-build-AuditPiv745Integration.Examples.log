@@ -1,0 +1,14 @@
+$ dotnet build docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/src/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/src/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj (in 920 ms).
+  3 of 4 projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.SecurityDomain -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll
+  Yubico.YubiKit.AuditPiv745Integration.Examples -> /tmp/opencode/piv-pr745-20261105-examples/bin/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.91

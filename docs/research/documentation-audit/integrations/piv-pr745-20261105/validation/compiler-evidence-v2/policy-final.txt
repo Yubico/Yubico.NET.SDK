@@ -1,0 +1,15 @@
+NETCoreSdkVersion=10.0.403
+TargetFramework=net10.0
+LangVersion=14
+Version=1.0.0
+YubiKitVersion=2.0.0-alpha.2
+WarningLevel=9999
+TreatWarningsAsErrors=true
+AnalysisLevel=preview
+AnalysisMode=AllEnabledByDefault
+EnableNETAnalyzers=false
+RunAnalyzersDuringBuild=true
+RunAnalyzers=
+SkipAnalyzers=
+SkipCompilerExecution=
+NoWarn=,CS1591,CA1848,1701,1702,8002

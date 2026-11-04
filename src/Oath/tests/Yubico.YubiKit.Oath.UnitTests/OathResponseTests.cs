@@ -433,12 +433,15 @@ public sealed class OathResponseTests
         return session;
     }
 
-    private static void AssertCleared(ApduResponse response) =>
+    private static void AssertCleared(ApduResponse? response)
+    {
+        Assert.NotNull(response);
         Assert.All(response.RawData.ToArray(), value => Assert.Equal(0, value));
+    }
 
     private sealed class ResponseBackend(Func<ApduCommand, ApduResponse> respond) : IOathBackend
     {
-        public ApduResponse LastResponse { get; private set; }
+        public ApduResponse? LastResponse { get; private set; }
         public int SendCount { get; private set; }
         public Task<OathInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();

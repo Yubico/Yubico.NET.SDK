@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
 
@@ -256,7 +257,7 @@ public sealed partial class OpenPgpSession
         return attrs switch
         {
             RsaAttributes => FormatRsaDecryptPayload(ciphertext),
-            EcAttributes { Oid: CurveOid.X25519 } => ciphertext.ToArray(),
+            EcAttributes { KeyType: KeyType.X25519 } => ciphertext.ToArray(),
             EcAttributes => FormatEcDecryptPayload(ciphertext),
             _ => throw new NotSupportedException($"Unsupported algorithm: {attrs.AlgorithmId}"),
         };

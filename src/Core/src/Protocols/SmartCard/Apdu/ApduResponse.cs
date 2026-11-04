@@ -13,14 +13,16 @@
 // limitations under the License.
 
 using System.Globalization;
+using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 /// <summary>
 ///     Represents an ISO 7816 application response.
 /// </summary>
-public readonly record struct ApduResponse
+public sealed class ApduResponse
 {
+    private readonly byte[] _rawData;
     /// <summary>
     ///     Initializes a new instance of the <see cref="ApduResponse" /> class.
     /// </summary>
@@ -31,7 +33,7 @@ public readonly record struct ApduResponse
             throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
                 "ExceptionMessages.ResponseApduNotEnoughBytes, data.Length"));
 
-        RawData = data.ToArray();
+        _rawData = data.ToArray();
     }
 
     /// <summary>
@@ -50,13 +52,13 @@ public readonly record struct ApduResponse
         dataWithoutSW.AsSpan().CopyTo(raw);
         raw[^2] = (byte)(sw >> 8);
         raw[^1] = (byte)(sw & 0xFF);
-        RawData = raw;
+        _rawData = raw;
     }
 
     /// <summary>
     ///     Gets the raw response data including the status word bytes.
     /// </summary>
-    public ReadOnlyMemory<byte> RawData { get; }
+    public ReadOnlyMemory<byte> RawData => _rawData;
 
     /// <summary>
     ///     The status word (two byte) code which represents the overall result of a CCID interaction.
@@ -88,4 +90,11 @@ public readonly record struct ApduResponse
     public override string ToString() => $"SW1: 0x{SW1:X2} SW2: 0x{SW2:X2} Data: {Data.Span.Length} bytes";
 
     public bool IsOK() => SW == SWConstants.Success;
+
+    /// <summary>Clears the owned response bytes, invalidating all exposed byte views.</summary>
+    /// <remarks>
+    /// Constructors copy caller input. Clearing affects this response and every alias of its owned
+    /// data, including status bytes, never the caller's source. Repeated clearing is harmless.
+    /// </remarks>
+    public void Clear() => CryptographicOperations.ZeroMemory(_rawData);
 }

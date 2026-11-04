@@ -1,0 +1,614 @@
+{
+  "status": "prepared-awaiting-coordinator-compilation",
+  "context": "current integrated guides, separate from frozen module runs",
+  "project": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/src/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj",
+  "selector": "Yubico.YubiKit.AuditPiv745Integration.Examples",
+  "documents": [
+    {
+      "path": "src/OpenPgp/README.md",
+      "bytes": 32056,
+      "sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "bytes": 14558,
+      "sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1"
+    }
+  ],
+  "groups": [
+    {
+      "name": "OpenPgp.ReadOnlySession",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 1,
+          "line": 51,
+          "body": "using System;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.OpenPgp;\n\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nawait using var session = await device.CreateOpenPgpSessionAsync();\nApplicationRelatedData data = await session.GetApplicationRelatedDataAsync();\nConsole.WriteLine($\"Card {data.Aid.Version}, applet {session.FirmwareVersion}\");\nforeach (var entry in await session.ListKeyInformationAsync())\n{\n    Console.WriteLine($\"{entry.Key}: {entry.Value}\");\n}\n",
+          "body_sha256": "5542ca500da6f1a37c534e01082300f70d3b8f51744c3fe47e6af0f20007a9c3",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "public static async Task InspectAsync()\n{\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nawait using var session = await device.CreateOpenPgpSessionAsync();\nApplicationRelatedData data = await session.GetApplicationRelatedDataAsync();\nConsole.WriteLine($\"Card {data.Aid.Version}, applet {session.FirmwareVersion}\");\nforeach (var entry in await session.ListKeyInformationAsync())\n{\n    Console.WriteLine($\"{entry.Key}: {entry.Value}\");\n}\n}\n",
+      "dependencies": "Real device discovery and OpenPGP applet; no supplied or stubbed device/session.",
+      "transformation": "Move exact original namespace imports to file scope; enclose all original entry statements in async method.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.ReadOnlySession.cs.txt",
+      "raw_sha256": "5542ca500da6f1a37c534e01082300f70d3b8f51744c3fe47e6af0f20007a9c3"
+    },
+    {
+      "name": "OpenPgp.ChangeCredentials",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 2,
+          "line": 101,
+          "body": "static async Task ChangeCredentialsAsync(\n    IYubiKey device, ReadOnlyMemory<byte> currentUserPin, ReadOnlyMemory<byte> newUserPin,\n    ReadOnlyMemory<byte> currentAdminPin, ReadOnlyMemory<byte> newAdminPin,\n    ReadOnlyMemory<byte> resetCode, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.ChangePinAsync(currentUserPin, newUserPin, cancellationToken);\n    await session.ChangeAdminAsync(currentAdminPin, newAdminPin, cancellationToken);\n    await session.VerifyAdminAsync(newAdminPin, cancellationToken);\n    await session.SetResetCodeAsync(resetCode, cancellationToken);\n}\n",
+          "body_sha256": "7ee760b780601580a24306e600e47871a9c24d3b92d318a38ddd95c68abf09aa",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task ChangeCredentialsAsync(\n    IYubiKey device, ReadOnlyMemory<byte> currentUserPin, ReadOnlyMemory<byte> newUserPin,\n    ReadOnlyMemory<byte> currentAdminPin, ReadOnlyMemory<byte> newAdminPin,\n    ReadOnlyMemory<byte> resetCode, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.ChangePinAsync(currentUserPin, newUserPin, cancellationToken);\n    await session.ChangeAdminAsync(currentAdminPin, newAdminPin, cancellationToken);\n    await session.VerifyAdminAsync(newAdminPin, cancellationToken);\n    await session.SetResetCodeAsync(resetCode, cancellationToken);\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.ChangeCredentials.cs.txt",
+      "raw_sha256": "7ee760b780601580a24306e600e47871a9c24d3b92d318a38ddd95c68abf09aa"
+    },
+    {
+      "name": "OpenPgp.RecoverUserPin",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 3,
+          "line": 121,
+          "body": "static async Task RecoverWithResetCodeAsync(\n    IYubiKey device, ReadOnlyMemory<byte> resetCode, ReadOnlyMemory<byte> newUserPin,\n    CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.ResetPinUsingResetCodeAsync(resetCode, newUserPin, cancellationToken);\n}\n\nstatic async Task RecoverWithAdminAsync(\n    IYubiKey device, ReadOnlyMemory<byte> adminPin, ReadOnlyMemory<byte> newUserPin,\n    CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.ResetPinUsingAdminAuthenticationAsync(newUserPin, cancellationToken);\n}\n",
+          "body_sha256": "96e614e3c4c87c063a6d0a1474d866d3a8f806a7569a7348b5c2d6a96a7db884",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task RecoverWithResetCodeAsync(\n    IYubiKey device, ReadOnlyMemory<byte> resetCode, ReadOnlyMemory<byte> newUserPin,\n    CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.ResetPinUsingResetCodeAsync(resetCode, newUserPin, cancellationToken);\n}\n\nstatic async Task RecoverWithAdminAsync(\n    IYubiKey device, ReadOnlyMemory<byte> adminPin, ReadOnlyMemory<byte> newUserPin,\n    CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.ResetPinUsingAdminAuthenticationAsync(newUserPin, cancellationToken);\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.RecoverUserPin.cs.txt",
+      "raw_sha256": "96e614e3c4c87c063a6d0a1474d866d3a8f806a7569a7348b5c2d6a96a7db884"
+    },
+    {
+      "name": "OpenPgp.ConfigureInitialKdf",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 4,
+          "line": 170,
+          "body": "static async Task ConfigureInitialKdfAsync(\n    IYubiKey device, ReadOnlyMemory<byte> currentAdminPin,\n    ReadOnlyMemory<byte> defaultUserPin, ReadOnlyMemory<byte> defaultAdminPin,\n    CancellationToken cancellationToken)\n{\n    byte[] saltUser = RandomNumberGenerator.GetBytes(8);\n    byte[] saltReset = RandomNumberGenerator.GetBytes(8);\n    byte[] saltAdmin = RandomNumberGenerator.GetBytes(8);\n    byte[] hashUser = [];\n    byte[] hashAdmin = [];\n    try\n    {\n        using var derivation = new KdfIterSaltedS2k\n        {\n            HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,\n            SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin\n        };\n        hashUser = derivation.Process(Pw.User, defaultUserPin.Span);\n        hashAdmin = derivation.Process(Pw.Admin, defaultAdminPin.Span);\n        using var configured = new KdfIterSaltedS2k\n        {\n            HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,\n            SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin,\n            InitialHashUser = hashUser, InitialHashAdmin = hashAdmin\n        };\n        await using (var provisioning = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken))\n        {\n            await provisioning.VerifyAdminAsync(currentAdminPin, cancellationToken);\n            await provisioning.SetKdfAsync(configured, cancellationToken);\n        }\n        await using var verification = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n        await verification.VerifyAdminAsync(defaultAdminPin, cancellationToken);\n        await verification.VerifyPinAsync(defaultUserPin, cancellationToken: cancellationToken);\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(hashUser);\n        CryptographicOperations.ZeroMemory(hashAdmin);\n        CryptographicOperations.ZeroMemory(saltUser);\n        CryptographicOperations.ZeroMemory(saltReset);\n        CryptographicOperations.ZeroMemory(saltAdmin);\n    }\n}\n",
+          "body_sha256": "35c5b8c7782d30e9e026fce4f7b5921390b70dd56151c9d1175edaa25c4d56e7",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task ConfigureInitialKdfAsync(\n    IYubiKey device, ReadOnlyMemory<byte> currentAdminPin,\n    ReadOnlyMemory<byte> defaultUserPin, ReadOnlyMemory<byte> defaultAdminPin,\n    CancellationToken cancellationToken)\n{\n    byte[] saltUser = RandomNumberGenerator.GetBytes(8);\n    byte[] saltReset = RandomNumberGenerator.GetBytes(8);\n    byte[] saltAdmin = RandomNumberGenerator.GetBytes(8);\n    byte[] hashUser = [];\n    byte[] hashAdmin = [];\n    try\n    {\n        using var derivation = new KdfIterSaltedS2k\n        {\n            HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,\n            SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin\n        };\n        hashUser = derivation.Process(Pw.User, defaultUserPin.Span);\n        hashAdmin = derivation.Process(Pw.Admin, defaultAdminPin.Span);\n        using var configured = new KdfIterSaltedS2k\n        {\n            HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,\n            SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin,\n            InitialHashUser = hashUser, InitialHashAdmin = hashAdmin\n        };\n        await using (var provisioning = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken))\n        {\n            await provisioning.VerifyAdminAsync(currentAdminPin, cancellationToken);\n            await provisioning.SetKdfAsync(configured, cancellationToken);\n        }\n        await using var verification = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n        await verification.VerifyAdminAsync(defaultAdminPin, cancellationToken);\n        await verification.VerifyPinAsync(defaultUserPin, cancellationToken: cancellationToken);\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(hashUser);\n        CryptographicOperations.ZeroMemory(hashAdmin);\n        CryptographicOperations.ZeroMemory(saltUser);\n        CryptographicOperations.ZeroMemory(saltReset);\n        CryptographicOperations.ZeroMemory(saltAdmin);\n    }\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.ConfigureInitialKdf.cs.txt",
+      "raw_sha256": "35c5b8c7782d30e9e026fce4f7b5921390b70dd56151c9d1175edaa25c4d56e7"
+    },
+    {
+      "name": "OpenPgp.ShowKeyMetadata",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 5,
+          "line": 228,
+          "body": "static void ShowKeyMetadata()\n{\n    KeyInfo keyInfo = CryptographicDefinitions.Keys.Ed25519;\n    OpenPgpKeyInfo? openPgpInfo = keyInfo.GetOpenPgpInfo();\n    Console.WriteLine(openPgpInfo?.CurveOid); // 1.3.6.1.4.1.11591.15.1 (OpenPGP)\n    Console.WriteLine(keyInfo.Asn1?.AlgorithmOid); // 1.3.101.112 (RFC 8410)\n    EcAttributes attributes = EcAttributes.Create(KeyRef.Sig, KeyType.Ed25519); // EdDSA, 0x16\n    Console.WriteLine(attributes.AlgorithmId);\n}\n",
+          "body_sha256": "4e52f02f04741ebf00edfbd5a991fdff34530e67f0336e307c8cfab09fcb525a",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static void ShowKeyMetadata()\n{\n    KeyInfo keyInfo = CryptographicDefinitions.Keys.Ed25519;\n    OpenPgpKeyInfo? openPgpInfo = keyInfo.GetOpenPgpInfo();\n    Console.WriteLine(openPgpInfo?.CurveOid); // 1.3.6.1.4.1.11591.15.1 (OpenPGP)\n    Console.WriteLine(keyInfo.Asn1?.AlgorithmOid); // 1.3.101.112 (RFC 8410)\n    EcAttributes attributes = EcAttributes.Create(KeyRef.Sig, KeyType.Ed25519); // EdDSA, 0x16\n    Console.WriteLine(attributes.AlgorithmId);\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.ShowKeyMetadata.cs.txt",
+      "raw_sha256": "4e52f02f04741ebf00edfbd5a991fdff34530e67f0336e307c8cfab09fcb525a"
+    },
+    {
+      "name": "OpenPgp.GenerateP256SigningKey",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 6,
+          "line": 253,
+          "body": "static async Task GenerateSigningKeyAsync(\n    IYubiKey device, ReadOnlyMemory<byte> adminPin, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.GenerateKeyAsync(KeyRef.Sig,\n        EcAttributes.Create(KeyRef.Sig, KeyType.P256), cancellationToken);\n    Console.WriteLine((await session.ListKeyInformationAsync(cancellationToken))[KeyRef.Sig]);\n}\n",
+          "body_sha256": "466855eb966f95e968297f8c853781f54467dc60ef262726f370547b3782d1c2",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task GenerateSigningKeyAsync(\n    IYubiKey device, ReadOnlyMemory<byte> adminPin, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.GenerateKeyAsync(KeyRef.Sig,\n        EcAttributes.Create(KeyRef.Sig, KeyType.P256), cancellationToken);\n    Console.WriteLine((await session.ListKeyInformationAsync(cancellationToken))[KeyRef.Sig]);\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.GenerateP256SigningKey.cs.txt",
+      "raw_sha256": "466855eb966f95e968297f8c853781f54467dc60ef262726f370547b3782d1c2"
+    },
+    {
+      "name": "OpenPgp.ImportRsaSigningKey",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 7,
+          "line": 276,
+          "body": "static async Task ImportRsaSigningKeyAsync(\n    IYubiKey device, ReadOnlyMemory<byte> adminPin, byte[] pkcs8Der,\n    CancellationToken cancellationToken)\n{\n    using var privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8Der);\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.PutKeyAsync(KeyRef.Sig, privateKey, cancellationToken);\n}\n",
+          "body_sha256": "a3485ea5b6911f8e4f6602037a075a0a8e5fd8c50771f6a8e02bfc1602a17eec",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task ImportRsaSigningKeyAsync(\n    IYubiKey device, ReadOnlyMemory<byte> adminPin, byte[] pkcs8Der,\n    CancellationToken cancellationToken)\n{\n    using var privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8Der);\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.PutKeyAsync(KeyRef.Sig, privateKey, cancellationToken);\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.ImportRsaSigningKey.cs.txt",
+      "raw_sha256": "a3485ea5b6911f8e4f6602037a075a0a8e5fd8c50771f6a8e02bfc1602a17eec"
+    },
+    {
+      "name": "OpenPgp.SignAndVerifyP256",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 8,
+          "line": 315,
+          "body": "static ECParameters DecodeP256PublicKey(ReadOnlyMemory<byte> template)\n{\n    using var outer = Tlv.Create(template.Span);\n    if (outer.Tag != 0x7F49)\n        throw new CryptographicException(\"Expected a card public-key template.\");\n    var point = TlvHelper.DecodeDictionary(outer.Value.Span)[0x86];\n    if (point.Length != 65 || point.Span[0] != 0x04)\n        throw new CryptographicException(\"Expected an uncompressed P-256 point.\");\n    return new ECParameters\n    {\n        Curve = ECCurve.NamedCurves.nistP256,\n        Q = new ECPoint { X = point.Slice(1, 32).ToArray(), Y = point.Slice(33, 32).ToArray() }\n    };\n}\n\nstatic async Task<bool> SignAndVerifyP256Async(\n    IYubiKey device, ReadOnlyMemory<byte> userPin, ReadOnlyMemory<byte> message,\n    CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    var attributes = await session.GetAlgorithmAttributesAsync(KeyRef.Sig, cancellationToken);\n    if (attributes is not EcAttributes { KeyType: KeyType.P256 })\n        throw new InvalidOperationException(\"Provision a P-256 signing key first.\");\n    using var verifier = ECDsa.Create(DecodeP256PublicKey(\n        await session.GetPublicKeyAsync(KeyRef.Sig, cancellationToken)));\n    await session.VerifyPinAsync(userPin, cancellationToken: cancellationToken);\n    ReadOnlyMemory<byte> signature = await session.SignAsync(message, HashAlgorithmName.SHA256, cancellationToken);\n    try\n    {\n        return verifier.VerifyData(message.Span, signature.Span, HashAlgorithmName.SHA256,\n            DSASignatureFormat.Rfc3279DerSequence);\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(signature).Span);\n    }\n}\n",
+          "body_sha256": "bfb83f253bd0bc29efbf837e2e471fd2388b92b2cc26db1a5a4c3c6c4189ef76",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static ECParameters DecodeP256PublicKey(ReadOnlyMemory<byte> template)\n{\n    using var outer = Tlv.Create(template.Span);\n    if (outer.Tag != 0x7F49)\n        throw new CryptographicException(\"Expected a card public-key template.\");\n    var point = TlvHelper.DecodeDictionary(outer.Value.Span)[0x86];\n    if (point.Length != 65 || point.Span[0] != 0x04)\n        throw new CryptographicException(\"Expected an uncompressed P-256 point.\");\n    return new ECParameters\n    {\n        Curve = ECCurve.NamedCurves.nistP256,\n        Q = new ECPoint { X = point.Slice(1, 32).ToArray(), Y = point.Slice(33, 32).ToArray() }\n    };\n}\n\nstatic async Task<bool> SignAndVerifyP256Async(\n    IYubiKey device, ReadOnlyMemory<byte> userPin, ReadOnlyMemory<byte> message,\n    CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    var attributes = await session.GetAlgorithmAttributesAsync(KeyRef.Sig, cancellationToken);\n    if (attributes is not EcAttributes { KeyType: KeyType.P256 })\n        throw new InvalidOperationException(\"Provision a P-256 signing key first.\");\n    using var verifier = ECDsa.Create(DecodeP256PublicKey(\n        await session.GetPublicKeyAsync(KeyRef.Sig, cancellationToken)));\n    await session.VerifyPinAsync(userPin, cancellationToken: cancellationToken);\n    ReadOnlyMemory<byte> signature = await session.SignAsync(message, HashAlgorithmName.SHA256, cancellationToken);\n    try\n    {\n        return verifier.VerifyData(message.Span, signature.Span, HashAlgorithmName.SHA256,\n            DSASignatureFormat.Rfc3279DerSequence);\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(signature).Span);\n    }\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.SignAndVerifyP256.cs.txt",
+      "raw_sha256": "bfb83f253bd0bc29efbf837e2e471fd2388b92b2cc26db1a5a4c3c6c4189ef76"
+    },
+    {
+      "name": "OpenPgp.DecipherAndConsume",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 9,
+          "line": 372,
+          "body": "static async Task DecipherAndConsumeAsync(\n    IYubiKey device, ReadOnlyMemory<byte> userPin, ReadOnlyMemory<byte> rawCiphertextOrPoint,\n    Func<ReadOnlyMemory<byte>, CancellationToken, Task> consume,\n    CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyPinAsync(userPin, extended: true, cancellationToken: cancellationToken);\n    ReadOnlyMemory<byte> result = await session.DecryptAsync(rawCiphertextOrPoint, cancellationToken);\n    try\n    {\n        await consume(result, cancellationToken);\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(result).Span);\n    }\n}\n",
+          "body_sha256": "754cbe59c499c0360b6c4f6697e1b4c3a54043c5dc808dcd8bebe8af94be32d3",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task DecipherAndConsumeAsync(\n    IYubiKey device, ReadOnlyMemory<byte> userPin, ReadOnlyMemory<byte> rawCiphertextOrPoint,\n    Func<ReadOnlyMemory<byte>, CancellationToken, Task> consume,\n    CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyPinAsync(userPin, extended: true, cancellationToken: cancellationToken);\n    ReadOnlyMemory<byte> result = await session.DecryptAsync(rawCiphertextOrPoint, cancellationToken);\n    try\n    {\n        await consume(result, cancellationToken);\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(result).Span);\n    }\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.DecipherAndConsume.cs.txt",
+      "raw_sha256": "754cbe59c499c0360b6c4f6697e1b4c3a54043c5dc808dcd8bebe8af94be32d3"
+    },
+    {
+      "name": "OpenPgp.StoreAndReadCertificate",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 10,
+          "line": 408,
+          "body": "static async Task<byte[]> StoreAndReadCertificateAsync(\n    IYubiKey device, KeyRef slot, ReadOnlyMemory<byte> adminPin, ReadOnlyMemory<byte> certificateDer,\n    CancellationToken cancellationToken)\n{\n    using var certificate = X509CertificateLoader.LoadCertificate(certificateDer.Span);\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.PutCertificateAsync(slot, certificate, cancellationToken);\n    using var readBack = await session.GetCertificateAsync(slot, cancellationToken);\n    return readBack?.RawData ?? throw new InvalidOperationException(\"Certificate was absent after writing.\");\n}\n",
+          "body_sha256": "7f232c1692697178f18b10a4113bc056dfb43b84bce378ac8ccf6f0e182f37d3",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task<byte[]> StoreAndReadCertificateAsync(\n    IYubiKey device, KeyRef slot, ReadOnlyMemory<byte> adminPin, ReadOnlyMemory<byte> certificateDer,\n    CancellationToken cancellationToken)\n{\n    using var certificate = X509CertificateLoader.LoadCertificate(certificateDer.Span);\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.PutCertificateAsync(slot, certificate, cancellationToken);\n    using var readBack = await session.GetCertificateAsync(slot, cancellationToken);\n    return readBack?.RawData ?? throw new InvalidOperationException(\"Certificate was absent after writing.\");\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.StoreAndReadCertificate.cs.txt",
+      "raw_sha256": "7f232c1692697178f18b10a4113bc056dfb43b84bce378ac8ccf6f0e182f37d3"
+    },
+    {
+      "name": "OpenPgp.AttestGeneratedKey",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 11,
+          "line": 426,
+          "body": "static async Task<byte[]> AttestGeneratedKeyAsync(\n    IYubiKey device, KeyRef slot, ReadOnlyMemory<byte> userPin, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyPinAsync(userPin, extended: false, cancellationToken: cancellationToken);\n    using var attestation = await session.AttestKeyAsync(slot, cancellationToken);\n    return attestation.RawData;\n}\n",
+          "body_sha256": "13023e0a198b307520c8060c4e9b271467aeddadcadc47ad127893952a708335",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task<byte[]> AttestGeneratedKeyAsync(\n    IYubiKey device, KeyRef slot, ReadOnlyMemory<byte> userPin, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyPinAsync(userPin, extended: false, cancellationToken: cancellationToken);\n    using var attestation = await session.AttestKeyAsync(slot, cancellationToken);\n    return attestation.RawData;\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.AttestGeneratedKey.cs.txt",
+      "raw_sha256": "13023e0a198b307520c8060c4e9b271467aeddadcadc47ad127893952a708335"
+    },
+    {
+      "name": "OpenPgp.ConfigureSigningPolicy",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 12,
+          "line": 446,
+          "body": "static async Task ConfigureSigningPolicyAsync(\n    IYubiKey device, ReadOnlyMemory<byte> adminPin, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.SetUifAsync(KeyRef.Sig, Uif.On, cancellationToken);\n    await session.SetSignaturePinPolicyAsync(PinPolicy.Always, cancellationToken);\n    Console.WriteLine(await session.GetUifAsync(KeyRef.Sig, cancellationToken));\n}\n",
+          "body_sha256": "0823dc3a40e008e70a56579670018d53f610299bde0fdf1efa5d2d871a937aee",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task ConfigureSigningPolicyAsync(\n    IYubiKey device, ReadOnlyMemory<byte> adminPin, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.VerifyAdminAsync(adminPin, cancellationToken);\n    await session.SetUifAsync(KeyRef.Sig, Uif.On, cancellationToken);\n    await session.SetSignaturePinPolicyAsync(PinPolicy.Always, cancellationToken);\n    Console.WriteLine(await session.GetUifAsync(KeyRef.Sig, cancellationToken));\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.ConfigureSigningPolicy.cs.txt",
+      "raw_sha256": "0823dc3a40e008e70a56579670018d53f610299bde0fdf1efa5d2d871a937aee"
+    },
+    {
+      "name": "OpenPgp.ResetAndInspect",
+      "originals": [
+        {
+          "path": "src/OpenPgp/README.md",
+          "index": 13,
+          "line": 491,
+          "body": "static async Task<ApplicationRelatedData> ResetAndInspectAsync(\n    IYubiKey device, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.ResetAsync(cancellationToken);\n    return await session.GetApplicationRelatedDataAsync(cancellationToken);\n}\n",
+          "body_sha256": "64afa4ae312015f8bf4c44aeb8cbab9998bdd6fc9b6b05b2e7b1cd1015136c18",
+          "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72"
+        }
+      ],
+      "wrapper": "static async Task<ApplicationRelatedData> ResetAndInspectAsync(\n    IYubiKey device, CancellationToken cancellationToken)\n{\n    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);\n    await session.ResetAsync(cancellationToken);\n    return await session.GetApplicationRelatedDataAsync(cancellationToken);\n}\n",
+      "dependencies": "Exact original typed method parameters and complete helper declarations; use shared original imports. ShowKeyMetadata requires real catalog APIs only.",
+      "transformation": "Original method declarations/bodies remain byte-for-byte; add containing static class only.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/OpenPgp.ResetAndInspect.cs.txt",
+      "raw_sha256": "64afa4ae312015f8bf4c44aeb8cbab9998bdd6fc9b6b05b2e7b1cd1015136c18"
+    },
+    {
+      "name": "SecurityDomain.ReadOnly",
+      "originals": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 1,
+          "line": 51,
+          "body": "using System.Security.Cryptography;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.SecurityDomain;\n\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nawait using var session = await device.CreateSecurityDomainSessionAsync();\n\nforeach (var keyInfo in await session.ListKeyInformationAsync())\n{\n    Console.WriteLine(keyInfo.KeyReference);\n}\n",
+          "body_sha256": "d4408cea0f39447dbe1eb119ff58745dced737a923b96a1885d1453a1e1bd5f8",
+          "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1"
+        }
+      ],
+      "wrapper": "public static async Task ReadOnlyAsync()\n{\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nawait using var session = await device.CreateSecurityDomainSessionAsync();\n\nforeach (var keyInfo in await session.ListKeyInformationAsync())\n{\n    Console.WriteLine(keyInfo.KeyReference);\n}\n}\n",
+      "dependencies": "Real device discovery and Security Domain session.",
+      "transformation": "Move original namespace imports to file scope; wrap complete entry statements.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/SecurityDomain.ReadOnly.cs.txt",
+      "raw_sha256": "d4408cea0f39447dbe1eb119ff58745dced737a923b96a1885d1453a1e1bd5f8"
+    },
+    {
+      "name": "SecurityDomain.Authenticate",
+      "originals": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 2,
+          "line": 79,
+          "body": "using var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo> keys = await session.ListKeyInformationAsync();\n",
+          "body_sha256": "dfde857b3cf0f57084842e3127b19395112f2c53bc5b293bfb32e0ab6c0ac32c",
+          "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1"
+        }
+      ],
+      "wrapper": "public static async Task AuthenticateAsync(IYubiKey device)\n{\nusing var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo> keys = await session.ListKeyInformationAsync();\n}\n",
+      "dependencies": "Caller-selected real IYubiKey with no other live session. Import/Generate include entire original administrative-session setup; reset is a separate unauthenticated task.",
+      "transformation": "Wrap complete original statements; import/generation each repeat the full original authentication block in its own resource scope, matching frozen consumer host grouping.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/SecurityDomain.Authenticate.cs.txt",
+      "raw_sha256": "dfde857b3cf0f57084842e3127b19395112f2c53bc5b293bfb32e0ab6c0ac32c"
+    },
+    {
+      "name": "SecurityDomain.Import",
+      "originals": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 2,
+          "line": 79,
+          "body": "using var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo> keys = await session.ListKeyInformationAsync();\n",
+          "body_sha256": "dfde857b3cf0f57084842e3127b19395112f2c53bc5b293bfb32e0ab6c0ac32c",
+          "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1"
+        },
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 3,
+          "line": 93,
+          "body": "byte[] keyMaterial = RandomNumberGenerator.GetBytes(48);\ntry\n{\n    // Escrow keyMaterial before you send it: the device will not give it back.\n    using var newKeys = new StaticKeys(keyMaterial.AsSpan(0, 16), keyMaterial.AsSpan(16, 16), keyMaterial.AsSpan(32, 16));\n    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, replaceKvn: 0);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(keyMaterial);\n}\n",
+          "body_sha256": "61351ce29b5719a3744ce3c8ae4831a5796c3fdc3a443ad672a2ee0be3a52abd",
+          "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1"
+        }
+      ],
+      "wrapper": "public static async Task ImportAsync(IYubiKey device)\n{\nusing var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo> keys = await session.ListKeyInformationAsync();\n\nbyte[] keyMaterial = RandomNumberGenerator.GetBytes(48);\ntry\n{\n    // Escrow keyMaterial before you send it: the device will not give it back.\n    using var newKeys = new StaticKeys(keyMaterial.AsSpan(0, 16), keyMaterial.AsSpan(16, 16), keyMaterial.AsSpan(32, 16));\n    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, replaceKvn: 0);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(keyMaterial);\n}\n}\n",
+      "dependencies": "Caller-selected real IYubiKey with no other live session. Import/Generate include entire original administrative-session setup; reset is a separate unauthenticated task.",
+      "transformation": "Wrap complete original statements; import/generation each repeat the full original authentication block in its own resource scope, matching frozen consumer host grouping.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/SecurityDomain.Import.cs.txt",
+      "raw_sha256": "8882b8656838d2417cb7f6bfe146f88883bc06694410069fcaf224f235eaa5ef"
+    },
+    {
+      "name": "SecurityDomain.Generate",
+      "originals": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 2,
+          "line": 79,
+          "body": "using var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo> keys = await session.ListKeyInformationAsync();\n",
+          "body_sha256": "dfde857b3cf0f57084842e3127b19395112f2c53bc5b293bfb32e0ab6c0ac32c",
+          "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1"
+        },
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 4,
+          "line": 129,
+          "body": "var keyReference = new KeyReference(ScpKid.SCP11b, Kvn: 0x01);\nECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, replaceKvn: 0);\n",
+          "body_sha256": "6a4e1071f9802c834144bc2b15837cc1f5b73e1921125b9fb754c534a359acef",
+          "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1"
+        }
+      ],
+      "wrapper": "public static async Task GenerateAsync(IYubiKey device)\n{\nusing var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo> keys = await session.ListKeyInformationAsync();\n\nvar keyReference = new KeyReference(ScpKid.SCP11b, Kvn: 0x01);\nECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, replaceKvn: 0);\n}\n",
+      "dependencies": "Caller-selected real IYubiKey with no other live session. Import/Generate include entire original administrative-session setup; reset is a separate unauthenticated task.",
+      "transformation": "Wrap complete original statements; import/generation each repeat the full original authentication block in its own resource scope, matching frozen consumer host grouping.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/SecurityDomain.Generate.cs.txt",
+      "raw_sha256": "d163e7e387b55c547cf5ed292b16858423a18afab0ba0d6e5a39bc63b82a33a6"
+    },
+    {
+      "name": "SecurityDomain.Reset",
+      "originals": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 5,
+          "line": 168,
+          "body": "await using var session = await device.CreateSecurityDomainSessionAsync();\nawait session.ResetAsync();\n",
+          "body_sha256": "99d8dde3f77b1aa8f602ce10e0684fc7a3dccc3965eac6a618da2c74c64f1f94",
+          "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1"
+        }
+      ],
+      "wrapper": "public static async Task ResetAsync(IYubiKey device)\n{\nawait using var session = await device.CreateSecurityDomainSessionAsync();\nawait session.ResetAsync();\n}\n",
+      "dependencies": "Caller-selected real IYubiKey with no other live session. Import/Generate include entire original administrative-session setup; reset is a separate unauthenticated task.",
+      "transformation": "Wrap complete original statements; import/generation each repeat the full original authentication block in its own resource scope, matching frozen consumer host grouping.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/SecurityDomain.Reset.cs.txt",
+      "raw_sha256": "99d8dde3f77b1aa8f602ce10e0684fc7a3dccc3965eac6a618da2c74c64f1f94"
+    },
+    {
+      "name": "SecurityDomain.OpenScp11",
+      "originals": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": "inline-constructor",
+          "body": "new Scp11KeyParameters(keyReference, devicePublicKey)",
+          "body_sha256": "2ea389e5e0e5abf22221078c95e047f756fe9725d2a5f96953d244988171791d",
+          "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1"
+        }
+      ],
+      "wrapper": "public static async Task OpenScp11Async(IYubiKey device, KeyReference keyReference, ECPublicKey devicePublicKey)\n{\nusing var parameters = new Scp11KeyParameters(keyReference, devicePublicKey);\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = parameters });\n}\n",
+      "dependencies": "Caller supplies trusted provisioned KeyReference/ECPublicKey and real IYubiKey after disposing the administrative session.",
+      "transformation": "Reuse frozen consumer typed constructor wrapper; retain complete exact current inline expression and parameter/session lifetime scopes.",
+      "lifetime": "Complete original using/await/finally scopes, helpers, parameters and cleanup remain intact. Borrowed dependencies retain the original caller-owned lifetime.",
+      "raw": "raw/SecurityDomain.OpenScp11.cs.txt",
+      "raw_sha256": "2ea389e5e0e5abf22221078c95e047f756fe9725d2a5f96953d244988171791d"
+    }
+  ],
+  "counts": {
+    "openpgp_readme_fences": 13,
+    "security_domain_readme_fences": 5,
+    "security_domain_groups": 6,
+    "total_groups": 19
+  },
+  "inputs": [
+    {
+      "path": "Directory.Build.props",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "Directory.Packages.props",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "global.json",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": ".editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "scripts/toolchain/Discovery.cs",
+      "bytes": 5896,
+      "sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7"
+    },
+    {
+      "path": "scripts/toolchain/Context.cs",
+      "bytes": 4681,
+      "sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e"
+    },
+    {
+      "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "bytes": 3024,
+      "sha256": "60705e6469ab458aa47a288fe1b2749e20506dfc006335bdbdb27d82e8668203"
+    },
+    {
+      "path": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+      "bytes": 864,
+      "sha256": "d150bc39c7c4545e4cf9b87ed2ad25e967c6116211d66f6026638306a0ac68af"
+    },
+    {
+      "path": "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+      "bytes": 856,
+      "sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/Directory.Build.props",
+      "bytes": 676,
+      "sha256": "f777d850a1cc77707154624b5cc54da311bd6a2072f1e4175ca7488342b5b339"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/Directory.Build.targets",
+      "bytes": 2195,
+      "sha256": "857fd6e9414e29ee2617da820ca8cfec6c24708838d4be59171939c2d2c2b360"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/examples.py",
+      "bytes": 14626,
+      "sha256": "7a8a4327642048a1e121a37ce02891d25ddff25227ec8232aba2b3949e63374f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/src/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj",
+      "bytes": 755,
+      "sha256": "6285a6de09ff22ecddec398d48b30c01af5cece3d9b063233c4b6b05cc16ec68"
+    }
+  ],
+  "historical_wrapper_sources": [
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/prepare-final.py",
+      "bytes": 31978,
+      "sha256": "8f0f693ff2e14fa96ae7d538d48b6d5c904a93c2dc9278cfc4f8790d881f859a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/src/Examples.cs",
+      "bytes": 12041,
+      "sha256": "8248882041e14b263bed7b16633e43d1a49bdc34d85bc7ef5ebcced075b457d6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/prepare.py",
+      "bytes": 8858,
+      "sha256": "dbfde687a232cf2764b53076f93ddec12f4e993873f4ee28ea0baa5b08e8e380"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/consumer/src/Examples.cs",
+      "bytes": 3136,
+      "sha256": "870dc0de4471348632f935a8b7c2f25ad0b3f66a5889011762b30c778c2179ac"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/manifest.json",
+      "bytes": 23309,
+      "sha256": "fff7429fadd8691925899979616d32c20f0eefca7255ac02e4e14913e152121d"
+    }
+  ],
+  "frozen_security_domain_scope": "Original ten groups = six README groups + contributor Inspect + three hardware-test snippets. Only the six affected README groups belong to this guide compilation.",
+  "generated": [
+    {
+      "path": "raw/OpenPgp.AttestGeneratedKey.cs.txt",
+      "bytes": 477,
+      "sha256": "13023e0a198b307520c8060c4e9b271467aeddadcadc47ad127893952a708335"
+    },
+    {
+      "path": "raw/OpenPgp.ChangeCredentials.cs.txt",
+      "bytes": 695,
+      "sha256": "7ee760b780601580a24306e600e47871a9c24d3b92d318a38ddd95c68abf09aa"
+    },
+    {
+      "path": "raw/OpenPgp.ConfigureInitialKdf.cs.txt",
+      "bytes": 2032,
+      "sha256": "35c5b8c7782d30e9e026fce4f7b5921390b70dd56151c9d1175edaa25c4d56e7"
+    },
+    {
+      "path": "raw/OpenPgp.ConfigureSigningPolicy.cs.txt",
+      "bytes": 547,
+      "sha256": "0823dc3a40e008e70a56579670018d53f610299bde0fdf1efa5d2d871a937aee"
+    },
+    {
+      "path": "raw/OpenPgp.DecipherAndConsume.cs.txt",
+      "bytes": 730,
+      "sha256": "754cbe59c499c0360b6c4f6697e1b4c3a54043c5dc808dcd8bebe8af94be32d3"
+    },
+    {
+      "path": "raw/OpenPgp.GenerateP256SigningKey.cs.txt",
+      "bytes": 526,
+      "sha256": "466855eb966f95e968297f8c853781f54467dc60ef262726f370547b3782d1c2"
+    },
+    {
+      "path": "raw/OpenPgp.ImportRsaSigningKey.cs.txt",
+      "bytes": 473,
+      "sha256": "a3485ea5b6911f8e4f6602037a075a0a8e5fd8c50771f6a8e02bfc1602a17eec"
+    },
+    {
+      "path": "raw/OpenPgp.ReadOnlySession.cs.txt",
+      "bytes": 783,
+      "sha256": "5542ca500da6f1a37c534e01082300f70d3b8f51744c3fe47e6af0f20007a9c3"
+    },
+    {
+      "path": "raw/OpenPgp.RecoverUserPin.cs.txt",
+      "bytes": 806,
+      "sha256": "96e614e3c4c87c063a6d0a1474d866d3a8f806a7569a7348b5c2d6a96a7db884"
+    },
+    {
+      "path": "raw/OpenPgp.ResetAndInspect.cs.txt",
+      "bytes": 359,
+      "sha256": "64afa4ae312015f8bf4c44aeb8cbab9998bdd6fc9b6b05b2e7b1cd1015136c18"
+    },
+    {
+      "path": "raw/OpenPgp.ShowKeyMetadata.cs.txt",
+      "bytes": 456,
+      "sha256": "4e52f02f04741ebf00edfbd5a991fdff34530e67f0336e307c8cfab09fcb525a"
+    },
+    {
+      "path": "raw/OpenPgp.SignAndVerifyP256.cs.txt",
+      "bytes": 1752,
+      "sha256": "bfb83f253bd0bc29efbf837e2e471fd2388b92b2cc26db1a5a4c3c6c4189ef76"
+    },
+    {
+      "path": "raw/OpenPgp.StoreAndReadCertificate.cs.txt",
+      "bytes": 736,
+      "sha256": "7f232c1692697178f18b10a4113bc056dfb43b84bce378ac8ccf6f0e182f37d3"
+    },
+    {
+      "path": "raw/SecurityDomain.Authenticate.cs.txt",
+      "bytes": 305,
+      "sha256": "dfde857b3cf0f57084842e3127b19395112f2c53bc5b293bfb32e0ab6c0ac32c"
+    },
+    {
+      "path": "raw/SecurityDomain.Generate.cs.txt",
+      "bytes": 460,
+      "sha256": "d163e7e387b55c547cf5ed292b16858423a18afab0ba0d6e5a39bc63b82a33a6"
+    },
+    {
+      "path": "raw/SecurityDomain.Import.cs.txt",
+      "bytes": 737,
+      "sha256": "8882b8656838d2417cb7f6bfe146f88883bc06694410069fcaf224f235eaa5ef"
+    },
+    {
+      "path": "raw/SecurityDomain.OpenScp11.cs.txt",
+      "bytes": 53,
+      "sha256": "2ea389e5e0e5abf22221078c95e047f756fe9725d2a5f96953d244988171791d"
+    },
+    {
+      "path": "raw/SecurityDomain.ReadOnly.cs.txt",
+      "bytes": 523,
+      "sha256": "d4408cea0f39447dbe1eb119ff58745dced737a923b96a1885d1453a1e1bd5f8"
+    },
+    {
+      "path": "raw/SecurityDomain.Reset.cs.txt",
+      "bytes": 103,
+      "sha256": "99d8dde3f77b1aa8f602ce10e0684fc7a3dccc3965eac6a618da2c74c64f1f94"
+    },
+    {
+      "path": "src/OpenPgpExamples.cs",
+      "bytes": 10527,
+      "sha256": "5923a9e63643f13480fa16dbdc9cda461a28b4c904f28cc319fa900dd56360db"
+    },
+    {
+      "path": "src/SecurityDomainExamples.cs",
+      "bytes": 2858,
+      "sha256": "ff8620114a43604b6b0dfa49a0526e46ec319dda10b2f20bf8222f0ee620007f"
+    }
+  ],
+  "limits": "Preparation validates complete current source extraction only. Coordinator builds and captures actual Csc membership separately. The library host has no entry point; no examples, tests or hardware operations execute. Frozen historical examples retain their original API dependencies.",
+  "parents": {
+    "head": "0c301252d7e8abfd1e84cb0cbc0ce17925f0b963",
+    "merge_head": "b1362127203beda5e9c797e8648b28e2716c496c"
+  }
+}

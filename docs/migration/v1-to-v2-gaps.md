@@ -86,9 +86,9 @@ v1 location: `Yubico.YubiKey/src/Yubico/YubiKey/Piv/**`
 v2 location: `src/Piv/src/**`
 
 - **Feature/API**: PIN-only mode (PIN-protected / PIN-derived management key) — `GetPinOnlyMode()`, `TryRecoverPinOnlyMode()`, `SetPinOnlyMode()` (`PivSession.Pinonly.cs`, `PivPinOnlyMode.cs`, ~1700 lines)
-  **v2 status**: Missing — no trace anywhere in `src/Piv`.
-  **User impact**: Integrations relying on PIV PIN-only mode (common in smart-card minidriver / Windows CAPI / macOS setups) have no migration path.
-  **Severity**: Major | **Confidence**: High
+  **v2 status**: Supported with a different API — `GetPinOnlyModeAsync`, `RecoverPinOnlyModeAsync`, and `SetPinOnlyModeAsync` support protected-mode setup and recovery of existing protected or derived keys. Enabling legacy PIN-derived mode is intentionally unavailable.
+  **User impact**: Migrate to async calls with explicit caller-owned credentials. Existing PIN-derived keys can be recovered, but new setup must use PIN-protected mode.
+  **Severity**: Minor (API adaptation and legacy derived-mode setup restriction) | **Confidence**: High
 
 - **Feature/API**: `KeyCollector` delegate pattern driving interactive PIN/PUK/management-key collection with retry/cancel semantics, used across nearly every PIV operation
   **v2 status**: Partially addressed — callers still pass PIN/PUK/management-key bytes directly with no built-in retry-loop callback. Touch notification is separate and now uses `SessionCreationOptions.UserPresencePrompt`/`IUserPresencePrompt`; the alpha-only `PivSession.OnTouchRequired` callback was removed outright.
@@ -96,9 +96,9 @@ v2 location: `src/Piv/src/**`
   **Severity**: Major | **Confidence**: High
 
 - **Feature/API**: Typed PIV data object model — `CardholderUniqueId` (CHUID), `CardCapabilityContainer` (CCC), `AdminData`, `KeyHistory`, `PinProtectedData`, base `PivDataObject` with `Encode()`/`Decode()`/`TryDecode()`
-  **v2 status**: Missing/Degraded — v2's `PivDataObject.cs` is only a `static class` of tag constants; `PivDataObjectProtocol.cs` exposes raw `GetObjectAsync`/`PutObjectAsync` with no parsed field access.
-  **User impact**: Consumers must hand-parse/build TLV-encoded CHUID/CCC/admin-data themselves.
-  **Severity**: Major | **Confidence**: High
+  **v2 status**: Different shape — `DataObject.cs` holds tag constants and `DataObjectProtocol.cs` provides raw GET/PUT exchanges. Typed `DataObjects.CardholderUniqueId`, `CardCapabilityContainer`, `AdminData`, and `KeyHistory` models provide parsed field access without the V1 `PivDataObject` base-class hierarchy; PIN-protected management material is handled by session workflows rather than a public `PinProtectedData` model.
+  **User impact**: Use the typed models and session accessors for CHUID, CCC, admin data, and key history. Adapt code relying on the V1 base-class hierarchy; use PIN-only session workflows for protected management keys.
+  **Severity**: Minor (API shape change) | **Confidence**: High
 
 - **Feature/API**: MSROOTS support (`WriteMsroots`, `WriteMsrootsStream`, `ReadMsroots`, `ReadMsrootsStream`, `DeleteMsroots`) for Windows minidriver root-cert bundle storage
   **v2 status**: Missing — no trace in `src/Piv`.
@@ -110,7 +110,7 @@ v2 location: `src/Piv/src/**`
   **Severity**: Cosmetic | **Confidence**: High
 
 - **Feature/API**: `ReplaceAttestationKeyAndCertificate(...)`/`GetAttestationCertificate()` convenience methods for the F9 attestation key/cert
-  **v2 status**: Present-but-renamed — reachable via generic `GetCertificateAsync(PivSlot.Attestation)`/`ImportKeyAsync(PivSlot.Attestation, ...)`, just without dedicated named methods/docs.
+  **v2 status**: Present-but-renamed — reachable via generic `GetCertificateAsync(Slot.Attestation)`/`ImportKeyAsync(Slot.Attestation, ...)`, just without dedicated named methods/docs.
   **Severity**: Cosmetic | **Confidence**: Medium
 
 - **Feature/API**: Certificate compression default behavior
@@ -141,7 +141,7 @@ v2 locations: `src/Fido2/src/**`, `src/WebAuthn/src/**`
   There is no one-to-one `KeyCollector` analog for PIN/UV collection, but touch is no longer a gap.
   **Severity**: Minor (migration friction, not capability loss) | **Confidence**: High
 
-- **Feature/API**: COSE named constants `ES512` (-36) and `ECDHwHKDF256` (-25)
+- **Feature/API**: COSE named constants `Es512` (-36) and `EcdhEsHkdf256` (-25)
   **v2 status**: Degraded (cosmetic) — `CoseAlgorithm.IsKnown`/`ToString()` doesn't recognize these; still functionally usable via `CoseAlgorithm.Other(int)`.
   **Severity**: Cosmetic | **Confidence**: Medium
 

@@ -31,12 +31,13 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     public static readonly CoseAlgorithm Es256 = new(-7);
 
     /// <summary>
-    /// Generic EdDSA identifier (-8); the WebAuthn credential-key profile uses Ed25519.
+    /// Generic EdDSA identifier (-8) for pure EdDSA; the key curve is separate metadata.
+    /// The WebAuthn credential-key profile uses Ed25519.
     /// </summary>
     public static readonly CoseAlgorithm EdDsa = new(-8);
 
     /// <summary>
-    /// ESP256: ECDSA using P-256 and SHA-256 (-9), not ES256K/secp256k1 (-47).
+    /// ESP256: ECDSA using P-256 and SHA-256 (-9). ES256K uses secp256k1 and identifier -47.
     /// </summary>
     public static readonly CoseAlgorithm Esp256 = new(-9);
 

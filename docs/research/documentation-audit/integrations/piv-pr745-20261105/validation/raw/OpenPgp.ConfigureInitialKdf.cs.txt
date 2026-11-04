@@ -1,0 +1,43 @@
+static async Task ConfigureInitialKdfAsync(
+    IYubiKey device, ReadOnlyMemory<byte> currentAdminPin,
+    ReadOnlyMemory<byte> defaultUserPin, ReadOnlyMemory<byte> defaultAdminPin,
+    CancellationToken cancellationToken)
+{
+    byte[] saltUser = RandomNumberGenerator.GetBytes(8);
+    byte[] saltReset = RandomNumberGenerator.GetBytes(8);
+    byte[] saltAdmin = RandomNumberGenerator.GetBytes(8);
+    byte[] hashUser = [];
+    byte[] hashAdmin = [];
+    try
+    {
+        using var derivation = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,
+            SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin
+        };
+        hashUser = derivation.Process(Pw.User, defaultUserPin.Span);
+        hashAdmin = derivation.Process(Pw.Admin, defaultAdminPin.Span);
+        using var configured = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,
+            SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin,
+            InitialHashUser = hashUser, InitialHashAdmin = hashAdmin
+        };
+        await using (var provisioning = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken))
+        {
+            await provisioning.VerifyAdminAsync(currentAdminPin, cancellationToken);
+            await provisioning.SetKdfAsync(configured, cancellationToken);
+        }
+        await using var verification = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+        await verification.VerifyAdminAsync(defaultAdminPin, cancellationToken);
+        await verification.VerifyPinAsync(defaultUserPin, cancellationToken: cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(hashUser);
+        CryptographicOperations.ZeroMemory(hashAdmin);
+        CryptographicOperations.ZeroMemory(saltUser);
+        CryptographicOperations.ZeroMemory(saltReset);
+        CryptographicOperations.ZeroMemory(saltAdmin);
+    }
+}

@@ -1,0 +1,31 @@
+<Project>
+  <Import Project="$(RepositoryRoot)/Directory.Build.targets" />
+  <Target Name="CapturePiv745GuideInputs" BeforeTargets="CoreCompile">
+    <MakeDir Directories="$(DocumentationWorkspace)" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/compile-inputs.txt" Lines="@(Compile-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/resolved-references.txt" Lines="@(ReferencePathWithRefAssemblies-&gt;'%(FullPath)|%(FusionName)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/analyzers.txt" Lines="@(Analyzer-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/analyzer-configs.txt" Lines="@(EditorConfigFiles-&gt;'%(FullPath)')" Overwrite="true" />
+  </Target>
+  <Target Name="CapturePiv745GuideCompilerPolicy" AfterTargets="CoreCompile">
+    <WriteLinesToFile File="$(DocumentationWorkspace)/csc-command-line.txt" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+    <ItemGroup>
+      <GuidePolicy Include="NETCoreSdkVersion=$(NETCoreSdkVersion)" />
+      <GuidePolicy Include="TargetFramework=$(TargetFramework)" />
+      <GuidePolicy Include="LangVersion=$(LangVersion)" />
+      <GuidePolicy Include="Version=$(Version)" />
+      <GuidePolicy Include="YubiKitVersion=$(YubiKitVersion)" />
+      <GuidePolicy Include="WarningLevel=$(WarningLevel)" />
+      <GuidePolicy Include="TreatWarningsAsErrors=$(TreatWarningsAsErrors)" />
+      <GuidePolicy Include="AnalysisLevel=$(AnalysisLevel)" />
+      <GuidePolicy Include="AnalysisMode=$(AnalysisMode)" />
+      <GuidePolicy Include="EnableNETAnalyzers=$(EnableNETAnalyzers)" />
+      <GuidePolicy Include="RunAnalyzersDuringBuild=$(RunAnalyzersDuringBuild)" />
+      <GuidePolicy Include="RunAnalyzers=$(RunAnalyzers)" />
+      <GuidePolicy Include="SkipAnalyzers=$(_SkipAnalyzers)" />
+      <GuidePolicy Include="SkipCompilerExecution=$(SkipCompilerExecution)" />
+      <GuidePolicy Include="NoWarn=$([System.String]::Copy('$(NoWarn)').Replace(';', ','))" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(DocumentationWorkspace)/policy-final.txt" Lines="@(GuidePolicy)" Overwrite="true" />
+  </Target>
+</Project>

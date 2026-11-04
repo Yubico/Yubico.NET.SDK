@@ -93,7 +93,7 @@ public class OpenPgpKeyImportTests
 
                 var keyInfo = await session.ListKeyInformationAsync();
                 Assert.Equal(KeyStatus.Imported, keyInfo[KeyRef.Sig]);
-                Assert.Equal(CurveOid.Secp256R1, Assert.IsType<EcAttributes>(await session.GetAlgorithmAttributesAsync(KeyRef.Sig)).Oid);
+                Assert.Equal(KeyType.P256, Assert.IsType<EcAttributes>(await session.GetAlgorithmAttributesAsync(KeyRef.Sig)).KeyType);
 
                 var message = "Import EC P256 test"u8.ToArray();
                 await session.VerifyPinAsync(DefaultUserPin);
@@ -136,7 +136,7 @@ public class OpenPgpKeyImportTests
                 await session.PutKeyAsync(KeyRef.Sig, key);
 
                 Assert.Equal(KeyStatus.Imported, (await session.ListKeyInformationAsync())[KeyRef.Sig]);
-                Assert.Equal(CurveOid.Ed25519, Assert.IsType<EcAttributes>(await session.GetAlgorithmAttributesAsync(KeyRef.Sig)).Oid);
+                Assert.Equal(KeyType.Ed25519, Assert.IsType<EcAttributes>(await session.GetAlgorithmAttributesAsync(KeyRef.Sig)).KeyType);
                 Assert.Equal(Ed25519TestPublicKey, await ReadEcPublicPointAsync(session, KeyRef.Sig));
             });
 
@@ -157,7 +157,7 @@ public class OpenPgpKeyImportTests
                 await session.PutKeyAsync(KeyRef.Dec, key);
 
                 Assert.Equal(KeyStatus.Imported, (await session.ListKeyInformationAsync())[KeyRef.Dec]);
-                Assert.Equal(CurveOid.X25519, Assert.IsType<EcAttributes>(await session.GetAlgorithmAttributesAsync(KeyRef.Dec)).Oid);
+                Assert.Equal(KeyType.X25519, Assert.IsType<EcAttributes>(await session.GetAlgorithmAttributesAsync(KeyRef.Dec)).KeyType);
                 Assert.Equal(X25519TestPublicKey, await ReadEcPublicPointAsync(session, KeyRef.Dec));
             });
 

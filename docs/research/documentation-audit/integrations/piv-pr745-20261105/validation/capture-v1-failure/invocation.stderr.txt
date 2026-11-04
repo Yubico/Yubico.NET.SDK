@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/examples.py", line 228, in <module>
+    capture()
+    ~~~~~~~^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/examples.py", line 186, in capture
+    assert policy['Version'] == policy['YubiKitVersion'] and policy['Version']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

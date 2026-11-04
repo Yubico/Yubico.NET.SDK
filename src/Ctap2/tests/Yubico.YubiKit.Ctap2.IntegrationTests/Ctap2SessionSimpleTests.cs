@@ -121,7 +121,7 @@ public class Ctap2SessionSimpleTests
             {
                 // ES256 is checked only for a nonempty advertisement, not by creating that algorithm.
                 var hasEs256 = info.Algorithms.Any(a =>
-                    a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.ES256);
+                    a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
                 Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
             }
         });

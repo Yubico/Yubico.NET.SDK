@@ -1,0 +1,5 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/src/OpenPgpExamples.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/src/SecurityDomainExamples.cs
+/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.GlobalUsings.g.cs
+/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/piv-pr745-20261105-examples/obj/Release/net10.0/Yubico.YubiKit.AuditPiv745Integration.Examples.AssemblyInfo.cs

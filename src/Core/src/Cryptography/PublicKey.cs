@@ -28,6 +28,9 @@ namespace Yubico.YubiKit.Core.Cryptography;
 public abstract class PublicKey : IPublicKey
 {
     /// <inheritdoc />
+    public abstract KeyInfo KeyInfo { get; }
+
+    /// <inheritdoc />
     public abstract KeyType KeyType { get; }
 
     /// <inheritdoc />

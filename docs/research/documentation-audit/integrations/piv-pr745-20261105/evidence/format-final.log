@@ -1,0 +1,4 @@
+$ dotnet format Yubico.YubiKit.sln --include src/Ctap2/src/Cose/CoseAlgorithm.cs src/OpenPgp/src/AlgorithmAttributes.cs src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs --verify-no-changes --verbosity minimal
+Warnings were encountered while loading the workspace. Set the verbosity option to the 'diagnostic' level to log warnings.
+
+EXIT=0

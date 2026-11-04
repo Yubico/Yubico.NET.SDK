@@ -15,7 +15,9 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples.Results;
+using PublicKey = System.Security.Cryptography.X509Certificates.PublicKey;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 
@@ -45,7 +47,7 @@ public static class Certificates
     /// <code>
     /// await using var session = await device.CreatePivSessionAsync(ct);
     /// 
-    /// var result = await Certificates.GetCertificateAsync(session, PivSlot.Authentication, ct);
+    /// var result = await Certificates.GetCertificateAsync(session, Slot.Authentication, ct);
     /// if (result.Success)
     /// {
     ///     Console.WriteLine($"Subject: {result.Certificate!.Subject}");
@@ -54,7 +56,7 @@ public static class Certificates
     /// </example>
     public static async Task<CertificateResult> GetCertificateAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -88,12 +90,12 @@ public static class Certificates
     /// 
     /// var certData = await File.ReadAllBytesAsync("certificate.pem", ct);
     /// var result = await Certificates.ImportCertificateAsync(
-    ///     session, PivSlot.Authentication, certData, PivCertificateCompression.Automatic, ct);
+    ///     session, Slot.Authentication, certData, CertificateCompression.Automatic, ct);
     /// </code>
     /// </example>
     public static async Task<CertificateResult> ImportCertificateAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         ReadOnlyMemory<byte> certificateData,
         bool compress = false,
         CancellationToken cancellationToken = default)
@@ -110,7 +112,7 @@ public static class Certificates
             await session.StoreCertificateAsync(
                 slot,
                 cert,
-                compress ? PivCertificateCompression.Always : PivCertificateCompression.Automatic,
+                compress ? CertificateCompression.Always : CertificateCompression.Automatic,
                 cancellationToken);
             return CertificateResult.Stored();
         }
@@ -135,7 +137,7 @@ public static class Certificates
     /// <code>
     /// await using var session = await device.CreatePivSessionAsync(ct);
     /// 
-    /// var result = await Certificates.ExportCertificatePemAsync(session, PivSlot.Authentication, ct);
+    /// var result = await Certificates.ExportCertificatePemAsync(session, Slot.Authentication, ct);
     /// if (result.Success &amp;&amp; result.Certificate is not null)
     /// {
     ///     var pem = result.Certificate.ExportCertificatePem();
@@ -145,7 +147,7 @@ public static class Certificates
     /// </example>
     public static async Task<CertificateResult> ExportCertificatePemAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -178,12 +180,12 @@ public static class Certificates
     /// await using var session = await device.CreatePivSessionAsync(ct);
     /// await session.AuthenticateAsync(managementKey, ct);
     /// 
-    /// var result = await Certificates.DeleteCertificateAsync(session, PivSlot.Authentication, ct);
+    /// var result = await Certificates.DeleteCertificateAsync(session, Slot.Authentication, ct);
     /// </code>
     /// </example>
     public static async Task<CertificateResult> DeleteCertificateAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -215,12 +217,12 @@ public static class Certificates
     /// await session.VerifyPinAsync(pin, ct);
     /// 
     /// var result = await Certificates.GenerateSelfSignedAsync(
-    ///     session, PivSlot.Authentication, "CN=Test User", 365, ct);
+    ///     session, Slot.Authentication, "CN=Test User", 365, ct);
     /// </code>
     /// </example>
     public static async Task<CertificateResult> GenerateSelfSignedAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         string subject,
         int validityDays,
         CancellationToken cancellationToken = default)
@@ -241,7 +243,8 @@ public static class Certificates
                 return CertificateResult.Failed($"Slot {slot} has no public key. Generate a key first.");
             }
 
-            using var publicKey = slotMetadata.Algorithm.IsRsa()
+            var keyType = slotMetadata.KeyType ?? throw new NotSupportedException($"Unknown PIV algorithm 0x{slotMetadata.RawAlgorithmId:X2}.");
+            using var publicKey = keyType.IsRsa()
                 ? (AsymmetricAlgorithm)slotMetadata.GetRsaPublicKey()
                 : slotMetadata.GetECDsaPublicKey();
 
@@ -251,7 +254,7 @@ public static class Certificates
             }
 
             var subjectName = new X500DistinguishedName(subject);
-            var hashAlgorithm = slotMetadata.Algorithm == PivAlgorithm.EccP384
+            var hashAlgorithm = slotMetadata.KeyType == KeyType.P384
                 ? HashAlgorithmName.SHA384
                 : HashAlgorithmName.SHA256;
 
@@ -261,12 +264,12 @@ public static class Certificates
             if (publicKey is RSA rsa)
             {
                 request = new CertificateRequest(subjectName, rsa, hashAlgorithm, RSASignaturePadding.Pkcs1);
-                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, slotMetadata.Algorithm, rsa);
+                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa);
             }
             else if (publicKey is ECDsa ecdsa)
             {
                 request = new CertificateRequest(subjectName, ecdsa, hashAlgorithm);
-                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, slotMetadata.Algorithm, ecdsa);
+                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa);
             }
             else
             {
@@ -299,7 +302,7 @@ public static class Certificates
             await session.StoreCertificateAsync(
                 slot,
                 newCert,
-                PivCertificateCompression.Automatic,
+                CertificateCompression.Automatic,
                 cancellationToken);
             return CertificateResult.Succeeded(newCert);
         }
@@ -322,7 +325,7 @@ public static class Certificates
     /// await using var session = await device.CreatePivSessionAsync(ct);
     /// 
     /// var result = await Certificates.GenerateCsrAsync(
-    ///     session, PivSlot.Authentication, "CN=Test User", ct);
+    ///     session, Slot.Authentication, "CN=Test User", ct);
     /// 
     /// if (result.Success)
     /// {
@@ -332,7 +335,7 @@ public static class Certificates
     /// </example>
     public static async Task<CertificateResult> GenerateCsrAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         string subject,
         CancellationToken cancellationToken = default)
     {
@@ -352,7 +355,8 @@ public static class Certificates
                 return CertificateResult.Failed($"Slot {slot} has no public key. Generate a key first.");
             }
 
-            using var publicKey = slotMetadata.Algorithm.IsRsa()
+            var keyType = slotMetadata.KeyType ?? throw new NotSupportedException($"Unknown PIV algorithm 0x{slotMetadata.RawAlgorithmId:X2}.");
+            using var publicKey = keyType.IsRsa()
                 ? (AsymmetricAlgorithm)slotMetadata.GetRsaPublicKey()
                 : slotMetadata.GetECDsaPublicKey();
 
@@ -362,7 +366,7 @@ public static class Certificates
             }
 
             var subjectName = new X500DistinguishedName(subject);
-            var hashAlgorithm = slotMetadata.Algorithm == PivAlgorithm.EccP384
+            var hashAlgorithm = slotMetadata.KeyType == KeyType.P384
                 ? HashAlgorithmName.SHA384
                 : HashAlgorithmName.SHA256;
 
@@ -374,12 +378,12 @@ public static class Certificates
             if (publicKey is RSA rsa)
             {
                 request = new CertificateRequest(subjectName, rsa, hashAlgorithm, RSASignaturePadding.Pkcs1);
-                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, slotMetadata.Algorithm, rsa);
+                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa);
             }
             else if (publicKey is ECDsa ecdsa)
             {
                 request = new CertificateRequest(subjectName, ecdsa, hashAlgorithm);
-                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, slotMetadata.Algorithm, ecdsa);
+                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa);
             }
             else
             {
@@ -406,8 +410,8 @@ public static class Certificates
 /// </summary>
 internal sealed class YubiKeyRsaSignatureGenerator(
     IPivSession session,
-    PivSlot slot,
-    PivAlgorithm algorithm,
+    Slot slot,
+    KeyType keyType,
     RSA publicKey) : X509SignatureGenerator
 {
     public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
@@ -455,7 +459,7 @@ internal sealed class YubiKeyRsaSignatureGenerator(
         byte[] padded = ApplyPkcs1Padding(digestInfo, keySize);
 
         // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
-        var signature = session.SignOrDecryptAsync(slot, algorithm, padded).GetAwaiter().GetResult();
+        var signature = session.SignOrDecryptAsync(slot, keyType, padded).GetAwaiter().GetResult();
 
         return signature.ToArray();
     }
@@ -512,8 +516,8 @@ internal sealed class YubiKeyRsaSignatureGenerator(
 /// </summary>
 internal sealed class YubiKeyEcdsaSignatureGenerator(
     IPivSession session,
-    PivSlot slot,
-    PivAlgorithm algorithm,
+    Slot slot,
+    KeyType keyType,
     ECDsa publicKey) : X509SignatureGenerator
 {
     public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
@@ -548,7 +552,7 @@ internal sealed class YubiKeyEcdsaSignatureGenerator(
         // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
         // YubiKey returns ECDSA signatures in DER format (RFC 3279 SEQUENCE { INTEGER r, INTEGER s }).
         // X.509 CSR signature fields also expect DER, so no conversion is needed.
-        var signatureMemory = session.SignOrDecryptAsync(slot, algorithm, hash).GetAwaiter().GetResult();
+        var signatureMemory = session.SignOrDecryptAsync(slot, keyType, hash).GetAwaiter().GetResult();
         return signatureMemory.ToArray();
     }
 

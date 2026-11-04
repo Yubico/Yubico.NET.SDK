@@ -1,0 +1,4 @@
+?? docs/research/audit-v2-closeout-review.md
+?? docs/research/audit-v2-execution.md
+?? docs/research/audit-v2-jira-traceability.md
+?? mise.toml

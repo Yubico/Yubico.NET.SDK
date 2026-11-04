@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Tests.Shared;
@@ -59,7 +61,7 @@ public class PivMetadataTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
 
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
 
         Assert.Null(metadata);
     }
@@ -71,13 +73,20 @@ public class PivMetadataTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        KeyType[] keyTypes = [KeyType.P256, KeyType.Rsa2048];
+        foreach (var keyType in keyTypes)
+        {
+            var generated = await session.GenerateKeyAsync(Slot.Authentication, keyType);
+            var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
 
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
-
-        Assert.NotNull(metadata);
-        Assert.Equal(PivAlgorithm.EccP256, metadata.Value.Algorithm);
-        Assert.True(metadata.Value.IsGenerated);
+            Assert.NotNull(metadata);
+            Assert.Equal(keyType, metadata.Value.KeyType);
+            Assert.True(metadata.Value.IsGenerated);
+            using AsymmetricAlgorithm extracted = keyType.IsRsa()
+                ? metadata.Value.GetRsaPublicKey()
+                : metadata.Value.GetECDsaPublicKey();
+            Assert.Equal(generated.ExportSubjectPublicKeyInfo(), extracted.ExportSubjectPublicKeyInfo());
+        }
     }
 
     [SkippableTheory]
@@ -93,11 +102,11 @@ public class PivMetadataTests
         // Key type depends on firmware version
         if (state.FirmwareVersion >= new FirmwareVersion(5, 7, 0))
         {
-            Assert.Equal(PivManagementKeyType.Aes192, metadata.KeyType);
+            Assert.Equal(KeyType.Aes192, metadata.KeyType);
         }
         else
         {
-            Assert.Equal(PivManagementKeyType.TripleDes, metadata.KeyType);
+            Assert.Equal(KeyType.TripleDes, metadata.KeyType);
         }
     }
 

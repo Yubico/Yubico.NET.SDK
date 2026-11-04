@@ -1,0 +1,1 @@
+check: 13 OpenPGP fences + 5 Security Domain fences/inline constructor = 19 full groups; unique project discovery and current input hashes verified. Compilation pending.

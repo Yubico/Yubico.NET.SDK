@@ -91,27 +91,18 @@ internal sealed class PrivateKeyImport : IDisposable
                     throw new NotSupportedException("RSA keys with a public exponent other than 65537 are not supported.");
                 }
 
-                var size = (RsaSize)rsa.KeyDefinition.LengthInBits;
-                if (!Enum.IsDefined(size))
-                {
-                    throw new NotSupportedException($"RSA {rsa.KeyDefinition.LengthInBits} is not a size the OpenPGP application imports.");
-                }
+                var rsaSize = rsa.KeyInfo.GetOpenPgpInfo()?.RsaSize
+                    ?? throw new NotSupportedException($"RSA {rsa.KeyInfo.KeySizeBits} is not a size the OpenPGP application imports.");
 
                 return RsaAttributes.Create(
-                    size,
+                    rsaSize,
                     firmwareVersion.Major is > 0 and < 4 ? RsaImportFormat.Crt : RsaImportFormat.Standard);
 
             case ECPrivateKey ec:
-                return EcAttributes.Create(keyRef, ec.KeyType switch
-                {
-                    KeyType.ECP256 => CurveOid.Secp256R1,
-                    KeyType.ECP384 => CurveOid.Secp384R1,
-                    KeyType.ECP521 => CurveOid.Secp521R1,
-                    _ => throw new NotSupportedException($"Curve {ec.KeyType} is not supported for OpenPGP import."),
-                });
+                return EcAttributes.Create(keyRef, ec.KeyType);
 
             case Curve25519PrivateKey curve:
-                return EcAttributes.Create(keyRef, curve.KeyType == KeyType.Ed25519 ? CurveOid.Ed25519 : CurveOid.X25519);
+                return EcAttributes.Create(keyRef, curve.KeyType);
 
             default:
                 throw new NotSupportedException($"Private key type {privateKey.GetType().Name} is not supported for OpenPGP import.");
@@ -126,7 +117,7 @@ internal sealed class PrivateKeyImport : IDisposable
             throw new ArgumentException("The RSA private key has no prime factors.", nameof(rsa));
         }
 
-        var componentLength = rsa.KeyDefinition.LengthInBytes / 2;
+        var componentLength = rsa.KeyInfo.KeySizeBytes / 2;
         var p = FixedLength(parameters.P, componentLength);
         var q = FixedLength(parameters.Q, componentLength);
         if (!useCrt)
@@ -150,7 +141,7 @@ internal sealed class PrivateKeyImport : IDisposable
     private PrivateKeyTemplate EcTemplate(ECPrivateKey ec)
     {
         var d = ec.Parameters.D ?? throw new ArgumentException("The EC private key has no scalar.", nameof(ec));
-        return new EcKeyTemplate(FixedLength(d, ec.KeyDefinition.LengthInBytes));
+        return new EcKeyTemplate(FixedLength(d, ec.KeyInfo.PrivateValueLengthBytes ?? throw new NotSupportedException("The EC scalar width is not modeled.")));
     }
 
     private PrivateKeyTemplate Curve25519Template(Curve25519PrivateKey curve)

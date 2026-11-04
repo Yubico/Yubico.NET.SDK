@@ -21,8 +21,8 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// Represents a Curve25519 public key.
 /// </summary>
 /// <remarks>
-/// This sealed class encapsulates Curve25519 public key data as a compressed point
-/// and supports both Ed25519 and X25519 key types.
+/// Stores the RFC 8410 public value: an Ed25519 compressed Edwards point or an X25519
+/// little-endian Montgomery u-coordinate. These are distinct constructions, not interchangeable points.
 /// It also provides factory methods for creating instances from public point values or DER-encoded data.
 /// </remarks>
 public sealed class Curve25519PublicKey : PublicKey
@@ -30,18 +30,18 @@ public sealed class Curve25519PublicKey : PublicKey
     private readonly Memory<byte> _publicPoint;
 
     /// <summary>
-    /// Gets the key definition associated with this RSA private key.
+    /// Gets the metadata associated with this 25519 public key.
     /// </summary>
     /// <value>
-    /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
+    /// A <see cref="KeyInfo"/> object that describes the key's representation.
     /// </value>
-    public KeyDefinition KeyDefinition { get; }
+    public override KeyInfo KeyInfo { get; }
 
     /// <inheritdoc />
-    public override KeyType KeyType => KeyDefinition.KeyType;
+    public override KeyType KeyType => KeyInfo.KeyType;
 
     /// <summary>
-    /// Gets the bytes representing the public key coordinates as a compressed point.
+    /// Gets the RFC 8410 public value for the concrete construction.
     /// </summary>
     /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the public key bytes.</returns>
     /// <remarks>
@@ -51,9 +51,9 @@ public sealed class Curve25519PublicKey : PublicKey
 
     private Curve25519PublicKey(
         ReadOnlyMemory<byte> publicPoint,
-        KeyDefinition keyDefinition)
+        KeyInfo keyInfo)
     {
-        KeyDefinition = keyDefinition;
+        KeyInfo = keyInfo;
         _publicPoint = new byte[publicPoint.Length];
 
         publicPoint.CopyTo(_publicPoint);
@@ -66,7 +66,7 @@ public sealed class Curve25519PublicKey : PublicKey
     /// A byte array containing the ASN.1 DER encoded public key.
     /// </returns>
     public override byte[] ExportSubjectPublicKeyInfo() =>
-        AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(_publicPoint, KeyDefinition.KeyType);
+        AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(_publicPoint, KeyInfo.KeyType);
 
     /// <summary>
     /// Creates a new instance of <see cref="Curve25519PublicKey"/> from a DER-encoded SubjectPublicKeyInfo.
@@ -89,7 +89,7 @@ public sealed class Curve25519PublicKey : PublicKey
     /// Creates an instance of <see cref="Curve25519PublicKey"/> from the given
     /// <paramref name="publicPoint"/> and <paramref name="keyType"/>.
     /// </summary>
-    /// <param name="publicPoint">The raw public key data, formatted as an compressed point.</param>
+    /// <param name="publicPoint">The raw 32-byte RFC 8410 public value for the concrete construction.</param>
     /// <param name="keyType">The type of key this is.</param>
     /// <returns>An instance of <see cref="Curve25519PublicKey"/>.</returns>
     /// <exception cref="ArgumentException">
@@ -97,15 +97,19 @@ public sealed class Curve25519PublicKey : PublicKey
     /// </exception>
     public static Curve25519PublicKey CreateFromValue(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
     {
-        var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-        if (publicPoint.Length != keyDefinition.LengthInBytes)
+        var keyInfo = keyType.GetKeyInfo();
+        if (!keyType.IsCurve25519())
+        {
+            throw new ArgumentException("Only X25519 and Ed25519 representations are supported.", nameof(keyType));
+        }
+        if (publicPoint.Length != keyInfo.PublicValueLengthBytes)
         {
             throw new ArgumentException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.InvalidPublicKeyData"));
+                    "Invalid 25519 public value: expected {0} bytes.", keyInfo.PublicValueLengthBytes), nameof(publicPoint));
         }
 
-        return new Curve25519PublicKey(publicPoint, keyDefinition);
+        return new Curve25519PublicKey(publicPoint, keyInfo);
     }
 }

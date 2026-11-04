@@ -33,7 +33,7 @@ public sealed class Fido2RequestAuditReproTests
             new byte[32],
             new PublicKeyCredentialRpEntity("example.com"),
             new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
-            [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.ES256)],
+            [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.Es256)],
             new MakeCredentialOptions { ResidentKey = true, UserPresence = false }));
 
         Assert.Equal("options", ex.ParamName);
@@ -75,13 +75,13 @@ public sealed class Fido2RequestAuditReproTests
     [Trait("Audit", "N1")]
     public void N1_MakeCredentialRejectsDuplicateCredentialParameters()
     {
-        var algorithm = new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.ES256);
+        var algorithm = new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.Es256);
 
         var ex = Assert.Throws<ArgumentException>(() => Ctap2SessionRequestEncoding.BuildMakeCredentialRequest(
             new byte[32],
             new PublicKeyCredentialRpEntity("example.com"),
             new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
-            [algorithm, new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.EdDSA), algorithm],
+            [algorithm, new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.EdDsa), algorithm],
             null));
 
         Assert.Equal("pubKeyCredParams", ex.ParamName);
@@ -96,7 +96,7 @@ public sealed class Fido2RequestAuditReproTests
             new byte[32],
             new PublicKeyCredentialRpEntity("example.com"),
             new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
-            [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.RS256), new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.ES256)],
+            [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.Rs256), new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.Es256)],
             null);
 
         var reader = new CborReader(request.AsMemory(1), CborConformanceMode.Ctap2Canonical);
@@ -124,7 +124,7 @@ public sealed class Fido2RequestAuditReproTests
                 algorithms.Add(alg!.Value);
             }
             reader.ReadEndArray();
-            Assert.Equal([(int)CoseAlgorithmIdentifier.RS256, (int)CoseAlgorithmIdentifier.ES256], algorithms);
+            Assert.Equal([(int)CoseAlgorithmIdentifier.Rs256, (int)CoseAlgorithmIdentifier.Es256], algorithms);
             return;
         }
 

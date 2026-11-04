@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples.Results;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
@@ -290,13 +291,13 @@ public static class PinManagement
     /// var newKey = new byte[24]; // or 16/32 for AES
     /// RandomNumberGenerator.Fill(newKey);
     /// var result = await PinManagement.ChangeManagementKeyAsync(
-    ///     session, newKey, PivManagementKeyType.TripleDes, ct);
+    ///     session, newKey, KeyType.TripleDes, ct);
     /// </code>
     /// </example>
     public static async Task<PinOperationResult> ChangeManagementKeyAsync(
         IPivSession session,
         ReadOnlyMemory<byte> newKey,
-        PivManagementKeyType keyType = PivManagementKeyType.TripleDes,
+        KeyType keyType = KeyType.TripleDes,
         bool requireTouch = false,
         CancellationToken cancellationToken = default)
     {

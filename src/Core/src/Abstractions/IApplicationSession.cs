@@ -40,6 +40,6 @@ public interface IApplicationSession : IDisposable, IAsyncDisposable
     ///     Returns <c>false</c> once disposal begins.
     /// </summary>
     bool IsAuthenticated { get; }
+    /// <summary>Evaluates known firmware compatibility, not runtime authorization or operation success.</summary>
     bool IsSupported(Feature feature);
-    void EnsureSupports(Feature feature);
 }

@@ -110,7 +110,7 @@ public class AsnPublicKeyDecoderTests
     [Fact]
     public void CreatePublicKey_EcPointPrefixNotUncompressed_ThrowsCryptographicExceptionWithExpectedMessage()
     {
-        var spki = BuildEcSubjectPublicKeyInfo(Oids.ECP256, PointWithBadPrefix(0x02, coordinateSize: 32));
+        var spki = BuildEcSubjectPublicKeyInfo(Oids.P256, PointWithBadPrefix(0x02, coordinateSize: 32));
 
         var ex = Assert.Throws<CryptographicException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
 
@@ -122,7 +122,7 @@ public class AsnPublicKeyDecoderTests
     {
         // Valid 0x04 prefix but truncated coordinate data for P-256 (expects 65 bytes total).
         var badPoint = new byte[] { 0x04, 0x01, 0x02, 0x03 };
-        var spki = BuildEcSubjectPublicKeyInfo(Oids.ECP256, badPoint);
+        var spki = BuildEcSubjectPublicKeyInfo(Oids.P256, badPoint);
 
         var ex = Assert.Throws<CryptographicException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
 
@@ -130,9 +130,9 @@ public class AsnPublicKeyDecoderTests
     }
 
     [Theory]
-    [InlineData(Oids.ECP256)]
-    [InlineData(Oids.ECP384)]
-    [InlineData(Oids.ECP521)]
+    [InlineData(Oids.P256)]
+    [InlineData(Oids.P384)]
+    [InlineData(Oids.P521)]
     public void CreatePublicKey_EmptyEcPoint_ThrowsCryptographicExceptionNotIndexOutOfRange(string curveOid)
     {
         // A zero-length BIT STRING has no prefix octet to inspect. The decoder must report this as
@@ -152,7 +152,7 @@ public class AsnPublicKeyDecoderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(Oids.RSA);
+                writer.WriteObjectIdentifier(Oids.Rsa);
                 writer.WriteNull();
             }
 
@@ -187,12 +187,24 @@ public class AsnPublicKeyDecoderTests
         Assert.Throws<NotSupportedException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
     }
 
+    [Theory]
+    [InlineData("3011300906072A8648CE380401030400020108")] // Parameters absent.
+    [InlineData("301C301406072A8648CE380401300902011702010B020102030400020108")]
+    public void CreatePublicKey_UnsupportedDsaWithOrWithoutParameters_ThrowsNotSupportedException(string spkiHex)
+    {
+        // id-dsa (1.2.840.10040.4.1), with optional Dss-Parms SEQUENCE (p=23, q=11, g=2),
+        // and a BIT STRING containing the DER INTEGER public value y=8. These small values
+        // exercise algorithm dispatch, not provider support or cryptographic strength.
+        var spki = Convert.FromHexString(spkiHex);
+
+        Assert.Throws<NotSupportedException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
+    }
+
     [Fact]
     public void CreatePublicKey_UnsupportedCurveOid_ThrowsNotSupportedException()
     {
-        // brainpoolP256r1 (1.3.36.3.3.2.8.1.1.7) is a syntactically valid EC curve OID that is
-        // not one of P-256/P-384/P-521, which AsnPublicKeyDecoder.CreateECPublicKey rejects.
-        var spki = BuildEcSubjectPublicKeyInfo("1.3.36.3.3.2.8.1.1.7", PointWithBadPrefix(0x04, coordinateSize: 32));
+        // brainpoolP320r1 is a syntactically valid named curve outside the modeled catalog.
+        var spki = BuildEcSubjectPublicKeyInfo("1.3.36.3.3.2.8.1.1.9", PointWithBadPrefix(0x04, coordinateSize: 40));
 
         Assert.Throws<NotSupportedException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
     }
@@ -222,7 +234,7 @@ public class AsnPublicKeyDecoderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(Oids.ECDSA);
+                writer.WriteObjectIdentifier(Oids.EcPublicKey);
                 writer.WriteObjectIdentifier(curveOid);
             }
 

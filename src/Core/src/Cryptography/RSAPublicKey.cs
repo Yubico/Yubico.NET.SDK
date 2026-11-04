@@ -38,21 +38,21 @@ public sealed class RSAPublicKey : PublicKey
     public RSAParameters Parameters { get; }
 
     /// <summary>
-    /// Gets the key definition associated with this RSA private key.
+    /// Gets the metadata associated with this RSA public key.
     /// </summary>
     /// <value>
-    /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
+    /// A <see cref="KeyInfo"/> object that describes the key's representation.
     /// </value>
-    public KeyDefinition KeyDefinition { get; }
+    public override KeyInfo KeyInfo { get; }
 
     /// <inheritdoc />
-    public override KeyType KeyType => KeyDefinition.KeyType;
+    public override KeyType KeyType => KeyInfo.KeyType;
 
     private RSAPublicKey(RSAParameters parameters)
     {
         ArgumentNullException.ThrowIfNull(parameters.Modulus);
         Parameters = parameters.DeepCopy();
-        KeyDefinition = KeyDefinitions.GetByRSAModulusLength(parameters.Modulus);
+        KeyInfo = CryptographicDefinitions.Keys.GetByRsaLength(parameters.Modulus.Length * 8);
     }
 
     /// <inheritdoc />

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
+using Yubico.YubiKit.Core.Cryptography;
 
 namespace Yubico.YubiKit.OpenPgp;
 
@@ -134,9 +135,9 @@ public sealed class EcAttributes : AlgorithmAttributes
     internal const int EddsaAlgorithmId = 0x16;
 
     /// <summary>
-    ///     The elliptic curve used by this key.
+    ///     The concrete EC key representation, not a curve OID or operation algorithm identifier.
     /// </summary>
-    public CurveOid Oid { get; init; }
+    public KeyType KeyType { get; init; }
 
     /// <summary>
     ///     The import format for this EC key.
@@ -144,49 +145,61 @@ public sealed class EcAttributes : AlgorithmAttributes
     public EcImportFormat ImportFormat { get; init; }
 
     /// <summary>
-    ///     Creates EC attributes for the given key slot and curve.
+    ///     Creates EC attributes for the given key slot and concrete key representation.
     ///     The algorithm ID is automatically determined:
     ///     Ed25519 → EdDSA (0x16), X25519 → ECDH (0x12), DEC slot → ECDH (0x12), others → ECDSA (0x13).
     /// </summary>
     /// <remarks>
-    ///     This factory chooses an identifier; the caller checks that the curve/slot combination is supported
+    ///     This factory chooses an identifier; the caller checks that the key/slot combination is supported
     ///     by the card. In particular, Ed25519 is a signing/authentication algorithm and X25519 is for agreement.
     /// </remarks>
-    public static EcAttributes Create(KeyRef keyRef, CurveOid oid) =>
-        new()
+    /// <param name="keyRef">The target slot, used to select ECDH for ordinary EC decryption keys.</param>
+    /// <param name="keyType">A concrete EC key with modeled OpenPGP representation metadata.</param>
+    /// <returns>Algorithm attributes using the standard EC import format.</returns>
+    /// <exception cref="ArgumentException">The key has no modeled OpenPGP EC representation.</exception>
+    public static EcAttributes Create(KeyRef keyRef, KeyType keyType)
+    {
+        var keyInfo = CryptographicDefinitions.Keys.Get(keyType);
+        if (keyInfo.GetOpenPgpInfo()?.CurveOid is null)
         {
-            AlgorithmId = oid switch
+            throw new ArgumentException($"Key '{keyType}' has no modeled OpenPGP EC representation.", nameof(keyType));
+        }
+        return new()
+        {
+            AlgorithmId = keyInfo.Curve?.Form switch
             {
-                CurveOid.Ed25519 => EddsaAlgorithmId,
-                CurveOid.X25519 => EcdhAlgorithmId,
-                _ => keyRef == KeyRef.Dec ? EcdhAlgorithmId : EcdsaAlgorithmId,
+                CurveForm.Edwards => EddsaAlgorithmId,
+                CurveForm.Montgomery => EcdhAlgorithmId,
+                CurveForm.ShortWeierstrass => keyRef == KeyRef.Dec ? EcdhAlgorithmId : EcdsaAlgorithmId,
+                _ => throw new ArgumentException($"Key '{keyType}' is not an OpenPGP EC construction.", nameof(keyType)),
             },
-            Oid = oid,
+            KeyType = keyType,
             ImportFormat = EcImportFormat.Standard,
         };
+    }
 
     internal static EcAttributes ParseData(int algorithmId, ReadOnlySpan<byte> data)
     {
         EcImportFormat importFormat;
-        ReadOnlySpan<byte> oidBytes;
+        ReadOnlySpan<byte> oidValueBytes;
 
         if (data.Length > 0 && data[^1] == (byte)EcImportFormat.StandardWithPubkey)
         {
             importFormat = EcImportFormat.StandardWithPubkey;
-            oidBytes = data[..^1];
+            oidValueBytes = data[..^1];
         }
         else
         {
             importFormat = EcImportFormat.Standard;
-            oidBytes = data;
+            oidValueBytes = data;
         }
 
-        var oid = CurveOidExtensions.FromOidBytes(oidBytes);
+        var keyType = OpenPgpCurveOids.FromOidValueBytes(oidValueBytes);
 
         return new EcAttributes
         {
             AlgorithmId = algorithmId,
-            Oid = oid,
+            KeyType = keyType,
             ImportFormat = importFormat,
         };
     }
@@ -194,11 +207,11 @@ public sealed class EcAttributes : AlgorithmAttributes
     /// <inheritdoc />
     public override byte[] ToBytes()
     {
-        var oidBytes = Oid.GetOidBytes();
+        var oidValueBytes = OpenPgpCurveOids.GetOidValueBytes(KeyType);
         var hasImportFormat = ImportFormat == EcImportFormat.StandardWithPubkey;
-        var result = new byte[1 + oidBytes.Length + (hasImportFormat ? 1 : 0)];
+        var result = new byte[1 + oidValueBytes.Length + (hasImportFormat ? 1 : 0)];
         result[0] = (byte)AlgorithmId;
-        oidBytes.CopyTo(result.AsSpan(1));
+        oidValueBytes.CopyTo(result.AsSpan(1));
         if (hasImportFormat)
         {
             result[^1] = (byte)ImportFormat;

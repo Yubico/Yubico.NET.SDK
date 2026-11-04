@@ -131,7 +131,7 @@ public class Ctap2GetInfoTests
             Assert.NotEmpty(info.Algorithms);
 
             var hasEs256 = info.Algorithms.Any(a =>
-                a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.ES256);
+                a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
             Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
         });
 

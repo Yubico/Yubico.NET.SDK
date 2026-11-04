@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(RepositoryRoot)/src/Core/src/Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="$(RepositoryRoot)/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" />
+    <ProjectReference Include="$(RepositoryRoot)/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj" />
+    <Compile Include="OpenPgpExamples.cs" />
+    <Compile Include="SecurityDomainExamples.cs" />
+  </ItemGroup>
+</Project>

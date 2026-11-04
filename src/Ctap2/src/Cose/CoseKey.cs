@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using CoseKeyType = Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType;
 
 namespace Yubico.YubiKit.Ctap2.Cose;
 
@@ -129,9 +130,9 @@ public abstract record CoseKey
 
         return keyType switch
         {
-            2 => DecodeEc2(parameters, algorithm),
-            1 => DecodeOkp(parameters, algorithm),
-            3 => DecodeRsa(parameters, algorithm),
+            (int)CoseKeyType.Ec2 => DecodeEc2(parameters, algorithm),
+            (int)CoseKeyType.Okp => DecodeOkp(parameters, algorithm),
+            (int)CoseKeyType.Rsa => DecodeRsa(parameters, algorithm),
             _ => new CoseOtherKey(keyType, algorithm, coseEncoded.ToArray())
         };
     }
@@ -252,7 +253,7 @@ public sealed record CoseEc2Key(
     ReadOnlyMemory<byte> X,
     ReadOnlyMemory<byte> Y) : CoseKey
 {
-    public override int KeyType => 2;
+    public override int KeyType => (int)CoseKeyType.Ec2;
     public override CoseAlgorithm Algorithm { get; } = Algorithm;
 
     public override byte[] Encode()
@@ -292,7 +293,7 @@ public sealed record CoseOkpKey(
     int Curve,
     ReadOnlyMemory<byte> X) : CoseKey
 {
-    public override int KeyType => 1;
+    public override int KeyType => (int)CoseKeyType.Okp;
     public override CoseAlgorithm Algorithm { get; } = Algorithm;
 
     public override byte[] Encode()
@@ -329,7 +330,7 @@ public sealed record CoseRsaKey(
     ReadOnlyMemory<byte> Modulus,
     ReadOnlyMemory<byte> Exponent) : CoseKey
 {
-    public override int KeyType => 3;
+    public override int KeyType => (int)CoseKeyType.Rsa;
     public override CoseAlgorithm Algorithm { get; } = Algorithm;
 
     public override byte[] Encode()

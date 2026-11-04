@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples.Results;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
@@ -36,7 +37,7 @@ public static class KeyGeneration
     /// </summary>
     /// <param name="session">An authenticated PIV session (management key verified).</param>
     /// <param name="slot">The slot to generate the key in.</param>
-    /// <param name="algorithm">The key algorithm and size.</param>
+    /// <param name="keyType">The key algorithm and size.</param>
     /// <param name="pinPolicy">PIN verification policy for key usage.</param>
     /// <param name="touchPolicy">Touch requirement policy for key usage.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -48,10 +49,10 @@ public static class KeyGeneration
     /// 
     /// var result = await KeyGeneration.GenerateKeyAsync(
     ///     session,
-    ///     PivSlot.Authentication,
-    ///     PivAlgorithm.EccP256,
-    ///     PivPinPolicy.Once,
-    ///     PivTouchPolicy.Cached,
+    ///     Slot.Authentication,
+    ///     KeyType.P256,
+    ///     PinPolicy.Once,
+    ///     TouchPolicy.Cached,
     ///     ct);
     /// 
     /// if (result.Success)
@@ -62,10 +63,10 @@ public static class KeyGeneration
     /// </example>
     public static async Task<KeyGenerationResult> GenerateKeyAsync(
         IPivSession session,
-        PivSlot slot,
-        PivAlgorithm algorithm,
-        PivPinPolicy pinPolicy = PivPinPolicy.Default,
-        PivTouchPolicy touchPolicy = PivTouchPolicy.Default,
+        Slot slot,
+        KeyType keyType,
+        PinPolicy pinPolicy = PinPolicy.Default,
+        TouchPolicy touchPolicy = TouchPolicy.Default,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -74,16 +75,16 @@ public static class KeyGeneration
         {
             var publicKey = await session.GenerateKeyAsync(
                 slot,
-                algorithm,
-                new PivKeyCreationOptions { PinPolicy = pinPolicy, TouchPolicy = touchPolicy },
+                keyType,
+                new KeyCreationOptions { PinPolicy = pinPolicy, TouchPolicy = touchPolicy },
                 cancellationToken);
 
             var spki = publicKey.ExportSubjectPublicKeyInfo();
-            return KeyGenerationResult.Succeeded(slot, algorithm, spki);
+            return KeyGenerationResult.Succeeded(slot, keyType, spki);
         }
         catch (NotSupportedException ex)
         {
-            return KeyGenerationResult.Failed($"Algorithm {algorithm} not supported: {ex.Message}");
+            return KeyGenerationResult.Failed($"Algorithm {keyType} not supported: {ex.Message}");
         }
         catch (Exception ex)
         {

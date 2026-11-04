@@ -286,9 +286,9 @@ public class ApplicationSessionDisposalTests
         session.Dispose();
 
         Assert.True(session.IsSupported(supported));
-        session.EnsureSupports(supported);
+        session.RequireFeature(supported);
         Assert.False(session.IsSupported(unsupported));
-        Assert.Throws<NotSupportedException>(() => session.EnsureSupports(unsupported));
+        Assert.Throws<NotSupportedException>(() => session.RequireFeature(unsupported));
     }
 
     [Fact]
@@ -452,6 +452,7 @@ public class ApplicationSessionDisposalTests
         public Task SyncBeforeBaseEntered => _syncBeforeBaseEntered.Task;
 
         public void AssertNotDisposed() => ThrowIfDisposed();
+        public void RequireFeature(Feature feature) => EnsureSupports(feature);
 
         public static void ValidateConnectionPreference(IConnection connection, SessionCreationOptions? options) =>
             ValidatePreferredConnectionType(connection, options);

@@ -6,8 +6,6 @@ public sealed class PublicReturnContractTests
 {
     private static readonly IReadOnlyDictionary<ReturnContractViolation, string> ReviewedExceptions = new Dictionary<ReturnContractViolation, string>
     {
-        [Tuple("Yubico.YubiKit.Core.Cryptography.Oids.GetOidsByKeyType(Yubico.YubiKit.Core.Cryptography.KeyType): System.ValueTuple<System.String, System.String>", "System.ValueTuple<System.String, System.String>")] =
-            "Existing low-level OID lookup returns its paired identifiers structurally.",
         [Mutable("Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.Children(): System.Collections.Generic.IList<Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice>", "System.Collections.Generic.IList<Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice>")] =
             "Existing Windows device-enumeration interop surface is outside the applet result contracts.",
         [Mutable("Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.GetList(System.Guid): System.Collections.Generic.IList<Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice>", "System.Collections.Generic.IList<Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice>")] =

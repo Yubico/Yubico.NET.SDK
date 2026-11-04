@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using Xunit.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Tests.Shared;
@@ -102,11 +103,11 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
         {
             await session.ResetAsync();
             await session.AuthenticateAsync(GetDefaultManagementKey(keyA.FirmwareVersion));
-            _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
             await session.VerifyPinAsync(DefaultPin);
 
             var digest = SHA256.HashData("multi-key contention"u8);
-            var before = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest);
+            var before = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
             Assert.NotEqual(0, before.Length);
 
             // Cold caches: identity + metadata reads run for every present device. Key A's smart-card
@@ -119,7 +120,7 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
             Assert.Contains(devices, device => device.DeviceId == $"ykphysical:{keyB.SerialNumber}");
 
             // The open, authenticated session on key A survives the multi-device scan.
-            var after = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest);
+            var after = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
             Assert.NotEqual(0, after.Length);
         }
 
@@ -155,7 +156,7 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
         {
             await session.ResetAsync();
             await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-            _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
             await session.VerifyPinAsync(DefaultPin);
         }
 
@@ -168,7 +169,7 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
             {
                 var digest = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes($"{label}-{i}"));
                 var signature = await session.SignOrDecryptAsync(
-                    PivSlot.Authentication, PivAlgorithm.EccP256, digest);
+                    Slot.Authentication, KeyType.P256, digest);
                 Assert.NotEqual(0, signature.Length);
                 completed++;
             }
@@ -208,9 +209,9 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
                 await session.ResetAsync();
                 await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
                 _ = await session.GenerateKeyAsync(
-                    PivSlot.Authentication,
-                    PivAlgorithm.EccP256,
-                    new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never });
+                    Slot.Authentication,
+                    KeyType.P256,
+                    new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never });
                 await session.VerifyPinAsync(DefaultPin);
             }
 
@@ -275,7 +276,7 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
         YubiKeyTestState responsiveKey)
     {
         var keygenStopwatch = Stopwatch.StartNew();
-        var keygenTask = busySession.GenerateKeyAsync(PivSlot.Retired1, PivAlgorithm.Rsa4096);
+        var keygenTask = busySession.GenerateKeyAsync(Slot.Retired1, KeyType.Rsa4096);
         var operationElapsed = TimeSpan.Zero;
 
         try
@@ -290,7 +291,7 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
                     $"cross-key-liveness-{busyKey.SerialNumber}-{responsiveKey.SerialNumber}"));
             var operationStopwatch = Stopwatch.StartNew();
             var signature = await responsiveSession
-                .SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest)
+                .SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest)
                 .WaitAsync(TimeSpan.FromSeconds(4));
             operationStopwatch.Stop();
             operationElapsed = operationStopwatch.Elapsed;

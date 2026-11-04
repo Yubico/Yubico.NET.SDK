@@ -8,3 +8,6 @@ modules/**/evidence/** -text -whitespace
 modules/**/patches/** -text -whitespace
 # Hardware CLI output is hashed evidence too; retain its original table padding and bytes.
 modules/**/hardware/** -text -whitespace
+# Integration compiler inputs and original command output also retain exact captured bytes.
+integrations/**/validation/** -text -whitespace
+integrations/**/evidence/** -text -whitespace

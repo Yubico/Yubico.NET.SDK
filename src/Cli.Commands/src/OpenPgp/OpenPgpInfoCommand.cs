@@ -5,6 +5,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Output;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.OpenPgp;
 
@@ -147,7 +148,7 @@ public sealed class OpenPgpInfoCommand : YkCommandBase<GlobalSettings>
         attrs switch
         {
             RsaAttributes rsa => $"RSA {rsa.NLen}",
-            EcAttributes ec => $"{FormatEcAlgorithm(ec.AlgorithmId)} {ec.Oid}",
+            EcAttributes ec => $"{FormatEcAlgorithm(ec.AlgorithmId)} {ec.KeyType.GetKeyInfo().DisplayName}",
             null => "Unknown",
             _ => $"Algorithm 0x{attrs.AlgorithmId:X2}"
         };

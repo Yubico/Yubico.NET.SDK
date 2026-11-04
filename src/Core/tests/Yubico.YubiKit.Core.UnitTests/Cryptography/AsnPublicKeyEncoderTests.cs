@@ -52,9 +52,9 @@ public class AsnPublicKeyEncoderTests
     private static readonly byte[] Rfc8410X25519RawPublicKey = Rfc8410X25519PublicKeySpki[12..];
 
     [Theory]
-    [InlineData("1.2.840.10045.3.1.7", KeyType.ECP256)] // P-256
-    [InlineData("1.3.132.0.34", KeyType.ECP384)] // P-384
-    [InlineData("1.3.132.0.35", KeyType.ECP521)] // P-521
+    [InlineData("1.2.840.10045.3.1.7", KeyType.P256)] // P-256
+    [InlineData("1.3.132.0.34", KeyType.P384)] // P-384
+    [InlineData("1.3.132.0.35", KeyType.P521)] // P-521
     public void EncodeToSubjectPublicKeyInfo_PublicPointAndKeyType_BclAcceptsAndMatchesOriginal(
         string curveOid, KeyType keyType)
     {
@@ -94,7 +94,7 @@ public class AsnPublicKeyEncoderTests
     [Fact]
     public void EncodeToSubjectPublicKeyInfo_UnsupportedKeyType_ThrowsNotSupportedException() =>
         Assert.Throws<NotSupportedException>(
-            () => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(new byte[32], KeyType.RSA2048));
+            () => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(new byte[32], KeyType.Rsa2048));
 
     [Fact]
     public void EncodeToSubjectPublicKeyInfo_EcPointWrongPrefix_ThrowsArgumentException()
@@ -103,7 +103,7 @@ public class AsnPublicKeyEncoderTests
         badPoint[0] = 0x02; // compressed-form prefix, not supported
 
         Assert.Throws<ArgumentException>(
-            () => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(badPoint, KeyType.ECP256));
+            () => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(badPoint, KeyType.P256));
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class AsnPublicKeyEncoderTests
         byte[] badPoint = [0x04, 0x01, 0x02, 0x03];
 
         Assert.Throws<ArgumentException>(
-            () => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(badPoint, KeyType.ECP256));
+            () => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(badPoint, KeyType.P256));
     }
 
     [Fact]
@@ -197,12 +197,12 @@ public class AsnPublicKeyEncoderTests
     }
 
     [Theory]
-    [InlineData(Oids.ECP256, 31, 32)] // X one byte short
-    [InlineData(Oids.ECP256, 32, 31)] // Y one byte short
-    [InlineData(Oids.ECP256, 33, 33)] // both oversized but self-consistent
-    [InlineData(Oids.ECP256, 48, 48)] // P-384 sized coordinates on a P-256 curve
-    [InlineData(Oids.ECP384, 32, 32)] // P-256 sized coordinates on a P-384 curve
-    [InlineData(Oids.ECP521, 65, 66)] // P-521 coordinates are 66 bytes each
+    [InlineData(Oids.P256, 31, 32)] // X one byte short
+    [InlineData(Oids.P256, 32, 31)] // Y one byte short
+    [InlineData(Oids.P256, 33, 33)] // both oversized but self-consistent
+    [InlineData(Oids.P256, 48, 48)] // P-384 sized coordinates on a P-256 curve
+    [InlineData(Oids.P384, 32, 32)] // P-256 sized coordinates on a P-384 curve
+    [InlineData(Oids.P521, 65, 66)] // P-521 coordinates are 66 bytes each
     public void EncodeToSubjectPublicKeyInfo_EcParametersCoordinateSizeMismatch_ThrowsArgumentException(
         string curveOid, int xLength, int yLength)
     {
@@ -251,8 +251,8 @@ public class AsnPublicKeyEncoderTests
     [Theory]
     [InlineData(Oids.X25519)]
     [InlineData(Oids.Ed25519)]
-    [InlineData(Oids.AES256Cbc)]
-    [InlineData("1.3.132.0.10")] // secp256k1
+    [InlineData(Oids.Aes256Cbc)]
+    [InlineData("1.3.132.0.31")] // secp192k1, intentionally not modeled
     public void EncodeToSubjectPublicKeyInfo_EcParametersNotASupportedPrimeCurve_ThrowsArgumentException(string oid)
     {
         var parameters = new ECParameters

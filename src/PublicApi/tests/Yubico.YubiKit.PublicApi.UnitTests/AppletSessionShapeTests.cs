@@ -1,5 +1,6 @@
 using System.Reflection;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Oath;
@@ -13,6 +14,17 @@ namespace Yubico.YubiKit.PublicApi.UnitTests;
 
 public sealed class AppletSessionShapeTests
 {
+    [Fact]
+    public void FeatureQueriesArePublic_WhileEnforcementIsProtectedSessionMachinery()
+    {
+        Assert.NotNull(typeof(IApplicationSession).GetMethod(nameof(IApplicationSession.IsSupported)));
+        Assert.Null(typeof(IApplicationSession).GetMethod("EnsureSupports"));
+        Assert.Null(typeof(ApplicationSession).GetMethod("EnsureSupports", BindingFlags.Public | BindingFlags.Instance));
+        var enforcement = typeof(ApplicationSession).GetMethod("EnsureSupports", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(enforcement);
+        Assert.True(enforcement.IsFamily);
+    }
+
     internal static readonly (Type Session, Type Contract, string FactoryName)[] Sessions =
     [
         (typeof(ManagementSession), typeof(IManagementSession), "CreateManagementSessionAsync"),

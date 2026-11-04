@@ -4,6 +4,7 @@
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -67,19 +68,19 @@ public sealed class KeysGenerateCommand : OpenPgpCommand<KeysGenerateCommand.Set
                         await session.GenerateKeyAsync(keyRef, RsaAttributes.Create(RsaSize.Rsa4096));
                         break;
                     case "ECCP256":
-                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.Secp256R1));
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.P256));
                         break;
                     case "ECCP384":
-                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.Secp384R1));
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.P384));
                         break;
                     case "ECCP521":
-                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.Secp521R1));
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.P521));
                         break;
                     case "ED25519":
-                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.Ed25519));
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.Ed25519));
                         break;
                     case "X25519":
-                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.X25519));
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.X25519));
                         break;
                     default:
                         throw new ArgumentException(

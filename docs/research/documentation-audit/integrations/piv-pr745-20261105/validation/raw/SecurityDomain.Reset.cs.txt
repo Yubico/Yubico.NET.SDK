@@ -1,0 +1,2 @@
+await using var session = await device.CreateSecurityDomainSessionAsync();
+await session.ResetAsync();

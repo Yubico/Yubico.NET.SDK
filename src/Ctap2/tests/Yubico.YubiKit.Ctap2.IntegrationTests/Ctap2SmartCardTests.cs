@@ -126,7 +126,7 @@ public class Ctap2SmartCardTests
                 Assert.NotEmpty(info.Algorithms);
 
                 var hasEs256 = info.Algorithms.Any(a =>
-                    a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.ES256);
+                    a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
                 Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
             }, preferredConnection: ConnectionType.SmartCard);
         }

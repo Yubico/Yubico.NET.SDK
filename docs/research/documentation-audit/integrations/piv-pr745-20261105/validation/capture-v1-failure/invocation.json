@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/examples.py",
+    "capture"
+  ],
+  "exit_code": 1,
+  "provenance": "Coordinator reported the same failure; this retained invocation reproduces it against the unchanged held build workspace. Python capture only; no build or compiler invocation.",
+  "original_sha256": "7a8a4327642048a1e121a37ce02891d25ddff25227ec8232aba2b3949e63374f",
+  "manifest_sha256": "6fa660fa570161a5d3035c2492b27651aea306bd9a882f858bdd2ace6f7a37d1",
+  "policy_sha256": "ef072cb30326126d990698ef12c8beb1ded11e8e55222abc8c098b5acdbc7404"
+}

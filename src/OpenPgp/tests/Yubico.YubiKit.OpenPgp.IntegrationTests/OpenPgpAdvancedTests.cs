@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
@@ -24,11 +25,11 @@ public class OpenPgpAdvancedTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Dec, EcAttributes.Create(KeyRef.Dec, CurveOid.X25519));
+                await session.GenerateKeyAsync(KeyRef.Dec, EcAttributes.Create(KeyRef.Dec, KeyType.X25519));
 
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Dec);
                 Assert.IsType<EcAttributes>(attrs);
-                Assert.Equal(CurveOid.X25519, ((EcAttributes)attrs).Oid);
+                Assert.Equal(KeyType.X25519, ((EcAttributes)attrs).KeyType);
 
                 var pubKey = await session.GetPublicKeyAsync(KeyRef.Dec);
                 Assert.True(pubKey.Length > 0);
@@ -158,11 +159,11 @@ public class OpenPgpAdvancedTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Ed25519));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.Ed25519));
 
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
                 Assert.IsType<EcAttributes>(attrs);
-                Assert.Equal(CurveOid.Ed25519, ((EcAttributes)attrs).Oid);
+                Assert.Equal(KeyType.Ed25519, ((EcAttributes)attrs).KeyType);
 
                 // Ed25519 signatures are 64 bytes
                 var message = "Hello Ed25519"u8.ToArray();

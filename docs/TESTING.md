@@ -237,9 +237,9 @@ The `[WithYubiKey]` attribute (used for integration tests requiring physical Yub
 // ❌ WRONG - Does not work
 [WithYubiKey(MinFirmware = "5.7.0")]
 [SkippableTheory]
-[InlineData(PivAlgorithm.Rsa3072)]
-[InlineData(PivAlgorithm.Rsa4096)]
-public async Task SignAsync_LargeRsa_Works(PivAlgorithm algorithm, YubiKeyTestState state)
+[InlineData(KeyType.Rsa3072)]
+[InlineData(KeyType.Rsa4096)]
+public async Task SignAsync_LargeRsa_Works(KeyType algorithm, YubiKeyTestState state)
 {
     // This will fail - state won't be injected correctly
 }

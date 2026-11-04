@@ -1,0 +1,7 @@
+{
+  "classification_and_containment_fixtures": "passed",
+  "malformed_fields": "rejected",
+  "changed_tip": "rejected",
+  "reversed_ancestry": "rejected",
+  "sdk_work_performed": false
+}

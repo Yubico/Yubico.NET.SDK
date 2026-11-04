@@ -661,7 +661,7 @@ public sealed class OpenPgpSessionWireTests
 
         _ = await Assert.ThrowsAsync<IndexOutOfRangeException>(() =>
             OpenPgpSession.FormatResolveAndTransferSignatureAsync(
-                EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1),
+                EcAttributes.Create(KeyRef.Sig, KeyType.P256),
                 ownedRawResponse,
                 () =>
                 {
@@ -884,8 +884,8 @@ public sealed class OpenPgpSessionWireTests
         encoding switch
         {
             SignatureEncoding.RsaRaw => RsaAttributes.Create(RsaSize.Rsa2048),
-            SignatureEncoding.EdDsaRaw => EcAttributes.Create(keyRef, CurveOid.Ed25519),
-            SignatureEncoding.EcdsaDer => EcAttributes.Create(keyRef, CurveOid.Secp256R1),
+            SignatureEncoding.EdDsaRaw => EcAttributes.Create(keyRef, KeyType.Ed25519),
+            SignatureEncoding.EcdsaDer => EcAttributes.Create(keyRef, KeyType.P256),
             _ => throw new ArgumentOutOfRangeException(nameof(encoding))
         };
 

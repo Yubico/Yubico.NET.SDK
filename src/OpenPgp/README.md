@@ -43,8 +43,8 @@ the Python SDK uses the broader conservative interval `[4.2.0, 4.3.5)`.
 
 This complete read-only example selects the first discoverable key. Applications managing several keys should
 select and confirm the intended device before any write. Every later C# block is a **composable method**: place
-it in a class with the directives below and supply its typed parameters from your application. Each method opens
-and disposes its own session. Parameters containing credentials, private-key input or message data are borrowed;
+it in a class with the directives below and supply its typed parameters from your application. Methods that use
+the device open and dispose their own session; the catalog-only example uses local metadata. Parameters containing credentials, private-key input or message data are borrowed;
 the caller keeps them valid through completion and clears sensitive source buffers afterward.
 
 ```csharp
@@ -219,6 +219,29 @@ session teardown, and clear separately owned initial hashes and serialized KDF b
 a fresh session to reload KDF; refreshing application data leaves the KDF cache unchanged. These lifetime constraints
 describe the current implementation rather than a general cloning/ownership policy.
 
+## Inspect key representation metadata
+
+Use Core's `CryptographicDefinitions` to inspect shared key, curve and operation metadata. This package
+provides optional OpenPGP representation metadata through `KeyInfo.GetOpenPgpInfo()`:
+
+```csharp
+static void ShowKeyMetadata()
+{
+    KeyInfo keyInfo = CryptographicDefinitions.Keys.Ed25519;
+    OpenPgpKeyInfo? openPgpInfo = keyInfo.GetOpenPgpInfo();
+    Console.WriteLine(openPgpInfo?.CurveOid); // 1.3.6.1.4.1.11591.15.1 (OpenPGP)
+    Console.WriteLine(keyInfo.Asn1?.AlgorithmOid); // 1.3.101.112 (RFC 8410)
+    EcAttributes attributes = EcAttributes.Create(KeyRef.Sig, KeyType.Ed25519); // EdDSA, 0x16
+    Console.WriteLine(attributes.AlgorithmId);
+}
+```
+
+The caller checks the card's supported algorithms and chooses the slot and import format separately.
+RSA metadata includes 2048/3072/4096; `CryptographicDefinitions.Keys.Rsa1024.GetOpenPgpInfo()` returns null,
+as do AES/Triple DES. For ordinary EC keys, the slot determines ECDSA versus ECDH; Ed25519 and X25519
+select their constructions. Parsed attributes retain their received algorithm byte and import format,
+even when they differ from factory choices. OpenPGP OIDs on the wire contain DER value octets only.
+
 ## Generate or import an ordinary-slot key
 
 Verify the Admin PIN, then choose a supported algorithm for `Sig`, `Dec` or `Aut`. Generation and import write
@@ -233,19 +256,21 @@ static async Task GenerateSigningKeyAsync(
     await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
     await session.VerifyAdminAsync(adminPin, cancellationToken);
     await session.GenerateKeyAsync(KeyRef.Sig,
-        EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1), cancellationToken);
+        EcAttributes.Create(KeyRef.Sig, KeyType.P256), cancellationToken);
     Console.WriteLine((await session.ListKeyInformationAsync(cancellationToken))[KeyRef.Sig]);
 }
 ```
 
-Use `RsaAttributes.Create(RsaSize.Rsa2048)` for RSA, subject to the ROCA guidance above. EC uses the SDK's 5.2.0 check
-and the card's advertised curve support. ATT provisioning currently uses malformed CRT encoding; ordinary target-key
+Use `RsaAttributes.Create(RsaSize.Rsa2048)` for RSA, subject to the ROCA guidance above. Use `EcAttributes.Create`
+with Core's concrete `KeyType` identities for EC, subject to the SDK's 5.2.0 check and the card's advertised curve
+support. ATT provisioning currently uses malformed CRT encoding; ordinary target-key
 attestation below is a separate operation. Replacing the factory ATT private key would irreversibly lose manufacturer
 attestation provenance, even if its public certificate had been saved.
 
-For import, supply a supported SDK `IPrivateKey`: RSA 2048/3072/4096 with exponent 65537, NIST P-256/P-384/P-521,
-Ed25519 or X25519 as appropriate for the slot. This method accepts **borrowed PKCS#8 DER containing an RSA key**,
-creates its own disposable private-key object, and leaves the source DER for its caller to clear.
+For import, supply an SDK `IPrivateKey` with a modeled OpenPGP representation: RSA 2048/3072/4096 with exponent
+65537, NIST P-256/P-384/P-521, secp256k1, Brainpool P256r1/P384r1/P512r1, Ed25519 or X25519 as appropriate for
+the slot. Confirm host-provider and card support for the chosen key. This method accepts **borrowed PKCS#8 DER
+containing an RSA key**, creates its own disposable private-key object, and leaves the source DER for its caller to clear.
 
 ```csharp
 static async Task ImportRsaSigningKeyAsync(
@@ -308,7 +333,7 @@ static async Task<bool> SignAndVerifyP256Async(
 {
     await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
     var attributes = await session.GetAlgorithmAttributesAsync(KeyRef.Sig, cancellationToken);
-    if (attributes is not EcAttributes { Oid: CurveOid.Secp256R1 })
+    if (attributes is not EcAttributes { KeyType: KeyType.P256 })
         throw new InvalidOperationException("Provision a P-256 signing key first.");
     using var verifier = ECDsa.Create(DecodeP256PublicKey(
         await session.GetPublicKeyAsync(KeyRef.Sig, cancellationToken)));

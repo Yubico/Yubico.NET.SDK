@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
@@ -28,10 +29,10 @@ public static class KeyGenerationMenu
         // Select slot
         var slot = SlotSelector.SelectSlot("Select slot for key generation:");
 
-        // Select algorithm
-        var algorithm = AnsiConsole.Prompt(
+        // Select key type
+        var keyTypeChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title("Select algorithm:")
+                .Title("Select key type:")
                 .AddChoices(
                 [
                     "RSA 2048",
@@ -43,16 +44,16 @@ public static class KeyGenerationMenu
                     "X25519 (YubiKey 5.7+)"
                 ]));
 
-        var pivAlgorithm = algorithm switch
+        var keyType = keyTypeChoice switch
         {
-            "RSA 2048" => PivAlgorithm.Rsa2048,
-            "RSA 3072" => PivAlgorithm.Rsa3072,
-            "RSA 4096" => PivAlgorithm.Rsa4096,
-            "ECC P-256" => PivAlgorithm.EccP256,
-            "ECC P-384" => PivAlgorithm.EccP384,
-            "Ed25519 (YubiKey 5.7+)" => PivAlgorithm.Ed25519,
-            "X25519 (YubiKey 5.7+)" => PivAlgorithm.X25519,
-            _ => PivAlgorithm.EccP256
+            "RSA 2048" => KeyType.Rsa2048,
+            "RSA 3072" => KeyType.Rsa3072,
+            "RSA 4096" => KeyType.Rsa4096,
+            "ECC P-256" => KeyType.P256,
+            "ECC P-384" => KeyType.P384,
+            "Ed25519 (YubiKey 5.7+)" => KeyType.Ed25519,
+            "X25519 (YubiKey 5.7+)" => KeyType.X25519,
+            _ => KeyType.P256
         };
 
         // Select PIN policy
@@ -61,10 +62,10 @@ public static class KeyGenerationMenu
                 .Title("Select PIN policy:")
                 .AddChoices(["Default", "Never", "Once", "Always"])) switch
         {
-            "Never" => PivPinPolicy.Never,
-            "Once" => PivPinPolicy.Once,
-            "Always" => PivPinPolicy.Always,
-            _ => PivPinPolicy.Default
+            "Never" => PinPolicy.Never,
+            "Once" => PinPolicy.Once,
+            "Always" => PinPolicy.Always,
+            _ => PinPolicy.Default
         };
 
         // Select touch policy
@@ -73,10 +74,10 @@ public static class KeyGenerationMenu
                 .Title("Select touch policy:")
                 .AddChoices(["Default", "Never", "Always", "Cached"])) switch
         {
-            "Never" => PivTouchPolicy.Never,
-            "Always" => PivTouchPolicy.Always,
-            "Cached" => PivTouchPolicy.Cached,
-            _ => PivTouchPolicy.Default
+            "Never" => TouchPolicy.Never,
+            "Always" => TouchPolicy.Always,
+            "Cached" => TouchPolicy.Cached,
+            _ => TouchPolicy.Default
         };
 
         // Authenticate management key
@@ -102,12 +103,12 @@ public static class KeyGenerationMenu
             .StartAsync("Generating key...", async ctx =>
             {
                 var result = await KeyGeneration.GenerateKeyAsync(
-                    session, slot, pivAlgorithm, pinPolicy, touchPolicy, cancellationToken);
+                    session, slot, keyType, pinPolicy, touchPolicy, cancellationToken);
 
                 if (result.Success)
                 {
                     OutputHelpers.WriteSuccess($"Key generated in slot {result.Slot}");
-                    OutputHelpers.WriteKeyValue("Algorithm", result.Algorithm.ToString());
+                    OutputHelpers.WriteKeyValue("Key type", result.KeyType.ToString());
                     OutputHelpers.WriteKeyValue("Public Key Size", $"{result.PublicKey.Length} bytes");
                 }
                 else

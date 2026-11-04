@@ -99,7 +99,7 @@ internal static class JsonOutput
         {
             ["success"] = result.Success,
             ["slot"] = result.Slot.ToString(),
-            ["algorithm"] = result.Algorithm.ToString(),
+            ["keyType"] = result.KeyType.ToString(),
             ["publicKeyBase64"] = result.PublicKey.Length > 0
                 ? Convert.ToBase64String(result.PublicKey.Span)
                 : null,
@@ -177,11 +177,11 @@ internal static class JsonOutput
                 ["certificate"] = SerializeCert(slot.Certificate)
             };
 
-            if (slot.Metadata is PivSlotMetadata m)
+            if (slot.Metadata is SlotMetadata m)
             {
                 slotNode["metadata"] = new JsonObject
                 {
-                    ["algorithm"] = m.Algorithm.ToString(),
+                    ["keyType"] = m.KeyType.ToString(),
                     ["pinPolicy"] = m.PinPolicy.ToString(),
                     ["touchPolicy"] = m.TouchPolicy.ToString(),
                     ["isGenerated"] = m.IsGenerated,

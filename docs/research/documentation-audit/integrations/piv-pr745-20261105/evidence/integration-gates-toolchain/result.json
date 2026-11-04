@@ -1,0 +1,31 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- build test docs-qa docs-architecture complexity --clean",
+  "started": "2026-11-05T00:45:24.8542971+01:00",
+  "durationSeconds": 15.6,
+  "runDirectory": "artifacts/toolchain/runs/20261105-004524-854-build+test+docs-qa+docs-architecture+complexity",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "failed",
+      "durationSeconds": 15.5,
+      "error": "`dotnet build Yubico.YubiKit.sln -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261105-004524-854-build+test+docs-qa+docs-architecture+complexity/02-build.log"
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

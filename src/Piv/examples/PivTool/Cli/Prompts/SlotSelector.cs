@@ -34,7 +34,7 @@ public static class SlotSelector
     /// </summary>
     /// <param name="prompt">Prompt text to display.</param>
     /// <returns>Selected PIV slot.</returns>
-    public static PivSlot SelectSlot(string prompt = "Select slot")
+    public static Slot SelectSlot(string prompt = "Select slot")
     {
         var selection = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -43,26 +43,26 @@ public static class SlotSelector
 
         return selection[..2] switch
         {
-            "9A" => PivSlot.Authentication,
-            "9C" => PivSlot.Signature,
-            "9D" => PivSlot.KeyManagement,
-            "9E" => PivSlot.CardAuthentication,
-            _ => PivSlot.Authentication
+            "9A" => Slot.Authentication,
+            "9C" => Slot.Signature,
+            "9D" => Slot.KeyManagement,
+            "9E" => Slot.CardAuthentication,
+            _ => Slot.Authentication
         };
     }
 
     /// <summary>
     /// Gets the display name for a PIV slot.
     /// </summary>
-    public static string GetSlotName(PivSlot slot)
+    public static string GetSlotName(Slot slot)
     {
         return slot switch
         {
-            PivSlot.Authentication => "Authentication (9A)",
-            PivSlot.Signature => "Digital Signature (9C)",
-            PivSlot.KeyManagement => "Key Management (9D)",
-            PivSlot.CardAuthentication => "Card Authentication (9E)",
-            PivSlot.Attestation => "Attestation (F9)",
+            Slot.Authentication => "Authentication (9A)",
+            Slot.Signature => "Digital Signature (9C)",
+            Slot.KeyManagement => "Key Management (9D)",
+            Slot.CardAuthentication => "Card Authentication (9E)",
+            Slot.Attestation => "Attestation (F9)",
             _ => $"Slot {slot}"
         };
     }

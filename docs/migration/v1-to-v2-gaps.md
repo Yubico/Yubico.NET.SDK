@@ -110,7 +110,7 @@ v2 location: `src/Piv/src/**`
   **Severity**: Cosmetic | **Confidence**: High
 
 - **Feature/API**: `ReplaceAttestationKeyAndCertificate(...)`/`GetAttestationCertificate()` convenience methods for the F9 attestation key/cert
-  **v2 status**: Present-but-renamed — reachable via generic `GetCertificateAsync(PivSlot.Attestation)`/`ImportKeyAsync(PivSlot.Attestation, ...)`, just without dedicated named methods/docs.
+  **v2 status**: Present-but-renamed — reachable via generic `GetCertificateAsync(Slot.Attestation)`/`ImportKeyAsync(Slot.Attestation, ...)`, just without dedicated named methods/docs.
   **Severity**: Cosmetic | **Confidence**: Medium
 
 - **Feature/API**: Certificate compression default behavior

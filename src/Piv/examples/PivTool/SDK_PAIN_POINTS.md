@@ -7,7 +7,7 @@ This document captures usability issues and improvement opportunities discovered
 ### 1. SignOrDecryptAsync API Ergonomics ✅ FIXED
 **Issue**: The `SignOrDecryptAsync` method requires passing the algorithm explicitly, even though the slot metadata already contains this information.
 
-**Resolution**: Added overload `SignOrDecryptAsync(PivSlot slot, ReadOnlyMemory<byte> data, CancellationToken)` that auto-detects the algorithm from slot metadata. Requires firmware 5.3+.
+**Resolution**: Added overload `SignOrDecryptAsync(Slot slot, ReadOnlyMemory<byte> data, CancellationToken)` that auto-detects the algorithm from slot metadata. Requires firmware 5.3+.
 
 ```csharp
 // New simplified API (firmware 5.3+)
@@ -49,10 +49,10 @@ await session.AuthenticateAsync(PivSession.DefaultManagementKey);
 **Resolution**: Added extension methods in `PivSlotMetadataExtensions`:
 - `GetRsaPublicKey()` - Returns `RSA` instance for RSA keys
 - `GetECDsaPublicKey()` - Returns `ECDsa` instance for P-256/P-384 keys
-- `IsRsa()` / `IsEcc()` - Algorithm type helpers
+- Core `KeyTypeExtensions.IsRSA()` / `IsEllipticCurve()` - shared key classification helpers
 
 ```csharp
-var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
 using var rsa = metadata.Value.GetRsaPublicKey();
 var request = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 ```

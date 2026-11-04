@@ -20,7 +20,7 @@ Current structure:
 - `IPivSession.cs` - public session contract.
 - `IYubiKeyExtensions.cs` - `IYubiKey.CreatePivSessionAsync(...)` convenience creation.
 - `Authentication/` - PIN, PUK, and management-key protocol helpers.
-- `Metadata/` - PIN/PUK/management-key metadata and retry-attempt helpers.
+- `Metadata/` - read-only PIN/PUK/management-key/slot metadata and serial parsing.
 - `DataObjects/` - PIV data-object GET/PUT helpers.
 - `Certificates/` - certificate storage and retrieval helpers.
 - `Keys/` - key generation, import, move, delete, and attestation helpers.
@@ -166,6 +166,20 @@ What still needs a human is presence and timing, not destruction — touch-polic
 
 Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of duplicating version checks. Be careful to distinguish device firmware from applet-reported firmware when beta hardware reports sentinel applet versions.
 
+`Features` is a public standalone PIV catalog; `IsSupported` stays public and `EnsureSupports` is protected.
+`Slot` replaces `PivSlot`; shared Core `KeyType` replaces `PivAlgorithm`. Only internal `PivAlgorithmId`
+maps Core key types to protocol bytes. Never cast `KeyType` to byte. Metadata preserves unknown algorithm
+identifiers through `RawAlgorithmId`, nullable `KeyType`, and complete `RawData`; malformed required fields
+still fail. The README records source-pinned support boundaries and Android/Python differences.
+
+The session owns key/policy gates, management-authentication prerequisites, PIN-only workflows, and retry
+fallback selection. Helpers take neither authentication booleans nor callbacks into the session. Metadata
+fallback is limited to instruction-unavailable compatibility responses; cancellation, malformed TLVs, and
+other device errors propagate. No-data VERIFY success without a retry count is explicitly unavailable,
+never an invented count of three. PIN-only candidate rejection is specifically `0x6982`; other errors
+do not initiate restoration traffic. Initialization and reset share management-key-type discovery using
+detected firmware, independent of compatibility overrides.
+
 ## Known Gotchas
 
 1. **Management key first**: key generation/import and some metadata changes require management-key authentication.
@@ -173,7 +187,7 @@ Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of 
 3. **Touch policy timing**: cached touch policy caches for a short window after first touch.
 4. **Certificate size limits**: PIV certificates may need compression or careful object sizing.
 5. **Default credentials**: never assume defaults are acceptable outside explicit test/reset flows.
-6. **Retry counters**: PIN/PUK blocking is persistent and human-coordinated.
+6. **Retry counters**: PIN/PUK blocking is persistent; use only explicitly authorized dedicated devices. Physical presence and timing still require human coordination.
 7. **PIN-only transitions**: enabling must authenticate the supplied active management key before PIN verification or writes; disabling restores the type-appropriate default key before deleting PRINTED, then ADMIN DATA.
 8. **Mixed PIN-only recovery**: a returned success flag must match the session's final authenticated candidate; restore an earlier protected-key success after a stale derived candidate fails, or return no success.
 9. **Management-key state**: `IsManagementKeyAuthenticated` reports PIV management-key authentication, distinct from the inherited protocol/SCP `IsAuthenticated`; successful SET updates the type and preserves card-session authentication without retaining key bytes; SET status `0x6982` clears recorded authentication while unrelated command failures preserve authentication and type; every failed authentication attempt and disposal clears prior authentication; initialization and successful RESET share the same conservative default-type fallback when metadata is unavailable, and RESET clears authentication before refresh.

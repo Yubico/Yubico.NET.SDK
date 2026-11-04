@@ -49,8 +49,10 @@ int pinAttempts = await session.GetPinAttemptsAsync();
 Console.WriteLine($"PIN attempts remaining: {pinAttempts}");
 ```
 
-Reading the PIN attempt counter needs no PIN, touch, or management key, and works on every supported
-firmware. Later snippets assume these directives and a `device` obtained the same way.
+Reading the PIN attempt counter needs no PIN, touch, or management key. On firmware without metadata,
+it uses a no-data VERIFY query (which does not consume retries). If the PIN is already verified and
+the device reports success without a count, it throws `InvalidOperationException` rather than guessing.
+Later snippets assume these directives and a `device` obtained the same way.
 
 ## Common operations
 
@@ -69,7 +71,7 @@ finally
     CryptographicOperations.ZeroMemory(managementKey);
 }
 var keyOptions = new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never };
-IPublicKey publicKey = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, keyOptions);
+IPublicKey publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, keyOptions);
 ```
 
 `IsManagementKeyAuthenticated` reports PIV authentication, distinct from the inherited `IsAuthenticated` (SCP).
@@ -80,8 +82,8 @@ Storing needs management-key authentication, so continue on the `session` from t
 
 ```csharp
 using var certificate = X509CertificateLoader.LoadCertificateFromFile("authentication.cer");
-await session.StoreCertificateAsync(PivSlot.Authentication, certificate, PivCertificateCompression.Automatic);
-using X509Certificate2? stored = await session.GetCertificateAsync(PivSlot.Authentication);
+await session.StoreCertificateAsync(Slot.Authentication, certificate, PivCertificateCompression.Automatic);
+using X509Certificate2? stored = await session.GetCertificateAsync(Slot.Authentication);
 ```
 
 ### Verify the PIN and sign
@@ -99,11 +101,11 @@ finally
     CryptographicOperations.ZeroMemory(pin);
 }
 byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
-ReadOnlyMemory<byte> signature = await session.SignOrDecryptAsync(PivSlot.Authentication, digest);
+ReadOnlyMemory<byte> signature = await session.SignOrDecryptAsync(Slot.Authentication, digest);
 ```
 
 ECDSA signs the digest you pass, so hash first. This overload reads slot metadata to pick the algorithm and
-needs firmware 5.3.0; older keys need the overload that takes an explicit `PivAlgorithm`.
+needs firmware 5.3.0; older keys need the overload that takes an explicit `KeyType`.
 
 ## User interaction
 
@@ -141,7 +143,30 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
   `SetPinAttemptsAsync`, and `SetPinOnlyModeAsync` change persistent state. `ResetAsync` destroys every key.
   `SetPinAttemptsAsync` resets the PIN to `123456` and the PUK to `12345678` every time it runs, even with
   unchanged limits; follow it with `ChangePinAsync` and `ChangePukAsync`.
-- Firmware gates throw `NotSupportedException`; `PivFeatures.SupportsRsaGeneration` screens ROCA-affected 4.2.6-4.3.4.
+- Operations enforce firmware gates themselves and throw `NotSupportedException` before transmitting an
+  unsupported key or policy request. RSA generation is disabled on ROCA-affected 4.2.6–4.3.4; import remains
+  independently available. YubiKey 4 FIPS (4.4.x) rejects RSA1024 and PIN policy `Never`.
+
+## Preview API migration
+
+- `PivSlot` → `Slot` (the numeric key references are unchanged; F9 is Yubico's attestation extension).
+- `PivFeatures` → standalone public `Features`. `session.IsSupported(Features.Metadata)` is optional;
+  operations enforce their own prerequisites. Queries evaluate known firmware compatibility, not authorization
+  or a guarantee that a command will succeed. Compatibility overrides affect these gates, not the physical
+  factory-default management-key algorithm used after reset.
+- `PivAlgorithm` → `Core.Cryptography.KeyType`, including `ImportKeyAsync`'s inferred return type. Never cast
+  a `KeyType` to a PIV byte. The SDK maps identifiers explicitly.
+- Slot metadata exposes nullable `KeyType`, `RawAlgorithmId`, and complete `RawData`. Unknown identifiers
+  remain readable, while using an unrecognized key algorithm throws `NotSupportedException`.
+- `EnsureSupports` is protected session implementation machinery, no longer a public interface member.
+  Derived sessions retain it; consumers should call operations directly or use `IsSupported` for UI hints.
+
+The support matrix follows the reviewed [Android PIV source](https://github.com/Yubico/yubikit-android/blob/76b89d35142d9a4937b6b72e5c840e057a280620/piv/src/main/java/com/yubico/yubikit/piv/PivSession.java).
+The reviewed [Python implementation](https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/piv.py)
+agrees on P-384/policies (4.0), cached touch/attestation (4.3), metadata (5.3), AES (5.4), and
+move/delete/Curve25519/large RSA (5.7). Its conservative serial (5.0.3) and ROCA (4.2.0) boundaries differ;
+this SDK retains the existing Android-aligned serial (5.0.0) and ROCA (4.2.6) boundaries. Major-zero
+development firmware retains Core's permissive compatibility handling.
 
 ## Security notes
 

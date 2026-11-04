@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditOtp001.Hardware.IntegrationTests --filter FullyQualifiedName~AesTicket_DecryptsSixByteChallenge_AndHasVendorCrcResidual",
+  "started": "2026-11-04T11:27:11.5444219+01:00",
+  "durationSeconds": 5.5,
+  "runDirectory": "artifacts/toolchain/runs/20261104-112711-544-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 5.4,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditOtp001.Hardware.IntegrationTests",
+      "outcome": "passed",
+      "reason": "1 executed, 0 skipped",
+      "executed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261104-112711-544-test/01-test-AuditOtp001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

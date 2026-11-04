@@ -20,10 +20,13 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <remarks>
 /// Wire format layout:
 /// <list type="bullet">
-/// <item><c>fixed[0..publicId.Length]</c> — modhex-encoded public identity (up to 16 bytes)</item>
+/// <item><c>fixed[0..publicId.Length]</c> — raw binary public identity (up to 16 bytes)</item>
 /// <item><c>uid</c> — 6-byte private identity</item>
 /// <item><c>key</c> — 16-byte AES-128 key</item>
 /// </list>
+/// The key emits two modhex characters per public-ID byte; input is not pre-encoded modhex text.
+/// The configuration copies inputs; dispose it and separately clear your secret source buffers.
+/// This configures keyboard output, not host challenge-response or server-side OTP verification.
 /// </remarks>
 public sealed class YubiOtpSlotConfiguration : KeyboardSlotConfiguration
 {
@@ -31,7 +34,7 @@ public sealed class YubiOtpSlotConfiguration : KeyboardSlotConfiguration
     /// Initializes a new Yubico OTP slot configuration.
     /// </summary>
     /// <param name="publicId">
-    /// The public identity prefix (modhex-encoded, up to 16 bytes).
+    /// The raw binary public identity prefix, up to 16 bytes.
     /// </param>
     /// <param name="privateId">The 6-byte private identity.</param>
     /// <param name="aesKey">The 16-byte AES-128 secret key.</param>

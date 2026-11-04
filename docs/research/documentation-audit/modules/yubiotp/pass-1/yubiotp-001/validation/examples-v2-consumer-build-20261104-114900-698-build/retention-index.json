@@ -1,0 +1,40 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-114900-698-build",
+  "files": [
+    {
+      "path": "01-clean-AuditOtp001.Examples.v2.consumer.log",
+      "bytes": 6446,
+      "sha256": "0ead86f5cb33e976af197a868155d771d4be74b2229fbb11425f0dded7ec8972",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "02-build-AuditOtp001.Examples.v2.consumer.log",
+      "bytes": 1014,
+      "sha256": "66e12917fc56ef8951cd3a8b445919edef836be670525cf75d34593a0dc00ae3",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 724,
+      "sha256": "c21f506c720c8241ff60624712e79ba6535e82957857d15258100d9b0e3395cc",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 449,
+      "sha256": "1d73907c026daad4698b36d1e832107cd2bc0adf3c6e31f3061bbb1e1d3b53b8",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2205,
+      "sha256": "8f500f153cae49d0394a1111aadb649a91488a600d1369fd79678eed26e3b564",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

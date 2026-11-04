@@ -1,0 +1,37 @@
+$ env -u CustomBeforeMicrosoftCommonProps CustomAfterMicrosoftCommonTargets=/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/OtpTool.Capture.targets dotnet toolchain.cs -- build --project OtpTool --clean
+▶ toolchain: build  (log: artifacts/toolchain/runs/20261104-120202-776-build/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet clean docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/dispatch/src/Yubico.YubiKit.AuditOtp001.Examples.Shipping.OtpTool.csproj -c Release
+  output: artifacts/toolchain/runs/20261104-120202-776-build/01-clean-AuditOtp001.Examples.Shipping.OtpTool.log
+▶ RUN dotnet build docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/dispatch/src/Yubico.YubiKit.AuditOtp001.Examples.Shipping.OtpTool.csproj -c Release --no-incremental
+  output: artifacts/toolchain/runs/20261104-120202-776-build/02-build-AuditOtp001.Examples.Shipping.OtpTool.log
+✓ Built 1 project(s) matching 'OtpTool': AuditOtp001.Examples.Shipping.OtpTool
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- build --project OtpTool --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      5.2s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-120202-776-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================
+
+EXIT=0

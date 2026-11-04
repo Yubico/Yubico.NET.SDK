@@ -1,0 +1,11 @@
+ReadOnlyMemory<byte> response = default;
+try
+{
+    response = await session.CalculateHmacSha1Async(Slot.Two, challenge);
+    // Consume with the application's verifier.
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(challenge);
+    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+}

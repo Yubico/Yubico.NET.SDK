@@ -1,0 +1,102 @@
+{
+  "date": "2026-11-04T10:26:45.912842+00:00",
+  "reviewer": "github-copilot/gpt-6.1-sol; fresh content/citation reviewer",
+  "round": "initial; no follow-up needed if pinned original clauses resolve claims",
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/5.8.0/yubikit/yubiotp.py",
+      "pinned_file": "ykman-5.8.0-yubiotp.py",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/5.8.0/yubikit/yubiotp.py",
+      "bytes": 31470,
+      "sha256": "ac2f9d053e8c900300f82cb45bf4bb07df3e8985754ca6a57924e1aaff9d25d2",
+      "fresh_bytes_match_pinned": true
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/v1.20.0/ykcore/ykdef.h",
+      "pinned_file": "personalization-1.20.0-ykdef.h",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/v1.20.0/ykcore/ykdef.h",
+      "bytes": 14457,
+      "sha256": "c0ca58a5c1870ab2e4ab820956dbb65b2836f3a0d4e489c34f904b764786523a",
+      "fresh_bytes_match_pinned": true
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/v1.20.0/ykpersonalize.1.adoc",
+      "pinned_file": "personalization-1.20.0-manual.txt",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/v1.20.0/ykpersonalize.1.adoc",
+      "bytes": 13723,
+      "sha256": "4b6287e37fda752b026ba7def11e24f44dc6767055a9c65938089bfb42ab48c2",
+      "fresh_bytes_match_pinned": true
+    },
+    {
+      "url": "https://downloads.yubico.com/support/yubico_YubiKey-Technical-Manual-v3.3_2014.pdf",
+      "pinned_file": "vendor-technical-manual-v3.3.pdf",
+      "status": 200,
+      "final_url": "https://downloads.yubico.com/support/yubico_YubiKey-Technical-Manual-v3.3_2014.pdf",
+      "bytes": 691675,
+      "sha256": "0f4fb9224b1247a57d9b8b13c3bc370512cf17d9027e2013104217e9032a45ca",
+      "fresh_bytes_match_pinned": true
+    },
+    {
+      "url": "https://www.yubico.com/wp-content/uploads/2015/03/YubiKeyManual_v3.4.pdf",
+      "pinned_file": null,
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc4226.txt",
+      "pinned_file": "rfc4226.txt",
+      "status": 200,
+      "final_url": "https://www.rfc-editor.org/rfc/rfc4226.txt",
+      "bytes": 77117,
+      "sha256": "db6974cd02ca33560ec3a191ee9b1016067cd11d1f5d89e7efa36be69482229d",
+      "fresh_bytes_match_pinned": true
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/v1.20.0/ykpers.c",
+      "pinned_file": "personalization-1.20.0-ykpers.c",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/v1.20.0/ykpers.c",
+      "bytes": 31870,
+      "sha256": "85ce6a16ece6869d93dd186966fcb54a054dc013520b2f9649c44c32fc6fb495",
+      "fresh_bytes_match_pinned": true
+    },
+    {
+      "url": "https://nfc-forum.org/build/specifications/uri-rtd-technical-specification/",
+      "pinned_file": "nfc-uri-rtd-official.html",
+      "status": 200,
+      "final_url": "https://nfc-forum.org/build/specifications/uri-rtd-technical-specification/",
+      "bytes": 28321,
+      "sha256": "2f060626744b4c0fb46b6bf272a4a0ed42733d7782ff7523cc577e9891bb7f50",
+      "fresh_bytes_match_pinned": true
+    },
+    {
+      "url": "https://nfc-forum.org/build/specifications/text-rtd-technical-specification/",
+      "pinned_file": "nfc-text-rtd-official.html",
+      "status": 200,
+      "final_url": "https://nfc-forum.org/build/specifications/text-rtd-technical-specification/",
+      "bytes": 28324,
+      "sha256": "84b1d09bc03112d61cbd1449d2dd78060c079c613637c54be6d3f36c238b67a0",
+      "fresh_bytes_match_pinned": true
+    },
+    {
+      "url": "https://berlin.ccc.de/~starbug/felica/NFCForum-TS-RTD_URI_1.0.pdf",
+      "pinned_file": "nfc-uri-rtd-1.0-mirror.pdf",
+      "status": 200,
+      "final_url": "https://berlin.ccc.de/~starbug/felica/NFCForum-TS-RTD_URI_1.0.pdf",
+      "bytes": 173937,
+      "sha256": "f4a5aeb53cfe96dee24dcc969b7e30c07e5296b97bb9b545025bc35af51b3b56",
+      "fresh_bytes_match_pinned": true
+    },
+    {
+      "url": "https://berlin.ccc.de/~starbug/felica/NFCForum-TS-RTD_Text_1.0.pdf",
+      "pinned_file": "nfc-text-rtd-1.0-mirror.pdf",
+      "status": 200,
+      "final_url": "https://berlin.ccc.de/~starbug/felica/NFCForum-TS-RTD_Text_1.0.pdf",
+      "bytes": 150406,
+      "sha256": "934153cabaa887726cf5c4b1f551f6bd4ea3902e507d650349f5d9a329c96535",
+      "fresh_bytes_match_pinned": true
+    }
+  ]
+}

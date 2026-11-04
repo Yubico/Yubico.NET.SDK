@@ -1,0 +1,8 @@
+RESULT: FAILED  (dotnet toolchain.cs -- build --project OtpTool --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✗ build                      0.4s  `dotnet clean docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/dispatch/src/Yubico.YubiKit.AuditOtp001.Examples.Shipping.OtpTool.csproj -c Release` exited with code 1; full output: artifacts/toolchain/runs/20261104-115031-825-build/01-clean-AuditOtp001.Examples.Shipping.OtpTool.log
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-115031-825-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

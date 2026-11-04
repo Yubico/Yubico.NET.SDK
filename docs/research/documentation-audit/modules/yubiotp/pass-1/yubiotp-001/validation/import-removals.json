@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "baseline": "95e5ccaeda33954c21f2a38058d4f66b5f208787",
+  "formatter": {
+    "diagnostic": "IDE0005",
+    "command_log": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/format-apply.log",
+    "command_log_sha256": "3943b643676ee47aa1b1bf50cbba9cb1bd87a20b325ea331af4aba83406d420f",
+    "log": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/format-initial.log",
+    "log_sha256": "fe56c7bb9769ef654395e9337fa78576bdc08f58105ea3682debee48d2429c6d"
+  },
+  "files": [
+    {
+      "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "baseline_sha256": "025ea30da7944e3534168fa1c714242e4f4262775079be9406f31dbd8639cea5",
+      "before": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/pre-format-content.json",
+        "bundle_sha256": "9fbb751bed7a75de323c34d491083807e8b97cec1cd4ef8f2047e54404e20542",
+        "sha256": "9f6673bf6ba09f0f2c096805af9ba4b35f8b044fbe4eae0564749e860bdc0f1d"
+      },
+      "after": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/format-transform.json",
+        "bundle_sha256": "57ce9f670073c35ab89f00cb0a349bfd900f43260785b6ac621330c80a17be83",
+        "sha256": "cdf2f0f475212ad45112adee839fc6fd63811a0d8200aef5ebdd0bc604ddc8e9"
+      },
+      "removals": [
+        {
+          "namespace": "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu"
+        },
+        {
+          "namespace": "Yubico.YubiKit.Core.Protocols.SmartCard.Scp"
+        }
+      ]
+    }
+  ]
+}

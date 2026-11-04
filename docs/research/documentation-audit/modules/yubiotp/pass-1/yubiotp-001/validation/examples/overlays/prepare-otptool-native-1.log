@@ -1,0 +1,5 @@
+$ python3 -B docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/prepare-otptool-native.py
+Prepared late-only OtpTool native-output overlay; 112 v1/v2 file identities pinned, accepted consumer/annotations first captures reused without duplication.
+No build, compilation, test, hardware, formatter, SDK/toolchain edit or prior evidence overwrite performed.
+
+EXIT=0

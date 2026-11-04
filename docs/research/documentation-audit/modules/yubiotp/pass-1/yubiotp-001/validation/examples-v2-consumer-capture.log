@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/capture.py v2 consumer first
+PASS: consumer/first: 4 actual compiler sources, 179 references, 10 analyzers; no binaries copied.
+
+EXIT=0

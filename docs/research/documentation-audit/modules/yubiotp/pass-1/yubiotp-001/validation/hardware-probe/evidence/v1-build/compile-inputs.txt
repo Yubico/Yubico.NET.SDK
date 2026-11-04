@@ -1,0 +1,5 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs
+/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
+/tmp/opencode/yubiotp-001-hardware-probe/obj/Release/net10.0/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests.GlobalUsings.g.cs
+/tmp/opencode/yubiotp-001-hardware-probe/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/yubiotp-001-hardware-probe/obj/Release/net10.0/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests.AssemblyInfo.cs

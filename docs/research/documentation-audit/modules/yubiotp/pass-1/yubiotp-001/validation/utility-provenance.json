@@ -1,0 +1,46 @@
+{
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/run-command.py",
+      "source_sha256": "597a0020c5dd5e36613f1fb6cd2ddcd0fa3c5e3944bc939e8a5eab74da5823dc",
+      "target": "run-command.py",
+      "target_sha256": "a145213edeed6a236ac2fa109fd801bfc924475ea8d55f325e6f6f641b7a93c6",
+      "adaptation": "Retain unique command logs and rotated toolchain text evidence; add shell-safe command display, launch-error retention, binary/cache exclusion index and overwrite/symlink guards."
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/check-preserved.py",
+      "source_sha256": "e941872e831e3d390472cc59ad17be7c8d35124f065c80c875b353f2d5cb60b9",
+      "target": "check-preserved.py",
+      "target_sha256": "c4fe73887f74c7a1b2e61d163e8d97ccff95c42fc8e56d18d6e4cde363ced259",
+      "adaptation": "Use this run's two baseline records; verify manifest hashes and expected 784/402/534/164 counts plus the four original user paths; use explicit fail-closed checks instead of assert."
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/check-records.py",
+      "source_sha256": "d5c1132dc425ba8db6ea507d604c00f3b64ff455576077494b73183991e4bd17",
+      "target": "check-records.py",
+      "target_sha256": "1373d145d47630bbf3400774081c8aa4bb8de5fe7d5b22afabf926e3decd68dd",
+      "adaptation": "Use current run records only by default, optional explicit reviewed hash and campaign Markdown inputs; dynamic counts, bounded link/fence/text checks; no automatic git diff or external-content reads."
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/manifest.py",
+      "source_sha256": "ef5495651af41b6a1d75c8a91955068dff0bf27b5e03e73700be3f25bcd8d018",
+      "target": "manifest.py",
+      "target_sha256": "0133cc45fc93bf390194ca552be1b4c15fdd2e2385cbb1f27d4d41163a8c1c46",
+      "adaptation": "Use YubiOTP identity/baseline, reject binary/cache/symlink entries, compare exact current inventory with frozen rows; exclusive manifest creation."
+    }
+  ],
+  "baselines": [
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/prior-archive-baseline.json",
+      "sha256": "00249331da409545e15dd5daadd18f6e676daf7b50eb802a091e7d410a521657"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/user-work-baseline.json",
+      "sha256": "8515cd743225e2c74b1249d0b7dc41226575f8a4d006835bafab3c25b0c95dc8"
+    }
+  ],
+  "generator": {
+    "path": "prepare-tools.py",
+    "sha256": "bfbb47af2c189c8241c0014acf7b646afa9e3c4cd98dd7d30aad1fefecef07de"
+  }
+}

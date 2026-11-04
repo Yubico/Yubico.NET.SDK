@@ -1,0 +1,14 @@
+byte[] challenge = Encoding.UTF8.GetBytes("some-challenge");
+ReadOnlyMemory<byte> response = default;
+try
+{
+    response = await device.CalculateHmacSha1Async(
+        Slot.Two, challenge,
+        new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
+    // Consume the response with your verifier here; do not log it.
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(challenge);
+    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+}

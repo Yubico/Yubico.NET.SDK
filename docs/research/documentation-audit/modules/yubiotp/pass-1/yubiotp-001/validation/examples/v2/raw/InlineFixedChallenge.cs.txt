@@ -1,0 +1,3 @@
+UseShortChallenge(false)
+UseShortChallenge(false)
+UseShortChallenge(false)

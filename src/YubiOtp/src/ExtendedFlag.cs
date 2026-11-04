@@ -17,6 +17,12 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <summary>
 /// Extended flags (EXTFLAG) controlling additional OTP slot behavior.
 /// </summary>
+/// <remarks>
+/// On legacy devices serial visibility merges across both slots. The personalization v1.20.0 manual documents
+/// button visibility for 2.x and USB serial unavailability on 3.0/3.1; these are legacy applicability notes, not universal
+/// 5.x restrictions. Builders do not enforce every flag's firmware requirements. AllowUpdate itself is
+/// in the update mask, so omitting it from a complete update can prevent subsequent updates.
+/// </remarks>
 [Flags]
 public enum ExtendedFlag : byte
 {

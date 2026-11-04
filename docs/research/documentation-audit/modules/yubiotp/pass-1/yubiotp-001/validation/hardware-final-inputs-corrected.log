@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/retain-inputs.py
+PASS: actual Csc membership,225 dependency identities, complete source/config text and assets retained; no re-execution.
+
+EXIT=0

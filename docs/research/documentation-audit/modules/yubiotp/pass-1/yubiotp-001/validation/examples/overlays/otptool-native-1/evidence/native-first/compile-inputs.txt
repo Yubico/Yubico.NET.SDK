@@ -1,0 +1,17 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/CliOptions.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/DeleteCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/InfoCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/DeviceHelper.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OutputHelper.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Program.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.GlobalUsings.g.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.AssemblyInfo.cs

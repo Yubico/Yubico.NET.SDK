@@ -175,7 +175,9 @@ For persistence, audit logs, allow lists, or anything surviving a process restar
 It adds no uniqueness — the serial is already unique — and it is not dependable as a discriminator:
 
 - It can differ per applet on one physical key. This SDK carries an explicit workaround taking the higher
-  of the Management and OTP values on NEO (`src/YubiOtp/src/YubiOtpSession.cs`).
+  of the Management and OTP values when OTP reports major version 3
+  (`src/YubiOtp/src/Backend/SmartCardBackend.cs`). The session's effective version is distinct from
+  `ConfigState`'s raw OTP-status version.
 - Canonical yubikit sometimes *guesses* it (`version = Version(3, 0, 0); // Guess NEO`).
 - Canonical Rust's polling merger has a `(version, serial)` fallback match. This SDK deliberately does not:
   development keys can expose an alpha/beta USB descriptor version while Management reports the effective

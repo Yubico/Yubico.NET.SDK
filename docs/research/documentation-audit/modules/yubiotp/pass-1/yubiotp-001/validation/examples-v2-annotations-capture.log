@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/capture.py v2 annotations first
+PASS: annotations/first: 5 actual compiler sources, 205 references, 12 analyzers; no binaries copied.
+
+EXIT=0

@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/check-records.py --reviewed
+PASS: 13 record Markdown files / 4 local links, balanced fences; 212 UTF-8 artifacts and 3 pinned primary-source PDFs; 50 reviewed hashes checked.
+
+EXIT=0

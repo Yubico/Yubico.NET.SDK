@@ -1,0 +1,876 @@
+{
+  "id": "otptool-native-1",
+  "base_revision": "v2",
+  "status": "prepared-not-built-not-captured",
+  "workspace": "/tmp/opencode/yubiotp-001-examples-v2-otptool-native-1",
+  "files": [
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/OtpTool.Capture.targets",
+      "bytes": 3736,
+      "sha256": "862231b870eba9de6a4c48d2eb87ec0887c4385227196158d012293f3cacd882"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/after/OtpTool.Capture.targets.snapshot",
+      "bytes": 3736,
+      "sha256": "862231b870eba9de6a4c48d2eb87ec0887c4385227196158d012293f3cacd882"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/after/capture.py.snapshot",
+      "bytes": 8890,
+      "sha256": "71de8c38ecfd614c6164a7e639123b5cb1d34bf113904562236e2df5be1dbed0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/after/prepare-otptool-native.py.snapshot",
+      "bytes": 12657,
+      "sha256": "f1bc36b300365d2969936b8633eaf323227d8ac5f5550237139718e12bb27b13"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/after/support.py.snapshot",
+      "bytes": 2296,
+      "sha256": "092a603555b545235faf41c943c45bfeb816d693aa914bfb8413c8bb7a468591"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/after/verify.py.snapshot",
+      "bytes": 8105,
+      "sha256": "79d8d2753930ab4c707e7677a5b3abec46ff0721404c4f68b3bc4b639eadbc59"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/before/OtpTool.Capture.targets.snapshot",
+      "bytes": 3066,
+      "sha256": "364ce2c4275c32cb4cdbdb6520ce43eb110fc87434bb794ae91504439f17ef0f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/before/OtpTool.Output.props.snapshot",
+      "bytes": 462,
+      "sha256": "36e405ab6efc203901e6ec83b6836f7ebb2eb54bc1d884154e9ea6a40566920c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/before/capture.py.snapshot",
+      "bytes": 7411,
+      "sha256": "56629dd0404f8be6e9ea6601dc700f0e7f2a6a5141e5e272fd0156e93c4fce1f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/before/inventory.py.snapshot",
+      "bytes": 7151,
+      "sha256": "4b10e856a273ea068149c87ad05507a1eb044c1076ee2c572f7bbeef4bb99334"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/before/snippet-preparation.md.snapshot",
+      "bytes": 15596,
+      "sha256": "3ab987ca8d03c4da2119370d9167804ec5b9261429815bb403348351a5b01d94"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/before/verify.py.snapshot",
+      "bytes": 7137,
+      "sha256": "79572ac86d8b844fe40d7556cacc57b9f8e0054b81061b93ccf026952752b6da"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/capture.py",
+      "bytes": 8890,
+      "sha256": "71de8c38ecfd614c6164a7e639123b5cb1d34bf113904562236e2df5be1dbed0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/support.py",
+      "bytes": 2296,
+      "sha256": "092a603555b545235faf41c943c45bfeb816d693aa914bfb8413c8bb7a468591"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/verify.py",
+      "bytes": 8105,
+      "sha256": "79d8d2753930ab4c707e7677a5b3abec46ff0721404c4f68b3bc4b639eadbc59"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/capture.py",
+      "bytes": 7411,
+      "sha256": "56629dd0404f8be6e9ea6601dc700f0e7f2a6a5141e5e272fd0156e93c4fce1f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/verify.py",
+      "bytes": 7137,
+      "sha256": "79572ac86d8b844fe40d7556cacc57b9f8e0054b81061b93ccf026952752b6da"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/inventory.py",
+      "bytes": 7151,
+      "sha256": "4b10e856a273ea068149c87ad05507a1eb044c1076ee2c572f7bbeef4bb99334"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/otptool/OtpTool.Output.props",
+      "bytes": 462,
+      "sha256": "36e405ab6efc203901e6ec83b6836f7ebb2eb54bc1d884154e9ea6a40566920c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/otptool/OtpTool.Capture.targets",
+      "bytes": 3066,
+      "sha256": "364ce2c4275c32cb4cdbdb6520ce43eb110fc87434bb794ae91504439f17ef0f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/manifest.json",
+      "bytes": 691250,
+      "sha256": "346bf38a848e2470f0ee68d163d12a0118645221616b3ddcb77996779741b8f9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/prepare-otptool-native.py",
+      "bytes": 12657,
+      "sha256": "f1bc36b300365d2969936b8633eaf323227d8ac5f5550237139718e12bb27b13"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples-v2-otptool-build.log",
+      "bytes": 3683,
+      "sha256": "9297ddc99ae08ea802a638d7defdb55a8363737c3ab0b3df623afcc3fbd7c511"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples-v2-otptool-build-20261104-115031-825-build/01-clean-AuditOtp001.Examples.Shipping.OtpTool.log",
+      "bytes": 2860,
+      "sha256": "505eab16510b473877cf9347275a951e112df4ee4eb177ebe01d36e2a6d89e30"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/manifest.json",
+      "bytes": 82096,
+      "sha256": "c6f1d8bdae7800e2d062fc85652551a2441dbf1200f7ae6ce2ad0702d6e96b72"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/manifest.json",
+      "bytes": 93604,
+      "sha256": "3d55a5ec7470c83b6fbbc79155d8b4388030315c8a91c9b41f563e61304f68a5"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/Sdk/Sdk.props",
+      "bytes": 2487,
+      "sha256": "41dc552e294cd1f0c6e640c302c112b0788fa8776ecac73e7fa013382a3bf713"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.props",
+      "bytes": 11765,
+      "sha256": "87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Microsoft.Common.CurrentVersion.targets",
+      "bytes": 387120,
+      "sha256": "879d9742497730b1c8bac7b90c3b14bcb3d4280a87c50b651a1c4430744207ba"
+    }
+  ],
+  "preserved_v1_v2": [
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/annotations/Directory.Build.props",
+      "bytes": 683,
+      "sha256": "63bee4a9446134704ebe9fd9a472216619175d788f43ebb46df9886e24f27a78"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/annotations/Directory.Build.targets",
+      "bytes": 2778,
+      "sha256": "cb9084c93c78f037ec90ffd0fd3e292ee02e99341dbbe5be346d12d520a023f8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/annotations/src/Examples.cs",
+      "bytes": 209,
+      "sha256": "44c9cd1efde6d378c8c2c117ce1e9bb685d6189985e7f6d0bf4eaaf418e1c456"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/annotations/src/Yubico.YubiKit.AuditOtp001.Examples.v1.annotations.csproj",
+      "bytes": 1342,
+      "sha256": "9f6bd3a51a40ec89ca27c02d8f476cb536a9ec09066887e973ae05da1ef358d9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/consumer/Directory.Build.props",
+      "bytes": 681,
+      "sha256": "534839ad9b371f68a80204b6d1a16aa39cd5a0063e1ff53662dc6a5f182de3a7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/consumer/Directory.Build.targets",
+      "bytes": 2778,
+      "sha256": "cb9084c93c78f037ec90ffd0fd3e292ee02e99341dbbe5be346d12d520a023f8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/consumer/src/Examples.cs",
+      "bytes": 8344,
+      "sha256": "f1ccf1c32cf014cdae75706cba76bcb5f6dc3a50553490f492a1c599501c0950"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditOtp001.Examples.v1.consumer.csproj",
+      "bytes": 490,
+      "sha256": "395edcf7a6efe96f42c752965c47ee05e535b7ebfebce236ae81ab86ad2e7e49"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/manifest.json",
+      "bytes": 688759,
+      "sha256": "428fb33cec1f904eb9e924fe45ae400932c5818638c4f02efecddf8cc04aad9a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/otptool/OtpTool.Capture.targets",
+      "bytes": 3066,
+      "sha256": "0b7925ea3843397a3f4d024ed2be11b1fd3fba0d1d046d1ac68c70511d383d84"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/AesTicket.cs.txt",
+      "bytes": 928,
+      "sha256": "f830f32aeaae06e7d7d068af073b15d184cd34c715a6c02e168e80336e5b83ae"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/BorrowedConnectionProvision.cs.txt",
+      "bytes": 259,
+      "sha256": "598b88e61b24ccd8f7ecbb3505c6b419e6da657f2ee03acf6b42a6d4581b2a01"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/CachedState.cs.txt",
+      "bytes": 88,
+      "sha256": "4863d78da4973b00cd8bb8e60bcaebd932bd826de38afb2120a474e0f19b3d57"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/CalculateHmac.cs.txt",
+      "bytes": 490,
+      "sha256": "5dbece7717fb0a0ddd728d4735941ee4494d7bd4e69e01cb25fb4c623a10c4fa"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/Discovery.cs.txt",
+      "bytes": 681,
+      "sha256": "b3feb1f35b46d2505121f1f0e4b64062bcb81974edff941d140a6744688e3cad"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/ExistingSessionChallenge.cs.txt",
+      "bytes": 313,
+      "sha256": "5b6dd85934c4a45eb0531253941bebb5a26247c7966a749a93d10766767723b9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/InlineConfigured.cs.txt",
+      "bytes": 28,
+      "sha256": "869f981d7067cd855faff7fa7df89f68f541d2c1964e9661acd01e0ba07bd77f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/InlineFixedChallenge.cs.txt",
+      "bytes": 74,
+      "sha256": "6fe19be57362a81e984b536b252cdc6fe9193e136d6f360dd649df80f26007a8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/InlineHidOptions.cs.txt",
+      "bytes": 78,
+      "sha256": "a36c31d772b0bb3186b45623c359425d06ec2499a1981d9330c4c800394c6796"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/InlineReadState.cs.txt",
+      "bytes": 28,
+      "sha256": "dccfc8f24bbca790405d63fb1719731fd5fca17334d481f609a282d6d24a870c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/InlineTrait.cs.txt",
+      "bytes": 69,
+      "sha256": "b5b3728b1044d893e9a7e5f27b3fd98ae2aefae47ca6eb7feee13aab15ebf595"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/MigrationCurrentV2.cs.txt",
+      "bytes": 1177,
+      "sha256": "d4084c757452039fc96397e4c8a1a24cc472c3ceaf9e67ef0f1cc7b0e9430470"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/PromptSession.cs.txt",
+      "bytes": 608,
+      "sha256": "c9a5980e4ad929660ba85efb13cd6b9fc7abc7e8c4468da897481f53cdea2086"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/ProvisionHmac.cs.txt",
+      "bytes": 561,
+      "sha256": "9bbc4212de9bb7a38bf885f7da2bdb6cdd85b0e0b7ac21ad223b5b22168808fc"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/SharedIntentPrompt.cs.txt",
+      "bytes": 616,
+      "sha256": "cdb35996f0077d9974a37ad4ecf16805b34fd470e34c9cd7208f081d168728af"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/SharedOperationWording.cs.txt",
+      "bytes": 513,
+      "sha256": "aadb7f3aa7711e6babbfbb6f67170eae06bec69826decf184b495644af78529a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/StaticPassword.cs.txt",
+      "bytes": 259,
+      "sha256": "b762b7285f16afe88b498f44e8dd5446bef34f3404f24e07835b21a035698419"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/SwapDelete.cs.txt",
+      "bytes": 157,
+      "sha256": "b4184fa2ca3b6e45038e45d41712c768713882e2bf307c523935111ee5a03842"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/raw/UpdateRetainCode.cs.txt",
+      "bytes": 396,
+      "sha256": "545d4f326c3ee679c24e5b3ceb026125667bfd0825d837384916d7ba7440d2e8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/tool-source/capture.py.snapshot",
+      "bytes": 7316,
+      "sha256": "5e497a9bee174337aca977084fe575d9803681a372d64f7ccbca498623ef025d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/tool-source/inventory.py.snapshot",
+      "bytes": 7151,
+      "sha256": "4b10e856a273ea068149c87ad05507a1eb044c1076ee2c572f7bbeef4bb99334"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/tool-source/prepare.py.snapshot",
+      "bytes": 21432,
+      "sha256": "352c532d7786343d5fee182ae4bf34ed6c7b6e1b57f465017860bf5467028bfd"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v1/tool-source/verify.py.snapshot",
+      "bytes": 6814,
+      "sha256": "2c224a842caa594c721f79e7e7447251bd32a938fcd8ba94897175927ab3b610"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/Directory.Build.props",
+      "bytes": 683,
+      "sha256": "8ebe278f77623c1d886a7a54ef6d66e0815a94f143b202f780699fffc395d870"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/Directory.Build.targets",
+      "bytes": 2778,
+      "sha256": "cb9084c93c78f037ec90ffd0fd3e292ee02e99341dbbe5be346d12d520a023f8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/Directory.Packages.props.snapshot",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/analyzer-config/4202bb3fff0d71e8-Yubico.YubiKit.AuditOtp001.Examples.v2.annotations.GeneratedMSBuildEditorConfig.editorconfig.snapshot",
+      "bytes": 817,
+      "sha256": "4202bb3fff0d71e8f13a41f3a509635d3ef8fb0b5cb0b34bae9d58b5f9566be5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/analyzer-config/630a8659fc5ba2d8-.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/analyzer-config/f23ec2c89e959e21-analysislevelstyle_recommended.globalconfig.snapshot",
+      "bytes": 15007,
+      "sha256": "f23ec2c89e959e21eb6135674b3108b5cb78601b9e5e14de4252fd7fffaaffb9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/analyzer-configs.txt",
+      "bytes": 369,
+      "sha256": "87a8542f28a8e8e896d7d22960f3ae89f40d4a795e97e52036458730a3c27b67"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/analyzers.txt",
+      "bytes": 1660,
+      "sha256": "6bb424008a642d2f2ec9b33b43db86b434748783a3fcccd211e33156a295ac6d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/compile-inputs.txt",
+      "bytes": 663,
+      "sha256": "cf9811d72afa551e6ae084f0a0440f75d094f742e2417d3d1ae050b869c632be"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/compiled-project.csproj.snapshot",
+      "bytes": 1342,
+      "sha256": "9f6bd3a51a40ec89ca27c02d8f476cb536a9ec09066887e973ae05da1ef358d9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/csc-command-line.txt",
+      "bytes": 32565,
+      "sha256": "1c92ab7c49fedfd1611e52102c1271b101802b7aef05f1bf1bd19f92a39a64c5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/global.json.snapshot",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/manifest.json",
+      "bytes": 93604,
+      "sha256": "3d55a5ec7470c83b6fbbc79155d8b4388030315c8a91c9b41f563e61304f68a5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/policy-final.txt",
+      "bytes": 955,
+      "sha256": "869712cb3543a878a230871e695ee12f7e0b644b2676b909a5d62713be9eb496"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/project.assets.json",
+      "bytes": 192089,
+      "sha256": "f18ad819de5cb99a627227496184da0ee8d93a82419dc3c8467bcd0fa6c53f6a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/resolved-references.txt",
+      "bytes": 45354,
+      "sha256": "4fd0c744af52ce8be32ff4be3808e7be63c491ad6d6b6a04a96596242363268d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/source/44c9cd1efde6d378-Examples.cs.snapshot",
+      "bytes": 209,
+      "sha256": "44c9cd1efde6d378c8c2c117ce1e9bb685d6189985e7f6d0bf4eaaf418e1c456"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/source/8f86a2cbf00ff3ee-Yubico.YubiKit.AuditOtp001.Examples.v2.annotations.GlobalUsings.g.cs.snapshot",
+      "bytes": 231,
+      "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/source/96bc0c80b9f52dad-Yubico.YubiKit.AuditOtp001.Examples.v2.annotations.AssemblyInfo.cs.snapshot",
+      "bytes": 1262,
+      "sha256": "96bc0c80b9f52dade79a7864de36c07f068a012c174c1a5cc2e76ae17e53e424"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/source/d66f12f9433816a8-Microsoft.NET.Test.Sdk.Program.cs.snapshot",
+      "bytes": 218,
+      "sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/source/f79c1ad9a9fc7611-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/source-context.csproj.snapshot",
+      "bytes": 1821,
+      "sha256": "efafa99712b038addecf307481addcd68351dfe9b2822da3f0bf95f6ade52317"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/src/Examples.cs",
+      "bytes": 209,
+      "sha256": "44c9cd1efde6d378c8c2c117ce1e9bb685d6189985e7f6d0bf4eaaf418e1c456"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/src/Yubico.YubiKit.AuditOtp001.Examples.v2.annotations.csproj",
+      "bytes": 1342,
+      "sha256": "9f6bd3a51a40ec89ca27c02d8f476cb536a9ec09066887e973ae05da1ef358d9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/Directory.Build.props",
+      "bytes": 681,
+      "sha256": "88dd182574d089671ec1c91ca3ac5d3ab1690c09c3caf222087bf6d9202c6403"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/Directory.Build.targets",
+      "bytes": 2778,
+      "sha256": "cb9084c93c78f037ec90ffd0fd3e292ee02e99341dbbe5be346d12d520a023f8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/Directory.Packages.props.snapshot",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/analyzer-config/035511a0a3824c3c-Yubico.YubiKit.AuditOtp001.Examples.v2.consumer.GeneratedMSBuildEditorConfig.editorconfig.snapshot",
+      "bytes": 811,
+      "sha256": "035511a0a3824c3c930f4d982bf97bf3586dbc2f03c7962e210f09bc768d21c0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/analyzer-config/630a8659fc5ba2d8-.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/analyzer-config/eac2678eed1cf246-analysislevelstyle_all.globalconfig.snapshot",
+      "bytes": 19880,
+      "sha256": "eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/analyzer-configs.txt",
+      "bytes": 355,
+      "sha256": "b64257835983374c263d82d799ccadfa714d7ee079a791d60022a6f4afb04cc4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/analyzers.txt",
+      "bytes": 1466,
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/compile-inputs.txt",
+      "bytes": 537,
+      "sha256": "2cdbc63af194bf0a4c63dd010e27d5aa07744cee5a08b69b7feafd6751bfb5b5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/compiled-project.csproj.snapshot",
+      "bytes": 490,
+      "sha256": "395edcf7a6efe96f42c752965c47ee05e535b7ebfebce236ae81ab86ad2e7e49"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/csc-command-line.txt",
+      "bytes": 28696,
+      "sha256": "e585219c10a9a083d735c7ede14edaa155168715bfcdb722876283b13ad90af5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/global.json.snapshot",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/manifest.json",
+      "bytes": 82096,
+      "sha256": "c6f1d8bdae7800e2d062fc85652551a2441dbf1200f7ae6ce2ad0702d6e96b72"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/policy-final.txt",
+      "bytes": 786,
+      "sha256": "d5d5fda094705f0e4fc90c71a4895103fe76c9d666950e6ef3fc68e473a302bd"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/project.assets.json",
+      "bytes": 119121,
+      "sha256": "7b66f3980d57b1bf454212671b889aeb66db3369b429afa311b6d9a0928f619c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/resolved-references.txt",
+      "bytes": 39588,
+      "sha256": "8e975a819f277e414ad556751f342625da9dcc9172955b4714892d876a9cf47b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/source/8f86a2cbf00ff3ee-Yubico.YubiKit.AuditOtp001.Examples.v2.consumer.GlobalUsings.g.cs.snapshot",
+      "bytes": 231,
+      "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/source/eca445cd7aa58033-Yubico.YubiKit.AuditOtp001.Examples.v2.consumer.AssemblyInfo.cs.snapshot",
+      "bytes": 1700,
+      "sha256": "eca445cd7aa58033cc7e376a0308b88adcf20bc9b5d8e8ca874d0705f99c1f26"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/source/f1ccf1c32cf014cd-Examples.cs.snapshot",
+      "bytes": 8344,
+      "sha256": "f1ccf1c32cf014cdae75706cba76bcb5f6dc3a50553490f492a1c599501c0950"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/source/f79c1ad9a9fc7611-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/source-context.csproj.snapshot",
+      "bytes": 936,
+      "sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/src/Examples.cs",
+      "bytes": 8344,
+      "sha256": "f1ccf1c32cf014cdae75706cba76bcb5f6dc3a50553490f492a1c599501c0950"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditOtp001.Examples.v2.consumer.csproj",
+      "bytes": 490,
+      "sha256": "395edcf7a6efe96f42c752965c47ee05e535b7ebfebce236ae81ab86ad2e7e49"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/manifest.json",
+      "bytes": 691250,
+      "sha256": "346bf38a848e2470f0ee68d163d12a0118645221616b3ddcb77996779741b8f9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/otptool/OtpTool.Capture.targets",
+      "bytes": 3066,
+      "sha256": "364ce2c4275c32cb4cdbdb6520ce43eb110fc87434bb794ae91504439f17ef0f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/otptool/OtpTool.Output.props",
+      "bytes": 462,
+      "sha256": "36e405ab6efc203901e6ec83b6836f7ebb2eb54bc1d884154e9ea6a40566920c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/AesTicket.cs.txt",
+      "bytes": 928,
+      "sha256": "f830f32aeaae06e7d7d068af073b15d184cd34c715a6c02e168e80336e5b83ae"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/BorrowedConnectionProvision.cs.txt",
+      "bytes": 259,
+      "sha256": "598b88e61b24ccd8f7ecbb3505c6b419e6da657f2ee03acf6b42a6d4581b2a01"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/CachedState.cs.txt",
+      "bytes": 88,
+      "sha256": "4863d78da4973b00cd8bb8e60bcaebd932bd826de38afb2120a474e0f19b3d57"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/CalculateHmac.cs.txt",
+      "bytes": 490,
+      "sha256": "5dbece7717fb0a0ddd728d4735941ee4494d7bd4e69e01cb25fb4c623a10c4fa"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/Discovery.cs.txt",
+      "bytes": 681,
+      "sha256": "b3feb1f35b46d2505121f1f0e4b64062bcb81974edff941d140a6744688e3cad"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/ExistingSessionChallenge.cs.txt",
+      "bytes": 313,
+      "sha256": "5b6dd85934c4a45eb0531253941bebb5a26247c7966a749a93d10766767723b9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/InlineConfigured.cs.txt",
+      "bytes": 28,
+      "sha256": "869f981d7067cd855faff7fa7df89f68f541d2c1964e9661acd01e0ba07bd77f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/InlineFixedChallenge.cs.txt",
+      "bytes": 74,
+      "sha256": "6fe19be57362a81e984b536b252cdc6fe9193e136d6f360dd649df80f26007a8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/InlineHidOptions.cs.txt",
+      "bytes": 78,
+      "sha256": "a36c31d772b0bb3186b45623c359425d06ec2499a1981d9330c4c800394c6796"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/InlineReadState.cs.txt",
+      "bytes": 28,
+      "sha256": "dccfc8f24bbca790405d63fb1719731fd5fca17334d481f609a282d6d24a870c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/InlineTrait.cs.txt",
+      "bytes": 69,
+      "sha256": "b5b3728b1044d893e9a7e5f27b3fd98ae2aefae47ca6eb7feee13aab15ebf595"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/MigrationCurrentV2.cs.txt",
+      "bytes": 1177,
+      "sha256": "d4084c757452039fc96397e4c8a1a24cc472c3ceaf9e67ef0f1cc7b0e9430470"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/PromptSession.cs.txt",
+      "bytes": 608,
+      "sha256": "c9a5980e4ad929660ba85efb13cd6b9fc7abc7e8c4468da897481f53cdea2086"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/ProvisionHmac.cs.txt",
+      "bytes": 561,
+      "sha256": "9bbc4212de9bb7a38bf885f7da2bdb6cdd85b0e0b7ac21ad223b5b22168808fc"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/SharedIntentPrompt.cs.txt",
+      "bytes": 616,
+      "sha256": "cdb35996f0077d9974a37ad4ecf16805b34fd470e34c9cd7208f081d168728af"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/SharedOperationWording.cs.txt",
+      "bytes": 513,
+      "sha256": "aadb7f3aa7711e6babbfbb6f67170eae06bec69826decf184b495644af78529a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/StaticPassword.cs.txt",
+      "bytes": 259,
+      "sha256": "b762b7285f16afe88b498f44e8dd5446bef34f3404f24e07835b21a035698419"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/SwapDelete.cs.txt",
+      "bytes": 157,
+      "sha256": "b4184fa2ca3b6e45038e45d41712c768713882e2bf307c523935111ee5a03842"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/raw/UpdateRetainCode.cs.txt",
+      "bytes": 396,
+      "sha256": "545d4f326c3ee679c24e5b3ceb026125667bfd0825d837384916d7ba7440d2e8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/tool-source/capture.py.snapshot",
+      "bytes": 7411,
+      "sha256": "56629dd0404f8be6e9ea6601dc700f0e7f2a6a5141e5e272fd0156e93c4fce1f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/tool-source/inventory.py.snapshot",
+      "bytes": 7151,
+      "sha256": "4b10e856a273ea068149c87ad05507a1eb044c1076ee2c572f7bbeef4bb99334"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/tool-source/prepare.py.snapshot",
+      "bytes": 23365,
+      "sha256": "90fa7f375ea1394fcf6c17a689be147c57af5cb2987bd27b47952e401b420f71"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/tool-source/verify.py.snapshot",
+      "bytes": 7137,
+      "sha256": "79572ac86d8b844fe40d7556cacc57b9f8e0054b81061b93ccf026952752b6da"
+    }
+  ],
+  "before": [
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/capture.py",
+        "bytes": 7411,
+        "sha256": "56629dd0404f8be6e9ea6601dc700f0e7f2a6a5141e5e272fd0156e93c4fce1f"
+      },
+      "snapshot": "before/capture.py.snapshot"
+    },
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/verify.py",
+        "bytes": 7137,
+        "sha256": "79572ac86d8b844fe40d7556cacc57b9f8e0054b81061b93ccf026952752b6da"
+      },
+      "snapshot": "before/verify.py.snapshot"
+    },
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/inventory.py",
+        "bytes": 7151,
+        "sha256": "4b10e856a273ea068149c87ad05507a1eb044c1076ee2c572f7bbeef4bb99334"
+      },
+      "snapshot": "before/inventory.py.snapshot"
+    },
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/otptool/OtpTool.Output.props",
+        "bytes": 462,
+        "sha256": "36e405ab6efc203901e6ec83b6836f7ebb2eb54bc1d884154e9ea6a40566920c"
+      },
+      "snapshot": "before/OtpTool.Output.props.snapshot"
+    },
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/otptool/OtpTool.Capture.targets",
+        "bytes": 3066,
+        "sha256": "364ce2c4275c32cb4cdbdb6520ce43eb110fc87434bb794ae91504439f17ef0f"
+      },
+      "snapshot": "before/OtpTool.Capture.targets.snapshot"
+    },
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/snippet-preparation.md",
+        "bytes": 15596,
+        "sha256": "3ab987ca8d03c4da2119370d9167804ec5b9261429815bb403348351a5b01d94"
+      },
+      "snapshot": "before/snippet-preparation.md.snapshot",
+      "role": "Historical preparation instructions before the authoritative overlay correction; not a current-input requirement."
+    }
+  ],
+  "after": [
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/capture.py",
+        "bytes": 8890,
+        "sha256": "71de8c38ecfd614c6164a7e639123b5cb1d34bf113904562236e2df5be1dbed0"
+      },
+      "snapshot": "after/capture.py.snapshot"
+    },
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/verify.py",
+        "bytes": 8105,
+        "sha256": "79d8d2753930ab4c707e7677a5b3abec46ff0721404c4f68b3bc4b639eadbc59"
+      },
+      "snapshot": "after/verify.py.snapshot"
+    },
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/support.py",
+        "bytes": 2296,
+        "sha256": "092a603555b545235faf41c943c45bfeb816d693aa914bfb8413c8bb7a468591"
+      },
+      "snapshot": "after/support.py.snapshot"
+    },
+    {
+      "source": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/OtpTool.Capture.targets",
+        "bytes": 3736,
+        "sha256": "862231b870eba9de6a4c48d2eb87ec0887c4385227196158d012293f3cacd882"
+      },
+      "snapshot": "after/OtpTool.Capture.targets.snapshot"
+    }
+  ],
+  "reused_captures": {
+    "consumer": {
+      "directory": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first",
+      "attempt": "first",
+      "counts": {
+        "sources": 4,
+        "references": 179,
+        "analyzers": 10,
+        "configs": 3
+      },
+      "manifest": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/evidence/first/manifest.json",
+        "bytes": 82096,
+        "sha256": "c6f1d8bdae7800e2d062fc85652551a2441dbf1200f7ae6ce2ad0702d6e96b72"
+      }
+    },
+    "annotations": {
+      "directory": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first",
+      "attempt": "first",
+      "counts": {
+        "sources": 5,
+        "references": 205,
+        "analyzers": 12,
+        "configs": 3
+      },
+      "manifest": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/annotations/evidence/first/manifest.json",
+        "bytes": 93604,
+        "sha256": "3d55a5ec7470c83b6fbbc79155d8b4388030315c8a91c9b41f563e61304f68a5"
+      }
+    }
+  },
+  "sdk_import_evidence": [
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/Sdk/Sdk.props",
+      "bytes": 2487,
+      "sha256": "41dc552e294cd1f0c6e640c302c112b0788fa8776ecac73e7fa013382a3bf713",
+      "excerpt_lines": [
+        44,
+        50
+      ],
+      "excerpt": "  <PropertyGroup Condition=\"'$(MSBuildProjectFullPath)' == '$(ProjectToOverrideProjectExtensionsPath)'\">\n    <MSBuildProjectExtensionsPath>$(ProjectExtensionsPathForSpecifiedProject)</MSBuildProjectExtensionsPath>\n  </PropertyGroup>\n\n  <Import Project=\"$(AlternateCommonProps)\" Condition=\"'$(AlternateCommonProps)' != ''\" />\n  <Import Project=\"$(MSBuildExtensionsPath)\\$(MSBuildToolsVersion)\\Microsoft.Common.props\" Condition=\"'$(AlternateCommonProps)' == ''\"/>\n  <Import Project=\"$(MSBuildThisFileDirectory)..\\targets\\Microsoft.NET.Sdk.props\"  />"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.props",
+      "bytes": 11765,
+      "sha256": "87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48",
+      "excerpt_lines": [
+        45,
+        92
+      ],
+      "excerpt": "  <PropertyGroup>\n    <!--\n        The declaration of $(BaseIntermediateOutputPath) had to be moved up from Microsoft.Common.CurrentVersion.targets\n        in order for the $(MSBuildProjectExtensionsPath) to use it as a default.\n    -->\n    <BaseIntermediateOutputPath Condition=\"'$(BaseIntermediateOutputPath)'=='' \">obj\\</BaseIntermediateOutputPath>\n    <BaseIntermediateOutputPath Condition=\"!HasTrailingSlash('$(BaseIntermediateOutputPath)')\">$(BaseIntermediateOutputPath)\\</BaseIntermediateOutputPath>\n    <_InitialBaseIntermediateOutputPath>$(BaseIntermediateOutputPath)</_InitialBaseIntermediateOutputPath>\n\n    <MSBuildProjectExtensionsPath Condition=\"'$(MSBuildProjectExtensionsPath)' == '' \">$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>\n    <!--\n        Import paths that are relative default to be relative to the importing file.  However, since MSBuildExtensionsPath\n        defaults to BaseIntermediateOutputPath we expect it to be relative to the project directory.  So if the path is relative\n        it needs to be made absolute based on the project directory.\n    -->\n    <MSBuildProjectExtensionsPath Condition=\"'$([System.IO.Path]::IsPathRooted($(MSBuildProjectExtensionsPath)))' == 'false'\">$([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(MSBuildProjectExtensionsPath)'))</MSBuildProjectExtensionsPath>\n    <MSBuildProjectExtensionsPath Condition=\"!HasTrailingSlash('$(MSBuildProjectExtensionsPath)')\">$(MSBuildProjectExtensionsPath)\\</MSBuildProjectExtensionsPath>\n\n    <!--\n        Don't import project extensions during restore because NuGet restore generates them.  Importing them during restore will embed\n        the pre-restore files in the binary log and then NuGet won't be able to embed the generated one after restore.  If some other\n        project extension mechanism wants to import project extensions during restore, they need to explicitly set ImportProjectExtensionProps\n    -->\n    <ImportProjectExtensionProps Condition=\"$([MSBuild]::AreFeaturesEnabled('17.10')) And '$(ImportProjectExtensionProps)' == '' And '$(MSBuildIsRestoring)' == 'true'\">false</ImportProjectExtensionProps>\n    \n    <ImportProjectExtensionProps Condition=\"'$(ImportProjectExtensionProps)' == ''\">true</ImportProjectExtensionProps>\n    <_InitialMSBuildProjectExtensionsPath Condition=\" '$(ImportProjectExtensionProps)' == 'true' \">$(MSBuildProjectExtensionsPath)</_InitialMSBuildProjectExtensionsPath>\n  </PropertyGroup>\n\n  <Import Project=\"$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.props\" Condition=\"'$(ImportProjectExtensionProps)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')\" />\n\n  <!--\n      Wildcard imports come from $(MSBuildExtensionsPath)\\$(MSBuildToolsVersion)\\Imports\\Microsoft.Common.props\\ directory.\n      This is very similar to the same extension point used in Microsoft.Common.targets, which is located in\n      the $(MSBuildExtensionsPath)\\$(MSBuildToolsVersion)\\Microsoft.Common.targets\\ directory.\n\n      Unfortunately, there is already a file named \"Microsoft.Common.props\" in this directory,\n      so we have to have a slightly different directory name to hold extensions.\n  -->\n  <Import Project=\"$(MSBuildUserExtensionsPath)\\$(MSBuildToolsVersion)\\Imports\\Microsoft.Common.props\\ImportBefore\\*\" Condition=\"'$(ImportUserLocationsByWildcardBeforeMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\\$(MSBuildToolsVersion)\\Imports\\Microsoft.Common.props\\ImportBefore')\"/>\n  <Import Project=\"$(MSBuildExtensionsPath)\\$(MSBuildToolsVersion)\\Imports\\Microsoft.Common.props\\ImportBefore\\*\" Condition=\"'$(ImportByWildcardBeforeMicrosoftCommonProps)' == 'true' and exists('$(MSBuildExtensionsPath)\\$(MSBuildToolsVersion)\\Imports\\Microsoft.Common.props\\ImportBefore')\"/>\n\n  <PropertyGroup>\n    <CustomBeforeMicrosoftCommonProps Condition=\"'$(CustomBeforeMicrosoftCommonProps)'==''\">$(MSBuildExtensionsPath)\\v$(MSBuildToolsVersion)\\Custom.Before.$(MSBuildThisFile)</CustomBeforeMicrosoftCommonProps>\n    <CustomAfterMicrosoftCommonProps Condition=\"'$(CustomAfterMicrosoftCommonProps)'==''\">$(MSBuildExtensionsPath)\\v$(MSBuildToolsVersion)\\Custom.After.$(MSBuildThisFile)</CustomAfterMicrosoftCommonProps>\n  </PropertyGroup>\n\n  <Import Project=\"$(CustomBeforeMicrosoftCommonProps)\" Condition=\"'$(CustomBeforeMicrosoftCommonProps)' != '' and Exists('$(CustomBeforeMicrosoftCommonProps)')\" />"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Microsoft.Common.CurrentVersion.targets",
+      "bytes": 387120,
+      "sha256": "879d9742497730b1c8bac7b90c3b14bcb3d4280a87c50b651a1c4430744207ba",
+      "excerpt_lines": [
+        866,
+        875
+      ],
+      "excerpt": "    <!--\n      Log an error MSB3540 if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project\n      if you set a value in the body, the value is not used by the top implicit import but is used by the bottom.\n      This can lead to confusing behavior and builds can fail for obscure reasons.\n    -->\n    <MSBuildInternalMessage\n      Condition=\" '$(_InitialMSBuildProjectExtensionsPath)' != '' And '$(MSBuildProjectExtensionsPath)' != '$(_InitialMSBuildProjectExtensionsPath)' \"\n      ResourceName=\"CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse\"\n      Severity=\"Error\"\n    />"
+    }
+  ],
+  "root_cause": "Installed 10.0.403 Microsoft.Common.props initializes/captures MSBuildProjectExtensionsPath at lines 54-71 and imports CustomBeforeMicrosoftCommonProps only at line 92; the original hook then changed it, and CurrentVersion.targets lines 871-875 emitted MSB3540 during Clean before compilation.",
+  "correction": "Remove the early output hook from the command entirely. Use actual shipping-native bin/obj and only the late observation hook with a distinct temporary capture workspace. No SDK, toolchain, driver or v1/v2 source/capture edits.",
+  "capture_adaptation": "Keep original strict Csc membership/policy/assets checks; route only OtpTool capture to this overlay; retain only the active late hook; assert actual ordinary shipping output paths and record overlay identity.",
+  "verifier_adaptation": "Keep original v2 body/source/config/dependency and compiled-evidence checks; pin/reuse consumer/first and annotations/first; route only OtpTool to overlay evidence; require new overlay/native-output identities.",
+  "documentation": [
+    "https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-by-directory?view=visualstudio",
+    "https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-net-builds?view=visualstudio",
+    "https://learn.microsoft.com/en-us/dotnet/core/project-sdk/overview"
+  ],
+  "limits": "Static preparation only; full-solution sample build success does not replace requested actual compiler provenance. Original failed clean/logs and first compiler identities remain retained; no binary/cache copies."
+}

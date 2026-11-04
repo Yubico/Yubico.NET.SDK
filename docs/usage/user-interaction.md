@@ -179,7 +179,10 @@ The source of that certainty differs by applet and transport:
   `PolicyRequires` for operations whose request requires user presence; they do not infer an
   in-flight smart-card timeout. Selection and reset can remain uncertain until HID reports a wait.
 - YubiOTP challenge-response can report `DeviceWaiting` over OTP HID. Its smart-card path uses
-  `PolicyRequires` when the slot configuration says touch is required.
+  `PolicyRequires` when cached OTP status marks the slot keyboard-touch-triggered. That indicator is not
+  a read-back of challenge-response `RequireTouch`: this is the current notification heuristic, not
+  established policy certainty. Unknown/non-triggered smart-card state remains silent; no notification
+  does not prove that the calculation needs no touch.
 - PIV, OATH, OpenPGP, and YubiHSM Auth are smart-card paths and therefore use policy evidence. PIV
   `Always`, OATH touch-required credentials, OpenPGP user-interaction flags `On`/`Fixed`, and a known
   touch-required YubiHSM Auth credential produce `PolicyRequires`.

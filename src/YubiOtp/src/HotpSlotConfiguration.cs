@@ -24,10 +24,15 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <list type="bullet">
 /// <item><c>key[0..16]</c> — first 16 bytes of the HMAC key</item>
 /// <item><c>uid[0..4]</c> — bytes 16–19 of the HMAC key</item>
-/// <item><c>uid[4..6]</c> — initial moving factor / 0x10000 (big-endian)</item>
+/// <item><c>uid[4..6]</c> — two-byte initial-counter field (big-endian)</item>
 /// </list>
 /// The key must be exactly 20 bytes. Keys of any other length are rejected
 /// before any device I/O is attempted; they are never hashed or padded to fit.
+/// The configuration owns a copy of the key; dispose it and separately clear the source.
+/// Use the default initial moving factor of zero. Nonzero IMF encoding currently divides by 65,536
+/// instead of the vendor protocol's 16 and will not provision the requested counter. HOTP is keyboard
+/// output; your verifier owns counter synchronization. Type-level firmware checks do not enforce the
+/// legacy firmware 2.2 minimum for counter presets.
 /// </remarks>
 public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
 {
@@ -38,10 +43,9 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
     /// The HMAC secret key. Must be exactly <see cref="YubiOtpConstants.HmacKeySize"/> (20) bytes.
     /// </param>
     /// <param name="imf">
-    /// Initial moving factor. Must be 0 or a positive multiple of 0x10000. Because this
-    /// parameter is a signed <see cref="int"/>, the largest representable value is
-    /// 0x7FFF0000 (2,147,450,880) — not the wire format's theoretical 0xFFFF0000 maximum,
-    /// which would require an unsigned value wider than 31 bits.
+    /// Initial moving factor. Use zero. The current SDK accepts positive multiples of 0x10000 but
+    /// encodes them with incorrect scaling; this is not the vendor counter contract (0..0xFFFF0 in steps
+    /// of 16). Nonzero values do not set the requested initial counter.
     /// </param>
     /// <exception cref="ArgumentException">
     /// Thrown when the key is not exactly 20 bytes, or IMF is negative or not a multiple of 0x10000.

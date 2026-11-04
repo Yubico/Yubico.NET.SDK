@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-04",
+  "review_report": "review.md",
+  "review_report_bytes": 20596,
+  "review_report_sha256": "93305ccdd9b5c6b235e3e86fe367387b5a5c5d87369b61e5483f69d8eca16dae",
+  "manifest_paths": 50,
+  "accepted_paths": 47,
+  "required_paths": 3,
+  "hash_drift_after_review": [],
+  "required_ids_all_present": true,
+  "note": "Fresh Python read/hash verification after report generation. No build, test, formatter or hardware command. git diff --check returned zero but these reviewer files are untracked, so that command is not claimed as a substantive formatting gate."
+}

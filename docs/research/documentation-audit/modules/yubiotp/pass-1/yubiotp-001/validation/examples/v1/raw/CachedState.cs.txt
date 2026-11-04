@@ -1,0 +1,2 @@
+var state = session.GetConfigState();
+bool isConfigured = state.IsConfigured(Slot.One);

@@ -1,0 +1,8 @@
+$ python3 docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/record-format.py
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/record-format.py", line 27, in <module>
+    assert re.sub(pattern,'',old,flags=re.M).rstrip('\n')==re.sub(pattern,'',current,flags=re.M).rstrip('\n'),row['path']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSessionIntegrationTests.cs
+
+EXIT=1

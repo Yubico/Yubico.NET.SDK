@@ -1,0 +1,20 @@
+$ python3 -B docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/verify.py v2 compiled --capture consumer=first --capture annotations=first --capture otptool=native-first --live
+PASS: overlay provenance; unchanged v1/v2 archives; accepted consumer/first and annotations/first retained identities reused without copying or recompiling.
+PASS: 40 C# fences: 15 selected / 25 excluded; 19 exact complete groups; body/addition and source/config dependency identities reconciled.
+PASS: XML documentation scanned in 51 module C# files, including all 42 edited C# paths; Python/XML syntax and two unique compiler-host names inspected.
+PASS: exact consumer/first retained Csc membership/source/reference/analyzer/config/assets evidence; current compiled example/sample bodies match.
+PASS: exact annotations/first retained Csc membership/source/reference/analyzer/config/assets evidence; current compiled example/sample bodies match.
+PASS: exact otptool/native-first retained Csc membership/source/reference/analyzer/config/assets evidence; current compiled example/sample bodies match.
+Live binary/analyzer dependency identities checked.
+Current document hashes (surrounding prose can change independently of compiled bodies):
+a96bc8ee80a2effd8d3c65b778e9683e5ef447ec13d2475ebc7bfe16b7e6c5f0 docs/architecture/device-discovery-guarantees.md
+7756ff4b87c1a44182b4e4524b00ecbf4fcb9fc3f013d23dfb6bdd455173e134 docs/migration/v1-to-v2-gaps.md
+bb2c6af2cf957fb1f72fbe9d2c9fd8f6a740df1211f4487c4fea47392fc75055 docs/migration/v1-to-v2-map.yml
+436d43e2c25c3a0238167f1f547a83adc930823aeda22c6324b42e7cd91a72b3 docs/migration/v1-to-v2.md
+6fc82b3d75b3fe35a33334b8d574986943fbab08597288afa7cc42f6533cf40b docs/usage/user-interaction.md
+24c603f4339e7f410dbe9a04ae0ba817c6a8cfb289a5d445705eeda878dd2145 src/YubiOtp/CLAUDE.md
+2c763883c8590fe486807cde76b967e52596f5b9520aa91375ff66d3a6a427cc src/YubiOtp/PACKAGE_README.md
+5ba4557b704e023e231e09208f584cdf8bbf1dc8753f8d437d8558ef2ff32eba src/YubiOtp/README.md
+7ff73c817886e7ada48b9b80048ee32bf3303971a5a0a413b7bdd04c7a509547 src/YubiOtp/tests/CLAUDE.md
+
+EXIT=0

@@ -1,0 +1,33 @@
+$ dotnet toolchain.cs -- test --integration --project YubiOtp.IntegrationTests --filter 'FullyQualifiedName!~CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse'
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261104-112532-728-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit + integration tests ===
+
+
+=== Testing: YubiOtp.IntegrationTests ===
+▶ RUN dotnet test src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj -c Release --list-tests --filter FullyQualifiedName!~CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse (output captured)
+▶ RUN dotnet test src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName!~CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse"
+  output: artifacts/toolchain/runs/20261104-112532-728-test/01-test-YubiOtp.IntegrationTests.log
+✓ PASS (15 executed, 0 skipped)
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- test --integration --project YubiOtp.IntegrationTests --filter "FullyQualifiedName!~CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ test                      10.7s
+Projects (test):
+  ✓ PASS      YubiOtp.IntegrationTests  15 executed, 0 skipped
+Totals: projects: 1 passed, 0 failed, 0 with no tests executed; tests: 15 executed, 0 failed, 0 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-112532-728-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================
+
+EXIT=0

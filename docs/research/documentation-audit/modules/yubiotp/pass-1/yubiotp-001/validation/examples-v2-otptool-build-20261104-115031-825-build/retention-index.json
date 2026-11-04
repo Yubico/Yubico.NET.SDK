@@ -1,0 +1,33 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-115031-825-build",
+  "files": [
+    {
+      "path": "01-clean-AuditOtp001.Examples.Shipping.OtpTool.log",
+      "bytes": 2860,
+      "sha256": "505eab16510b473877cf9347275a951e112df4ee4eb177ebe01d36e2a6d89e30",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 1019,
+      "sha256": "9e29087de62b88d7be3b3a6e3996405afb4f56a970d39cd04f08b1f5011eb3d3",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 748,
+      "sha256": "5b1a3b829d80d5ec959d9a0fbd0304600879a158254f19dc25bc047f10a33169",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 3527,
+      "sha256": "5c85fda8d337a3529a896e7a6b5b6d11fdd6cb12fd8f48c248a596edae2fb939",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

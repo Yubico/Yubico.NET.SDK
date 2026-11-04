@@ -1,0 +1,23 @@
+[
+  {
+    "path": "evidence/nfc-text-rtd-1.0-mirror.pdf",
+    "bytes": 150406,
+    "sha256": "934153cabaa887726cf5c4b1f551f6bd4ea3902e507d650349f5d9a329c96535",
+    "kind": "primary-source-pdf",
+    "reason": "Pinned original specification/vendor document; source/status/provenance and text extraction recorded in evidence/sources.md"
+  },
+  {
+    "path": "evidence/nfc-uri-rtd-1.0-mirror.pdf",
+    "bytes": 173937,
+    "sha256": "f4a5aeb53cfe96dee24dcc969b7e30c07e5296b97bb9b545025bc35af51b3b56",
+    "kind": "primary-source-pdf",
+    "reason": "Pinned original specification/vendor document; source/status/provenance and text extraction recorded in evidence/sources.md"
+  },
+  {
+    "path": "evidence/vendor-technical-manual-v3.3.pdf",
+    "bytes": 691675,
+    "sha256": "0f4fb9224b1247a57d9b8b13c3bc370512cf17d9027e2013104217e9032a45ca",
+    "kind": "primary-source-pdf",
+    "reason": "Pinned original specification/vendor document; source/status/provenance and text extraction recorded in evidence/sources.md"
+  }
+]

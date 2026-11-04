@@ -1,0 +1,72 @@
+{
+  "access_date": "2026-11-04",
+  "sources": [
+    {
+      "file": "ykman-5.8.0-yubiotp.py",
+      "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/5.8.0/yubikit/yubiotp.py",
+      "status": 200,
+      "bytes": 31470,
+      "sha256": "ac2f9d053e8c900300f82cb45bf4bb07df3e8985754ca6a57924e1aaff9d25d2"
+    },
+    {
+      "file": "personalization-1.20.0-ykdef.h",
+      "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/v1.20.0/ykcore/ykdef.h",
+      "status": 200,
+      "bytes": 14457,
+      "sha256": "c0ca58a5c1870ab2e4ab820956dbb65b2836f3a0d4e489c34f904b764786523a"
+    },
+    {
+      "file": "personalization-1.20.0-manual.txt",
+      "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/v1.20.0/ykpersonalize.1.adoc",
+      "status": 200,
+      "bytes": 13723,
+      "sha256": "4b6287e37fda752b026ba7def11e24f44dc6767055a9c65938089bfb42ab48c2"
+    },
+    {
+      "file": "vendor-ykpersonalize.html",
+      "url": "https://developers.yubico.com/yubikey-personalization/Manuals/ykpersonalize.1.html",
+      "status": 200,
+      "bytes": 36858,
+      "sha256": "cc66bb26a57b2c848791a8ac947781b42eaebf4dd156d1e00887ca46d3948795"
+    },
+    {
+      "file": "vendor-otp-explained.html",
+      "url": "https://developers.yubico.com/OTP/OTPs_Explained.html",
+      "status": 200,
+      "bytes": 21828,
+      "sha256": "b15eb9bba19bdf0456896312f27b5127229763419265641aca0b04bd5be159f0"
+    },
+    {
+      "file": "vendor-technical-manual-v3.3.pdf",
+      "url": "https://downloads.yubico.com/support/yubico_YubiKey-Technical-Manual-v3.3_2014.pdf",
+      "status": 200,
+      "bytes": 691675,
+      "sha256": "0f4fb9224b1247a57d9b8b13c3bc370512cf17d9027e2013104217e9032a45ca"
+    },
+    {
+      "file": null,
+      "attempted_file": "vendor-manual-v3.4.pdf",
+      "url": "https://www.yubico.com/wp-content/uploads/2015/03/YubiKeyManual_v3.4.pdf",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "file": "rfc4226.txt",
+      "url": "https://www.rfc-editor.org/rfc/rfc4226.txt",
+      "status": 200,
+      "bytes": 77117,
+      "sha256": "db6974cd02ca33560ec3a191ee9b1016067cd11d1f5d89e7efa36be69482229d"
+    },
+    {
+      "file": null,
+      "attempted_file": "failed-otp-related.html",
+      "url": "https://developers.yubico.com/OTP/Specifications/OTP_related_commands.html",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "file": null,
+      "attempted_file": "failed-challenge-response.html",
+      "url": "https://developers.yubico.com/OTP/Challenge-Response.html",
+      "error": "HTTP Error 404: Not Found"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+<Project>
+  <!-- Standalone checker only. Real snippet hosts import the canonical repository targets. -->
+</Project>

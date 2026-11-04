@@ -1,0 +1,10 @@
+try
+{
+    await using var session = await YubiOtpSession.CreateAsync(connection);
+    using var config = new HmacSha1SlotConfiguration(key);
+    await session.PutConfigurationAsync(Slot.Two, config);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(key);
+}

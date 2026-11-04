@@ -1,0 +1,10 @@
+$ dotnet run --project src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj -c Release
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+
+Test run summary: Passed! - /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.dll (net10.0|x64)
+  total: 492
+  failed: 0
+  succeeded: 492
+  skipped: 0
+  duration: 339ms

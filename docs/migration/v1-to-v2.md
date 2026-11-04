@@ -533,7 +533,7 @@ for the reopening pattern. This OATH contract does not change reset behavior in 
 
 ### YubiOTP: HMAC-SHA1 Challenge-Response
 
-V1 used OTP operation builders for slot programming and calculation:
+V1 used OTP operation builders for slot programming and calculation (historical v1 example):
 
 ```csharp
 using Yubico.YubiKey.Otp;
@@ -552,17 +552,28 @@ var response = otp.CalculateChallengeResponse(Slot.LongPress)
     .GetDataBytes();
 ```
 
-V2 uses explicit slot configuration objects and async session methods:
+V2 uses explicit slot configuration objects and async session methods. This application-dependent fragment
+requires an `IYubiKey device`, owned `byte[] hmacKey` of exactly 20 bytes, owned `byte[] challenge` of
+1–63 bytes, and a `CancellationToken cancellationToken`. Slot 2 must be authorized for replacement; securely
+provision the key to your verifier first. No other session/connection may be open on the key. OTP HID is
+selected explicitly for this USB challenge recipe rather than assuming SmartCard command parity.
 
 ```csharp
+using System;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Threading;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.YubiOtp;
 
-await using var otp = await device.CreateYubiOtpSessionAsync(
-    cancellationToken: cancellationToken);
-
+ReadOnlyMemory<byte> response = default;
 try
 {
+    await using var otp = await device.CreateYubiOtpSessionAsync(
+        new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp },
+        cancellationToken);
     using var config = new HmacSha1SlotConfiguration(hmacKey);
     config.UseShortChallenge();
 
@@ -571,15 +582,18 @@ try
         config,
         cancellationToken: cancellationToken);
 
-    var response = await otp.CalculateHmacSha1Async(
+    response = await otp.CalculateHmacSha1Async(
         Slot.Two,
         challenge,
         cancellationToken);
+    // Consume the caller-owned response with your verifier; do not log it.
 }
 finally
 {
     CryptographicOperations.ZeroMemory(hmacKey);
     CryptographicOperations.ZeroMemory(challenge);
+    // This is the documented caller-owned SDK output, not arbitrary borrowed read-only memory.
+    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
 }
 ```
 
@@ -588,6 +602,11 @@ Migration notes:
 - Slot mapping is semantic, not textual: v1 `ShortPress` and `LongPress` map to v2 `Slot.One` and `Slot.Two` respectively.
 - Programming a slot overwrites persistent device state. Prefer slot 2 for examples and tests unless a human explicitly chooses otherwise.
 - Review touch, access-code, short-challenge, update, and NDEF behavior manually before migrating production slot code.
+- Short mode hashes 1–63-byte inputs as given after SDK padding; fixed mode needs exactly 64 bytes with
+  your verifier's convention. Empty/64-byte short-mode boundaries need target-firmware verification.
+  See the [three-layer input/payload/hashed-message explanation](../../src/YubiOtp/README.md#calculate-an-hmac-sha1-response).
+- Updates send complete masked values, not patches. `currentAccessCode` authenticates a write; `accessCode`
+  sets its new code. Repeat the code in both to retain protection; omission of the new code sends zeros.
 
 ### PIV: Enable PIN-Only Management Key Mode
 
@@ -722,7 +741,13 @@ Use `Yubico.YubiKit.YubiOtp` for Yubico OTP configuration and slot operations. R
 A keyboard-layout-aware `StaticPasswordSlotConfiguration(string, KeyboardLayout)` constructor and Yubico-OTP-algorithm challenge-response (`YubicoOtpChallengeResponseSlotConfiguration`/`CalculateYubicoOtpAsync`) were restored after an initial v2 gap; see `yubiotp-static-password-keyboard` and `yubiotp-yubico-otp-challenge-response` in `v1-to-v2-map.yml`. HMAC-SHA1 and Yubico OTP key inputs of invalid length now fail before any device I/O instead of being silently hashed or padded.
 
 Migrate v1 `UseTouchNotifier` to `SessionCreationOptions.UserPresencePrompt`. OTP HID reports a live
-`DeviceWaiting` signal; smart-card challenge-response notification is policy-based.
+`DeviceWaiting` signal. The smart-card implementation emits `PolicyRequires` from cached keyboard-trigger
+status, not a verified read-back of challenge-response `RequireTouch`; unknown/non-triggered status stays
+silent. Static-password strings have the usual immutable-string cleanup tradeoff; the raw overload needs
+translated scan codes, not UTF-8. OtpTool's static command currently makes that encoding mistake and ignores
+layout, and its `--totp` flag does not generate TOTP codes. Use the public SDK recipes, not those sample
+options, as migration guidance. Nonzero HOTP IMF and full scan-map programming also have current limitations;
+see the [YubiOTP guide](../../src/YubiOtp/README.md#constraints).
 
 ### OpenPGP
 

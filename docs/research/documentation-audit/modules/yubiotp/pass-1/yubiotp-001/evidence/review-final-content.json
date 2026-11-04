@@ -1,0 +1,656 @@
+{
+  "date": "2026-11-04",
+  "reviewer": "github-copilot/gpt-6.1-sol",
+  "baseline": "95e5ccaeda33954c21f2a38058d4f66b5f208787",
+  "verdict": "PASS content and bounded hardware-impact review",
+  "accepted_paths": 50,
+  "unchanged_since_original_review": 47,
+  "corrected_paths": 3,
+  "original_review_preserved": true,
+  "files": [
+    {
+      "path": "docs/architecture/device-discovery-guarantees.md",
+      "bytes": 25460,
+      "sha256": "a96bc8ee80a2effd8d3c65b778e9683e5ef447ec13d2475ebc7bfe16b7e6c5f0",
+      "verdict": "accepted-content",
+      "original_review_sha256": "a96bc8ee80a2effd8d3c65b778e9683e5ef447ec13d2475ebc7bfe16b7e6c5f0",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "YubiOTP-only assigned sections"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "bytes": 39254,
+      "sha256": "7756ff4b87c1a44182b4e4524b00ecbf4fcb9fc3f013d23dfb6bdd455173e134",
+      "verdict": "accepted-content",
+      "original_review_sha256": "7756ff4b87c1a44182b4e4524b00ecbf4fcb9fc3f013d23dfb6bdd455173e134",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "YubiOTP-only assigned sections"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "bytes": 64384,
+      "sha256": "bb2c6af2cf957fb1f72fbe9d2c9fd8f6a740df1211f4487c4fea47392fc75055",
+      "verdict": "accepted-content",
+      "original_review_sha256": "bb2c6af2cf957fb1f72fbe9d2c9fd8f6a740df1211f4487c4fea47392fc75055",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "YubiOTP-only assigned sections"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "bytes": 55365,
+      "sha256": "436d43e2c25c3a0238167f1f547a83adc930823aeda22c6324b42e7cd91a72b3",
+      "verdict": "accepted-content",
+      "original_review_sha256": "436d43e2c25c3a0238167f1f547a83adc930823aeda22c6324b42e7cd91a72b3",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "YubiOTP-only assigned sections"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "bytes": 12958,
+      "sha256": "6fc82b3d75b3fe35a33334b8d574986943fbab08597288afa7cc42f6533cf40b",
+      "verdict": "accepted-content",
+      "original_review_sha256": "6fc82b3d75b3fe35a33334b8d574986943fbab08597288afa7cc42f6533cf40b",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "YubiOTP-only assigned sections"
+    },
+    {
+      "path": "src/YubiOtp/CLAUDE.md",
+      "bytes": 12511,
+      "sha256": "24c603f4339e7f410dbe9a04ae0ba817c6a8cfb289a5d445705eeda878dd2145",
+      "verdict": "accepted-content",
+      "original_review_sha256": "24c603f4339e7f410dbe9a04ae0ba817c6a8cfb289a5d445705eeda878dd2145",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/README.md",
+      "bytes": 22516,
+      "sha256": "5ba4557b704e023e231e09208f584cdf8bbf1dc8753f8d437d8558ef2ff32eba",
+      "verdict": "accepted-content",
+      "original_review_sha256": "20f56a448dae2cbba9ef8deef5c732861c83a1711739d63238331c97744fb0ec",
+      "unchanged_since_original_review": false,
+      "correction_reverse_sha256": "20f56a448dae2cbba9ef8deef5c732861c83a1711739d63238331c97744fb0ec",
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/CliOptions.cs",
+      "bytes": 19170,
+      "sha256": "8c7a628e11fa1f2367dd9584270e8d198c9dcdbaf44f616a939cc976a37888b4",
+      "verdict": "accepted-content",
+      "original_review_sha256": "8c7a628e11fa1f2367dd9584270e8d198c9dcdbaf44f616a939cc976a37888b4",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs",
+      "bytes": 2479,
+      "sha256": "d83144628e283b34dda5db591fd742fccbc0138ba8676f133c90fff57ac52dcf",
+      "verdict": "accepted-content",
+      "original_review_sha256": "d83144628e283b34dda5db591fd742fccbc0138ba8676f133c90fff57ac52dcf",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs",
+      "bytes": 3723,
+      "sha256": "e9eb737725715557b7012e0c9db1abcee0c167f22f60a37cf600b23b7751d4df",
+      "verdict": "accepted-content",
+      "original_review_sha256": "e9eb737725715557b7012e0c9db1abcee0c167f22f60a37cf600b23b7751d4df",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs",
+      "bytes": 3405,
+      "sha256": "2e8e0b9824eabf4502e1b6a93f3a747bfd395371f296648b593f0fa5dd2978b1",
+      "verdict": "accepted-content",
+      "original_review_sha256": "2e8e0b9824eabf4502e1b6a93f3a747bfd395371f296648b593f0fa5dd2978b1",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs",
+      "bytes": 3248,
+      "sha256": "6a3aa1848e5cbeb4af38ef07334c0437403524d4ccf167d174d6a0f00c472fc4",
+      "verdict": "accepted-content",
+      "original_review_sha256": "6a3aa1848e5cbeb4af38ef07334c0437403524d4ccf167d174d6a0f00c472fc4",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs",
+      "bytes": 3271,
+      "sha256": "1c6a2ba587553406f8335c218c124f4d1c1d5db2f6403eb3fca02e81ca1cad5a",
+      "verdict": "accepted-content",
+      "original_review_sha256": "1c6a2ba587553406f8335c218c124f4d1c1d5db2f6403eb3fca02e81ca1cad5a",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs",
+      "bytes": 4560,
+      "sha256": "03b101b5d199f8960c93947c2f14f1752cd098b9eef72b67475b9f34b1eb0afe",
+      "verdict": "accepted-content",
+      "original_review_sha256": "03b101b5d199f8960c93947c2f14f1752cd098b9eef72b67475b9f34b1eb0afe",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs",
+      "bytes": 1794,
+      "sha256": "655efc2440286e9c01355117bf77dff8a6aebcbc81447cf6e0fbb10a366646e2",
+      "verdict": "accepted-content",
+      "original_review_sha256": "655efc2440286e9c01355117bf77dff8a6aebcbc81447cf6e0fbb10a366646e2",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs",
+      "bytes": 6080,
+      "sha256": "e129bcfbfc3ff12f64eb5f0d4c5fe688b8bd63078f4f26d50d9dba542ff7c45d",
+      "verdict": "accepted-content",
+      "original_review_sha256": "2e91394f0ce0f6e53e394e4a32f2a1e30a93f00d1a917c824fb8eb2958115db5",
+      "unchanged_since_original_review": false,
+      "correction_reverse_sha256": "2e91394f0ce0f6e53e394e4a32f2a1e30a93f00d1a917c824fb8eb2958115db5",
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+      "bytes": 11667,
+      "sha256": "431309511ddda3e3391c0eb962257db57ad50111c8dde09f3c5142aaf2c86661",
+      "verdict": "accepted-content",
+      "original_review_sha256": "431309511ddda3e3391c0eb962257db57ad50111c8dde09f3c5142aaf2c86661",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/OutputHelper.cs",
+      "bytes": 4230,
+      "sha256": "57e48f47712ab87f0b6dd53ac8cd9323a9ecce4ccb94c16b05f52e1acabb15d9",
+      "verdict": "accepted-content",
+      "original_review_sha256": "57e48f47712ab87f0b6dd53ac8cd9323a9ecce4ccb94c16b05f52e1acabb15d9",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+      "bytes": 5364,
+      "sha256": "71116ae755f93751bfb724debd4a7a9505f40a65f98615c46a864a92e44fe277",
+      "verdict": "accepted-content",
+      "original_review_sha256": "71116ae755f93751bfb724debd4a7a9505f40a65f98615c46a864a92e44fe277",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+      "bytes": 8598,
+      "sha256": "8ca26eba06f9edd66734f893ec7a9736eb72786aa8a20d32c24b5cc530fca109",
+      "verdict": "accepted-content",
+      "original_review_sha256": "8ca26eba06f9edd66734f893ec7a9736eb72786aa8a20d32c24b5cc530fca109",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/ConfigFlag.cs",
+      "bytes": 2050,
+      "sha256": "e130899ecaa76881dd59649b2d54e69b5ae205e4d85b12778d20872728be1b86",
+      "verdict": "accepted-content",
+      "original_review_sha256": "e130899ecaa76881dd59649b2d54e69b5ae205e4d85b12778d20872728be1b86",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/ConfigState.cs",
+      "bytes": 5506,
+      "sha256": "8b267d2f7825d5e568a055c956a00a52dd2c8b9e48d5866e972d110c5a69c3a5",
+      "verdict": "accepted-content",
+      "original_review_sha256": "8b267d2f7825d5e568a055c956a00a52dd2c8b9e48d5866e972d110c5a69c3a5",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/ExtendedFlag.cs",
+      "bytes": 1943,
+      "sha256": "6ac9449167e736fe03b5475eafdf1364cd49ce1319b7a4607271578e5ca9f7c1",
+      "verdict": "accepted-content",
+      "original_review_sha256": "9c70b120a8c2ec18a5986db3be95a9a54553282e0dcf2d2289dc096a272907a9",
+      "unchanged_since_original_review": false,
+      "correction_reverse_sha256": "9c70b120a8c2ec18a5986db3be95a9a54553282e0dcf2d2289dc096a272907a9",
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/HmacSha1SlotConfiguration.cs",
+      "bytes": 3459,
+      "sha256": "85b95c757de9b5425ec5c0cc2d1f56c02aa00365788ead41273e5a1a423b02dd",
+      "verdict": "accepted-content",
+      "original_review_sha256": "85b95c757de9b5425ec5c0cc2d1f56c02aa00365788ead41273e5a1a423b02dd",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/HotpSlotConfiguration.cs",
+      "bytes": 4410,
+      "sha256": "0cabb1f86817a968f4d9b7847e82f7e77f0f5e968ae38d4fad6333d09cfaf1ed",
+      "verdict": "accepted-content",
+      "original_review_sha256": "0cabb1f86817a968f4d9b7847e82f7e77f0f5e968ae38d4fad6333d09cfaf1ed",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "bytes": 7848,
+      "sha256": "9f6673bf6ba09f0f2c096805af9ba4b35f8b044fbe4eae0564749e860bdc0f1d",
+      "verdict": "accepted-content",
+      "original_review_sha256": "9f6673bf6ba09f0f2c096805af9ba4b35f8b044fbe4eae0564749e860bdc0f1d",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+      "bytes": 20930,
+      "sha256": "2be16a3001b4956538c7d724ad87e95898e3ba6d1872ea3c8147b2a874d75905",
+      "verdict": "accepted-content",
+      "original_review_sha256": "2be16a3001b4956538c7d724ad87e95898e3ba6d1872ea3c8147b2a874d75905",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/KeyboardSlotConfiguration.cs",
+      "bytes": 5659,
+      "sha256": "6e88fe341d4e4d445f66fc3090c211decbefaac18fcb45f96fc25ab1ddb5ebaa",
+      "verdict": "accepted-content",
+      "original_review_sha256": "6e88fe341d4e4d445f66fc3090c211decbefaac18fcb45f96fc25ab1ddb5ebaa",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/NdefType.cs",
+      "bytes": 1072,
+      "sha256": "5610839bc362f9b53c3ebdebdf5c16dba7339ed82e1a158cc03d184b071b8543",
+      "verdict": "accepted-content",
+      "original_review_sha256": "5610839bc362f9b53c3ebdebdf5c16dba7339ed82e1a158cc03d184b071b8543",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/SlotConfiguration.cs",
+      "bytes": 13189,
+      "sha256": "74b6975844a67c317eae16e06723635f79090168c909665b88262297de8b39b9",
+      "verdict": "accepted-content",
+      "original_review_sha256": "74b6975844a67c317eae16e06723635f79090168c909665b88262297de8b39b9",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+      "bytes": 6839,
+      "sha256": "81cd75a38707a1549c4b52352767555eb7a4ba3a208b98143d6a19bf4d32fd8b",
+      "verdict": "accepted-content",
+      "original_review_sha256": "81cd75a38707a1549c4b52352767555eb7a4ba3a208b98143d6a19bf4d32fd8b",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/TicketFlag.cs",
+      "bytes": 2087,
+      "sha256": "1a763f1fcd5d36dc06627fe1e227e4c274674fa829470988d3ae69273c5f0a3c",
+      "verdict": "accepted-content",
+      "original_review_sha256": "1a763f1fcd5d36dc06627fe1e227e4c274674fa829470988d3ae69273c5f0a3c",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/UpdateConfiguration.cs",
+      "bytes": 5310,
+      "sha256": "93805eb2c264ff12736502106960cd5bf536debaabaee7fc9e69657a5efbd8f0",
+      "verdict": "accepted-content",
+      "original_review_sha256": "93805eb2c264ff12736502106960cd5bf536debaabaee7fc9e69657a5efbd8f0",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/YubiOtpConstants.cs",
+      "bytes": 1797,
+      "sha256": "beaa9bd24ed5cdc25218162c0c7ef1182c402b866cadcc445d7e5d9c1a1c5068",
+      "verdict": "accepted-content",
+      "original_review_sha256": "beaa9bd24ed5cdc25218162c0c7ef1182c402b866cadcc445d7e5d9c1a1c5068",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/YubiOtpSession.cs",
+      "bytes": 22997,
+      "sha256": "c62b0f431411b34fe26bb28ed8725f178bd3c960b399878c8087b40f2e751468",
+      "verdict": "accepted-content",
+      "original_review_sha256": "c62b0f431411b34fe26bb28ed8725f178bd3c960b399878c8087b40f2e751468",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/YubiOtpSlotConfiguration.cs",
+      "bytes": 2155,
+      "sha256": "774968a716dbdebec5f2e520f7d83585cb64203b490d7b62235dee893d4e0e07",
+      "verdict": "accepted-content",
+      "original_review_sha256": "774968a716dbdebec5f2e520f7d83585cb64203b490d7b62235dee893d4e0e07",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs",
+      "bytes": 2943,
+      "sha256": "760fa2607003834b6b7d4360a8e9bda9d1bae8896be48b1de6cb5191236b0ad0",
+      "verdict": "accepted-content",
+      "original_review_sha256": "760fa2607003834b6b7d4360a8e9bda9d1bae8896be48b1de6cb5191236b0ad0",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/CLAUDE.md",
+      "bytes": 1509,
+      "sha256": "7ff73c817886e7ada48b9b80048ee32bf3303971a5a0a413b7bdd04c7a509547",
+      "verdict": "accepted-content",
+      "original_review_sha256": "7ff73c817886e7ada48b9b80048ee32bf3303971a5a0a413b7bdd04c7a509547",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpHmacChallengeKnownAnswerTests.cs",
+      "bytes": 4552,
+      "sha256": "f1b6d67378ebcf4e657d7b50f43fe65d44c5095cb53baf85971861d15b75b304",
+      "verdict": "accepted-content",
+      "original_review_sha256": "f1b6d67378ebcf4e657d7b50f43fe65d44c5095cb53baf85971861d15b75b304",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpProtectSlot2Tests.cs",
+      "bytes": 5823,
+      "sha256": "ec7b36f767f026cd777e0823cba14a86449595d96fd2d3ce2926e6f4f2f67e86",
+      "verdict": "accepted-content",
+      "original_review_sha256": "ec7b36f767f026cd777e0823cba14a86449595d96fd2d3ce2926e6f4f2f67e86",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSessionIntegrationTests.cs",
+      "bytes": 5354,
+      "sha256": "54214801a3eaeda52ee0e59fab4fa461357fd48c648afc834a864d30b11c4519",
+      "verdict": "accepted-content",
+      "original_review_sha256": "54214801a3eaeda52ee0e59fab4fa461357fd48c648afc834a864d30b11c4519",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSlotConfigTests.cs",
+      "bytes": 6952,
+      "sha256": "24a79eac1aa7af865358611dc1134dcc651baa00ef622248d96fde12062157fc",
+      "verdict": "accepted-content",
+      "original_review_sha256": "24a79eac1aa7af865358611dc1134dcc651baa00ef622248d96fde12062157fc",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/AuditV2/YubiOtpAuditReproTests.cs",
+      "bytes": 2259,
+      "sha256": "a86a9bfd728338cd2d6f4dc33dea1ceb4286efb37eaeb430bf589c562dc13608",
+      "verdict": "accepted-content",
+      "original_review_sha256": "a86a9bfd728338cd2d6f4dc33dea1ceb4286efb37eaeb430bf589c562dc13608",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/ConfigStateTests.cs",
+      "bytes": 5216,
+      "sha256": "1192d6d4ee69f679ceb8eb58d4932f58829f0874a8e695b1d0d10e76a80710e5",
+      "verdict": "accepted-content",
+      "original_review_sha256": "1192d6d4ee69f679ceb8eb58d4932f58829f0874a8e695b1d0d10e76a80710e5",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/HidBackendTests.cs",
+      "bytes": 20757,
+      "sha256": "a415655ed5178f1498718504debc3559b7c4b120754cca5433a2ec0b8c7c5cdb",
+      "verdict": "accepted-content",
+      "original_review_sha256": "a415655ed5178f1498718504debc3559b7c4b120754cca5433a2ec0b8c7c5cdb",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "bytes": 9749,
+      "sha256": "31933bac9fce6202a991cd672141a114527155400fa0420f9ddf36b7afc99347",
+      "verdict": "accepted-content",
+      "original_review_sha256": "31933bac9fce6202a991cd672141a114527155400fa0420f9ddf36b7afc99347",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+      "bytes": 36142,
+      "sha256": "c00512b2cf27c41d9afc46b60b1f4874c3f5b2761a7eaeea58ef861a010ac3dd",
+      "verdict": "accepted-content",
+      "original_review_sha256": "c00512b2cf27c41d9afc46b60b1f4874c3f5b2761a7eaeea58ef861a010ac3dd",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs",
+      "bytes": 18476,
+      "sha256": "187c7fc18b5b276bf2888eb04a230b2481f511034ea4e6de08ab776cbe933f09",
+      "verdict": "accepted-content",
+      "original_review_sha256": "187c7fc18b5b276bf2888eb04a230b2481f511034ea4e6de08ab776cbe933f09",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpBackendLifecycleTests.cs",
+      "bytes": 1677,
+      "sha256": "ec58c9d652ae17981df955a5b3c3a1d7266d8972798441e468cff3394a4d4c5a",
+      "verdict": "accepted-content",
+      "original_review_sha256": "ec58c9d652ae17981df955a5b3c3a1d7266d8972798441e468cff3394a4d4c5a",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionTests.cs",
+      "bytes": 28102,
+      "sha256": "96994fe90887fb9a044f81c9667c04b01480444a3cd81220875e6c6d01c297a9",
+      "verdict": "accepted-content",
+      "original_review_sha256": "96994fe90887fb9a044f81c9667c04b01480444a3cd81220875e6c6d01c297a9",
+      "unchanged_since_original_review": true,
+      "correction_reverse_sha256": null,
+      "scope": "whole affected file"
+    }
+  ],
+  "hardware_scope": "serial103; Linux/Omarchy; metadata5.8.0.beta.0; raw/effectiveOTP0.0.1; explicit USB HID and USB SmartCard only",
+  "probe_compiler_source_sha256": "1a9dd85f2a0856d0eb61581624e38737c217266d619dc988b7dd3367b3e9bdf6",
+  "raw_execution_logs": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/integration-reader-released-20261104-112532-728-test/01-test-YubiOtp.IntegrationTests.log",
+      "bytes": 5815,
+      "sha256": "caff3085388b8f2b9f7d2f4aa0a34373644a532107b73e4ee38983affd4d0c1b",
+      "passed": 15,
+      "read_scope": "full raw log"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/integration-successful-touch-20261104-112953-488-test/01-test-YubiOtp.IntegrationTests.log",
+      "bytes": 4141,
+      "sha256": "495727bbb663f31a92b835109a0dfa794b1f930c3753dc83d0a6f06cff340804",
+      "passed": 1,
+      "read_scope": "full raw log"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe-v1-status-20261104-112650-246-test/01-test-AuditOtp001.Hardware.IntegrationTests.log",
+      "bytes": 12939,
+      "sha256": "f950d72679568a787b6d64811bb10615d7b7246244a706c7fc95e283b1777885",
+      "passed": 1,
+      "read_scope": "full raw log"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe-v1-aes-20261104-112711-544-test/01-test-AuditOtp001.Hardware.IntegrationTests.log",
+      "bytes": 6884,
+      "sha256": "1328ddf2c05bdd751ec3f443bf21ad4e7ca1196d877f24552aa24002b3e8d174",
+      "passed": 1,
+      "read_scope": "full raw log"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe-v1-cancel-20261104-112736-534-test/01-test-AuditOtp001.Hardware.IntegrationTests.log",
+      "bytes": 11390,
+      "sha256": "4e4bff1519277d9c3b828e643e224ff6322ce1ebecded7b1285c8a26910cfc30",
+      "passed": 1,
+      "read_scope": "full raw log"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe-v1-timeout-20261104-112812-821-test/01-test-AuditOtp001.Hardware.IntegrationTests.log",
+      "bytes": 11527,
+      "sha256": "248b0e383e2c194f2eeba8ed64f179720a8b3154c6b3faffaf7ee155e82930d3",
+      "passed": 1,
+      "read_scope": "full raw log"
+    }
+  ],
+  "other_evidence_identities": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-followup.md",
+      "bytes": 11936,
+      "sha256": "42ab917173987b63c43f5d584ab591399331cc5c87353993c7345f2081fdc1fe"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/evidence/review-followup-check.py",
+      "bytes": 7113,
+      "sha256": "d3d0ca35d324f55b996c07b65427da3a171bdddd50807d6edfeb9936e9b8cd8a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/hardware/results.md",
+      "bytes": 6153,
+      "sha256": "ae9474eb765f981f908175fa0f7463f85c1807816dc6ead29de69a2e80f02580"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/hardware/final-info.log",
+      "bytes": 518,
+      "sha256": "e1f0822028a1e34b1d5ae7057ed56e371a949f21f0dccd3c71a4f1c8dd9b6a60"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/hardware/final-slots.log",
+      "bytes": 103,
+      "sha256": "74b81f1105bb9b564c6a822bf8f0256ee5417f2abba9575096fe3385345288cd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/hardware/initial-info.log",
+      "bytes": 518,
+      "sha256": "5171474d3dde660c7854f273a3b60273f6a8492555e6e144f05165ae4800daa2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/hardware/initial-slots.log",
+      "bytes": 103,
+      "sha256": "52457384771795350ee650e12144f2a51ce943a6ebb7874ddea30b8b8d24ee34"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/edit-corrections.md",
+      "bytes": 6461,
+      "sha256": "5aeb621c62807486db5e120aeab73e7d193a788734a971623e8e75fb8619cf40"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/evidence/sources.md",
+      "bytes": 11844,
+      "sha256": "c0b6ea99af30a7362eb418d65dc0722ed0bdc49387e403d97b2a7a794a7f864c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review.md",
+      "bytes": 20596,
+      "sha256": "93305ccdd9b5c6b235e3e86fe367387b5a5c5d87369b61e5483f69d8eca16dae"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/integration-initial-20261104-111329-828-test/01-test-YubiOtp.IntegrationTests.log",
+      "bytes": 11720,
+      "sha256": "94befe4133db9b6e4e677b27affa34fa1ff0acede5f4ca4c31125e50851dab32"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "bytes": 31062,
+      "sha256": "1a9dd85f2a0856d0eb61581624e38737c217266d619dc988b7dd3367b3e9bdf6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/evidence/v1-build/capture.json",
+      "bytes": 69206,
+      "sha256": "dfd37abb577e291c0dea87e44ba40710e3d370ed7cca3100df2ac2dd1cc7b16c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/evidence/v1-build/compile-inputs.txt",
+      "bytes": 700,
+      "sha256": "688b501c5437d63fc3aa09e8222534a555021abc9d6fba1cd950bbcdf72267f2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/probe.runsettings",
+      "bytes": 498,
+      "sha256": "15c3eb32ebbc3109c9a3ed353284b9538ca6e83c12b378d67e32b5946dfe01c1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests.csproj",
+      "bytes": 2038,
+      "sha256": "d75336af5b00ffd7ad48f12e70b0d8ea81304740328b0bdea89ce8748e8aced9"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/UserPresenceProbeTests.cs",
+      "bytes": 7609,
+      "sha256": "ac3ba249a2b5b3017a5c61518552ad258dd4c3675a5409181a3335721f8a6846"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpHmacChallengeKnownAnswerTests.cs",
+      "bytes": 4552,
+      "sha256": "f1b6d67378ebcf4e657d7b50f43fe65d44c5095cb53baf85971861d15b75b304"
+    }
+  ],
+  "limits": [
+    "No test/build/device command executed by reviewer",
+    "No inference of dummy-reset bytes, native lifetime, same-session recovery, NFC read-back or universal firmware support",
+    "Shared document acceptance limited to five assigned YubiOTP sections",
+    "Final formatter/build/analyzer/token and record gates are separate"
+  ]
+}

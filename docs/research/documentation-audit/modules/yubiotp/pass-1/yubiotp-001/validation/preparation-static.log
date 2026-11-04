@@ -1,0 +1,9 @@
+$ python3 docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/verify-preparation.py
+PASS: Python syntax parsed for 6 retained tools; no imports executed or bytecode caches generated.
+PASS: all four frozen checker source/config copies match exactly the recorded substitutions and hashes.
+PASS: four adapted tool source/target hashes, two new baseline record hashes and generator hash reconciled.
+PASS: 3 XML configuration files parsed; recursive project path discovery finds exactly one AuditOtp001.Checker match.
+PASS: preparation remains unfrozen, without import-removal approvals, retained binaries or caches.
+NOT RUN: checker build, tokens/API, preservation, final record review, examples, repository tests/gates, formatter or hardware.
+
+EXIT=0

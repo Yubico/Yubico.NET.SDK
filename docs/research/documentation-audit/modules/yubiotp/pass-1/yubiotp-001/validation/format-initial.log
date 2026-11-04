@@ -1,0 +1,266 @@
+$ dotnet format Yubico.YubiKit.sln --include src/YubiOtp/examples/OtpTool/CliOptions.cs src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs src/YubiOtp/examples/OtpTool/DeviceHelper.cs src/YubiOtp/examples/OtpTool/OutputHelper.cs src/YubiOtp/src/Backend/HidBackend.cs src/YubiOtp/src/Backend/SmartCardBackend.cs src/YubiOtp/src/ConfigFlag.cs src/YubiOtp/src/ConfigState.cs src/YubiOtp/src/ExtendedFlag.cs src/YubiOtp/src/HmacSha1SlotConfiguration.cs src/YubiOtp/src/HotpSlotConfiguration.cs src/YubiOtp/src/IYubiKeyExtensions.cs src/YubiOtp/src/IYubiOtpSession.cs src/YubiOtp/src/KeyboardSlotConfiguration.cs src/YubiOtp/src/NdefType.cs src/YubiOtp/src/SlotConfiguration.cs src/YubiOtp/src/StaticPasswordSlotConfiguration.cs src/YubiOtp/src/TicketFlag.cs src/YubiOtp/src/UpdateConfiguration.cs src/YubiOtp/src/YubiOtpConstants.cs src/YubiOtp/src/YubiOtpSession.cs src/YubiOtp/src/YubiOtpSlotConfiguration.cs src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpHmacChallengeKnownAnswerTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpProtectSlot2Tests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSessionIntegrationTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSlotConfigTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/AuditV2/YubiOtpAuditReproTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/ConfigStateTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/HidBackendTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpBackendLifecycleTests.cs src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionTests.cs --verify-no-changes --verbosity diagnostic
+The dotnet runtime version is '10.0.14'.
+Formatting code files in workspace '/home/rupicola/Code/y/Yubico.Yubikit.NET/Yubico.YubiKit.sln'.
+Loading workspace.
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj'
+Duplicate source file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj'
+Project Yubico.YubiKit.Core is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Debug/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Debug/net10.0/Yubico.YubiKit.Management.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Management.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Management.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Management.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Management.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Core.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Core.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Core.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Core.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Core.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Core.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Core.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Core.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Management.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Management.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Management.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Management.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Tests.Shared is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Tests.Shared is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Tests.Shared is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Debug/net10.0/Yubico.YubiKit.Tests.Shared.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Debug/net10.0/Yubico.YubiKit.Piv.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Piv.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Piv.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Piv.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Piv.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Piv.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Piv.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Piv.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Piv.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Debug/net10.0/Yubico.YubiKit.Ctap2.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Ctap2.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Ctap2.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Ctap2.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Ctap2.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.SecurityDomain is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/obj/Debug/net10.0/Yubico.YubiKit.SecurityDomain.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.SecurityDomain.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.SecurityDomain.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.SecurityDomain.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Debug/net10.0/Yubico.YubiKit.Oath.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Oath.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Oath.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Oath.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Oath.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Oath.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Oath.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Oath.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Oath.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Debug/net10.0/Yubico.YubiKit.YubiHsm.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiHsm.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.YubiHsm.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiHsm.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.YubiHsm.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiHsm.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.YubiHsm.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiHsm.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.YubiHsm.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Debug/net10.0/Yubico.YubiKit.YubiOtp.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiOtp.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.YubiOtp.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiOtp.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.YubiOtp.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiOtp.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.YubiOtp.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiOtp.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.YubiOtp.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Debug/net10.0/Yubico.YubiKit.OpenPgp.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.OpenPgp.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.OpenPgp.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.OpenPgp.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.OpenPgp.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.OpenPgp.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.OpenPgp.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.OpenPgp.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.OpenPgp.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Tests.TestProject is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Tests.TestProject is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Tests.TestProject is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.TestProject/obj/Debug/net10.0/Yubico.YubiKit.Tests.TestProject.GeneratedMSBuildEditorConfig.editorconfig'.
+Project ManagementTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project ManagementTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project ManagementTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/examples/ManagementTool/obj/Debug/net10.0/ManagementTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project HsmAuthTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project HsmAuthTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project HsmAuthTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/examples/HsmAuthTool/obj/Debug/net10.0/HsmAuthTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project FidoTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project FidoTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project FidoTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/examples/FidoTool/obj/Debug/net10.0/FidoTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Ctap2.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Ctap2.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Ctap2.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Debug/net10.0/Yubico.YubiKit.Cli.Shared.GeneratedMSBuildEditorConfig.editorconfig'.
+Project OathTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project OathTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project OathTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/examples/OathTool/obj/Debug/net10.0/OathTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project OpenPgpTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project OpenPgpTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project OpenPgpTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/examples/OpenPgpTool/obj/Debug/net10.0/OpenPgpTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Debug/net10.0/Yubico.YubiKit.Cli.Commands.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Cli.YkTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.Cli.YkTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Cli.YkTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli/YkTool/obj/Debug/net10.0/Yubico.YubiKit.Cli.YkTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.WebAuthn is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.WebAuthn is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.WebAuthn is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Debug/net10.0/Yubico.YubiKit.WebAuthn.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.WebAuthn.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.WebAuthn.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.WebAuthn.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.WebAuthn.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.WebAuthn.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.WebAuthn.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.WebAuthn.IntegrationTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project PivTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project PivTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project PivTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Debug/net10.0/PivTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project OtpTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project OtpTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project OtpTool is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/obj/Debug/net10.0/OtpTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.PublicApi.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project Yubico.YubiKit.PublicApi.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.PublicApi.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.PublicApi.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 7082ms.
+Determining formattable files.
+Complete in 250ms.
+Running formatters.
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Backend/HidBackend.cs(142,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Backend/SmartCardBackend.cs(240,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/ConfigFlag.cs(60,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/ConfigState.cs(132,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/ExtendedFlag.cs(54,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/HmacSha1SlotConfiguration.cs(81,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/HotpSlotConfiguration.cs(106,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/IYubiKeyExtensions.cs(154,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/IYubiOtpSession.cs(340,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/KeyboardSlotConfiguration.cs(167,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/NdefType.cs(29,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/SlotConfiguration.cs(372,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs(179,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/TicketFlag.cs(65,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/UpdateConfiguration.cs(153,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs(71,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/YubiOtpConstants.cs(45,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/YubiOtpSession.cs(650,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/YubiOtpSlotConfiguration.cs(53,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/AuditV2/YubiOtpAuditReproTests.cs(59,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/ConfigStateTests.cs(174,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/HidBackendTests.cs(528,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs(226,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs(1073,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs(473,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpBackendLifecycleTests.cs(44,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionTests.cs(670,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpHmacChallengeKnownAnswerTests.cs(93,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpProtectSlot2Tests.cs(130,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSessionIntegrationTests.cs(134,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSlotConfigTests.cs(178,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/CliOptions.cs(561,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs(67,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs(111,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs(104,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs(95,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs(97,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs(126,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs(54,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs(166,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/DeviceHelper.cs(299,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OutputHelper.cs(126,2): error FINALNEWLINE: Fix final newline. Delete 1 characters. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OtpTool.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSessionIntegrationTests.cs(1,1): error IMPORTS: Fix imports ordering. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj]
+Running Code Style analysis.
+Determining diagnostics...
+Running 5 analyzers on Yubico.YubiKit.YubiOtp.
+Running 5 analyzers on Yubico.YubiKit.YubiOtp.UnitTests.
+Running 5 analyzers on Yubico.YubiKit.YubiOtp.IntegrationTests.
+Running 5 analyzers on OtpTool.
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/IYubiKeyExtensions.cs(17,1): error IDE0005: Using directive is unnecessary. [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj]
+Complete in 2448ms.
+Analysis complete in 2448ms.
+Running Analyzer Reference analysis.
+Determining diagnostics...
+Running 157 analyzers on Yubico.YubiKit.YubiOtp.
+Running 209 analyzers on Yubico.YubiKit.YubiOtp.UnitTests.
+Running 207 analyzers on Yubico.YubiKit.YubiOtp.IntegrationTests.
+Running 151 analyzers on OtpTool.
+Complete in 1160ms.
+Analysis complete in 1160ms.
+Complete in 4408ms.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Backend/HidBackend.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Backend/SmartCardBackend.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/ConfigFlag.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/ConfigState.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/ExtendedFlag.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/HmacSha1SlotConfiguration.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/HotpSlotConfiguration.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/IYubiKeyExtensions.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/IYubiOtpSession.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/KeyboardSlotConfiguration.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/NdefType.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/SlotConfiguration.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/TicketFlag.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/UpdateConfiguration.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/YubiOtpConstants.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/YubiOtpSession.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/YubiOtpSlotConfiguration.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/AuditV2/YubiOtpAuditReproTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/ConfigStateTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/HidBackendTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpBackendLifecycleTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpHmacChallengeKnownAnswerTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpProtectSlot2Tests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSessionIntegrationTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSlotConfigTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/CliOptions.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/DeviceHelper.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/OutputHelper.cs'.
+Formatted 42 of 1376 files.
+Format complete in 11741ms.
+
+EXIT=2

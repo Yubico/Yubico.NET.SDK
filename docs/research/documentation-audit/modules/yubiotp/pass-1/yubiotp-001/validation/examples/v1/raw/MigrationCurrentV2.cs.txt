@@ -1,0 +1,36 @@
+using System;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Threading;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.YubiOtp;
+
+ReadOnlyMemory<byte> response = default;
+try
+{
+    await using var otp = await device.CreateYubiOtpSessionAsync(
+        new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp },
+        cancellationToken);
+    using var config = new HmacSha1SlotConfiguration(hmacKey);
+    config.UseShortChallenge();
+
+    await otp.PutConfigurationAsync(
+        Slot.Two,
+        config,
+        cancellationToken: cancellationToken);
+
+    response = await otp.CalculateHmacSha1Async(
+        Slot.Two,
+        challenge,
+        cancellationToken);
+    // Consume the caller-owned response with your verifier; do not log it.
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(hmacKey);
+    CryptographicOperations.ZeroMemory(challenge);
+    // This is the documented caller-owned SDK output, not arbitrary borrowed read-only memory.
+    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+}

@@ -1,0 +1,1 @@
+state.IsConfigured(Slot.One)

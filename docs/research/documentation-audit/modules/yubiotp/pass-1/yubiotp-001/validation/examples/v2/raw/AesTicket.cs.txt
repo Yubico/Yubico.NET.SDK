@@ -1,0 +1,21 @@
+byte[] aesKey = [];
+byte[] challenge = [];
+ReadOnlyMemory<byte> ticket = default;
+try
+{
+    aesKey = RandomNumberGenerator.GetBytes(16);
+    challenge = RandomNumberGenerator.GetBytes(6);
+    // Securely provision aesKey to the verifier here as part of your application's enrollment.
+    await using var session = await device.CreateYubiOtpSessionAsync(
+        new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
+    using var config = new YubicoOtpChallengeResponseSlotConfiguration(aesKey);
+    await session.PutConfigurationAsync(Slot.Two, config);
+    ticket = await session.CalculateYubicoOtpAsync(Slot.Two, challenge);
+    // Send the ticket to your verifier through your application's secure channel.
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(aesKey);
+    CryptographicOperations.ZeroMemory(challenge);
+    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(ticket).Span);
+}

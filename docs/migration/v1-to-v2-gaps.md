@@ -200,15 +200,15 @@ v1 location: `Yubico.YubiKey/src/Yubico/YubiKey/Otp/**`
 v2 location: `src/YubiOtp/src/**`
 
 - **Feature/API**: Static password from human-readable string with keyboard-layout translation (`SetPassword(ReadOnlyMemory<char>)`, `WithKeyboard(KeyboardLayout)`, `GeneratePassword(...)`)
-  **v2 status**: Missing from the YubiOtp public surface — v2's `StaticPasswordSlotConfiguration` only takes raw scan-code bytes. `HidCodeTranslator`/`KeyboardLayout` still exist under Core but are wired only into the `OtpTool` CLI, not the public session API.
-  **Severity**: Major | **Confidence**: High
+  **v2 status**: String/layout construction is restored through `StaticPasswordSlotConfiguration(string, KeyboardLayout)`; generation helpers remain absent from the library. The string is immutable and cannot be cleared by disposal. The raw overload copies already translated scan codes, not UTF-8 bytes. OtpTool's static command currently passes UTF-8 bytes to that raw overload and ignores its layout option; use the public string/layout constructor instead.
+  **Severity**: Minor for missing generation; sample encoding defect | **Confidence**: High
 
 - **Feature/API**: Yubico-OTP-algorithm challenge-response (config + calculate) and TOTP-style challenge convenience (`UseYubiOtp()`, `UseTotp()`, `WithPeriod()`, `GetCode()`)
-  **v2 status**: Missing — v2's `YubiOtpSession` only exposes `CalculateHmacSha1Async`; no Yubico-OTP-algorithm challenge-response path at all.
-  **Severity**: Major | **Confidence**: High
+  **v2 status**: AES challenge-response is restored through `YubicoOtpChallengeResponseSlotConfiguration` and `CalculateYubicoOtpAsync`: exact 16-byte key, six-byte challenge, 16-byte encrypted Yubico ticket. Repeated challenges need not produce equal tickets; the application verifies decrypted challenge, CRC and replay policy. TOTP time/period/truncation/code conveniences remain absent; OtpTool's `--totp` does not implement them. See the [HMAC length convention](../../src/YubiOtp/README.md#calculate-an-hmac-sha1-response) before building a time-based application.
+  **Severity**: Minor for remaining convenience gap | **Confidence**: High
 
 - **Feature/API**: Touch-required notification callback during challenge-response (`UseTouchNotifier(Action)`)
-  **v2 status**: Restored through the cross-applet `SessionCreationOptions.UserPresencePrompt`/`IUserPresencePrompt` contract for both HMAC-SHA1 and Yubico OTP challenge-response. OTP HID reports `DeviceWaiting` from live transport status; the smart-card path uses known slot policy.
+  **v2 status**: Restored through `SessionCreationOptions.UserPresencePrompt`/`IUserPresencePrompt` for both calculations. OTP HID reports `DeviceWaiting` from live status; SmartCard emits `PolicyRequires` from a cached keyboard-trigger indicator, not a verified read-back of challenge-response `RequireTouch`. Unknown/non-triggered SmartCard status stays silent.
   **Severity**: Minor | **Confidence**: Medium
 
 - **Feature/API**: Reading back a programmed NDEF tag over NFC (`ReadNdefTag()`)
@@ -216,11 +216,11 @@ v2 location: `src/YubiOtp/src/**`
   **Severity**: Minor | **Confidence**: High
 
 - **Feature/API**: NDEF URI well-known-prefix compression and text language-code/UTF-16 configuration
-  **v2 status**: Degraded — `SetNdefConfigurationAsync` has no prefix-compression, language-code, or UTF-16 parameters, risking overflow of the ~54-byte NDEF payload for long URIs that fit in v1.
+  **v2 status**: URI prefix compression is present and automatic (longest case-sensitive ordinal table match). URI remainder allows 53 UTF-8 bytes; text allows 51 UTF-8 bytes with fixed English (`en`) metadata. Arbitrary language and UTF-16 options remain missing. Null sends an all-zero disable request, distinct from an empty URI/text configuration; verify on-tap effects on the target NFC-capable key. No read-back API is supplied.
   **Severity**: Minor | **Confidence**: Medium
 
 - **Feature/API**: "Use device serial number as Yubico OTP public ID" convenience (`UseSerialNumberAsPublicId`)
-  **v2 status**: Missing — no serial-derived helper anywhere.
+  **v2 status**: Missing from the library configuration API. OtpTool contains a serial-to-six-byte-public-ID helper; callers can implement that convention explicitly using raw public-ID bytes (the key emits modhex characters).
   **Severity**: Minor | **Confidence**: High
 
 - **Feature/API**: In-builder cryptographically random key/private-ID/IMF generation helpers (`GenerateKey`, `GeneratePrivateId`)
@@ -228,9 +228,16 @@ v2 location: `src/YubiOtp/src/**`
   **Severity**: Minor | **Confidence**: Medium
 
 - **Feature/API**: Exact-size key validation for HMAC-SHA1/Yubico OTP keys (throws on wrong length)
-  **v2 status**: Behavior-changed — v2 silently SHA-1-hashes keys >20 bytes and zero-pads keys <20 bytes instead of throwing.
-  **User impact**: A caller passing a wrong-length key gets silently different key material programmed onto the device instead of an immediate error — can go undetected until a production challenge-response mismatch.
+  **v2 status**: Restored — HMAC keys must be exactly 20 bytes and AES keys exactly 16; wrong lengths are rejected before device I/O, not silently normalized. Configuration objects copy inputs and must be disposed; callers separately clear source buffers and successful calculation output. Invalid access-code preflight still has internal temporary-buffer cleanup gaps.
+  **Severity**: No key-normalization gap; cleanup limitation remains | **Confidence**: High
+
+- **Feature/API**: HOTP initial moving factor and full keyboard scan-map programming
+  **v2 status**: Present with implementation limitations. Nonzero HOTP IMF is scaled by 65,536 instead of the vendor protocol's 16; use the default zero and synchronize the verifier. `SetScanMapAsync` enforces 38 bytes versus the vendor's 45-entry map; do not truncate a map to fit. Type-level firmware checks also do not validate every selected flag or password length.
   **Severity**: Major | **Confidence**: High
+
+- **Feature/API**: Slot flag updates and access-code retention
+  **v2 status**: Updates send complete masked values, not patches. Keep intended flags in application state. Supply `currentAccessCode` to authenticate and repeat it as the new `accessCode` to retain protection; omission sends zeros where firmware allows removal. OtpTool does not preserve this protection automatically. Legacy code-change restrictions are not fully gated by the SDK.
+  **Severity**: Manual migration required | **Confidence**: High
 
 - **Feature/API**: FIPS-mode query (`QueryFipsModeCommand`)
   **v2 status**: Missing from YubiOtp session — not verified whether it moved to Management.
@@ -240,7 +247,7 @@ v2 location: `src/YubiOtp/src/**`
   **v2 status**: Degraded/Missing at YubiOtp-session level — not verified against `src/Management`.
   **Severity**: Minor | **Confidence**: Low (unverified relocation)
 
-**Verified improvement, no gap**: slot configuration flags, config-state, swap/delete/update operations all present with clearer typed enums (`ConfigFlag`/`TicketFlag`/`ExtendedFlag`), plus v2 adds SmartCard transport in addition to HID.
+**Present surfaces**: typed flags, cached config-state, and swap/delete/update operations. SmartCard and OTP HID sessions are supported, but this does not establish per-command device parity across USB CCID/NFC/HID. Use explicit OTP HID for the documented USB challenge recipe. Configured-bit/response-length tests alone do not prove keyboard output or cryptographic correctness. FIPS and legacy-command relocation above remains unverified.
 
 ---
 

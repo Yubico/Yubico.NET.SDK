@@ -1,0 +1,455 @@
+URI Record Type Definition
+    Technical Specification
+        NFC ForumTM
+        RTD-URI 1.0
+  NFCForum-TS-RTD_URI_1.0
+         2006-07-24
+RESTRICTIONS ON USE
+This specification is copyright © 2005-2006 by the NFC Forum, and was made available pursuant to a
+license agreement entered into between the recipient (Licensee) and NFC Forum, Inc. (Licensor) and may
+be used only by Licensee, and in compliance with the terms of that license agreement (License). If you are
+not the Licensee, you are not authorized to make any use of this specification. However, you may obtain a
+copy at the following page of Licensor's Website: http://www.nfc-forum.org/resources/spec_license after
+entering into and agreeing to such license terms as Licensor is then requiring. On the date that this
+specification was downloaded by Licensee, those terms were as follows:
+1. LICENSE GRANT.
+Licensor hereby grants Licensee the right, without charge, to copy (for internal purposes only) and share
+the Specification with Licensee's members, employees and consultants (as appropriate). This license grant
+does not include the right to sublicense, modify or create derivative works based upon the Specification.
+2. NO WARRANTIES.
+THE SPECIFICATION IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS AND
+NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL LICENSOR, ITS
+MEMBERS OR ITS CONTRIBUTORS BE LIABLE FOR ANY CLAIM, OR ANY DIRECT, SPECIAL,
+INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH
+THE USE OR PERFORMANCE OF THE SPECIFICATION.
+3. THIRD PARTY RIGHTS.
+Without limiting the generality of Section 2 above, LICENSOR ASSUMES NO RESPONSIBILITY TO
+COMPILE, CONFIRM, UPDATE OR MAKE PUBLIC ANY THIRD PARTY ASSERTIONS OF
+PATENT OR OTHER INTELLECTUAL PROPERTY RIGHTS THAT MIGHT NOW OR IN THE
+FUTURE BE INFRINGED BY AN IMPLEMENTATION OF THE SPECIFICATION IN ITS CURRENT,
+OR IN ANY FUTURE FORM. IF ANY SUCH RIGHTS ARE DESCRIBED ON THE SPECIFICATION,
+LICENSOR TAKES NO POSITION AS TO THE VALIDITY OR INVALIDITY OF SUCH
+ASSERTIONS, OR THAT ALL SUCH ASSERTIONS THAT HAVE OR MAY BE MADE ARE SO
+LISTED.
+4. TERMINATION OF LICENSE.
+In the event of a breach of this Agreement by Licensee or any of its employees or members, Licensor shall
+give Licensee written notice and an opportunity to cure. If the breach is not cured within thirty (30) days
+after written notice, or if the breach is of a nature that cannot be cured, then Licensor may immediately or
+thereafter terminate the licenses granted in this Agreement.
+5. MISCELLANEOUS.
+All notices required under this Agreement shall be in writing, and shall be deemed effective five days from
+deposit in the mails. Notices and correspondence to the NFC Forum address as it appears below. This
+Agreement shall be construed and interpreted under the internal laws of the United States and the
+Commonwealth of Massachusetts, without giving effect to its principles of conflict of law.
+NFC Forum, Inc.
+401 Edgewater Place, Suite 600
+Wakefield, MA, USA 01880
+                                                                                                                                    Contents
+
+
+Contents
+1 Overview ........................................................................................................1
+     1.1 Objectives........................................................................................................................... 1
+     1.2 Purpose ............................................................................................................................... 1
+         1.2.1 Mission Statement and Goals ................................................................................ 1
+     1.3 References .......................................................................................................................... 1
+     1.4 Administration.................................................................................................................... 1
+     1.5 Special Word Usage ........................................................................................................... 2
+     1.6 Name and Logo Usage ....................................................................................................... 2
+     1.7 Intellectual Property ........................................................................................................... 2
+     1.8 Acronyms ........................................................................................................................... 3
+2 URI Service.....................................................................................................4
+     2.1 NDEF Message Sequences................................................................................................. 4
+     2.2 Dependencies...................................................................................................................... 4
+3 NDEF Structure..............................................................................................5
+     3.1 Messaging Sequence .......................................................................................................... 5
+     3.2 Records Mapping ............................................................................................................... 5
+         3.2.1 URI Record Type .................................................................................................. 5
+         3.2.2 URI Identifier Code............................................................................................... 5
+         3.2.3 URI Field............................................................................................................... 7
+4 Handling Guideline........................................................................................8
+A. Examples........................................................................................................9
+     A.1 Simple URL with No Substitution ..................................................................................... 9
+     A.2 Storing a Telephone Number ............................................................................................. 9
+     A.3 Storing a Proprietary URI on the Tag............................................................................... 10
+B. Revision History ..........................................................................................11
+
+
+Tables
+Table 1. Acronyms .......................................................................................................................... 3
+Table 2. URI Record Contents ........................................................................................................ 5
+Table 3. Abbreviation Table............................................................................................................ 5
+Table 4. Simple URL with No Substitution .................................................................................... 9
+Table 5. Storing a Telephone Number ............................................................................................ 9
+Table 6. Storing a Proprietary URI on the Tag.............................................................................. 10
+Table 7. Revision History.............................................................................................................. 11
+
+
+
+
+URI Record Type Definition                                                                                                              Page i
+                                                                                       Overview
+
+
+1 Overview
+The URI Service RTD (Record Type Description) is an NFC RTD describing a record to be used
+with the NFC Data Exchange Format (NDEF) to retrieve a URI stored in a NFC-compliant tag or
+to transport a URI from one NFC device to another.
+The URI (either a URN or URL) also provides a way to store URIs inside other NFC elements,
+such as a Smart Poster (please see the Smart Poster RTD for more information).
+
+1.1 Objectives
+The RTD defines the use of NDEF by the means of the NDEF records mapping.
+
+1.2 Purpose
+1.2.1 Mission Statement and Goals
+The purpose of the URI RTD is to provide a “primitive” to contain URIs as defined by RFC 3986
+in a compact manner.
+
+1.3 References
+[NDEF]                  “NFC Data Exchange Format Specification”, NFC Forum, 2006.
+[NFC RTD]               “NFC Record Type Definition (RTD) Specification”, NFC Forum, 2006.
+[RFC 2119]              S. Bradner, “Key words for use in RFCs to Indicate Requirement
+                        Levels”, RFC 2119, Harvard University, March 1997.
+                        http://www.apps.ietf.org/rfc/rfc2119.html
+[RFC 3492]              A. Costello: “Punycode: A Bootstring encoding of Unicode for
+                        Internationalized Domain Names in Applications (IDNA)”, RFC 3492,
+                        March 2003. http://www.apps.ietf.org/rfc/rfc3492.html
+[RFC 3986]              T. Berners-Lee, R. Fielding, L. Masinter, “Uniform Resource Identifiers
+                        (URI): Generic Syntax”, RFC 3986, MIT/LCS, U.C. Irvine, Xerox
+                        Corporation, January 2005. http://www.apps.ietf.org/rfc/rfc3986.html
+[RFC 3987]              M. Duerst, M. Suignard, “Internationalized Resource Identifiers (IRIs)”,
+                        RFC 3987, Microsoft Corporation, January 2005.
+                        http://rfc.net/rfc3987.html
+[SMARTPOSTER]           “Smart Poster RTD Specification”, NFC Forum, 2006.
+[URI SCHEME]            List of Uniform Resource Identifier (URI) schemes registered by IANA.
+                        http://www.iana.org/assignments/uri-schemes
+
+1.4 Administration
+The URI RTD Specification is an open specification supported by the Near Field Communication
+Forum, Inc., located at:
+401 Edgewater Place, Suite 600
+Wakefield, MA, 01880
+Tel.: +1 781-876-8955
+Fax: +1 781-224-1239
+
+
+
+URI Record Type Definition                                                                Page 1
+                                                                                       Overview
+
+
+http://www.nfc-forum.org
+The Reference Applications technical working group maintains this specification.
+This specification has been contributed to by Sony, Panasonic, Philips and Nokia.
+
+1.5 Special Word Usage
+The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
+“SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this
+document are to be interpreted as described in RFC 2119.
+
+1.6 Name and Logo Usage
+The Near Field Communication Forum’s policy regarding the use of the trademarks NFC Forum
+and the NFC Forum logo is as follows:
+•   Any company MAY claim compatibility with NFC Forum specifications, whether a member
+    of the NFC Forum or not.
+•   Permission to use the NFC Forum logos is automatically granted to designated members only
+    as stipulated on the most recent Membership Privileges document, during the period of time
+    for which their membership dues are paid.
+•   Member’s distributors and sales representatives MAY use the NFC Forum logo in promoting
+    member’s products sold under the name of the member.
+•   The logo SHALL be printed in black or in color as illustrated on the Logo Page that is
+    available from the NFC Forum at the address above. The aspect ratio of the logo SHALL be
+    maintained, but the size MAY be varied. Nothing MAY be added to or deleted from the
+    logos.
+•   Since the NFC Forum name is a trademark of the Near Field Communication Forum, the
+    following statement SHALL be included in all published literature and advertising material in
+    which the name or logo appears:
+    NFC Forum and the NFC Forum logo are trademarks of the Near Field Communication
+    Forum.
+
+1.7 Intellectual Property
+The URI Record Type Definition Specification conforms to the Intellectual Property guidelines
+specified in the NFC Forum's Intellectual Property Right Policy, as approved on November 9,
+2004 and outlined in the NFC Forum Rules of Procedures, as approved on December 17, 2004.
+
+
+
+
+URI Record Type Definition                                                                Page 2
+                                                                                 Overview
+
+
+
+1.8 Acronyms
+This table defines all relevant terms and acronyms used in this specification.
+
+                                       Table 1. Acronyms
+
+Acronyms         Definition
+NDEF             NFC Data Exchange Format
+URI              Uniform Resource Identifier
+URL              Uniform Resource Locator (this is a special case of an URI)
+RFU              Reserved for Future Use
+NFC              Near Field Communication
+
+
+
+
+URI Record Type Definition                                                         Page 3
+                                                                                     URI Service
+
+
+
+2 URI Service
+This document defines URI Service with data model, describing the application scenarios for
+simple Smart Poster applications, the structure of an URI located on an NFC compliant device or
+tag, and provides examples.
+The URI record type MAY also be used as a part of some other RTD, in which case it implies no
+specific action. A typical example of this might be a case where the developer wants to build his
+own record type containing multiple URLs. In this case, it is impossible to divine the meaning of
+each URL automatically, so it is left to the handler taking care of the developer’s own type.
+Devices are NOT required to implement any particular URI protocol.
+
+2.1 NDEF Message Sequences
+There are no specific message sequences.
+
+2.2 Dependencies
+The Smart Poster RTD [SMARTPOSTER] may be considered to be an extended version of the
+URI RTD. It uses auxiliary records to add metadata to the URI.
+
+
+
+
+URI Record Type Definition                                                                 Page 4
+                                                                                     NDEF Structure
+
+
+3 NDEF Structure
+3.1 Messaging Sequence
+There is no particular messaging sequence.
+
+3.2 Records Mapping
+3.2.1 URI Record Type
+The Well Known Type for an URI record is “U” (0x55 in the NDEF binary representation).
+The structure of an URI record is described below.
+
+                                  Table 2. URI Record Contents
+
+        Name         Offset      Size       Value                  Description
+        Identifier   0           1 byte     URI identifier code    The URI identifier code, as
+        code                                                       specified in Table 3.
+        URI          1           N          UTF-8 string           The rest of the URI, or the entire
+        field                                                      URI (if identifier code is 0x00).
+
+3.2.2 URI Identifier Code
+In order to shorten the URI, the first byte of the record data describes the protocol field of an
+URI. The following table MUST be used to encode and decode the URI, though applications
+MAY use the 0x00 value to denote no prefixing when encoding, regardless of whether there
+actually is a suitable abbreviation code.
+For explanations of the different protocols, please refer to the protocol documentations
+themselves. NFC devices are not required to support any particular protocol.
+
+                                     Table 3. Abbreviation Table
+
+          Decimal        Hex              Protocol
+          0              0x00             N/A. No prepending is done, and the URI field
+                                          contains the unabridged URI.
+          1              0x01             http://www.
+          2              0x02             https://www.
+          3              0x03             http://
+          4              0x04             https://
+          5              0x05             tel:
+          6              0x06             mailto:
+          7              0x07             ftp://anonymous:anonymous@
+          8              0x08             ftp://ftp.
+          9              0x09             ftps://
+
+
+
+URI Record Type Definition                                                                     Page 5
+                                                                                    NDEF Structure
+
+
+          Decimal     Hex                Protocol
+          10          0x0A               sftp://
+          11          0x0B               smb://
+          12          0x0C               nfs://
+          13          0x0D               ftp://
+          14          0x0E               dav://
+          15          0x0F               news:
+          16          0x10               telnet://
+          17          0x11               imap:
+          18          0x12               rtsp://
+          19          0x13               urn:
+          20          0x14               pop:
+          21          0x15               sip:
+          22          0x16               sips:
+          23          0x17               tftp:
+          24          0x18               btspp://
+          25          0x19               btl2cap://
+          26          0x1A               btgoep://
+          27          0x1B               tcpobex://
+          28          0x1C               irdaobex://
+          29          0x1D               file://
+          30          0x1E               urn:epc:id:
+          31          0x1F               urn:epc:tag:
+          32          0x20               urn:epc:pat:
+          33          0x21               urn:epc:raw:
+          34          0x22               urn:epc:
+          35          0x23               urn:nfc:
+          36…255      0x24..0xFF         RFU
+
+For example, if the content of this field is 0x02, and the content of the URI field reads as “nfc-
+forum.org”, the resulting URI is “https://www.nfc-forum.org”.
+If the content this field is zero (0x00), then NO prepending SHALL be done.
+All fields marked RFU SHALL be treated as if they were value zero (no prepending). A
+compliant system MUST NOT produce values that are marked RFU.
+
+
+
+URI Record Type Definition                                                                    Page 6
+                                                                                   NDEF Structure
+
+
+3.2.3 URI Field
+This field provides the URI as per RFC 3987 [RFC 3987] (so that it is actually an IRI, or
+Internationalized Resource Identifier, but for legacy reasons we use the word URI). This IRI can
+be a URL or URN as explained before. The encoding used MUST be UTF-8, unless the URI
+scheme specifies some particular encoding.
+The length of the IRI can be calculated by taking the length of the payload, and subtracting 1 for
+the protocol abbreviation code byte. This is the length in bytes, not in characters (as UTF-8
+characters can occupy more than one byte).
+URIs are defined only in the 7-bit US-ASCII space. Therefore, a compliant application SHOULD
+transform the UTF-8 IRI string to a 7-bit US-ASCII string by changing code points above 127
+into the proper encoding. This coding has been defined in the RFC 3987 [RFC 3987] and IDN
+[RFC 3492] documents. For different schemes, the encoding may be different.
+For example, if the URI (after the prepending of the URI type field) contains the following string:
+“http://www.hääyö.com/”, it is transformed, as per standard IDN [RFC 3492] rules, into
+“http://www.xn--hy-viaa5g.com” before acting on it. Most modern applications already support
+this new Internationalized Resource Identifier (IRI) scheme. It is RECOMMENDED that
+implementations include support for IRI where display of the URI in human-readable form is
+anticipated.
+To clarify: yes, the URI MAY contain UTF-8 characters. However, the Internet cannot handle
+them, and therefore the URI needs to be transformed before use. For most devices, this
+conversion is handled by the application.
+Any character value within the URI between (and including) 0 and 31 SHALL be recorded as an
+error, and the URI record to be discarded. Any invalid UTF-8 sequence SHALL be considered an
+error, and the entire URI record SHALL be discarded.
+
+
+
+
+URI Record Type Definition                                                                  Page 7
+                                                                              Handling Guideline
+
+
+4 Handling Guideline
+The URI RTD does not define any specific action that the device is required to perform. This is
+left to the implementation.
+Please see the Smart Poster RTD [SMARTPOSTER] for an example on how to use the URI RTD
+in your own application.
+
+
+
+
+URI Record Type Definition                                                                 Page 8
+                                                                                     Examples
+
+
+A. Examples
+These examples omit the MB and ME flags from the URI RTD, and assume the Short Record
+format. See the NDEF specification [NDEF] for more information.
+
+A.1 Simple URL with No Substitution
+To put the URL http://www.nfc.com on a tag using the NDEF protocol, add the following byte
+sequence. Total length: 12 bytes.
+
+                         Table 4. Simple URL with No Substitution
+
+         Offset       Content                   Explanation
+
+         0            0xD1                      SR = 1, TNF = 0x01 (NFC Forum Well Known
+                                                Type), ME=1, MB=1
+         1            0x01                      Length of the Record Type (1 byte)
+         2            0x08                      Length of the payload (8 bytes)
+         3            0x55                      The URI record type (“U”)
+         4            0x01                      URI identifier (“http://www.”)
+         5            0x6e 0x66 0x63 0x2e       The string “nfc.com” in UTF-8.
+                      0x63 0x6f 0x6d
+
+A.2 Storing a Telephone Number
+To store a telephone number (for example, to make a mobile phone make a call to this number),
+use the following byte sequence. The number is ‘+358-9-1234567’. Total length is 17 bytes.
+
+                             Table 5. Storing a Telephone Number
+
+         Offset       Content                   Explanation
+
+         0            0xD1                      SR = 1, TNF = 0x01 (NFC Forum Well Known
+                                                Type), MB=1, ME=1
+         1            0x01                      Length of the Record Type (1 byte)
+         2            0x0D                      Length of the payload (13 bytes)
+         3            0x55                      The Record Name (“U”)
+         4            0x05                      Abbreviation for “tel:”
+         5            0x2b 0x33 0x35 0x38       The string “+35891234567” in UTF-8.
+                      0x39 0x31 0x32 0x33
+                      0x34 0x35 0x36 0x37
+
+
+
+
+URI Record Type Definition                                                              Page 9
+                                                                                       Examples
+
+
+
+A.3 Storing a Proprietary URI on the Tag
+To store a proprietary URI, you can use the following byte sequence. The URI in this case is
+“mms://example.com/download.wmv”. Total length is 35 bytes.
+
+                        Table 6. Storing a Proprietary URI on the Tag
+
+         Offset       Content                   Explanation
+
+         0            0xD1                      SR = 1, TNF = 0x01 (NFC Forum Well Known
+                                                Type), MB=1, ME=1
+         1            0x01                      Length of the Record Type (1 byte)
+         2            0x1F                      Length of the payload (31 bytes)
+         3            0x55                      The Record Name (“U”)
+         4            0x00                      No abbreviation
+         5            0x6d 0x6d 0x73 0x3a       The string
+                      0x2f 0x2f 0x65 0x78       “mms://example.com/download.wmv“.
+                      0x61 0x6d 0x70 0x6c
+                      0x65 0x2e 0x63 0x6f
+                      0x6d 0x2f 0x64 0x6f
+                      0x77 0x6e 0x6c 0x6f
+                      0x61 0x64 0x2e 0x77
+                      0x6d 0x76
+
+
+
+
+URI Record Type Definition                                                               Page 10
+                                                                               Revision History
+
+
+B. Revision History
+The following table outlines the revision history of the RTD_URI Technical Specification.
+
+                                    Table 7. Revision History
+
+Document           Revision and         Status             Change Notice       Supersedes
+Name               Release Date
+NFCForum-TS-       1.0, July 2006       Final              None
+RTD_URI_1.0
+
+
+
+
+URI Record Type Definition                                                              Page 11
+

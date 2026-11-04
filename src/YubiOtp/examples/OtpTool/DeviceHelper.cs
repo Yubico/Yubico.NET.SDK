@@ -51,6 +51,9 @@ public record DeviceSelection(
 /// OTP is available over both SmartCard (CCID/NFC) and OTP HID (USB keyboard interface).
 /// Discovery groups proven interfaces into physical keys; this selector filters that result rather
 /// than deduplicating by serial. Session creation uses the SDK's SmartCard-first default.
+/// There is no transport option or presence prompt here, and a failed open does not fall back. Supported
+/// session transports do not establish device support for challenge commands over USB CCID or NFC;
+/// use explicit OTP HID through the public SDK for the documented USB challenge recipe.
 /// Management metadata lookup is best-effort and can select either HID route when SmartCard is absent.
 /// Current Core product-flag retention can produce unnamed form factors; display does not prove family eligibility.
 /// </remarks>
@@ -104,7 +107,7 @@ public static class DeviceHelper
                 device.AvailableConnections);
         }
 
-        // Multiple devices found — in non-interactive mode, prefer SmartCard (richer protocol)
+        // Multiple devices found: non-interactive selection prefers a key exposing SmartCard.
         if (!AnsiConsole.Profile.Capabilities.Interactive)
         {
             var preferred = devices.FirstOrDefault(d => d.SupportsConnection(ConnectionType.SmartCard))

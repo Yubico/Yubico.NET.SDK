@@ -1,0 +1,48 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project YubiOtp --filter \"FullyQualifiedName!~CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse\"",
+  "started": "2026-11-04T11:13:29.8286749+01:00",
+  "durationSeconds": 11.4,
+  "runDirectory": "artifacts/toolchain/runs/20261104-111329-828-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 11.3,
+      "error": "No tests were executed (no matching tests, or every test was skipped)"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "YubiOtp.UnitTests",
+      "outcome": "no-tests-executed",
+      "reason": "no test matches --filter",
+      "executed": null,
+      "failed": null,
+      "skipped": null,
+      "failedTests": [],
+      "log": null
+    },
+    {
+      "target": "test",
+      "project": "YubiOtp.IntegrationTests",
+      "outcome": "no-tests-executed",
+      "reason": "all 15 tests skipped; these tests need a YubiKey: is one with the required firmware/capabilities connected?",
+      "executed": 0,
+      "failed": 0,
+      "skipped": 15,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261104-111329-828-test/01-test-YubiOtp.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

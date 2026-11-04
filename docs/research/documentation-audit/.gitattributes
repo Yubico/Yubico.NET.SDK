@@ -6,3 +6,5 @@ maintenance/**/validation/** -text -whitespace
 modules/**/validation/** -text -whitespace
 modules/**/evidence/** -text -whitespace
 modules/**/patches/** -text -whitespace
+# Hardware CLI output is hashed evidence too; retain its original table padding and bytes.
+modules/**/hardware/** -text -whitespace

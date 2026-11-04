@@ -37,18 +37,15 @@ public class HidBackendTests
         var result = new byte[data.Length + 2];
         data.CopyTo(result, 0);
 
-        // Calculate CRC complement and append as little-endian
+        // The final CRC below is complemented and little-endian for the expected residual. This helper
+        // shares ChecksumUtils with the backend, so it is not an independent CRC implementation oracle.
         var crc = ChecksumUtils.CalculateCrc(data, data.Length);
 
-        // We need the CRC such that CheckCrc(result, result.Length) == ValidResidue
-        // The standard approach: append ~crc (complement)
+        // These preliminary bytes are overwritten with the complement below.
         result[data.Length] = (byte)(crc & 0xFF);
         result[data.Length + 1] = (byte)(crc >> 8);
 
-        // Verify our construction is correct
-        // Actually, let's compute it properly. The CRC of data+crc_bytes should equal ValidResidue.
-        // We need to find crc_lo, crc_hi such that CalculateCrc(result, result.Length) == 0xF0B8
-        // The standard CRC-CCITT approach: append the complement of the CRC
+        // Appending the complement gives the expected 0xF0B8 residual.
         var fullCrc = (ushort)(0xFFFF & ~ChecksumUtils.CalculateCrc(data, data.Length));
         result[data.Length] = (byte)(fullCrc & 0xFF);
         result[data.Length + 1] = (byte)(fullCrc >> 8);

@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'OtpTool'">
+    <DocumentationWorkspace>/tmp/opencode/yubiotp-001-examples-v2-otptool</DocumentationWorkspace>
+    <BaseIntermediateOutputPath>$(DocumentationWorkspace)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(DocumentationWorkspace)/obj/</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(DocumentationWorkspace)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

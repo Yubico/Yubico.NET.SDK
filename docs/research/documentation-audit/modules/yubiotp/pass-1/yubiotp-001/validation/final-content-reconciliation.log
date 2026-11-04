@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/finalize-content.py
+PASS:50accepted authored hashes=>final,42formatter transforms,63module paths,3/21 final clean samples; no other-module source changes.
+
+EXIT=0

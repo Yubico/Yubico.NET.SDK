@@ -19,6 +19,12 @@ namespace Yubico.YubiKit.YubiOtp;
 /// (Yubico OTP, HOTP, static password, static ticket). Adds shared CR, tab, delay,
 /// pacing, and numeric keypad flag setters.
 /// </summary>
+/// <remarks>
+/// Defaults add AppendCr and FastTrigger to the base SerialApiVisible/AllowUpdate flags. Legacy
+/// Manual 3.3 documents delay flags for older firmware, fast trigger only with one configuration,
+/// and firmware-specific numeric-keypad support. Tagged personalization documentation notes fast
+/// triggering is always effective on 3+. These setters do not validate every firmware/flag combination.
+/// </remarks>
 public abstract class KeyboardSlotConfiguration : SlotConfiguration
 {
     protected KeyboardSlotConfiguration()
@@ -82,7 +88,7 @@ public abstract class KeyboardSlotConfiguration : SlotConfiguration
     }
 
     /// <summary>
-    /// Enables fast triggering (slot 2 only, reduced activation delay).
+    /// Enables reduced activation delay when applicable; not a slot-2-only setting.
     /// </summary>
     public KeyboardSlotConfiguration FastTrigger(bool enable = true)
     {
@@ -91,7 +97,7 @@ public abstract class KeyboardSlotConfiguration : SlotConfiguration
     }
 
     /// <summary>
-    /// Adds a 20ms delay between each keystroke for slow USB hosts.
+    /// Selects 10 ms intra-character pacing (30 ms when combined with PacingChar20).
     /// </summary>
     public KeyboardSlotConfiguration PacingChar10(bool enable = true)
     {
@@ -100,7 +106,7 @@ public abstract class KeyboardSlotConfiguration : SlotConfiguration
     }
 
     /// <summary>
-    /// Adds a 40ms delay between each keystroke for very slow USB hosts.
+    /// Selects 20 ms intra-character pacing (30 ms when combined with PacingChar10).
     /// </summary>
     public KeyboardSlotConfiguration PacingChar20(bool enable = true)
     {

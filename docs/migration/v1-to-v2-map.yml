@@ -207,7 +207,7 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/OtpSession.cs
       - yubikit:src/YubiOtp/
-    notes: Review slot configuration behavior manually.
+    notes: Review replacement versus complete masked updates, current/new access-code retention, cached status, and device/transport command support manually; see src/YubiOtp/README.md for current HOTP IMF, scan-map and sample limitations.
     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
   - id: applet-openpgp
     status: assisted
@@ -365,7 +365,7 @@ mappings:
       - yubikit:src/YubiOtp/src/HmacSha1SlotConfiguration.cs
       - yubikit:src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs
       - yubikit:src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs
-    notes: Slot programming is persistent and requires manual review for slot number, access-code, touch, short-challenge, update, and NDEF behavior; v1 ShortPress/LongPress map semantically to v2 Slot.One/Slot.Two.
+    notes: Slot programming is persistent; v1 ShortPress/LongPress map semantically to Slot.One/Slot.Two. Use explicit OTP HID for the documented USB challenge recipe. Agree one challenge-length convention with the verifier (see src/YubiOtp/README.md); the SDK sends 64 bytes but does not know the slot mode. Review touch notifications, complete masked updates and both current/new access-code arguments. Clear caller-owned source buffers and returned response separately from configuration disposal.
     last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
   - id: piv-pin-only-mode
     status: assisted
@@ -442,7 +442,7 @@ mappings:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/Operations/ConfigureStaticPassword.cs
       - yubikit:src/YubiOtp/src/StaticPasswordSlotConfiguration.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot's `StaticPasswordSlotConfiguration` only accepted raw scan-code bytes, losing v1's human-readable-string-plus-keyboard-layout entry point (historical gap 12). The `yubikit-gaps` remediation effort added a `StaticPasswordSlotConfiguration(string password, KeyboardLayout keyboardLayout)` constructor that translates each character to a HID scan code via the existing Core `HidCodeTranslator`, validates every character against the layout before allocating the scan-code buffer, and zeroes the intermediate scan-code array after copying it into the configuration. Password/scan-code generation helpers and NDEF read-back from v1 are not restored; review those manually if used.
+    notes: The string/layout constructor restores the historical missing entry point. It validates characters before allocating translated scan codes and clears the intermediate after copying into the configuration; it cannot erase the immutable source string. The raw overload takes translated scan codes, not UTF-8. OtpTool currently makes that encoding mistake and ignores layout, so use the public constructor as the migration route. Library generation helpers and NDEF read-back remain absent.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: yubiotp-yubico-otp-challenge-response
     status: manual
@@ -455,7 +455,7 @@ mappings:
       - yubikit:src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs
       - yubikit:src/YubiOtp/src/IYubiOtpSession.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot's `YubiOtpSession` only exposed `CalculateHmacSha1Async`, with no Yubico-OTP-algorithm (AES-128) challenge-response path at all (historical gap 12). The `yubikit-gaps` remediation effort added `YubicoOtpChallengeResponseSlotConfiguration`, which requires an exact 16-byte AES key (validated before any device I/O), plus `CalculateYubicoOtpAsync` on `IYubiOtpSession`. Slot programming is persistent state; review slot number, touch requirement (`RequireTouch(...)`), and access-code behavior manually before migrating production slot code.
+    notes: The restored AES configuration requires an exact 16-byte key; CalculateYubicoOtpAsync sends six challenge bytes and returns a caller-owned 16-byte encrypted Yubico ticket, not deterministic raw challenge encryption. The application verifies decrypted challenge, ticket CRC and replay policy. TOTP time/period/code conveniences are separate and remain absent. Review persistent slot effects, explicit OTP HID selection, touch notifications and current/new access-code behavior manually.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: yubihsm-retry-exception
     status: assisted

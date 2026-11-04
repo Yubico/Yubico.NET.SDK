@@ -24,7 +24,9 @@ namespace Yubico.YubiKit.YubiOtp.Backend;
 
 /// <summary>
 /// Backend implementation for YubiOTP operations over OTP HID (8-byte feature reports).
-/// Delegates to <see cref="IOtpHidProtocol"/> and validates CRC on responses.
+/// Delegates to <see cref="IOtpHidProtocol"/>. Data reads require the expected prefix plus two CRC bytes
+/// and validate that prefix; excess bytes are not returned. Writes check minimum status length here,
+/// not the data-response CRC. CRC detects transmission errors, not cryptographic authenticity.
 /// </summary>
 internal sealed class HidBackend : IYubiOtpBackend
 {

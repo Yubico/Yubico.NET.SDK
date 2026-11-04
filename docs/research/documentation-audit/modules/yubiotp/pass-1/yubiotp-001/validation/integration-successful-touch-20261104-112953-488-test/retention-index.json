@@ -1,0 +1,33 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-112953-488-test",
+  "files": [
+    {
+      "path": "01-test-YubiOtp.IntegrationTests.log",
+      "bytes": 4141,
+      "sha256": "495727bbb663f31a92b835109a0dfa794b1f930c3753dc83d0a6f06cff340804",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 1034,
+      "sha256": "f4a88c4d06b3e7b626a6c2695b7acb97dcc47b65cc2230fd22e3cb35c04d555f",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 696,
+      "sha256": "2e1272f06970246013475aead03159ce8d0678a1b06f4c6f90546fc59e192941",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2230,
+      "sha256": "6dc1734711912f0fd14db199ef1e99bad000c9a26a841f106911984f8a5034f7",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

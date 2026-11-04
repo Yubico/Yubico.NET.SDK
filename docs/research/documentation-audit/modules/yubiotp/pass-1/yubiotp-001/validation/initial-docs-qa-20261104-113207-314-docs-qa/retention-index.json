@@ -1,0 +1,26 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-113207-314-docs-qa",
+  "files": [
+    {
+      "path": "result.json",
+      "bytes": 425,
+      "sha256": "7798c1209f0f75d1f20a81b6be5ba030770ec3c42745d19179a9587040f9b730",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 311,
+      "sha256": "1ac7d88aaff92e16fd2cb2e405bc1cc3cbbe4e8c087141006dad067b60c85914",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 1084,
+      "sha256": "b8851948f669d84285ff9cb554c2a60c142c0441db7ca1222447240968655dd6",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/v2/consumer/src/Examples.cs
+/tmp/opencode/yubiotp-001-examples-v2-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditOtp001.Examples.v2.consumer.GlobalUsings.g.cs
+/tmp/opencode/yubiotp-001-examples-v2-consumer/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/yubiotp-001-examples-v2-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditOtp001.Examples.v2.consumer.AssemblyInfo.cs

@@ -109,7 +109,8 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
         var statusBytes = response.Data;
 
-        // If response data is empty, read status separately (some firmware versions)
+        // A short write response needs a separate status read. The validator below currently does not
+        // reject a fallback that is still short; successful return is not complete malformed-status validation.
         if (statusBytes.Length < YubiOtpConstants.StatusBytesLength)
         {
             statusBytes = await ReadStatusAsync(cancellationToken).ConfigureAwait(false);
@@ -202,9 +203,9 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
     }
 
     /// <summary>
-    /// Validates that the programming sequence counter incremented by 1 after a write.
-    /// Handles edge cases: sequence rollover to 0, and firmware 5.0.0-5.4.3 which
-    /// does not always update the programming sequence.
+    /// Checks the sequence when status is long enough. Current exceptions are an effective firmware
+    /// interval of 5.0.0 inclusive to 5.5.0 exclusive, and any returned zero. These permissive checks
+    /// do not establish that every malformed status or rejected device write is detected.
     /// </summary>
     private void ValidateProgrammingSequence(ReadOnlySpan<byte> statusBytes)
     {
@@ -215,7 +216,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
         var newProgSeq = statusBytes[3];
 
-        // Firmware 5.0.0 through 5.4.3 do not reliably update prog_seq
+        // The current compatibility bypass covers all 5.0.0 <= version < 5.5.0.
         if (_firmwareVersion >= Firmware500
             && _firmwareVersion < Firmware550)
         {
@@ -223,7 +224,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
             return;
         }
 
-        // prog_seq should increment by 1, with rollover: 0 follows any value
+        // Accept the increment, or zero after any predecessor (not only a 255-to-0 rollover).
         var expectedProgSeq = (byte)((_lastProgSeq + 1) & 0xFF);
 
         if (newProgSeq != 0 && newProgSeq != expectedProgSeq)

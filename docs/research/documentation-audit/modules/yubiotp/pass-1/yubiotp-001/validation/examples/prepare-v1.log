@@ -1,0 +1,7 @@
+$ python3 -B docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/prepare.py v1
+Confirmed REV003 README SHA256=5ba4557b704e023e231e09208f584cdf8bbf1dc8753f8d437d8558ef2ff32eba
+Prepared consumer: 18 complete groups, Yubico.YubiKit.AuditOtp001.Examples.v1.consumer.csproj; no build or execution.
+Prepared annotations: 1 complete groups, Yubico.YubiKit.AuditOtp001.Examples.v1.annotations.csproj; no build or execution.
+Inventoried 9 documents, 40 C# fences across shared/module scope, 42 affected and 51 total module C# XML-documentation files; 19 compile groups; original PDFs listed for coordinator exception handling.
+
+EXIT=0

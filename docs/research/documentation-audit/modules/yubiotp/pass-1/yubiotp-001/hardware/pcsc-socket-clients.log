@@ -1,0 +1,3 @@
+Read-only ss -xnp targeted PCSC socket/peer rows; process details may require elevated visibility.
+u_str ESTAB 0      0                                                                                                    * 1506394            * 1506404
+u_str ESTAB 0      0                                                                                /run/pcscd/pcscd.comm 1506404            * 1506394

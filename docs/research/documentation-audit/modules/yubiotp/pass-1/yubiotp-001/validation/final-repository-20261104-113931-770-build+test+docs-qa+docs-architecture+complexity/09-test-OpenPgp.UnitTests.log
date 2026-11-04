@@ -1,0 +1,10 @@
+$ dotnet run --project src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj -c Release
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+
+Test run summary: Passed! - /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.UnitTests.dll (net10.0|x64)
+  total: 186
+  failed: 0
+  succeeded: 186
+  skipped: 0
+  duration: 390ms

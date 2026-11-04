@@ -1,0 +1,6 @@
+$ ykman --device 103 otp info
+UTC 2026-11-04T10:01:38.774673+00:00
+Slot 1: empty
+Slot 2: empty
+
+EXIT=0

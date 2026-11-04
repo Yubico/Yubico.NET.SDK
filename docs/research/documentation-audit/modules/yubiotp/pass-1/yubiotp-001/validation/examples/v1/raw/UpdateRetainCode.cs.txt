@@ -1,0 +1,14 @@
+try
+{
+    await using var session = await device.CreateYubiOtpSessionAsync();
+    using var update = new UpdateConfiguration();
+    update.AppendCr();
+    update.FastTrigger();
+    update.PacingChar10();
+    await session.UpdateConfigurationAsync(
+        Slot.Two, update, accessCode: accessCode, currentAccessCode: accessCode);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(accessCode);
+}

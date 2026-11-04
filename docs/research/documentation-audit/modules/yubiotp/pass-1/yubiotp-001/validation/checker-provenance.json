@@ -1,0 +1,60 @@
+{
+  "baseline": "95e5ccaeda33954c21f2a38058d4f66b5f208787",
+  "replacements": {
+    "b73efe3813b429b4b8eb2a7e819a6ad7be699d47": "95e5ccaeda33954c21f2a38058d4f66b5f208787",
+    "modules/security-domain/pass-1/security-domain-001/": "modules/yubiotp/pass-1/yubiotp-001/",
+    "/tmp/opencode/security-domain-001-doccheck": "/tmp/opencode/yubiotp-001-doccheck",
+    "Yubico.YubiKit.AuditSd001.Checker": "Yubico.YubiKit.AuditOtp001.Checker"
+  },
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/checker/src/Program.cs",
+      "source_sha256": "284b1ef757c618d2014bb5bc5d01769fca751d4985477be2650009a371ef22af",
+      "target": "checker/src/Program.cs",
+      "target_sha256": "93978bc908189099ee1423357623ca389bc0c7bb4930846cf1e0d68dffdd13d2",
+      "substitution_counts": {
+        "b73efe3813b429b4b8eb2a7e819a6ad7be699d47": 4,
+        "modules/security-domain/pass-1/security-domain-001/": 1,
+        "/tmp/opencode/security-domain-001-doccheck": 0,
+        "Yubico.YubiKit.AuditSd001.Checker": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/checker/Directory.Build.props",
+      "source_sha256": "25f9096ee67025285dc66f6348c4e24e7d4db002bdcdb50748f97f2fcf849d55",
+      "target": "checker/Directory.Build.props",
+      "target_sha256": "346893c3e402f56bbc99fcc36bf6174dcb735a613b31abfd8d3215ac3fbc6fdc",
+      "substitution_counts": {
+        "b73efe3813b429b4b8eb2a7e819a6ad7be699d47": 0,
+        "modules/security-domain/pass-1/security-domain-001/": 0,
+        "/tmp/opencode/security-domain-001-doccheck": 1,
+        "Yubico.YubiKit.AuditSd001.Checker": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/checker/Directory.Build.targets",
+      "source_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a",
+      "target": "checker/Directory.Build.targets",
+      "target_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a",
+      "substitution_counts": {
+        "b73efe3813b429b4b8eb2a7e819a6ad7be699d47": 0,
+        "modules/security-domain/pass-1/security-domain-001/": 0,
+        "/tmp/opencode/security-domain-001-doccheck": 0,
+        "Yubico.YubiKit.AuditSd001.Checker": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/checker/src/Yubico.YubiKit.AuditSd001.Checker.csproj",
+      "source_sha256": "89bd979476711371091b95a0972f4765b994e3b3e4baffe201c4c5dbb79de465",
+      "target": "checker/src/Yubico.YubiKit.AuditOtp001.Checker.csproj",
+      "target_sha256": "cb9880b13e80c29958a0e623b044145d270125c6eb0fb602e96d1e9e98d4350d",
+      "substitution_counts": {
+        "b73efe3813b429b4b8eb2a7e819a6ad7be699d47": 0,
+        "modules/security-domain/pass-1/security-domain-001/": 0,
+        "/tmp/opencode/security-domain-001-doccheck": 0,
+        "Yubico.YubiKit.AuditSd001.Checker": 1
+      }
+    }
+  ],
+  "policy": "Checker algorithms unchanged; no examples or import-removal approvals copied. Compile subcommand retains historical CTAP defaults and is not the final example-validation host."
+}

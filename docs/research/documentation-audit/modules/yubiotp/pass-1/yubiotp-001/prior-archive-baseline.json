@@ -1,0 +1,26 @@
+[
+  {
+    "manifest": "docs/research/documentation-audit/record-manifest.json",
+    "manifest_sha256": "a15061df202536b7894c257e7dfbee6578240747f69d86d1e40d9534630df905",
+    "checked": 784,
+    "result": "pass"
+  },
+  {
+    "manifest": "docs/research/documentation-audit/modules/management/pass-1/management-001/record-manifest.json",
+    "manifest_sha256": "49c18caac492aac9afa0d7bcede415f96422e98a3cc85692c3bb2bfa90bff139",
+    "checked": 402,
+    "result": "pass"
+  },
+  {
+    "manifest": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/record-manifest.json",
+    "manifest_sha256": "b562b58457fb384dea05e7cadf8b32d64f1abcc56ab2e56abd0b96d906655fe1",
+    "checked": 534,
+    "result": "pass"
+  },
+  {
+    "manifest": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/record-manifest.json",
+    "manifest_sha256": "791f112af52904b167ec87c5f70a526f625ccf6524c9daf8a09a68f8cf364ac2",
+    "checked": 164,
+    "result": "pass"
+  }
+]

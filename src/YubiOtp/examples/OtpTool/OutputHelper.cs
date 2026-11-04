@@ -91,7 +91,8 @@ public static class OutputHelper
     }
 
     /// <summary>
-    /// Parses a hex string to bytes, with error reporting.
+    /// Parses hex with error reporting. Failure diagnostics can echo the original input, including a
+    /// secret. This sample is not a hardened credential-input path; protect stderr/log capture.
     /// </summary>
     public static byte[]? ParseHex(string? hex, string paramName)
     {

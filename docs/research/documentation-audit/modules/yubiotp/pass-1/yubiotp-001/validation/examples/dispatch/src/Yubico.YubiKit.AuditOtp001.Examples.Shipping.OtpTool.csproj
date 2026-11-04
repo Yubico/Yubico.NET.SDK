@@ -1,0 +1,25 @@
+<Project DefaultTargets="Build">
+  <!-- Build traversal only, not a C# host. The unmodified shipping SDK project
+       imports its own canonical props/targets and compiles all real sample files.
+       This prefix-qualified filename makes the toolchain's OtpTool selector work
+       without editing toolchain discovery or adding a reduced sample project. -->
+  <PropertyGroup>
+    <RepositoryRoot>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)', 'toolchain.cs'))</RepositoryRoot>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+    <ShippingOtpToolProject>$(RepositoryRoot)/src/YubiOtp/examples/OtpTool/OtpTool.csproj</ShippingOtpToolProject>
+  </PropertyGroup>
+  <Target Name="Restore">
+    <MSBuild Projects="$(ShippingOtpToolProject)" Targets="Restore" BuildInParallel="false" Properties="Configuration=$(Configuration)" />
+  </Target>
+  <Target Name="Clean">
+    <MSBuild Projects="$(ShippingOtpToolProject)" Targets="Clean" BuildInParallel="false" Properties="Configuration=$(Configuration)" />
+  </Target>
+  <Target Name="Build">
+    <MSBuild Projects="$(ShippingOtpToolProject)" Targets="Build" BuildInParallel="false" Properties="Configuration=$(Configuration)" />
+  </Target>
+  <Target Name="Rebuild">
+    <MSBuild Projects="$(ShippingOtpToolProject)" Targets="Rebuild" BuildInParallel="false" Properties="Configuration=$(Configuration)" />
+  </Target>
+</Project>

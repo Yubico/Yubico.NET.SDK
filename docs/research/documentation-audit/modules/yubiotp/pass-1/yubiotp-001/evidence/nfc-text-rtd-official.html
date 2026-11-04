@@ -1,0 +1,677 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta content="notranslate" name="google">
+  <meta content="en_US" http-equiv="Content-Language">
+  <meta charset="utf-8">
+  <title>Text RTD Technical Specification</title>
+  <meta content="Everyday millions and millions of people use NFC technology to connect to things and the world around them. It’s the super-fast and secure way to pay for things, ride the train, unlock a door, start your car, and even connect to the brands we all love." name="description">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <link data-cms-original-href="/apple-touch-icon.png" href="/apple-touch-icon.png?_cchid=92b9dc8c648a491784e9955cf386e5bf" rel="apple-touch-icon" sizes="180x180">
+  <link data-cms-original-href="/favicon-32x32.png" href="/favicon-32x32.png?_cchid=9b520fb656ff72cbf1cbd9031deea197" rel="icon" sizes="32x32" type="image/png">
+  <link data-cms-original-href="/favicon-16x16.png" href="/favicon-16x16.png?_cchid=dfe5bde0d7fb97c6c54300363d04ff56" rel="icon" sizes="16x16" type="image/png">
+  <link data-cms-original-href="/site.webmanifest" href="/site.webmanifest?_cchid=053100cb84a50d2ae7f5492f7dd7f25e" rel="manifest">
+  <link color="#5bbad5" data-cms-original-href="/safari-pinned-tab.svg" href="/safari-pinned-tab.svg?_cchid=4abe5f91d1b936458aade5922d37cdee" rel="mask-icon">
+  <meta content="#00aba9" name="msapplication-TileColor">
+  <meta content="#ffffff" name="theme-color">
+  <meta content="Text RTD Technical Specification" property="og:title">
+<meta content="Everyday millions and millions of people use NFC technology to connect to things and the world around them. It’s the super-fast and secure way to pay for things, ride the train, unlock a door, start your car, and even connect to the brands we all love." property="og:description">
+<meta content="website" property="og:type">
+<meta content="https://nfc-forum.org//build/specifications/text-rtd-technical-specification/" property="og:url">
+<meta content="https://nfc-forum.org//img/socialshare.png" property="og:image">
+<meta content="image/png" property="og:image:type">
+<meta content="1200" property="og:image:width">
+<meta content="630" property="og:image:height">
+
+<meta content="summary_large_image" name="twitter:card">
+<meta content="" name="twitter:site">
+<meta content="" name="twitter:creator">
+<meta content="Text RTD Technical Specification" name="twitter:title">
+<meta content="Everyday millions and millions of people use NFC technology to connect to things and the world around them. It’s the super-fast and secure way to pay for things, ride the train, unlock a door, start your car, and even connect to the brands we all love." name="twitter:description">
+<meta content="Everyday millions and millions of people use NFC technology to connect to things and the world around them. It’s the super-fast and secure way to pay for things, ride the train, unlock a door, start your car, and even connect to the brands we all love." name="twitter:text:description">
+<meta content="https://nfc-forum.org//img/socialshare.png" name="twitter:image">
+<meta content="NFC Forum" name="twitter:image:alt">
+  
+  <!-- Icons -->
+  <script crossorigin="anonymous" src="https://kit.fontawesome.com/760bd56aab.js"></script>
+
+  <link href="https://use.typekit.net/kyg4yyz.css" rel="stylesheet">
+
+  <!-- CSS -->
+  <link data-cms-original-href="/css/main.css" href="/css/main.css?_cchid=75ae647ee510cda056bd1b3b8328bd94" rel="stylesheet">
+  <!-- Analytics -->
+  
+  <!-- Fathom - beautiful, simple website analytics -->
+    <script data-site="EVMNGNHT" data-spa="hash" defer="" src="https://cdn.usefathom.com/script.js"></script>
+  <!-- / Fathom -->
+
+</head>
+
+  <body class="specification">
+    <a class="visually-hidden-focusable" href="#pageContent">Skip to main content</a>
+    <header id="pageHeader" s="">
+  <div class="container">
+    <div class="navbar navbar-expand-lg py-lg-0">
+      <!-- logo -->
+      <a class="navbar-brand logo-black" href="/" title="NFC Forum"><img alt="" data-cms-original-src="/img/logo-black.svg" src="/img/logo-black.svg?_cchid=3ed9699fb70efe23d78b7420aec1530a"></a>
+      <a class="navbar-brand logo-white" href="/" title="NFC Forum"><img alt="" data-cms-original-src="/img/logo-white.svg" src="/img/logo-white.svg?_cchid=6a010d835c0427fce4005d32e3842279"></a>
+      
+      <!-- Mobile Toggle -->
+      <button aria-controls="primarynav" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler collapsed" data-bs-target="#primarynav" data-bs-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </span>
+      </button>
+
+      <!-- Start Primary Navigation -->
+      <nav class="collapse navbar-collapse" id="primarynav">
+        <!-- Links -->
+        <ul class="primary-nav-links navbar-nav ms-auto ">
+          
+            
+            
+            
+            <li class="nav-item dropdown d-block d-lg-none ">
+              <a aria-expanded="false" aria-haspopup="true" class="nav-link  dropdown-toggle" data-bs-toggle="dropdown" data-href="" data-toggle="dropdown" href="" id="collapse-learn" role="button">
+                Learn
+                <span class="visually-hidden-focusable">(current)</span>
+              </a>
+              
+              <div aria-labelledby="collapse-learn" class="dropdown-menu columns-2 v-2 z-depth-1">
+                <a class="nav-back-button d-flex justify-content-start d-lg-none w-100" href="#"><i class="fa-solid fa-arrow-left text-pink me-3"></i> Back</a>
+                <span>
+                  <ul class="list-unstyled multi-column-dropdown">
+                    <div class="">
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/learn/what-nfc-does/">
+                          What NFC Does
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/learn/nfc-technology/">
+                          NFC Technology
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/products/product-showcase/">
+                          Product Showcase
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/learn/use-cases/">
+                          Use Cases
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/learn/whitepapers">
+                          Whitepapers &amp; Infographics
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/learn/videos">
+                          Videos
+                        </a>
+                      </li>
+                      
+                    </div>
+                    
+                  </ul>
+                </span>
+              </div>
+              
+            </li>
+            <li class="nav-item hover-menu-item d-none d-lg-inline-block ">
+              <a class="nav-link" href="#">Learn</a>
+              <div aria-labelledby="hover-learn" class="hover-menu">
+                <div class="hover-spacer"></div>
+                <div class="hover-content columns-2">
+                  <ul class="list-unstyled multi-column-dropdown">
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/learn/what-nfc-does/">
+                        What NFC Does
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/learn/nfc-technology/">
+                        NFC Technology
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/products/product-showcase/">
+                        Product Showcase
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/learn/use-cases/">
+                        Use Cases
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/learn/whitepapers">
+                        Whitepapers &amp; Infographics
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/learn/videos">
+                        Videos
+                      </a>
+                    </li>
+                    
+                    
+                  </ul>
+                </div>
+              </div>
+            </li>
+            
+            
+          
+            
+            
+            
+            <li class="nav-item dropdown d-block d-lg-none ">
+              <a aria-expanded="false" aria-haspopup="true" class="nav-link  dropdown-toggle" data-bs-toggle="dropdown" data-href="" data-toggle="dropdown" href="" id="collapse-build" role="button">
+                Build
+                <span class="visually-hidden-focusable">(current)</span>
+              </a>
+              
+              <div aria-labelledby="collapse-build" class="dropdown-menu columns-2 v-2 z-depth-1">
+                <a class="nav-back-button d-flex justify-content-start d-lg-none w-100" href="#"><i class="fa-solid fa-arrow-left text-pink me-3"></i> Back</a>
+                <span>
+                  <ul class="list-unstyled multi-column-dropdown">
+                    <div class="">
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/build/specifications">
+                          Specifications
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/nfc-release-15">
+                          NFC Release 15
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/build/branding">
+                          Branding &amp; Marks
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/build/certification">
+                          Product Certification
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/build/certification/resources">
+                          Certification Resources
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/build/certification/authorized-tools-labs">
+                          Labs &amp; Testing Tools
+                        </a>
+                      </li>
+                      
+                    </div>
+                    
+                  </ul>
+                </span>
+              </div>
+              
+            </li>
+            <li class="nav-item hover-menu-item d-none d-lg-inline-block active">
+              <a class="nav-link" href="#">Build</a>
+              <div aria-labelledby="hover-build" class="hover-menu">
+                <div class="hover-spacer"></div>
+                <div class="hover-content columns-2">
+                  <ul class="list-unstyled multi-column-dropdown">
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/build/specifications">
+                        Specifications
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/nfc-release-15">
+                        NFC Release 15
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/build/branding">
+                        Branding &amp; Marks
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/build/certification">
+                        Product Certification
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/build/certification/resources">
+                        Certification Resources
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/build/certification/authorized-tools-labs">
+                        Labs &amp; Testing Tools
+                      </a>
+                    </li>
+                    
+                    
+                  </ul>
+                </div>
+              </div>
+            </li>
+            
+            
+          
+            
+            
+            
+            <li class="nav-item dropdown d-block d-lg-none ">
+              <a aria-expanded="false" aria-haspopup="true" class="nav-link  dropdown-toggle" data-bs-toggle="dropdown" data-href="" data-toggle="dropdown" href="" id="collapse-engage" role="button">
+                Engage
+                <span class="visually-hidden-focusable">(current)</span>
+              </a>
+              
+              <div aria-labelledby="collapse-engage" class="dropdown-menu columns-2 v-2 z-depth-1">
+                <a class="nav-back-button d-flex justify-content-start d-lg-none w-100" href="#"><i class="fa-solid fa-arrow-left text-pink me-3"></i> Back</a>
+                <span>
+                  <ul class="list-unstyled multi-column-dropdown">
+                    <div class="">
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/engage/join">
+                          Join the Forum
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/engage/events">
+                          Events &amp; Webinars
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/engage/innovation-awards-2026">
+                          Innovation Awards
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="https://members.nfc-forum.org">
+                          Member Website
+                        </a>
+                      </li>
+                      
+                    </div>
+                    
+                  </ul>
+                </span>
+              </div>
+              
+            </li>
+            <li class="nav-item hover-menu-item d-none d-lg-inline-block ">
+              <a class="nav-link" href="#">Engage</a>
+              <div aria-labelledby="hover-engage" class="hover-menu">
+                <div class="hover-spacer"></div>
+                <div class="hover-content columns-2">
+                  <ul class="list-unstyled multi-column-dropdown">
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/engage/join">
+                        Join the Forum
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/engage/events">
+                        Events &amp; Webinars
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/engage/innovation-awards-2026">
+                        Innovation Awards
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="https://members.nfc-forum.org">
+                        Member Website
+                      </a>
+                    </li>
+                    
+                    
+                  </ul>
+                </div>
+              </div>
+            </li>
+            
+            
+          
+            
+            
+            
+              <li class="nav-item ">
+                <a class="nav-link " href="/engage/sustainability">Sustainability</a>
+              </li>
+            
+            
+          
+            
+            
+            
+              <li class="nav-item ">
+                <a class="nav-link " href="/products/certified-products">Certified</a>
+              </li>
+            
+            
+          
+            
+            
+            
+            <li class="nav-item dropdown d-block d-lg-none ">
+              <a aria-expanded="false" aria-haspopup="true" class="nav-link  dropdown-toggle" data-bs-toggle="dropdown" data-href="" data-toggle="dropdown" href="" id="collapse-about" role="button">
+                About
+                <span class="visually-hidden-focusable">(current)</span>
+              </a>
+              
+              <div aria-labelledby="collapse-about" class="dropdown-menu columns-2 v-2 z-depth-1">
+                <a class="nav-back-button d-flex justify-content-start d-lg-none w-100" href="#"><i class="fa-solid fa-arrow-left text-pink me-3"></i> Back</a>
+                <span>
+                  <ul class="list-unstyled multi-column-dropdown">
+                    <div class="">
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/about/leadership">
+                          Leadership
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/about/member-companies">
+                          Member Companies
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/about/special-interest-groups">
+                          Special Interest Groups
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/about/technical-committee">
+                          Technical Committee
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/about/compliance-committee">
+                          Compliance Committee
+                        </a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="menu-item" href="/about/liasons">
+                          Liaisons
+                        </a>
+                      </li>
+                      
+                    </div>
+                    
+                  </ul>
+                </span>
+              </div>
+              
+            </li>
+            <li class="nav-item hover-menu-item d-none d-lg-inline-block ">
+              <a class="nav-link" href="#">About</a>
+              <div aria-labelledby="hover-about" class="hover-menu">
+                <div class="hover-spacer"></div>
+                <div class="hover-content columns-2">
+                  <ul class="list-unstyled multi-column-dropdown">
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/about/leadership">
+                        Leadership
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/about/member-companies">
+                        Member Companies
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/about/special-interest-groups">
+                        Special Interest Groups
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/about/technical-committee">
+                        Technical Committee
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/about/compliance-committee">
+                        Compliance Committee
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <a class="menu-item" href="/about/liasons">
+                        Liaisons
+                      </a>
+                    </li>
+                    
+                    
+                  </ul>
+                </div>
+              </div>
+            </li>
+            
+            
+          
+            
+            
+            
+              <li class="nav-item ">
+                <a class="nav-link " href="/news/">News</a>
+              </li>
+            
+            
+          
+            
+            
+            
+              <li class="nav-item nav-item-button">
+                <a class="nav-link " href="/engage/join">Join</a>
+              </li>
+            
+            
+          
+            
+            
+            
+              <li class="nav-item ">
+                <a class="nav-link " href="https://members.nfc-forum.org/?utm_campaign=membership&amp;utm_source=partner&amp;utm_medium=view&amp;utm_content=public_website_login_link">Login</a>
+              </li>
+            
+            
+          
+            
+            
+            
+              <li class="nav-item ">
+                <a class="nav-link " href="/contact-us">Contact</a>
+              </li>
+            
+            
+          
+        </ul>
+        <!--
+          <ul id="topnav" class="navbar-nav ms-auto">
+          <li class="nav-item search">
+            <a class="nav-link" href="/search">
+              <i class="ri-search-line"></i>
+            </a>
+          </li>
+          
+        </ul>
+      -->
+      </nav>
+      <!-- END Primary Navigation -->
+    </div>
+  </div>
+</header>
+    <main id="pageContent">
+      
+
+      <section>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1>Text RTD Technical Specification</h1>  
+        
+        <div class="my-5">
+          <p>Provides an efficient way to store text strings in multiple languages by using the RTD mechanism and NDEF format. An example of using this specification is included in the Smart Poster RTD.</p>
+        </div>
+        <button class="btn btn-outline-primary btn-launch-store" data-bs-target="#store-modal" data-bs-toggle="modal" data-id="24" type="button">
+          Purchase Specification
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+<div aria-hidden="true" aria-labelledby="store-modal-label" class="modal fade" id="store-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="store-modal-label">Purchase and Download Specifications</h5>
+        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+      </div>
+      <div class="modal-body">
+        <iframe height="1835" id="iframe-store" src="" style="border:0;width:100%;" title="Purchase and download specification"></iframe>
+        <script src="https://www.cognitoforms.com/f/iframe.js"></script>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    </main>
+    
+    <footer id="pageFooter">
+  <section>
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <img alt="NFC Forum" class="logo-footer img-fluid" data-cms-original-src="/img/logo-black.svg" src="/img/logo-black.svg?_cchid=3ed9699fb70efe23d78b7420aec1530a">
+        </div>
+        <!-- <div class="col-12 col-md-3">
+          <ul class="p-0 m-0">
+            
+              <li class="list-unstyled "><a class="nav-link font-weight-light" href="/explore ">Explore </a></li>
+            
+              <li class="list-unstyled "><a class="nav-link font-weight-light" href="/develop ">Develop </a></li>
+            
+              <li class="list-unstyled "><a class="nav-link font-weight-light" href="/get-involved ">Get Involved </a></li>
+            
+              <li class="list-unstyled "><a class="nav-link font-weight-light" href="/about ">About </a></li>
+            
+              <li class="list-unstyled "><a class="nav-link font-weight-light" href="/news ">News </a></li>
+            
+          </ul>
+        </div> -->
+        <div class="col-12 col-md-3 ms-lg-auto">
+          <ul class="p-0 m-0">
+            
+              <li class="list-unstyled"><a class="nav-link text-lg-end text-uppercase text-black" href="/contact-us ">Contact </a></li>
+            
+              <li class="list-unstyled"><a class="nav-link text-lg-end text-uppercase text-black" href="/news ">News </a></li>
+            
+              <li class="list-unstyled"><a class="nav-link text-lg-end text-uppercase text-black" href="/engage/join ">Join </a></li>
+            
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="socialnav-rounded">
+            <div class="socialnav">
+  
+  <a aria-label="Linkedin" class="linkedin" href="https://www.linkedin.com/company/nfc-forum" rel="noopener" target="_blank">
+    <i class="fab fa-linkedin-in"></i>
+  </a>
+  
+  <a aria-label="Youtube" class="linkedin" href="https://www.youtube.com/user/NFCForum" rel="noopener" target="_blank">
+    <i class="fab fa-youtube"></i>
+  </a>
+  
+</div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="bg-black text-white py-3" id="legal-nav">
+    <div class="container">
+      <div class="row align-items-center justify-content-lg-between">
+        <div class="col-12 col-lg-auto">
+          <p class="mb-0 text-uppercase text-center text-lg-left">© 2026 NFC Forum | All Rights Reserved</p>
+        </div>
+        <div class="col">
+          <ul class="navbar-nav justify-content-center justify-content-lg-end ms-lg-3">
+            
+              <li class="nav-item">
+                <a class="nav-link" href="/privacy-policy">Privacy Policy</a>
+              </li>
+            
+              <li class="nav-item">
+                <a class="nav-link" href="/terms-and-conditions">Terms &amp; Conditions</a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</footer>
+    <!-- JS Dependencies -->
+<script crossorigin="anonymous" defer="" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+<script crossorigin="anonymous" defer="" src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js"></script>
+<script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.7/ScrollMagic.min.js"></script>
+<script data-cms-original-src="/js/main.js" defer="" src="/js/main.js?_cchid=66f912d13448dae75c0f16ab929edb31"></script>
+ 
+
+  
+
+</body></html>

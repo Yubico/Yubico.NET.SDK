@@ -21,6 +21,15 @@ namespace Yubico.YubiKit.YubiOtp;
 /// Session interface for the YubiOTP application on a YubiKey.
 /// Provides operations for slot configuration, challenge-response, and NDEF setup.
 /// </summary>
+/// <remarks>
+/// Keep borrowed memory arguments stable until the awaited operation finishes. Configuration objects
+/// remain caller-owned and must be disposed. Successful challenge-response output transfers to the
+/// caller, who must clear it after use; a read-only view does not erase its backing storage.
+/// Transport support for a session does not guarantee every command on every device/interface.
+/// SmartCard programming-sequence checks currently bypass effective firmware 5.0.0 inclusive to 5.5.0
+/// exclusive and accept zero after any predecessor. Short fallback status can escape rejection. These
+/// limitations mean successful return is not exhaustive malformed-status or write-acceptance validation.
+/// </remarks>
 public interface IYubiOtpSession : IApplicationSession
 {
     /// <summary>
@@ -36,17 +45,28 @@ public interface IYubiOtpSession : IApplicationSession
     Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets the current slot configuration state (which slots are programmed, touch-triggered).
+    /// Gets cached slot status from session creation or the last successful write, without device I/O.
     /// </summary>
+    /// <remarks>
+    /// This snapshot does not expose keys, access codes, slot mode, or challenge-response touch policy.
+    /// Its raw OTP-status firmware can differ from the session's effective firmware version.
+    /// </remarks>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     ConfigState GetConfigState();
 
     /// <summary>
-    /// Writes a new slot configuration to the specified slot.
+    /// Replaces the specified slot's configuration, including its key material.
     /// </summary>
+    /// <remarks>
+    /// Use a mode-specific configuration for replacement, not an update configuration. To retain write
+    /// protection, pass the current code as both access-code arguments. Omitting the new code sends zeros,
+    /// removing protection where firmware permits. Access codes protect writes, not challenge calculations
+    /// or transport confidentiality. Validate code lengths before calling: current invalid-code preflight
+    /// paths can leave internal secret copies uncleared despite performing no device I/O.
+    /// </remarks>
     /// <param name="slot">The slot to program (One or Two).</param>
-    /// <param name="config">The slot configuration to write.</param>
-    /// <param name="accessCode">Optional 6-byte access code to set on the slot.</param>
+    /// <param name="config">The caller-owned slot configuration; this method does not dispose it.</param>
+    /// <param name="accessCode">The new 6-byte write-protection code; empty or all-zero removes protection where allowed.</param>
     /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="config"/> is null.</exception>
@@ -63,7 +83,8 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the configuration.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown when the device returns a malformed or too-short status response.
+    /// Thrown for detected malformed status. OTP HID rejects short write status; SmartCard can currently
+    /// return a short fallback status without rejecting it, so this is not an exhaustive validation guarantee.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task PutConfigurationAsync(
@@ -77,9 +98,16 @@ public interface IYubiOtpSession : IApplicationSession
     /// Updates behavioral flags on an existing slot without reprogramming key material.
     /// The slot must have been originally programmed with <see cref="ExtendedFlag.AllowUpdate"/> enabled.
     /// </summary>
+    /// <remarks>
+    /// The update sends complete values within the update masks, not a read-modify-write patch. Explicitly
+    /// retain every desired allowed flag. A new configuration defaults to SerialApiVisible and AllowUpdate,
+    /// with ticket/configuration flags clear. To keep write protection, supply the same code in both code
+    /// arguments; omission of the new code does not preserve the old one. Vendor tools disallow changing
+    /// the code on firmware 4.3.2–4.3.5; this SDK does not enforce that firmware restriction.
+    /// </remarks>
     /// <param name="slot">The slot to update (One or Two).</param>
-    /// <param name="config">The update configuration containing the flags to modify.</param>
-    /// <param name="accessCode">Optional 6-byte access code to set on the slot.</param>
+    /// <param name="config">Caller-owned complete masked flag values; this method does not dispose it.</param>
+    /// <param name="accessCode">The new 6-byte write-protection code; empty or all-zero removes protection where allowed.</param>
     /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="config"/> is null.</exception>
@@ -97,7 +125,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the configuration.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown when the device returns a malformed or too-short status response.
+    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task UpdateConfigurationAsync(
@@ -110,6 +138,11 @@ public interface IYubiOtpSession : IApplicationSession
     /// <summary>
     /// Swaps the configurations of slot 1 and slot 2.
     /// </summary>
+    /// <remarks>
+    /// The device enforces swap permissions; the legacy vendor contract requires both slots to allow
+    /// updates. There is no access-code argument for this operation. Existing slot secrets cannot be read
+    /// back for restoration.
+    /// </remarks>
     /// <exception cref="NotSupportedException">
     /// Thrown when the device firmware does not support slot swapping (requires 2.3.0+).
     /// </exception>
@@ -118,7 +151,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the swap.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown when the device returns a malformed or too-short status response.
+    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SwapSlotsAsync(CancellationToken cancellationToken = default);
@@ -139,7 +172,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the deletion.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown when the device returns a malformed or too-short status response.
+    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task DeleteSlotAsync(
@@ -150,7 +183,12 @@ public interface IYubiOtpSession : IApplicationSession
     /// <summary>
     /// Sets a custom keyboard scan code map.
     /// </summary>
-    /// <param name="scanMap">The 38-byte scan code map.</param>
+    /// <remarks>
+    /// The current API enforces 38 bytes, whereas the tagged vendor personalization tool specifies a
+    /// 45-entry map for firmware 3+. This mismatch is an implementation limitation, not supported full-map
+    /// programming. Do not truncate a vendor map to fit. This method has no scan-map firmware gate.
+    /// </remarks>
+    /// <param name="scanMap">The payload, currently required to be 38 bytes by the SDK.</param>
     /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="ArgumentException">
@@ -163,7 +201,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the scan map.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown when the device returns a malformed or too-short status response.
+    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SetScanMapAsync(
@@ -172,11 +210,20 @@ public interface IYubiOtpSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Configures NFC NDEF for a slot. When the YubiKey is tapped via NFC,
-    /// it will present the configured URI or text record.
+    /// Configures URI/text content for NFC output from an existing compatible OTP slot.
     /// </summary>
+    /// <remarks>
+    /// Requires NFC-capable hardware as well as firmware support. URI mode chooses the longest
+    /// case-sensitive ordinal table prefix and allows 53 UTF-8 bytes after that prefix. Text mode allows
+    /// 51 UTF-8 text bytes with a fixed English (en) header. The 56-byte programming block is not the final
+    /// on-tap NDEF message; legacy device documentation describes a URI prefix followed by generated OTP.
+    /// There is no NFC read-back here. Only pass defined enum values; URI syntax is not validated.
+    /// </remarks>
     /// <param name="slot">The slot to configure NDEF for.</param>
-    /// <param name="uri">The URI or text content. If null, NDEF is disabled for the slot.</param>
+    /// <param name="uri">
+    /// URI or text content. Null sends an all-zero disable request; verify on-tap behavior on the target
+    /// key. An empty string sends an empty content configuration with its URI/text header, not that request.
+    /// </param>
     /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
     /// <param name="ndefType">The type of NDEF record (URI or Text).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -194,7 +241,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the configuration.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown when the device returns a malformed or too-short status response.
+    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SetNdefConfigurationAsync(
@@ -211,12 +258,12 @@ public interface IYubiOtpSession : IApplicationSession
     /// <para>
     /// The YubiKey always receives 64 bytes. A shorter challenge is padded with a byte that differs
     /// from its last byte (0x01 after a trailing 0x00, otherwise 0x00, including empty input), the same
-    /// encoding ykman uses. A challenge of exactly 64 bytes is sent unchanged.
+    /// encoding used by yubikey-manager 5.8.0. A challenge of exactly 64 bytes is sent unchanged.
     /// </para>
     /// <para>
     /// What the YubiKey then hashes depends on how the slot was programmed. In short-challenge mode
-    /// (<see cref="HmacSha1SlotConfiguration.UseShortChallenge"/>, the default, and the only mode ykman
-    /// programs) the final byte of the 64 is the end-of-input marker: the YubiKey discards it together
+    /// (<see cref="HmacSha1SlotConfiguration.UseShortChallenge"/>, the default, also used by
+    /// yubikey-manager 5.8.0's HMAC configuration builder) the final byte of the 64 is the end-of-input marker: the YubiKey discards it together
     /// with the run of equal bytes before it, retaining at least one byte. Inputs of 1 to 63 bytes
     /// are hashed exactly as given. A 64-byte challenge to such a slot loses at least its last byte.
     /// An all-equal transmitted payload is hashed as a single byte of that value; empty input, sent
@@ -230,11 +277,18 @@ public interface IYubiOtpSession : IApplicationSession
     /// 64-byte form produce identical requests and responses in either mode: for example, [0x41] and
     /// [0x41, 0x00 × 63], or [0x41, 0x00] and [0x41, 0x00, 0x01 × 62].
     /// </para>
+    /// <para>
+    /// The minimum-one-byte interpretation is expected by the supplied known-answer vectors, not a
+    /// universal firmware guarantee from request-encoding tests. Prefer 1–63 bytes in short mode and
+    /// verify empty/64-byte boundaries on your target firmware. For USB challenge-response, explicitly
+    /// selecting OTP HID avoids assuming SmartCard command parity. Notifications depend on transport;
+    /// cached keyboard-trigger status is not a read-back of RequireTouch.
+    /// </para>
     /// </remarks>
     /// <param name="slot">The slot configured for HMAC-SHA1.</param>
     /// <param name="challenge">The challenge data (up to 64 bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The 20-byte HMAC-SHA1 response.</returns>
+    /// <returns>The caller-owned 20-byte HMAC-SHA1 response. Clear its backing memory after use.</returns>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="challenge"/> is more than 64 bytes. No device I/O is
     /// performed when this is thrown.
@@ -255,10 +309,18 @@ public interface IYubiOtpSession : IApplicationSession
     /// <summary>
     /// Performs a Yubico OTP (AES-128) challenge-response operation on the specified slot.
     /// </summary>
+    /// <remarks>
+    /// Returns an encrypted Yubico ticket, not AES applied directly to six challenge bytes. Variable
+    /// counter/random fields can make repeated challenges produce different tickets. With the zero private
+    /// ID used by YubicoOtpChallengeResponseSlotConfiguration, a verifier expects the first six decrypted
+    /// bytes to equal the challenge; it must also validate the ticket CRC and freshness/replay policy.
+    /// This method does not decrypt, verify, or format an OTP. The challenge is borrowed unchanged until
+    /// the await completes. Prefer explicit OTP HID for the USB recipe rather than assuming SmartCard parity.
+    /// </remarks>
     /// <param name="slot">The slot configured for Yubico OTP challenge-response.</param>
     /// <param name="challenge">The challenge data, which must be exactly 6 bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The 16-byte AES-128 response.</returns>
+    /// <returns>The caller-owned 16-byte encrypted ticket. Clear its backing memory after use.</returns>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="challenge"/> is not exactly 6 bytes. No device I/O is
     /// performed when this is thrown.

@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>    <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>     <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>     <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<title>ykpersonalize.1</title>
+<meta content="" name="description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="/vendor/font-awesome/css/all.min.css" rel="stylesheet"/>
+<link href="/vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="/css/main.css" rel="stylesheet"/>
+<link href="/css/pygments.css" rel="stylesheet"/>
+<link href="/css/pygmentsmaterial.css" rel="stylesheet"/>
+<link href="/css/code-tabs.css" rel="stylesheet"/>
+<link href="/css/asciidoc.css" rel="stylesheet"/>
+<link href="/vendor/vanilla-cookieconsent/dist/cookieconsent.css" rel="stylesheet"/>
+<link href="/css/cookieconsent-yubicostyle.css" rel="stylesheet"/>
+<link href="/vendor/jquery.tablesorter/dist/css/theme.default.min.css" rel="stylesheet"/>
+<link href="/favicon-192x192.png" rel="icon" sizes="192x192"/>
+<!--<script src="/vendor/modernizr/dist/modernizr-build.js"></script>-->
+<!-- Google Tag Manager -->
+<script data-cookiecategory="analytics" type="text/plain">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KRP726L');</script>
+<!-- End Google Tag Manager -->
+<!-- Hotjar Tracking Code for www.yubico.com -->
+<script data-cookiecategory="analytics" type="text/plain">
+      (function(h,o,t,j,a,r){
+          h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+          h._hjSettings={hjid:835276,hjsv:6};
+          a=o.getElementsByTagName('head')[0];
+          r=o.createElement('script');r.async=1;
+          r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+          a.appendChild(r);
+      })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    </script>
+</head>
+<body>
+<!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+<nav class="navbar navbar-expand-lg navbar-top navbar-dark">
+<div class="container">
+<a class="navbar-brand" href="/"><img src="/logo.png"/></a>
+<button aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarToggler" data-bs-toggle="collapse" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="navbar-collapse collapse" id="navbarToggler">
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+<li class="nav-item"><a "="" class="nav-link fw-bold" href="/Passkeys">Passkeys</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/WebAuthn">WebAuthn</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/CTAP">CTAP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/OTP">OTP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/OATH">OATH</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/PGP">PGP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/PIV">PIV</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Secure_Domain">Secure Domain</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/YubiHSM2">YubiHSM2</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Software_Projects">Software Projects</a></li>
+</ul>
+<!-- Google Custom Search Engine -->
+<div class="navbar-form navbar-right" id="search-box">
+<script data-cookiecategory="functional" type="text/plain">
+          (function() {
+            var cx = '4d44ab063517e6a2e';
+            var gcse = document.createElement('script');
+            gcse.type = 'text/javascript';
+            gcse.async = true;
+            gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+            '//www.google.com/cse/cse.js?cx=' + cx;
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(gcse, s);
+          })();
+          </script>
+<gcse:searchbox-only></gcse:searchbox-only>
+</div>
+<!-- End Google Custom Search Engine -->
+</div><!--/.navbar-collapse -->
+</div>
+</nav>
+<div class="container">
+<div class="row bg-light">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="/yubikey-personalization">yubikey-personalization</a></li>
+<li class="breadcrumb-item"><a href="/yubikey-personalization/Manuals">Manuals</a></li>
+<li class="breadcrumb-item active">ykpersonalize.1</li>
+</ol>
+</div>
+<div class="row">
+<div class="col-md-4" style="padding-left: 0;">
+<!-- Sidebar -->
+<ul class="nav nav-side card card-body bg-light">
+<li class="active"><a href="/yubikey-personalization">yubikey-personalization</a><ul class="">
+<li><a href="/yubikey-personalization/Releases">Releases</a></li>
+<li><a href="/yubikey-personalization/Release_Notes.html">Release Notes</a></li>
+<li class="active"><a href="/yubikey-personalization/Manuals">Manuals</a><ul class="">
+<li><a href="/yubikey-personalization/Manuals/ykchalresp.1.html">ykchalresp.1</a></li>
+<li><a href="/yubikey-personalization/Manuals/ykinfo.1.html">ykinfo.1</a></li>
+<li class="active"><a href="/yubikey-personalization/Manuals/ykpersonalize.1.html">ykpersonalize.1</a>
+</li></ul>
+<li><a href="/yubikey-personalization/Compatibility.html">Compatibility</a></li>
+<li><a href="/yubikey-personalization/USB-Hid-Issue.html">USB-Hid-Issue</a></li>
+</li></ul>
+</li></ul>
+<!-- End sidebar -->
+</div>
+<div class="col-md-8">
+<!-- Main content -->
+<div class="sidelinks">
+<ul></ul>
+</div>
+<div id="page-content">
+<div class="sect1">
+<h1 id="_synopsis">SYNOPSIS</h1>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>ykpersonalize</strong> [<em>-Nkey</em>] [<em>-1</em> | <em>-2</em>] [<em>-sfile</em>] [<em>-ifile</em>] [<em>-fformat</em>] [<em>-axxx</em>] [<em>-cxxx</em>] [<em>-ooption</em>] [<em>-y</em>] [<em>-v</em>] [<em>-d</em>] [<em>-h</em>] [<em>-n</em>] [<em>-t</em>] [<em>-u</em>] [<em>-x</em>] [<em>-z</em>] [<em>-m</em>] [<em>-S</em>] [<em>-V</em>] [<em>-Dxxx</em>_]</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Set the AES key, user ID and other settings in a YubiKey. For the
+complete explanation of the meaning of all parameters, see the reference
+manual: YubiKey manual (<a href="https://www.yubico.com/wp-content/uploads/2015/03/YubiKeyManual_v3.4.pdf" rel="noopener noreferrer" target="_blank">https://www.yubico.com/wp-content/uploads/2015/03/YubiKeyManual_v3.4.pdf</a>)</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong>-Nkey</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+use the nth YubiKey found.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-1</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+change the first configuration. This is the default and is
+normally used for true OTP generation. In this configuration, the option
+flag <strong>-oappend-cr</strong> is set by default.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-2</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+change the second configuration. This is for YubiKey II only
+and is then normally used for static key generation. In this
+configuration, the option flags <strong>-oappend-cr</strong>, <strong>-ostatic-ticket</strong>,
+<strong>-ostrong-pw1</strong>, <strong>-ostrong-pw2</strong> and <strong>-oman-update</strong> are set by default.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-z</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+delete configuration in selected slot.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-s</strong><em>file</em>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+save configuration to file instead of key (if file
+is -, send to stdout).
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-i</strong><em>file</em>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+read configuration from file (if file is -, read
+from stdin). Configuration import is only valid for the ycfg format.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-f</strong><em>format</em>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+format to be used with <strong>-s</strong> and <strong>-i</strong>. Valid options are <strong>ycfg</strong> and <strong>legacy</strong>.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-a</strong>[<em>xxx</em>]
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+the AES secret key as a 32 (or 40 for OATH-HOTP/HMAC CHAL-RESP) char hex value (not modhex) (none to prompt for key on stdin). If <strong>-a</strong> is not used a random key will be generated.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-c</strong>[<em>xxx</em>]
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+a 12 char hex value (not modhex) to use as the access
+code for programming. NOTE: this does NOT SET the access code. That is
+done with <strong>-oaccess</strong><em>=</em>. If no argument is provided the code is prompted for on stdin.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-o</strong><em>option</em>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+change configuration option. Possible option arguments are:
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<strong>fixed</strong>=<em>fffffffffff</em>
+</dt>
+<dd>
+<p>
+The modhex <em>public identity</em> of the YubiKey, 0-32 characters long
+(encoding up to 16 bytes). It’s possible to give the identity in hex as
+well, just prepend the value with ’h:’. The fixed part is emitted before
+the OTP when the button on the YubiKey is pressed. It can be used as an
+identifier for the user, for example.
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>uid</strong>[=<em>uuuuuu</em>]
+</dt>
+<dd>
+<p>
+The uid part of the generated OTP, also called <em>private identity</em>, in hex. Must be 12 characters long. The uid is 6 bytes of static data that is included (encrypted) in every OTP, and is used to validate that an OTP was in fact encrypted with the AES key shared between the YubiKey and the validation service. It cannot be used to identify the YubiKey as it is only readable to those that know the AES key. If no argument is provided the uid is prompted for on stdin.
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>access</strong>[=<em>fffffffffff</em>]
+</dt>
+<dd>
+<p>
+New hex access code to set. Must be 12 characters long. If an access code is set, it will be required for subsequent reprogramming of the YubiKey. If no argument is provided code is prompted for on stdin.
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>oath-imf</strong>=<em>xxx</em>
+</dt>
+<dd>
+<p>
+Set OATH Initial Moving Factor. This is the initial counter value for the YubiKey. This should be a value between 0 and 1048560, evenly dividable by 16.
+</p>
+</dd>
+<dt class="hdlist1">
+<em><span class="-">ticket-flag</span></em>
+</dt>
+<dd>
+<p>
+Set/clear ticket flag, see the section <a href="#ticket-flags"><em>Ticket Flags</em></a>.
+</p>
+</dd>
+<dt class="hdlist1">
+<em><span class="-">configuration-flag</span></em>
+</dt>
+<dd>
+<p>
+Set/clear configuration flag, see the section <a href="#configuration-flags"><em>Configuration flags</em></a>.
+</p>
+</dd>
+</dl></div>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-y</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+always commit without prompting.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-d</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+dry-run, run without writing a YubiKey.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-v</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+be more verbose.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-h</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+display help.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-V</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+display version.
+</p>
+</td>
+</tr>
+</table></div>
+<div class="sect2">
+<h3 id="_yubikey_neo_only">YubiKey Neo only</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong>-n</strong> URI
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+program NFC NDEF URI.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-t</strong> text
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+program NFC NDEF text.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_3_and_4_only">YubiKey 3 and 4 only</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong>-m</strong> mode
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+set device configuration for the YubiKey. It is parsed in the form
+<em>mode:cr_timeout:autoeject_timeout</em><br/>
+ where mode is:<br/>
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+0
+</dt>
+<dd>
+<p>
+OTP device only.
+</p>
+</dd>
+<dt class="hdlist1">
+1
+</dt>
+<dd>
+<p>
+CCID device only.
+</p>
+</dd>
+<dt class="hdlist1">
+2
+</dt>
+<dd>
+<p>
+OTP/CCID composite device.
+</p>
+</dd>
+<dt class="hdlist1">
+3
+</dt>
+<dd>
+<p>
+U2F device only.
+</p>
+</dd>
+<dt class="hdlist1">
+4
+</dt>
+<dd>
+<p>
+OTP/U2F composite device.
+</p>
+</dd>
+<dt class="hdlist1">
+5
+</dt>
+<dd>
+<p>
+U2F/CCID composite device.
+</p>
+</dd>
+<dt class="hdlist1">
+6
+</dt>
+<dd>
+<p>
+OTP/U2F/CCID composite device.
+ Add 80 to set MODE_FLAG_EJECT, for example: 81<br/>
+ cr_timeout is the timeout in seconds for the YubiKey to wait on button
+press for challenge response (default is 15)<br/>
+ autoeject_timeout is the timeout in seconds before the card is
+automatically ejected in mode 81
+</p>
+</dd>
+</dl></div>
+</td>
+</tr>
+</table></div>
+<div class="paragraph"><p>Removing OTP mode also disables communication between ykpersonalize and
+the YubiKey. Further mode changes will have to be done with ykneomgr (for CCID mode)
+or u2f-host (for U2F mode).</p></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_3_and_above">YubiKey 3 and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong>-S</strong><em>0605…</em>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+set the scanmap to be used with the YubiKey. It must be 45 unique
+bytes as 90 characters. Leave argument empty to reset to the YubiKey’s
+default. The scanmap must be sent in the order:
+</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>cbdefghijklnrtuvCBDEFGHIJKLNRTUV0123456789!\t\r</pre>
+</div></div>
+<div class="paragraph"><p>The default scanmap in the YubiKey is:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>06050708090a0b0c0d0e0f111517181986858788898a8b8c8d8e8f9195979899271e1f202122232425269e2b28</pre>
+</div></div>
+<div class="paragraph"><p>An example for simplified U.S. Dvorak would be:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>0c110b071c180d0a0619130f120e09378c918b879c988d8a8699938f928e89b7271e1f202122232425269e2b28</pre>
+</div></div>
+<div class="paragraph"><p>Or for a French azerty keyboard (digits are shifted):</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>06050708090a0b0c0d0e0f111517181986858788898a8b8c8d8e8f9195979899a79e9fa0a1a2a3a4a5a6382b28</pre>
+</div></div>
+<div class="paragraph"><p>Or for a French BÉPO keyboard (French Dvorak):</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>0b140c0938363707130512330f0d16188b948c89b8b6b787938592b38f8d9698a79e9fa0a1a2a3a4a5a69c2b28</pre>
+</div></div>
+<div class="paragraph"><p>And a Turkish example (has a dotless i instead of usual i):</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>06050708090a0b340d0e0f111517181986858788898a8b8c8d8e8f9195979899271e1f202122232425269e2b28</pre>
+</div></div>
+<div class="paragraph"><p>Note that you must remove any whitespace present in these examples before using the values.</p></div>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_5_and_above">YubiKey 5 and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong>-D</strong><em>0403…</em>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Set the deviceinfo to use with this YubiKey.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_2_3_and_above">YubiKey 2.3 and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong>-u</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Update existing configuration, rather than overwriting. Only
+possible if the slot is configured as updatable.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>-x</strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Swap configuration slot 1 and 2 inside the YubiKey. Only
+possible if both slots are configured as updatable.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ticket_flags">Ticket flags</h2>
+<div class="sectionbody">
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">tab-first</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Send a tab character as the first character. This is usually used to
+move to the next input field.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">append-tab1</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Send a tab character between the fixed part and the one-time password
+part. This is useful if you have the fixed portion equal to the user
+name and two input fields that you navigate between using tab.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">append-tab2</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Send a tab character as the last character.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">append-delay1</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Add a half-second delay before sending the one-time password part. This
+option is only valid for firmware 1.x and 2.x.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">append-delay2</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Add a half-second delay after sending the one-time password part. This
+option is only valid for firmware 1.x and 2.x.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">append-cr</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Add a carriage return after sending the one-time password part.
+</p>
+</td>
+</tr>
+</table></div>
+<div class="sect2">
+<h3 id="_yubikey_2_0_firmware_and_above">YubiKey 2.0 firmware and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">protect-cfg2</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+When written to configuration 1, block later updates to configuration 2.
+When written to configuration 2, prevent configuration 1 from having the lock bit set.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_2_1_firmware_and_above">YubiKey 2.1 firmware and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">oath-hotp</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Set OATH-HOTP mode rather than YubiKey mode. In this mode, the token
+functions according to the OATH-HOTP standard.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_2_2_firmware_and_above">YubiKey 2.2 firmware and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">chal-resp</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Set challenge-response mode.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration_flags">Configuration flags</h2>
+<div class="sectionbody">
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">send-ref</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Send a reference string of all 16 modhex characters before the fixed part. When combined
+with <strong>-ostrong-pw2</strong> this sends a <em>!</em> before the rest of the string.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">pacing-10ms</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Add a 10ms delay between key presses.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">pacing-20ms</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Add a 20ms delay between key presses.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">static-ticket</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Output a fixed string rather than a one-time password. The password is
+still based on the AES key and should be hard to guess and impossible to
+remember.
+</p>
+</td>
+</tr>
+</table></div>
+<div class="sect2">
+<h3 id="_yubikey_1_x_firmware_only">YubiKey 1.x firmware only</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">ticket-first</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Send the one-time password rather than the fixed part first.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">allow-hidtrig</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Allow trigger through HID/keyboard by pressing caps-, num or scroll-lock
+twice. Not recommended for security reasons.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_2_0_firmware_and_above_2">YubiKey 2.0 firmware and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">short-ticket</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Limit the length of the static string to max 16 digits. This flag only
+makes sense with the <strong>-ostatic-ticket</strong> option. When <strong>-oshort-ticket</strong> is
+used without <strong>-ostatic-ticket</strong> it will program the YubiKey in "scan-code
+mode", in this mode the key sends the contents of fixed, uid and key as
+raw keyboard scancodes. For example, by using the fixed string
+<em>h:8b080f0f122c9a12150f079e</em> in this mode it will send <em>Hello World!</em> on
+a qwerty keyboard. This mode sends raw scan codes, so output will differ
+between keyboard layouts.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">strong-pw1</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Upper-case the two first letters of the output string. This is for
+compatibility with legacy systems that enforce both uppercase and
+lowercase characters in a password and does not add any security.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">strong-pw2</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Replace the first eight characters of the modhex alphabet with the
+numbers 0 to 7. Like <strong>-ostrong-pw1</strong>, this is intended to support
+legacy systems.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">man-update</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Enable user-initiated update of the static password. Only makes sense
+with the <strong>-ostatic-ticket</strong> option. This is only valid for firmware 2.x.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_2_1_firmware_and_above_2">YubiKey 2.1 firmware and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">oath-hotp8</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Generate an 8-digit HOTP rather than a 6-digit one.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">oath-fixed-modhex1</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Send the first byte of the fixed part as modhex.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">oath-fixed-modhex2</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Send the first two bytes of the fixed part as modhex.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">oath-fixed-modhex</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Send the fixed part is as modhex.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>oath-id</strong>=m:OOTTUUUUUUUU
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Configure OATH token id with a provided value. See description of this
+option under the 2.2 section for details, but note that a YubiKey 2.1
+key can’t report its serial number and thus a token identifier value
+must be specified.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_2_2_firmware_and_above_2">YubiKey 2.2 firmware and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">chal-yubico</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Yubico OTP challenge-response mode.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">chal-hmac</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Generate HMAC-SHA1 challenge responses.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">hmac-lt64</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Calculate HMAC on less than 64 bytes input. Whatever is in the last byte
+of the challenge is used as end of input marker (backtracking from end
+of payload).
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">chal-btn-trig</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+The YubiKey will wait for the user to press the key (within 15 seconds)
+before answering the challenge.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">serial-btn-visible</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+The YubiKey will emit its serial number if the button is pressed during
+power-up. This option is only valid for the 2.x firmware line.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">serial-usb-visible</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+The YubiKey will indicate its serial number in the USB iSerial field.
+This option is not available in the 3.0 and 3.1 firmwares.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">serial-api-visible</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+The YubiKey will allow its serial number to be read using an API call.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong>oath-id</strong>[=m:OOTTUUUUUUUU]
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Configure OATH token id with a provided value, or if used without a
+value use the standard YubiKey token identifier.
+</p>
+</td>
+</tr>
+</table></div>
+<div class="paragraph"><p>The standard OATH token id for a Yubico YubiKey is (modhex) OO=ub,
+TT=he, (decimal) UUUUUUUU=serial number.</p></div>
+<div class="paragraph"><p>The reason for the decimal serial number is to make it easy for humans
+to correlate the serial number on the back of the YubiKey to an entry in
+a list of associated tokens for example. Other encodings can be
+accomplished using the appropriate oath-fixed-modhex options.</p></div>
+<div class="paragraph"><p>Note that the YubiKey must be programmed to allow reading its serial
+number, otherwise automatic token id creation is not possible.</p></div>
+<div class="paragraph"><p>See section "5.3.4 - OATH-HOTP Token Identifier" of the YubiKey manual
+<a href="http://yubico.com/files/YubiKey_manual-2.0.pdf" rel="noopener noreferrer" target="_blank">http://yubico.com/files/YubiKey_manual-2.0.pdf</a> for further details.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_2_3_firmware_and_above">YubiKey 2.3 firmware and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">use-numeric-keypad</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Send scancodes for numeric keypad keypresses when sending digits - helps
+with some keyboard layouts. This option is only valid for the 2.x
+firmware line.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">fast-trig</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Faster triggering when only configuration 1 is available. This option is
+always in effect on firmware versions 3.0 and above.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">allow-update</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Allow updating (or swapping) of certain parameters in a configuration at
+a later time.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">dormant</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Hides/unhides a configuration stored in a YubiKey.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_yubikey_2_4_3_1_firmware_and_above">YubiKey 2.4/3.1 firmware and above</h3>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+<strong><span class="-">led-inv</span></strong>
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Inverts the behaviour of the led on the YubiKey.
+</p>
+</td>
+</tr>
+</table></div>
+</div>
+<div class="sect2">
+<h3 id="_oath_hotp_mode">OATH-HOTP Mode</h3>
+<div class="paragraph"><p>When using OATH-HOTP mode, a HMAC key of 160 bits (20 bytes, 40 chars of
+hex) can be supplied with <strong>-a</strong>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_challenge_response_mode">Challenge-response Mode</h3>
+<div class="paragraph"><p>In <strong>CHAL-RESP</strong> mode, the token will NOT generate any keypresses when the
+button is pressed (although it is perfectly possible to have one slot
+with a keypress-generating configuration, and the other in
+challenge-response mode). Instead, a program capable of sending USB HID
+feature reports to the token must be used to send it a challenge, and
+read the response.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_modhex">Modhex</h3>
+<div class="paragraph"><p>Modhex is a way of writing hex digits where the “digits” are chosen for
+being in the same place on most keyboard layouts.
+To convert from hex to modhex, you can use:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>tr "[0123456789abcdef]" "[cbdefghijklnrtuv]"</pre>
+</div></div>
+<div class="paragraph"><p>To convert the other way, use:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>tr "[cbdefghijklnrtuv]" "[0123456789abcdef]"</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_examples">EXAMPLES</h3>
+<div class="paragraph"><p>Programming for YubiCloud:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>ouid=`dd if=/dev/urandom 2&gt;/dev/null | tr -d '[:upper:]' | tr -cd '[:xdigit:]' | fold -w12 | head -1`
+ofixed=ff`dd if=/dev/urandom 2&gt;/dev/null | tr -d '[:upper:]' | tr -cd '[:xdigit:]' | fold -w10 | head -1`
+ykpersonalize -1 -ouid=h:$ouid -ofixed=h:$ofixed</pre>
+</div></div>
+<div class="paragraph"><p>This will program a key with a random 6 byte uid and a 12 character fixed
+string starting with vv. This is suitable for upload to YubiCloud at
+<a href="https://upload.yubico.com/" rel="noopener noreferrer" target="_blank">https://upload.yubico.com/</a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_bugs">BUGS</h3>
+<div class="paragraph"><p>Report ykpersonalize bugs in the issue tracker
+<a href="https://github.com/Yubico/yubikey-personalization/issues" rel="noopener noreferrer" target="_blank">https://github.com/Yubico/yubikey-personalization/issues</a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_see_also">SEE ALSO</h3>
+<div class="paragraph"><p>The ykpersonalize home page
+<a href="https://developers.yubico.com/yubikey-personalization/">https://developers.yubico.com/yubikey-personalization/</a></p></div>
+<div class="paragraph"><p>YubiKeys can be obtained from Yubico <a href="http://www.yubico.com/" rel="noopener noreferrer" target="_blank">http://www.yubico.com/</a></p></div>
+</div>
+</div>
+</div>
+</div>
+<!-- End main content -->
+</div>
+</div>
+</div>
+<footer class="container">
+<div class="row" style="margin-top:30px;padding-top:20px;border-top:1px solid #eee;">
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%">
+<strong><a href="/" style="color:#000">DEV.YUBICO</a></strong><br/>
+<a href="/Passkeys">Passkeys</a><br/>
+<a href="/WebAuthn">WebAuthn</a><br/>
+<a href="/CTAP">CTAP</a><br/>
+<a href="/OTP">OTP</a><br/>
+<a href="/OATH">OATH</a><br/>
+<a href="/PGP">PGP</a><br/>
+<a href="/PIV">PIV</a><br/>
+<a href="/Secure_Domain">Secure Domain</a><br/>
+<a href="/YubiHSM2">YubiHSM2</a><br/>
+<a href="/Software_Projects">Software Projects</a><br/>
+</p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong>RESOURCES</strong><br/>
+<a href="https://www.yubico.com/store/" rel="noopener noreferrer" target="_blank">Buy YubiKeys</a><br/>
+<a href="https://www.yubico.com/blog/" rel="noopener noreferrer" target="_blank">Blog</a><br/>
+<a href="https://www.yubico.com/email-subscription/" rel="noopener noreferrer" target="_blank">Newsletter</a><br/>
+<a href="https://forum.yubico.com/" rel="noopener noreferrer" target="_blank">Yubico Forum Archive</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong><a href="https://www.yubico.com/" rel="noopener noreferrer" style="color:#000" target="_blank">YUBICO.COM</a></strong><br/>
+<a href="https://www.yubico.com/why-yubico/" rel="noopener noreferrer" target="_blank">Why Yubico</a><br/>
+<a href="https://www.yubico.com/about/about-us/" rel="noopener noreferrer" target="_blank">About Yubico</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/cookie-notice/" rel="noopener noreferrer" target="_blank">Cookie</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/" rel="noopener noreferrer" target="_blank">Legal</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/privacy-notice/" rel="noopener noreferrer" target="_blank">Privacy</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/yubico-website-terms-conditions/" rel="noopener noreferrer" target="_blank">Terms of use</a><br/>
+<a href="https://www.yubico.com/trust/" rel="noopener noreferrer" target="_blank">Trust</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:1em;font-size:90%"> </p>
+<table align="right" cellpadding="0" cellspacing="0" style="color:#9aca3c">
+<tbody>
+<tr>
+<td style="padding:10px"><a href="https://www.yubico.com/feed/" rel="noopener noreferrer" target="_blank" title="Blog RSS"><i class="fa fa-rss"></i></a></td>
+<td style="padding:10px"><a href="https://twitter.com/yubico" rel="noopener noreferrer" target="_blank" title="Twitter"><i class="fa-brands fa-twitter"></i></a></td>
+<td style="padding:10px"><a href="https://www.facebook.com/Yubikey" rel="noopener noreferrer" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a></td>
+<td style="padding:10px"><a href="https://www.youtube.com/c/Yubico" rel="noopener noreferrer" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a></td>
+<td style="padding:10px 0 10px 10px"><a href="https://github.com/Yubico" rel="noopener noreferrer" target="_blank" title="GitHub"><i class="fa-brands fa-github"></i></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</footer>
+<script src="/vendor/jquery/dist/jquery.min.js"></script>
+<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/vendor/jquery.tablesorter/dist/js/jquery.tablesorter.min.js"></script>
+<script src="/js/code-tabs.js"></script>
+<script src="/js/main.js"></script>
+<!-- Cookie Consent -->
+<script defer="" src="/vendor/vanilla-cookieconsent/dist/cookieconsent.js"></script>
+<script defer="" src="/js/cookieconsent-init.js"></script>
+<!-- End Cookie Consent -->
+</body>
+</html>

@@ -17,6 +17,12 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <summary>
 /// Configuration flags (CFGFLAG) controlling OTP slot behavior.
 /// </summary>
+/// <remarks>
+/// Names sharing a bit are mode-specific aliases, not independent options. For example, 0x02 selects
+/// ticket ordering, short static output, or eight-digit HOTP depending on mode; 0x04/0x08 mean keyboard
+/// pacing or HMAC short-challenge/challenge touch. Use the mode-specific configuration builders.
+/// Legacy flags are retained for their firmware-specific uses, not guaranteed on every newer key.
+/// </remarks>
 [Flags]
 public enum ConfigFlag : byte
 {
@@ -43,7 +49,8 @@ public enum ConfigFlag : byte
 }
 
 /// <summary>
-/// Defines which <see cref="ConfigFlag"/> values are valid for update operations.
+/// Defines keyboard pacing bits transmitted by update operations. Their HMAC/challenge aliases do not
+/// make short-challenge or touch policy updateable; replace the configuration to change those policies.
 /// </summary>
 public static class ConfigFlagMasks
 {

@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project YubiOtp.IntegrationTests --filter \"FullyQualifiedName!~CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse\"",
+  "started": "2026-11-04T11:25:32.7283102+01:00",
+  "durationSeconds": 10.8,
+  "runDirectory": "artifacts/toolchain/runs/20261104-112532-728-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 10.7,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "YubiOtp.IntegrationTests",
+      "outcome": "passed",
+      "reason": "15 executed, 0 skipped",
+      "executed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261104-112532-728-test/01-test-YubiOtp.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

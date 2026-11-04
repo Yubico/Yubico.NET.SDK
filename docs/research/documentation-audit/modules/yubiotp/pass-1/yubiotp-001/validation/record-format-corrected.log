@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/record-format.py
+PASS:42 exact source transforms;2named ordinary import removals/1file; other text preserved except import order and final newlines. Roslyn proof is separate.
+
+EXIT=0

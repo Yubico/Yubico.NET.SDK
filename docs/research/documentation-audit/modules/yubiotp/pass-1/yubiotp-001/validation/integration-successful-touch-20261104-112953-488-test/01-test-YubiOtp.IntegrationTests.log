@@ -1,0 +1,32 @@
+$ dotnet test src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.YubiOtp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.YubiOtp.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.IntegrationTests.dll
+Test run for /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.YubiOtp.IntegrationTests
+[xUnit.net 00:00:00.11]   Discovered:  Yubico.YubiKit.YubiOtp.IntegrationTests
+[xUnit.net 00:00:00.13]   Starting:    Yubico.YubiKit.YubiOtp.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.47]     Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [OUTPUT] Prerequisites: Firmware=0.0.1, Slot1Configured=False, Slot2Configured=False, Slot2TouchTriggered=False
+[xUnit.net 00:00:00.51]     Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [OUTPUT] Post-configuration status: Slot2IsTouchTriggered=False (reported for inspection; HID wait behavior is authoritative for this probe).
+[xUnit.net 00:00:00.52]     Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [OUTPUT] [2026-11-04T10:29:59.0178013+00:00] YubiOTP user-presence request: Basis=DeviceWaiting, Slot=Two. Touch the YubiKey now.
+[xUnit.net 00:00:03.79]     Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [OUTPUT] [2026-11-04T10:30:02.2857380+00:00] YubiOTP user-presence resolution: Outcome=Completed.
+[xUnit.net 00:00:03.83]     Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [OUTPUT] Cleanup: deleted the test-created configuration from YubiOTP slot 2.
+[xUnit.net 00:00:03.85]   Finished:    Yubico.YubiKit.YubiOtp.IntegrationTests
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [3 s]
+
+Test Run Successful.
+Total tests: 1
+     Passed: 1
+ Total time: 4.1816 Seconds

@@ -1,0 +1,40 @@
+{
+  "access_date": "2026-11-04",
+  "sources": [
+    {
+      "file": "personalization-1.20.0-ykpers.c",
+      "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/v1.20.0/ykpers.c",
+      "status": 200,
+      "bytes": 31870,
+      "sha256": "85ce6a16ece6869d93dd186966fcb54a054dc013520b2f9649c44c32fc6fb495"
+    },
+    {
+      "file": "nfc-uri-rtd-official.html",
+      "url": "https://nfc-forum.org/build/specifications/uri-rtd-technical-specification/",
+      "status": 200,
+      "bytes": 28321,
+      "sha256": "2f060626744b4c0fb46b6bf272a4a0ed42733d7782ff7523cc577e9891bb7f50"
+    },
+    {
+      "file": "nfc-text-rtd-official.html",
+      "url": "https://nfc-forum.org/build/specifications/text-rtd-technical-specification/",
+      "status": 200,
+      "bytes": 28324,
+      "sha256": "84b1d09bc03112d61cbd1449d2dd78060c079c613637c54be6d3f36c238b67a0"
+    },
+    {
+      "file": "nfc-uri-rtd-1.0-mirror.pdf",
+      "url": "https://berlin.ccc.de/~starbug/felica/NFCForum-TS-RTD_URI_1.0.pdf",
+      "status": 200,
+      "bytes": 173937,
+      "sha256": "f4a5aeb53cfe96dee24dcc969b7e30c07e5296b97bb9b545025bc35af51b3b56"
+    },
+    {
+      "file": "nfc-text-rtd-1.0-mirror.pdf",
+      "url": "https://berlin.ccc.de/~starbug/felica/NFCForum-TS-RTD_Text_1.0.pdf",
+      "status": 200,
+      "bytes": 150406,
+      "sha256": "934153cabaa887726cf5c4b1f551f6bd4ea3902e507d650349f5d9a329c96535"
+    }
+  ]
+}

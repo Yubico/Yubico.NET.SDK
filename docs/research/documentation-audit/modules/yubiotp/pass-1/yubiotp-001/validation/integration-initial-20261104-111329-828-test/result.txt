@@ -1,0 +1,11 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project YubiOtp --filter "FullyQualifiedName!~CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                      11.3s  No tests were executed (no matching tests, or every test was skipped)
+Projects (test):
+  ○ NO-TESTS  YubiOtp.UnitTests         no test matches --filter
+  ○ NO-TESTS  YubiOtp.IntegrationTests  all 15 tests skipped; these tests need a YubiKey: is one with the required firmware/capabilities connected?
+Totals: projects: 0 passed, 0 failed, 2 with no tests executed; tests: 0 executed, 0 failed, 15 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-111329-828-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

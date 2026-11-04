@@ -1,0 +1,320 @@
+{
+  "baseline": "95e5ccaeda33954c21f2a38058d4f66b5f208787",
+  "files": [
+    {
+      "path": "src/YubiOtp/CLAUDE.md",
+      "bytes": 7770,
+      "sha256": "a089f9d30a9b22fd0a9ca6c648e38f28042696b71fa4d496a0a4f129701465a8"
+    },
+    {
+      "path": "src/YubiOtp/PACKAGE_README.md",
+      "bytes": 1216,
+      "sha256": "2c763883c8590fe486807cde76b967e52596f5b9520aa91375ff66d3a6a427cc"
+    },
+    {
+      "path": "src/YubiOtp/README.md",
+      "bytes": 8720,
+      "sha256": "dcda17d13127bd64055c031e0eb3cdeecf7ca14f984d3c01efc5ec124ff3658d"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/CliOptions.cs",
+      "bytes": 18373,
+      "sha256": "70ad3c548e2e62566e1ce615f163165061065c5554e7c3421fae070f676969f9"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs",
+      "bytes": 2275,
+      "sha256": "97f225c25ab252eaf51c48e3dd19e384bc72e38c548eb26692ac40e14de2cb38"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs",
+      "bytes": 3279,
+      "sha256": "f89a91dba960295d00ff2ef242b9096e758ae70c91e3546bc2b6cafbfa341287"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/DeleteCommand.cs",
+      "bytes": 2177,
+      "sha256": "2eb5facfeab1b0c5e03602ab3997600fe769e6f4e3fb27a1c79b9c79bf5cdb66"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs",
+      "bytes": 3067,
+      "sha256": "aa9a03e73bac66b64bec955b6102d22b97bf55de2849af45b855575732f6c3ee"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/InfoCommand.cs",
+      "bytes": 3738,
+      "sha256": "83039cd35c4207b9646513b60cd35a00baa9c7e551d53c8d05bcf92b5459631d"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs",
+      "bytes": 2902,
+      "sha256": "208130947440c0b0e9b9dc2ccb554fd7580539274c79f66d371b5515b68aa8c3"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs",
+      "bytes": 2942,
+      "sha256": "14e7a2bbde755ab75275ba37a2b90d37d810a63bdb434cf8d6a266e04afbfc29"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs",
+      "bytes": 3803,
+      "sha256": "7fbdc2ee0402c2bf8a4759d03001764c000aca8843440c8ceaa0252a1765deef"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs",
+      "bytes": 1555,
+      "sha256": "cbd6b361b2677a42e34400e03804020fdeea9546a5187c2b33b83fcedd88f025"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs",
+      "bytes": 5537,
+      "sha256": "89f2711877fcbe1d5ca857a8f4e1ba27b030dc9fcba566ec2b8208cca986fd62"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+      "bytes": 11374,
+      "sha256": "4f66b7ae8b7860d0e9e64bcfeb679ae9bc844afef178625b15822c0fa1f5b755"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+      "bytes": 1019,
+      "sha256": "1085ebedfad2fc0669bab7c600a4ac962cec36d3c237e9f0ff1801ee6f936028"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/OutputHelper.cs",
+      "bytes": 4091,
+      "sha256": "0dfcf56e707af658d4a6524ed2dcb0e5a6395bf65d1d14baa1ecbfa14362b35b"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/Program.cs",
+      "bytes": 2082,
+      "sha256": "1c2cc8ff67000673694ff6af2a6ad00016987670033ec4c7e420183c4ddc61f1"
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+      "bytes": 5138,
+      "sha256": "e28ce8029c7115ca948f1d32f0b82c1e038ca5824e50fe19da7628c93b495b7f"
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/IYubiOtpBackend.cs",
+      "bytes": 3037,
+      "sha256": "4f0e5bf874cd54316e73b23e13163de03546b49694551e3385830ab144b8a3fa"
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+      "bytes": 8374,
+      "sha256": "88ab6952a68322054ff683e78145e634be54ac16baf2b9ee410acd9ed5fe25fb"
+    },
+    {
+      "path": "src/YubiOtp/src/ConfigFlag.cs",
+      "bytes": 1491,
+      "sha256": "0055c0f6af4358a88e1572ed252c1ec2b53b719d30638c2a004662df657c8676"
+    },
+    {
+      "path": "src/YubiOtp/src/ConfigSlot.cs",
+      "bytes": 1111,
+      "sha256": "79d6b7ec6db9f2ce0be957296147c9bf443c360d8d66da3bb22474685089b45d"
+    },
+    {
+      "path": "src/YubiOtp/src/ConfigState.cs",
+      "bytes": 5301,
+      "sha256": "324ac23000af6c0e9d27b3c4e707f8defbc33bb6a0d682a8557534687fb0094a"
+    },
+    {
+      "path": "src/YubiOtp/src/ExtendedFlag.cs",
+      "bytes": 1480,
+      "sha256": "06e97f1ee4db3ae6ea6d58b54594556677a03d17a78a9bfbc90b62b6e2141feb"
+    },
+    {
+      "path": "src/YubiOtp/src/HmacSha1SlotConfiguration.cs",
+      "bytes": 3075,
+      "sha256": "dd67d6389bb18a390e8c61e4fcffd165dfc702174b7d817a31b7ac8af2a6009e"
+    },
+    {
+      "path": "src/YubiOtp/src/HotpSlotConfiguration.cs",
+      "bytes": 4016,
+      "sha256": "8045152bb459fbfb218ae1e54b55d66e5aa4355c806632953f51dcdb8d0c073d"
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "bytes": 7128,
+      "sha256": "025ea30da7944e3534168fa1c714242e4f4262775079be9406f31dbd8639cea5"
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+      "bytes": 15714,
+      "sha256": "4df5806f6dc7f4c6d638452ccd27536feffe2f13d8f884b4f22441d93e6579ec"
+    },
+    {
+      "path": "src/YubiOtp/src/KeyboardSlotConfiguration.cs",
+      "bytes": 5190,
+      "sha256": "ee3a14283a979e3decc5fbb74ef4797ecf26c4f125703135dbdaeaed7e605fb7"
+    },
+    {
+      "path": "src/YubiOtp/src/NdefType.cs",
+      "bytes": 768,
+      "sha256": "92bacfe155c4fc309ac1099d7c55b8b989d112fc91dda2598e15642a22e39915"
+    },
+    {
+      "path": "src/YubiOtp/src/PublicAPI.Shipped.txt",
+      "bytes": 17,
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+      "bytes": 26567,
+      "sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47"
+    },
+    {
+      "path": "src/YubiOtp/src/Slot.cs",
+      "bytes": 2189,
+      "sha256": "8acbbe8c6f4613a9fdd3aff3131c7f6da0177b2a9608b692a403ec92307ac103"
+    },
+    {
+      "path": "src/YubiOtp/src/SlotConfiguration.cs",
+      "bytes": 11870,
+      "sha256": "93e9954d6f4d72408c108e388d9feaea8c63a1978d6256a2e24600f0b9be62ec"
+    },
+    {
+      "path": "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+      "bytes": 6364,
+      "sha256": "4ddb818c22bf2cab1bfd5772f532b35f8b0d067f3bd98259784c265f7521238e"
+    },
+    {
+      "path": "src/YubiOtp/src/StaticTicketSlotConfiguration.cs",
+      "bytes": 2093,
+      "sha256": "e131d39da2e755697e83621f35cd125aea16833506a15130b02595f480c2ec8a"
+    },
+    {
+      "path": "src/YubiOtp/src/TicketFlag.cs",
+      "bytes": 1870,
+      "sha256": "b4526a3f3edfb75d0a13cc51e3010c05c19fc51f092abb1f2931c841083ddd3f"
+    },
+    {
+      "path": "src/YubiOtp/src/UpdateConfiguration.cs",
+      "bytes": 4845,
+      "sha256": "c85060da47c6df5cf130de20ef2dac679769d45b113f805b36217f8936a93fc4"
+    },
+    {
+      "path": "src/YubiOtp/src/YubiOtpConstants.cs",
+      "bytes": 1604,
+      "sha256": "84c3b5931f78eb21f2c1c1fc4cd4ea7b8fff01fec49063790ac39b09dbc492a9"
+    },
+    {
+      "path": "src/YubiOtp/src/YubiOtpSession.cs",
+      "bytes": 21790,
+      "sha256": "f70415dab0f942b95c3437dcd21e8c9539f76b2102120f241fd38cf32e3c8f4d"
+    },
+    {
+      "path": "src/YubiOtp/src/YubiOtpSlotConfiguration.cs",
+      "bytes": 1871,
+      "sha256": "e8f6fe2106c156bf0a0c79af4920ed2a64bfac52a4359e6ecf377653c29fddff"
+    },
+    {
+      "path": "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj",
+      "bytes": 936,
+      "sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc"
+    },
+    {
+      "path": "src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs",
+      "bytes": 2626,
+      "sha256": "ece03f1c2f088f57fb8bb3f2082fc553c40ff1a7bfaea34aaf286b41f87a3ff0"
+    },
+    {
+      "path": "src/YubiOtp/tests/CLAUDE.md",
+      "bytes": 485,
+      "sha256": "13105c060e93015c839338e3fa90278abb994ad83b89592f1892ebded530cb06"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpHmacChallengeKnownAnswerTests.cs",
+      "bytes": 4430,
+      "sha256": "34768faf9caea1d539d87ac0af413e2e4c56995715538ce9f9d8b5a6211fea6b"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpProtectSlot2Tests.cs",
+      "bytes": 5632,
+      "sha256": "a46c075d93fc56862cd08ee07d4a9d663f418910456d506c85381bbae8637d5d"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/UserPresenceProbeTests.cs",
+      "bytes": 7609,
+      "sha256": "ac3ba249a2b5b3017a5c61518552ad258dd4c3675a5409181a3335721f8a6846"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSessionIntegrationTests.cs",
+      "bytes": 5064,
+      "sha256": "429d9a29ebc6fe91a1e4e86b630d9f4ed8a9e71dd71b73e36b27b20be4d490bc"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSlotConfigTests.cs",
+      "bytes": 6851,
+      "sha256": "78d16bb75f1be9d02e1f78e65112caba4c22ec01f9c9c82f99faa6e8e72db0ab"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj",
+      "bytes": 1821,
+      "sha256": "efafa99712b038addecf307481addcd68351dfe9b2822da3f0bf95f6ade52317"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/xunit.runner.json",
+      "bytes": 201,
+      "sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/AuditV2/YubiOtpAuditReproTests.cs",
+      "bytes": 2160,
+      "sha256": "e72990141d4c13a773dd6b2a376fa5db726a22d81b4c95fb68b3d904119d5769"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/ConfigStateTests.cs",
+      "bytes": 5223,
+      "sha256": "3973b0f765450aa39a90abe04892978d5cb898f2c19b16ac62cfcf2a4a35da2a"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/HidBackendTests.cs",
+      "bytes": 20927,
+      "sha256": "4f77f4eed6cb1e2e222679a93070d532644171cf05761e55ba5524e3e679d855"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "bytes": 9758,
+      "sha256": "f3add9471e43695627f41afbc8c45cc79996ef2ea5a6612590ac8e5df17dc6c6"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationEncapsulationTests.cs",
+      "bytes": 4063,
+      "sha256": "a7928ba0dd8cfaca8c0ddb9ddd2a621796f5e950540afe19fc4bc99b83857b73"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+      "bytes": 35935,
+      "sha256": "060e39987329f25d84d8f582b47f7de5af572d7f6f329655f7062f7cd4479fce"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs",
+      "bytes": 18380,
+      "sha256": "0990dfa2f0b1ae381862c5f5b192b2d1f48aa789d880d39a4a37bc603c35613d"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpBackendLifecycleTests.cs",
+      "bytes": 1572,
+      "sha256": "eb31f5bfd42c3c2d62ca28c08289e30074c1a03b825bb71e3ab3920f88afbff8"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionTests.cs",
+      "bytes": 29010,
+      "sha256": "da84af886b34e953be60c99826950b72bc0e5ba75efde14627d4be2cac18cab4"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj",
+      "bytes": 947,
+      "sha256": "c80a84f2acd59f0d1c0580fd2c1d597e4a912101da65121b871a3d4584792cc3"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/xunit.runner.json",
+      "bytes": 77,
+      "sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad"
+    }
+  ]
+}

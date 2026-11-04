@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditOtp001.Hardware.IntegrationTests --filter FullyQualifiedName~HidNaturalTimeout_WithoutTouch_ResolvesTimedOutOnce_AndReopens",
+  "started": "2026-11-04T11:28:12.8214715+01:00",
+  "durationSeconds": 19.5,
+  "runDirectory": "artifacts/toolchain/runs/20261104-112812-821-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 19.5,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditOtp001.Hardware.IntegrationTests",
+      "outcome": "passed",
+      "reason": "1 executed, 0 skipped",
+      "executed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261104-112812-821-test/01-test-AuditOtp001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

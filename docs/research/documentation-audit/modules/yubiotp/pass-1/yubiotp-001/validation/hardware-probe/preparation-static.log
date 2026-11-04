@@ -1,0 +1,6 @@
+$ python3 docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/prepare-provenance.py verify
+PASS: static preparation only; 8 probe source/config records, 28 original input hashes, verified vendor passages retained, one discoverable unique host.
+PASS: Python/XML syntax, canonical integration package set/runner policy, and declared 90-second VSTest bound inspected without executing tests.
+NOT RUN: C# build/analyzers, xUnit discovery/execution, device I/O, formatter, tests or hardware validation.
+
+EXIT=0

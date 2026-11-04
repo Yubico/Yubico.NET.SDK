@@ -1,0 +1,39 @@
+"""Bind actual Csc membership and retain full text inputs after the accepted hardware runs."""
+from pathlib import Path
+import hashlib
+import json
+
+HERE=Path(__file__).resolve().parent
+ROOT=next(p for p in HERE.parents if (p/'toolchain.cs').exists())
+CAPTURE=HERE/'evidence/v1-build'
+data=json.loads((CAPTURE/'capture.json').read_text())
+DEST=HERE/'evidence/final-inputs'
+DEST.mkdir(exist_ok=False)
+project=next((HERE/'tests').rglob('*.csproj'))
+args=(CAPTURE/'csc-command-line.txt').read_text().splitlines()
+def resolve(p):return str((project.parent/p.strip('"')).resolve())
+for kind,prefix in [('resolved-references.txt','/reference:'),('analyzers.txt','/analyzer:'),('analyzer-configs.txt','/analyzerconfig:')]:
+    actual={resolve(a[len(prefix):]) for a in args if a.startswith(prefix)}
+    expected={str(Path(r['path']).resolve()) for r in data['dependency_identities'] if r['kind']==kind}
+    assert actual==expected,(kind,actual-expected,expected-actual)
+source_args={resolve(a) for a in args if a.endswith('.cs') and not a.startswith(('/reference:','/analyzer:'))}
+assert source_args=={str(Path(r['path']).resolve()) for r in data['dependency_identities'] if r['kind']=='compile-inputs.txt'}
+assert '/warnaserror+' in args and any('Microsoft.CodeAnalysis.NetAnalyzers.dll' in a for a in args)
+assert any('xunit.analyzers' in a for a in args)
+assert not any('/skipanalyzers' in a.lower() for a in args)
+rows=[]
+for r in data['dependency_identities']:
+    p=Path(r['path']);raw=p.read_bytes();h=hashlib.sha256(raw).hexdigest()
+    assert h==r['sha256'] and len(raw)==r['bytes'],p
+    if r['kind'] in ('compile-inputs.txt','analyzer-configs.txt'):
+        target=DEST/(h[:12]+'-'+p.name+'.snapshot');target.write_bytes(raw)
+        rows.append(dict(r,retained=target.name))
+for name in ['Directory.Build.props','Directory.Build.targets','Directory.Packages.props','global.json','.editorconfig']:
+    p=ROOT/name;raw=p.read_bytes();target=DEST/(name+'.snapshot');target.write_bytes(raw)
+    rows.append(dict(path=str(p),bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest(),retained=target.name))
+assets=Path('/tmp/opencode/yubiotp-001-hardware-probe/obj/project.assets.json')
+raw=assets.read_bytes();(DEST/'project.assets.json').write_bytes(raw)
+rows.append(dict(path=str(assets),bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest(),retained='project.assets.json'))
+(DEST/'manifest.json').write_text(json.dumps(dict(records=rows,checked_dependencies=len(data['dependency_identities']),
+    evidence='Actual Csc source/reference/analyzer/config sets reconcile; warnings-as-errors and pinned analyzers present; all dependency identities match final solution; no host re-execution'),indent=2)+'\n')
+print('PASS: actual Csc membership,225 dependency identities, complete source/config text and assets retained; no re-execution.')

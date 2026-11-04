@@ -27,6 +27,11 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <item><c>uid[0..6]</c> — scan code bytes 16–21</item>
 /// <item><c>key[0..16]</c> — scan code bytes 22–37</item>
 /// </list>
+/// Both constructors copy scan codes into private storage; dispose the configuration and clear mutable
+/// source buffers separately. The string overload clears its translated intermediate, not the immutable
+/// password string. Use raw translated scan codes, not UTF-8 text bytes, when source erasure matters.
+/// Legacy Manual 3.3 documents 16 characters on firmware 2.1 and 38 on 2.2; the inherited type minimum
+/// does not enforce these length-dependent capabilities.
 /// </remarks>
 public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
 {

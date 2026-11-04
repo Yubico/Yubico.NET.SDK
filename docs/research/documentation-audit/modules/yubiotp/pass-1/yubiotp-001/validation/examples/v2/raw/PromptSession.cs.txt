@@ -1,0 +1,15 @@
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
+}
+
+{
+    await using var session = await device.CreateYubiOtpSessionAsync(
+        new SessionCreationOptions
+        {
+            PreferredConnectionType = ConnectionType.HidOtp,
+            UserPresencePrompt = new TouchPrompt()
+        });
+    // Calculate a challenge-response on this session using the cleanup pattern above.
+}

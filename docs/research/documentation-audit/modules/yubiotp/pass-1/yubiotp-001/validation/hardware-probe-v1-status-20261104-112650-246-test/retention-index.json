@@ -1,0 +1,33 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-112650-246-test",
+  "files": [
+    {
+      "path": "01-test-AuditOtp001.Hardware.IntegrationTests.log",
+      "bytes": 12939,
+      "sha256": "f950d72679568a787b6d64811bb10615d7b7246244a706c7fc95e283b1777885",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 1054,
+      "sha256": "0caa1d34f043d486c4d673d02e144f88ca7e717c9708c1f0d2b3b75b12ec85ef",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 701,
+      "sha256": "8aaf18fc0a40d6ab7ca7ffe5b22543edfcffdaae23b74777dbac75ec4cfcd58c",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2437,
+      "sha256": "f1b7370b88acd590ea041787194195321509e10c57612e5d8034e4d4331746e9",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

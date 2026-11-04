@@ -1,0 +1,190 @@
+# Current documentation example compilation preparation
+
+**Authoritative extraction: `validation/examples/v2/`. Prepared, not compiled or executed.**
+Sol, 2026-11-04. Ownership is limited to this record and `validation/examples/`; no
+hardware-probe files or coordinator validation/manifest tools were changed. No builds,
+tests, formatter, hardware, commits or agents were run. No Core/other-module implementation
+was read. This is compilation preparation, not a content-review or hardware verdict.
+
+## Current bodies and counts
+
+The current README SHA-256 is
+`5ba4557b704e023e231e09208f584cdf8bbf1dc8753f8d437d8558ef2ff32eba`.
+Both retained extraction revisions include the OTP-REV-003 enrollment comment **verbatim**
+in the full HMAC provisioning block, README fence lines **146–162**. Its original-body
+SHA-256 is `9bbc4212de9bb7a38bf885f7da2bdb6cdd85b0e0b7ac21ad223b5b22168808fc`.
+No pre-correction HMAC body was extracted. The editor's original edit-report line ranges
+remain historical; `edit-corrections.md` and the current source supplied this extraction.
+
+| Surface | Actual inventory and disposition |
+| --- | --- |
+| `src/YubiOtp/README.md` | **9 C# fences**, all selected. Prompt declaration plus prompt-session fence form one complete group, so eight task groups. Bash installation/sample-launch recipes are inventoried but not C# or executed. |
+| `src/YubiOtp/CLAUDE.md` | **3 C# fences**, all selected. Both non-C# diagrams are inventoried separately. |
+| `src/YubiOtp/PACKAGE_README.md` and `src/YubiOtp/tests/CLAUDE.md` | No C# fences. Included in discovery so later additions are detected. |
+| `docs/migration/v1-to-v2.md`, assigned YubiOTP section | **2 C# fences**: current v2 recipe selected, historical v1 before block explicitly excluded. Another **22** C# fences elsewhere in the shared migration guide receive out-of-OTP dispositions, not fabricated compilation claims. |
+| Entire `docs/usage/user-interaction.md` | **4 C# fences**, not just keyword hits. The generic operation-message switch and full intent-prompt callback are selected using Core public constants through the real YubiOtp reference. The unchanged explicit PIV session/CLI prompt block is excluded as another applet's example. The implicit `client.GetAssertionAsync` block is explicitly identified as WebAuthn (`WebAuthnClient`, `PublicKeyCredentialRequestOptions`, caller cancellation token from its surrounding prose), not an OTP call or a stubbed client. |
+| Other three accepted shared docs | Discovery guarantees, migration gaps and migration map contain no C# fences. Inline designators and the four YubiOTP map entries are inventoried. Missing/historical API catalogs, symbolic signatures and ellipses are not relabeled executable examples. No YAML cleanup or boundary audit was performed. |
+| Module C# XML documentation | Scanned **all 51** module C# files, including all **42 edited** C# paths. Actual result: **one `<code>` block**, the complete non-executable 52-byte wire-layout table; **zero `<example>` blocks**; **20 `<c>` spans**. The meaningful `UseShortChallenge(false)` span is compiled with a real typed receiver. Identifier/range/literal spans and the table have explicit non-executable dispositions. |
+| Shipping OtpTool | **14 original C# source files**, not a reduced wrapper. Its actual project is built separately and all fourteen source paths must be present in actual Csc membership. Eleven comment-edited files are not mistaken for the whole executable sample. |
+
+Across the nine inventoried Markdown/YAML documents there are **40 C# fences**: **15 selected,
+25 excluded**. These include the thirteen current OTP fences, two generic shared callback
+pieces, the historical v1 block and unrelated shared examples. Meaningful inline expressions
+and the real trait annotation add five groups, yielding **19 groups** total: **18 consumer**
+and **one annotation** group. Every fenced/inline/XML item has an explicit disposition in
+`v2/manifest.json`; exclusions are not successful compilations.
+
+## Groups, wrappers and real contexts
+
+| Generated context | Groups / classes |
+| --- | --- |
+| `AuditOtp001.Examples.v2.consumer` | `ConsumerExamples`: Discovery, UpdateRetainCode, ProvisionHmac, CalculateHmac, AesTicket, StaticPassword, SwapDelete, PromptSession, BorrowedConnectionProvision, ExistingSessionChallenge, CachedState, MigrationCurrentV2, SharedOperationWording, InlineFixedChallenge, InlineConfigured, InlineReadState, InlineHidOptions. `SharedIntentPrompt` is a type-only group implemented by the real `IntentPrompt : IUserPresencePrompt`; the original README `TouchPrompt` type is also retained. |
+| `AuditOtp001.Examples.v2.annotations` | InlineTrait: original `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]` on `AnnotationExample`, using actual xUnit-v2 and Tests.Shared constants. This is a compilation-only attribute declaration, **not** a placeholder test or a device probe. No Fact/Theory or test execution is invented. |
+| Actual shipping `OtpTool.csproj` | All original sample classes/top-level program, original references/global imports and existing analyzer policy. No source body is replaced. Its existing CA1852 CLI/example waiver is retained as existing project policy, not added by these hosts. |
+
+Consumer hosts reference the real YubiOtp project, bringing its actual Core public dependency
+transitively. Annotation compilation uses the genuine YubiOtp integration project's complete
+central-package reference elements and a real Tests.Shared project reference. All compiler
+hosts import canonical root props/targets and keep warnings-as-errors and analyzers enabled.
+They are unique `Yubico.YubiKit.AuditOtp001.Examples.*.csproj` projects, not solution members;
+normal solution compilation does not automatically qualify these snippets.
+
+`raw/*.cs.txt` retains complete original bodies. Typed wrappers provide actual `IYubiKey`,
+`IConnection`, `YubiOtpSession`, `ConfigState`, owned byte arrays, callback contexts and
+cancellation-token prerequisites rather than dummy implementations. Only namespace import
+directives are separated into file scope. `using`, `await using`, braces, `try/finally`, input
+clearing and owned-output cleanup remain intact. Prompt types are placed at namespace scope
+instead of illegally preceding top-level statements. The generic wording wrapper returns the
+original `message`; type-only callback grouping adds no empty callable placeholder.
+
+The four inline expression groups bind configured-state access, one-shot state read, fixed
+challenge mode and explicit HID session options. Unqualified instance-method designators
+receive a recorded real typed receiver; no client/API is simulated. A borrowed configuration
+or session stays caller-owned. Current task groups retain their actual destructive effects,
+access-code/update prerequisites, verifier-enrollment responsibility and existing-session
+lifetime. Compilation does not supply missing application enrollment/verifier policy.
+
+## Shipping sample discovery and capture
+
+Static inspection found that toolchain build discovery requires a `Yubico.YubiKit.` path
+substring. The shipping `src/YubiOtp/examples/OtpTool/OtpTool.csproj` lacks it, so plain
+selector `OtpTool` otherwise has no buildable match in this checkout. No toolchain or
+shipping project was edited to conceal that limitation.
+
+The prepared, **unbuilt** traversal driver is
+`validation/examples/dispatch/src/Yubico.YubiKit.AuditOtp001.Examples.Shipping.OtpTool.csproj`.
+It is the one prefix-qualified `OtpTool` selector match and delegates Restore/Clean/Build/
+Rebuild directly to the **untouched actual shipping project** with the toolchain's selected
+configuration. It is an MSBuild traversal file, not a C# host, clone, fake API or reduced
+sample. The actual SDK project still imports canonical props/targets and resolves all real
+references/packages. The coordinator must accept and validate this driver before execution;
+no driver/build success is claimed here.
+
+Two process-scoped external hooks are supplied for that actual project:
+
+- `v2/otptool/OtpTool.Output.props`, via `CustomBeforeMicrosoftCommonProps`, changes only the
+  exact `MSBuildProjectName == OtpTool` project's output/intermediate paths early enough.
+- `v2/otptool/OtpTool.Capture.targets`, via `CustomAfterMicrosoftCommonTargets`, observes actual
+  Csc inputs/policy and enables command-line argument capture for that same exact project.
+
+These hooks do not replace canonical Directory.Build imports, affect another module's
+compiler policy or change source/reference/analyzer selection. They do not execute the CLI.
+All new host/sample outputs and capture files go to
+`/tmp/opencode/yubiotp-001-examples-v2-{consumer,annotations,otptool}`. Referenced SDK/shared
+projects keep their canonical build context; no binaries/cache are copied into run evidence.
+The MSBuild hook/import-order mechanism was checked against current Microsoft Learn docs
+after a Context7 lookup; the evaluated behavior is still coordinator-build evidence, not a
+static-preparation result.
+
+## Exact coordinator commands — not executed here
+
+Run from the repository root, serially with every other toolchain/device operation. Read
+the RESULT/exit status and raw compiler/analyzer diagnostics after each build. Do not use
+`test`, `run`, sample launch commands or hardware operations for this assignment.
+
+```bash
+ROOT=/home/rupicola/Code/y/Yubico.Yubikit.NET
+RUN=docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001
+EX="$RUN/validation/examples"
+
+python3 -B "$EX/verify.py" v2 prepared
+
+python3 "$RUN/validation/run-command.py" examples-v2-consumer-build dotnet toolchain.cs -- build --project AuditOtp001.Examples.v2.consumer --clean
+python3 "$RUN/validation/run-command.py" examples-v2-consumer-capture python3 -B "$EX/capture.py" v2 consumer first
+
+python3 "$RUN/validation/run-command.py" examples-v2-annotations-build dotnet toolchain.cs -- build --project AuditOtp001.Examples.v2.annotations --clean
+python3 "$RUN/validation/run-command.py" examples-v2-annotations-capture python3 -B "$EX/capture.py" v2 annotations first
+
+python3 "$RUN/validation/run-command.py" examples-v2-otptool-build env CustomBeforeMicrosoftCommonProps="$ROOT/$EX/v2/otptool/OtpTool.Output.props" CustomAfterMicrosoftCommonTargets="$ROOT/$EX/v2/otptool/OtpTool.Capture.targets" dotnet toolchain.cs -- build --project OtpTool --clean
+python3 "$RUN/validation/run-command.py" examples-v2-otptool-capture python3 -B "$EX/capture.py" v2 otptool first
+
+python3 "$RUN/validation/run-command.py" examples-v2-final-verify python3 -B "$EX/verify.py" v2 compiled --capture consumer=first --capture annotations=first --capture otptool=first --live
+```
+
+The build commands retain real toolchain logs before five-run rotation, including raw
+warnings/errors and failures. Capture immediately after the associated build, before another
+build overwrites temporary capture files. A capture pass is **not** a build-success verdict:
+the actual matching build must separately report zero compiler/analyzer warnings and errors.
+Pre-compile target output can survive a failed compile even when post-compile policy/argument
+files are missing; capture failures preserve available text plus `capture-failure.json` and
+must not be counted as compiler/example failures or successes without the real build log.
+
+Each context/attempt capture directory is exclusive-create. Retry with new log and attempt
+names; never overwrite `first` or regenerate a prior extraction. Any required body/wrapper/
+context changes need a **new extraction revision** and new compile/capture evidence. Do not
+remove assertions, original resource scopes or diagnostics to force a green result. Stop and
+record an actual content/API/context issue when the real compiler reveals one.
+
+## Evidence and final reconciliation
+
+The generator adapts frozen Security Domain host props/targets and compiler-capture approach,
+not old example bodies or results. `v2/manifest.json` pins exact source/target template hashes,
+substitutions/transforms, canonical source/configuration dependencies, the correction-record
+hash, raw/full wrapper bodies and every generated source/config file. Version-local
+`tool-source/*.snapshot` retains the exact generator/inventory/capture/verifier sources.
+
+Actual capture checks **Csc arguments against the full source, resolved-reference and analyzer
+item sets**, requires canonical .NET/xUnit analyzers in their respective contexts, and retains
+the original generated source, actual source snapshots, analyzer configs, evaluated policy,
+actual `project.assets.json`, root props/targets/package/global/editor configuration and
+compiled project. Binary reference/analyzer paths, sizes and hashes are retained without
+copying those files. For OtpTool, membership must include every one of its fourteen real
+sample source files; a successfully built traversal file alone is insufficient.
+
+Final verification rescans current documents and all module XML documentation. It detects
+changed/new/removed C# fences, meaningful inline expressions, XML code/spans and current
+mapping signatures; it checks exact raw/wrapper bodies and prepared source/config/dependency
+hashes. It permits surrounding Markdown/YAML prose and line-number shifts when compiled
+bodies/signatures stay unchanged, printing current document hashes rather than silently
+rebasing the original snapshot. C# source/config dependency drift is deliberately stricter.
+With compiled capture selectors it also binds the retained actual compiler source snapshots
+to the final current host/sample bodies and canonical config. `--live` rechecks available
+current binary/analyzer/assets identities before closeout; omit it only for explicitly
+offline retained-archive verification, not to imply current dependencies were checked.
+
+Version `v1/` and its logs remain unchanged as the initial successful **preparation-only**
+checkpoint. It already contained REV003 but did not yet solve shipping-sample discovery and
+isolated output capture. `v2/` supersedes it for coordinator execution. No compile evidence
+exists for either revision at this handoff. Root utility sources now describe v2; v1's exact
+original sources remain archived under its own `tool-source/`.
+
+## Retained source PDF identities
+
+The coordinator reports that explicit source-artifact exceptions are already added to the
+record/manifest tools. Those tools were **not changed** here. The exact three retained source
+PDFs, also listed in the extraction manifest, are:
+
+| Path relative to RUN | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `evidence/nfc-text-rtd-1.0-mirror.pdf` | 150406 | `934153cabaa887726cf5c4b1f551f6bd4ea3902e507d650349f5d9a329c96535` |
+| `evidence/nfc-uri-rtd-1.0-mirror.pdf` | 173937 | `f4a5aeb53cfe96dee24dcc969b7e30c07e5296b97bb9b545025bc35af51b3b56` |
+| `evidence/vendor-technical-manual-v3.3.pdf` | 691675 | `0f4fb9224b1247a57d9b8b13c3bc370512cf17d9027e2013104217e9032a45ca` |
+
+These source blobs were not copied, rewritten or reclassified as binaries/cache generated by
+example compilation. Retaining a mirror does not upgrade its normative/provenance status.
+
+**Static readiness:** `prepare-v2.log` and `verify-v2-prepared.log` show exit 0 for extraction,
+body/dependency reconciliation, Python/XML syntax and unique-name discovery. README REV003
+is retained exactly. C# compilation/analyzer results, traversal/hook behavior, actual Csc
+membership and all three capture contexts remain pending coordinator execution. Successful
+hardware runs owned by the coordinator do not substitute for these compilation checks.

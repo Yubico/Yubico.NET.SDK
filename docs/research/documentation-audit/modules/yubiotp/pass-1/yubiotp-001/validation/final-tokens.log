@@ -1,0 +1,49 @@
+$ dotnet /tmp/opencode/yubiotp-001-doccheck/bin/Release/net10.0/Yubico.YubiKit.AuditOtp001.Checker.dll tokens-import-removals /home/rupicola/Code/y/Yubico.Yubikit.NET docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/import-removals.json
+IMPORT EXCEPTION MANIFEST: /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/import-removals.json; SHA256=9B35B0F76F0ED47BB9D91905E11A7F1B8C2E120DDA71096959FD38C52D8C6CC6; baseline=95e5ccaeda33954c21f2a38058d4f66b5f208787
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/CliOptions.cs; SHA256=0416F55338F04E565DFDBFA17A8ADFAD1C77EFDB76528AD1B04C44558A8C7137
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs; SHA256=B92E64F18935CF39E3BAD8B81BFA66F5B50D1581A89712A036EBD6C626430093
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs; SHA256=BE1BD6B479AF7D14B5C8B10A4928BEE1CBC3D8959D98427EF577F8A6302E0122
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs; SHA256=10171EDC0C87B73D830FBC12F7A8E0008388775A9EF897A3EAF085B485A714E9
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs; SHA256=D1E090AD356B2283325846FD71292CC8DD923ACBF12E95495055A6203C99E900
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs; SHA256=F68393918ADB0B8F1390ACDC9C58D1D2BC54B49BC48B4BFA18DEAB613F4119B0
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs; SHA256=C1500D389C4C1B6B140D1DABF09E171DB3EF6426A852248F0ED0C2E5AAEAE3C6
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs; SHA256=E3A6D1678C8A155943D4699335642E9794222B9687CAA32114B3ECB16399768B
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs; SHA256=8B47933A84381B2AE5A036454CEE74A3BF03358344198F9DFE5169CF6D8CB49A
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/DeviceHelper.cs; SHA256=FB5F7A55BD35972D30F98EC017E2C3527D38E87FBC678984D3D4DB66D56D48CB
+PASS: strict tokens/directives src/YubiOtp/examples/OtpTool/OutputHelper.cs; SHA256=824CCCA3E2F76BEBD0CCC9256DFBFB31A8AB2DE4B1964170E8FBE6F126241CCA
+PASS: strict tokens/directives src/YubiOtp/src/Backend/HidBackend.cs; SHA256=663E4B8C7496F3FD6074550D689844B854F1640F61FB5F92F9E1ABF4ED202A1E
+PASS: strict tokens/directives src/YubiOtp/src/Backend/SmartCardBackend.cs; SHA256=DCF197B6CD374AA2ABE0FF6B0C9CEC1B696EBB547EA502F696ADDD6759A4B62F
+PASS: strict tokens/directives src/YubiOtp/src/ConfigFlag.cs; SHA256=FE677EF04A9F9077798D651E66ACB82B28B400E0A7DAFA99906676B2C0FE0964
+PASS: strict tokens/directives src/YubiOtp/src/ConfigState.cs; SHA256=0E774DC1D8DF261096BEA16951FD776C90B3715414EDAF6926E61701DFAB6FB8
+PASS: strict tokens/directives src/YubiOtp/src/ExtendedFlag.cs; SHA256=86CD1422423EC1778C9A16CFA92ABBDC0C17FE42FCF68CD96C8A1109E1B7118A
+PASS: strict tokens/directives src/YubiOtp/src/HmacSha1SlotConfiguration.cs; SHA256=9E6228DD64951A2DC355B52F75527C9C5F8435E559D75D1D3AD2CE4E9D15A8B6
+PASS: strict tokens/directives src/YubiOtp/src/HotpSlotConfiguration.cs; SHA256=390027311D79E5E52CECE6656DAFA86DAE035CD52A891C6577EBF10F1601F2FE
+IMPORT REMOVAL: src/YubiOtp/src/IYubiKeyExtensions.cs: using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu; IDE0005 provenance=docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/format-apply.log
+IMPORT REMOVAL: src/YubiOtp/src/IYubiKeyExtensions.cs: using Yubico.YubiKit.Core.Protocols.SmartCard.Scp; IDE0005 provenance=docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/YubiOtp/src/IYubiKeyExtensions.cs; SHA256=CDF2F0F475212AD45112ADEE839FC6FD63811A0D8200AEF5EBDD0BC604DDC8E9
+PASS: strict tokens/directives src/YubiOtp/src/IYubiOtpSession.cs; SHA256=DF8EAEF9B2BAA09FAFBBA4AFCE88D4616719EFAE9E14D241BB4A9F5564D3F554
+PASS: strict tokens/directives src/YubiOtp/src/KeyboardSlotConfiguration.cs; SHA256=B3166E4244AE4169FFD5DDB842C10CD20EAF7EA7DE9B61BF7EBDEFAD830FE505
+PASS: strict tokens/directives src/YubiOtp/src/NdefType.cs; SHA256=DA1D34DD659E899E77658B2945CE3096E1DB9460EBBF3AEEE4D513F498C9ED1B
+PASS: strict tokens/directives src/YubiOtp/src/SlotConfiguration.cs; SHA256=CB09F583373475151421EBA8DDD05381011C503842589AF7E83216BCE5BBA3A0
+PASS: strict tokens/directives src/YubiOtp/src/StaticPasswordSlotConfiguration.cs; SHA256=736E70325799845627A56BB4F9A95549356F11F8EE47FFA0BB80C8B55EBC02ED
+PASS: strict tokens/directives src/YubiOtp/src/TicketFlag.cs; SHA256=E90A09209FD585D289049BD5E916FC8E6B0C928A150C04BDCA7B6C1BA1D84BD3
+PASS: strict tokens/directives src/YubiOtp/src/UpdateConfiguration.cs; SHA256=036EC5E4C92366332517A4F9A3F89EC7AEA47D83A56852A0D45CD68D95FDEEDF
+PASS: strict tokens/directives src/YubiOtp/src/YubiOtpConstants.cs; SHA256=B36A052FEAE139091B648B9761C0EC17742EA46C020AD0C6BCE7B356BF705B2B
+PASS: strict tokens/directives src/YubiOtp/src/YubiOtpSession.cs; SHA256=273530FED238B68C1B9ADA1CDF7541672E591DFB2BCC3919E59D5D02785DCBCD
+PASS: strict tokens/directives src/YubiOtp/src/YubiOtpSlotConfiguration.cs; SHA256=4540A3CFB64744028068AE0F1BA78F2C8F5F1FF3F7B785D4300208D26B3F6BA0
+PASS: strict tokens/directives src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs; SHA256=C639995B4058BFDC93F949F3851CD6EC13EDB02AED8D5E612DED09549805D500
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpHmacChallengeKnownAnswerTests.cs; SHA256=EA37EED91D668F350661FFBD46EF12D07FD4F2DAA8F3E9F3316261F01837B2D4
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpProtectSlot2Tests.cs; SHA256=64B8B590C9FDB8B4582ED65E92957821606C75E12A1804872832782C9AB47449
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSessionIntegrationTests.cs; SHA256=93CCCC93F20C62E5FF276B2EB682FC267460431C4FE749311EADE46F5F3DA443
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSlotConfigTests.cs; SHA256=0B4A2854DFC855191A19D3D8501972FD8306BDBBED44D9ED2A957077CEFAF153
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/AuditV2/YubiOtpAuditReproTests.cs; SHA256=6B0B508921A99CBC594E8DE62B3591B7CBA475A8BDE63CECC4A32C8E1614A128
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/ConfigStateTests.cs; SHA256=BCF243423B1AE8A747D66837DD9DAD394973B6DE9D508E3C21930C1A04FC70AC
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/HidBackendTests.cs; SHA256=6F3A934F9071FB713D9A57FC5AC5673E5C8CD2659F30C3AC4D75282BB5CF6C60
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs; SHA256=35767E4255667F55FB88C1949986670F26DB167410141A3C5D32BA76E4337663
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs; SHA256=1EA72A87C5E4FEF816BFE681EC4F8E67C8F4D1E299AC78C7A2F8E320EACE848E
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs; SHA256=78AC079A5225CD351D9BA1171BC24400B7AF9BC966DBAE4D31D213D9C9BF33E8
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpBackendLifecycleTests.cs; SHA256=41E0D3B0D1998FB31652D482145593ECF75C70E1BD685ACEECB86D551B100DDB
+PASS: strict tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionTests.cs; SHA256=1407C923BB859C7942B013A73EF50E86B04C4DC28D6868177C5B71B65AFE1E61
+Import-accounted comparison against 95e5ccaeda33954c21f2a38058d4f66b5f208787: files=42, exception-files=1, explicitly-listed-removals=2, failures=0; syntax is NOT identical: only listed ordinary namespace imports plus the existing directive-free using order allowance were normalized.
+
+EXIT=0

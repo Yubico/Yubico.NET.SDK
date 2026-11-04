@@ -1,0 +1,15 @@
+byte[] hmacKey = RandomNumberGenerator.GetBytes(20);
+try
+{
+    // Securely enroll hmacKey with your verifier here as part of your application's provisioning.
+    await using var session = await device.CreateYubiOtpSessionAsync(
+        new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
+    using var config = new HmacSha1SlotConfiguration(hmacKey);
+    config.RequireTouch();
+    config.UseShortChallenge();
+    await session.PutConfigurationAsync(Slot.Two, config);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(hmacKey);
+}

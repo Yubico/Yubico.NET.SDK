@@ -1,0 +1,5 @@
+{
+    await using var session = await device.CreateYubiOtpSessionAsync();
+    await session.SwapSlotsAsync();
+    await session.DeleteSlotAsync(Slot.Two);
+}

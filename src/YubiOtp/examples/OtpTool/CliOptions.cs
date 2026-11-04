@@ -15,8 +15,8 @@
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool;
 
 /// <summary>
-/// Parsed CLI options matching ykman's OTP command structure.
-/// Slot is always a positional argument (1 or 2).
+/// Parsed options using a ykman-like command structure, not a compatibility guarantee.
+/// Commands that take a slot use positional 1 or 2. See the module README for sample limitations.
 /// </summary>
 public sealed record CliOptions
 {
@@ -31,7 +31,8 @@ public sealed record CliOptions
     public Slot? Slot { get; init; }
 
     /// <summary>
-    /// Hex-encoded 6-byte access code for protected slot operations.
+    /// Hex-encoded current 6-byte code for write authentication, not a new code setting.
+    /// Programming/settings omit the new code and can remove protection; swap ignores this option.
     /// Global option: --access-code HEX.
     /// </summary>
     public string? AccessCode { get; init; }
@@ -42,7 +43,8 @@ public sealed record CliOptions
     public bool Force { get; init; }
 
     /// <summary>
-    /// Whether to output in JSON format (--json / -j).
+    /// Whether to output JSON (--json / -j). Also bypasses confirmation even without Force;
+    /// generated-secret output differs from human mode.
     /// </summary>
     public bool Json { get; init; }
 
@@ -59,7 +61,8 @@ public sealed record CliOptions
     public bool RequireTouch { get; init; }
 
     /// <summary>
-    /// Program for TOTP use (implies --require-touch, enables short challenge) (--totp).
+    /// Enables touch and already-default short-challenge mode (--totp). Does not compute Unix-time
+    /// counters, apply a period, truncate a response, or generate a TOTP code.
     /// </summary>
     public bool Totp { get; init; }
 
@@ -76,7 +79,7 @@ public sealed record CliOptions
     public int? Digits { get; init; }
 
     /// <summary>
-    /// Initial moving factor for HOTP (--imf VALUE).
+    /// Initial moving factor (--imf VALUE). Use zero: the SDK's current nonzero scaling is incorrect.
     /// </summary>
     public int? Imf { get; init; }
 
@@ -93,7 +96,8 @@ public sealed record CliOptions
     public int? Length { get; init; }
 
     /// <summary>
-    /// Keyboard layout for static password (--keyboard-layout LAYOUT).
+    /// Parsed layout option (--keyboard-layout LAYOUT), currently unused by StaticCommand.
+    /// The public SDK string/layout constructor is the working translation route.
     /// </summary>
     public string? KeyboardLayout { get; init; }
 
@@ -127,7 +131,7 @@ public sealed record CliOptions
     // -- calculate options --
 
     /// <summary>
-    /// Hex-encoded challenge for challenge-response (positional after SLOT).
+    /// Required hex challenge (positional after SLOT); the current command has no stdin fallback.
     /// </summary>
     public string? Challenge { get; init; }
 
@@ -151,13 +155,14 @@ public sealed record CliOptions
     public int? Pacing { get; init; }
 
     /// <summary>
-    /// Disable carriage return after OTP output (--no-enter).
+    /// Requests no carriage return (--no-enter). The fresh full-mask UpdateConfiguration already
+    /// has AppendCr clear; this command does not preserve unspecified current slot flags.
     /// </summary>
     public bool NoEnter { get; init; }
 
     /// <summary>
     /// Parses command-line arguments into a <see cref="CliOptions"/> instance.
-    /// Matches ykman's OTP command structure with positional SLOT argument.
+    /// Uses positional SLOT where required. Parsed secret strings are immutable and cannot be zeroed.
     /// </summary>
     public static CliOptions Parse(string[] args)
     {
@@ -380,7 +385,8 @@ public sealed record CliOptions
     }
 
     /// <summary>
-    /// Prints top-level usage information matching ykman's format.
+    /// Prints sample usage. Existing help has known stdin/TOTP/layout/swap-code mismatches;
+    /// see the module README before relying on an advertised option.
     /// </summary>
     public static void PrintHelp()
     {

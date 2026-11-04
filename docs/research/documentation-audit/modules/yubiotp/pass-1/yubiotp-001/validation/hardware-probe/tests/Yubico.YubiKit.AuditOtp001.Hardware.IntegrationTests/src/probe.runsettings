@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <MaxCpuCount>1</MaxCpuCount>
+    <!-- Execute each lane in its own filtered invocation. This is a last-resort
+         host bound, not a cleanup mechanism or an expected device timeout. -->
+    <TestSessionTimeout>90000</TestSessionTimeout>
+    <ResultsDirectory>/tmp/opencode/yubiotp-001-hardware-probe/results</ResultsDirectory>
+    <TreatNoTestsAsError>true</TreatNoTestsAsError>
+  </RunConfiguration>
+</RunSettings>

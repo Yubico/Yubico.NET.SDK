@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- docs-qa",
+  "started": "2026-11-04T11:32:07.3147587+01:00",
+  "durationSeconds": 0.4,
+  "runDirectory": "artifacts/toolchain/runs/20261104-113207-314-docs-qa",
+  "targets": [
+    {
+      "name": "docs-qa",
+      "status": "passed",
+      "durationSeconds": 0.3,
+      "error": null
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

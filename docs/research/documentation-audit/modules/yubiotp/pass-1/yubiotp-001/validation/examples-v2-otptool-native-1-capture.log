@@ -1,0 +1,5 @@
+$ python3 -B docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/examples/overlays/otptool-native-1/capture.py v2 otptool native-first
+PASS: overlay provenance; unchanged v1/v2 archives; accepted consumer/first and annotations/first retained identities reused without copying or recompiling.
+PASS: otptool/native-first: 17 actual compiler sources, 208 references, 10 analyzers; no binaries copied.
+
+EXIT=0

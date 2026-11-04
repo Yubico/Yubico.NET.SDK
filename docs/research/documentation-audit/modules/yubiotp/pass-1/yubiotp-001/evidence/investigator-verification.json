@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-04",
+  "scope": "report/inventory integrity only; no build/test/hardware execution",
+  "checks": {
+    "coverage_json_parses": true,
+    "all_63_inventory_paths_dispositioned": true,
+    "all_module_hashes_unchanged": true,
+    "193_api_entries_classified": true,
+    "18_candidates_present": true,
+    "27_unique_clean_units": true,
+    "all_clean_line_ranges_exist": true,
+    "hardware_plan_saved": true,
+    "all_successful_source_captures_hash_match": true,
+    "local_link_targets_exist": true
+  },
+  "reports": {
+    "investigation.md": {
+      "bytes": 39955,
+      "sha256": "30f524099ae0cfc702ea2526ef3050267ffdaaae742c4dba94177d0a76d0cf12"
+    },
+    "coverage.json": {
+      "bytes": 24637,
+      "sha256": "90a0df2f30303c7923c16bce7c4494113e5e0af8fb7aa25f1b79e648d589b744"
+    },
+    "hardware-test-plan.md": {
+      "bytes": 12991,
+      "sha256": "ba0bf2d5ae515c452b859446090fa8d14dae153a0a71a6cf28cb9401123478f6"
+    }
+  }
+}

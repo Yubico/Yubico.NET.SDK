@@ -1,0 +1,44 @@
+$ dotnet test src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName!~CalculateHmacSha1Async_TouchRequired_CompletesOnceAndReturnsExpectedResponse"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.YubiOtp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.YubiOtp.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.IntegrationTests.dll
+Test run for /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.YubiOtp.IntegrationTests
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.YubiOtp.IntegrationTests
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.YubiOtp.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.AuditV2.YubiOtpHmacChallengeKnownAnswerTests.FixedChallengeSlot_HashesAll64BytesAsSent(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=HidOtp)) [405 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.AuditV2.YubiOtpHmacChallengeKnownAnswerTests.ShortChallengeSlot_HashesExactlyTheChallenge_WithTheLastByteAsMarker(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=HidOtp)) [153 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSlotConfigTests.PutConfiguration_StaticPassword_ConfiguresAndDeletesSlot(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=HidOtp)) [68 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSlotConfigTests.PutConfiguration_YubicoOtp_ConfiguresAndDeletesSlot(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=HidOtp)) [71 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSlotConfigTests.PutConfiguration_Hotp8Digits_ConfiguresAndDeletesSlot(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=HidOtp)) [69 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSlotConfigTests.PutConfiguration_Hotp_ConfiguresAndDeletesSlot(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=HidOtp)) [70 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSessionIntegrationTests.PutConfiguration_HmacSha1_ThenDelete_Succeeds(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=SmartCard)) [75 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSessionIntegrationTests.GetConfigState_ReturnsValidState(state: YubiKey(Placeholder #0: All)) [18 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSessionIntegrationTests.GetSerial_ReturnsPositiveSerialNumber(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=SmartCard)) [20 ms]
+[xUnit.net 00:00:01.40]     Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.InspectPrerequisites_ReadOnly_PrintsNonSecretState(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [OUTPUT] Firmware=0.0.1
+[xUnit.net 00:00:01.40]     Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.InspectPrerequisites_ReadOnly_PrintsNonSecretState(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [OUTPUT] Slot1: IsConfigured=False, IsTouchTriggered=False
+[xUnit.net 00:00:01.40]     Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.InspectPrerequisites_ReadOnly_PrintsNonSecretState(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [OUTPUT] Slot2: IsConfigured=False, IsTouchTriggered=False
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSessionIntegrationTests.SwapSlots_Succeeds(state: YubiKey(Placeholder #0: FW>=2.3.0,Conn=SmartCard)) [120 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSessionIntegrationTests.CalculateHmacSha1_WithKnownKey_ReturnsExpectedResponse(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=HidOtp)) [84 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.YubiOtpSessionIntegrationTests.SetNdefConfiguration_UriType_Succeeds(state: YubiKey(Placeholder #0: FW>=3.0.0)) [35 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.UserPresenceProbeTests.InspectPrerequisites_ReadOnly_PrintsNonSecretState(state: YubiKey(Placeholder #0: FW>=3.0.0,Conn=HidOtp)) [2 ms]
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.AuditV2.YubiOtpProtectSlot2Tests.YESDK1634_ProtectSlot2_DoesNotDisturbChallengeResponseBit(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=HidOtp)) [129 ms]
+[xUnit.net 00:00:04.72]   Finished:    Yubico.YubiKit.YubiOtp.IntegrationTests
+  Passed Yubico.YubiKit.YubiOtp.IntegrationTests.AuditV2.YubiOtpProtectSlot2Tests.YESDK1634_ProtectSlot2OnSlot1_BlocksSlot2Write(state: YubiKey(Placeholder #0: FW>=2.2.0,Conn=HidOtp)) [3 s]
+
+Test Run Successful.
+Total tests: 15
+     Passed: 15
+ Total time: 5.0360 Seconds

@@ -220,7 +220,7 @@ public class SlotConfigurationTests
     [Fact]
     public void HmacSha1_ExactLengthKey_PreservedByteForByte_NotHashedOrPadded()
     {
-        // ISC-30: valid-length keys must survive into the wire format unmodified.
+        // Valid-length keys must survive into the wire format unmodified.
         byte[] hmacKey = Enumerable.Range(1, 20).Select(i => (byte)i).ToArray();
 
         using var config = new HmacSha1SlotConfiguration(hmacKey);
@@ -298,7 +298,7 @@ public class SlotConfigurationTests
     [Fact]
     public void YubicoOtpChallengeResponse_ExactLengthKey_PreservedByteForByte()
     {
-        // ISC-30: valid-length keys must survive into the wire format unmodified.
+        // Valid-length keys must survive into the wire format unmodified.
         byte[] aesKey = Enumerable.Range(1, 16).Select(i => (byte)i).ToArray();
 
         using var config = new YubicoOtpChallengeResponseSlotConfiguration(aesKey);
@@ -429,7 +429,8 @@ public class SlotConfigurationTests
         using var config = new HotpSlotConfiguration(hmacKey, imf);
         var result = config.GetConfig();
 
-        // IMF / 0x10000 = 3, stored big-endian in uid[4..6]
+        // Pins the current SDK encoding, not correct device-counter scaling: vendor IMF / 16 would
+        // encode 0x3000. The current 0003 field represents counter 48, not the requested 0x30000.
         Assert.Equal(0x00, result[UidOffset + 4]);
         Assert.Equal(0x03, result[UidOffset + 5]);
         AssertValidCrc(result);
@@ -444,7 +445,7 @@ public class SlotConfigurationTests
         using var config = new HotpSlotConfiguration(hmacKey, imf);
         var result = config.GetConfig();
 
-        // IMF / 0x10000 = 0x00FF, big-endian
+        // Pins the current erroneous divisor (0x10000), not a vendor counter known-answer result.
         Assert.Equal(0x00, result[UidOffset + 4]);
         Assert.Equal(0xFF, result[UidOffset + 5]);
     }
@@ -507,9 +508,8 @@ public class SlotConfigurationTests
     [Fact]
     public void Hotp_InvalidImfAndInvalidKeyLength_ThrowsForImfFirst()
     {
-        // Locks in validation order: IMF is checked before the key length (via ProcessHmacKey).
-        // If this ordering is intentionally reversed in the future, this test must be updated
-        // to match, so the change is deliberate rather than an unnoticed side effect.
+        // IMF validation currently precedes SetHmacKey's key-length check. This assertion pins that
+        // ordering, not correctness of the accepted nonzero IMF range or scale.
         byte[] shortKey = [0x01, 0x02, 0x03];
 
         var ex = Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(shortKey, imf: 100));
@@ -623,7 +623,7 @@ public class SlotConfigurationTests
     [Fact]
     public void StaticPassword_FromString_EnUsLayout_TranslatesToExpectedScanCodes()
     {
-        // ISC-27: exact HID scan-code vectors matching HidCodeTranslator's en_US mapping.
+        // Exact HID scan-code vectors matching HidCodeTranslator's en_US mapping.
         using var config = new StaticPasswordSlotConfiguration("abc", KeyboardLayout.en_US);
         var result = config.GetConfig();
 
@@ -814,8 +814,8 @@ public class SlotConfigurationTests
         var result = config.GetConfig();
         byte extFlags = result[ExtFlagsOffset];
 
-        // AllowUpdate is NOT in the update mask, so shouldn't be writable through the mask
-        // But Dormant, UseNumericKeypad, FastTrigger ARE in the mask
+        // These three flags survive the complete extended update mask. AllowUpdate is also in that
+        // mask; its inclusion is asserted separately below.
         Assert.Equal((byte)ExtendedFlag.Dormant, extFlags & (byte)ExtendedFlag.Dormant);
         Assert.Equal((byte)ExtendedFlag.UseNumericKeypad, extFlags & (byte)ExtendedFlag.UseNumericKeypad);
         Assert.Equal((byte)ExtendedFlag.FastTrigger, extFlags & (byte)ExtendedFlag.FastTrigger);
@@ -1021,7 +1021,8 @@ public class SlotConfigurationTests
 
         config.Dispose();
 
-        // After dispose, GetConfig should throw
+        // This checks post-disposal access rejection, not erasure of fields or priorResult. Actual
+        // private-array zeroing is inspected in SlotConfigurationEncapsulationTests.
         Assert.Throws<ObjectDisposedException>(() => config.GetConfig());
     }
 

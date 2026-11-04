@@ -1,0 +1,278 @@
+{
+  "run": "yubiotp-001",
+  "baseline": "95e5ccaeda33954c21f2a38058d4f66b5f208787",
+  "status": "prepared-only-not-compiled-not-executed",
+  "identity": "serial 103, user-reported firmware 5.8.0.beta.0; fresh read-only identity/status before writes",
+  "project": {
+    "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests.csproj",
+    "bytes": 2038,
+    "sha256": "d75336af5b00ffd7ad48f12e70b0d8ea81304740328b0bdea89ce8748e8aced9"
+  },
+  "sources": [
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/Directory.Build.props",
+      "bytes": 634,
+      "sha256": "3961fe692d93f8a56e7f78f96ab27e245acbb9cfce31319c62b46f173b4d29e5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/Directory.Build.targets",
+      "bytes": 1977,
+      "sha256": "265565f49cd6fb556fc144d7b786edd93f7746b4f38b54cccf24c054ea749ef8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/capture-compiler.py",
+      "bytes": 1753,
+      "sha256": "ae4a8fcb76b1fb619b71bde068bbf0eff54a831259126c0f5f869f2d72c6fba0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/prepare-provenance.py",
+      "bytes": 8976,
+      "sha256": "a7c70443f022bf574c0505f877b185e0b22b3a237cceac4701e256ceca55dc15"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "bytes": 31062,
+      "sha256": "1a9dd85f2a0856d0eb61581624e38737c217266d619dc988b7dd3367b3e9bdf6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests.csproj",
+      "bytes": 2038,
+      "sha256": "d75336af5b00ffd7ad48f12e70b0d8ea81304740328b0bdea89ce8748e8aced9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/probe.runsettings",
+      "bytes": 498,
+      "sha256": "15c3eb32ebbc3109c9a3ed353284b9538ca6e83c12b378d67e32b5946dfe01c1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditOtp001.Hardware.IntegrationTests/src/xunit.runner.json",
+      "bytes": 201,
+      "sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4"
+    }
+  ],
+  "input_provenance": [
+    {
+      "path": "Directory.Build.props",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "role": "Canonical language, test analyzer and warning policy imported without relaxation."
+    },
+    {
+      "path": "Directory.Build.targets",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "role": "Canonical common analyzer packages imported without relaxation."
+    },
+    {
+      "path": "Directory.Packages.props",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3",
+      "role": "Canonical central package versions: xUnit v2 and VSTest packages."
+    },
+    {
+      "path": ".editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "role": "Canonical source style/analyzer context."
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj",
+      "bytes": 1821,
+      "sha256": "efafa99712b038addecf307481addcd68351dfe9b2822da3f0bf95f6ade52317",
+      "role": "Actual integration package/reference template; project references retargeted to root paths, no existing tests linked."
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/xunit.runner.json",
+      "bytes": 201,
+      "sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4",
+      "role": "Runner JSON copied exactly: disabled assembly/collection parallelism, one thread and live output."
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/UserPresenceProbeTests.cs",
+      "bytes": 7609,
+      "sha256": "ac3ba249a2b5b3017a5c61518552ad258dd4c3675a5409181a3335721f8a6846",
+      "role": "Public prompt interface/lifecycle and known-answer reference, not linked or run."
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+      "bytes": 20930,
+      "sha256": "2be16a3001b4956538c7d724ad87e95898e3ba6d1872ea3c8147b2a874d75905",
+      "role": "Public slot/configuration/challenge API signatures."
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "bytes": 7848,
+      "sha256": "9f6673bf6ba09f0f2c096805af9ba4b35f8b044fbe4eae0564749e860bdc0f1d",
+      "role": "Explicit transport and owned convenience-session lifetime."
+    },
+    {
+      "path": "src/YubiOtp/src/YubiOtpSession.cs",
+      "bytes": 22997,
+      "sha256": "c62b0f431411b34fe26bb28ed8725f178bd3c960b399878c8087b40f2e751468",
+      "role": "Module API implementation for configuration, response ownership and cached status; no Core implementation read."
+    },
+    {
+      "path": "src/YubiOtp/src/ConfigState.cs",
+      "bytes": 5506,
+      "sha256": "8b267d2f7825d5e568a055c956a00a52dd2c8b9e48d5866e972d110c5a69c3a5",
+      "role": "Public observed status fields; disputed touch indicators logged, not preassumed."
+    },
+    {
+      "path": "src/YubiOtp/src/HmacSha1SlotConfiguration.cs",
+      "bytes": 3459,
+      "sha256": "85b95c757de9b5425ec5c0cc2d1f56c02aa00365788ead41273e5a1a423b02dd",
+      "role": "Non-touch/RequireTouch/short challenge provisioning."
+    },
+    {
+      "path": "src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs",
+      "bytes": 2943,
+      "sha256": "760fa2607003834b6b7d4360a8e9bda9d1bae8896be48b1de6cb5191236b0ad0",
+      "role": "AES key provisioning with zero UID and six-byte challenge contract."
+    },
+    {
+      "path": "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+      "bytes": 6839,
+      "sha256": "81cd75a38707a1549c4b52352767555eb7a4ba3a208b98143d6a19bf4d32fd8b",
+      "role": "Raw-scan-code constructor, never triggered by this probe."
+    },
+    {
+      "path": "src/YubiOtp/src/KeyboardSlotConfiguration.cs",
+      "bytes": 5659,
+      "sha256": "6e88fe341d4e4d445f66fc3090c211decbefaac18fcb45f96fc25ab1ddb5ebaa",
+      "role": "AppendCr(false) on the raw-static measurement configuration."
+    },
+    {
+      "path": "src/YubiOtp/src/SlotConfiguration.cs",
+      "bytes": 13189,
+      "sha256": "74b6975844a67c317eae16e06723635f79090168c909665b88262297de8b39b9",
+      "role": "Owned cloned configuration buffers disposed; API-visible defaults."
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+      "bytes": 5364,
+      "sha256": "71116ae755f93751bfb724debd4a7a9505f40a65f98615c46a864a92e44fe277",
+      "role": "Module-layer terminal mapping/returned buffer handling; timeout identified by module catch name only."
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+      "bytes": 8598,
+      "sha256": "8ca26eba06f9edd66734f893ec7a9736eb72786aa8a20d32c24b5cc530fca109",
+      "role": "Module-layer APDU errors and notification lifecycle; no transport-internals prediction."
+    },
+    {
+      "path": "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj",
+      "bytes": 1794,
+      "sha256": "4f37a8227bd5b8c1ef9fb089c65667c989b60d9b80f2d5e7c5e3287ae494a963",
+      "role": "Real discovery/allow-list library reference and output appsettings source."
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+      "bytes": 8126,
+      "sha256": "4ed3880bf8ddc6deaa67ac189f4872100c50f36efd015c3b4c49d58f12f31435",
+      "role": "Real lazy device-binding/custom-filter attribute, no fixture provisioning."
+    },
+    {
+      "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+      "bytes": 2347,
+      "sha256": "0f5f2b8ea5c63d21db73bf30d644838d796305567f055faf719c5e6155202f82",
+      "role": "Serial103Filter contract."
+    },
+    {
+      "path": "src/Tests.Shared/YubiKeyTestState.cs",
+      "bytes": 20340,
+      "sha256": "8d40305bf0021173ed0d64c29a8417fc5534e9d017133e623007a2bc207bac88",
+      "role": "Authorized device/metadata wrapper."
+    },
+    {
+      "path": "src/Core/src/PublicAPI.Unshipped.txt",
+      "bytes": 139758,
+      "sha256": "a3783751457529595f2e085e75656b99d073a88a4b6f5ef15d4474c9112eb0a0",
+      "role": "Public signatures only: session transport, identity, APDU SW, version qualifier and prompts; no Core implementation."
+    },
+    {
+      "path": "scripts/toolchain/Discovery.cs",
+      "bytes": 5896,
+      "sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "role": "Recursive tests/src path and unique selector discovery."
+    },
+    {
+      "path": "scripts/toolchain/Context.cs",
+      "bytes": 4681,
+      "sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "role": "Buildable src path plus integration tests path discovery."
+    },
+    {
+      "path": "scripts/toolchain/TestTargets.cs",
+      "bytes": 14282,
+      "sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "role": "Real xUnit-v2/VSTest invocation and normal-verbosity output retention."
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/hardware/Directory.Build.props",
+      "bytes": 688,
+      "sha256": "992d156289223beaf844157f4c5047025d0eaaa5a0f72cbe734ed23c21dc9252",
+      "role": "Adapted canonical-import/isolated-output host pattern, output path changed to YubiOTP probe."
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/hardware/Directory.Build.targets",
+      "bytes": 2308,
+      "sha256": "4ad2be5400bcb7cfc02ffe1f815183d5c90ba3fbff8e107fd8b0630cdc8ee66c",
+      "role": "Adapted compiler input/policy capture pattern, target names changed; not SD example bodies."
+    }
+  ],
+  "vendor": {
+    "source": {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/evidence/vendor-technical-manual-v3.3.txt",
+      "bytes": 97342,
+      "sha256": "ba1462dfd6285c610e4e0b5f315a0f4c1073223aa89e63aa0e477c81cb87d37c"
+    },
+    "original_pdf": {
+      "url": "https://downloads.yubico.com/support/yubico_YubiKey-Technical-Manual-v3.3_2014.pdf",
+      "sha256": "0f4fb9224b1247a57d9b8b13c3bc370512cf17d9027e2013104217e9032a45ca"
+    },
+    "title": "The YubiKey Manual",
+    "revision": "3.3, 17 September 2014",
+    "passages": [
+      {
+        "section": "4.3",
+        "lines": [
+          926,
+          931
+        ],
+        "text": "             static mode.\n             If both configurations are set, the trigger behavior is slightly different as\n             the user must select which OTP configuration that is desired:\n                 \uf0b7   Short press 0.3 \u2013 1.5 seconds) and release \u2013 OTP from configuration\n                     #1 is yielded\n                 \uf0b7   Long press (2.5 \u2013 5 seconds) and release \u2013 OTP from configuration"
+      },
+      {
+        "section": "6.1.1",
+        "lines": [
+          1480,
+          1493
+        ],
+        "text": "             code.\n\n5.8          Automatic navigation\n             In YubiKey 1, prior to version 1.3.5, a function was provided to allow\n             automatic navigation when the device is inserted, where an URL string\n             was outputted. This function is discouraged and has been removed in\n             recent versions as it implies potential security and compatibility issues.\n\n\n\n\n\u00a9 Yubico, 2015                         Page 32 of 41          Version: Yubikey Manual_V3.3.Doc\n\nThe YubiKey Manual"
+      },
+      {
+        "section": "6.1.6",
+        "lines": [
+          1557,
+          1564
+        ],
+        "text": "             practical to use in challenge-response settings where the interaction\n             occurs very often. Consider HMAC-SHA1 mode instead for such settings.\n             The field is stored in little-endian format, i.e. the least significant byte\n             being stored first.\n\n\n6.1.3        Timestamp\n             The timestamp is a 24-bit field incremented with a rate of approximately 8"
+      },
+      {
+        "section": "6.3",
+        "lines": [
+          1591,
+          1627
+        ],
+        "text": "             A 16-bit ISO13239 1st complement checksum is added to the end. The\n             checksum spans all bytes except the checksum itself. The checksum is\n             verified by calculating the checksum of all bytes, including the checksum\n             field. This shall give a fixed residual of 0xf0b8 if the checksum is valid. If\n             the checksum is invalid, the OTP shall be rejected.\n             The field is stored in little-endian format, i.e. the least significant byte\n             being stored first.\n\n6.2          Modified Hexadecimal (Modhex) encoding\n             The Modhex encoding scheme was invented to cope with potential\n             keyboard mapping ambiguities. See section 2.1.3for background\n             information.\n\n\n\n\n\u00a9 Yubico, 2015                           Page 34 of 41           Version: Yubikey Manual_V3.3.Doc\n\nThe YubiKey Manual\n\n             The Modhex mapping done like with hexadecimal coding but the output is\n             mapped in the following way:\n            0           c          4         f           8       j     c          r\n            1           b          5         g           9       k     d          t\n            2           d          6         h           a       l     e          u\n            3           e          7         i           b       n     f          v\n\n\n             Examples:\n                 \uf0b7    The hexadecimal byte 0x47 is represented as fi\n                 \uf0b7    The hexadecimal string 0xba 0xad 0xf0 0x0d is represented as\n                      nlltvcct\n\n\n6.3          CRC16 calculation and verification\n             The CRC16 algorithm used follows the                    ISO13239         standard.   The\n             schoolbook implementation can be done as:"
+      }
+    ],
+    "limits": "Legacy manual timing motivates a longer outer token; modern timeout is measured. CRC verifier is an independent bitwise implementation, not SDK ChecksumUtils."
+  },
+  "external_api_docs": [
+    "https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.aes?view=net-10.0",
+    "https://xunit.net/docs/running-tests-in-parallel",
+    "https://xunit.net/docs/config-runsettings",
+    "https://learn.microsoft.com/en-us/visualstudio/test/configure-unit-tests-by-using-a-dot-runsettings-file?view=visualstudio"
+  ],
+  "policy": "Canonical props/targets/packages; no warning relaxation, mocks, raw I/O, Core implementation or hardware execution. Optional access-code lane omitted."
+}

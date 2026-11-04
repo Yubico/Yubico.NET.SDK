@@ -30,7 +30,8 @@ public sealed class YubiOtpHmacChallengeKnownAnswerTests
     private static readonly byte[] Key = [.. Enumerable.Repeat((byte)0x31, 20)];
     private static readonly byte[] SixtyFourDistinct = [.. Enumerable.Range(0, 64).Select(i => (byte)i)];
 
-    // (label, challenge given to CalculateHmacSha1Async, message the device hashes)
+    // (label, challenge given to CalculateHmacSha1Async, expected hashed message). These vectors check
+    // minimum-one-byte marker behavior only on the device/firmware where the tests actually execute.
     private static readonly (string Label, byte[] Challenge, byte[] HashedMessage)[] ShortModeVectors =
     [
         ("one byte", [0x41], [0x41]),

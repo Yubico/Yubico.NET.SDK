@@ -1,0 +1,349 @@
+Text Record Type Definition
+    Technical Specification
+        NFC ForumTM
+        RTD-Text 1.0
+  NFCForum-TS-RTD_Text_1.0
+         2006-07-24
+RESTRICTIONS ON USE
+This specification is copyright © 2005-2006 by the NFC Forum, and was made available pursuant to a
+license agreement entered into between the recipient (Licensee) and NFC Forum, Inc. (Licensor) and may
+be used only by Licensee, and in compliance with the terms of that license agreement (License). If you are
+not the Licensee, you are not authorized to make any use of this specification. However, you may obtain a
+copy at the following page of Licensor's Website: http://www.nfc-forum.org/resources/spec_license after
+entering into and agreeing to such license terms as Licensor is then requiring. On the date that this
+specification was downloaded by Licensee, those terms were as follows:
+1. LICENSE GRANT.
+Licensor hereby grants Licensee the right, without charge, to copy (for internal purposes only) and share
+the Specification with Licensee's members, employees and consultants (as appropriate). This license grant
+does not include the right to sublicense, modify or create derivative works based upon the Specification.
+2. NO WARRANTIES.
+THE SPECIFICATION IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS AND
+NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL LICENSOR, ITS
+MEMBERS OR ITS CONTRIBUTORS BE LIABLE FOR ANY CLAIM, OR ANY DIRECT, SPECIAL,
+INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH
+THE USE OR PERFORMANCE OF THE SPECIFICATION.
+3. THIRD PARTY RIGHTS.
+Without limiting the generality of Section 2 above, LICENSOR ASSUMES NO RESPONSIBILITY TO
+COMPILE, CONFIRM, UPDATE OR MAKE PUBLIC ANY THIRD PARTY ASSERTIONS OF
+PATENT OR OTHER INTELLECTUAL PROPERTY RIGHTS THAT MIGHT NOW OR IN THE
+FUTURE BE INFRINGED BY AN IMPLEMENTATION OF THE SPECIFICATION IN ITS CURRENT,
+OR IN ANY FUTURE FORM. IF ANY SUCH RIGHTS ARE DESCRIBED ON THE SPECIFICATION,
+LICENSOR TAKES NO POSITION AS TO THE VALIDITY OR INVALIDITY OF SUCH
+ASSERTIONS, OR THAT ALL SUCH ASSERTIONS THAT HAVE OR MAY BE MADE ARE SO
+LISTED.
+4. TERMINATION OF LICENSE.
+In the event of a breach of this Agreement by Licensee or any of its employees or members, Licensor shall
+give Licensee written notice and an opportunity to cure. If the breach is not cured within thirty (30) days
+after written notice, or if the breach is of a nature that cannot be cured, then Licensor may immediately or
+thereafter terminate the licenses granted in this Agreement.
+5. MISCELLANEOUS.
+All notices required under this Agreement shall be in writing, and shall be deemed effective five days from
+deposit in the mails. Notices and correspondence to the NFC Forum address as it appears below. This
+Agreement shall be construed and interpreted under the internal laws of the United States and the
+Commonwealth of Massachusetts, without giving effect to its principles of conflict of law.
+NFC Forum, Inc.
+401 Edgewater Place, Suite 600
+Wakefield, MA, USA 01880
+                                                                                                                                    Contents
+
+
+Contents
+1 Overview ........................................................................................................1
+     1.1 Objectives........................................................................................................................... 1
+     1.2 Purpose ............................................................................................................................... 1
+         1.2.1 Mission Statement and Goals ................................................................................ 1
+     1.3 References .......................................................................................................................... 1
+     1.4 Administration.................................................................................................................... 1
+     1.5 Special Word Usage ........................................................................................................... 2
+     1.6 Name and Logo Usage ....................................................................................................... 2
+     1.7 Intellectual Property ........................................................................................................... 2
+     1.8 Acronyms ........................................................................................................................... 2
+2 Text Record....................................................................................................3
+     2.1 Introduction ........................................................................................................................ 3
+     2.2 Dependencies...................................................................................................................... 3
+     2.3 Security Considerations...................................................................................................... 3
+3 NDEF structure ..............................................................................................4
+     3.1 Messaging Sequence .......................................................................................................... 4
+     3.2 Records Mapping ............................................................................................................... 4
+         3.2.1 Syntax.................................................................................................................... 4
+         3.2.2 Structure ................................................................................................................ 5
+     3.3 Language Codes ................................................................................................................. 5
+     3.4 UTF-16 Byte Order ............................................................................................................ 5
+A. Example UTF-8 Encoding .............................................................................6
+B. Revision History ............................................................................................7
+
+
+Tables
+Table 1. Acronyms .......................................................................................................................... 2
+Table 2. Text Record Content Syntax ............................................................................................. 4
+Table 3. Status Byte Encodings....................................................................................................... 4
+Table 4. Example: “Hello, world!”.................................................................................................. 6
+Table 5. Revision History................................................................................................................ 7
+
+
+
+
+Text Record Type Definition                                                                                                             Page i
+                                                                                           Overview
+
+
+1 Overview
+The Text Record Type Description defines an NFC Forum Well Known Type [NFC RTD] for
+plain text data. It may be used as free form text descriptions of other objects on an RFID tag.
+
+1.1 Objectives
+The objective of this document is to function as a normative reference to the Text RTD.
+
+1.2 Purpose
+1.2.1 Mission Statement and Goals
+The Text RTD was designed to be used as a general purpose text field to add metadata to things
+such as URLs. It needs to provide a lightweight component with clearly defined semantics.
+The goal is not to replace text/plain, but to define a clear subset that can be used in cases where
+there is not much space to be used, and to cover the most probable use cases.
+The Text RTD must work well for non-western languages also, and it needs to include the
+language information for localization purposes so that the language can be identified and served
+to the user.
+
+1.3 References
+[NDEF]                   “NFC Data Exchange Format Specification”, NFC Forum, 2006.
+[NFC RTD]                “NFC Record Type Definition (RTD) Specification”, NFC Forum, 2006.
+[RFC 2119]               S. Bradner, “Key words for use in RFCs to Indicate Requirement
+                         Levels”, RFC 2119, Harvard University, March 1997.
+                         http://www.apps.ietf.org/rfc/rfc2119.html
+[RFC 3066]               H. Alvestrand, “Tags for the Identification of Languages”, RFC 3066,
+                         Cisco Systems, January 2001. http://www.faqs.org/rfcs/rfc3066.html
+[RFC 3066bis]            A. Phillips, M. Davis, “Tags for the Identification of Languages”. IETF
+                         Draft. http://www.ietf.org/internet-drafts/draft-ietf-ltru-registry-14.txt
+[UNICODE]                “The Unicode 4.0.1 standard”.
+                         http://www.unicode.org/versions/Unicode4.0.1/
+
+1.4 Administration
+The Text RTD Specification is an open specification supported by the Near Field Communication
+Forum, Inc., located at:
+401 Edgewater Place, Suite 600
+Wakefield, MA, 01880
+Tel.: +1 781-876-8955
+Fax: +1 781-224-1239
+http://www.nfc-forum.org
+The Reference Applications Framework technical working group maintains this specification.
+
+
+
+
+Text Record Type Definition                                                                    Page 1
+                                                                                       Overview
+
+
+1.5 Special Word Usage
+The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
+“SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this
+document are to be interpreted as described in RFC 2119.
+
+1.6 Name and Logo Usage
+The Near Field Communication Forum’s policy regarding the use of the trademarks NFC Forum
+and the NFC Forum logo is as follows:
+•   Any company MAY claim compatibility with NFC Forum specifications, whether a member
+    of the NFC Forum or not.
+•   Permission to use the NFC Forum logos is automatically granted to designated members only
+    as stipulated on the most recent Membership Privileges document, during the period of time
+    for which their membership dues are paid.
+•   Member’s distributors and sales representatives MAY use the NFC Forum logo in promoting
+    member’s products sold under the name of the member.
+•   The logo SHALL be printed in black or in color as illustrated on the Logo Page that is
+    available from the NFC Forum at the address above. The aspect ratio of the logo SHALL be
+    maintained, but the size MAY be varied. Nothing MAY be added to or deleted from the
+    logos.
+•   Since the NFC Forum name is a trademark of the Near Field Communication Forum, the
+    following statement SHALL be included in all published literature and advertising material in
+    which the name or logo appears:
+    NFC Forum and the NFC Forum logo are trademarks of the Near Field Communication
+    Forum.
+
+1.7 Intellectual Property
+The Text RTD Specification conforms to the Intellectual Property guidelines specified in the
+NFC Forum's Intellectual Property Right Policy, as approved on November 9, 2004 and outlined
+in the NFC Forum Rules of Procedures, as approved on December 17, 2004.
+
+1.8 Acronyms
+This table defines all relevant terms and acronyms used in this specification.
+
+                                         Table 1. Acronyms
+
+Acronyms         Definition
+LSB              Least Significant Bit
+NDEF             NFC Data Exchange Format
+RFU              Reserved for Future Use
+RTD              Record Type Description
+URI              Uniform Resource Identifier
+URL              Uniform Resource Locator (this is a special case of an URI)
+
+
+Text Record Type Definition                                                               Page 2
+                                                                                       Text Record
+
+
+
+2 Text Record
+2.1 Introduction
+The “Text” record contains freeform plain text. It can be used to describe a service or the contents
+of the tag, for example.
+The Text record MAY appear as a sole record in an NDEF message [NDEF], but in this case the
+behavior is undefined and left to the application to handle. Typically, the Text record should be
+used in conjunction with other records to provide explanatory text.
+
+2.2 Dependencies
+There are no dependencies for the Text element.
+
+2.3 Security Considerations
+It is possible to write different text on the Text record than what the tag actually does, and thus
+spoof the user into doing something else than what he actually wanted (i.e., phishing). Thus it is a
+good idea for the user interface to use the Text field only as an informative field.
+
+
+
+
+Text Record Type Definition                                                                  Page 3
+                                                                                 NDEF structure
+
+
+3 NDEF structure
+3.1 Messaging Sequence
+There is no particular messaging sequence available for this RTD.
+
+3.2 Records Mapping
+3.2.1 Syntax
+The NFC Forum Well Known Type [NDEF], [NFC RTD] for the Text record is “T” (in NFC
+binary encoding: 0x54).
+The data content is as follows:
+
+                              Table 2. Text Record Content Syntax
+
+               Offset     Length      Content
+               (bytes)    (bytes)
+               0          1           Status byte. See Table 3.
+
+               1          <n>         ISO/IANA language code. Examples: “fi”, “en-US”, “fr-
+                                      CA”, “jp”. The encoding is US-ASCII.
+               n+1        <m>         The actual text. Encoding is either UTF-8 or UTF-16,
+                                      depending on the status bit.
+
+The Status bit encodings are as described in Table 3. Any value marked RFU SHALL be ignored,
+and any software writing these bits SHALL use the value zero for these bits.
+
+                                  Table 3. Status Byte Encodings
+
+               Bit number (0      Content
+               is LSB)
+
+               7                  0: The text is encoded in UTF-8
+                                  1: The text is encoded in UTF16
+
+               6                  RFU (MUST be set to zero)
+
+
+               5..0               The length of the IANA language code.
+
+
+The contents of the text field MAY be shown to the user. If multiple 'T' records exist, the one
+with the closest matching language to the user preference SHOULD be displayed. To have
+multiple text elements within a single application, context with the same language code SHOULD
+be considered an error.
+
+
+
+
+Text Record Type Definition                                                                  Page 4
+                                                                                      NDEF structure
+
+
+Control characters (0x00-0x1F in UTF-8) should be removed prior to display, except for newline,
+line feed (0x0D, 0x0A) and tab (0x08) characters. Markup MUST NOT be embedded (please use
+the “text/xhtml” or other suitable MIME types). The Text record should be considered to be equal
+to the MIME type “text/plain; format=fixed”.
+Line breaks in the text MUST be represented using the CRLF (so-called DOS convention, the
+sequence 0x0D,0x0A in UTF-8). The device may deal with the tab character as it wishes.
+White space other than newline and tab SHOULD be collapsed, i.e., multiple space characters are
+to be considered a single space character.
+To find the length of the actual text in bytes, you calculate the length via “m=(length of the
+payload – length of the IANA language code – 1)”
+
+3.2.2 Structure
+If the Text record describes an element, it SHOULD occur in the NDEF record list before the
+element it is describing. This makes it faster to find and display to the user if the element is very
+large.
+
+3.3 Language Codes
+All language codes MUST be done according to RFC 3066 [RFC3066]. The language code MAY
+NOT be omitted.
+The language code length is encoded in the six least significant bits of the status byte. Thus it is
+easy to find by masking the status byte with the value 0x3F.
+The language code is typically either two characters or five characters, though in the future, it is
+likely that it will be possible to have longer codes. At this time, IETF is considering an extension
+to RFC 3066 which will cover language codes up to 33 bytes in length [RFC 3066bis]. The two-
+character version disregards any dialects, and thus is used most often; for example, “fi” for
+Finnish, “jp” for Japanese, “fr” for French. However, in some cases you might want to
+differentiate between variants of the same language, such as providing US-English and British
+English versions via “en-US” and “en-UK” respectively.
+
+3.4 UTF-16 Byte Order
+The Unicode Byte-Order-Mark (BOM) in the actual string MUST be tolerated (i.e. no error
+condition). When generating a Text record, the BOM MAY be omitted. If the BOM is omitted,
+the byte order shall be big-endian (UTF-16 BE).
+
+
+
+
+Text Record Type Definition                                                                      Page 5
+                                                                       Example UTF-8 Encoding
+
+
+A. Example UTF-8 Encoding
+Here’s an example on how the English phrase “Hello, world!” would be encoded in UTF-8:
+
+                              Table 4. Example: “Hello, world!”
+
+           Offset     Content     Explanation                           Syntactical info
+
+           0          N/A         IL flag = 0 (no ID field), SF=1
+                                  (Short format)
+           1          0x01        Length of the record name
+                                                                        NDEF record header
+           2          0x10        The length of the payload data (16
+                                  bytes)
+           3          “T”         The binary encoding of the name,
+                                  as defined in [1]
+           4          0x02        Status byte: This is UTF-8, and
+                                  has a two-byte language code          Payload
+           5          “en”        “en” is the ISO code for “English”
+
+           7          “Hello,     UTF-8 string “Hello, world!”
+                                                                        The actual body text.
+                      world!”
+
+
+
+
+Text Record Type Definition                                                                Page 6
+                                                                                Revision History
+
+
+
+B. Revision History
+The following table outlines the revision history of the Text RTD Technical Specification.
+
+                                     Table 5. Revision History
+
+Document            Revision and         Status             Change Notice       Supersedes
+Name                Release Date
+NFCForum-TS-        1.0, July 2006                          None                First Revision
+RTD_Text_1.0
+
+
+
+
+Text Record Type Definition                                                                  Page 7
+

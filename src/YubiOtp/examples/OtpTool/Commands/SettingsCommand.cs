@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// Updates slot settings/flags without reprogramming key material (ykman otp settings SLOT).
 /// Requires the slot to have been programmed with AllowUpdate enabled.
 /// </summary>
+/// <remarks>
+/// Sends complete masked values, not a patch. Unspecified current flags are not preserved; AppendCr
+/// is already false in this fresh update, irrespective of NoEnter. Current-code authentication alone
+/// does not retain protection: the omitted new code sends zeros where firmware permits removal.
+/// </remarks>
 public static class SettingsCommand
 {
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)

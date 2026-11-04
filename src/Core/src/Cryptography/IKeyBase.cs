@@ -23,6 +23,9 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// </remarks>
 public interface IKeyBase
 {
+    /// <summary>Gets immutable shared metadata for this concrete key representation.</summary>
+    public KeyInfo KeyInfo { get; }
+
     /// <summary>
     /// Gets the type of the cryptographic key.
     /// </summary>

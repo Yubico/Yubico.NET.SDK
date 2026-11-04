@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
@@ -24,12 +25,12 @@ public class OpenPgpMultiCurveTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp384R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P384));
 
                 // Verify algorithm attributes were updated
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
                 Assert.IsType<EcAttributes>(attrs);
-                Assert.Equal(CurveOid.Secp384R1, ((EcAttributes)attrs).Oid);
+                Assert.Equal(KeyType.P384, ((EcAttributes)attrs).KeyType);
 
                 // Read back the public key
                 var pubKey = await session.GetPublicKeyAsync(KeyRef.Sig);
@@ -53,11 +54,11 @@ public class OpenPgpMultiCurveTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.BrainpoolP256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.BrainpoolP256r1));
 
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
                 Assert.IsType<EcAttributes>(attrs);
-                Assert.Equal(CurveOid.BrainpoolP256R1, ((EcAttributes)attrs).Oid);
+                Assert.Equal(KeyType.BrainpoolP256r1, ((EcAttributes)attrs).KeyType);
 
                 var pubKey = await session.GetPublicKeyAsync(KeyRef.Sig);
                 Assert.True(pubKey.Length > 0);

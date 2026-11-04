@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
+
 namespace Yubico.YubiKit.OpenPgp.UnitTests;
 
 public class AlgorithmAttributesTests
@@ -71,54 +73,52 @@ public class AlgorithmAttributesTests
     }
 
     [Theory]
-    [InlineData(CurveOid.Secp256R1, KeyRef.Sig, 0x13)]
-    [InlineData(CurveOid.Secp384R1, KeyRef.Aut, 0x13)]
-    [InlineData(CurveOid.Secp256R1, KeyRef.Dec, 0x12)]
-    [InlineData(CurveOid.Ed25519, KeyRef.Sig, 0x16)]
-    [InlineData(CurveOid.Ed25519, KeyRef.Aut, 0x16)]
-    public void EcAttributes_Create_SetsCorrectAlgorithmId(CurveOid oid, KeyRef keyRef, int expectedAlgId)
+    [InlineData(KeyType.P256, KeyRef.Sig, 0x13)]
+    [InlineData(KeyType.P384, KeyRef.Aut, 0x13)]
+    [InlineData(KeyType.P256, KeyRef.Dec, 0x12)]
+    [InlineData(KeyType.Ed25519, KeyRef.Sig, 0x16)]
+    [InlineData(KeyType.Ed25519, KeyRef.Aut, 0x16)]
+    [InlineData(KeyType.X25519, KeyRef.Aut, 0x12)]
+    [InlineData(KeyType.Secp256k1, KeyRef.Dec, 0x12)]
+    [InlineData(KeyType.BrainpoolP512r1, KeyRef.Sig, 0x13)]
+    public void EcAttributes_Create_SetsCorrectAlgorithmId(KeyType keyType, KeyRef keyRef, int expectedAlgorithmId)
     {
-        var attrs = EcAttributes.Create(keyRef, oid);
+        var attributes = EcAttributes.Create(keyRef, keyType);
 
-        Assert.Equal(expectedAlgId, attrs.AlgorithmId);
-        Assert.Equal(oid, attrs.Oid);
+        Assert.Equal(expectedAlgorithmId, attributes.AlgorithmId);
+        Assert.Equal(keyType, attributes.KeyType);
     }
 
     [Theory]
-    [InlineData(CurveOid.Secp256R1)]
-    [InlineData(CurveOid.Secp384R1)]
-    [InlineData(CurveOid.Secp521R1)]
-    [InlineData(CurveOid.BrainpoolP256R1)]
-    [InlineData(CurveOid.Ed25519)]
-    [InlineData(CurveOid.X25519)]
-    public void EcAttributes_RoundTrip_PreservesOid(CurveOid oid)
+    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.P384)]
+    [InlineData(KeyType.P521)]
+    [InlineData(KeyType.BrainpoolP256r1)]
+    [InlineData(KeyType.Ed25519)]
+    [InlineData(KeyType.X25519)]
+    public void EcAttributes_RoundTrip_PreservesConcreteKeyType(KeyType keyType)
     {
-        var keyRef = oid == CurveOid.X25519 ? KeyRef.Dec : KeyRef.Sig;
-        var attrs = EcAttributes.Create(keyRef, oid);
+        var keyRef = keyType == KeyType.X25519 ? KeyRef.Dec : KeyRef.Sig;
+        var attributes = EcAttributes.Create(keyRef, keyType);
 
-        var bytes = attrs.ToBytes();
+        var bytes = attributes.ToBytes();
         var parsed = AlgorithmAttributes.Parse(bytes);
 
         var ec = Assert.IsType<EcAttributes>(parsed);
-        Assert.Equal(oid, ec.Oid);
+        Assert.Equal(keyType, ec.KeyType);
     }
 
     [Fact]
     public void EcAttributes_WithPubkeyFormat_RoundTrips()
     {
-        // Build raw bytes: algorithmId=0x13, OID bytes for Secp256R1, import format 0xFF
-        var oidBytes = CurveOid.Secp256R1.GetOidBytes();
-        var raw = new byte[1 + oidBytes.Length + 1];
-        raw[0] = 0x13; // ECDSA
-        oidBytes.CopyTo(raw.AsSpan(1));
-        raw[^1] = (byte)EcImportFormat.StandardWithPubkey;
+        byte[] raw = Convert.FromHexString("132A8648CE3D030107FF");
         var attrs = AlgorithmAttributes.Parse(raw);
 
         var bytes = attrs.ToBytes();
         var parsed = AlgorithmAttributes.Parse(bytes);
 
         var ec = Assert.IsType<EcAttributes>(parsed);
-        Assert.Equal(CurveOid.Secp256R1, ec.Oid);
+        Assert.Equal(KeyType.P256, ec.KeyType);
         Assert.Equal(EcImportFormat.StandardWithPubkey, ec.ImportFormat);
     }
 
@@ -128,4 +128,26 @@ public class AlgorithmAttributesTests
         byte[] wire = [0xFF, 0x00, 0x00];
         Assert.Throws<ArgumentException>(() => AlgorithmAttributes.Parse(wire));
     }
+
+    [Theory]
+    [InlineData("122A8648CE3D030107FF", 0x12)]
+    [InlineData("132A8648CE3D030107FF", 0x13)]
+    [InlineData("162A8648CE3D030107FF", 0x16)]
+    public void EcAttributes_Parse_PreservesReceivedAlgorithmAndFormat(string wireHex, int algorithmId)
+    {
+        var wire = Convert.FromHexString(wireHex);
+        var attributes = Assert.IsType<EcAttributes>(AlgorithmAttributes.Parse(wire));
+        Assert.Equal(KeyType.P256, attributes.KeyType);
+        Assert.Equal(algorithmId, attributes.AlgorithmId);
+        Assert.Equal(EcImportFormat.StandardWithPubkey, attributes.ImportFormat);
+        Assert.Equal(wire, attributes.ToBytes());
+    }
+
+    [Theory]
+    [InlineData(KeyType.Rsa2048)]
+    [InlineData(KeyType.Aes256)]
+    [InlineData(KeyType.TripleDes)]
+    [InlineData(KeyType.None)]
+    public void EcAttributes_NonEcKey_NeverFallsBackToEcdsa(KeyType keyType) =>
+        Assert.Throws<ArgumentException>(() => EcAttributes.Create(KeyRef.Sig, keyType));
 }

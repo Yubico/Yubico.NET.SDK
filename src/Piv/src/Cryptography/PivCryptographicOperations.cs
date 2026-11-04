@@ -304,9 +304,9 @@ internal static class PivCryptographicOperations
         // Determine algorithm from public key
         var algorithm = peerPublicKey switch
         {
-            ECPublicKey ecKey when ecKey.KeyDefinition.KeyType == KeyType.ECP256 => PivAlgorithm.EccP256,
-            ECPublicKey ecKey when ecKey.KeyDefinition.KeyType == KeyType.ECP384 => PivAlgorithm.EccP384,
-            Curve25519PublicKey cv25519 when cv25519.KeyDefinition.KeyType == KeyType.X25519 => PivAlgorithm.X25519,
+            ECPublicKey ecKey when ecKey.KeyType == KeyType.P256 => PivAlgorithm.EccP256,
+            ECPublicKey ecKey when ecKey.KeyType == KeyType.P384 => PivAlgorithm.EccP384,
+            Curve25519PublicKey curve25519Key when curve25519Key.KeyType == KeyType.X25519 => PivAlgorithm.X25519,
             _ => throw new ArgumentException("Unsupported public key type for ECDH", nameof(peerPublicKey))
         };
 

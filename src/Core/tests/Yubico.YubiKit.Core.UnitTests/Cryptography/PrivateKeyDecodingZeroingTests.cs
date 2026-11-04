@@ -280,7 +280,7 @@ public class PrivateKeyDecodingZeroingTests
         {
             using var key = ECPrivateKey.CreateFromValue(
                 privateValue,
-                KeyType.ECP256,
+                KeyType.P256,
                 parameters => temporaryValues.Add(Assert.IsType<byte[]>(parameters.D)));
 
             Assert.Equal(2, temporaryValues.Count);

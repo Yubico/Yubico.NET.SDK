@@ -41,15 +41,15 @@ public sealed class RSAPrivateKey : PrivateKey
     public RSAParameters Parameters { get; }
 
     /// <summary>
-    /// Gets the key definition associated with this RSA private key.
+    /// Gets the metadata associated with this RSA private key.
     /// </summary>
     /// <value>
-    /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
+    /// A <see cref="KeyInfo"/> object that describes the key's representation.
     /// </value>
-    public KeyDefinition KeyDefinition { get; }
+    public override KeyInfo KeyInfo { get; }
 
     /// <inheritdoc />
-    public override KeyType KeyType => KeyDefinition.KeyType;
+    public override KeyType KeyType => KeyInfo.KeyType;
 
     /// <exception cref="CryptographicException">
     ///     Thrown when a component is missing or the RFC 8017 relations between <c>n, e, d, p, q, dP, dQ, qInv</c>
@@ -61,7 +61,7 @@ public sealed class RSAPrivateKey : PrivateKey
     {
         var keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
 
-        KeyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits); // cheap gate first: unsupported sizes never reach arithmetic
+        KeyInfo = CryptographicDefinitions.Keys.GetByRsaLength(keyLengthBits); // cheap gate first: unsupported sizes never reach arithmetic
         PrivateKeyConsistency.ThrowIfInconsistent(parameters);
         Parameters = parameters.NormalizeParameters(parametersCopied);
     }

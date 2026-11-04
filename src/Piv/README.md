@@ -134,6 +134,10 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
 
 ## Constraints
 
+Core's [cryptographic catalog](../Core/README.md#cryptographic-metadata) exposes immutable `KeyInfo` on
+key objects. PIV's independent `PivAlgorithm` identifiers and firmware restrictions remain protocol-owned;
+never cast from Core `KeyType` or infer PIV support from catalog representation/applicability.
+
 - Requesting a non-SmartCard transport through `SessionCreationOptions { PreferredConnectionType = ... }` throws.
 - One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
   disposes it with `await using`; a session from `CreatePivSessionAsync` owns and disposes the one it opened.

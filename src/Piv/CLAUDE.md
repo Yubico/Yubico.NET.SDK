@@ -4,6 +4,11 @@ This file provides Claude-specific guidance for working with the PIV module. **R
 
 ## Documentation Maintenance
 
+Core's `CryptographicDefinitions.Keys` provides immutable `KeyInfo` on key objects. Keep the explicit
+`PivAlgorithm` mappings and independent protocol values; catalog representation or algorithm applicability
+never implies PIV operation support or broadens its supported curves. See
+[Core catalog](../Core/README.md#cryptographic-metadata).
+
 When working on this module:
 
 - Update both `CLAUDE.md` and `README.md` for notable API, behavior, test, or security-pattern changes.

@@ -132,6 +132,10 @@ than other operations.
 
 ## Constraints
 
+Shared Core [cryptographic metadata](../Core/README.md#cryptographic-metadata) uses `KeyType` concrete
+identities and `KeyInfo` on key objects. Catalog representation/applicability and COSE mappings do not
+expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
+
 - SmartCard transport only. Requesting another transport through
   `SessionCreationOptions { PreferredConnectionType = ... }` throws.
 - One live connection per physical YubiKey, and one session per connection. Whoever creates a connection

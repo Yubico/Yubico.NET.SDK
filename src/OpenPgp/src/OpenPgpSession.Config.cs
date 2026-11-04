@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Utilities;
 
@@ -226,19 +227,19 @@ public sealed partial class OpenPgpSession
             }
 
             // Remove X25519 entries with EdDSA algorithm ID (invalid)
-            if (ec.Oid == CurveOid.X25519 && ec.AlgorithmId == EcAttributes.EddsaAlgorithmId)
+            if (ec.KeyType == KeyType.X25519 && ec.AlgorithmId == EcAttributes.EddsaAlgorithmId)
             {
                 // Replace: DEC gets X25519/ECDH, others skip
                 if (keyRef == KeyRef.Dec)
                 {
-                    result.Add(new SupportedAlgorithm(keyRef, EcAttributes.Create(KeyRef.Dec, CurveOid.X25519)));
+                    result.Add(new SupportedAlgorithm(keyRef, EcAttributes.Create(KeyRef.Dec, KeyType.X25519)));
                 }
 
                 continue;
             }
 
             // Remove Ed25519 from DEC and ATT (invalid for those slots)
-            if (ec.Oid == CurveOid.Ed25519 && keyRef is KeyRef.Dec or KeyRef.Att)
+            if (ec.KeyType == KeyType.Ed25519 && keyRef is KeyRef.Dec or KeyRef.Att)
             {
                 continue;
             }

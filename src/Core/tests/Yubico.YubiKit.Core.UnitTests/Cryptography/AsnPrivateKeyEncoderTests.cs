@@ -27,9 +27,9 @@ public class AsnPrivateKeyEncoderTests
 {
     private static KeyType GetKeyType(string curveOid) => curveOid switch
     {
-        Oids.ECP256 => KeyType.ECP256,
-        Oids.ECP384 => KeyType.ECP384,
-        Oids.ECP521 => KeyType.ECP521,
+        Oids.P256 => KeyType.P256,
+        Oids.P384 => KeyType.P384,
+        Oids.P521 => KeyType.P521,
         _ => throw new ArgumentOutOfRangeException(nameof(curveOid))
     };
 
@@ -78,9 +78,9 @@ public class AsnPrivateKeyEncoderTests
     #region EncodeToPkcs8(ECParameters) - Encoder vs BCL oracle
 
     [Theory]
-    [InlineData(Oids.ECP256)]
-    [InlineData(Oids.ECP384)]
-    [InlineData(Oids.ECP521)]
+    [InlineData(Oids.P256)]
+    [InlineData(Oids.P384)]
+    [InlineData(Oids.P521)]
     public void EncodeToPkcs8_EcParametersWithPublicPoint_BclImportsAndRoundTrips(string curveOid)
     {
         using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
@@ -100,9 +100,9 @@ public class AsnPrivateKeyEncoderTests
     }
 
     [Theory]
-    [InlineData(Oids.ECP256, 32)]
-    [InlineData(Oids.ECP384, 48)]
-    [InlineData(Oids.ECP521, 66)]
+    [InlineData(Oids.P256, 32)]
+    [InlineData(Oids.P384, 48)]
+    [InlineData(Oids.P521, 66)]
     public void EncodeToPkcs8_EcParametersWithPublicPoint_EmitsExplicitlyTaggedBitString(
         string curveOid, int coordinateSize)
     {
@@ -257,7 +257,7 @@ public class AsnPrivateKeyEncoderTests
     [Theory]
     [InlineData(Oids.X25519)]
     [InlineData(Oids.Ed25519)]
-    [InlineData(Oids.AES256Cbc)]
+    [InlineData(Oids.Aes256Cbc)]
     public void EncodeToPkcs8_EcParametersNonEcCurveOid_ThrowsArgumentException(string oid)
     {
         var parameters = new ECParameters
@@ -271,7 +271,7 @@ public class AsnPrivateKeyEncoderTests
     }
 
     [Theory]
-    [InlineData("1.3.132.0.10")] // secp256k1
+    [InlineData("1.3.132.0.31")] // secp192k1, intentionally not modeled
     [InlineData("1.2.840.10045.3.1.1")] // secp192r1
     public void EncodeToPkcs8_EcParametersUnsupportedCurveOid_ThrowsArgumentException(string oid)
     {
@@ -291,7 +291,7 @@ public class AsnPrivateKeyEncoderTests
     /// </summary>
     [Theory]
     [InlineData(Oids.X25519)]
-    [InlineData("1.3.132.0.10")] // secp256k1
+    [InlineData("1.3.132.0.31")] // secp192k1, intentionally not modeled
     public void EncodeToPkcs8_EcParametersUnsupportedCurveOidWithoutPublicPoint_ThrowsArgumentException(string oid)
     {
         var parameters = new ECParameters
@@ -304,12 +304,12 @@ public class AsnPrivateKeyEncoderTests
     }
 
     [Theory]
-    [InlineData(Oids.ECP256, 31, 32)] // X one byte short
-    [InlineData(Oids.ECP256, 32, 31)] // Y one byte short
-    [InlineData(Oids.ECP256, 33, 33)] // both oversized but self-consistent
-    [InlineData(Oids.ECP256, 48, 48)] // P-384 sized coordinates on a P-256 curve
-    [InlineData(Oids.ECP384, 32, 32)] // P-256 sized coordinates on a P-384 curve
-    [InlineData(Oids.ECP521, 65, 66)] // P-521 coordinates are 66 bytes each
+    [InlineData(Oids.P256, 31, 32)] // X one byte short
+    [InlineData(Oids.P256, 32, 31)] // Y one byte short
+    [InlineData(Oids.P256, 33, 33)] // both oversized but self-consistent
+    [InlineData(Oids.P256, 48, 48)] // P-384 sized coordinates on a P-256 curve
+    [InlineData(Oids.P384, 32, 32)] // P-256 sized coordinates on a P-384 curve
+    [InlineData(Oids.P521, 65, 66)] // P-521 coordinates are 66 bytes each
     public void EncodeToPkcs8_EcParametersCoordinateSizeMismatch_ThrowsArgumentException(
         string curveOid, int xLength, int yLength)
     {
@@ -339,14 +339,14 @@ public class AsnPrivateKeyEncoderTests
     /// malformed, but plausible enough that the caller got no signal at all.
     /// </summary>
     [Theory]
-    [InlineData(Oids.ECP256, 31)] // one byte short
-    [InlineData(Oids.ECP256, 33)] // one byte long
-    [InlineData(Oids.ECP256, 48)] // a P-384 scalar on a P-256 curve
-    [InlineData(Oids.ECP384, 32)] // a P-256 scalar on a P-384 curve
-    [InlineData(Oids.ECP384, 66)] // a P-521 scalar on a P-384 curve
-    [InlineData(Oids.ECP521, 32)] // a P-256 scalar on a P-521 curve
-    [InlineData(Oids.ECP521, 65)] // one byte short of P-521's 66
-    [InlineData(Oids.ECP256, 0)] // empty
+    [InlineData(Oids.P256, 31)] // one byte short
+    [InlineData(Oids.P256, 33)] // one byte long
+    [InlineData(Oids.P256, 48)] // a P-384 scalar on a P-256 curve
+    [InlineData(Oids.P384, 32)] // a P-256 scalar on a P-384 curve
+    [InlineData(Oids.P384, 66)] // a P-521 scalar on a P-384 curve
+    [InlineData(Oids.P521, 32)] // a P-256 scalar on a P-521 curve
+    [InlineData(Oids.P521, 65)] // one byte short of P-521's 66
+    [InlineData(Oids.P256, 0)] // empty
     public void EncodeToPkcs8_EcParametersPrivateScalarWrongLength_ThrowsArgumentException(
         string curveOid, int dLength)
     {
@@ -367,9 +367,9 @@ public class AsnPrivateKeyEncoderTests
     /// optional RFC 5915 <c>publicKey</c> field is exactly where a bad D has nothing else to trip on.
     /// </summary>
     [Theory]
-    [InlineData(Oids.ECP256, 48)]
-    [InlineData(Oids.ECP384, 32)]
-    [InlineData(Oids.ECP521, 48)]
+    [InlineData(Oids.P256, 48)]
+    [InlineData(Oids.P384, 32)]
+    [InlineData(Oids.P521, 48)]
     public void EncodeToPkcs8_EcParametersPrivateScalarWrongLengthWithoutPublicPoint_ThrowsArgumentException(
         string curveOid, int dLength)
     {
@@ -383,9 +383,9 @@ public class AsnPrivateKeyEncoderTests
     }
 
     [Theory]
-    [InlineData(Oids.ECP256)]
-    [InlineData(Oids.ECP384)]
-    [InlineData(Oids.ECP521)]
+    [InlineData(Oids.P256)]
+    [InlineData(Oids.P384)]
+    [InlineData(Oids.P521)]
     public void EncodeToPkcs8_EcParametersPrivateScalarCurveSized_IsAccepted(string curveOid)
     {
         using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
@@ -427,9 +427,9 @@ public class AsnPrivateKeyEncoderTests
     #region EncodeToPkcs8(ReadOnlyMemory<byte>, ReadOnlyMemory<byte>?, KeyType) - EC via raw values
 
     [Theory]
-    [InlineData(Oids.ECP256)]
-    [InlineData(Oids.ECP384)]
-    [InlineData(Oids.ECP521)]
+    [InlineData(Oids.P256)]
+    [InlineData(Oids.P384)]
+    [InlineData(Oids.P521)]
     public void EncodeToPkcs8_RawEcKeyWithPublicPoint_BclImportsAndRoundTrips(string curveOid)
     {
         using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
@@ -461,15 +461,15 @@ public class AsnPrivateKeyEncoderTests
         point[0] = prefix;
 
         Assert.Throws<ArgumentException>(() =>
-            AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], point, KeyType.ECP256));
+            AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], point, KeyType.P256));
     }
 
     [Theory]
-    [InlineData(KeyType.ECP256, 64)] // one byte short
-    [InlineData(KeyType.ECP256, 66)] // one byte long
-    [InlineData(KeyType.ECP256, 97)] // a P-384 point on a P-256 key
-    [InlineData(KeyType.ECP384, 65)] // a P-256 point on a P-384 key
-    [InlineData(KeyType.ECP521, 97)] // a P-384 point on a P-521 key
+    [InlineData(KeyType.P256, 64)] // one byte short
+    [InlineData(KeyType.P256, 66)] // one byte long
+    [InlineData(KeyType.P256, 97)] // a P-384 point on a P-256 key
+    [InlineData(KeyType.P384, 65)] // a P-256 point on a P-384 key
+    [InlineData(KeyType.P521, 97)] // a P-384 point on a P-521 key
     public void EncodeToPkcs8_RawEcKeyPublicPointWrongLength_ThrowsArgumentException(
         KeyType keyType, int pointLength)
     {
@@ -483,12 +483,12 @@ public class AsnPrivateKeyEncoderTests
     [Fact]
     public void EncodeToPkcs8_RawEcKeyEmptyPublicPoint_ThrowsArgumentException() =>
         Assert.Throws<ArgumentException>(() =>
-            AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], ReadOnlyMemory<byte>.Empty, KeyType.ECP256));
+            AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], ReadOnlyMemory<byte>.Empty, KeyType.P256));
 
     [Fact]
     public void EncodeToPkcs8_UnsupportedKeyType_ThrowsNotSupportedException() =>
         Assert.Throws<NotSupportedException>(() =>
-            AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], null, KeyType.RSA2048));
+            AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], null, KeyType.Rsa2048));
 
     #endregion
 

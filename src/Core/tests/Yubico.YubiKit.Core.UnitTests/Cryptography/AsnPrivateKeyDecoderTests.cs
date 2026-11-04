@@ -36,9 +36,9 @@ public class AsnPrivateKeyDecoderTests
     #region CreateECParameters - Decoder vs BCL oracle (happy paths, all three curves)
 
     [Theory]
-    [InlineData(Oids.ECP256)]
-    [InlineData(Oids.ECP384)]
-    [InlineData(Oids.ECP521)]
+    [InlineData(Oids.P256)]
+    [InlineData(Oids.P384)]
+    [InlineData(Oids.P521)]
     public void CreateECParameters_BclEncodedKey_MatchesBclExportedParameters(string curveOid)
     {
         using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
@@ -74,7 +74,7 @@ public class AsnPrivateKeyDecoderTests
         {
             var parametersTag = new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true);
             ecWriter.PushSequence(parametersTag);
-            ecWriter.WriteObjectIdentifier(curveOid ?? Oids.ECP256);
+            ecWriter.WriteObjectIdentifier(curveOid ?? Oids.P256);
             ecWriter.PopSequence(parametersTag);
         }
 
@@ -120,7 +120,7 @@ public class AsnPrivateKeyDecoderTests
     [Fact]
     public void CreateECParameters_Pkcs8VersionOne_ThrowsValidButUnsupportedCryptographicException()
     {
-        var pkcs8 = BuildEcPkcs8(Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue: new byte[32], pkcs8Version: 1);
+        var pkcs8 = BuildEcPkcs8(Oids.EcPublicKey, Oids.P256, ecVersion: 1, privateKeyValue: new byte[32], pkcs8Version: 1);
 
         var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
 
@@ -130,7 +130,7 @@ public class AsnPrivateKeyDecoderTests
     [Fact]
     public void CreateECParameters_AlgorithmOidNotEcdsa_ThrowsInvalidOperationException()
     {
-        var pkcs8 = BuildEcPkcs8(Oids.RSA, Oids.ECP256, ecVersion: 1, privateKeyValue: new byte[32]);
+        var pkcs8 = BuildEcPkcs8(Oids.Rsa, Oids.P256, ecVersion: 1, privateKeyValue: new byte[32]);
 
         Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
     }
@@ -138,7 +138,7 @@ public class AsnPrivateKeyDecoderTests
     [Fact]
     public void CreateECParameters_UnsupportedCurveOid_ThrowsInvalidOperationException()
     {
-        var pkcs8 = BuildEcPkcs8(Oids.ECDSA, "1.2.3.4.5", ecVersion: 1, privateKeyValue: new byte[32]);
+        var pkcs8 = BuildEcPkcs8(Oids.EcPublicKey, "1.2.3.4.5", ecVersion: 1, privateKeyValue: new byte[32]);
 
         Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
     }
@@ -146,7 +146,7 @@ public class AsnPrivateKeyDecoderTests
     [Fact]
     public void CreateECParameters_InnerEcVersionNotOne_ThrowsCryptographicException()
     {
-        var pkcs8 = BuildEcPkcs8(Oids.ECDSA, Oids.ECP256, ecVersion: 2, privateKeyValue: new byte[32]);
+        var pkcs8 = BuildEcPkcs8(Oids.EcPublicKey, Oids.P256, ecVersion: 2, privateKeyValue: new byte[32]);
 
         Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
     }
@@ -156,7 +156,7 @@ public class AsnPrivateKeyDecoderTests
     {
         var privateKeyValue = new byte[32];
         Array.Fill(privateKeyValue, (byte)0x07);
-        var pkcs8 = BuildEcPkcs8(Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue);
+        var pkcs8 = BuildEcPkcs8(Oids.EcPublicKey, Oids.P256, ecVersion: 1, privateKeyValue);
 
         var result = AsnPrivateKeyDecoder.CreateECParameters(pkcs8);
 
@@ -171,7 +171,7 @@ public class AsnPrivateKeyDecoderTests
         var point = new byte[65];
         point[0] = 0x04;
         var pkcs8 = BuildEcPkcs8(
-            Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue: new byte[32],
+            Oids.EcPublicKey, Oids.P256, ecVersion: 1, privateKeyValue: new byte[32],
             publicKeyPointBytes: point, publicKeyUnusedBits: 1);
 
         Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
@@ -185,7 +185,7 @@ public class AsnPrivateKeyDecoderTests
         var privateKeyValue = new byte[32];
         Array.Fill(privateKeyValue, (byte)0x09);
         var pkcs8 = BuildEcPkcs8(
-            Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue,
+            Oids.EcPublicKey, Oids.P256, ecVersion: 1, privateKeyValue,
             publicKeyPointBytes: compressedPoint);
 
         var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
@@ -200,7 +200,7 @@ public class AsnPrivateKeyDecoderTests
         var privateKeyValue = new byte[32];
         Array.Fill(privateKeyValue, (byte)0x0A);
         var pkcs8 = BuildEcPkcs8(
-            Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue,
+            Oids.EcPublicKey, Oids.P256, ecVersion: 1, privateKeyValue,
             publicKeyPointBytes: wrongLengthPoint);
 
         var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
@@ -211,7 +211,7 @@ public class AsnPrivateKeyDecoderTests
     public void CreateECParameters_ZeroLengthPublicKeyBitString_ThrowsCryptographicException()
     {
         var pkcs8 = BuildEcPkcs8(
-            Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue: new byte[32],
+            Oids.EcPublicKey, Oids.P256, ecVersion: 1, privateKeyValue: new byte[32],
             publicKeyPointBytes: []);
 
         var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
@@ -231,12 +231,12 @@ public class AsnPrivateKeyDecoderTests
         expected.Q.Y!.CopyTo(point, 33);
 
         var pkcs8 = BuildEcPkcs8(
-            Oids.ECDSA, Oids.ECP256, ecVersion: 1, expected.D!,
+            Oids.EcPublicKey, Oids.P256, ecVersion: 1, expected.D!,
             publicKeyPointBytes: point, explicitPublicKeyTag: explicitPublicKeyTag);
 
         var result = AsnPrivateKeyDecoder.CreateECParameters(pkcs8);
 
-        AssertEcParametersMatch(expected, result, Oids.ECP256);
+        AssertEcParametersMatch(expected, result, Oids.P256);
     }
 
     [Theory]
@@ -250,7 +250,7 @@ public class AsnPrivateKeyDecoderTests
         compressedPoint[0] = 0x02;
 
         var pkcs8 = BuildEcPkcs8(
-            Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue: new byte[32],
+            Oids.EcPublicKey, Oids.P256, ecVersion: 1, privateKeyValue: new byte[32],
             publicKeyPointBytes: compressedPoint, explicitPublicKeyTag: explicitPublicKeyTag);
 
         var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
@@ -268,12 +268,12 @@ public class AsnPrivateKeyDecoderTests
         expected.Q.Y!.CopyTo(point, 33);
 
         var pkcs8 = BuildEcPkcs8(
-            Oids.ECDSA, Oids.ECP256, ecVersion: 1, expected.D!,
+            Oids.EcPublicKey, Oids.P256, ecVersion: 1, expected.D!,
             publicKeyPointBytes: point, includeParametersField: true);
 
         var result = AsnPrivateKeyDecoder.CreateECParameters(pkcs8);
 
-        AssertEcParametersMatch(expected, result, Oids.ECP256);
+        AssertEcParametersMatch(expected, result, Oids.P256);
     }
 
     #endregion
@@ -340,7 +340,7 @@ public class AsnPrivateKeyDecoderTests
     [Fact]
     public void CreateRSAParameters_AlgorithmOidNotRsa_ThrowsInvalidOperationException()
     {
-        var pkcs8 = BuildRsaPkcs8WithAlgorithmOid(Oids.ECDSA);
+        var pkcs8 = BuildRsaPkcs8WithAlgorithmOid(Oids.EcPublicKey);
 
         Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyDecoder.CreateRSAParameters(pkcs8));
     }
@@ -542,7 +542,7 @@ public class AsnPrivateKeyDecoderTests
     [Fact]
     public void GetCurve25519PrivateKeyData_UnsupportedAlgorithmOid_ThrowsArgumentException()
     {
-        var pkcs8 = BuildCurve25519Pkcs8(Oids.RSA, new byte[32]);
+        var pkcs8 = BuildCurve25519Pkcs8(Oids.Rsa, new byte[32]);
 
         Assert.Throws<ArgumentException>(() => AsnPrivateKeyDecoder.GetCurve25519PrivateKeyData(pkcs8));
     }

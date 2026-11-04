@@ -17,17 +17,19 @@ Yubico.YubiKit.OpenPgp.ApplicationRelatedData.HistoricalBytes.get -> System.Read
 Yubico.YubiKit.OpenPgp.ApplicationRelatedData.HistoricalBytes.init -> void
 Yubico.YubiKit.OpenPgp.Credentials.OpenPgpCredentialOptions
 Yubico.YubiKit.OpenPgp.Crt
-Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOid.BrainpoolP256R1 = 4 -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOid.BrainpoolP384R1 = 5 -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOid.BrainpoolP512R1 = 6 -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOid.Ed25519 = 8 -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOid.Secp256K1 = 1 -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOid.Secp256R1 = 0 -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOid.Secp384R1 = 2 -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOid.Secp521R1 = 3 -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOid.X25519 = 7 -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.CurveOidExtensions
+Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo
+Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.<Clone>$() -> Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo!
+Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.CurveOid.get -> string?
+Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.RsaSize.get -> Yubico.YubiKit.OpenPgp.RsaSize?
+Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.Equals(Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo? other) -> bool
+override Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.Equals(object? obj) -> bool
+override Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.GetHashCode() -> int
+override Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.ToString() -> string!
+static Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.operator ==(Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo? left, Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo? right) -> bool
+static Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo.operator !=(Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo? left, Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo? right) -> bool
+Yubico.YubiKit.OpenPgp.OpenPgpKeyInfoExtensions
+static Yubico.YubiKit.OpenPgp.OpenPgpKeyInfoExtensions.GetOpenPgpInfo(this Yubico.YubiKit.Core.Cryptography.KeyInfo! keyInfo) -> Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo?
 Yubico.YubiKit.OpenPgp.DataObject
 Yubico.YubiKit.OpenPgp.DataObject.Aid = 79 -> Yubico.YubiKit.OpenPgp.DataObject
 Yubico.YubiKit.OpenPgp.DataObject.AlgorithmAttributesAtt = 218 -> Yubico.YubiKit.OpenPgp.DataObject
@@ -112,8 +114,8 @@ Yubico.YubiKit.OpenPgp.EcAttributes
 Yubico.YubiKit.OpenPgp.EcAttributes.EcAttributes() -> void
 Yubico.YubiKit.OpenPgp.EcAttributes.ImportFormat.get -> Yubico.YubiKit.OpenPgp.EcImportFormat
 Yubico.YubiKit.OpenPgp.EcAttributes.ImportFormat.init -> void
-Yubico.YubiKit.OpenPgp.EcAttributes.Oid.get -> Yubico.YubiKit.OpenPgp.CurveOid
-Yubico.YubiKit.OpenPgp.EcAttributes.Oid.init -> void
+Yubico.YubiKit.OpenPgp.EcAttributes.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.OpenPgp.EcAttributes.KeyType.init -> void
 Yubico.YubiKit.OpenPgp.EcImportFormat
 Yubico.YubiKit.OpenPgp.EcImportFormat.Standard = 0 -> Yubico.YubiKit.OpenPgp.EcImportFormat
 Yubico.YubiKit.OpenPgp.EcImportFormat.StandardWithPubkey = 255 -> Yubico.YubiKit.OpenPgp.EcImportFormat
@@ -386,13 +388,8 @@ static Yubico.YubiKit.OpenPgp.Crt.Att.get -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.OpenPgp.Crt.Aut.get -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.OpenPgp.Crt.Dec.get -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.OpenPgp.Crt.Sig.get -> System.ReadOnlyMemory<byte>
-static Yubico.YubiKit.OpenPgp.CurveOidExtensions.FromOidBytes(System.ReadOnlySpan<byte> oidBytes) -> Yubico.YubiKit.OpenPgp.CurveOid
-static Yubico.YubiKit.OpenPgp.CurveOidExtensions.GetOidBytes(this Yubico.YubiKit.OpenPgp.CurveOid curveOid) -> System.ReadOnlySpan<byte>
-static Yubico.YubiKit.OpenPgp.CurveOidExtensions.ToDottedString(this Yubico.YubiKit.OpenPgp.CurveOid curveOid) -> string!
-static Yubico.YubiKit.OpenPgp.CurveOidExtensions.ToEcCurve(this Yubico.YubiKit.OpenPgp.CurveOid curveOid) -> System.Security.Cryptography.ECCurve
-static Yubico.YubiKit.OpenPgp.CurveOidExtensions.TryFromOidBytes(System.ReadOnlySpan<byte> oidBytes, out Yubico.YubiKit.OpenPgp.CurveOid curveOid) -> bool
 static Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects!
-static Yubico.YubiKit.OpenPgp.EcAttributes.Create(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.CurveOid oid) -> Yubico.YubiKit.OpenPgp.EcAttributes!
+static Yubico.YubiKit.OpenPgp.EcAttributes.Create(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.OpenPgp.EcAttributes!
 static Yubico.YubiKit.OpenPgp.ExtendedCapabilities.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.ExtendedCapabilities!
 static Yubico.YubiKit.OpenPgp.ExtendedLengthInfo.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.ExtendedLengthInfo!
 static Yubico.YubiKit.OpenPgp.IYubiKeyExtensions.CreateOpenPgpSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.OpenPgpSession!>!

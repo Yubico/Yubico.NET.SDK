@@ -624,7 +624,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             throw new BadResponseException("Generate EC key response was empty.");
 
         var publicPoint = TlvHelper.GetValue(KeyTypeEccPublicKey, response.Span);
-        return ECPublicKey.CreateFromValue(publicPoint, KeyType.ECP256);
+        return ECPublicKey.CreateFromValue(publicPoint, KeyType.P256);
     }
 
     /// <summary>

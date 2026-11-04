@@ -2,12 +2,16 @@
 
 ## Current cycle
 
-Pass-1 content, independent review and execution gates are complete as
+**Pass 1 is complete and published** as
 [security-domain-001](modules/security-domain/pass-1/security-domain-001/plan.md),
-on `yubikit-docs-audit` from verified local/GitHub baseline
-`b73efe3813b429b4b8eb2a7e819a6ad7be699d47`. See [current status](modules/security-domain/pass-1/security-domain-001/status.md).
-Fresh independent final record review passed with no required corrections. Publication is pending at
-this checkpoint; the verified content commit and GitHub hash will be recorded here after push.
+on `yubikit-docs-audit`. Baseline:
+`b73efe3813b429b4b8eb2a7e819a6ad7be699d47`. Content and complete run records:
+**`7f7623595859b153a3c80d0e49bbdac60ecb43e4`**, committed/pushed and independently matched to GitHub's
+branch HEAD on 2026-11-04. Fresh independent final record review passed with no required corrections.
+
+The [frozen run status](modules/security-domain/pass-1/security-domain-001/status.md) preserves the
+pre-publication checkpoint; this handoff supersedes its publication-pending next step. This publication-only
+update changes no reviewed content, compiler inputs, evidence or run hashes.
 
 The user approved a module-focused, proportionate cycle. Core project investigation and dedicated
 cross-module boundary review are deferred until Core, the final target, when per-applet relationships
@@ -18,6 +22,11 @@ authored paths have independent acceptance; three final clean samples cover nine
 Ten meaningful example groups compiled across two contexts. Final clean solution gates passed 3998 unit
 tests, including 50 Security Domain cases, with five existing skips and zero compiler/analyzer warnings.
 Implementation and hardware verification remain separate from documentation completion.
+
+The [run manifest](modules/security-domain/pass-1/security-domain-001/record-manifest.json) preserves
+**164 text artifacts / 2,385,100 bytes**, excluding the manifest itself. Exact staged Git blob bytes were
+checked against retained files before publication. Finalized earlier archives and four original untracked
+files remain unchanged. No PR or merge was performed.
 
 ## Return-visit records
 

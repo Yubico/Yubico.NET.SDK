@@ -34,7 +34,7 @@ public class PivAuditHardwareReproTests
             await setup.ResetAsync();
             await setup.AuthenticateAsync(ManagementKey);
             publicKey = (ECPublicKey)await setup.GenerateKeyAsync(Slot.Authentication,
-                KeyType.ECP256,
+                KeyType.P256,
                 new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never });
         }
 
@@ -42,7 +42,7 @@ public class PivAuditHardwareReproTests
         await using (var baseline = await state.Device.CreatePivSessionAsync())
         {
             InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                baseline.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest));
+                baseline.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
             Assert.Contains("Security status not satisfied", exception.Message, StringComparison.Ordinal);
         }
 
@@ -58,7 +58,7 @@ public class PivAuditHardwareReproTests
         await using var unverified = await state.Device.CreatePivSessionAsync();
         ReadOnlyMemory<byte> signature = ReadOnlyMemory<byte>.Empty;
         Exception? rejection = await Record.ExceptionAsync(async () =>
-            signature = await unverified.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest));
+            signature = await unverified.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
         if (rejection is null)
         {
             using var ecdsa = ECDsa.Create();

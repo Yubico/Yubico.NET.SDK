@@ -49,7 +49,7 @@ public class PivCompressedCertTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         // Generate a key in the slot first
-        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
         // Create a self-signed certificate
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);

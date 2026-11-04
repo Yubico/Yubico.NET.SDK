@@ -4,6 +4,11 @@ This file provides Claude-specific guidance for working with the PIV module. **R
 
 ## Documentation Maintenance
 
+Core's `CryptographicDefinitions.Keys` provides immutable `KeyInfo` on key objects. Keep the explicit
+internal `KeyTypeEncoding` mappings and independent protocol values; catalog representation or algorithm applicability
+never implies PIV operation support or broadens its supported curves. See
+[Core catalog](../Core/README.md#cryptographic-metadata).
+
 When working on this module:
 
 - Update both `CLAUDE.md` and `README.md` for notable API, behavior, test, or security-pattern changes.
@@ -176,7 +181,10 @@ What still needs a human is presence and timing, not destruction — touch-polic
 Helpers obtain metadata-only category loggers from `YubiKitLogging`, not logger parameters. `KeyTypeEncoding`
 is the sole PIV wire-ID table; its frozen inverse is derived once. Request encoders enforce management vs
 asymmetric subsets, so shared Core `KeyType` does not permit AES slot generation or P-521 requests. Management
-key lengths and EC curve OIDs/sizes come from Core definitions. `KeyReference` holds only internal PIN/PUK,
+key lengths come from `KeyInfo.KeySizeBytes`; EC points use `Curve.CoordinateLengthBytes`, private scalars/seeds
+use `PrivateValueLengthBytes`, and ordinary EC curve identity comes from `Curve.NamedCurveOid`. Core's new
+secp256k1/Brainpool identities remain unsupported by PIV generation/import/agreement until separately modeled
+in the protocol map and capability rules. `KeyReference` holds only internal PIN/PUK,
 management, and Bio references, separate from public asymmetric `Slot` values.
 
 PIN/PUK parameters are named by role and carry caller-owned UTF-8 bytes, not ASCII-only credentials. Internal

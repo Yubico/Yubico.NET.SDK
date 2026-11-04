@@ -164,7 +164,7 @@ internal static class KeyProtocol
             keyData = privateKey switch
             {
                 RSAPrivateKey rsaKey => EncodeRsaPrivateKey(rsaKey),
-                ECPrivateKey ecKey => EncodeEcPrivateKey(ecKey, keyType),
+                ECPrivateKey ecKey => EncodeEcPrivateKey(ecKey),
                 Curve25519PrivateKey curveKey => EncodeCurve25519PrivateKey(curveKey),
                 _ => throw new NotSupportedException($"Private key type {privateKey.GetType().Name} is not supported")
             };
@@ -250,7 +250,7 @@ internal static class KeyProtocol
         }
 
         // All components should be half the modulus length
-        var componentLength = rsaKey.KeyType.GetKeySizeBytes() / 2;
+        var componentLength = rsaKey.KeyInfo.KeySizeBytes / 2;
 
         // Create TLVs for each component, padding to correct length
         using var pTlv = CreatePaddedComponent(TagRsaP, parameters.P, componentLength);
@@ -271,7 +271,7 @@ internal static class KeyProtocol
     /// Encodes EC private key D value as TLV for PIV import.
     /// ECC format: TLV(0x06, D)
     /// </summary>
-    private static byte[] EncodeEcPrivateKey(ECPrivateKey ecKey, KeyType keyType)
+    private static byte[] EncodeEcPrivateKey(ECPrivateKey ecKey)
     {
         var parameters = ecKey.Parameters;
 
@@ -281,8 +281,9 @@ internal static class KeyProtocol
         }
 
         // D should be padded to the curve size
-        var curveSize = keyType.GetKeySizeBytes();
-        using var dTlv = CreatePaddedComponent(TagEcScalar, parameters.D, curveSize);
+        int scalarLength = ecKey.KeyInfo.PrivateValueLengthBytes
+            ?? throw new NotSupportedException("The key has no modeled private scalar representation.");
+        using var dTlv = CreatePaddedComponent(TagEcScalar, parameters.D, scalarLength);
 
         return dTlv.AsSpan().ToArray();
     }
@@ -295,6 +296,10 @@ internal static class KeyProtocol
     private static byte[] EncodeCurve25519PrivateKey(Curve25519PrivateKey curveKey)
     {
         var tag = curveKey.KeyType == KeyType.Ed25519 ? TagEd25519PrivateKey : TagX25519PrivateKey;
+        int privateValueLength = curveKey.KeyInfo.PrivateValueLengthBytes
+            ?? throw new NotSupportedException("The key has no modeled private value representation.");
+        if (curveKey.PrivateKey.Length != privateValueLength)
+            throw new ArgumentException("Private scalar/seed length does not match the key representation.", nameof(curveKey));
         using var tlv = new Tlv(tag, curveKey.PrivateKey.Span);
 
         return tlv.AsSpan().ToArray();
@@ -419,9 +424,9 @@ internal static class KeyProtocol
         // Parse based on algorithm
         return keyType switch
         {
-            KeyType.ECP256 or KeyType.ECP384 => ParseEccPublicKey(keyData, keyType),
+            KeyType.P256 or KeyType.P384 => ParseEccPublicKey(keyData, keyType),
             KeyType.Ed25519 or KeyType.X25519 => ParseCurve25519PublicKey(keyData, keyType),
-            KeyType.RSA1024 or KeyType.RSA2048 or KeyType.RSA3072 or KeyType.RSA4096
+            KeyType.Rsa1024 or KeyType.Rsa2048 or KeyType.Rsa3072 or KeyType.Rsa4096
                 => ParseRsaPublicKey(keyData),
             _ => throw new NotSupportedException($"Unsupported algorithm: {keyType}")
         };
@@ -439,10 +444,11 @@ internal static class KeyProtocol
         var point = pointTlv.Value.Span;
 
         // Convert to ECPublicKey using the Core cryptography types
-        var definition = keyType.GetKeyDefinition();
-        var curve = ECCurve.CreateFromOid(new Oid(definition.CurveOid
+        var curveInfo = keyType.GetKeyInfo().Curve
+            ?? throw new NotSupportedException($"Key type {keyType} has no modeled curve.");
+        var curve = ECCurve.CreateFromOid(new Oid(curveInfo.NamedCurveOid
             ?? throw new NotSupportedException($"Key type {keyType} has no EC curve OID.")));
-        int coordinateSize = definition.LengthInBytes;
+        int coordinateSize = curveInfo.CoordinateLengthBytes;
         if (point.Length != 1 + 2 * coordinateSize || point[0] != UncompressedPoint)
             throw new ApduException("Invalid uncompressed EC public point length or format.");
 
@@ -470,7 +476,7 @@ internal static class KeyProtocol
         using var pointTlv = Tlv.Create(data);
         var point = pointTlv.Value.Span;
 
-        if (point.Length != keyType.GetKeySizeBytes())
+        if (point.Length != keyType.GetKeyInfo().PublicValueLengthBytes)
             throw new ApduException("Public point length does not match the key definition.");
         return Curve25519PublicKey.CreateFromValue(point.ToArray(), keyType);
     }

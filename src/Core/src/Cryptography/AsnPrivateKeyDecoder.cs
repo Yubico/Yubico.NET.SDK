@@ -48,35 +48,16 @@ internal class AsnPrivateKeyDecoder
         ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
-        var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        switch (oidAlgorithm)
+        var keyAlgorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+
+        // Each typed decoder validates its AlgorithmIdentifier before reading private material.
+        return keyAlgorithmOid switch
         {
-            case Oids.RSA:
-                {
-                    if (seqAlgorithmIdentifier.HasData)
-                    {
-                        seqAlgorithmIdentifier.ReadNull();
-                        seqAlgorithmIdentifier.ThrowIfNotEmpty();
-                    }
-
-                    return RSAPrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
-                }
-            case Oids.ECDSA:
-                {
-                    return ECPrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
-                }
-            case Oids.X25519:
-            case Oids.Ed25519:
-                {
-                    return Curve25519PrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
-                }
-        }
-
-        throw new InvalidOperationException(
-            string.Format(
-                CultureInfo.CurrentCulture,
-                "Unsupported private key algorithm OID '{0}'.",
-                oidAlgorithm));
+            Oids.Rsa => RSAPrivateKey.CreateFromPkcs8(pkcs8EncodedKey),
+            Oids.EcPublicKey => ECPrivateKey.CreateFromPkcs8(pkcs8EncodedKey),
+            Oids.X25519 or Oids.Ed25519 => Curve25519PrivateKey.CreateFromPkcs8(pkcs8EncodedKey),
+            _ => throw new InvalidOperationException($"Unsupported private key algorithm OID '{keyAlgorithmOid}'.")
+        };
     }
 
     /// <summary>
@@ -124,13 +105,18 @@ internal class AsnPrivateKeyDecoder
         ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
-        var algorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (!Oids.IsCurve25519Algorithm(algorithmOid))
+        var keyAlgorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        var keyInfo = CryptographicDefinitions.Keys.All.SingleOrDefault(keyInfo =>
+            keyInfo.KeyType.IsCurve25519() && keyInfo.Asn1?.AlgorithmOid == keyAlgorithmOid);
+        if (keyInfo is null)
         {
             throw new ArgumentException(
-                "Invalid curve OID. Must be: " + Oids.X25519 + " or " +
+                "Invalid 25519 key algorithm OID. Must be: " + Oids.X25519 + " or " +
                 Oids.Ed25519);
         }
+
+        // RFC 8410 section 3: NULL is not interchangeable with absent parameters.
+        seqAlgorithmIdentifier.ThrowIfNotEmpty();
 
         using var privateKeyDataHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
         var seqPrivateKey = new AsnReader(privateKeyDataHandle.Data, AsnEncodingRules.DER);
@@ -151,8 +137,7 @@ internal class AsnPrivateKeyDecoder
 
             seqPrivateKeyInfo.ThrowIfNotEmpty();
 
-            var keyDefinition = KeyDefinitions.GetByOid(algorithmOid);
-            return (privateKey, keyDefinition.KeyType);
+            return (privateKey, keyInfo.KeyType);
         }
         catch
         {
@@ -184,26 +169,25 @@ internal class AsnPrivateKeyDecoder
         ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
-        var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != Oids.ECDSA)
+        var keyAlgorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        if (keyAlgorithmOid != Oids.EcPublicKey)
         {
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     "Expected an EC private key using id-ecPublicKey, but the algorithm OID was '{0}'.",
-                    oidAlgorithm));
+                    keyAlgorithmOid));
         }
 
         var curveOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (curveOid is not (
-            Oids.ECP256 or
-            Oids.ECP384 or
-            Oids.ECP521))
+        seqAlgorithmIdentifier.ThrowIfNotEmpty();
+        if (!CryptographicDefinitions.Curves.TryGetByOid(curveOid, out var curveInfo)
+            || curveInfo.Form != CurveForm.ShortWeierstrass)
         {
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "Unsupported EC curve OID '{0}'. Supported curves are P-256, P-384 and P-521.",
+                    "Unsupported ordinary EC named-curve OID '{0}'.",
                     curveOid));
         }
 
@@ -257,12 +241,12 @@ internal class AsnPrivateKeyDecoder
 
                 AsnUtilities.ValidateDecodedEcPoint(publicKeyBytes.Span, curveOid);
 
-                var coordinateSize = AsnUtilities.GetDecodedCoordinateSize(curveOid);
-                var xCoordinate = new byte[coordinateSize];
-                var yCoordinate = new byte[coordinateSize];
+                var coordinateLengthBytes = AsnUtilities.GetDecodedCoordinateLengthBytes(curveOid);
+                var xCoordinate = new byte[coordinateLengthBytes];
+                var yCoordinate = new byte[coordinateLengthBytes];
 
-                publicKeyBytes.Slice(1, coordinateSize).CopyTo(xCoordinate);
-                publicKeyBytes.Slice(1 + coordinateSize, coordinateSize).CopyTo(yCoordinate);
+                publicKeyBytes.Slice(1, coordinateLengthBytes).CopyTo(xCoordinate);
+                publicKeyBytes.Slice(1 + coordinateLengthBytes, coordinateLengthBytes).CopyTo(yCoordinate);
 
                 point = new ECPoint
                 {
@@ -312,15 +296,22 @@ internal class AsnPrivateKeyDecoder
         ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
-        var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != Oids.RSA)
+        var keyAlgorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        if (keyAlgorithmOid != Oids.Rsa)
         {
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     "Expected an RSA private key, but the algorithm OID was '{0}'.",
-                    oidAlgorithm));
+                    keyAlgorithmOid));
         }
+
+        // RFC 8017 specifies NULL; preserve the existing absent-parameter input tolerance.
+        if (seqAlgorithmIdentifier.HasData)
+        {
+            seqAlgorithmIdentifier.ReadNull();
+        }
+        seqAlgorithmIdentifier.ThrowIfNotEmpty();
 
         using var privateKeyDataHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
         seqPrivateKeyInfo.ThrowIfNotEmpty();

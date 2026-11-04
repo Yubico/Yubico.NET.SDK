@@ -71,7 +71,7 @@ finally
     CryptographicOperations.ZeroMemory(managementKey);
 }
 var keyOptions = new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never };
-IPublicKey publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, keyOptions);
+IPublicKey publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, keyOptions);
 ```
 
 `IsManagementKeyAuthenticated` reports PIV authentication, distinct from the inherited `IsAuthenticated` (SCP).
@@ -136,6 +136,10 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
 
 ## Constraints
 
+Core's [cryptographic catalog](../Core/README.md#cryptographic-metadata) exposes immutable `KeyInfo` on
+key objects. Internal `KeyTypeEncoding` owns PIV's independent wire identifiers and strict request subsets;
+never cast from Core `KeyType` or infer PIV support from catalog representation/applicability.
+
 - Requesting a non-SmartCard transport through `SessionCreationOptions { PreferredConnectionType = ... }` throws.
 - One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
   disposes it with `await using`; a session from `CreatePivSessionAsync` owns and disposes the one it opened.
@@ -159,9 +163,13 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
 - PIV-local model/policy prefixes are removed: for example `PinPolicy`, `TouchPolicy`, `PinMetadata`,
   `SlotMetadata`, `KeyCreationOptions`, and `DataObjects.AdminData`. Session entrypoints remain `PivSession`
   and `IPivSession`. CLI key selectors use `--key-type` and key-type result fields are named `KeyType`.
-- Management-key operations also use Core `KeyType` (`TripleDES`, `AES128`, `AES192`, `AES256`) and canonical
+- Management-key operations also use Core `KeyType` (`TripleDes`, `Aes128`, `Aes192`, `Aes256`) and canonical
   key sizes. Symmetric management types cannot be generated/imported as asymmetric slot keys. The session's
   nullable `ManagementKeyType` is null for an unmodeled algorithm; raw management metadata remains inspectable.
+
+PIV reads representation-aware catalog fields: RSA/symmetric stored widths from `KeyInfo.KeySizeBytes`, EC
+coordinates from `Curve.CoordinateLengthBytes`, and scalar/seed widths from `PrivateValueLengthBytes`.
+Shared Core support for secp256k1 or Brainpool does not add PIV generation, import, or agreement support.
 - Slot metadata exposes nullable `KeyType`, `RawAlgorithmId`, and complete `RawData`. Unknown identifiers
   remain readable, while using an unrecognized key algorithm throws `NotSupportedException`.
 - `EnsureSupports` is protected session implementation machinery, no longer a public interface member.

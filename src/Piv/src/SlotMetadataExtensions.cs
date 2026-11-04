@@ -50,7 +50,7 @@ public static class SlotMetadataExtensions
     public static RSA GetRsaPublicKey(this SlotMetadata metadata)
     {
         var keyType = metadata.RequireKeyType();
-        if (!keyType.IsRSA())
+        if (!keyType.IsRsa())
         {
             throw new InvalidOperationException(
                 $"Slot contains PIV algorithm 0x{metadata.RawAlgorithmId:X2}, not a known RSA key.");
@@ -138,14 +138,15 @@ public static class SlotMetadataExtensions
                 "Public key is not in expected uncompressed EC point format (0x04 prefix).");
         }
 
-        var definition = keyType.GetKeyDefinition();
-        int coordinateSize = definition.LengthInBytes;
+        var curveInfo = keyType.GetKeyInfo().Curve
+            ?? throw new NotSupportedException($"Key type {keyType} has no modeled curve.");
+        int coordinateSize = curveInfo.CoordinateLengthBytes;
         if (ecPoint.Length != 1 + 2 * coordinateSize)
             throw new InvalidOperationException("Public point length does not match the key definition.");
         var x = ecPoint[1..(1 + coordinateSize)].ToArray();
         var y = ecPoint[(1 + coordinateSize)..].ToArray();
 
-        var curve = ECCurve.CreateFromOid(new Oid(definition.CurveOid
+        var curve = ECCurve.CreateFromOid(new Oid(curveInfo.NamedCurveOid
             ?? throw new NotSupportedException($"Key type {keyType} has no EC curve OID.")));
 
         var ecParams = new ECParameters

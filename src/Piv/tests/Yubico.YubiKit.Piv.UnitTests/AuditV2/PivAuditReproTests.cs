@@ -41,7 +41,7 @@ public class PivAuditReproTests
     {
         var connection = CreateConnection();
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
-        _ = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256,
+        _ = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256,
             new byte[] { 0xA1, 0xB2 }, TestContext.Current.CancellationToken);
 
         byte[] apdu = connection.TransmittedCommands[^1];
@@ -60,7 +60,7 @@ public class PivAuditReproTests
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         byte[] digest = Enumerable.Range(1, 20).Select(i => (byte)i).ToArray();
 
-        _ = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest, TestContext.Current.CancellationToken);
+        _ = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest, TestContext.Current.CancellationToken);
 
         byte[] apdu = connection.TransmittedCommands[^1];
         Assert.Equal(0x81, apdu[9]);
@@ -78,7 +78,7 @@ public class PivAuditReproTests
         var block = new byte[129];
         block[0] = 0xA1;
         await Assert.ThrowsAsync<ArgumentException>(() => session.SignOrDecryptAsync(
-            Slot.Authentication, KeyType.RSA1024, block, TestContext.Current.CancellationToken));
+            Slot.Authentication, KeyType.Rsa1024, block, TestContext.Current.CancellationToken));
         Assert.DoesNotContain(connection.TransmittedCommands, apdu => apdu[1] == 0x87);
     }
 

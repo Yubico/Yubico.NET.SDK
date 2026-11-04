@@ -171,7 +171,7 @@ internal static class PrivateKeyOperations
         ArgumentNullException.ThrowIfNull(padding);
         Logger.LogDebug("PIV: DecryptAsync slot 0x{Slot:X2}", (byte)slot);
 
-        if (metadata is null || !metadata.Value.RequireKeyType().IsRSA())
+        if (metadata is null || !metadata.Value.RequireKeyType().IsRsa())
         {
             throw new ArgumentException(
                 $"Slot 0x{(byte)slot:X2} does not contain an RSA key.", nameof(slot));
@@ -293,9 +293,8 @@ internal static class PrivateKeyOperations
         // Determine algorithm from public key
         var keyType = peerPublicKey switch
         {
-            ECPublicKey ecKey when ecKey.KeyDefinition.KeyType == KeyType.ECP256 => KeyType.ECP256,
-            ECPublicKey ecKey when ecKey.KeyDefinition.KeyType == KeyType.ECP384 => KeyType.ECP384,
-            Curve25519PublicKey cv25519 when cv25519.KeyDefinition.KeyType == KeyType.X25519 => KeyType.X25519,
+            ECPublicKey ecKey when ecKey.KeyType is KeyType.P256 or KeyType.P384 => ecKey.KeyType,
+            Curve25519PublicKey curve25519Key when curve25519Key.KeyType == KeyType.X25519 => curve25519Key.KeyType,
             _ => throw new ArgumentException("Unsupported public key type for ECDH", nameof(peerPublicKey))
         };
 
@@ -381,7 +380,7 @@ internal static class PrivateKeyOperations
     /// </summary>
     private static int PreparedDataLength(KeyType keyType, int dataLength) =>
         // RFC 8032: Ed25519 signs the message, not a locally padded/prehashed digest.
-        keyType.IsRSA() || keyType.IsECDsa() ? keyType.GetKeySizeBytes() : dataLength;
+        keyType.IsRsa() || keyType.IsShortWeierstrass() ? keyType.GetKeySizeBytes() : dataLength;
 
     /// <summary>
     ///     Writes the TAG 81 payload for <paramref name="keyType" /> into <paramref name="destination" />,
@@ -391,7 +390,7 @@ internal static class PrivateKeyOperations
     /// <exception cref="ArgumentException">An RSA block longer than the modulus.</exception>
     private static void WritePreparedData(KeyType keyType, ReadOnlySpan<byte> data, Span<byte> destination)
     {
-        if (keyType.IsRSA())
+        if (keyType.IsRsa())
         {
             // A short encoded RSA block is the same integer left-padded. A longer one cannot be
             // represented faithfully: reject it rather than silently truncating caller input.
@@ -400,7 +399,7 @@ internal static class PrivateKeyOperations
             LeftPad(data, destination);
             return;
         }
-        if (keyType.IsECDsa())
+        if (keyType.IsShortWeierstrass())
         {
             // FIPS 186-5 §6.4.1 uses the leftmost min(N, outlen) bits of the digest.
             if (data.Length >= destination.Length)

@@ -46,14 +46,14 @@ public static class KeyGenerationMenu
 
         var keyType = keyTypeChoice switch
         {
-            "RSA 2048" => KeyType.RSA2048,
-            "RSA 3072" => KeyType.RSA3072,
-            "RSA 4096" => KeyType.RSA4096,
-            "ECC P-256" => KeyType.ECP256,
-            "ECC P-384" => KeyType.ECP384,
+            "RSA 2048" => KeyType.Rsa2048,
+            "RSA 3072" => KeyType.Rsa3072,
+            "RSA 4096" => KeyType.Rsa4096,
+            "ECC P-256" => KeyType.P256,
+            "ECC P-384" => KeyType.P384,
             "Ed25519 (YubiKey 5.7+)" => KeyType.Ed25519,
             "X25519 (YubiKey 5.7+)" => KeyType.X25519,
-            _ => KeyType.ECP256
+            _ => KeyType.P256
         };
 
         // Select PIN policy

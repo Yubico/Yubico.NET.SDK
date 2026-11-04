@@ -242,7 +242,7 @@ public class AuthenticatorInfoTests
 
         // Assert
         info.Algorithms.Should().HaveCount(1);
-        info.Algorithms[0].Algorithm.Should().Be(CoseAlgorithmIdentifier.ES256);
+        info.Algorithms[0].Algorithm.Should().Be(CoseAlgorithmIdentifier.Es256);
         info.Algorithms[0].Type.Should().Be("public-key");
     }
 

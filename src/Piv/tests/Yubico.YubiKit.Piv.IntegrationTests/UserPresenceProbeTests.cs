@@ -79,7 +79,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             $"The management key touch policy is {managementKeyMetadata.TouchPolicy}; refusing an unrelated touch " +
             "during prerequisite authentication.");
         Skip.If(
-            managementKeyMetadata.KeyType is not KeyType.TripleDES and not KeyType.AES192,
+            managementKeyMetadata.KeyType is not KeyType.TripleDes and not KeyType.Aes192,
             $"The default management key cannot be used with reported key type {managementKeyMetadata.KeyType}.");
         Skip.If(
             session.ManagementKeyType != managementKeyMetadata.KeyType,
@@ -109,7 +109,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
         {
             IPublicKey generatedPublicKey = await session.GenerateKeyAsync(
                 Slot.Retired20,
-                KeyType.ECP256,
+                KeyType.P256,
                 new KeyCreationOptions
                 {
                     PinPolicy = PinPolicy.Never,
@@ -127,7 +127,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             using var operationCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             signature = await session.SignOrDecryptAsync(
                 Slot.Retired20,
-                KeyType.ECP256,
+                KeyType.P256,
                 digest,
                 operationCts.Token);
 
@@ -153,7 +153,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
                 Slot.Retired20,
                 followUpCts.Token);
             Assert.NotNull(slotMetadata);
-            Assert.Equal(KeyType.ECP256, slotMetadata.Value.KeyType);
+            Assert.Equal(KeyType.P256, slotMetadata.Value.KeyType);
             Assert.Equal(PinPolicy.Never, slotMetadata.Value.PinPolicy);
             Assert.Equal(TouchPolicy.Always, slotMetadata.Value.TouchPolicy);
             Assert.Equal(state.SerialNumber, await session.GetSerialNumberAsync(followUpCts.Token));

@@ -5,13 +5,13 @@ using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Piv.UnitTests;
 
-public class KeyDefinitionBehaviorTests
+public class CatalogBehaviorTests
 {
     [Theory]
-    [InlineData(KeyType.TripleDES, 0x03, 24)]
-    [InlineData(KeyType.AES128, 0x08, 16)]
-    [InlineData(KeyType.AES192, 0x0A, 24)]
-    [InlineData(KeyType.AES256, 0x0C, 32)]
+    [InlineData(KeyType.TripleDes, 0x03, 24)]
+    [InlineData(KeyType.Aes128, 0x08, 16)]
+    [InlineData(KeyType.Aes192, 0x0A, 24)]
+    [InlineData(KeyType.Aes256, 0x0C, 32)]
     public async Task ManagementKey_UsesCanonicalSizeAndWireId_AndMetadataDecodesSameType(KeyType keyType, int algorithmId, int length)
     {
         byte[] raw = [0x01, 0x01, (byte)algorithmId, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x00];
@@ -43,9 +43,9 @@ public class KeyDefinitionBehaviorTests
     }
 
     [Theory]
-    [InlineData(KeyType.ECP256)]
-    [InlineData(KeyType.ECP521)]
-    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.P521)]
+    [InlineData(KeyType.Rsa2048)]
     public async Task ManagementKey_RejectsAsymmetricTypesBeforeMutation(KeyType keyType)
     {
         var connection = Connection();
@@ -75,19 +75,20 @@ public class KeyDefinitionBehaviorTests
     }
 
     [Theory]
-    [InlineData(KeyType.ECP256)]
-    [InlineData(KeyType.ECP384)]
+    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.P384)]
     public void MetadataExtraction_UsesCanonicalCurveAndCoordinateSize(KeyType keyType)
     {
-        var definition = keyType.GetKeyDefinition();
-        using var expected = ECDsa.Create(ECCurve.CreateFromOid(new Oid(definition.CurveOid ?? throw new InvalidOperationException("Curve OID missing."))));
+        var keyInfo = keyType.GetKeyInfo();
+        var curveInfo = keyInfo.Curve ?? throw new InvalidOperationException("Curve metadata missing.");
+        using var expected = ECDsa.Create(ECCurve.CreateFromOid(new Oid(curveInfo.NamedCurveOid ?? throw new InvalidOperationException("Curve OID missing."))));
         var parameters = expected.ExportParameters(false);
         byte[] point = [0x04, .. parameters.Q.X ?? throw new InvalidOperationException(), .. parameters.Q.Y ?? throw new InvalidOperationException()];
         var metadata = new SlotMetadata(keyType, PinPolicy.Default, TouchPolicy.Default, true, (byte[])[0x86, (byte)point.Length, .. point]);
 
         using var actual = metadata.GetECDsaPublicKey();
 
-        Assert.Equal(definition.LengthInBits, actual.KeySize);
+        Assert.Equal(keyInfo.KeySizeBits, actual.KeySize);
         Assert.Equal(expected.ExportSubjectPublicKeyInfo(), actual.ExportSubjectPublicKeyInfo());
     }
 

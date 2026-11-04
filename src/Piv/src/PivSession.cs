@@ -52,7 +52,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private FirmwareVersion _detectedFirmwareVersion = new(0, 0, 0);
 
     /// <inheritdoc />
-    public KeyType? ManagementKeyType { get; private set; } = KeyType.TripleDES;
+    public KeyType? ManagementKeyType { get; private set; } = KeyType.TripleDes;
 
     /// <summary>
     /// Gets the well-known 24-byte factory-default PIV management key value.
@@ -222,8 +222,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// </remarks>
     private static KeyType GetConservativeDefaultManagementKeyType(FirmwareVersion firmwareVersion) =>
         firmwareVersion.IsAtLeast(5, 7, 0)
-            ? KeyType.AES192
-            : KeyType.TripleDES;
+            ? KeyType.Aes192
+            : KeyType.TripleDes;
 
     private async Task<KeyType?> ResolveManagementKeyTypeAsync(IBackend backend, CancellationToken cancellationToken)
     {
@@ -754,7 +754,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
     {
         EnsureBackend(cancellationToken);
         _ = KeyTypeEncoding.EncodeManagement(keyType);
-        if (keyType != KeyType.TripleDES)
+        if (keyType != KeyType.TripleDes)
             EnsureSupports(Features.AesKey);
         if (requireTouch)
             EnsureSupports(Features.UsagePolicy);
@@ -908,15 +908,15 @@ public sealed class PivSession : ApplicationSession, IPivSession
         _ = KeyTypeEncoding.EncodeAsymmetric(keyType);
         Feature? feature = keyType switch
         {
-            KeyType.ECP384 => Features.P384,
+            KeyType.P384 => Features.P384,
             KeyType.Ed25519 or KeyType.X25519 => Features.Cv25519,
-            KeyType.RSA3072 or KeyType.RSA4096 => Features.Rsa3072Rsa4096,
+            KeyType.Rsa3072 or KeyType.Rsa4096 => Features.Rsa3072Rsa4096,
             _ => null
         };
         if (feature is { } required)
             EnsureSupports(required);
         EnsureKeyPoliciesSupported(pinPolicy, touchPolicy);
-        if (generate && keyType.IsRSA() && !Features.SupportsRsaGeneration(FirmwareVersion))
+        if (generate && keyType.IsRsa() && !Features.SupportsRsaGeneration(FirmwareVersion))
             throw new NotSupportedException("RSA key generation is disabled on ROCA-affected firmware 4.2.6–4.3.4.");
         EnsureFipsKeyPolicySupported(keyType, pinPolicy);
     }
@@ -942,7 +942,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private void EnsureFipsKeyPolicySupported(KeyType keyType, PinPolicy pinPolicy)
     {
         if (!FirmwareVersion.IsAlphaOrBeta && FirmwareVersion.IsAtLeast(4, 4, 0) && !FirmwareVersion.IsAtLeast(4, 5, 0)
-            && (keyType == KeyType.RSA1024 || pinPolicy == PinPolicy.Never))
+            && (keyType == KeyType.Rsa1024 || pinPolicy == PinPolicy.Never))
             throw new NotSupportedException("RSA1024 and PIN policy Never are not supported on YubiKey 4 FIPS.");
     }
 

@@ -63,6 +63,18 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose
         /// <summary>
         /// Ed448 for use with EdDSA only
         /// </summary>
-        Ed448 = 7
+        Ed448 = 7,
+
+        /// <summary>secp256k1, IANA COSE curve 8.</summary>
+        Secp256k1 = 8,
+
+        /// <summary>brainpoolP256r1, IANA COSE curve 256 (ISO/IEC 18013-5).</summary>
+        BrainpoolP256r1 = 256,
+
+        /// <summary>brainpoolP384r1, IANA COSE curve 258 (ISO/IEC 18013-5).</summary>
+        BrainpoolP384r1 = 258,
+
+        /// <summary>brainpoolP512r1, IANA COSE curve 259 (ISO/IEC 18013-5).</summary>
+        BrainpoolP512r1 = 259
     }
 }

@@ -59,7 +59,7 @@ public class PivConnectionConcurrencyTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
+        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         // A ~2.5KB object makes the read a large multi-frame exchange on the wire.
@@ -73,7 +73,7 @@ public class PivConnectionConcurrencyTests
         {
             var readTask = session.GetObjectAsync(DataObject.Retired1);
             await Assert.ThrowsAsync<InvalidOperationException>(
-                async () => await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest));
+                async () => await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
             var readBack = await readTask;
             Assert.Equal(storedObject, readBack.ToArray());
         }

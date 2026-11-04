@@ -54,7 +54,7 @@ public class PivFullWorkflowTests
         // 2. Generate key
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
-            KeyType.ECP256,
+            KeyType.P256,
             new KeyCreationOptions { PinPolicy = PinPolicy.Once });
 
         Assert.NotNull(publicKey);
@@ -68,7 +68,7 @@ public class PivFullWorkflowTests
         var hash = SHA256.HashData(dataToSign);
         var signature = await session.SignOrDecryptAsync(
             Slot.Signature,
-            KeyType.ECP256,
+            KeyType.P256,
             hash);
 
         Assert.NotEmpty(signature.ToArray());
@@ -91,7 +91,7 @@ public class PivFullWorkflowTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         var devicePublicKey = await session.GenerateKeyAsync(
             Slot.KeyManagement,
-            KeyType.ECP256);
+            KeyType.P256);
 
         Assert.NotNull(devicePublicKey);
         Assert.IsType<ECPublicKey>(devicePublicKey);
@@ -137,7 +137,7 @@ public class PivFullWorkflowTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         var publicKey = await session.GenerateKeyAsync(
             Slot.Authentication,
-            KeyType.ECP256);
+            KeyType.P256);
 
         // 2. Move key to retired slot
         await session.MoveKeyAsync(Slot.Authentication, Slot.Retired1);
@@ -151,7 +151,7 @@ public class PivFullWorkflowTests
         var hash = SHA256.HashData("test"u8);
         var signature = await session.SignOrDecryptAsync(
             Slot.Retired1,
-            KeyType.ECP256,
+            KeyType.P256,
             hash);
 
         Assert.NotEmpty(signature.ToArray());
@@ -166,7 +166,7 @@ public class PivFullWorkflowTests
 
         // 1. Authenticate and generate key
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
         // 2. Attest the generated key
         var attestation = await session.AttestKeyAsync(Slot.Authentication);

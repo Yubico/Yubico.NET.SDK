@@ -154,13 +154,13 @@ Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm.Aes256 = 3 -> Yubico.Y
 Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm.Unknown = 0 -> Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm
 Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithmExtensions
 Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
-Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.ECDHwHKDF256 = -25 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
-Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.ES256 = -7 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
-Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.ES384 = -35 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
-Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.ES512 = -36 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
-Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.EdDSA = -8 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.EcdhEsHkdf256 = -25 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.Es256 = -7 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.Es384 = -35 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.Es512 = -36 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.EdDsa = -8 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
 Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.None = 0 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
-Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.RS256 = -257 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.Rs256 = -257 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
 Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
 Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.Ed25519 = 6 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
 Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.Ed448 = 7 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
@@ -175,31 +175,24 @@ Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType.Ec2 = 2 -> Yubico.YubiKit.Core
 Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType.Okp = 1 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
 Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType.Symmetric = 4 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
 Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType.Unknown = 0 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
-Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition
-Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.AlgorithmIdentifier.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
-Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.AlgorithmIdentifier.set -> void
-Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.CoseKeyDefinition() -> void
-Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.CurveIdentifier.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
-Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.CurveIdentifier.set -> void
-Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.Type.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
-Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.Type.set -> void
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType.Rsa = 3 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
 Yubico.YubiKit.Core.Cryptography.CryptographyProviders
 Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey
-Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+override Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
 Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.PrivateKey.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey
-Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+override Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
 Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey.PublicPoint.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Core.Cryptography.ECParametersExtensions
 Yubico.YubiKit.Core.Cryptography.ECParametersExtensions.extension(System.Security.Cryptography.ECParameters)
 Yubico.YubiKit.Core.Cryptography.ECParametersExtensions.extension(System.Security.Cryptography.ECParameters).DeepCopy() -> System.Security.Cryptography.ECParameters
 Yubico.YubiKit.Core.Cryptography.ECParametersExtensions.extension(System.Security.Cryptography.ECParameters).ToUncompressedPoint() -> byte[]!
 Yubico.YubiKit.Core.Cryptography.ECPrivateKey
-Yubico.YubiKit.Core.Cryptography.ECPrivateKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+override Yubico.YubiKit.Core.Cryptography.ECPrivateKey.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
 Yubico.YubiKit.Core.Cryptography.ECPrivateKey.Parameters.get -> System.Security.Cryptography.ECParameters
 Yubico.YubiKit.Core.Cryptography.ECPrivateKey.ToECDiffieHellman() -> System.Security.Cryptography.ECDiffieHellman!
 Yubico.YubiKit.Core.Cryptography.ECPublicKey
-Yubico.YubiKit.Core.Cryptography.ECPublicKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+override Yubico.YubiKit.Core.Cryptography.ECPublicKey.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
 Yubico.YubiKit.Core.Cryptography.ECPublicKey.Parameters.get -> System.Security.Cryptography.ECParameters
 Yubico.YubiKit.Core.Cryptography.ECPublicKey.PublicPoint.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Core.Cryptography.ECPublicKey.ToECDiffieHellmanPublicKey() -> System.Security.Cryptography.ECDiffieHellmanPublicKey!
@@ -212,40 +205,20 @@ Yubico.YubiKit.Core.Cryptography.IPrivateKeyExtensions
 Yubico.YubiKit.Core.Cryptography.IPublicKey
 Yubico.YubiKit.Core.Cryptography.IPublicKey.ExportSubjectPublicKeyInfo() -> byte[]!
 Yubico.YubiKit.Core.Cryptography.IPublicKeyExtensions
-Yubico.YubiKit.Core.Cryptography.KeyDefinition
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.AlgorithmOid.get -> string!
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.AlgorithmOid.init -> void
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.CoseKeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition?
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.CoseKeyDefinition.init -> void
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.CurveOid.get -> string?
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.CurveOid.init -> void
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.IsAsymmetric.get -> bool
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.IsEllipticCurve.get -> bool
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.IsRSA.get -> bool
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.IsSymmetric.get -> bool
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.KeyDefinition() -> void
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.KeyType.init -> void
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.LengthInBits.get -> int
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.LengthInBits.init -> void
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.LengthInBytes.get -> int
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.LengthInBytes.init -> void
-Yubico.YubiKit.Core.Cryptography.KeyDefinition.Name.get -> string!
-Yubico.YubiKit.Core.Cryptography.KeyDefinitions
 Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.AES128 = 11 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.AES192 = 12 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.AES256 = 13 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.ECP256 = 1 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.ECP384 = 2 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.ECP521 = 3 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.Aes128 = 11 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.Aes192 = 12 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.Aes256 = 13 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.P256 = 1 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.P384 = 2 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.P521 = 3 -> Yubico.YubiKit.Core.Cryptography.KeyType
 Yubico.YubiKit.Core.Cryptography.KeyType.Ed25519 = 5 -> Yubico.YubiKit.Core.Cryptography.KeyType
 Yubico.YubiKit.Core.Cryptography.KeyType.None = 0 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.RSA1024 = 6 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.RSA2048 = 7 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.RSA3072 = 8 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.RSA4096 = 9 -> Yubico.YubiKit.Core.Cryptography.KeyType
-Yubico.YubiKit.Core.Cryptography.KeyType.TripleDES = 10 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.Rsa1024 = 6 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.Rsa2048 = 7 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.Rsa3072 = 8 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.Rsa4096 = 9 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.TripleDes = 10 -> Yubico.YubiKit.Core.Cryptography.KeyType
 Yubico.YubiKit.Core.Cryptography.KeyType.X25519 = 4 -> Yubico.YubiKit.Core.Cryptography.KeyType
 Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions
 Yubico.YubiKit.Core.Cryptography.Oids
@@ -257,10 +230,10 @@ Yubico.YubiKit.Core.Cryptography.PublicKey
 Yubico.YubiKit.Core.Cryptography.PublicKey.PublicKey() -> void
 Yubico.YubiKit.Core.Cryptography.RSAParametersExtensions
 Yubico.YubiKit.Core.Cryptography.RSAPrivateKey
-Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+override Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
 Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.Parameters.get -> System.Security.Cryptography.RSAParameters
 Yubico.YubiKit.Core.Cryptography.RSAPublicKey
-Yubico.YubiKit.Core.Cryptography.RSAPublicKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+override Yubico.YubiKit.Core.Cryptography.RSAPublicKey.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
 Yubico.YubiKit.Core.Cryptography.RSAPublicKey.Parameters.get -> System.Security.Cryptography.RSAParameters
 Yubico.YubiKit.Core.DeviceAction
 Yubico.YubiKit.Core.DeviceAction.Added = 0 -> Yubico.YubiKit.Core.DeviceAction
@@ -793,16 +766,16 @@ abstract Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.<Clone>$()
 abstract Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.Dispose() -> void
 abstract Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Start() -> void
 abstract Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Stop() -> void
-const Yubico.YubiKit.Core.Cryptography.Oids.AES128Cbc = "2.16.840.1.101.3.4.1.2" -> string!
-const Yubico.YubiKit.Core.Cryptography.Oids.AES192Cbc = "2.16.840.1.101.3.4.1.22" -> string!
-const Yubico.YubiKit.Core.Cryptography.Oids.AES256Cbc = "2.16.840.1.101.3.4.1.42" -> string!
-const Yubico.YubiKit.Core.Cryptography.Oids.ECDSA = "1.2.840.10045.2.1" -> string!
-const Yubico.YubiKit.Core.Cryptography.Oids.ECP256 = "1.2.840.10045.3.1.7" -> string!
-const Yubico.YubiKit.Core.Cryptography.Oids.ECP384 = "1.3.132.0.34" -> string!
-const Yubico.YubiKit.Core.Cryptography.Oids.ECP521 = "1.3.132.0.35" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.Aes128Cbc = "2.16.840.1.101.3.4.1.2" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.Aes192Cbc = "2.16.840.1.101.3.4.1.22" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.Aes256Cbc = "2.16.840.1.101.3.4.1.42" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.EcPublicKey = "1.2.840.10045.2.1" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.P256 = "1.2.840.10045.3.1.7" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.P384 = "1.3.132.0.34" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.P521 = "1.3.132.0.35" -> string!
 const Yubico.YubiKit.Core.Cryptography.Oids.Ed25519 = "1.3.101.112" -> string!
-const Yubico.YubiKit.Core.Cryptography.Oids.RSA = "1.2.840.113549.1.1.1" -> string!
-const Yubico.YubiKit.Core.Cryptography.Oids.TripleDESCbc = "1.2.840.113549.3.7" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.Rsa = "1.2.840.113549.1.1.1" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.TripleDesCbc = "1.2.840.113549.3.7" -> string!
 const Yubico.YubiKit.Core.Cryptography.Oids.X25519 = "1.3.101.110" -> string!
 const Yubico.YubiKit.Core.Native.Linux.Libc.LibcFcntlConstants.F_GETFL = 3 -> int
 const Yubico.YubiKit.Core.Native.Linux.Libc.LibcFcntlConstants.F_SETFL = 4 -> int
@@ -894,9 +867,6 @@ override Yubico.YubiKit.Core.Cryptography.ECPrivateKey.ExportPkcs8PrivateKey() -
 override Yubico.YubiKit.Core.Cryptography.ECPrivateKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
 override Yubico.YubiKit.Core.Cryptography.ECPublicKey.ExportSubjectPublicKeyInfo() -> byte[]!
 override Yubico.YubiKit.Core.Cryptography.ECPublicKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
-override Yubico.YubiKit.Core.Cryptography.KeyDefinition.Equals(object? obj) -> bool
-override Yubico.YubiKit.Core.Cryptography.KeyDefinition.GetHashCode() -> int
-override Yubico.YubiKit.Core.Cryptography.KeyDefinition.ToString() -> string!
 override Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.Clear() -> void
 override Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.ExportPkcs8PrivateKey() -> byte[]!
 override Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
@@ -988,32 +958,17 @@ static Yubico.YubiKit.Core.Cryptography.ECPublicKey.CreateFromSubjectPublicKeyIn
 static Yubico.YubiKit.Core.Cryptography.ECPublicKey.CreateFromValue(System.ReadOnlyMemory<byte> publicPoint, Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.ECPublicKey!
 static Yubico.YubiKit.Core.Cryptography.IPrivateKeyExtensions.Cast<T>(this Yubico.YubiKit.Core.Cryptography.IPrivateKey! key) -> T!
 static Yubico.YubiKit.Core.Cryptography.IPublicKeyExtensions.Cast<T>(this Yubico.YubiKit.Core.Cryptography.IPublicKey! key) -> T!
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.All.get -> System.Collections.Generic.IReadOnlyDictionary<Yubico.YubiKit.Core.Cryptography.KeyType, Yubico.YubiKit.Core.Cryptography.KeyDefinition!>!
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByCoseCurve(Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve curve) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByKeyType(Yubico.YubiKit.Core.Cryptography.KeyType type) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByOid(System.Security.Cryptography.Oid! oid) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByOid(string? oid) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByRSALength(int keySizeBits) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByRSAModulusLength(byte[]! modulus) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetEcKeyDefinitions() -> System.Collections.Generic.IReadOnlyCollection<Yubico.YubiKit.Core.Cryptography.KeyDefinition!>!
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetKeyTypeByOid(System.Security.Cryptography.Oid! algorithmOid) -> Yubico.YubiKit.Core.Cryptography.KeyType
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetKeyTypeByOid(string? algorithmOid) -> Yubico.YubiKit.Core.Cryptography.KeyType
-static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetRsaKeyDefinitions() -> System.Collections.Generic.IReadOnlyCollection<Yubico.YubiKit.Core.Cryptography.KeyDefinition!>!
-static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetAlgorithmOid(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> string!
-static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetCurveOid(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> string?
-static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetKeyDefinition(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetKeyInfo(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetCoseKeyType(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType?
 static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetKeySizeBits(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> int
 static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetKeySizeBytes(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> int
 static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsAsymmetric(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
-static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsCoseKey(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.HasCoseMapping(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
 static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsCurve25519(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
-static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsECDsa(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsShortWeierstrass(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
 static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsEllipticCurve(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
-static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsRSA(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsRsa(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
 static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsSymmetric(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
-static Yubico.YubiKit.Core.Cryptography.Oids.GetOidsByKeyType(Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> (string! AlgorithmOid, string? Curveoid)
-static Yubico.YubiKit.Core.Cryptography.Oids.IsCurve25519Algorithm(string? algorithmOid) -> bool
-static Yubico.YubiKit.Core.Cryptography.Oids.IsECDsaCurve(string? curveOid) -> bool
 static Yubico.YubiKit.Core.Cryptography.RSAParametersExtensions.DeepCopy(this System.Security.Cryptography.RSAParameters original) -> System.Security.Cryptography.RSAParameters
 static Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.CreateFromParameters(System.Security.Cryptography.RSAParameters parameters) -> Yubico.YubiKit.Core.Cryptography.RSAPrivateKey!
 static Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.CreateFromPkcs8(System.ReadOnlyMemory<byte> encodedKey) -> Yubico.YubiKit.Core.Cryptography.RSAPrivateKey!
@@ -1140,19 +1095,6 @@ static Yubico.YubiKit.Core.YubiKitLogging.Configure(Microsoft.Extensions.Logging
 static Yubico.YubiKit.Core.YubiKitLogging.LoggerFactory.get -> Microsoft.Extensions.Logging.ILoggerFactory!
 static Yubico.YubiKit.Core.YubiKitLogging.LoggerFactory.set -> void
 static Yubico.YubiKit.Core.YubiKitLogging.UseTemporary(Microsoft.Extensions.Logging.ILoggerFactory! factory) -> System.IDisposable!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.AES128 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.AES192 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.AES256 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.Ed25519 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.P256 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.P384 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.P521 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.RSA1024 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.RSA2048 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.RSA3072 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.RSA4096 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.TripleDes -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
-static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.X25519 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
 static readonly Yubico.YubiKit.Core.Devices.FirmwareVersion.Default -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
 static readonly Yubico.YubiKit.Core.Devices.FirmwareVersion.V5_3_0 -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
 static readonly Yubico.YubiKit.Core.Devices.FirmwareVersion.V5_4_3 -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
@@ -1262,3 +1204,210 @@ Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.SmartCardCon
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.IsExclusive.get -> bool
 static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.DefaultSharing.get -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
 static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.DefaultSharing.set -> void
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.<Clone>$() -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.AlgorithmOid.get -> string?
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.Applicability.get -> System.Collections.Immutable.ImmutableList<Yubico.YubiKit.Core.Cryptography.KeyApplicability!>!
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.CipherMode.get -> System.Security.Cryptography.CipherMode?
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.CoseAlgorithmId.get -> int?
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.Derivation.get -> string?
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.DisplayName.get -> string!
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.Equals(Yubico.YubiKit.Core.Cryptography.AlgorithmInfo? other) -> bool
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.HashAlgorithm.get -> System.Security.Cryptography.HashAlgorithmName?
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.Id.get -> string!
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.MaskGenerationHashAlgorithm.get -> System.Security.Cryptography.HashAlgorithmName?
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.Operation.get -> Yubico.YubiKit.Core.Cryptography.CryptographicOperation
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.SaltLengthBytes.get -> int?
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.SignaturePadding.get -> System.Security.Cryptography.RSASignaturePaddingMode?
+Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.TrailerField.get -> int?
+Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo
+Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.<Clone>$() -> Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo!
+Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.AlgorithmOid.get -> string!
+Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.Equals(Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo? other) -> bool
+Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.NamedCurveOid.get -> string?
+Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.ParameterKind.get -> Yubico.YubiKit.Core.Cryptography.Asn1ParameterKind
+Yubico.YubiKit.Core.Cryptography.Asn1ParameterKind
+Yubico.YubiKit.Core.Cryptography.Asn1ParameterKind.Absent = 0 -> Yubico.YubiKit.Core.Cryptography.Asn1ParameterKind
+Yubico.YubiKit.Core.Cryptography.Asn1ParameterKind.NamedCurve = 2 -> Yubico.YubiKit.Core.Cryptography.Asn1ParameterKind
+Yubico.YubiKit.Core.Cryptography.Asn1ParameterKind.Null = 1 -> Yubico.YubiKit.Core.Cryptography.Asn1ParameterKind
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.Secp256k1 = 8 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.BrainpoolP256r1 = 256 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.BrainpoolP384r1 = 258 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.BrainpoolP512r1 = 259 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo.<Clone>$() -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo!
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo.CurveIdentifier.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve?
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo.Equals(Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo? other) -> bool
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo.Type.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
+Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions
+Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms
+Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves
+Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys
+Yubico.YubiKit.Core.Cryptography.CryptographicOperation
+Yubico.YubiKit.Core.Cryptography.CryptographicOperation.Encryption = 3 -> Yubico.YubiKit.Core.Cryptography.CryptographicOperation
+Yubico.YubiKit.Core.Cryptography.CryptographicOperation.KeyAgreement = 1 -> Yubico.YubiKit.Core.Cryptography.CryptographicOperation
+Yubico.YubiKit.Core.Cryptography.CryptographicOperation.KeyDerivation = 2 -> Yubico.YubiKit.Core.Cryptography.CryptographicOperation
+Yubico.YubiKit.Core.Cryptography.CryptographicOperation.Signature = 0 -> Yubico.YubiKit.Core.Cryptography.CryptographicOperation
+Yubico.YubiKit.Core.Cryptography.CurveForm
+Yubico.YubiKit.Core.Cryptography.CurveForm.Edwards = 2 -> Yubico.YubiKit.Core.Cryptography.CurveForm
+Yubico.YubiKit.Core.Cryptography.CurveForm.Montgomery = 1 -> Yubico.YubiKit.Core.Cryptography.CurveForm
+Yubico.YubiKit.Core.Cryptography.CurveForm.ShortWeierstrass = 0 -> Yubico.YubiKit.Core.Cryptography.CurveForm
+Yubico.YubiKit.Core.Cryptography.CurveInfo
+Yubico.YubiKit.Core.Cryptography.CurveInfo.<Clone>$() -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+Yubico.YubiKit.Core.Cryptography.CurveInfo.CoordinateLengthBytes.get -> int
+Yubico.YubiKit.Core.Cryptography.CurveInfo.DisplayName.get -> string!
+Yubico.YubiKit.Core.Cryptography.CurveInfo.Equals(Yubico.YubiKit.Core.Cryptography.CurveInfo? other) -> bool
+Yubico.YubiKit.Core.Cryptography.CurveInfo.FieldSizeBits.get -> int
+Yubico.YubiKit.Core.Cryptography.CurveInfo.Form.get -> Yubico.YubiKit.Core.Cryptography.CurveForm
+Yubico.YubiKit.Core.Cryptography.CurveInfo.Id.get -> string!
+Yubico.YubiKit.Core.Cryptography.CurveInfo.NamedCurveOid.get -> string?
+Yubico.YubiKit.Core.Cryptography.CurveInfo.OrderSizeBits.get -> int
+Yubico.YubiKit.Core.Cryptography.IKeyBase.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+Yubico.YubiKit.Core.Cryptography.KeyApplicability
+Yubico.YubiKit.Core.Cryptography.KeyApplicability.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType?
+Yubico.YubiKit.Core.Cryptography.KeyApplicability.<Clone>$() -> Yubico.YubiKit.Core.Cryptography.KeyApplicability!
+Yubico.YubiKit.Core.Cryptography.KeyApplicability.CurveForm.get -> Yubico.YubiKit.Core.Cryptography.CurveForm?
+Yubico.YubiKit.Core.Cryptography.KeyApplicability.CurveId.get -> string?
+Yubico.YubiKit.Core.Cryptography.KeyApplicability.Equals(Yubico.YubiKit.Core.Cryptography.KeyApplicability? other) -> bool
+Yubico.YubiKit.Core.Cryptography.KeyApplicability.Family.get -> Yubico.YubiKit.Core.Cryptography.KeyFamily
+Yubico.YubiKit.Core.Cryptography.KeyApplicability.Matches(Yubico.YubiKit.Core.Cryptography.KeyInfo! keyInfo) -> bool
+Yubico.YubiKit.Core.Cryptography.KeyApplicability.MaximumKeySizeBits.get -> int?
+Yubico.YubiKit.Core.Cryptography.KeyApplicability.MinimumKeySizeBits.get -> int
+Yubico.YubiKit.Core.Cryptography.KeyFamily
+Yubico.YubiKit.Core.Cryptography.KeyFamily.Aes = 2 -> Yubico.YubiKit.Core.Cryptography.KeyFamily
+Yubico.YubiKit.Core.Cryptography.KeyFamily.EllipticCurve = 0 -> Yubico.YubiKit.Core.Cryptography.KeyFamily
+Yubico.YubiKit.Core.Cryptography.KeyFamily.Rsa = 1 -> Yubico.YubiKit.Core.Cryptography.KeyFamily
+Yubico.YubiKit.Core.Cryptography.KeyFamily.TripleDes = 3 -> Yubico.YubiKit.Core.Cryptography.KeyFamily
+Yubico.YubiKit.Core.Cryptography.KeyInfo
+Yubico.YubiKit.Core.Cryptography.KeyInfo.<Clone>$() -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+Yubico.YubiKit.Core.Cryptography.KeyInfo.Asn1.get -> Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo?
+Yubico.YubiKit.Core.Cryptography.KeyInfo.Cose.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo?
+Yubico.YubiKit.Core.Cryptography.KeyInfo.Curve.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo?
+Yubico.YubiKit.Core.Cryptography.KeyInfo.DisplayName.get -> string!
+Yubico.YubiKit.Core.Cryptography.KeyInfo.Equals(Yubico.YubiKit.Core.Cryptography.KeyInfo? other) -> bool
+Yubico.YubiKit.Core.Cryptography.KeyInfo.Family.get -> Yubico.YubiKit.Core.Cryptography.KeyFamily
+Yubico.YubiKit.Core.Cryptography.KeyInfo.IsAsymmetric.get -> bool
+Yubico.YubiKit.Core.Cryptography.KeyInfo.IsEllipticCurve.get -> bool
+Yubico.YubiKit.Core.Cryptography.KeyInfo.IsRsa.get -> bool
+Yubico.YubiKit.Core.Cryptography.KeyInfo.IsShortWeierstrass.get -> bool
+Yubico.YubiKit.Core.Cryptography.KeyInfo.IsSymmetric.get -> bool
+Yubico.YubiKit.Core.Cryptography.KeyInfo.KeySizeBits.get -> int
+Yubico.YubiKit.Core.Cryptography.KeyInfo.KeySizeBytes.get -> int
+Yubico.YubiKit.Core.Cryptography.KeyInfo.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyInfo.PrivateValueLengthBytes.get -> int?
+Yubico.YubiKit.Core.Cryptography.KeyInfo.PublicValueLengthBytes.get -> int?
+Yubico.YubiKit.Core.Cryptography.KeyType.BrainpoolP256r1 = 15 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.BrainpoolP384r1 = 16 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.BrainpoolP512r1 = 17 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.Secp256k1 = 14 -> Yubico.YubiKit.Core.Cryptography.KeyType
+abstract Yubico.YubiKit.Core.Cryptography.PrivateKey.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+abstract Yubico.YubiKit.Core.Cryptography.PublicKey.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+const Yubico.YubiKit.Core.Cryptography.Oids.BrainpoolP256r1 = "1.3.36.3.3.2.8.1.1.7" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.BrainpoolP384r1 = "1.3.36.3.3.2.8.1.1.11" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.BrainpoolP512r1 = "1.3.36.3.3.2.8.1.1.13" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.EcdsaSha1 = "1.2.840.10045.4.1" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.EcdsaSha256 = "1.2.840.10045.4.3.2" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.EcdsaSha384 = "1.2.840.10045.4.3.3" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.EcdsaSha512 = "1.2.840.10045.4.3.4" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.RsaPss = "1.2.840.113549.1.1.10" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.RsaSha1 = "1.2.840.113549.1.1.5" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.RsaSha256 = "1.2.840.113549.1.1.11" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.RsaSha384 = "1.2.840.113549.1.1.12" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.RsaSha512 = "1.2.840.113549.1.1.13" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.Secp256k1 = "1.3.132.0.10" -> string!
+override Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.GetHashCode() -> int
+override Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.ToString() -> string!
+override Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.GetHashCode() -> int
+override Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.ToString() -> string!
+override Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo.GetHashCode() -> int
+override Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo.ToString() -> string!
+override Yubico.YubiKit.Core.Cryptography.CurveInfo.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Cryptography.CurveInfo.GetHashCode() -> int
+override Yubico.YubiKit.Core.Cryptography.CurveInfo.ToString() -> string!
+override Yubico.YubiKit.Core.Cryptography.KeyApplicability.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Cryptography.KeyApplicability.GetHashCode() -> int
+override Yubico.YubiKit.Core.Cryptography.KeyApplicability.ToString() -> string!
+override Yubico.YubiKit.Core.Cryptography.KeyInfo.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Cryptography.KeyInfo.GetHashCode() -> int
+override Yubico.YubiKit.Core.Cryptography.KeyInfo.ToString() -> string!
+static Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.operator !=(Yubico.YubiKit.Core.Cryptography.AlgorithmInfo? left, Yubico.YubiKit.Core.Cryptography.AlgorithmInfo? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.AlgorithmInfo.operator ==(Yubico.YubiKit.Core.Cryptography.AlgorithmInfo? left, Yubico.YubiKit.Core.Cryptography.AlgorithmInfo? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.operator !=(Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo? left, Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo.operator ==(Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo? left, Yubico.YubiKit.Core.Cryptography.Asn1KeyInfo? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo.operator !=(Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo? left, Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo.operator ==(Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo? left, Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyInfo? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.Aes128Cbc.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.Aes192Cbc.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.Aes256Cbc.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.All.get -> System.Collections.Immutable.ImmutableList<Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.Ecdh.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.EcdhEsHkdf256.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.Ecdsa.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.EcdsaSha1.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.EcdsaSha256.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.EcdsaSha384.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.EcdsaSha512.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.Ed25519.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.EdDsa.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.FindByOid(string! algorithmOid) -> System.Collections.Immutable.ImmutableList<Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.FindForKey(Yubico.YubiKit.Core.Cryptography.KeyInfo! keyInfo) -> System.Collections.Immutable.ImmutableList<Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.Get(string! algorithmId) -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaPkcs1.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaPkcs1Sha1.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaPkcs1Sha256.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaPkcs1Sha384.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaPkcs1Sha512.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaPss.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaPssSha256.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaPssSha384.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaPssSha512.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.RsaSignature.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.TripleDesCbc.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.TryGet(string! algorithmId, out Yubico.YubiKit.Core.Cryptography.AlgorithmInfo? algorithmInfo) -> bool
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Algorithms.X25519.get -> Yubico.YubiKit.Core.Cryptography.AlgorithmInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.All.get -> System.Collections.Immutable.ImmutableList<Yubico.YubiKit.Core.Cryptography.CurveInfo!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.BrainpoolP256r1.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.BrainpoolP384r1.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.BrainpoolP512r1.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.Curve25519.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.Edwards25519.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.Get(string! curveId) -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.GetByOid(string! curveOid) -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.P256.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.P384.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.P521.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.Secp256k1.get -> Yubico.YubiKit.Core.Cryptography.CurveInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.TryGet(string! curveId, out Yubico.YubiKit.Core.Cryptography.CurveInfo? curveInfo) -> bool
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Curves.TryGetByOid(string? curveOid, out Yubico.YubiKit.Core.Cryptography.CurveInfo? curveInfo) -> bool
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Aes128.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Aes192.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Aes256.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.All.get -> System.Collections.Immutable.ImmutableList<Yubico.YubiKit.Core.Cryptography.KeyInfo!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.BrainpoolP256r1.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.BrainpoolP384r1.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.BrainpoolP512r1.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Ed25519.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Get(Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.GetByCurve(Yubico.YubiKit.Core.Cryptography.CurveInfo! curveInfo) -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.FindByCurve(Yubico.YubiKit.Core.Cryptography.CurveInfo! curveInfo) -> System.Collections.Immutable.ImmutableList<Yubico.YubiKit.Core.Cryptography.KeyInfo!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.GetByRsaLength(int keySizeBits) -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.P256.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.P384.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.P521.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Rsa1024.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Rsa2048.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Rsa3072.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Rsa4096.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.Secp256k1.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.TripleDes.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.TryGet(Yubico.YubiKit.Core.Cryptography.KeyType keyType, out Yubico.YubiKit.Core.Cryptography.KeyInfo? keyInfo) -> bool
+static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions.Keys.X25519.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
+static Yubico.YubiKit.Core.Cryptography.CurveInfo.operator !=(Yubico.YubiKit.Core.Cryptography.CurveInfo? left, Yubico.YubiKit.Core.Cryptography.CurveInfo? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.CurveInfo.operator ==(Yubico.YubiKit.Core.Cryptography.CurveInfo? left, Yubico.YubiKit.Core.Cryptography.CurveInfo? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyApplicability.operator !=(Yubico.YubiKit.Core.Cryptography.KeyApplicability? left, Yubico.YubiKit.Core.Cryptography.KeyApplicability? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyApplicability.operator ==(Yubico.YubiKit.Core.Cryptography.KeyApplicability? left, Yubico.YubiKit.Core.Cryptography.KeyApplicability? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyInfo.operator !=(Yubico.YubiKit.Core.Cryptography.KeyInfo? left, Yubico.YubiKit.Core.Cryptography.KeyInfo? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyInfo.operator ==(Yubico.YubiKit.Core.Cryptography.KeyInfo? left, Yubico.YubiKit.Core.Cryptography.KeyInfo? right) -> bool

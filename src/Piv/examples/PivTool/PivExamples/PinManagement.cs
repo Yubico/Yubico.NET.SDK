@@ -291,13 +291,13 @@ public static class PinManagement
     /// var newKey = new byte[24]; // or 16/32 for AES
     /// RandomNumberGenerator.Fill(newKey);
     /// var result = await PinManagement.ChangeManagementKeyAsync(
-    ///     session, newKey, KeyType.TripleDES, ct);
+    ///     session, newKey, KeyType.TripleDes, ct);
     /// </code>
     /// </example>
     public static async Task<PinOperationResult> ChangeManagementKeyAsync(
         IPivSession session,
         ReadOnlyMemory<byte> newKey,
-        KeyType keyType = KeyType.TripleDES,
+        KeyType keyType = KeyType.TripleDes,
         bool requireTouch = false,
         CancellationToken cancellationToken = default)
     {

@@ -101,7 +101,7 @@ public class PivDecryptTests
         await ResetAndAuthenticate(session, state.FirmwareVersion);
 
         // Generate an ECC key so the slot has metadata (not empty)
-        await session.GenerateKeyAsync(Slot.KeyManagement, KeyType.ECP256);
+        await session.GenerateKeyAsync(Slot.KeyManagement, KeyType.P256);
 
         var fakeCiphertext = new byte[32]; // wrong size, wrong key type -- error fires on type check
 
@@ -123,7 +123,7 @@ public class PivDecryptTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await ResetAndAuthenticate(session, state.FirmwareVersion);
 
-        await session.GenerateKeyAsync(Slot.KeyManagement, KeyType.RSA2048);
+        await session.GenerateKeyAsync(Slot.KeyManagement, KeyType.Rsa2048);
 
         // RSA 2048 expects exactly 256 bytes; pass 100 instead
         var shortCiphertext = new byte[100];
@@ -149,7 +149,7 @@ public class PivDecryptTests
 
         var publicKey = await session.GenerateKeyAsync(
             Slot.KeyManagement,
-            KeyType.RSA4096);
+            KeyType.Rsa4096);
         await session.VerifyPinAsync(DefaultPin);
 
         var plaintext = "RSA 4096 decrypt test"u8.ToArray();
@@ -190,7 +190,7 @@ public class PivDecryptTests
 
         var publicKey = await session.GenerateKeyAsync(
             Slot.KeyManagement,
-            KeyType.RSA2048);
+            KeyType.Rsa2048);
         await session.VerifyPinAsync(DefaultPin);
 
         using var rsa = RSA.Create();

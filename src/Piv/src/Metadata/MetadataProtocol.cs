@@ -208,7 +208,7 @@ internal static class MetadataProtocol
         // Present known fields must still have their exact protocol lengths.
         byte algorithmId = tlvDict.ContainsKey(TagAlgorithm)
             ? RequiredField(tlvDict, TagAlgorithm, 1).Span[0]
-            : KeyTypeEncoding.EncodeManagement(KeyType.TripleDES);
+            : KeyTypeEncoding.EncodeManagement(KeyType.TripleDes);
         var keyType = KeyTypeEncoding.Decode(algorithmId);
 
         var touchPolicy = (TouchPolicy)RequiredField(tlvDict, TagPolicy, 2).Span[1];

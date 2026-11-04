@@ -59,7 +59,7 @@ public class PrivateKeyOperationsTests
             backend,
 
             Slot.Authentication,
-            KeyType.ECP256,
+            KeyType.P256,
             new byte[32],
             UserPresenceNotification.None,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -119,7 +119,7 @@ public class PrivateKeyOperationsTests
                 backend,
 
                 Slot.Authentication,
-                KeyType.ECP256,
+                KeyType.P256,
                 new byte[32],
                 notification,
                 TestContext.Current.CancellationToken));

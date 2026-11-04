@@ -233,8 +233,8 @@ The `[WithYubiKey]` attribute (used for integration tests requiring physical Yub
 // ❌ WRONG - Does not work
 [WithYubiKey(MinFirmware = "5.7.0")]
 [SkippableTheory]
-[InlineData(KeyType.RSA3072)]
-[InlineData(KeyType.RSA4096)]
+[InlineData(KeyType.Rsa3072)]
+[InlineData(KeyType.Rsa4096)]
 public async Task SignAsync_LargeRsa_Works(KeyType algorithm, YubiKeyTestState state)
 {
     // This will fail - state won't be injected correctly

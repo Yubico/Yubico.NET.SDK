@@ -165,11 +165,11 @@ internal static class DeviceHelper
 
         var keyType = value.ToLowerInvariant() switch
         {
-            "rsa2048" => (KeyType?)KeyType.RSA2048,
-            "rsa3072" => KeyType.RSA3072,
-            "rsa4096" => KeyType.RSA4096,
-            "eccp256" => KeyType.ECP256,
-            "eccp384" => KeyType.ECP384,
+            "rsa2048" => (KeyType?)KeyType.Rsa2048,
+            "rsa3072" => KeyType.Rsa3072,
+            "rsa4096" => KeyType.Rsa4096,
+            "eccp256" => KeyType.P256,
+            "eccp384" => KeyType.P384,
             "ed25519" => KeyType.Ed25519,
             "x25519" => KeyType.X25519,
             _ => null
@@ -214,10 +214,10 @@ internal static class DeviceHelper
     internal static KeyType ParseMgmtKeyType(string? value) =>
         value?.ToLowerInvariant() switch
         {
-            "aes128" => KeyType.AES128,
-            "aes192" => KeyType.AES192,
-            "aes256" => KeyType.AES256,
-            _ => KeyType.TripleDES
+            "aes128" => KeyType.Aes128,
+            "aes192" => KeyType.Aes192,
+            "aes256" => KeyType.Aes256,
+            _ => KeyType.TripleDes
         };
 
     /// <summary>

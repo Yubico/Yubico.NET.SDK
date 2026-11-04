@@ -51,7 +51,7 @@ public class PivKeyOperationsTests
 
         var publicKey = await session.GenerateKeyAsync(
             Slot.Authentication,
-            KeyType.ECP256);
+            KeyType.P256);
 
         Assert.NotNull(publicKey);
         Assert.IsType<ECPublicKey>(publicKey);
@@ -80,7 +80,7 @@ public class PivKeyOperationsTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
         var attestation = await session.AttestKeyAsync(Slot.Authentication);
 
@@ -96,7 +96,7 @@ public class PivKeyOperationsTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
+        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
         await session.MoveKeyAsync(Slot.Authentication, Slot.Retired1);
 
@@ -111,7 +111,7 @@ public class PivKeyOperationsTests
         var hash = SHA256.HashData("test data"u8);
         var signature = await session.SignOrDecryptAsync(
             Slot.Retired1,
-            KeyType.ECP256,
+            KeyType.P256,
             hash);
 
         // Verify signature with original public key
@@ -145,7 +145,7 @@ public class PivKeyOperationsTests
         var hash = SHA256.HashData(dataToSign);
         var signature = await session.SignOrDecryptAsync(
             Slot.Authentication,
-            KeyType.ECP256,
+            KeyType.P256,
             hash);
 
         // Verify with software public key
@@ -161,7 +161,7 @@ public class PivKeyOperationsTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         // Generate key
-        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
         // Verify key exists
         var metadataBefore = await session.GetSlotMetadataAsync(Slot.Authentication);

@@ -49,11 +49,11 @@ public class PivResetTests
         // Verify default state - management key type resets to TripleDes (or AES for fw >= 5.7.0)
         if (state.FirmwareVersion >= new FirmwareVersion(5, 7, 0))
         {
-            Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+            Assert.Equal(KeyType.Aes192, session.ManagementKeyType);
         }
         else
         {
-            Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
+            Assert.Equal(KeyType.TripleDes, session.ManagementKeyType);
         }
 
         // Verify we can authenticate with default management key
@@ -83,7 +83,7 @@ public class PivResetTests
 
         // Generate a key in a slot
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
         // Reset again
         await session.ResetAsync();

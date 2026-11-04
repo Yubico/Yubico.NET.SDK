@@ -27,14 +27,14 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenTouchPolicyAlways_RequestsBeforeApduAndResolvesCompleted()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
+            SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt(() => connection.TransmittedCommands.Count);
         await using var session = await CreateSessionAsync(connection, prompt);
 
         var result = await session.SignOrDecryptAsync(
             Slot.Authentication,
-            KeyType.ECP256,
+            KeyType.P256,
             new byte[32],
             TestContext.Current.CancellationToken);
 
@@ -54,7 +54,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_InsideIntentScope_ReportsIntentAfterMetadataLookup()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
+            SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -63,7 +63,7 @@ public class TouchNotificationTests
         {
             _ = await session.SignOrDecryptAsync(
                 Slot.Signature,
-                KeyType.ECP256,
+                KeyType.P256,
                 new byte[32],
                 TestContext.Current.CancellationToken);
         }
@@ -78,7 +78,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_AutoDetect_ReusesLoadedMetadata()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
+            SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -103,7 +103,7 @@ public class TouchNotificationTests
     public async Task DecryptAsync_ReusesMetadataAndResolvesCompletedBeforePostProcessingFails()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.RSA1024, TouchPolicy.Always),
+            SlotMetadataResponse(KeyType.Rsa1024, TouchPolicy.Always),
             [0x7C, 0x02, 0x82, 0x00, 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt(() => connection.TransmittedCommands.Count);
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -131,7 +131,7 @@ public class TouchNotificationTests
     public async Task CalculateSecretAsync_WhenTouchPolicyCached_RequestsConservatively()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Cached),
+            SlotMetadataResponse(KeyType.P256, TouchPolicy.Cached),
             [0x7C, 0x22, 0x82, 0x20, .. new byte[32], 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -157,14 +157,14 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenTouchPolicyDoesNotRequireTouch_RemainsSilent(TouchPolicy touchPolicy)
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, touchPolicy),
+            SlotMetadataResponse(KeyType.P256, touchPolicy),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
 
         _ = await session.SignOrDecryptAsync(
             Slot.Signature,
-            KeyType.ECP256,
+            KeyType.P256,
             new byte[32],
             TestContext.Current.CancellationToken);
 
@@ -176,14 +176,14 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenTouchPolicyIsUnknown_RequestsConservatively()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, (TouchPolicy)0x7F),
+            SlotMetadataResponse(KeyType.P256, (TouchPolicy)0x7F),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
 
         _ = await session.SignOrDecryptAsync(
             Slot.Signature,
-            KeyType.ECP256,
+            KeyType.P256,
             new byte[32],
             TestContext.Current.CancellationToken);
 
@@ -205,7 +205,7 @@ public class TouchNotificationTests
 
         _ = await session.SignOrDecryptAsync(
             Slot.Signature,
-            KeyType.ECP256,
+            KeyType.P256,
             new byte[32],
             TestContext.Current.CancellationToken);
 
@@ -220,7 +220,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenPromptThrows_DoesNotTransmitOrResolve()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
+            SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt
         {
@@ -230,7 +230,7 @@ public class TouchNotificationTests
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => session.SignOrDecryptAsync(
             Slot.Authentication,
-            KeyType.ECP256,
+            KeyType.P256,
             new byte[32],
             TestContext.Current.CancellationToken));
 
@@ -245,7 +245,7 @@ public class TouchNotificationTests
     {
         using var cancellationSource = new CancellationTokenSource();
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
+            SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt
         {
@@ -255,7 +255,7 @@ public class TouchNotificationTests
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.SignOrDecryptAsync(
             Slot.Authentication,
-            KeyType.ECP256,
+            KeyType.P256,
             new byte[32],
             cancellationSource.Token));
 
@@ -272,7 +272,7 @@ public class TouchNotificationTests
     {
         var expected = new InvalidOperationException("resolution failed");
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
+            SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt { ResolutionException = expected };
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -280,7 +280,7 @@ public class TouchNotificationTests
         InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             session.SignOrDecryptAsync(
                 Slot.Authentication,
-                KeyType.ECP256,
+                KeyType.P256,
                 new byte[32],
                 TestContext.Current.CancellationToken));
 
@@ -291,7 +291,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenSuccessResponseIsMalformed_ResolvesFailedAndPreservesParseError()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
+            SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
             [0x7D, 0x00, 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt
         {
@@ -301,7 +301,7 @@ public class TouchNotificationTests
 
         ApduException actual = await Assert.ThrowsAsync<ApduException>(() => session.SignOrDecryptAsync(
             Slot.Authentication,
-            KeyType.ECP256,
+            KeyType.P256,
             new byte[32],
             TestContext.Current.CancellationToken));
 
@@ -317,7 +317,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenApduAndResolutionFail_PreservesApduException()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
+            SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
             [0x69, 0x82]);
         var prompt = new RecordingUserPresencePrompt
         {
@@ -328,7 +328,7 @@ public class TouchNotificationTests
         InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             session.SignOrDecryptAsync(
                 Slot.Authentication,
-                KeyType.ECP256,
+                KeyType.P256,
                 new byte[32],
                 TestContext.Current.CancellationToken));
 

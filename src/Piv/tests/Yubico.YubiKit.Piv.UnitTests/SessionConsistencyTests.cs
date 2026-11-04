@@ -21,10 +21,10 @@ public class SessionConsistencyTests
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
 
-        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256,
+        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256,
             new KeyCreationOptions { PinPolicy = PinPolicy.MatchOnce }, TestContext.Current.CancellationToken);
 
-        Assert.Equal(KeyType.ECP256, publicKey.KeyType);
+        Assert.Equal(KeyType.P256, publicKey.KeyType);
         Assert.Equal(0xF7, connection.TransmittedCommands[^2][1]);
         Assert.Equal(0x96, connection.TransmittedCommands[^2][3]);
         Assert.Equal(0x47, connection.TransmittedCommands[^1][1]);
@@ -56,7 +56,7 @@ public class SessionConsistencyTests
         typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
         Task Invoke() => operation switch
         {
-            "generate" => session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, cancellationToken: TestContext.Current.CancellationToken),
+            "generate" => session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, cancellationToken: TestContext.Current.CancellationToken),
             "move" => session.MoveKeyAsync(Slot.Authentication, Slot.Signature, TestContext.Current.CancellationToken),
             "delete" => session.DeleteKeyAsync(Slot.Authentication, TestContext.Current.CancellationToken),
             _ => session.AttestKeyAsync(Slot.Authentication, TestContext.Current.CancellationToken)
@@ -98,7 +98,7 @@ public class SessionConsistencyTests
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
 
-        await Assert.ThrowsAsync<NotSupportedException>(() => session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256,
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.GenerateKeyAsync(Slot.Authentication, KeyType.P256,
             new KeyCreationOptions { PinPolicy = policy }, TestContext.Current.CancellationToken));
 
         Assert.Equal(0xF7, connection.TransmittedCommands[^1][1]);
@@ -145,7 +145,7 @@ public class SessionConsistencyTests
             "puk" => session.GetPukMetadataAsync(TestContext.Current.CancellationToken),
             "management" => session.GetManagementKeyMetadataAsync(TestContext.Current.CancellationToken),
             "slot" => session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken),
-            _ => session.SetManagementKeyAsync(KeyType.AES192, new byte[24], cancellationToken: TestContext.Current.CancellationToken)
+            _ => session.SetManagementKeyAsync(KeyType.Aes192, new byte[24], cancellationToken: TestContext.Current.CancellationToken)
         });
 
         Assert.False(session.IsSupported(Features.Metadata));
@@ -153,15 +153,15 @@ public class SessionConsistencyTests
     }
 
     [Theory]
-    [InlineData(3, 4, 0, KeyType.ECP384, PinPolicy.Default, TouchPolicy.Default)]
-    [InlineData(3, 4, 0, KeyType.ECP256, PinPolicy.Once, TouchPolicy.Default)]
-    [InlineData(4, 2, 9, KeyType.ECP256, PinPolicy.Default, TouchPolicy.Cached)]
+    [InlineData(3, 4, 0, KeyType.P384, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(3, 4, 0, KeyType.P256, PinPolicy.Once, TouchPolicy.Default)]
+    [InlineData(4, 2, 9, KeyType.P256, PinPolicy.Default, TouchPolicy.Cached)]
     [InlineData(5, 6, 9, KeyType.Ed25519, PinPolicy.Default, TouchPolicy.Default)]
     [InlineData(5, 6, 9, KeyType.X25519, PinPolicy.Default, TouchPolicy.Default)]
-    [InlineData(5, 6, 9, KeyType.RSA3072, PinPolicy.Default, TouchPolicy.Default)]
-    [InlineData(5, 6, 9, KeyType.RSA4096, PinPolicy.Default, TouchPolicy.Default)]
-    [InlineData(5, 7, 0, KeyType.ECP521, PinPolicy.Default, TouchPolicy.Default)]
-    [InlineData(5, 7, 0, KeyType.AES256, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(5, 6, 9, KeyType.Rsa3072, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(5, 6, 9, KeyType.Rsa4096, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(5, 7, 0, KeyType.P521, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(5, 7, 0, KeyType.Aes256, PinPolicy.Default, TouchPolicy.Default)]
     public async Task Generate_UnsupportedKeyOrPolicy_DoesNotTransmit(int major, int minor, int patch,
         KeyType keyType, PinPolicy pinPolicy, TouchPolicy touchPolicy)
     {
@@ -255,12 +255,12 @@ public class SessionConsistencyTests
     }
 
     [Theory]
-    [InlineData(KeyType.RSA1024, 0x06)]
-    [InlineData(KeyType.RSA2048, 0x07)]
-    [InlineData(KeyType.RSA3072, 0x05)]
-    [InlineData(KeyType.RSA4096, 0x16)]
-    [InlineData(KeyType.ECP256, 0x11)]
-    [InlineData(KeyType.ECP384, 0x14)]
+    [InlineData(KeyType.Rsa1024, 0x06)]
+    [InlineData(KeyType.Rsa2048, 0x07)]
+    [InlineData(KeyType.Rsa3072, 0x05)]
+    [InlineData(KeyType.Rsa4096, 0x16)]
+    [InlineData(KeyType.P256, 0x11)]
+    [InlineData(KeyType.P384, 0x14)]
     [InlineData(KeyType.Ed25519, 0xE0)]
     [InlineData(KeyType.X25519, 0xE1)]
     public async Task Generate_UsesExplicitPivAlgorithmBytes(KeyType keyType, int algorithmId)
@@ -318,7 +318,7 @@ public class SessionConsistencyTests
         typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
 
         await Assert.ThrowsAsync<NotSupportedException>(() => session.GenerateKeyAsync(
-            Slot.Authentication, KeyType.RSA2048, cancellationToken: TestContext.Current.CancellationToken));
+            Slot.Authentication, KeyType.Rsa2048, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(3, connection.TransmittedCommands.Count);
     }
@@ -334,7 +334,7 @@ public class SessionConsistencyTests
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+        Assert.Equal(KeyType.Aes192, session.ManagementKeyType);
     }
 
     private static RecordingSmartCardConnection Connection(params byte[][] responses) => new(

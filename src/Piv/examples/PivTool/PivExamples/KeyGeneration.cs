@@ -50,7 +50,7 @@ public static class KeyGeneration
     /// var result = await KeyGeneration.GenerateKeyAsync(
     ///     session,
     ///     Slot.Authentication,
-    ///     KeyType.ECP256,
+    ///     KeyType.P256,
     ///     PinPolicy.Once,
     ///     TouchPolicy.Cached,
     ///     ct);

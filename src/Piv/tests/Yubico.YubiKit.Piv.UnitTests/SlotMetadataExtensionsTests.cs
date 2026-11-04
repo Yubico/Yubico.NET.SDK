@@ -19,26 +19,26 @@ namespace Yubico.YubiKit.Piv.UnitTests;
 public class KeyClassificationTests
 {
     [Theory]
-    [InlineData(KeyType.RSA1024, true)]
-    [InlineData(KeyType.RSA2048, true)]
-    [InlineData(KeyType.RSA3072, true)]
-    [InlineData(KeyType.RSA4096, true)]
-    [InlineData(KeyType.ECP256, false)]
-    [InlineData(KeyType.ECP384, false)]
+    [InlineData(KeyType.Rsa1024, true)]
+    [InlineData(KeyType.Rsa2048, true)]
+    [InlineData(KeyType.Rsa3072, true)]
+    [InlineData(KeyType.Rsa4096, true)]
+    [InlineData(KeyType.P256, false)]
+    [InlineData(KeyType.P384, false)]
     [InlineData(KeyType.Ed25519, false)]
     [InlineData(KeyType.X25519, false)]
     public void IsRsa_ReturnsCorrectValue(KeyType keyType, bool expected)
     {
-        Assert.Equal(expected, keyType.IsRSA());
+        Assert.Equal(expected, keyType.IsRsa());
     }
 
     [Theory]
-    [InlineData(KeyType.RSA1024, false)]
-    [InlineData(KeyType.RSA2048, false)]
-    [InlineData(KeyType.RSA3072, false)]
-    [InlineData(KeyType.RSA4096, false)]
-    [InlineData(KeyType.ECP256, true)]
-    [InlineData(KeyType.ECP384, true)]
+    [InlineData(KeyType.Rsa1024, false)]
+    [InlineData(KeyType.Rsa2048, false)]
+    [InlineData(KeyType.Rsa3072, false)]
+    [InlineData(KeyType.Rsa4096, false)]
+    [InlineData(KeyType.P256, true)]
+    [InlineData(KeyType.P384, true)]
     [InlineData(KeyType.Ed25519, true)]
     [InlineData(KeyType.X25519, true)]
     public void IsEcc_ReturnsCorrectValue(KeyType keyType, bool expected)
@@ -54,7 +54,7 @@ public class SlotMetadataExtensionsTests
     {
         // Arrange: Create metadata with ECC algorithm
         var metadata = new SlotMetadata(
-            KeyType: KeyType.ECP256,
+            KeyType: KeyType.P256,
             PinPolicy: PinPolicy.Default,
             TouchPolicy: TouchPolicy.Default,
             IsGenerated: true,
@@ -71,7 +71,7 @@ public class SlotMetadataExtensionsTests
     {
         // Arrange: Create metadata with RSA algorithm
         var metadata = new SlotMetadata(
-            KeyType: KeyType.RSA2048,
+            KeyType: KeyType.Rsa2048,
             PinPolicy: PinPolicy.Default,
             TouchPolicy: TouchPolicy.Default,
             IsGenerated: true,

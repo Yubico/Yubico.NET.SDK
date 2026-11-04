@@ -77,7 +77,7 @@ public class PivSessionContentionTests
     {
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(firmware));
-        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
+        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
     }
 
@@ -99,14 +99,14 @@ public class PivSessionContentionTests
         var digest = SHA256.HashData("session contention"u8);
 
         // Baseline: the PIN-gated sign works while this session is the only holder.
-        var before = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest);
+        var before = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
         Assert.NotEqual(0, before.Length);
 
         // The third line of the motivating sequence. Ordinary public API, no exotic conditions.
         _ = await Assert.ThrowsAsync<ConnectionInUseException>(() => state.Device.GetDeviceInfoAsync());
 
         // The existing holder must remain usable after the second ownership attempt is refused.
-        var after = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest);
+        var after = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
         Assert.NotEqual(0, after.Length);
     }
 
@@ -127,7 +127,7 @@ public class PivSessionContentionTests
 
         // Refusal is only correct if the lease holder is still healthy afterwards.
         var digest = SHA256.HashData("management fallback"u8);
-        var signature = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest);
+        var signature = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
         Assert.NotEqual(0, signature.Length);
     }
 
@@ -157,7 +157,7 @@ public class PivSessionContentionTests
 
         // The refusal must be non-destructive: the victim keeps its verified-PIN state.
         var digest = SHA256.HashData("refused acquisition"u8);
-        var signature = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest);
+        var signature = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
         Assert.NotEqual(0, signature.Length);
     }
 

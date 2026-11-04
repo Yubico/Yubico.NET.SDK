@@ -349,7 +349,7 @@ try
 
     var publicKey = await piv.GenerateKeyAsync(
         Slot.Authentication,
-        KeyType.ECP256,
+        KeyType.P256,
         new KeyCreationOptions
         {
             PinPolicy = PinPolicy.Default,

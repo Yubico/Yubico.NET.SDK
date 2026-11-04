@@ -171,15 +171,15 @@ public static class PivHelpers
     private static readonly FrozenDictionary<string, KeyType> KeyTypeNames =
         new Dictionary<string, KeyType>
         {
-            ["rsa2048"] = KeyType.RSA2048,
-            ["rsa3072"] = KeyType.RSA3072,
-            ["rsa4096"] = KeyType.RSA4096,
-            ["eccp256"] = KeyType.ECP256,
-            ["ecp256"] = KeyType.ECP256,
-            ["p256"] = KeyType.ECP256,
-            ["eccp384"] = KeyType.ECP384,
-            ["ecp384"] = KeyType.ECP384,
-            ["p384"] = KeyType.ECP384,
+            ["rsa2048"] = KeyType.Rsa2048,
+            ["rsa3072"] = KeyType.Rsa3072,
+            ["rsa4096"] = KeyType.Rsa4096,
+            ["eccp256"] = KeyType.P256,
+            ["ecp256"] = KeyType.P256,
+            ["p256"] = KeyType.P256,
+            ["eccp384"] = KeyType.P384,
+            ["ecp384"] = KeyType.P384,
+            ["p384"] = KeyType.P384,
             ["ed25519"] = KeyType.Ed25519,
             ["x25519"] = KeyType.X25519
         }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -216,10 +216,10 @@ public static class PivHelpers
     public static KeyType ParseManagementKeyType(string? keyType) =>
         keyType?.ToLowerInvariant() switch
         {
-            null or "3des" => KeyType.TripleDES,
-            "aes128" => KeyType.AES128,
-            "aes192" => KeyType.AES192,
-            "aes256" => KeyType.AES256,
+            null or "3des" => KeyType.TripleDes,
+            "aes128" => KeyType.Aes128,
+            "aes192" => KeyType.Aes192,
+            "aes256" => KeyType.Aes256,
             _ => throw new ArgumentException($"Unknown key type: {keyType}. Use 3des, aes128, aes192, aes256.")
         };
 

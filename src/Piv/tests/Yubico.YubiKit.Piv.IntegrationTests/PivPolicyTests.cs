@@ -51,7 +51,7 @@ public class PivPolicyTests
 
         var publicKey = await session.GenerateKeyAsync(
             Slot.Authentication,
-            KeyType.ECP256,
+            KeyType.P256,
             new KeyCreationOptions { PinPolicy = PinPolicy.Never });
 
         Assert.NotNull(publicKey);
@@ -65,7 +65,7 @@ public class PivPolicyTests
         var hash = SHA256.HashData("no-pin-required"u8);
         var signature = await session.SignOrDecryptAsync(
             Slot.Authentication,
-            KeyType.ECP256,
+            KeyType.P256,
             hash);
 
         Assert.False(signature.IsEmpty);
@@ -86,7 +86,7 @@ public class PivPolicyTests
 
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
-            KeyType.ECP256,
+            KeyType.P256,
             new KeyCreationOptions { PinPolicy = PinPolicy.Always });
 
         Assert.NotNull(publicKey);
@@ -101,7 +101,7 @@ public class PivPolicyTests
         var hash = SHA256.HashData("pin-always-test"u8);
         var signature = await session.SignOrDecryptAsync(
             Slot.Signature,
-            KeyType.ECP256,
+            KeyType.P256,
             hash);
 
         Assert.False(signature.IsEmpty);

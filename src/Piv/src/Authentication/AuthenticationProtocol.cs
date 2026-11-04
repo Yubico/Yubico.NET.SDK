@@ -47,7 +47,7 @@ internal static class AuthenticationProtocol
     private const int PinPairLength = PinUtilities.PinLength * 2;
     private const int DesBlockSize = 8;
     private const int AesBlockSize = 16;
-    private static readonly int DesKeyComponentLength = KeyType.TripleDES.GetKeySizeBytes() / 3;
+    private static readonly int DesKeyComponentLength = KeyType.TripleDes.GetKeyInfo().KeySizeBytes / 3;
 
     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Authentication.AuthenticationProtocol");
 
@@ -74,12 +74,12 @@ internal static class AuthenticationProtocol
     ];
 
     internal static ReadOnlySpan<byte> DefaultManagementKey =>
-        DefaultManagementKeyBytes.AsSpan(0, KeyType.TripleDES.GetKeySizeBytes());
+        DefaultManagementKeyBytes.AsSpan(0, KeyType.TripleDes.GetKeyInfo().KeySizeBytes);
 
     internal static ReadOnlyMemory<byte> GetDefaultManagementKey(KeyType keyType)
     {
         _ = KeyTypeEncoding.EncodeManagement(keyType);
-        return DefaultManagementKeyBytes.AsMemory(0, keyType.GetKeySizeBytes());
+        return DefaultManagementKeyBytes.AsMemory(0, keyType.GetKeyInfo().KeySizeBytes);
     }
 
     /// <summary>
@@ -108,7 +108,7 @@ internal static class AuthenticationProtocol
 
         // Validate key length based on management key type
         byte algorithmId = KeyTypeEncoding.EncodeManagement(managementKeyType);
-        int expectedKeyLength = managementKeyType.GetKeySizeBytes();
+        int expectedKeyLength = managementKeyType.GetKeyInfo().KeySizeBytes;
 
         if (managementKey.Length != expectedKeyLength)
         {
@@ -118,7 +118,7 @@ internal static class AuthenticationProtocol
         }
 
         // Challenge length: 8 bytes for 3DES, 16 bytes for AES
-        int challengeLength = managementKeyType == KeyType.TripleDES ? DesBlockSize : AesBlockSize;
+        int challengeLength = managementKeyType == KeyType.TripleDes ? DesBlockSize : AesBlockSize;
 
 
         var keyBytes = ArrayPool<byte>.Shared.Rent(expectedKeyLength);
@@ -304,7 +304,7 @@ internal static class AuthenticationProtocol
     /// </summary>
     private static void CryptoBlockCore(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, KeyType keyType, bool encrypt)
     {
-        if (keyType == KeyType.TripleDES)
+        if (keyType == KeyType.TripleDes)
         {
             // Preserve explicit EDE for the public factory default, which .NET rejects as a
             // weak TripleDES key even though PIV requires it. Each DES component is still valid.
@@ -585,7 +585,7 @@ internal static class AuthenticationProtocol
 
         // Validate key length
         byte algorithmId = KeyTypeEncoding.EncodeManagement(keyType);
-        int expectedLength = keyType.GetKeySizeBytes();
+        int expectedLength = keyType.GetKeyInfo().KeySizeBytes;
 
         if (newKey.Length != expectedLength)
         {

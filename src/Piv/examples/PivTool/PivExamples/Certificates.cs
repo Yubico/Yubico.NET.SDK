@@ -244,7 +244,7 @@ public static class Certificates
             }
 
             var keyType = slotMetadata.KeyType ?? throw new NotSupportedException($"Unknown PIV algorithm 0x{slotMetadata.RawAlgorithmId:X2}.");
-            using var publicKey = keyType.IsRSA()
+            using var publicKey = keyType.IsRsa()
                 ? (AsymmetricAlgorithm)slotMetadata.GetRsaPublicKey()
                 : slotMetadata.GetECDsaPublicKey();
 
@@ -254,7 +254,7 @@ public static class Certificates
             }
 
             var subjectName = new X500DistinguishedName(subject);
-            var hashAlgorithm = slotMetadata.KeyType == KeyType.ECP384
+            var hashAlgorithm = slotMetadata.KeyType == KeyType.P384
                 ? HashAlgorithmName.SHA384
                 : HashAlgorithmName.SHA256;
 
@@ -356,7 +356,7 @@ public static class Certificates
             }
 
             var keyType = slotMetadata.KeyType ?? throw new NotSupportedException($"Unknown PIV algorithm 0x{slotMetadata.RawAlgorithmId:X2}.");
-            using var publicKey = keyType.IsRSA()
+            using var publicKey = keyType.IsRsa()
                 ? (AsymmetricAlgorithm)slotMetadata.GetRsaPublicKey()
                 : slotMetadata.GetECDsaPublicKey();
 
@@ -366,7 +366,7 @@ public static class Certificates
             }
 
             var subjectName = new X500DistinguishedName(subject);
-            var hashAlgorithm = slotMetadata.KeyType == KeyType.ECP384
+            var hashAlgorithm = slotMetadata.KeyType == KeyType.P384
                 ? HashAlgorithmName.SHA384
                 : HashAlgorithmName.SHA256;
 

@@ -85,7 +85,7 @@ public class PivImportTests
 
         var signature = await session.SignOrDecryptAsync(
             Slot.Authentication,
-            KeyType.RSA2048,
+            KeyType.Rsa2048,
             padded);
 
         // Verify the raw RSA signature with the software public key
@@ -114,7 +114,7 @@ public class PivImportTests
         // Verify slot metadata shows key is present
         var metadata = await session.GetSlotMetadataAsync(Slot.Signature);
         Assert.NotNull(metadata);
-        Assert.Equal(KeyType.RSA3072, metadata.Value.KeyType);
+        Assert.Equal(KeyType.Rsa3072, metadata.Value.KeyType);
     }
 
     [SkippableTheory]

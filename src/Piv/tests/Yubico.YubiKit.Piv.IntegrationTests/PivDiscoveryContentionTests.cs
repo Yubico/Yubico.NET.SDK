@@ -65,7 +65,7 @@ public class PivDiscoveryContentionTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         // Occupy the card with a long on-card operation; deliberately not awaited yet.
-        var keygenTask = session.GenerateKeyAsync(Slot.Retired1, KeyType.RSA4096);
+        var keygenTask = session.GenerateKeyAsync(Slot.Retired1, KeyType.Rsa4096);
 
         var scanElapsed = TimeSpan.Zero;
         try
@@ -118,13 +118,13 @@ public class PivDiscoveryContentionTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
+        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var digest = SHA256.HashData("discovery contention"u8);
 
         // Baseline: the PIN-gated sign works on the open session.
-        var before = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest);
+        var before = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
         Assert.NotEqual(0, before.Length);
 
         // Fresh FindYubiKeys instance = cold caches, exactly what a first enumeration or
@@ -134,7 +134,7 @@ public class PivDiscoveryContentionTests
 
         // The already-open session must be unaffected by passive enumeration. Pre-fix this throws:
         // the PIV applet was deselected (SW 6D00/6E00) or its PIN state reset (SW 6982).
-        var after = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest);
+        var after = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
         Assert.NotEqual(0, after.Length);
     }
 }

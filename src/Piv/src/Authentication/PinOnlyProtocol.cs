@@ -35,7 +35,7 @@ internal static class PinOnlyProtocol
     private const int ManagementKeyTag = 0x89;
     private const int Pbkdf2Iterations = 10_000;
     private static readonly int[] ValidManagementKeyLengths =
-        [KeyType.AES128.GetKeySizeBytes(), KeyType.AES192.GetKeySizeBytes(), KeyType.AES256.GetKeySizeBytes()];
+        [KeyType.Aes128.GetKeySizeBytes(), KeyType.Aes192.GetKeySizeBytes(), KeyType.Aes256.GetKeySizeBytes()];
 
     internal static async Task<PinOnlyMode> GetPinOnlyModeAsync(
         IBackend backend,

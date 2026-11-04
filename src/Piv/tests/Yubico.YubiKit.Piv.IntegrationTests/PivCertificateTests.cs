@@ -47,7 +47,7 @@ public class PivCertificateTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
+        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
         // Create a self-signed certificate (uses software key)
         var cert = CreateSelfSignedCertificate();

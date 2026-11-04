@@ -16,7 +16,6 @@ using System.Formats.Cbor;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Ctap2.Cbor;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Cbor;
 
@@ -29,7 +28,7 @@ public sealed class Ctap2SessionRequestEncodingTests
             ClientDataHash(),
             new PublicKeyCredentialRpEntity("example.com", "Example"),
             new PublicKeyCredentialUserEntity(new byte[] { 0x01, 0x02, 0x03, 0x04 }, "alice", "Alice"),
-            [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.ES256)],
+            [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.Es256)],
             options: null);
 
         Assert.Equal(CtapCommand.MakeCredential, request[0]);
@@ -68,7 +67,7 @@ public sealed class Ctap2SessionRequestEncodingTests
             ClientDataHash(),
             new PublicKeyCredentialRpEntity("example.com"),
             new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
-            [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.ES256)],
+            [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.Es256)],
             options);
 
         var reader = CborPayloadReader(request);

@@ -31,10 +31,10 @@ public class PivTypesTests
     }
 
     [Theory]
-    [InlineData(KeyType.RSA1024, 0x06)]
-    [InlineData(KeyType.RSA2048, 0x07)]
-    [InlineData(KeyType.ECP256, 0x11)]
-    [InlineData(KeyType.ECP384, 0x14)]
+    [InlineData(KeyType.Rsa1024, 0x06)]
+    [InlineData(KeyType.Rsa2048, 0x07)]
+    [InlineData(KeyType.P256, 0x11)]
+    [InlineData(KeyType.P384, 0x14)]
     [InlineData(KeyType.Ed25519, 0xE0)]
     [InlineData(KeyType.X25519, 0xE1)]
     public void PivAlgorithmId_HasCorrectValue(KeyType algo, byte expected)
@@ -43,10 +43,10 @@ public class PivTypesTests
     }
 
     [Theory]
-    [InlineData(KeyType.TripleDES, 0x03)]
-    [InlineData(KeyType.AES128, 0x08)]
-    [InlineData(KeyType.AES192, 0x0A)]
-    [InlineData(KeyType.AES256, 0x0C)]
+    [InlineData(KeyType.TripleDes, 0x03)]
+    [InlineData(KeyType.Aes128, 0x08)]
+    [InlineData(KeyType.Aes192, 0x0A)]
+    [InlineData(KeyType.Aes256, 0x0C)]
     public void PivManagementKeyType_HasCorrectValue(KeyType type, byte expected)
     {
         Assert.Equal(expected, KeyTypeEncoding.Encode(type));

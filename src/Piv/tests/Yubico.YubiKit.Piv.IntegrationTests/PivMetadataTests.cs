@@ -73,7 +73,7 @@ public class PivMetadataTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        KeyType[] keyTypes = [KeyType.ECP256, KeyType.RSA2048];
+        KeyType[] keyTypes = [KeyType.P256, KeyType.Rsa2048];
         foreach (var keyType in keyTypes)
         {
             var generated = await session.GenerateKeyAsync(Slot.Authentication, keyType);
@@ -82,7 +82,7 @@ public class PivMetadataTests
             Assert.NotNull(metadata);
             Assert.Equal(keyType, metadata.Value.KeyType);
             Assert.True(metadata.Value.IsGenerated);
-            using AsymmetricAlgorithm extracted = keyType.IsRSA()
+            using AsymmetricAlgorithm extracted = keyType.IsRsa()
                 ? metadata.Value.GetRsaPublicKey()
                 : metadata.Value.GetECDsaPublicKey();
             Assert.Equal(generated.ExportSubjectPublicKeyInfo(), extracted.ExportSubjectPublicKeyInfo());
@@ -102,11 +102,11 @@ public class PivMetadataTests
         // Key type depends on firmware version
         if (state.FirmwareVersion >= new FirmwareVersion(5, 7, 0))
         {
-            Assert.Equal(KeyType.AES192, metadata.KeyType);
+            Assert.Equal(KeyType.Aes192, metadata.KeyType);
         }
         else
         {
-            Assert.Equal(KeyType.TripleDES, metadata.KeyType);
+            Assert.Equal(KeyType.TripleDes, metadata.KeyType);
         }
     }
 

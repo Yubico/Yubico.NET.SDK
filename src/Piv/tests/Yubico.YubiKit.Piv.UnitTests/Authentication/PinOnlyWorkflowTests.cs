@@ -56,10 +56,10 @@ public class PinOnlyWorkflowTests
     }
 
     [Theory]
-    [InlineData(KeyType.AES128, 16)]
-    [InlineData(KeyType.AES192, 24)]
-    [InlineData(KeyType.AES256, 32)]
-    [InlineData(KeyType.TripleDES, 24)]
+    [InlineData(KeyType.Aes128, 16)]
+    [InlineData(KeyType.Aes192, 24)]
+    [InlineData(KeyType.Aes256, 32)]
+    [InlineData(KeyType.TripleDes, 24)]
     public async Task Disable_ReplacesTypeAppropriateDefaultBeforeDeletingRecoveryObjects(KeyType type, int length)
     {
         using var backend = new WorkflowBackend { HasProtectedMode = true };
@@ -130,7 +130,7 @@ public class PinOnlyWorkflowTests
         Assert.All(backend.SecretBuffers, buffer => Assert.All(buffer.ToArray(), b => Assert.Equal(0, b)));
     }
 
-    private static async Task<PivSession> CreateSessionAsync(WorkflowBackend backend, KeyType type = KeyType.AES192)
+    private static async Task<PivSession> CreateSessionAsync(WorkflowBackend backend, KeyType type = KeyType.Aes192)
     {
         var connection = new RecordingSmartCardConnection([0x90, 0x00], [5, 7, 0, 0x90, 0x00],
             [0x01, 0x01, KeyTypeEncoding.Encode(type), 0x02, 0x02, 0x00, 0x00, 0x05, 0x01, 0x01, 0x90, 0x00]);

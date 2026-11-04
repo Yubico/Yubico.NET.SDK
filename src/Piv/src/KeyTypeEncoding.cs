@@ -23,16 +23,16 @@ internal static class KeyTypeEncoding
     // The single protocol table defines PIV identifiers, not numeric Core enum values.
     private static readonly FrozenDictionary<KeyType, byte> Identifiers = new Dictionary<KeyType, byte>
     {
-        [KeyType.TripleDES] = 0x03,
-        [KeyType.AES128] = 0x08,
-        [KeyType.AES192] = 0x0A,
-        [KeyType.AES256] = 0x0C,
-        [KeyType.RSA1024] = 0x06,
-        [KeyType.RSA2048] = 0x07,
-        [KeyType.RSA3072] = 0x05,
-        [KeyType.RSA4096] = 0x16,
-        [KeyType.ECP256] = 0x11,
-        [KeyType.ECP384] = 0x14,
+        [KeyType.TripleDes] = 0x03,
+        [KeyType.Aes128] = 0x08,
+        [KeyType.Aes192] = 0x0A,
+        [KeyType.Aes256] = 0x0C,
+        [KeyType.Rsa1024] = 0x06,
+        [KeyType.Rsa2048] = 0x07,
+        [KeyType.Rsa3072] = 0x05,
+        [KeyType.Rsa4096] = 0x16,
+        [KeyType.P256] = 0x11,
+        [KeyType.P384] = 0x14,
         [KeyType.Ed25519] = 0xE0,
         [KeyType.X25519] = 0xE1
     }.ToFrozenDictionary();

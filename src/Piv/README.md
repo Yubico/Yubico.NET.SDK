@@ -183,6 +183,14 @@ The interactive PivTool sample lives at `src/Piv/examples/PivTool/`.
 dotnet run --project src/Piv/examples/PivTool/PivTool.csproj
 ```
 
+## Maintainer verification
+
+For maintainers, run unit tests with `dotnet toolchain.cs -- test --project Piv`. On an explicitly allowlisted
+dedicated test key, run smoke with `dotnet toolchain.cs -- test --integration --project Piv --smoke`, then full
+unattended coverage with `dotnet toolchain.cs -- test --integration --project Piv --filter "Category!=RequiresUserPresence"`.
+These tests reset and mutate PIV, including a protected-mode enable/reopen/recover/disable round trip. Touch
+and hotplug tests need separate human coordination; multi-key contention tests need two attached keys.
+
 ## Related
 
 - [Core](../Core/README.md) - device discovery, SmartCard protocol, TLV, and cryptography primitives.

@@ -145,6 +145,10 @@ User-presence tests use a recording `IUserPresencePrompt` and fake SmartCard res
 policy basis, PIV slot scope, request/resolution pairing, callback failure behavior, and that
 metadata already loaded by an operation is not fetched again.
 
+`PivPinOnlyWorkflowTests` exercises a real protected-mode enable → connection close → recovery → disable
+cycle with a randomized management key, verifies default-key authentication afterward, and resets PIV in
+bounded independent cleanup. It requires an allowlisted dedicated key, but no physical touch ceremony.
+
 Integration tests must use `[Theory]` plus `[WithYubiKey]` from `Tests.Shared`:
 
 ```csharp

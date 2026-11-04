@@ -29,7 +29,7 @@ namespace Yubico.YubiKit.OpenPgp;
 /// <remarks>
 ///     <para>
 ///         Use the static <see cref="CreateAsync" /> factory method to create and initialize a session.
-///         The constructor is private to enforce two-phase initialization (construct + SELECT + version detect).
+///         Initialization selects the applet, configures the protocol and parses application data before return.
 ///     </para>
 ///     <para>
 ///         This is a partial class split across multiple files by operation domain:
@@ -41,28 +41,28 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 {
     // ── Feature Constants ─────────────────────────────────────────────
 
-    /// <summary>Factory reset support.</summary>
+    /// <summary>Current SDK version threshold for application reset (1.0.6).</summary>
     public static readonly Feature FeatureReset = new("OpenPGP Reset", 1, 0, 6);
 
-    /// <summary>User Interaction Flag (touch policy) support.</summary>
+    /// <summary>Current SDK UIF threshold (4.2.0); individual policies/slots need additional card support.</summary>
     public static readonly Feature FeatureUif = new("OpenPGP UIF", 4, 2, 0);
 
-    /// <summary>Elliptic curve key support.</summary>
+    /// <summary>Current SDK EC generation/import threshold (5.2.0); consult advertised algorithms.</summary>
     public static readonly Feature FeatureEc = new("OpenPGP EC Keys", 5, 2, 0);
 
-    /// <summary>Per-slot certificate storage.</summary>
+    /// <summary>Current SDK threshold for ordinary per-slot certificate access (5.2.0).</summary>
     public static readonly Feature FeatureCertificates = new("OpenPGP Certificates", 5, 2, 0);
 
-    /// <summary>Key attestation support.</summary>
+    /// <summary>Current SDK target-key attestation threshold (5.2.0).</summary>
     public static readonly Feature FeatureAttestation = new("OpenPGP Key Attestation", 5, 2, 0);
 
-    /// <summary>Algorithm information query.</summary>
+    /// <summary>Current SDK algorithm-information query threshold (5.2.0).</summary>
     public static readonly Feature FeatureAlgorithmInfo = new("OpenPGP Algorithm Info", 5, 2, 0);
 
-    /// <summary>SELECT_DATA fix for multi-certificate access.</summary>
+    /// <summary>SDK threshold for corrected SELECT DATA framing (5.4.4); earlier paths add a length prefix.</summary>
     public static readonly Feature FeatureSelectDataFix = new("OpenPGP SELECT_DATA Fix", 5, 4, 4);
 
-    /// <summary>PIN unverify support.</summary>
+    /// <summary>Current SDK User PIN unverification threshold (5.6.0).</summary>
     public static readonly Feature FeatureUnverify = new("OpenPGP Unverify PIN", 5, 6, 0);
 
     // ── Fields ────────────────────────────────────────────────────────
@@ -92,6 +92,12 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     /// <param name="options">Optional cross-cutting session creation settings.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>An initialized <see cref="OpenPgpSession" />.</returns>
+    /// <remarks>
+    ///     The caller retains the connection and disposes it after session teardown. Use the IYubiKey extension
+    ///     to acquire an owned connection automatically. Parsed mandatory algorithm fields must be understood
+    ///     for initialization to succeed. Version checks use session configuration; preserve applet/device
+    ///     version provenance when diagnosing development-device feature checks.
+    /// </remarks>
     public static Task<OpenPgpSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
@@ -139,7 +145,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
         _backend = backend;
 
-        // Cache ApplicationRelatedData for feature detection and KDF state
+        // Cache capabilities, algorithms and UIF. F9/KDF is loaded separately on first use.
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
 
@@ -381,7 +387,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         }
         catch (ApduException)
         {
-            // KDF not supported or not configured
+            // Any F9 APDU error currently falls back to KdfNone, including errors beyond absence.
             _kdf = new KdfNone();
         }
 

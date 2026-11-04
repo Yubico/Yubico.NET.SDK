@@ -1,0 +1,2 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/openpgptool/OpenPgpTool.Capture.targets
+/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.targets/ImportAfter/Microsoft.TestPlatform.ImportAfter.targets

@@ -42,8 +42,9 @@ internal sealed class PrivateKeyImport : IDisposable
     ///     running <paramref name="firmwareVersion" />.
     /// </summary>
     /// <remarks>
-    ///     RSA uses the standard (e, p, q) form on firmware 4 and later; firmware 1 through 3 took only the
-    ///     CRT form with modulus. The slot picks ECDH or ECDSA for NIST curves; Ed25519 is always EdDSA and
+    ///     RSA uses the standard (e, p, q) form on firmware 4 and later. The older-family branch constructs
+    ///     CRT components including modulus, but advertises format 02 instead of vendor format 03; NEO
+    ///     compatibility needs separate qualification. The slot picks ECDH or ECDSA for NIST curves; Ed25519 is EdDSA and
     ///     X25519 always ECDH. The X25519 scalar is sent big-endian, the reverse of its RFC 7748 encoding.
     /// </remarks>
     /// <exception cref="NotSupportedException">

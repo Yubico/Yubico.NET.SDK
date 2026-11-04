@@ -1,0 +1,41 @@
+commit fe09b795f1ad858dc5770591e75adfee0fb61345
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Sun Mar 24 16:51:54 2024 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Sun Mar 24 16:52:51 2024 +0100
+
+    OPENPGP: Use correct format when generating RSA keys on NEO
+
+diff --git a/yubikit/openpgp.py b/yubikit/openpgp.py
+index 116781bd..8ab08227 100644
+--- a/yubikit/openpgp.py
++++ b/yubikit/openpgp.py
+@@ -895,9 +895,11 @@ def _get_key_attributes(
+             raise ValueError("RSA keys with e != 65537 are not supported!")
+         return RsaAttributes.create(
+             RSA_SIZE(private_key.key_size),
+-            RSA_IMPORT_FORMAT.CRT_W_MOD
+-            if 0 < version[0] < 4
+-            else RSA_IMPORT_FORMAT.STANDARD,
++            (
++                RSA_IMPORT_FORMAT.CRT_W_MOD
++                if 0 < version[0] < 4
++                else RSA_IMPORT_FORMAT.STANDARD
++            ),
+         )
+     return EcAttributes.create(key_ref, OID._from_key(private_key))
+ 
+@@ -1521,7 +1523,12 @@ class OpenPgpSession:
+             EXTENDED_CAPABILITY_FLAGS.ALGORITHM_ATTRIBUTES_CHANGEABLE
+             in self.extended_capabilities.flags
+         ):
+-            attributes = RsaAttributes.create(key_size)
++            import_format = (
++                RSA_IMPORT_FORMAT.CRT_W_MOD
++                if 0 < self.version[0] < 4  # Use CRT for NEO
++                else RSA_IMPORT_FORMAT.STANDARD
++            )
++            attributes = RsaAttributes.create(key_size, import_format)
+             self.set_algorithm_attributes(key_ref, attributes)
+         elif key_size != RSA_SIZE.RSA2048:
+             raise NotSupportedError("Algorithm attributes not supported")

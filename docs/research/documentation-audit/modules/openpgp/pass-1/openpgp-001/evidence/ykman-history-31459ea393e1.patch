@@ -1,0 +1,36 @@
+commit 31459ea393e1e3d603dea99152fbfbd2917f5280
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Wed Nov 12 15:22:08 2025 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Wed Nov 19 15:25:49 2025 +0100
+
+    OpenPGP: Better support for NEO errors
+
+diff --git a/yubikit/openpgp.py b/yubikit/openpgp.py
+index 71c6545b..23632eb2 100644
+--- a/yubikit/openpgp.py
++++ b/yubikit/openpgp.py
+@@ -1210,7 +1210,10 @@ class OpenPgpSession:
+         try:
+             self.protocol.send_apdu(0, INS.VERIFY, 0, pw + mode, pin_enc)
+         except ApduError as e:
+-            if e.sw == SW.SECURITY_CONDITION_NOT_SATISFIED:
++            if e.sw == SW.SECURITY_CONDITION_NOT_SATISFIED or (
++                # Pre 4.0 firmware returns this on incorrect PIN/PUK
++                (e.sw >> 8) == 0x63 and self._version < (4, 0, 0)
++            ):
+                 attempts = self.get_pin_status().get_attempts(pw)
+                 raise InvalidPinError(attempts)
+             if e.sw == SW.AUTH_METHOD_BLOCKED:
+@@ -1262,7 +1265,10 @@ class OpenPgpSession:
+                 self._process_pin(kdf, pw, pin) + self._process_pin(kdf, pw, new_pin),
+             )
+         except ApduError as e:
+-            if e.sw == SW.SECURITY_CONDITION_NOT_SATISFIED:
++            if e.sw == SW.SECURITY_CONDITION_NOT_SATISFIED or (
++                # Pre 4.0 firmware returns this on incorrect PIN/PUK
++                e.sw == SW.CONDITIONS_NOT_SATISFIED and self._version < (4, 0, 0)
++            ):
+                 attempts = self.get_pin_status().get_attempts(pw)
+                 raise InvalidPinError(attempts)
+             if e.sw == SW.AUTH_METHOD_BLOCKED:

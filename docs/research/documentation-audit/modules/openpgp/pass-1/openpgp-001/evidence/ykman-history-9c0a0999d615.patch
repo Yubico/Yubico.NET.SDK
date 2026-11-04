@@ -1,0 +1,37 @@
+commit 9c0a0999d615859dfb195aac112775e266e48e10
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Wed Nov 11 15:19:31 2020 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Wed Nov 11 15:19:31 2020 +0100
+
+    Various cleanups.
+    
+    - Remove unused code.
+    - Move utility functions only used by single app.
+    - Use built-in hashing where reasonable to do so.
+
+diff --git a/ykman/openpgp.py b/ykman/openpgp.py
+index ca28196b..062b6d42 100644
+--- a/ykman/openpgp.py
++++ b/ykman/openpgp.py
+@@ -25,9 +25,7 @@
+ # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ # POSSIBILITY OF SUCH DAMAGE.
+ 
+-from .util import ensure_not_cve201715361_vulnerable_firmware_version
+-
+-from yubikit.core import AID, Tlv
++from yubikit.core import AID, Tlv, NotSupportedError
+ from yubikit.core.smartcard import SmartCardConnection, SmartCardProtocol, ApduError, SW
+ 
+ from cryptography import x509
+@@ -465,7 +463,8 @@ class OpenPgpController(object):
+ 
+     def generate_rsa_key(self, key_slot, key_size, timestamp=None):
+         """Requires Admin PIN verification."""
+-        ensure_not_cve201715361_vulnerable_firmware_version(self.version)
++        if (4, 2, 0) <= self.version < (4, 3, 5):
++            raise NotSupportedError("RSA key generation not supported on this YubiKey")
+ 
+         if timestamp is None:
+             timestamp = int(time.time())

@@ -39,6 +39,11 @@ public static class Crt
     /// <summary>
     ///     CRT for the Attestation key slot.
     /// </summary>
+    /// <remarks>
+    ///     Current encoding is B6 01 81; Yubico's attestation extension specifies B6 03 84 01 81.
+    ///     Read/generate/import operations using this value can fail. Target-key attestation uses a separate
+    ///     command and is independent of this encoder defect. Treat this static memory as borrowed read-only data.
+    /// </remarks>
     public static ReadOnlyMemory<byte> Att { get; } = BuildAttCrt();
 
     private static byte[] BuildCrt(int tag)

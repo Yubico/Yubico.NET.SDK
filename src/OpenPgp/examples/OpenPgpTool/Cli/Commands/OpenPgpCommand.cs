@@ -17,6 +17,11 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 ///     Base class for all OpenPGP CLI commands. Handles device selection
 ///     and session lifecycle.
 /// </summary>
+/// <remarks>
+///     Uses static DeviceSelector, whose noninteractive path selects the first SmartCard device.
+///     Confirm the intended key before mutation. The session has no user-presence prompt installed;
+///     applications needing touch UI should create a session with their own prompt.
+/// </remarks>
 public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     where TSettings : CommandSettings
 {
@@ -86,8 +91,12 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     private static readonly ConsoleCredentialReader CredentialReader = new();
 
     /// <summary>
-    ///     Gets a credential value as secure bytes, using the provided option or prompting interactively.
+    ///     Gets disposable credential bytes from an option or interactive reader.
     /// </summary>
+    /// <remarks>
+    ///     Disposing the result clears its byte storage. A supplied command-line option remains in an immutable
+    ///     string and can be exposed through process arguments; prefer application-owned input buffers for secrets.
+    /// </remarks>
     protected static IMemoryOwner<byte>? GetCredential(string? provided, CredentialReaderOptions options)
     {
         if (!string.IsNullOrEmpty(provided))
@@ -103,19 +112,19 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     }
 
     /// <summary>
-    ///     Gets the OpenPGP User PIN (6-127 characters).
+    ///     Gets User PIN input with reader limits 6–127; the application also applies card byte/profile limits.
     /// </summary>
     protected static IMemoryOwner<byte>? GetPin(string? provided) =>
         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpPin());
 
     /// <summary>
-    ///     Gets the OpenPGP Admin PIN (8-127 characters).
+    ///     Gets Admin PIN input with reader limits 8–127; the application also applies card byte/profile limits.
     /// </summary>
     protected static IMemoryOwner<byte>? GetAdminPin(string? provided) =>
         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpAdminPin());
 
     /// <summary>
-    ///     Gets the OpenPGP Reset Code (8-127 characters).
+    ///     Gets Reset Code input with reader limits 8–127; the application also applies card byte/profile limits.
     /// </summary>
     protected static IMemoryOwner<byte>? GetResetCode(string? provided) =>
         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpResetCode());

@@ -1,0 +1,368 @@
+{
+  "baseline": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+  "status": "skeleton-awaiting-editor-completion",
+  "source_manifest": {
+    "manifest": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/record-manifest.json",
+    "manifest_sha256": "9a32ac8f9d2443a65864dbe44432c6d4b1dd40ad7f00b676a6c0ecae950631dc",
+    "checked": 477,
+    "result": "pass"
+  },
+  "copies": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/consumer/Directory.Build.props",
+      "source_sha256": "f75c2018505cd0bed3a9d7a0dd0ac84b40123004e25d3c5160f32370d8fee20d",
+      "target": "v1/consumer/Directory.Build.props",
+      "target_sha256": "e9685de4c47c377bf07e991e9d602edebeb9e4a8901e0ca59c9bb03017df37c4",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 0,
+        "yubihsm-001": 1,
+        "YubiHsm": 0,
+        "YubiHSM": 0,
+        "HsmAuthTool": 0,
+        "hsmauthtool": 0,
+        "outside-hsm-": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/consumer/Directory.Build.targets",
+      "source_sha256": "41ef951234b88058602931df2b284191fdf5e72491555296ef407746b0ceba02",
+      "target": "v1/consumer/Directory.Build.targets",
+      "target_sha256": "6965eb75d83a83b7ecabe3b43f3a7447ad45b263d73f3c063162add5a1b2f4f9",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-",
+        "<MakeDir Directories=\"$(DocumentationWorkspace)\" />": "<MakeDir Directories=\"$(DocumentationWorkspace)\" />\n    <WriteLinesToFile File=\"$(DocumentationWorkspace)/imported-projects.txt\" Lines=\"$(MSBuildAllProjects)\" Overwrite=\"true\" />"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 2,
+        "yubihsm-001": 0,
+        "YubiHsm": 0,
+        "YubiHSM": 0,
+        "HsmAuthTool": 0,
+        "hsmauthtool": 0,
+        "outside-hsm-": 0,
+        "<MakeDir Directories=\"$(DocumentationWorkspace)\" />": 1
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditHsm001.Examples.v1.consumer.csproj",
+      "source_sha256": "5b102850a5e1591d96bd18d2067f2d8c77401c19644f48185604d6eafddcb32c",
+      "target": "v1/consumer/src/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj",
+      "target_sha256": "522d58ac4429c763f6db17267ecbec7099980bc5861b3262813371b429dc8f4f",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 0,
+        "yubihsm-001": 0,
+        "YubiHsm": 2,
+        "YubiHSM": 0,
+        "HsmAuthTool": 0,
+        "hsmauthtool": 0,
+        "outside-hsm-": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/annotations/Directory.Build.props",
+      "source_sha256": "699e23d9f27da09e23038b310f616aa9df303e24ab1f106d54acf7597207f5c1",
+      "target": "v1/annotations/Directory.Build.props",
+      "target_sha256": "5d39a87a675bf96ec3604cb70a92fd4d62fdf1158de0f3c48a85821c82cf2737",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 0,
+        "yubihsm-001": 1,
+        "YubiHsm": 0,
+        "YubiHSM": 0,
+        "HsmAuthTool": 0,
+        "hsmauthtool": 0,
+        "outside-hsm-": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/annotations/Directory.Build.targets",
+      "source_sha256": "41ef951234b88058602931df2b284191fdf5e72491555296ef407746b0ceba02",
+      "target": "v1/annotations/Directory.Build.targets",
+      "target_sha256": "6965eb75d83a83b7ecabe3b43f3a7447ad45b263d73f3c063162add5a1b2f4f9",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-",
+        "<MakeDir Directories=\"$(DocumentationWorkspace)\" />": "<MakeDir Directories=\"$(DocumentationWorkspace)\" />\n    <WriteLinesToFile File=\"$(DocumentationWorkspace)/imported-projects.txt\" Lines=\"$(MSBuildAllProjects)\" Overwrite=\"true\" />"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 2,
+        "yubihsm-001": 0,
+        "YubiHsm": 0,
+        "YubiHSM": 0,
+        "HsmAuthTool": 0,
+        "hsmauthtool": 0,
+        "outside-hsm-": 0,
+        "<MakeDir Directories=\"$(DocumentationWorkspace)\" />": 1
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/annotations/src/Yubico.YubiKit.AuditHsm001.Examples.v1.annotations.csproj",
+      "source_sha256": "a1e5e60006092c79cc7f52da486a70e8fe11a63249e50a63163c539e002de152",
+      "target": "v1/annotations/src/Yubico.YubiKit.AuditPgp001.Examples.v1.annotations.csproj",
+      "target_sha256": "044025bfd9bae6c48a7cdd7d79ae048ab8708bca3433ee97fbf1a5ba07ee5282",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 0,
+        "yubihsm-001": 0,
+        "YubiHsm": 2,
+        "YubiHSM": 0,
+        "HsmAuthTool": 0,
+        "hsmauthtool": 0,
+        "outside-hsm-": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/v1/hsmauthtool/HsmAuthTool.Capture.targets",
+      "source_sha256": "6a43237f56d009de0c12ce70a515471a21b05ffb3b97c799363e6f838622378d",
+      "target": "v1/openpgptool/OpenPgpTool.Capture.targets",
+      "target_sha256": "5b4f47ba75ff03270aeaf783a819debb9b536e807e2e13defe6a5dcfa31695f1",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-",
+        "<MakeDir Directories=\"$(DocumentationWorkspace)\" />": "<MakeDir Directories=\"$(DocumentationWorkspace)\" />\n    <WriteLinesToFile File=\"$(DocumentationWorkspace)/imported-projects.txt\" Lines=\"$(MSBuildAllProjects)\" Overwrite=\"true\" />"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 2,
+        "yubihsm-001": 1,
+        "YubiHsm": 0,
+        "YubiHSM": 0,
+        "HsmAuthTool": 3,
+        "hsmauthtool": 1,
+        "outside-hsm-": 0,
+        "<MakeDir Directories=\"$(DocumentationWorkspace)\" />": 1
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/dispatch/src/Yubico.YubiKit.AuditHsm001.Examples.Shipping.HsmAuthTool.csproj",
+      "source_sha256": "b59b0bda16d921a35348c51ef59820f28d61b0ce52e24635349949690b2ffb1a",
+      "target": "dispatch/src/Yubico.YubiKit.AuditPgp001.Examples.Shipping.OpenPgpTool.csproj",
+      "target_sha256": "04f714a1f558bcf915e9c932187ef7a3f414051a6ae984da4f15d7a61b0fabee",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 0,
+        "yubihsm-001": 0,
+        "YubiHsm": 1,
+        "YubiHSM": 0,
+        "HsmAuthTool": 9,
+        "hsmauthtool": 0,
+        "outside-hsm-": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/inventory.py",
+      "source_sha256": "7de1bde9fe0f40958edf114b27347752eed8b5b177c764a6c227b829e554e564",
+      "target": "inventory.py",
+      "target_sha256": "e1330fb9927dc85f7d5b5a7d819ea80b98b24528d395aa289c48ae670ee92dce",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-",
+        "relative.startswith('docs/') and Path(relative).suffix in ('.md', '.yml')": "(relative.startswith('docs/') or relative == 'README.md') and Path(relative).suffix in ('.md', '.yml')",
+        "def scope_for(path, headings):\n    if path.startswith('src/OpenPgp/'):\n        return 'module'\n    if path == 'docs/usage/user-interaction.md':\n        return 'shared-interaction'\n    if path == 'docs/migration/v1-to-v2.md':\n        return 'hsm-migration' if any('OpenPGP' in heading for heading in headings) else 'outside-openpgp-migration'\n    if path == 'docs/migration/v1-to-v2-gaps.md':\n        return 'hsm-gaps' if any('OpenPGP' in heading for heading in headings) else 'outside-openpgp-gaps'\n    return 'shared-record-metadata'\n": "def scope_for(path, headings):\n    if path.startswith('src/OpenPgp/'):\n        return 'module'\n    accepted = accepted_scope()\n    if path in accepted.get('whole_shared_paths', []):\n        return 'shared-openpgp'\n    selectors = accepted.get('shared_sections', {}).get(path, [])\n    if any(selector.casefold() in heading.casefold() for selector in selectors for heading in headings):\n        return 'shared-openpgp'\n    return 'outside-openpgp-section'\n",
+        "if 'yubihsm' in match[1].lower():": "if 'openpgp' in match[1].lower():"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 0,
+        "yubihsm-001": 0,
+        "YubiHsm": 3,
+        "YubiHSM": 2,
+        "HsmAuthTool": 0,
+        "hsmauthtool": 0,
+        "outside-hsm-": 3,
+        "relative.startswith('docs/') and Path(relative).suffix in ('.md', '.yml')": 1,
+        "def scope_for(path, headings):\n    if path.startswith('src/OpenPgp/'):\n        return 'module'\n    if path == 'docs/usage/user-interaction.md':\n        return 'shared-interaction'\n    if path == 'docs/migration/v1-to-v2.md':\n        return 'hsm-migration' if any('OpenPGP' in heading for heading in headings) else 'outside-openpgp-migration'\n    if path == 'docs/migration/v1-to-v2-gaps.md':\n        return 'hsm-gaps' if any('OpenPGP' in heading for heading in headings) else 'outside-openpgp-gaps'\n    return 'shared-record-metadata'\n": 1,
+        "if 'yubihsm' in match[1].lower():": 1
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/capture.py",
+      "source_sha256": "89bcb6bde430c7a81c5f7d15e2129c403566b4905f5b7b6fb87fadd43066ead5",
+      "target": "capture.py",
+      "target_sha256": "490c3c564ede73ae147937af4ab9a3af7daa3a297dd1ecce7003e1bef44875f1",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-",
+        "require(policy['RunAnalyzersDuringBuild'] == 'true' and policy['SkipAnalyzers'].lower() != 'true', 'Analyzers skipped')": "require(policy['RunAnalyzersDuringBuild'] == 'true' and policy['SkipAnalyzers'].lower() != 'true' and policy['RunAnalyzers'].lower() != 'false' and policy['EnableNETAnalyzers'] == 'true', 'Analyzers skipped')",
+        "from inventory import HERE, ROOT, sha, file_record, require": "from inventory import HERE, ROOT, sha, file_record, require, source_paths\nimport importlib.util\n_sdk_spec = importlib.util.spec_from_file_location('audit_pgp_sdk_policy', HERE / 'sdk-policy.py')\n_sdk_policy = importlib.util.module_from_spec(_sdk_spec)\n_sdk_spec.loader.exec_module(_sdk_policy)",
+        "require(not policy['CustomBeforeMicrosoftCommonProps'].strip(), 'Remove early common-props hook from the shipping command')": "sdk_default = _sdk_policy.validate(policy)\n        require(Path(policy['CustomAfterMicrosoftCommonTargets']).resolve() == (folder / 'OpenPgpTool.Capture.targets').resolve(), 'Require exact active late capture hook')\n        for sdk_source in sdk_default['sdk_sources']:\n            retained.append(retain(Path(sdk_source['path']), 'sdk-source/' + Path(sdk_source['path']).name + '.snapshot'))",
+        "require(len(sample_paths) == 22 and len(set(sample_paths)) == 22, 'Reconcile all 22 original sample sources')": "require(len(sample_paths) == len(set(sample_paths)) == 19 and sample_paths == source_paths(actual_project.parent), 'Reconcile all 19 original OpenPgpTool sources')",
+        "native_shipping_capture=context == 'openpgptool', assets_identity=": "sdk_optional_hook=sdk_default if context == 'openpgptool' else None, native_shipping_capture=context == 'openpgptool', assets_identity=",
+        "('compile-inputs.txt', 'resolved-references.txt', 'analyzers.txt', 'analyzer-configs.txt', 'policy-final.txt', 'csc-command-line.txt')": "('compile-inputs.txt', 'resolved-references.txt', 'analyzers.txt', 'analyzer-configs.txt', 'policy-final.txt', 'csc-command-line.txt', 'imported-projects.txt')",
+        "assets = Path(policy['ProjectAssetsFile'])": "for name in sorted(set(lines(dest / 'imported-projects.txt'))):\n        path = Path(resolve(name))\n        require(path.is_file(), 'Imported project input missing: ' + str(path))\n        relative = 'imported-project/' + sha(path.read_bytes()) + '-' + path.name + '.snapshot'\n        captured = retain(path, relative)\n        retained.append(captured)\n        records.append(dict(kind='imported-project', path=str(path), bytes=captured['bytes'], sha256=captured['sha256'], retained=relative))\n    for argument in args:\n        if argument.startswith(('/resource:', '/linkresource:')):\n            path = Path(resolve(argument.split(':', 1)[1].split(',', 1)[0]))\n            raw = path.read_bytes()\n            records.append(dict(kind='resource', path=str(path), bytes=len(raw), sha256=sha(raw), compiler_argument=argument, retention='Resource identity; binary contents remain outside text archive.'))\n    assets = Path(policy['ProjectAssetsFile'])",
+        "snippet/sample/HSM execution.": "snippet/sample/device execution."
+      },
+      "substitution_counts": {
+        "AuditHsm001": 1,
+        "yubihsm-001": 1,
+        "YubiHsm": 5,
+        "YubiHSM": 0,
+        "HsmAuthTool": 1,
+        "hsmauthtool": 7,
+        "outside-hsm-": 0,
+        "require(policy['RunAnalyzersDuringBuild'] == 'true' and policy['SkipAnalyzers'].lower() != 'true', 'Analyzers skipped')": 1,
+        "from inventory import HERE, ROOT, sha, file_record, require": 1,
+        "require(not policy['CustomBeforeMicrosoftCommonProps'].strip(), 'Remove early common-props hook from the shipping command')": 1,
+        "require(len(sample_paths) == 22 and len(set(sample_paths)) == 22, 'Reconcile all 22 original sample sources')": 1,
+        "native_shipping_capture=context == 'openpgptool', assets_identity=": 1,
+        "('compile-inputs.txt', 'resolved-references.txt', 'analyzers.txt', 'analyzer-configs.txt', 'policy-final.txt', 'csc-command-line.txt')": 1,
+        "assets = Path(policy['ProjectAssetsFile'])": 1,
+        "snippet/sample/HSM execution.": 1
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/verify.py",
+      "source_sha256": "a3cd6bb5557ac28ee04388ea2e907580818ed14cb22e645c7d4764a5c8bc1d52",
+      "target": "verify.py",
+      "target_sha256": "0348b7bfea6d314d12a0a8514a8cca95afd006dd275332b7e90f5f3dd6d2e6c0",
+      "substitutions": {
+        "AuditHsm001": "AuditPgp001",
+        "yubihsm-001": "openpgp-001",
+        "YubiHsm": "OpenPgp",
+        "YubiHSM": "OpenPGP",
+        "HsmAuthTool": "OpenPgpTool",
+        "hsmauthtool": "openpgptool",
+        "outside-hsm-": "outside-openpgp-",
+        "len(sample['source_paths']) == 22": "len(sample['source_paths']) == 19",
+        "all 22 current shipping source paths": "all 19 current OpenPgpTool source paths",
+        "22 shipping source paths": "19 shipping source paths",
+        "name = f'Yubico.YubiKit.AuditPgp001.Examples.{args.revision}.{context}'\n    require(list(ROOT.rglob(name + '.csproj')) == [folder / context / 'src' / (name + '.csproj')], f'Project name collision: {name}')": "name = f'Yubico.YubiKit.AuditPgp001.Examples.{args.revision}.{context}'\n    selector = f'AuditPgp001.Examples.{args.revision}.{context}'\n    matches = sorted(path for path in ROOT.rglob('*.csproj') if selector.lower() in path.stem.lower())\n    require(matches == [folder / context / 'src' / (name + '.csproj')], f'Project name collision: {name}')",
+        "require(bool(group['originals']) and raw ==": "require(bool(group.get('prerequisites')) and bool(group.get('resource_lifetimes')) and bool(group.get('transform')), 'Describe typed dependencies, resource ownership/lifetimes and whole-body wrapper transformation for every group')\n    require(bool(group['originals']) and raw ==",
+        "require(data['native_shipping_capture'] is True, 'Require native-output actual shipping capture')": "require(data['native_shipping_capture'] is True, 'Require native-output actual shipping capture')\n            sdk = data['sdk_optional_hook']\n            require(sdk['sdk_version'] == data['policy']['NETCoreSdkVersion'] == '10.0.403' and sdk['target_exists'] is False, 'Require pinned SDK optional-hook evidence')\n            for source in sdk['sdk_sources']:\n                require(retained['sdk-source/' + Path(source['path']).name + '.snapshot']['sha256'] == source['sha256'], 'SDK source snapshot differs from optional-hook evidence')"
+      },
+      "substitution_counts": {
+        "AuditHsm001": 3,
+        "yubihsm-001": 0,
+        "YubiHsm": 1,
+        "YubiHSM": 0,
+        "HsmAuthTool": 3,
+        "hsmauthtool": 7,
+        "outside-hsm-": 0,
+        "len(sample['source_paths']) == 22": 1,
+        "all 22 current shipping source paths": 1,
+        "22 shipping source paths": 1,
+        "name = f'Yubico.YubiKit.AuditPgp001.Examples.{args.revision}.{context}'\n    require(list(ROOT.rglob(name + '.csproj')) == [folder / context / 'src' / (name + '.csproj')], f'Project name collision: {name}')": 1,
+        "require(bool(group['originals']) and raw ==": 1,
+        "require(data['native_shipping_capture'] is True, 'Require native-output actual shipping capture')": 1
+      }
+    }
+  ],
+  "lesson_sources": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/sdk-default.py",
+      "bytes": 11673,
+      "sha256": "3f14ff6eeb87854f48e591fd35b0930faed0a06d74be0cfbb8b73904d7f9ef14",
+      "application": "Integrated optional SDK-default/Exists guard; extract final post-format inputs directly, retaining current identities rather than replaying historical runtime overlays."
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/examples/post-format.py",
+      "bytes": 12359,
+      "sha256": "7fd645b5bbeefbfc06393b27a722b449809b4c7bc2e7c29edd6d5fe1ea5f0e67",
+      "application": "Integrated optional SDK-default/Exists guard; extract final post-format inputs directly, retaining current identities rather than replaying historical runtime overlays."
+    }
+  ],
+  "tools": [
+    {
+      "path": "capture.py",
+      "bytes": 10807,
+      "sha256": "490c3c564ede73ae147937af4ab9a3af7daa3a297dd1ecce7003e1bef44875f1"
+    },
+    {
+      "path": "inventory.py",
+      "bytes": 8333,
+      "sha256": "e1330fb9927dc85f7d5b5a7d819ea80b98b24528d395aa289c48ae670ee92dce"
+    },
+    {
+      "path": "prepare-tools.py",
+      "bytes": 12202,
+      "sha256": "b3ee626bfc87c2c2efe8e1318a1ff993c70dcda106d0be89de663a5372693456"
+    },
+    {
+      "path": "sdk-policy.py",
+      "bytes": 2944,
+      "sha256": "6ae48d93202d4827a5c03b2cc4d743d85d149fc60027a7a04c39e63ea60779c1"
+    },
+    {
+      "path": "verify-skeleton.py",
+      "bytes": 6280,
+      "sha256": "adec5c59ee3b64fff5d15f9c4cec116f80e76faf51722f5e064d1572b15af8b1"
+    },
+    {
+      "path": "verify.py",
+      "bytes": 9502,
+      "sha256": "0348b7bfea6d314d12a0a8514a8cca95afd006dd275332b7e90f5f3dd6d2e6c0"
+    }
+  ],
+  "sample_context": {
+    "path": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+    "bytes": 1083,
+    "sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b"
+  },
+  "policy": "Fresh compiler/inventory/capture/verification tools and empty hosts only. Final-HSM algorithms with exact integrated substitutions; SDK hook helper derived from the final capture correction. Native sample outputs and late-only observation retained. Final body extraction, typed groups, dispositions and compilation await coordinator checkpoint; historical source bodies/results/caches excluded."
+}

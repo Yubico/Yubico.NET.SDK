@@ -1,0 +1,9 @@
+{
+  "case": "TouchSign_P256_HostVerifies",
+  "utc": "2026-11-04T14:02:52.353282+00:00",
+  "baseline": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-baseline-v2.json",
+  "test_exit": 1,
+  "cleanup_exit": 0,
+  "toolchain_log_retention": "artifacts/toolchain/runs/20261104-150252-643-test",
+  "before_cleanup_read_exit": 0
+}

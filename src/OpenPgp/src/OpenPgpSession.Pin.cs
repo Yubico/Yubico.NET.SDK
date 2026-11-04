@@ -28,9 +28,9 @@ public sealed partial class OpenPgpSession
     {
         ThrowIfDisposed();
 
-        // P2: 0x81 (Pw.User) = signature verification only (per spec)
-        //     0x82 (Pw.Reset) = extended mode (decrypt/authenticate/attest, NOT sign)
-        // Matches ykman canonical: pw + mode where mode = 1 if extended else 0
+        // Card §7.2.2 uses P2=81/82 for two access states of the same User PIN.
+        // Current extended handling also selects Reset identity for KDF/retry lookup;
+        // distinct User/Reset salts expose that mismatch. Reset Code is a separate credential.
         var p2 = extended ? (byte)Pw.Reset : (byte)Pw.User;
         var pw = extended ? Pw.Reset : Pw.User;
 
@@ -279,8 +279,8 @@ public sealed partial class OpenPgpSession
         }
     }
 
-    // Resolves the number of retries remaining after a failed VERIFY, handling the two
-    // status-word special cases firmware can return instead of the standard 0x63Cx form.
+    // VERIFY failures include non-PIN errors. Extract explicit counts or query C4 for 6982;
+    // callers retain SW to diagnose other causes and an unknown count.
     private async Task<int> ResolveRemainingRetriesAsync(
         Pw pw,
         ApduResponse response,
@@ -291,16 +291,14 @@ public sealed partial class OpenPgpSession
 
         if (remaining < 0 && response.SW == SWConstants.AuthenticationMethodBlocked)
         {
-            // The PIN/PUK is already permanently blocked (0 retries remaining).
-            // No status query is needed; 0x6983 unambiguously means zero.
+            // 6983 reports a blocked credential. User PIN recovery still has Reset Code/Admin routes.
             return 0;
         }
 
         if (remaining < 0 && response.SW == SWConstants.SecurityStatusNotSatisfied)
         {
-            // Some firmware (including 5.8.0-alpha) returns 0x6982 (Security Status
-            // Not Satisfied) for wrong PIN instead of 0x63Cx. Per Python canonical:
-            // query GET DATA for PW_STATUS_BYTES to get remaining attempts.
+            // 6982 can cover wrong/unverified PW or secure-messaging failure (Card §7.9).
+            // C4 provides counters, though the extended-mode caller currently selects Reset's counter.
             try
             {
                 var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);

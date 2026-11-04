@@ -77,16 +77,17 @@ public class OpenPgpAdvancedTests
                         InitialHashAdmin = initialHashAdmin,
                     };
 
-                    // Set the KDF, then change PINs to their KDF-derived values
+                    // Set F9 and retain this KDF instance in the session cache.
                     await session.SetKdfAsync(kdfWithHashes);
 
-                    // Change user PIN: old PIN is raw UTF-8, new PIN will be KDF-processed
+                    // ChangePinAsync derives both current and new inputs with that cached KDF.
+                    // Equal input values leave this case unable to distinguish a real credential transition.
                     await session.ChangePinAsync(DefaultUserPin, DefaultUserPin);
 
-                    // Change admin PIN similarly
+                    // ChangeAdminAsync likewise derives both inputs.
                     await session.ChangeAdminAsync(DefaultAdminPin, DefaultAdminPin);
 
-                    // Verify the KDF is now active
+                    // GetKdfAsync returns the cached object here; these checks establish cached parameters.
                     var readKdf = await session.GetKdfAsync();
                     Assert.IsType<KdfIterSaltedS2k>(readKdf);
 
@@ -94,7 +95,8 @@ public class OpenPgpAdvancedTests
                     Assert.Equal(KdfHashAlgorithm.Sha256, readS2k.HashAlgorithm);
                     Assert.Equal(100000, readS2k.IterationCount);
 
-                    // Verify PIN works with KDF active
+                    // Ordinary User verification exercises the active KDF; extended mode/fresh-session
+                    // reload and enable/change/disable transitions require separate evidence.
                     await session.VerifyPinAsync(DefaultUserPin);
                 }
                 finally

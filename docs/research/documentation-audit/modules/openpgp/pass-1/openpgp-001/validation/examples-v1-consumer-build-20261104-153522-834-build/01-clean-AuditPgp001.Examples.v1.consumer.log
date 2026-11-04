@@ -1,0 +1,52 @@
+$ dotnet clean docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj -c Release
+Build started 11/4/2026 3:35:23 PM.
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Creating directory "/tmp/opencode/openpgp-001-examples-v1-consumer/obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (2:2) on node 1 (Clean target(s)).
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.Y.064A78F6.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/refint/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/ref/Yubico.YubiKit.OpenPgp.dll".
+   2:2>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (2:2) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj" (3:2) on node 1 (Clean target(s)).
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/refint/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll".
+     3>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj" (Clean target(s)).
+     2>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (Clean target(s)).
+     1>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.37

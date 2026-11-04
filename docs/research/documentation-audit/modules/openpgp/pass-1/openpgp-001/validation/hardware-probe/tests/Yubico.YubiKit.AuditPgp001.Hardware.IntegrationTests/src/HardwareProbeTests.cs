@@ -1,0 +1,287 @@
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using Xunit.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.OpenPgp;
+using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
+
+[assembly: CollectionBehavior(DisableTestParallelization = true, MaxParallelThreads = 1)]
+
+namespace Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests;
+
+public sealed class Serial103Filter : IYubiKeyFilter
+{
+    public bool Matches(YubiKeyTestState device) => device.SerialNumber == 103;
+    public string GetDescription() => "Only the dedicated OpenPGP audit key, serial 103";
+}
+
+[Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+public sealed partial class HardwareProbeTests(ITestOutputHelper output)
+{
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.6.0", CustomFilter = typeof(Serial103Filter))]
+    public Task KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(YubiKeyTestState state) =>
+        ProbeScope.RunAsync(state, output,
+            "With three distinct KDF salts, ordinary and extended VERIFY both authenticate the User PIN", async (probe, token) =>
+            {
+                byte[] user = [.. "123456"u8];
+                byte[] admin = [.. "12345678"u8];
+                byte[] saltUser = [1, 2, 3, 4, 5, 6, 7, 8];
+                byte[] saltReset = [11, 12, 13, 14, 15, 16, 17, 18];
+                byte[] saltAdmin = [21, 22, 23, 24, 25, 26, 27, 28];
+                byte[]? initialUser = null;
+                byte[]? initialAdmin = null;
+                using var derivation = new KdfIterSaltedS2k
+                {
+                    HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,
+                    SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin,
+                };
+                try
+                {
+                    initialUser = derivation.Process(Pw.User, user);
+                    initialAdmin = derivation.Process(Pw.Admin, admin);
+                    using var configuration = new KdfIterSaltedS2k
+                    {
+                        HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,
+                        SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin,
+                        InitialHashUser = initialUser, InitialHashAdmin = initialAdmin,
+                    };
+                    // SetKdf changes factory credential representation on the card.
+                    // A fresh session observes that transition without relying on cache ownership.
+                    await using (var setup = await probe.OpenAsync(null, token))
+                    {
+                        await setup.VerifyAdminAsync(admin, token);
+                        await setup.SetKdfAsync(configuration, token);
+                    }
+                    await using var session = await probe.OpenAsync(null, token);
+                    var observed = Assert.IsType<KdfIterSaltedS2k>(await session.GetKdfAsync(token));
+                    // GetKdfAsync currently lends the session cache. The session owns
+                    // that result; this probe records public fields and leaves it alive.
+                    Assert.Equal(100000L, observed.IterationCount);
+                    Assert.True(observed.SaltUser.Span.SequenceEqual(saltUser));
+                    Assert.True(observed.SaltReset is { } reset && reset.Span.SequenceEqual(saltReset));
+                    Assert.True(observed.SaltAdmin is { } administrator && administrator.Span.SequenceEqual(saltAdmin));
+                    output.WriteLine("KDF configured=iterated-salted-S2K hash=SHA256 octet-count=100000 salts=three-distinct; no credential/hash bytes retained");
+                    await session.VerifyAdminAsync(admin, token);
+                    // Provision KDF before the control key. The original v1 attempt
+                    // received 6985 when it wrote F9 after generating that key.
+                    await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1), token);
+                    await session.VerifyPinAsync(user, cancellationToken: token);
+                    using var host = ProbeScope.EcPublic(await session.GetPublicKeyAsync(KeyRef.Sig, token));
+                    var signature = await session.SignAsync("KDF ordinary user control"u8.ToArray(), HashAlgorithmName.SHA256, token);
+                    try
+                    {
+                        Assert.True(host.VerifyData("KDF ordinary user control"u8, signature.Span, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence));
+                    }
+                    finally
+                    {
+                        ProbeScope.Clear(signature);
+                    }
+                    await session.UnverifyPinAsync(token);
+                    await ProbeScope.RecordPinsAsync(session, output, "before-extended-user-verify", token);
+                    try
+                    {
+                        await session.VerifyPinAsync(user, extended: true, cancellationToken: token);
+                    }
+                    finally
+                    {
+                        await ProbeScope.RecordPinsAsync(session, output, "after-extended-user-verify", token);
+                    }
+                    output.WriteLine("KDF extended-user-verify=accepted; ordinary-signature-control=host-verified");
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(user);
+                    CryptographicOperations.ZeroMemory(admin);
+                    CryptographicOperations.ZeroMemory(saltUser);
+                    CryptographicOperations.ZeroMemory(saltReset);
+                    CryptographicOperations.ZeroMemory(saltAdmin);
+                    if (initialUser is not null) CryptographicOperations.ZeroMemory(initialUser);
+                    if (initialAdmin is not null) CryptographicOperations.ZeroMemory(initialAdmin);
+                }
+            }, requireKdf: true);
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.6.0", CustomFilter = typeof(Serial103Filter))]
+    public Task ExtendedWrongPin_ReportsUserRetryCounter(YubiKeyTestState state) =>
+        ProbeScope.RunAsync(state, output,
+            "A failed extended User VERIFY consumes and reports the User retry counter, while Reset Code retries stay unchanged", async (probe, token) =>
+            {
+                byte[] wrong = [.. "654321"u8];
+                try
+                {
+                    await using var session = await probe.OpenAsync(null, token);
+                    var before = await session.GetPinStatusAsync(token);
+                    var failure = await Assert.ThrowsAsync<OpenPgpInvalidPinException>(() => session.VerifyPinAsync(wrong, extended: true, cancellationToken: token));
+                    var after = await session.GetPinStatusAsync(token);
+                    output.WriteLine($"RETRY_IDENTITY user-before={before.AttemptsUser} user-after={after.AttemptsUser} reset-before={before.AttemptsReset} reset-after={after.AttemptsReset} typed-retries={failure.RetriesRemaining}");
+                    Assert.Equal(before.AttemptsUser - 1, after.AttemptsUser);
+                    Assert.Equal(before.AttemptsReset, after.AttemptsReset);
+                    Assert.Equal(after.AttemptsUser, failure.RetriesRemaining);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(wrong);
+                }
+            });
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.6.0", CustomFilter = typeof(Serial103Filter))]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
+    public Task TouchSign_P256_HostVerifies(YubiKeyTestState state) =>
+        EcTouchAsync(state, KeyRef.Sig, UserPresenceOperations.OpenPgp.Sign);
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.6.0", CustomFilter = typeof(Serial103Filter))]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
+    public Task TouchAuthenticate_P256_OrdinaryVerifyIsInsufficient(YubiKeyTestState state) =>
+        EcTouchAsync(state, KeyRef.Aut, UserPresenceOperations.OpenPgp.Authenticate);
+
+    private Task EcTouchAsync(YubiKeyTestState state, KeyRef slot, string operation) =>
+        ProbeScope.RunAsync(state, output,
+            $"{operation} with ordinary On touch policy completes and verifies under the generated P-256 public key", async (probe, token) =>
+            {
+                byte[] admin = [.. "12345678"u8];
+                byte[] user = [.. "123456"u8];
+                byte[] message = [.. "OpenPGP audit presence verification"u8];
+                try
+                {
+                    var prompt = new RecordingPrompt(output, inviteTouch: true);
+                    await using var session = await probe.OpenAsync(prompt, token);
+                    await session.VerifyAdminAsync(admin, token);
+                    await session.GenerateKeyAsync(slot, EcAttributes.Create(slot, CurveOid.Secp256R1), token);
+                    using var host = ProbeScope.EcPublic(await session.GetPublicKeyAsync(slot, token));
+                    if (slot == KeyRef.Aut)
+                    {
+                        // Keep this control silent: UIF is still Off. It establishes
+                        // ordinary VERIFY's mode boundary before the touch ceremony.
+                        await session.VerifyPinAsync(user, cancellationToken: token);
+                        var denied = await Record.ExceptionAsync(() => session.AuthenticateAsync(message, HashAlgorithmName.SHA256, token));
+                        Assert.NotNull(denied);
+                        ProbeScope.LogError(output, "ordinary-user-authenticate-control", denied);
+                        Assert.Equal((short)0x6982, Assert.IsAssignableFrom<ApduException>(denied).SW);
+                        await session.UnverifyPinAsync(token);
+                    }
+                    await session.SetUifAsync(slot, Uif.On, token);
+                    Assert.Equal(Uif.On, await session.GetUifAsync(slot, token));
+                    await session.VerifyPinAsync(user, extended: slot == KeyRef.Aut, cancellationToken: token);
+                    var signature = slot == KeyRef.Sig
+                        ? await session.SignAsync(message, HashAlgorithmName.SHA256, token)
+                        : await session.AuthenticateAsync(message, HashAlgorithmName.SHA256, token);
+                    try
+                    {
+                        Assert.True(host.VerifyData(message, signature.Span, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence));
+                        prompt.AssertTerminal(operation, UserPresenceOutcome.Completed);
+                        output.WriteLine($"ORACLE operation={operation} ECDSA-P256-SHA256=host-verified; touch-policy=On");
+                    }
+                    finally
+                    {
+                        ProbeScope.Clear(signature);
+                    }
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(admin);
+                    CryptographicOperations.ZeroMemory(user);
+                    CryptographicOperations.ZeroMemory(message);
+                }
+            });
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.6.0", CustomFilter = typeof(Serial103Filter))]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
+    public Task TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(YubiKeyTestState state) =>
+        ProbeScope.RunAsync(state, output,
+            "Decrypt requires extended User VERIFY and On touch policy, then recovers the host-encrypted known plaintext", async (probe, token) =>
+            {
+                byte[] admin = [.. "12345678"u8];
+                byte[] user = [.. "123456"u8];
+                byte[] plaintext = [.. "OpenPGP audit public test plaintext"u8];
+                byte[]? ciphertext = null;
+                try
+                {
+                    var prompt = new RecordingPrompt(output, inviteTouch: true);
+                    await using var session = await probe.OpenAsync(prompt, token);
+                    await session.VerifyAdminAsync(admin, token);
+                    await session.GenerateKeyAsync(KeyRef.Dec, RsaAttributes.Create(RsaSize.Rsa2048), token);
+                    using var host = ProbeScope.RsaPublic(await session.GetPublicKeyAsync(KeyRef.Dec, token));
+                    ciphertext = host.Encrypt(plaintext, RSAEncryptionPadding.Pkcs1);
+                    await session.VerifyPinAsync(user, cancellationToken: token);
+                    var denied = await Record.ExceptionAsync(() => session.DecryptAsync(ciphertext, token));
+                    Assert.NotNull(denied);
+                    ProbeScope.LogError(output, "ordinary-user-decrypt-control", denied);
+                    Assert.Equal((short)0x6982, Assert.IsAssignableFrom<ApduException>(denied).SW);
+                    await session.UnverifyPinAsync(token);
+                    await session.SetUifAsync(KeyRef.Dec, Uif.On, token);
+                    Assert.Equal(Uif.On, await session.GetUifAsync(KeyRef.Dec, token));
+                    await session.VerifyPinAsync(user, extended: true, cancellationToken: token);
+                    var recovered = await session.DecryptAsync(ciphertext, token);
+                    try
+                    {
+                        Assert.True(CryptographicOperations.FixedTimeEquals(plaintext, recovered.Span));
+                        prompt.AssertTerminal(UserPresenceOperations.OpenPgp.Decrypt, UserPresenceOutcome.Completed);
+                        output.WriteLine("ORACLE RSA2048-PKCS1-decrypt=known-plaintext-matched; ordinary-mode-control=denied; touch-policy=On");
+                    }
+                    finally
+                    {
+                        ProbeScope.Clear(recovered);
+                    }
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(admin);
+                    CryptographicOperations.ZeroMemory(user);
+                    CryptographicOperations.ZeroMemory(plaintext);
+                    if (ciphertext is not null) CryptographicOperations.ZeroMemory(ciphertext);
+                }
+            });
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, RequireUsb = true, MinFirmware = "5.6.0", CustomFilter = typeof(Serial103Filter))]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
+    public Task TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(YubiKeyTestState state) =>
+        ProbeScope.RunAsync(state, output,
+            "Attestation with existing Att key and regular On policy binds a generated key to a certificate signed by the preserved issuer", async (probe, token) =>
+            {
+                byte[] admin = [.. "12345678"u8];
+                byte[] user = [.. "123456"u8];
+                try
+                {
+                    var prompt = new RecordingPrompt(output, inviteTouch: true);
+                    await using var session = await probe.OpenAsync(prompt, token);
+                    using var issuer = await session.GetCertificateAsync(KeyRef.Att, token);
+                    Assert.NotNull(issuer);
+                    output.WriteLine($"ATT issuer-public-certificate-sha256={Convert.ToHexString(SHA256.HashData(issuer.RawDataMemory.Span))}");
+                    await session.VerifyAdminAsync(admin, token);
+                    await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1), token);
+                    using var publicKey = ProbeScope.EcPublic(await session.GetPublicKeyAsync(KeyRef.Sig, token));
+                    await session.SetUifAsync(KeyRef.Att, Uif.On, token);
+                    Assert.Equal(Uif.On, await session.GetUifAsync(KeyRef.Att, token));
+                    // v2's extended-only route returned 6982 before the ceremony.
+                    // Use the ordinary User mode used by the vendor and existing tests.
+                    await session.VerifyPinAsync(user, cancellationToken: token);
+                    using var certificate = await session.AttestKeyAsync(KeyRef.Sig, token);
+                    ProbeScope.VerifyCertificateSignature(certificate, issuer);
+                    using var certified = certificate.GetECDsaPublicKey();
+                    Assert.NotNull(certified);
+                    Assert.Equal(publicKey.ExportSubjectPublicKeyInfo(), certified.ExportSubjectPublicKeyInfo());
+                    using var after = await session.GetCertificateAsync(KeyRef.Att, token);
+                    Assert.NotNull(after);
+                    Assert.Equal(issuer.RawData, after.RawData);
+                    prompt.AssertTerminal(UserPresenceOperations.OpenPgp.AttestKey, UserPresenceOutcome.Completed);
+                    output.WriteLine("ORACLE attestation-certificate-signature=issuer-verified; certified-SPKI=generated-key; Att-certificate=unchanged; no Att-key replacement");
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(admin);
+                    CryptographicOperations.ZeroMemory(user);
+                }
+            });
+}

@@ -44,17 +44,17 @@ public sealed class ExtendedCapabilities
     public int SmAlgorithm { get; init; }
 
     /// <summary>
-    ///     Maximum length for GET CHALLENGE responses.
+    ///     Advertised maximum GET CHALLENGE response length in bytes.
     /// </summary>
     public int ChallengeMaxLength { get; init; }
 
     /// <summary>
-    ///     Maximum length for certificate data objects.
+    ///     Advertised maximum certificate data-object length in bytes.
     /// </summary>
     public int CertificateMaxLength { get; init; }
 
     /// <summary>
-    ///     Maximum length for special data objects.
+    ///     Advertised maximum special data-object length in bytes.
     /// </summary>
     public int SpecialDoMaxLength { get; init; }
 

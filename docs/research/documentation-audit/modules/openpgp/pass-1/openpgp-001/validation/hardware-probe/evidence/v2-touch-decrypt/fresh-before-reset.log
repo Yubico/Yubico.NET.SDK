@@ -1,0 +1,4 @@
+$ /usr/bin/python3 /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-state.py baseline --output /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/evidence/v2-touch-decrypt/fresh-before-reset.json
+{"output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/evidence/v2-touch-decrypt/fresh-before-reset.json", "success": true}
+
+EXIT=0

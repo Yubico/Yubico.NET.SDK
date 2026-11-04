@@ -32,8 +32,8 @@ boundary, the first-use flow, and current extension/protocol limitations.
 ### OpenPGP
 
 `Yubico.YubiKit.OpenPgp` brings OpenPGP support to the .NET SDK for the first
-time. Supported operations and firmware requirements live in the per-applet
-documentation rather than here.
+time. The [OpenPGP guide](../src/OpenPgp/README.md) covers key provisioning, PIN recovery,
+raw signing/decipher/agreement formats, certificates, touch policy and current firmware/implementation limits.
 
 ## Async applet operations
 

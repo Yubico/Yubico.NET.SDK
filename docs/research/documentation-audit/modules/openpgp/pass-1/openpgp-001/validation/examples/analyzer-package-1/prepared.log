@@ -1,0 +1,4 @@
+PASS: 407 explicit unit dispositions, 17 complete groups, 19 shipping source paths; current bodies, typed wrappers and source/configuration identities reconcile.
+PENDING: builds, C# binding/analyzers and actual compiler captures. Example/sample/test/hardware execution remains separately scoped.
+
+EXIT=0

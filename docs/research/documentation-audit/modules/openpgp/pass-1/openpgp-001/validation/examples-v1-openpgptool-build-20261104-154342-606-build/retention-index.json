@@ -1,0 +1,40 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-154342-606-build",
+  "files": [
+    {
+      "path": "01-clean-AuditPgp001.Examples.Shipping.OpenPgpTool.log",
+      "bytes": 49731,
+      "sha256": "6eb1190adcb39a5e11d2f62f029ef1d5ed24a05c69468e516a68566a8551ee41",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "02-build-AuditPgp001.Examples.Shipping.OpenPgpTool.log",
+      "bytes": 1809,
+      "sha256": "97d56be9603113b61ff37bc88c72956638adecb1cd4f882f02b7265895aecae9",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 731,
+      "sha256": "23e0c934a6b0fc35d576d6aa4feb9be03f3f84b59ed44746b3cfa7994c79971b",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 458,
+      "sha256": "fee69d64a8de8787f1b1d9550b9bd7c4d268f2526dfed6097c8318aad3fd0525",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2271,
+      "sha256": "839a856a05e8ce0c2527994145c125e5db119feb012e077bada6de565f05aafe",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

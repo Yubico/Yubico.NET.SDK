@@ -1,0 +1,10 @@
+$ python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/capture.py v1 consumer first
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/capture.py", line 49, in <module>
+    require(policy['RunAnalyzersDuringBuild'] == 'true' and policy['SkipAnalyzers'].lower() != 'true' and policy['RunAnalyzers'].lower() != 'false' and policy['EnableNETAnalyzers'] == 'true', 'Analyzers skipped')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/inventory.py", line 19, in require
+    raise ValueError(message)
+ValueError: Analyzers skipped
+
+EXIT=1

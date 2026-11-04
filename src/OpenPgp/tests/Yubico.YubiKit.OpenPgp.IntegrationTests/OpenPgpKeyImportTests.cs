@@ -32,7 +32,7 @@ public class OpenPgpKeyImportTests
     private static readonly byte[] DefaultUserPin = "123456"u8.ToArray();
     private static readonly byte[] DefaultAdminPin = "12345678"u8.ToArray();
 
-    // RFC 8032 §7.1, test 1
+    // RFC 8032 §7.1, test 1: the 32-byte private input is a seed.
     private static readonly byte[] Ed25519TestPrivateKey = Convert.FromHexString(
         "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60");
     private static readonly byte[] Ed25519TestPublicKey = Convert.FromHexString(
@@ -48,6 +48,9 @@ public class OpenPgpKeyImportTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ImportRsaKey_2048_ThenSign_VerifiesWithTheHostPublicKey(YubiKeyTestState state)
     {
+        // Current early return covers 4.2.0–4.3.5 inclusive before any setup/assertion.
+        // YSA-2017-01 concerns generated RSA, and recommends external import as a mitigation;
+        // this imported-key exclusion and corrected-4.3.5 boundary need separate applicability review.
         if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
             state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
         {
@@ -119,7 +122,7 @@ public class OpenPgpKeyImportTests
                 Assert.True(ecdsa.VerifyData(message, signature.Span, HashAlgorithmName.SHA384, DSASignatureFormat.Rfc3279DerSequence));
             });
 
-    /// <summary>The card reports the RFC 8032 public key for the RFC 8032 private key: the scalar went in as is.</summary>
+    /// <summary>Compares the card public key with RFC 8032's public key for the imported seed; no signing is exercised.</summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
     public async Task ImportEcKey_Ed25519_CardReportsTheTestVectorPublicKey(YubiKeyTestState state) =>
@@ -138,8 +141,8 @@ public class OpenPgpKeyImportTests
             });
 
     /// <summary>
-    ///     The card reports the RFC 7748 public key for the RFC 7748 private key: the scalar went in
-    ///     byte-reversed, as the card expects.
+    ///     Compares the card public key with the RFC 7748 vector after scalar-byte reversal for import.
+    ///     This checks import/public-key correspondence; X25519 agreement requires a separate operation.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]

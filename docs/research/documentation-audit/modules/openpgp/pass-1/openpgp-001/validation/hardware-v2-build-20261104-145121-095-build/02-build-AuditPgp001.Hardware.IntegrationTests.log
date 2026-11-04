@@ -1,0 +1,14 @@
+$ dotnet build docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj -c Release --no-incremental
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests -> /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.51

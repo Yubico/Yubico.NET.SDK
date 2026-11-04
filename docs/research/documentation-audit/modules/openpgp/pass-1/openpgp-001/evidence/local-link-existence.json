@@ -1,0 +1,72 @@
+[
+  {
+    "source": "src/OpenPgp/README.md",
+    "label": "repository README",
+    "target": "../../README.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  },
+  {
+    "source": "src/OpenPgp/README.md",
+    "label": "Linux setup",
+    "target": "../../docs/linux-setup.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  },
+  {
+    "source": "src/OpenPgp/README.md",
+    "label": "../Core/README.md",
+    "target": "../Core/README.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  },
+  {
+    "source": "src/OpenPgp/README.md",
+    "label": "../Piv/README.md",
+    "target": "../Piv/README.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  },
+  {
+    "source": "src/OpenPgp/README.md",
+    "label": "../Management/README.md",
+    "target": "../Management/README.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  },
+  {
+    "source": "src/OpenPgp/README.md",
+    "label": "user-interaction.md",
+    "target": "../../docs/usage/user-interaction.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  },
+  {
+    "source": "src/OpenPgp/README.md",
+    "label": "device-discovery.md",
+    "target": "../../docs/usage/device-discovery.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  },
+  {
+    "source": "src/OpenPgp/README.md",
+    "label": "Developer guide",
+    "target": "../../docs/DEV-GUIDE.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  },
+  {
+    "source": "src/OpenPgp/CLAUDE.md",
+    "label": "CLAUDE.md",
+    "target": "../../CLAUDE.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  },
+  {
+    "source": "src/OpenPgp/tests/CLAUDE.md",
+    "label": "`docs/TESTING.md`",
+    "target": "../../../docs/TESTING.md",
+    "exists": true,
+    "scope": "existence only; target source/docs not investigated"
+  }
+]

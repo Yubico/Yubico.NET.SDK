@@ -1,0 +1,5 @@
+PASS: original guard rejected the canonical NuGet replacement flag; exact 9.0.0 import/pin, both real Csc analyzer assemblies, all 10 analyzer arguments and unchanged warning/no-skip policy reconcile.
+PASS: frozen v1 extraction, 17 groups/407 dispositions/110 dependencies, original tools, first failure and intact consumer workspace preserved; corrected capture/verify source identities and exact substitutions reconcile.
+PENDING: coordinator consumer/second capture, shipping build/first capture and corrected final --live verification. No build/test/device/formatter invoked.
+
+EXIT=0

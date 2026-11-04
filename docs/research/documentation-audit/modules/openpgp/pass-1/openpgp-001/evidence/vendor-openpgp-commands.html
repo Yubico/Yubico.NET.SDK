@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenPGP Commands &mdash; YubiKey Manager (ykman) CLI Guide  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/dist.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/gtm.js"></script>
+        <script src="https://kit.fontawesome.com/ea7c27f2b7.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="OTP Commands" href="OTP_Commands.html" />
+    <link rel="prev" title="OATH Commands" href="OATH_Commands.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            YubiKey Manager (ykman) CLI Guide
+              <img src="https://resources.yubico.com/XEG5TAAH/at/8kq7984j7ffgq82qvfgqvbnh/logo.svg?auto=webp&format=svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Install_ykman.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Using_the_ykman_CLI.html">Using the ykman CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Base_Commands.html">Base ykman Command</a></li>
+<li class="toctree-l1"><a class="reference internal" href="APDU_Commands.html">APDU Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Config_Commands.html">CONFIG Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FIDO_Commands.html">FIDO Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HSMauth_Commands.html">HSMauth Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OATH_Commands.html">OATH Commands</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">OpenPGP Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-options-command-args">ykman openpgp [OPTIONS] COMMAND [ARGS]…</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#commands">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-access-options-command-args">ykman openpgp access [OPTIONS] COMMAND [ARGS]…</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-access-change-admin-pin-options">ykman openpgp access change-admin-pin [OPTIONS]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-access-change-pin-options">ykman openpgp access change-pin [OPTIONS]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-access-change-reset-code-options">ykman openpgp access change-reset-code [OPTIONS]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-access-set-retries-options-pin-retries-reset-code-retries-admin-pin-retries">ykman openpgp access set-retries [OPTIONS] PIN-RETRIES RESET-CODE-RETRIES ADMIN-PIN-RETRIES</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#arguments">Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-access-set-signature-policy-options-policy">ykman openpgp access set-signature-policy [OPTIONS] POLICY</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-access-unblock-pin-options">ykman openpgp access unblock-pin [OPTIONS]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-certificates-options-command-args">ykman openpgp certificates [OPTIONS] COMMAND [ARGS]…</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-certificates-delete-options-key">ykman openpgp certificates delete [OPTIONS] KEY</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id12">Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-certificates-export-options-key-certificate">ykman openpgp certificates export [OPTIONS] KEY CERTIFICATE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-certificates-import-options-key-certificate">ykman openpgp certificates import [OPTIONS] KEY CERTIFICATE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id16">Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id17">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-info-options">ykman openpgp info [OPTIONS]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id18">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-keys-options-command-args">ykman openpgp keys [OPTIONS] COMMAND [ARGS]…</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id19">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id20">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-keys-attest-options-key-certificate">ykman openpgp keys attest [OPTIONS] KEY CERTIFICATE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id21">Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id22">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-keys-import-options-key-private-key">ykman openpgp keys import [OPTIONS] KEY PRIVATE-KEY</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id23">Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id24">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-keys-info-options-key">ykman openpgp keys info  [OPTIONS] KEY</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id25">Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id26">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-keys-set-touch-options-key-policy">ykman openpgp keys set-touch [OPTIONS] KEY POLICY</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id27">Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#touch-policies">Touch Policies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id28">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ykman-openpgp-reset-options">ykman openpgp reset [OPTIONS]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id29">Options</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="OTP_Commands.html">OTP Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PIV_Commands.html">PIV Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Security_Domain_SD_Commands.html">Security Domain (SD) Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Using_the_ykman_GUI.html">Using the YubiKey Manager GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyright</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">YubiKey Manager (ykman) CLI Guide</a>
+      </nav>
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">OpenPGP Commands</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/OpenPGP_Commands.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="openpgp-commands">
+<span id="openpgp-commands-label"></span><h1>OpenPGP Commands<a class="headerlink" href="#openpgp-commands" title="Permalink to this heading"></a></h1>
+<p>Acronyms and their definitions are listed at the bottom of the <a class="reference internal" href="Base_Commands.html#base-commands-label"><span class="std std-ref">Base ykman Command</span></a> page.</p>
+<div class="section" id="ykman-openpgp-options-command-args">
+<h2>ykman openpgp [OPTIONS] COMMAND [ARGS]…<a class="headerlink" href="#ykman-openpgp-options-command-args" title="Permalink to this heading"></a></h2>
+<p>Manage OpenPGP application.</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h3>
+<p><strong>Set the retries</strong> for PIN, Reset Code and Admin PIN to 10:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ykman openpgp access set-retries 10 10 10
+</pre></div>
+</div>
+<p><strong>Require touch</strong> to use the authentication key:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ykman openpgp keys set-touch aut on
+</pre></div>
+</div>
+</div>
+<div class="section" id="options">
+<h3>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="22%" />
+<col width="78%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="commands">
+<h3>Commands<a class="headerlink" href="#commands" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Command</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">access</span></code></td>
+<td>Manage PIN, Reset Code, and Admin PIN.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">certificates</span></code></td>
+<td>Manage certificates.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">info</span></code></td>
+<td>Display general status of the OpenPGP application.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">keys</span></code></td>
+<td>Manage private keys.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">reset</span></code></td>
+<td>Reset all OpenPGP data.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-access-options-command-args">
+<h2>ykman openpgp access [OPTIONS] COMMAND [ARGS]…<a class="headerlink" href="#ykman-openpgp-access-options-command-args" title="Permalink to this heading"></a></h2>
+<p>Manage PIN, Reset Code, and Admin PIN.</p>
+<div class="section" id="id1">
+<h3>Options<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id2">
+<h3>Commands<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="35%" />
+<col width="65%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Command</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">change-admin-pin</span></code></td>
+<td>Change the Admin PIN.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">change-pin</span></code></td>
+<td>Change the User PIN.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">change-reset-code</span></code></td>
+<td>Change the Reset Code.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">set-retries</span></code></td>
+<td>Set the number of retry attempts for the user.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">set-signature-policy</span></code></td>
+<td>Set the Signature PIN policy.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">unblock-pin</span></code></td>
+<td>Unblock the PIN using Reset Code or Admin PIN.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-access-change-admin-pin-options">
+<h2>ykman openpgp access change-admin-pin [OPTIONS]<a class="headerlink" href="#ykman-openpgp-access-change-admin-pin-options" title="Permalink to this heading"></a></h2>
+<p>Change the Admin PIN. The Admin PIN has a minimum length of 8, and supports any type of alphanumeric characters.</p>
+<div class="section" id="id3">
+<h3>Options<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td>Current Admin PIN.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-n,</span> <span class="pre">--new-admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td>New Admin PIN.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-access-change-pin-options">
+<h2>ykman openpgp access change-pin [OPTIONS]<a class="headerlink" href="#ykman-openpgp-access-change-pin-options" title="Permalink to this heading"></a></h2>
+<p>Change the User PIN. The PIN has a minimum length of 6, and supports any type of alphanumeric characters. PIN minimum length for YubiKey FIPS 5.7.+ when not using Key Derivation Function (KDF) is 8.</p>
+<div class="section" id="id4">
+<h3>Options<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-n,</span> <span class="pre">--new-pin</span> <span class="pre">TEXT</span></code></td>
+<td>A new PIN.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-P,</span> <span class="pre">--pin</span> <span class="pre">TEXT</span></code></td>
+<td>Current PIN code.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-access-change-reset-code-options">
+<h2>ykman openpgp access change-reset-code [OPTIONS]<a class="headerlink" href="#ykman-openpgp-access-change-reset-code-options" title="Permalink to this heading"></a></h2>
+<p>Change the Reset Code. The Reset Code has a minimum length of 6, and supports any type of alphanumeric characters.</p>
+<div class="section" id="id5">
+<h3>Options<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td>Admin PIN.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-r,</span> <span class="pre">--reset-code</span> <span class="pre">TEXT</span></code></td>
+<td>A new Reset Code.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-access-set-retries-options-pin-retries-reset-code-retries-admin-pin-retries">
+<h2>ykman openpgp access set-retries [OPTIONS] PIN-RETRIES RESET-CODE-RETRIES ADMIN-PIN-RETRIES<a class="headerlink" href="#ykman-openpgp-access-set-retries-options-pin-retries-reset-code-retries-admin-pin-retries" title="Permalink to this heading"></a></h2>
+<p>Set the number of retry attempts for the user PIN, Reset Code, and Admin PIN.</p>
+<div class="section" id="arguments">
+<h3>Arguments<a class="headerlink" href="#arguments" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="32%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">PIN-RETRIES</span></code></td>
+<td>Set number of retries for PIN attempts.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">RESET-CODE-RETRIES</span></code></td>
+<td>Set number of retries for Reset Code attempts.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ADMIN-PIN-RETRIES</span></code></td>
+<td>Set number of retries for Admin PIN attempts.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id6">
+<h3>Options<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="36%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td>Admin PIN for OpenPGP.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-f,</span> <span class="pre">--force</span></code></td>
+<td>Confirm the action without prompting.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-access-set-signature-policy-options-policy">
+<h2>ykman openpgp access set-signature-policy [OPTIONS] POLICY<a class="headerlink" href="#ykman-openpgp-access-set-signature-policy-options-policy" title="Permalink to this heading"></a></h2>
+<p>Set the Signature PIN policy. The Signature PIN policy is used to control whether the PIN is always required when using the Signature key, or if it is required only once per session.</p>
+<div class="section" id="id7">
+<h3>Arguments<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="32%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">POLICY</span></code></td>
+<td>Signature PIN policy to set (always, once).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id8">
+<h3>Options<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td>Admin PIN for OpenPGP.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-access-unblock-pin-options">
+<h2>ykman openpgp access unblock-pin [OPTIONS]<a class="headerlink" href="#ykman-openpgp-access-unblock-pin-options" title="Permalink to this heading"></a></h2>
+<p>Unblock the PIN, using Reset Code or Admin PIN.</p>
+<p>If the PIN is lost or blocked you can reset it to a new value using the Reset Code. Alternatively, the Admin PIN can be used with the <code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span></code> option, instead of the Reset Code.</p>
+<p>The new PIN has a minimum length of 6, and supports any type of alphanumeric characters.</p>
+<div class="section" id="id9">
+<h3>Options<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td><div class="first last line-block">
+<div class="line">Admin PIN. Use <code class="docutils literal notranslate"><span class="pre">-</span></code> as a value to</div>
+<div class="line">prompt for input.</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-n,</span> <span class="pre">--new-pin</span> <span class="pre">TEXT</span></code></td>
+<td>A new PIN.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-r,</span> <span class="pre">--reset-code</span> <span class="pre">TEXT</span></code></td>
+<td>Reset Code.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-certificates-options-command-args">
+<h2>ykman openpgp certificates [OPTIONS] COMMAND [ARGS]…<a class="headerlink" href="#ykman-openpgp-certificates-options-command-args" title="Permalink to this heading"></a></h2>
+<p>Manage certificates.</p>
+<div class="section" id="id10">
+<h3>Options<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="36%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id11">
+<h3>Commands<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="36%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Command</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">delete</span></code></td>
+<td>Delete an OpenPGP certificate.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">export</span></code></td>
+<td>Export an OpenPGP certificate.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">import</span></code></td>
+<td>Import an OpenPGP certificate.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-certificates-delete-options-key">
+<h2>ykman openpgp certificates delete [OPTIONS] KEY<a class="headerlink" href="#ykman-openpgp-certificates-delete-options-key" title="Permalink to this heading"></a></h2>
+<p>Delete an OpenPGP certificate.</p>
+<div class="section" id="id12">
+<h3>Arguments<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">KEY</span></code></td>
+<td><div class="first last line-block">
+<div class="line">Key slot to delete certificate from <code class="docutils literal notranslate"><span class="pre">sig</span></code>, <code class="docutils literal notranslate"><span class="pre">enc</span></code>,</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">aut</span></code>,  or <code class="docutils literal notranslate"><span class="pre">att</span></code>.</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id13">
+<h3>Options<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="36%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td>Admin PIN for OpenPGP.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-certificates-export-options-key-certificate">
+<h2>ykman openpgp certificates export [OPTIONS] KEY CERTIFICATE<a class="headerlink" href="#ykman-openpgp-certificates-export-options-key-certificate" title="Permalink to this heading"></a></h2>
+<p>Export an OpenPGP certificate.</p>
+<div class="section" id="id14">
+<h3>Arguments<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">CERTIFICATE</span></code></td>
+<td><div class="first last line-block">
+<div class="line">File to write certificate to. Use <code class="docutils literal notranslate"><span class="pre">-</span></code> to use</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">stdout</span></code>.</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">KEY</span></code></td>
+<td><div class="first last line-block">
+<div class="line">Key slot to read from (<code class="docutils literal notranslate"><span class="pre">sig</span></code>, <code class="docutils literal notranslate"><span class="pre">enc</span></code>, <code class="docutils literal notranslate"><span class="pre">aut</span></code>,</div>
+<div class="line">or <code class="docutils literal notranslate"><span class="pre">att</span></code>).</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id15">
+<h3>Options<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="39%" />
+<col width="61%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-F,</span> <span class="pre">--format</span> <span class="pre">[PEM|DER]</span></code></td>
+<td>Encoding format.  Default: <code class="docutils literal notranslate"><span class="pre">PEM</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-certificates-import-options-key-certificate">
+<h2>ykman openpgp certificates import [OPTIONS] KEY CERTIFICATE<a class="headerlink" href="#ykman-openpgp-certificates-import-options-key-certificate" title="Permalink to this heading"></a></h2>
+<p>Import an OpenPGP certificate.</p>
+<div class="section" id="id16">
+<h3>Arguments<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">CERTIFICATE</span></code></td>
+<td><div class="first last line-block">
+<div class="line">File containing the certificate. Use <code class="docutils literal notranslate"><span class="pre">-</span></code> to</div>
+<div class="line">use <code class="docutils literal notranslate"><span class="pre">stdin</span></code>.</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">KEY</span></code></td>
+<td><div class="first last line-block">
+<div class="line">Key slot to import certificate to (<code class="docutils literal notranslate"><span class="pre">sig</span></code>, <code class="docutils literal notranslate"><span class="pre">enc</span></code>,</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">aut</span></code>, or <code class="docutils literal notranslate"><span class="pre">att</span></code>).</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id17">
+<h3>Options<a class="headerlink" href="#id17" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="39%" />
+<col width="61%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td>Admin PIN for OpenPGP.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-info-options">
+<h2>ykman openpgp info [OPTIONS]<a class="headerlink" href="#ykman-openpgp-info-options" title="Permalink to this heading"></a></h2>
+<p>Display status of OpenPGP application.</p>
+<div class="section" id="id18">
+<h3>Options<a class="headerlink" href="#id18" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="22%" />
+<col width="78%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-keys-options-command-args">
+<h2>ykman openpgp keys [OPTIONS] COMMAND [ARGS]…<a class="headerlink" href="#ykman-openpgp-keys-options-command-args" title="Permalink to this heading"></a></h2>
+<p>Manage private keys.</p>
+<div class="section" id="id19">
+<h3>Options<a class="headerlink" href="#id19" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="39%" />
+<col width="61%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id20">
+<h3>Commands<a class="headerlink" href="#id20" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Command</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">attest</span></code></td>
+<td>Generate an attestation certificate for a key.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">import</span></code></td>
+<td>Import a private key for OpoenPGP attestation.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">info</span></code></td>
+<td>Show metadata about a private key.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">set-touch</span></code></td>
+<td>Set touch policy for OpenPGP keys.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-keys-attest-options-key-certificate">
+<h2>ykman openpgp keys attest [OPTIONS] KEY CERTIFICATE<a class="headerlink" href="#ykman-openpgp-keys-attest-options-key-certificate" title="Permalink to this heading"></a></h2>
+<p>Generate an attestation certificate for a key. Attestation is used to show that an asymmetric key was generated on the YubiKey and therefore does not exist outside the device.</p>
+<div class="section" id="id21">
+<h3>Arguments<a class="headerlink" href="#id21" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">KEY</span></code></td>
+<td>Key slot to attest (<code class="docutils literal notranslate"><span class="pre">sig</span></code>, <code class="docutils literal notranslate"><span class="pre">enc</span></code>, <code class="docutils literal notranslate"><span class="pre">aut</span></code>).</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">CERTIFICATE</span></code></td>
+<td><div class="first last line-block">
+<div class="line">File to write attestation certificate to. Use <code class="docutils literal notranslate"><span class="pre">-</span></code></div>
+<div class="line">to use <code class="docutils literal notranslate"><span class="pre">stdout</span></code>.</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id22">
+<h3>Options<a class="headerlink" href="#id22" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-F,</span> <span class="pre">--format</span> <span class="pre">[PEM|DER]</span></code></td>
+<td>Encoding format.  Default: <code class="docutils literal notranslate"><span class="pre">PEM</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-P,</span> <span class="pre">--pin</span> <span class="pre">TEXT</span></code></td>
+<td>PIN code.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-keys-import-options-key-private-key">
+<h2>ykman openpgp keys import [OPTIONS] KEY PRIVATE-KEY<a class="headerlink" href="#ykman-openpgp-keys-import-options-key-private-key" title="Permalink to this heading"></a></h2>
+<p>Import a private key for OpenPGP attestation.</p>
+<p>The attestation key is by default pre-generated during production with a Yubico-issued key and certificate.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This private key cannot be recovered once overwritten!</p>
+</div>
+<div class="section" id="id23">
+<h3>Arguments<a class="headerlink" href="#id23" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">KEY</span></code></td>
+<td>Key slot to import to. Only <code class="docutils literal notranslate"><span class="pre">att</span></code> is supported.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">PRIVATE-KEY</span></code></td>
+<td><div class="first last line-block">
+<div class="line">File containing the private key. Use <code class="docutils literal notranslate"><span class="pre">-</span></code> to</div>
+<div class="line">use <code class="docutils literal notranslate"><span class="pre">stdin</span></code>.</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id24">
+<h3>Options<a class="headerlink" href="#id24" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td>Admin PIN for OpenPGP.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-keys-info-options-key">
+<h2>ykman openpgp keys info  [OPTIONS] KEY<a class="headerlink" href="#ykman-openpgp-keys-info-options-key" title="Permalink to this heading"></a></h2>
+<p>Shows metadata about a private key.</p>
+<p>This shows what type of key is stored in a specific slot, whether it was imported into the YubiKey, or generated on-chip, and what the Touch policy is for using the key.</p>
+<div class="section" id="id25">
+<h3>Arguments<a class="headerlink" href="#id25" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">KEY</span></code></td>
+<td>Key slot to set (<code class="docutils literal notranslate"><span class="pre">sig</span></code>, <code class="docutils literal notranslate"><span class="pre">dec</span></code>, <code class="docutils literal notranslate"><span class="pre">enc</span></code>, <code class="docutils literal notranslate"><span class="pre">aut</span></code>).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id26">
+<h3>Options<a class="headerlink" href="#id26" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-keys-set-touch-options-key-policy">
+<h2>ykman openpgp keys set-touch [OPTIONS] KEY POLICY<a class="headerlink" href="#ykman-openpgp-keys-set-touch-options-key-policy" title="Permalink to this heading"></a></h2>
+<p>Set touch policy for OpenPGP keys. The touch policy is used to require user interaction for all operations using the private key on the YubiKey. The touch policy is set individually for each key slot.</p>
+<p>To see the current touch policy, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ykman openpgp info
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Setting the touch policy of the attestation key to “fixed” cannot
+be undone without replacing the attestation private key.</p>
+</div>
+<div class="section" id="id27">
+<h3>Arguments<a class="headerlink" href="#id27" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="18%" />
+<col width="82%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">KEY</span></code></td>
+<td>Key slot to set (<code class="docutils literal notranslate"><span class="pre">sig</span></code>, <code class="docutils literal notranslate"><span class="pre">enc</span></code>, <code class="docutils literal notranslate"><span class="pre">aut</span></code> or <code class="docutils literal notranslate"><span class="pre">att</span></code>).</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">POLICY</span></code></td>
+<td>Touch policy to set (<code class="docutils literal notranslate"><span class="pre">on</span></code>, <code class="docutils literal notranslate"><span class="pre">off</span></code>, <code class="docutils literal notranslate"><span class="pre">fixed</span></code>, <code class="docutils literal notranslate"><span class="pre">cached</span></code>
+or <code class="docutils literal notranslate"><span class="pre">cached-fixed</span></code>).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="touch-policies">
+<h3>Touch Policies<a class="headerlink" href="#touch-policies" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Policy</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">Cached</span></code></td>
+<td>Touch required, cached for 15s after use.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">Cached-Fixed</span></code></td>
+<td><div class="first last line-block">
+<div class="line">Touch required, cached for 15s after use, cannot be</div>
+<div class="line">disabled without deleting the private key.</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">Fixed</span></code></td>
+<td><div class="first last line-block">
+<div class="line">Touch required, cannot be disabled without deleting</div>
+<div class="line">the private key.</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">Off</span></code></td>
+<td>No touch required. (Default)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">On</span></code></td>
+<td>Touch required.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id28">
+<h3>Options<a class="headerlink" href="#id28" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="35%" />
+<col width="65%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-a,</span> <span class="pre">--admin-pin</span> <span class="pre">TEXT</span></code></td>
+<td>Admin PIN for OpenPGP.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-f,</span> <span class="pre">--force</span></code></td>
+<td>Confirm the action without prompting.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="ykman-openpgp-reset-options">
+<h2>ykman openpgp reset [OPTIONS]<a class="headerlink" href="#ykman-openpgp-reset-options" title="Permalink to this heading"></a></h2>
+<p>Reset OpenPGP application. This action wipes all OpenPGP data, and sets all PINs to their default values.</p>
+<p>The attestation key and certificate are not reset.</p>
+<div class="section" id="id29">
+<h3>Options<a class="headerlink" href="#id29" title="Permalink to this heading"></a></h3>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></td>
+<td>Show this message and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-f,</span> <span class="pre">--force</span></code></td>
+<td>Confirm the action without prompting.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="OATH_Commands.html" class="btn btn-neutral float-left" title="OATH Commands" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="OTP_Commands.html" class="btn btn-neutral float-right" title="OTP Commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="copyright.html">Copyright</a> 2026, Yubico AB.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+<noscript>
+  <iframe
+    title="Blank"
+    aria-hidden="true"
+    src="https://sgtm.yubico.com/ns.html?id=GTM-TCVFSSSJ"
+    height="0"
+    width="0"
+    style="display: none; visibility: hidden"
+  ></iframe>
+</noscript>
+<div>
+  <a
+    href="https://www.yubico.com/support/terms-conditions/cookie-notice/"
+    target="_blank"
+    >Cookies</a
+  >
+  |
+  <a
+    href="https://www.yubico.com/support/terms-conditions/privacy-notice/"
+    target="_blank"
+    >Privacy Policy</a
+  >
+</div>
+
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

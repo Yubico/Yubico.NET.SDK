@@ -1,0 +1,7 @@
+$ python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/verify.py v1 compiled --capture consumer=second --capture openpgptool=first --live
+PASS: 407 explicit unit dispositions, 17 complete groups, 19 shipping source paths; current bodies, typed wrappers and source/configuration identities reconcile.
+PASS: exact consumer/second actual Csc/source/reference/analyzer/config/assets evidence; current complete compiler bodies match.
+PASS: exact openpgptool/first actual Csc/source/reference/analyzer/config/assets evidence; current complete compiler bodies match.
+PASS: live binary/analyzer/assets identities checked.
+
+EXIT=0

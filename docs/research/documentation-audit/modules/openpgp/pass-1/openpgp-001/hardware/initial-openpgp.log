@@ -1,0 +1,11 @@
+$ ykman --device 103 openpgp info
+UTC 2026-11-04T13:27:47.613343+00:00
+OpenPGP version:            3.4
+Application version:        5.8.0
+PIN tries remaining:        3
+Reset code tries remaining: 0
+Admin PIN tries remaining:  3
+Require PIN for signature:  Once
+KDF enabled:                False
+
+EXIT=0

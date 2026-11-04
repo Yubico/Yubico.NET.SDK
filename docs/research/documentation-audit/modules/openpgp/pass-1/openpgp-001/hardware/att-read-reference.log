@@ -1,0 +1,5 @@
+$ /usr/bin/python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/vendor-reference-v2.py att --baseline docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-baseline-v2.json --output docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/att-read-reference.json
+UTC 2026-11-04T14:11:18.403798+00:00
+{"output": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/att-read-reference.json", "success": true, "phase": "complete"}
+
+EXIT=0

@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/retain-inputs.py v1-build final-inputs-v1
+PASS: actual Csc membership and 227 dependency identities reconciled; 22 source/config/assets text snapshots retained.
+
+EXIT=0

@@ -37,6 +37,11 @@ public enum KeyRef : byte
     /// <summary>
     ///     The Attestation key slot.
     /// </summary>
+    /// <remarks>
+    ///     Yubico extension used to attest generated Sig/Dec/Aut keys. Its key/certificate survive application
+    ///     reset. Current CRT encoding limits SDK read/generate/import operations on this slot; ordinary
+    ///     target-key attestation uses a separate command.
+    /// </remarks>
     Att = 0x81,
 }
 
@@ -85,6 +90,7 @@ public static class KeyRefExtensions
     /// <summary>
     ///     Gets the Control Reference Template bytes for this key slot.
     /// </summary>
+    /// <remarks>Returns borrowed static storage. ATT currently inherits the malformed encoding documented on Crt.Att.</remarks>
     public static ReadOnlyMemory<byte> GetCrt(this KeyRef keyRef) =>
         GetKeyRefData(keyRef).Crt;
 }

@@ -1,0 +1,5 @@
+$ /usr/bin/python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-state.py baseline --output docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-baseline.json
+UTC 2026-11-04T13:39:29.179166+00:00
+{"output": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-baseline.json", "success": false}
+
+EXIT=1

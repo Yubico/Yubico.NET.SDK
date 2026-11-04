@@ -1,0 +1,87 @@
+$ dotnet test docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~KdfDistinctSalts_ExtendedVerifyUsesUserIdentity"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests -> /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (app domain = off, method display = ClassAndMethod, method display options = None)
+[xUnit.net 00:00:00.09]   Discovered:  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (7 test cases to be run)
+[xUnit.net 00:00:00.11]   Starting:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (parallel test collections = off, stop on fail = off, explicit = off)
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.41]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] HYPOTHESIS With three distinct KDF salts, ordinary and extended VERIFY both authenticate the User PIN; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T13:51:51.6955104+00:00
+[xUnit.net 00:00:00.44]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:00.45]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:01.02]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.12]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.13]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] KDF configured=iterated-salted-S2K hash=SHA256 octet-count=100000 salts=three-distinct; no credential/hash bytes retained
+[xUnit.net 00:00:01.76]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PINS phase=before-extended-user-verify user=3 reset=0 admin=3 policy=Once
+[xUnit.net 00:00:01.77]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PINS phase=after-extended-user-verify user=2 reset=0 admin=3 policy=Once
+[xUnit.net 00:00:01.78]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ERROR phase=body type=Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException HResult=0x80131500
+[xUnit.net 00:00:01.78]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] APDU phase=body SW=0x6982 CLA= INS= P1= P2=
+[xUnit.net 00:00:01.78]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PIN_ERROR phase=body typed-retries=0
+[xUnit.net 00:00:01.78]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:01.79]       Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException : PIN verification failed (0 attempt(s) remaining)
+[xUnit.net 00:00:01.79]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [FAIL]
+[xUnit.net 00:00:01.79]       Stack Trace:
+[xUnit.net 00:00:01.80]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Pin.cs(263,0): at Yubico.YubiKit.OpenPgp.OpenPgpSession.VerifyPwAsync(Pw pw, Byte p2, ReadOnlyMemory`1 pin, CancellationToken cancellationToken)
+[xUnit.net 00:00:01.80]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Pin.cs(38,0): at Yubico.YubiKit.OpenPgp.OpenPgpSession.VerifyPinAsync(ReadOnlyMemory`1 pin, Boolean extended, CancellationToken cancellationToken)
+[xUnit.net 00:00:01.80]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(87,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<KdfDistinctSalts_ExtendedVerifyUsesUserIdentity>b__3_0(ProbeScope probe, CancellationToken token)
+[xUnit.net 00:00:01.80]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(91,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<KdfDistinctSalts_ExtendedVerifyUsesUserIdentity>b__3_0(ProbeScope probe, CancellationToken token)
+[xUnit.net 00:00:01.80]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(93,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<KdfDistinctSalts_ExtendedVerifyUsesUserIdentity>b__3_0(ProbeScope probe, CancellationToken token)
+[xUnit.net 00:00:01.80]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/ProbeSupport.cs(62,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.ProbeScope.RunAsync(YubiKeyTestState state, ITestOutputHelper output, String hypothesis, Func`3 action, Boolean requireKdf)
+[xUnit.net 00:00:01.80]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:01.80]       Output:
+[xUnit.net 00:00:01.80]         HYPOTHESIS With three distinct KDF salts, ordinary and extended VERIFY both authenticate the User PIN; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T13:51:51.6955104+00:00
+[xUnit.net 00:00:01.80]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.80]         PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:01.80]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.80]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.80]         KDF configured=iterated-salted-S2K hash=SHA256 octet-count=100000 salts=three-distinct; no credential/hash bytes retained
+[xUnit.net 00:00:01.80]         PINS phase=before-extended-user-verify user=3 reset=0 admin=3 policy=Once
+[xUnit.net 00:00:01.80]         PINS phase=after-extended-user-verify user=2 reset=0 admin=3 policy=Once
+[xUnit.net 00:00:01.80]         ERROR phase=body type=Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException HResult=0x80131500
+[xUnit.net 00:00:01.80]         APDU phase=body SW=0x6982 CLA= INS= P1= P2=
+[xUnit.net 00:00:01.80]         PIN_ERROR phase=body typed-retries=0
+[xUnit.net 00:00:01.80]         FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:01.81]   Finished:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests
+  Failed Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.KdfDistinctSalts_ExtendedVerifyUsesUserIdentity(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [1 s]
+  Error Message:
+   Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException : PIN verification failed (0 attempt(s) remaining)
+  Stack Trace:
+     at Yubico.YubiKit.OpenPgp.OpenPgpSession.VerifyPwAsync(Pw pw, Byte p2, ReadOnlyMemory`1 pin, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Pin.cs:line 263
+   at Yubico.YubiKit.OpenPgp.OpenPgpSession.VerifyPinAsync(ReadOnlyMemory`1 pin, Boolean extended, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Pin.cs:line 38
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<KdfDistinctSalts_ExtendedVerifyUsesUserIdentity>b__3_0(ProbeScope probe, CancellationToken token) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 87
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<KdfDistinctSalts_ExtendedVerifyUsesUserIdentity>b__3_0(ProbeScope probe, CancellationToken token) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 91
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<KdfDistinctSalts_ExtendedVerifyUsesUserIdentity>b__3_0(ProbeScope probe, CancellationToken token) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 93
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.ProbeScope.RunAsync(YubiKeyTestState state, ITestOutputHelper output, String hypothesis, Func`3 action, Boolean requireKdf) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/ProbeSupport.cs:line 62
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ HYPOTHESIS With three distinct KDF salts, ordinary and extended VERIFY both authenticate the User PIN; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T13:51:51.6955104+00:00
+ OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+ PREMUTATION applet-KDF-capability=True; gate=application-related-data
+ OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+ OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+ KDF configured=iterated-salted-S2K hash=SHA256 octet-count=100000 salts=three-distinct; no credential/hash bytes retained
+ PINS phase=before-extended-user-verify user=3 reset=0 admin=3 policy=Once
+ PINS phase=after-extended-user-verify user=2 reset=0 admin=3 policy=Once
+ ERROR phase=body type=Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException HResult=0x80131500
+ APDU phase=body SW=0x6982 CLA= INS= P1= P2=
+ PIN_ERROR phase=body typed-retries=0
+ FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+
+
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 2.1007 Seconds

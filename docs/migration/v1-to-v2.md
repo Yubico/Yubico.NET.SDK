@@ -751,9 +751,15 @@ see the [YubiOTP guide](../../src/YubiOtp/README.md#constraints).
 
 ### OpenPGP
 
-Use `Yubico.YubiKit.OpenPgp` for OpenPGP card operations. Review key slots, PIN policy, management key behavior, and command-level assumptions manually.
+Use `Yubico.YubiKit.OpenPgp` for OpenPGP card operations. Review key slots, User/Admin PIN authorization,
+KDF transitions, persistent card state and any optional secure-channel setup manually. The
+[OpenPGP guide](../../src/OpenPgp/README.md) covers provisioning, recovery, raw crypto formats and resource scopes.
 
-PIN verification failures throw a dedicated `OpenPgpInvalidPinException` with a typed `RetriesRemaining`; see `openpgp-exception` in `v1-to-v2-map.yml`.
+User/Admin VERIFY failures currently throw `OpenPgpInvalidPinException` for every unsuccessful response,
+including non-PIN errors. Inspect `SW` and nullable `RetriesRemaining`; change/recovery commands use general
+APDU exceptions. Extended-mode 6982 fallback currently reports Reset Code attempts instead of User attempts:
+query fresh PIN status and inspect `AttemptsUser`, and diagnose before retrying. Distinct KDF salts also affect
+extended verification. See `openpgp-exception` in `v1-to-v2-map.yml` and the guide's credential/KDF sections.
 
 OpenPGP user-interaction-flag policy notifies `SessionCreationOptions.UserPresencePrompt`; cached or unknown
 policy is advisory and may not result in a device wait.

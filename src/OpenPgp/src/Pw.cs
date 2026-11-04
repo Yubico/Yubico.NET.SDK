@@ -25,7 +25,9 @@ public enum Pw : byte
     User = 0x81,
 
     /// <summary>
-    ///     The Reset Code (PW1 with extended verification), used to reset the User PIN.
+    ///     The Reset Code used to recover the User PIN. This is a separate credential from PW1.
+    ///     VERIFY P2=82 instead selects PW1's other-operation access state; that byte overlap
+    ///     does not make the Reset Code a second User PIN.
     /// </summary>
     Reset = 0x82,
 

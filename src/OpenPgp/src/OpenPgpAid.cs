@@ -55,7 +55,8 @@ public sealed class OpenPgpAid
     /// <summary>
     ///     The device serial number, decoded from BCD.
     ///     If the serial number bytes contain invalid BCD (hex A-F), the raw 4-byte value
-    ///     is returned as a negative number.
+    ///     is cast to a signed 32-bit integer and negated. High-bit raw values can therefore yield a positive
+    ///     result; use Raw for the original identity bytes rather than interpreting the sign as a validity flag.
     /// </summary>
     public int Serial { get; private init; }
 

@@ -1,0 +1,349 @@
+{
+  "baseline": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+  "accepted_manifest_sha256": "fced852141bced96663c590805afa9de5de76dcf10cbb05f2c8701a1364cc834",
+  "files": [
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesExportCommand.cs",
+      "before_sha256": "2fbad1fa86cf62a6e3720675baa2759a3650f85eaf680153bc60b738f6c8aac5",
+      "after_sha256": "d84b95f30ee4efcf484ce3dcf94562c5aab121b0ac5ce506fb9c2e1687864efc",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesImportCommand.cs",
+      "before_sha256": "a5a9b881d132d673b0ae04d6586a6931c8c45e6e246d3d4efbc17b22d8af6d70",
+      "after_sha256": "539ea85c4c9e9e328fabb9254ab89f77500a75137526434d890e09126f542f5c",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/InfoCommand.cs",
+      "before_sha256": "3fa7bdacdf96791a0074b0cdfd11d1a757e5f7006cfcb840681e1af9d78d78c2",
+      "after_sha256": "eccd5014b068e0321819b34c01462cc7975c1ad7bfe50540d3cfa55ab0b0186a",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysAttestCommand.cs",
+      "before_sha256": "8cbe17965a59f94fc7141cba0786c3664136ad6503ca924bb400e59056044717",
+      "after_sha256": "11f44d7298fc86e2c6b41565b2a85811c64f0d4e423f24625a110a0b821f1b05",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysGenerateCommand.cs",
+      "before_sha256": "8966ef9ed58883bf2366e25d21d3fee6764d05aae44391d999f3b6bea91cfb3a",
+      "after_sha256": "5dcdb4a1b315c00b7f06cf86d79d144268e4041b28ce96018c00cc2a762988c2",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysImportCommand.cs",
+      "before_sha256": "031279f1528a65506ad83bffc418cb5cc8c3b7dcb1b5d26591b909a0ec6353be",
+      "after_sha256": "5f909d54a5d3f3619fc70151baab4424bca2459e4ee518eab8ed5eefe88f4624",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysSetTouchCommand.cs",
+      "before_sha256": "3584703895992acdd2de60492f7a11b623eee9e27891120a8132a94b7fd3e436",
+      "after_sha256": "721fa97551f978fb894ef67d0d811d2a76b3797e5a0070076e6b1fcc77e60cbb",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "before_sha256": "303de986b42d36fe4e699cee303e412005502b9e39b424ba3ac1a59a7bb14951",
+      "after_sha256": "ccaaeff365d3abd714ee69bbfc9da26143ceb179b38371bbf9ccf9296eef01f5",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+      "before_sha256": "178a885130a56fc2c90aa2e4fda37e641671eb2f7aa61b9fd754cb4c4e91b0d8",
+      "after_sha256": "e1ac6a3b5917e1002061166dfb8fdaccb244cef3463e345ab89762ec6680839e",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/OpenPgpDeviceSelector.cs",
+      "before_sha256": "14ed72f594cbf7d504e91cbaf146cf6a75ef254e7ce9d716c1d7b4d7eeaed455",
+      "after_sha256": "56edaf32eb3d3ca0015c67d03115e6cc0f555a30b68a88bb5c8cb26365c93423",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/AlgorithmAttributes.cs",
+      "before_sha256": "e742cfd3fcfe46cf494e79497d665dd89d3dd3ade4dc089ad4337e473e7c22be",
+      "after_sha256": "b46332c14801ed1050cb251a15e039256c7517546ca41e5eceab2f2cf55cd21c",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/ApplicationRelatedData.cs",
+      "before_sha256": "5ae325d247d60ed0bea8ee1b1d666f5e7ab7aeb2e60e35850732492346e1e6e5",
+      "after_sha256": "0cc21c1c01d0d2178186108ffcb0ab224cca84ebe47a90e89f5b8d58b62f1e5e",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+      "before_sha256": "74ff3cd5b67c5adbd1b101d7550fb950d442944975c781f8db08bcfd3662ab9c",
+      "after_sha256": "d893613409896ba63a52e2826dbfb129dd624410b8e85cd7b620bef7f51614d8",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/Crt.cs",
+      "before_sha256": "472043789195dd78289bd081ac36757b10841781b948f8892ae97cdc73f2b920",
+      "after_sha256": "273b4df438ba81f96033c688b1ccc10a9817d5879ca49198a83ae3cb8a774bda",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/CurveOid.cs",
+      "before_sha256": "883f2378039fd639a0cb814a29903b0d0d061642e8f3483ffa7a7fe19ea14355",
+      "after_sha256": "29fbf9dea49b8f3e027dea233af695844316a6b1e068c5c60e65625fc1c91eee",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/DataObject.cs",
+      "before_sha256": "eaedb154c75ed52df38af40b18fdb9df9156c6ba13c4272d877c6c3a55e2ba24",
+      "after_sha256": "39f3c960032e0142745d6657d66f705a58ae19680e0221963e955e21f744047c",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/DiscretionaryDataObjects.cs",
+      "before_sha256": "49aee7366b5f60ea2dde6d178c9cbbc7a37d2101fb91c314649a2ea1f2b2c1cb",
+      "after_sha256": "c90fd5003c306f39ba32ec0d4db63a7c660a1e10c3ca3d818ec52956ad19f042",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/ExtendedCapabilities.cs",
+      "before_sha256": "3591bc11683f40e0e3bff69b7fa9a93c729665ec251d8696a2309e1f1bde6f44",
+      "after_sha256": "a586a6949514d62c9774380bc73a8a41253929e8852e3daf88a4249ff6cc07fd",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/GenerationTimes.cs",
+      "before_sha256": "32cf3e8d5546f1d4dc007b284615c15cd856660823b53f6d07b3202622e0458f",
+      "after_sha256": "fa6cd5981fc6f12bdc6987b87bb4012eb3dbb83d133b5eb7b0cf0e09355ffd4a",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+      "before_sha256": "0326d6e87ab8dea3883d38f7b57f7abb4d089cee6ccd3dee237424a18e2999a9",
+      "after_sha256": "c80eca42c1b5c5d18d867af94d7c625413e2fce7d26253d24ee73237c8daa9ca",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/Kdf.cs",
+      "before_sha256": "bf19616dd57e25528b1cf95d6a7906ac975729a629a73bf7da32af093113e837",
+      "after_sha256": "c801bcb46603c91a89c08bdb68e895e1a3f5b0c5f2fa73221ec2748fcb85a0fe",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/KeyRef.cs",
+      "before_sha256": "8659315711a981818be21b1f183a6bc1c83fad884c4b17906de60046d82c64f7",
+      "after_sha256": "89c55bec16ab698482d8e9b0fe54ef1564f12f94aa44de57236737ba1288383b",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpAid.cs",
+      "before_sha256": "8ee3cfbce1845ce9193333ae1f6b0867a0d486256d2c0a5cfb5decb7e2b132a6",
+      "after_sha256": "ef109e699a27fc4e2993de7b6aed9643e484ea45af16f9d5b9480d9779ed5f02",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpInvalidPinException.cs",
+      "before_sha256": "cae01b440186b2b19d9b434aed04e5fda82fae45c495fe7f5024dc884586e55d",
+      "after_sha256": "3fa2b9e1f36c4cf10e452e4a895a3d37e16565e3c5a71d7ac7909a5cba882b99",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "before_sha256": "7321f5d2c7a4da47d7b4aeffce568b73c651e42866899e2624bbf2796a9a7d2c",
+      "after_sha256": "f72f23197a1187d184e00299fbf26d921340f739d879b42929d33db2137a4b91",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+      "before_sha256": "c91410f4bd71eafb9597a4a4850238c6d627bc81a753a5e9d9193811d060778c",
+      "after_sha256": "0d26708272a205128ca9a4455476787ee84838b731e244d575a8585aa99d27f9",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+      "before_sha256": "02f054d3cecd25d87052f704ae86f297ad7b42c86d46148f1f95d4b770918cbc",
+      "after_sha256": "a56b8eb0ebf35588d53239c981f190b29c6872976c283552a9ee677dd39c6163",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+      "before_sha256": "0e37d06b8d231236ac0b61b0c480af1e115cf9dee8e71fa88ae28df0c273ec48",
+      "after_sha256": "6fc6942f305ffaa58482b46900531164d61bf005897cbf2028ea8cb5b3f91d56",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+      "before_sha256": "f892a3f48338adeff8f2805440dc76eb4f327140b7d46e85ee2b3965bbc4dd6c",
+      "after_sha256": "a3e816b6d82a4da3a87603cfd062637f889e4c42ed147be34bea2dd9781f3377",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.cs",
+      "before_sha256": "19aa4b550e4fd4e30cd8ce745f38ab0c8e391249784eda0ff2c31235f89bc2d5",
+      "after_sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/PinPolicy.cs",
+      "before_sha256": "115d8df77dd27b548776df90c36d301e1300293697d9cf7ac24b9180d896f85d",
+      "after_sha256": "797223515b16746e8fc61d7fdb28c0972aa7c60f00b40999518a6e90769470d1",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+      "before_sha256": "b22541b9708eb8a9286bfa07312475a80119d334e973216ee5b3c0538e617434",
+      "after_sha256": "948e178666c641ea5c07ef918afb530826004b5f3e2b8ca8e0b342748367a4ac",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+      "before_sha256": "4026623b84c0f54d144dab69851fb8b2d0b936291c2890fe55ae890d70c4ed91",
+      "after_sha256": "bf994242ce0c9a0529bc1c9037cc4ede1c83bbb41ffa90aba2b5dfdf4780764f",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/Pw.cs",
+      "before_sha256": "e0e8fe18804a47f792d6aeb46662b14e16a89a09ad3094964d81ff32aa22a428",
+      "after_sha256": "9d6a58143ad43251e5d48eae541d2d5776b9f99ddac2d989d8db0566f45756c8",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/PwStatus.cs",
+      "before_sha256": "e8f13e6a7860ee814b8e632710df819d3bb57d9a79b0bedb8792cacbdd8b3c12",
+      "after_sha256": "6363c56e80aad022fa327a4130385608b0bcf891e3540a17b6878462647ca723",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/RsaSize.cs",
+      "before_sha256": "132fd5f1617873ff9342ce22521e21553e499b042aa75f9c65999d04241a2c0d",
+      "after_sha256": "ec8c027e1e482d74a33d5dcf27c386ff28db5d38a7ee67f7382a1d36a8728a41",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/SecuritySupportTemplate.cs",
+      "before_sha256": "5d476ef3485784f79e0b027c42c00ee26607301955d6e79125fb7112c0b028e4",
+      "after_sha256": "87e75603f7177bb63d24d2c65652b32a18a4d691f22956b21c6995de21192765",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/src/Uif.cs",
+      "before_sha256": "465caf48023ddea18b5196a16c65a649109b1b435468e2a62f0fa4758eea98f4",
+      "after_sha256": "53528c10dc014e49c3c5f24f98975ca82f5843a86487c351ff4aa2341c4c60d5",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpAdvancedTests.cs",
+      "before_sha256": "10fb63b144c1e22c28c524edfc3b4915a90df20ff1e8a2b7b932ddb7954e0027",
+      "after_sha256": "03c320010d5d14768c8cac39902f85fec6ae730a5fa6ed95d1d438b856d6cb03",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpDecryptTests.cs",
+      "before_sha256": "65cd4304162f736d17938679b049d17b65b39c276743fa95ee6b472b79463236",
+      "after_sha256": "5885993d692f88631bc7816a37c95aefe53dcaa1a73c77888bc531bc3ebb33b7",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpKeyImportTests.cs",
+      "before_sha256": "22875acf6dfdca9dfee221c801ab275553d20837e58a02148c074b6417ab92c8",
+      "after_sha256": "4d8a4f565ff7fb93942111c441779ef52a1dd12866575a85d066f0ec74a6f9f9",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+      "before_sha256": "10b2d3e9fc5b17a33e01d98863ada8872a9f627860abba5237b2971a3fde208d",
+      "after_sha256": "18809d5c63503bcb2fb742a939cb02032f4759b5dfa9b0c2423955919a770e04",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+      "before_sha256": "3af089b333d8a544437f967c885c085bf2934d324bd86eba55cef166def387da",
+      "after_sha256": "ab6dae4010bb2da012aa6d8788106bbd46eb9fe1642635088b20d0dd8302c8a9",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+      "before_sha256": "be2285192e822b3fc7fa5351a88bd52b11fb14a1a4a2af499a5d551947868713",
+      "after_sha256": "90b087ce7568b52cb0c8a945d2379928fe9b07f32f1d7aa6422ef1404df57d12",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AlgorithmAttributesTests.cs",
+      "before_sha256": "a7419eb23dbfbb28a2aeb106a3f1fee3eccda593aeea4252d89f10f062794505",
+      "after_sha256": "bf7e3899f7e3e8c7c94fdd8c7db8bf50206eca7efcece7db97ff17f30c3c372f",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AuditV2/OpenPgpAuditReproTests.cs",
+      "before_sha256": "8765e254667eab89c6c9de4beea68b033a3d349027317ffbbf41a789997997f9",
+      "after_sha256": "46ed843b7cba4e2b77521c071e27f96e6feb58b47a67bd2f7b8eadf7c3588919",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+      "before_sha256": "0e432c5b41d340606f927699fe8f0258f37e4c2fa56c5debf45092fc25913c63",
+      "after_sha256": "ad67b4ff9c4445f7d18a9dc67de7ac36af8035152ef1660024b57003e2a46d89",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+      "before_sha256": "17d6061c6c70feccfb1526f586b24b02d381423ca42090fa86bc4653daba8f19",
+      "after_sha256": "20af9a448615fa1d97498a73072f8f5cb1caac88d1b282eb61f342468e00f5e8",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs",
+      "before_sha256": "6024d0f4fe09e66132dcb56866b64e951d94af170861e7c09aad328a6ab0fd8c",
+      "after_sha256": "6dc53913bcb7e721ea0378e8d3198caea428def944cdef6b354c40bde502b8a9",
+      "whitespace_only": true,
+      "imports_identical": true
+    }
+  ]
+}

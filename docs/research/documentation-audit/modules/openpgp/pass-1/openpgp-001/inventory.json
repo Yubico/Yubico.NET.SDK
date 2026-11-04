@@ -1,0 +1,485 @@
+{
+  "baseline": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+  "files": [
+    {
+      "path": "src/OpenPgp/CLAUDE.md",
+      "bytes": 7277,
+      "sha256": "d21b502b8ffd855f4bac3eb0d5de689faa41146a900ce471f950c93b33e889ca"
+    },
+    {
+      "path": "src/OpenPgp/PACKAGE_README.md",
+      "bytes": 1136,
+      "sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd"
+    },
+    {
+      "path": "src/OpenPgp/README.md",
+      "bytes": 10254,
+      "sha256": "7f02b14413a0d3b6c7f2a344f4e166da94be52773bcf9fdefc5cdd73452d4025"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangeAdminPinCommand.cs",
+      "bytes": 1596,
+      "sha256": "7ff369f8579c47fcdaf2524e9ae80474aded01f90b44450fe6ac4976f56a5532"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangePinCommand.cs",
+      "bytes": 1530,
+      "sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetResetCodeCommand.cs",
+      "bytes": 1606,
+      "sha256": "cafab235d7fa46edf85db375bc7e4b3a85777c8c79d7e40c28667a6e6e08650a"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetRetriesCommand.cs",
+      "bytes": 1852,
+      "sha256": "ad911419163de36ea121584ca0b0454aea371133ffeaf9f596fb83318c94d213"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessUnblockPinCommand.cs",
+      "bytes": 1579,
+      "sha256": "da02efebfe500148ace77a80777fb1f17015ede7a8067bcf535c01d14bcbf0d3"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesDeleteCommand.cs",
+      "bytes": 1859,
+      "sha256": "7d8a1b892e46000910c5c39ae4d26c1c2c5472ae38467f71e36bbb87801f33b2"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesExportCommand.cs",
+      "bytes": 2086,
+      "sha256": "b41f31d38b22185550f6bca50a10e4434802ec94afebae7a8761d327c3c4aa8c"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesImportCommand.cs",
+      "bytes": 2367,
+      "sha256": "9e3bd03824f08d2395c2b661a24b50640d383bb7774e600291d596c1e1a3817f"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/InfoCommand.cs",
+      "bytes": 5841,
+      "sha256": "99a9d2207183c02907c2aca83b8b264bda86d0fd0811166a53d896caab77bf4c"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysAttestCommand.cs",
+      "bytes": 2079,
+      "sha256": "4ba7a2947ab2d5e306e0f30fb3f0c08ccbe86de2a189ac86ca386ea87e861d9e"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysGenerateCommand.cs",
+      "bytes": 3623,
+      "sha256": "0cdc972763cf3e44417c40c52a81a2a675a68be4716e86fa46245c52f0e5a3fd"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysImportCommand.cs",
+      "bytes": 4558,
+      "sha256": "5dc9baee028991e821502f11eef4f7eb47be009add03e622125a4dd62c320f05"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysSetTouchCommand.cs",
+      "bytes": 2790,
+      "sha256": "c6ba1829fb7150ad1cfdf4cb355bc34fa2c6234ac2338a49d12f0bb6345e114b"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "bytes": 4617,
+      "sha256": "f1bab4a3fbcc6601e1e2702ff89ee98eb54a6c4e0837b029f2cd082ba676d26a"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+      "bytes": 2017,
+      "sha256": "51ee40e6346776da9adb773a95e44fe30191ae3ca0142b5a49182d960edca70e"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Output/OutputHelpers.cs",
+      "bytes": 2983,
+      "sha256": "0a7bc56e6b7aeaefec99531c23a08db9d76f70c40df72b5a572cb40a05227244"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/DeviceSelector.cs",
+      "bytes": 6245,
+      "sha256": "20b4b9f81b16d742baf6f5139b29e942dcfd686259f559b79f5a23df5c954ed5"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/OpenPgpDeviceSelector.cs",
+      "bytes": 2459,
+      "sha256": "e7dce92dcf927dd2c6526750528d28418d7bde58dffc27480844969dd587ae73"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+      "bytes": 1083,
+      "sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+      "bytes": 2438,
+      "sha256": "b3aa927f8bfd67fd9a0bb510ceb72473fbc1e6f9bb433854f4c7c01004d50d75"
+    },
+    {
+      "path": "src/OpenPgp/src/AlgorithmAttributes.cs",
+      "bytes": 6602,
+      "sha256": "a7a75e490a2b9c096165b64e80d14c47b073677ba4170d9b4bcec92ff6915015"
+    },
+    {
+      "path": "src/OpenPgp/src/ApplicationRelatedData.cs",
+      "bytes": 4460,
+      "sha256": "0ca26124661cf78e78c5d6563ce100488a14cd868f915feff0e94eed47667712"
+    },
+    {
+      "path": "src/OpenPgp/src/Backend/IOpenPgpBackend.cs",
+      "bytes": 977,
+      "sha256": "4340a3d888e757c06fc08d5975229285a9884ecdef9daebcea334a73f32cc398"
+    },
+    {
+      "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+      "bytes": 3511,
+      "sha256": "2158b42ab9c5dd247a194609ff3e327703ca84a589c94e2866c9f8e89f208f9a"
+    },
+    {
+      "path": "src/OpenPgp/src/BcdHelper.cs",
+      "bytes": 1826,
+      "sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b"
+    },
+    {
+      "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+      "bytes": 1816,
+      "sha256": "19a458b15cba78a661d5c3010cffd570ac862b9c98981ea5e9c3b57a521e55d9"
+    },
+    {
+      "path": "src/OpenPgp/src/Crt.cs",
+      "bytes": 1788,
+      "sha256": "391fcb05621ab43d1883210bf6ad1793f624ee4b810923783f8440f56417540f"
+    },
+    {
+      "path": "src/OpenPgp/src/CurveOid.cs",
+      "bytes": 5792,
+      "sha256": "b0b35fd5f6588caafb11fab5bd92fd32919d7c092db213541a68adbfeda477e5"
+    },
+    {
+      "path": "src/OpenPgp/src/DataObject.cs",
+      "bytes": 2559,
+      "sha256": "9536497ddb7e42365fdcd943e1d592334c357cf7f893f152281ac07957113b71"
+    },
+    {
+      "path": "src/OpenPgp/src/DigestInfo.cs",
+      "bytes": 3010,
+      "sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a"
+    },
+    {
+      "path": "src/OpenPgp/src/DiscretionaryDataObjects.cs",
+      "bytes": 7288,
+      "sha256": "751ef7472865af5cf2024d3ac0313b20de336dc75d7c4f06fc5dc6572d93682d"
+    },
+    {
+      "path": "src/OpenPgp/src/EcImportFormat.cs",
+      "bytes": 983,
+      "sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc"
+    },
+    {
+      "path": "src/OpenPgp/src/ExtendedCapabilities.cs",
+      "bytes": 3167,
+      "sha256": "f3a97caaa79f73f2bdeddaeb763bc1243f3e8dd0df14fc07ffc074ecc97c2aa1"
+    },
+    {
+      "path": "src/OpenPgp/src/ExtendedCapabilityFlags.cs",
+      "bytes": 1021,
+      "sha256": "93ba53dcd741d201781298d441067699f5f3c2f303b868a96c5135761ab33008"
+    },
+    {
+      "path": "src/OpenPgp/src/ExtendedLengthInfo.cs",
+      "bytes": 2167,
+      "sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc"
+    },
+    {
+      "path": "src/OpenPgp/src/GeneralFeatureManagement.cs",
+      "bytes": 975,
+      "sha256": "6812033c5dfd3bceb683a04a4cd107783fa5e707294c8be2919f68f69c103a94"
+    },
+    {
+      "path": "src/OpenPgp/src/GenerationTimes.cs",
+      "bytes": 1664,
+      "sha256": "9c2e0ebaaf0c233d542663298af34a4ea71e21d086a155fe45f4e8cad8645339"
+    },
+    {
+      "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+      "bytes": 19398,
+      "sha256": "83e52989b212393b2971d5098c8939924fa8ce25f627281351e81c0ed85614e3"
+    },
+    {
+      "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "bytes": 3295,
+      "sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2"
+    },
+    {
+      "path": "src/OpenPgp/src/Ins.cs",
+      "bytes": 1107,
+      "sha256": "512ecc1908428b5d93d31ccba7e2858081fcf8a574458dfa4e2811dcfda5a7fd"
+    },
+    {
+      "path": "src/OpenPgp/src/Kdf.cs",
+      "bytes": 12374,
+      "sha256": "583ac6bd355794537455b480e47e1e37a991a87e3308c5d6125a01a2f6695cd8"
+    },
+    {
+      "path": "src/OpenPgp/src/KeyFingerprints.cs",
+      "bytes": 1777,
+      "sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679"
+    },
+    {
+      "path": "src/OpenPgp/src/KeyInformation.cs",
+      "bytes": 1721,
+      "sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63"
+    },
+    {
+      "path": "src/OpenPgp/src/KeyRef.cs",
+      "bytes": 3436,
+      "sha256": "35dfbbadb87fe5537c8e6e9696c00ebb754823d5d282fae028735a766173b075"
+    },
+    {
+      "path": "src/OpenPgp/src/KeyStatus.cs",
+      "bytes": 1040,
+      "sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpAid.cs",
+      "bytes": 3135,
+      "sha256": "c8c1b93de0564e47a8fb0658a46986f6397144d6639e63a0eb4006592a969085"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpInvalidPinException.cs",
+      "bytes": 2957,
+      "sha256": "57233b660e9d7ee04cd28d1c0570625d997e8987bb9bcba5975c9aba77cc97a0"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Certificates.cs",
+      "bytes": 5177,
+      "sha256": "0d5ad3295feb9cb698d52261620252e258976e311fd83a4f4477728300f6c449"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "bytes": 8985,
+      "sha256": "f176214e30852ddfa860a1412301925138f3bd3acb2807a5030da4f677ba1448"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+      "bytes": 15145,
+      "sha256": "adcae7368ae1e4e7701f877e1d8f2cb7cd6ec5e1bc2e9ce0eb91f4e7bec7a209"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+      "bytes": 9894,
+      "sha256": "c56026f1202824d41de16bf786dee05c5fe3690a68dbeb88464d12fc5be91756"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+      "bytes": 13179,
+      "sha256": "b195c385a306696be5f7d676917331cd58e4cc9a56fc70f4f318fc8f3bd6477e"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+      "bytes": 3781,
+      "sha256": "1e22d15b6647a67f6fc09d094c7467e25ad75481b8a21595c7cef47e204f2050"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.cs",
+      "bytes": 15201,
+      "sha256": "47676d54085f3ba943785e90886ea96790036c2a7e66c78feac0ffc5e6e7a31e"
+    },
+    {
+      "path": "src/OpenPgp/src/PinPolicy.cs",
+      "bytes": 1017,
+      "sha256": "5fae6376f3ee15cf1ae1a2a98dea8045b3d52ac4bb63fd45fc1800ab1969f6f8"
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+      "bytes": 7579,
+      "sha256": "24b0597793ebe450e2bb4c70cfee587427b880a2200a85754e30da3fc2f3a8d8"
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+      "bytes": 7216,
+      "sha256": "4d925736452b745ad5779dc427e0ebe99a3cede7609fbb45567af31a51bd7183"
+    },
+    {
+      "path": "src/OpenPgp/src/PublicAPI.Shipped.txt",
+      "bytes": 17,
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/OpenPgp/src/PublicAPI.Unshipped.txt",
+      "bytes": 50250,
+      "sha256": "51a2c4de21868278f00f7d012e7d1bb12907e70bd5e6a8dfad2ea5fbb85be9e9"
+    },
+    {
+      "path": "src/OpenPgp/src/Pw.cs",
+      "bytes": 1149,
+      "sha256": "c90d9d85ec96cb1c5208d6f7cad20747dca7b6109ddafcf4fc50f82ef9a5bf96"
+    },
+    {
+      "path": "src/OpenPgp/src/PwStatus.cs",
+      "bytes": 3890,
+      "sha256": "3a4e872190e7a4e182ee023d48774189e70931511e71010a75fe59f34ccc0ad0"
+    },
+    {
+      "path": "src/OpenPgp/src/RsaImportFormat.cs",
+      "bytes": 1233,
+      "sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81"
+    },
+    {
+      "path": "src/OpenPgp/src/RsaSize.cs",
+      "bytes": 790,
+      "sha256": "c7759cb429158cce387450a5cfa581f171089f3bb1e32d39c0af68333b496bdf"
+    },
+    {
+      "path": "src/OpenPgp/src/SecuritySupportTemplate.cs",
+      "bytes": 2034,
+      "sha256": "986b4850d9f2488a6e60bae32333040cba315a35a355adb8c654119b91cc127d"
+    },
+    {
+      "path": "src/OpenPgp/src/SupportedAlgorithm.cs",
+      "bytes": 1166,
+      "sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1"
+    },
+    {
+      "path": "src/OpenPgp/src/Uif.cs",
+      "bytes": 2332,
+      "sha256": "d4dfbc0f3a22564b6b9a6e7a72a9dc159af4bbd2573deb2bf3ba9bc2cd23c546"
+    },
+    {
+      "path": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+      "bytes": 826,
+      "sha256": "34662c67febedf12e697a58bbc4ce872ccdd50f67080cb432d4c4c4cfba0d00a"
+    },
+    {
+      "path": "src/OpenPgp/tests/CLAUDE.md",
+      "bytes": 485,
+      "sha256": "f91706d227c7a7df549dc2d5fbc5914251428fa10f614badd6c5d1ee903dae13"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpAdvancedTests.cs",
+      "bytes": 7914,
+      "sha256": "6d40972ed1fb5387b39ba2701f00d97f5b567a70a26fe692eb851978a760c59f"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpDecryptTests.cs",
+      "bytes": 3873,
+      "sha256": "47b50e6f7adaeebb820b4d9cd88f687348a47e4693ca62743404c0f0959b9daf"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpKeyImportTests.cs",
+      "bytes": 9811,
+      "sha256": "40e28e90438253162a0e1d55002fbad0956d4ac6430f4cdd302ab1db04dc0d09"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpMultiCurveTests.cs",
+      "bytes": 4320,
+      "sha256": "5880b1541e5f79eab983f56475793b77935a342b9d970112d820c407b1611e83"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+      "bytes": 7699,
+      "sha256": "fa1736d01a01cec8d8472b0fcd8ada8f26b2484ffdc77000c1cccd1990e7f3e2"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+      "bytes": 26759,
+      "sha256": "9398ff19ed5da0721766a9a737b155277036ff5c15a54e053d49e12cfac98467"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+      "bytes": 3278,
+      "sha256": "46b64ad9428a58959eba21df42fb5778c60b5b0e60461083e9ffd66f2c1f6c4e"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj",
+      "bytes": 1844,
+      "sha256": "6744bd61272f01d8a9af9050b0aa4e1463eece747ebbb354252515d96b698846"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/xunit.runner.json",
+      "bytes": 175,
+      "sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AlgorithmAttributesTests.cs",
+      "bytes": 4545,
+      "sha256": "4226ccd36ca46fef9826d7ac667ac3215f5e483c990a02bc320ac25dea634118"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/ApplicationRelatedDataTests.cs",
+      "bytes": 9084,
+      "sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AuditV2/OpenPgpAuditReproTests.cs",
+      "bytes": 6300,
+      "sha256": "1582e439e7c235e72d37444f574169ed28121e2ceae38250cdf54167a7ce9077"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/BcdHelperTests.cs",
+      "bytes": 2068,
+      "sha256": "568be427fe9a635459e08777ba7c39349e7dc290e699b1b3e352bf431f7c03c4"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/CurveOidTests.cs",
+      "bytes": 2816,
+      "sha256": "3294fdece45a60c199112bb8839539dfd9b29de3ee0e48424799d77edf04695d"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/DigestInfoTests.cs",
+      "bytes": 2886,
+      "sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/KdfTests.cs",
+      "bytes": 7608,
+      "sha256": "ff763440884972fca0fbc1469fa5155894ec113488aee94febf46fe02b826e5a"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpAidTests.cs",
+      "bytes": 3177,
+      "sha256": "cae003ca497e9d4c5c630a0e07755b273edc298513bc821c544c1eb759995a18"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpCollectionContractTests.cs",
+      "bytes": 1554,
+      "sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+      "bytes": 14132,
+      "sha256": "37ce64fa7863f45a05e1238436087ceba8ab144580d411b0be845d61d13c97ed"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+      "bytes": 13412,
+      "sha256": "de35e4db3018b2a8bf3cf320418aee1c50e2b7981bc8c41c725b99dd0bc5c2cf"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+      "bytes": 43066,
+      "sha256": "8b3fdcc86cbbfe9272ecd0bd7c832caa0b5fd8222bfcaff5a706fd3fe06d6bc4"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs",
+      "bytes": 6815,
+      "sha256": "903c855d48cac642ab855c46ef8d63fa8dd6abbba0b5dec6c7f47e4c519a1831"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PwStatusTests.cs",
+      "bytes": 2486,
+      "sha256": "cc30c1a61e32e60c5ce3613117a55d50341ec15205824c3b0c34cfabc8bb04df"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj",
+      "bytes": 1012,
+      "sha256": "eec7d8b986d4cfba471ee689d8d83347d6bd41bd6b40eba9500e7e6bfbf576f0"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/xunit.runner.json",
+      "bytes": 77,
+      "sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad"
+    }
+  ]
+}

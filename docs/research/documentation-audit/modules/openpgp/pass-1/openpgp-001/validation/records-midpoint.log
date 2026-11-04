@@ -1,0 +1,5 @@
+$ python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/check-records.py
+PASS: 11 record Markdown files / 11 local links, balanced fences; 400 UTF-8 artifacts and 1 pinned primary-source PDFs; 0 reviewed hashes checked.
+NOT RUN: final reviewed-files hash check (use --reviewed after review). No module content or external target contents opened.
+
+EXIT=0

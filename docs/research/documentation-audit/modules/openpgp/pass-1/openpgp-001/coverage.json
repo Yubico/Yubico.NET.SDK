@@ -1,0 +1,2328 @@
+{
+  "baseline": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+  "investigation_date": "2026-11-04",
+  "scope": "whole module and assigned shared OpenPGP sections",
+  "file_read_count": 96,
+  "files": [
+    {
+      "path": "src/OpenPgp/CLAUDE.md",
+      "sha256": "d21b502b8ffd855f4bac3eb0d5de689faa41146a900ce471f950c93b33e889ca",
+      "matches_inventory": true,
+      "lines": 142,
+      "category": "narrative",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C004",
+        "PGP-C010",
+        "PGP-C014",
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/PACKAGE_README.md",
+      "sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+      "matches_inventory": true,
+      "lines": 24,
+      "category": "narrative",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/README.md",
+      "sha256": "7f02b14413a0d3b6c7f2a344f4e166da94be52773bcf9fdefc5cdd73452d4025",
+      "matches_inventory": true,
+      "lines": 215,
+      "category": "narrative",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C001",
+        "PGP-C002",
+        "PGP-C003",
+        "PGP-C004",
+        "PGP-C005",
+        "PGP-C006",
+        "PGP-C007",
+        "PGP-C008",
+        "PGP-C009",
+        "PGP-C010",
+        "PGP-C011",
+        "PGP-C012",
+        "PGP-C015",
+        "PGP-C017",
+        "PGP-C019"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangeAdminPinCommand.cs",
+      "sha256": "7ff369f8579c47fcdaf2524e9ae80474aded01f90b44450fe6ac4976f56a5532",
+      "matches_inventory": true,
+      "lines": 49,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangePinCommand.cs",
+      "sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+      "matches_inventory": true,
+      "lines": 49,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetResetCodeCommand.cs",
+      "sha256": "cafab235d7fa46edf85db375bc7e4b3a85777c8c79d7e40c28667a6e6e08650a",
+      "matches_inventory": true,
+      "lines": 50,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetRetriesCommand.cs",
+      "sha256": "ad911419163de36ea121584ca0b0454aea371133ffeaf9f596fb83318c94d213",
+      "matches_inventory": true,
+      "lines": 57,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessUnblockPinCommand.cs",
+      "sha256": "da02efebfe500148ace77a80777fb1f17015ede7a8067bcf535c01d14bcbf0d3",
+      "matches_inventory": true,
+      "lines": 49,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesDeleteCommand.cs",
+      "sha256": "7d8a1b892e46000910c5c39ae4d26c1c2c5472ae38467f71e36bbb87801f33b2",
+      "matches_inventory": true,
+      "lines": 58,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesExportCommand.cs",
+      "sha256": "b41f31d38b22185550f6bca50a10e4434802ec94afebae7a8761d327c3c4aa8c",
+      "matches_inventory": true,
+      "lines": 68,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesImportCommand.cs",
+      "sha256": "9e3bd03824f08d2395c2b661a24b50640d383bb7774e600291d596c1e1a3817f",
+      "matches_inventory": true,
+      "lines": 73,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/InfoCommand.cs",
+      "sha256": "99a9d2207183c02907c2aca83b8b264bda86d0fd0811166a53d896caab77bf4c",
+      "matches_inventory": true,
+      "lines": 169,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysAttestCommand.cs",
+      "sha256": "4ba7a2947ab2d5e306e0f30fb3f0c08ccbe86de2a189ac86ca386ea87e861d9e",
+      "matches_inventory": true,
+      "lines": 60,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C012",
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysGenerateCommand.cs",
+      "sha256": "0cdc972763cf3e44417c40c52a81a2a675a68be4716e86fa46245c52f0e5a3fd",
+      "matches_inventory": true,
+      "lines": 90,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C009",
+        "PGP-C010",
+        "PGP-C013",
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysImportCommand.cs",
+      "sha256": "5dc9baee028991e821502f11eef4f7eb47be009add03e622125a4dd62c320f05",
+      "matches_inventory": true,
+      "lines": 137,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysSetTouchCommand.cs",
+      "sha256": "c6ba1829fb7150ad1cfdf4cb355bc34fa2c6234ac2338a49d12f0bb6345e114b",
+      "matches_inventory": true,
+      "lines": 82,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C004",
+        "PGP-C010",
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "sha256": "f1bab4a3fbcc6601e1e2702ff89ee98eb54a6c4e0837b029f2cd082ba676d26a",
+      "matches_inventory": true,
+      "lines": 135,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C015",
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+      "sha256": "51ee40e6346776da9adb773a95e44fe30191ae3ca0142b5a49182d960edca70e",
+      "matches_inventory": true,
+      "lines": 56,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C004",
+        "PGP-C005",
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Output/OutputHelpers.cs",
+      "sha256": "0a7bc56e6b7aeaefec99531c23a08db9d76f70c40df72b5a572cb40a05227244",
+      "matches_inventory": true,
+      "lines": 65,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/DeviceSelector.cs",
+      "sha256": "20b4b9f81b16d742baf6f5139b29e942dcfd686259f559b79f5a23df5c954ed5",
+      "matches_inventory": true,
+      "lines": 178,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/OpenPgpDeviceSelector.cs",
+      "sha256": "e7dce92dcf927dd2c6526750528d28418d7bde58dffc27480844969dd587ae73",
+      "matches_inventory": true,
+      "lines": 75,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+      "sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b",
+      "matches_inventory": true,
+      "lines": 27,
+      "category": "project-runner",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+      "sha256": "b3aa927f8bfd67fd9a0bb510ceb72473fbc1e6f9bb433854f4c7c01004d50d75",
+      "matches_inventory": true,
+      "lines": 72,
+      "category": "example",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C004",
+        "PGP-C015"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/AlgorithmAttributes.cs",
+      "sha256": "a7a75e490a2b9c096165b64e80d14c47b073677ba4170d9b4bcec92ff6915015",
+      "matches_inventory": true,
+      "lines": 199,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C009",
+        "PGP-C010",
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/ApplicationRelatedData.cs",
+      "sha256": "0ca26124661cf78e78c5d6563ce100488a14cd868f915feff0e94eed47667712",
+      "matches_inventory": true,
+      "lines": 112,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/Backend/IOpenPgpBackend.cs",
+      "sha256": "4340a3d888e757c06fc08d5975229285a9884ecdef9daebcea334a73f32cc398",
+      "matches_inventory": true,
+      "lines": 27,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+      "sha256": "2158b42ab9c5dd247a194609ff3e327703ca84a589c94e2866c9f8e89f208f9a",
+      "matches_inventory": true,
+      "lines": 93,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/BcdHelper.cs",
+      "sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b",
+      "matches_inventory": true,
+      "lines": 56,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+      "sha256": "19a458b15cba78a661d5c3010cffd570ac862b9c98981ea5e9c3b57a521e55d9",
+      "matches_inventory": true,
+      "lines": 56,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/Crt.cs",
+      "sha256": "391fcb05621ab43d1883210bf6ad1793f624ee4b810923783f8440f56417540f",
+      "matches_inventory": true,
+      "lines": 56,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C013"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/CurveOid.cs",
+      "sha256": "b0b35fd5f6588caafb11fab5bd92fd32919d7c092db213541a68adbfeda477e5",
+      "matches_inventory": true,
+      "lines": 135,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/DataObject.cs",
+      "sha256": "9536497ddb7e42365fdcd943e1d592334c357cf7f893f152281ac07957113b71",
+      "matches_inventory": true,
+      "lines": 89,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/DigestInfo.cs",
+      "sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a",
+      "matches_inventory": true,
+      "lines": 69,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/DiscretionaryDataObjects.cs",
+      "sha256": "751ef7472865af5cf2024d3ac0313b20de336dc75d7c4f06fc5dc6572d93682d",
+      "matches_inventory": true,
+      "lines": 178,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/EcImportFormat.cs",
+      "sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+      "matches_inventory": true,
+      "lines": 31,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/ExtendedCapabilities.cs",
+      "sha256": "f3a97caaa79f73f2bdeddaeb763bc1243f3e8dd0df14fc07ffc074ecc97c2aa1",
+      "matches_inventory": true,
+      "lines": 92,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/ExtendedCapabilityFlags.cs",
+      "sha256": "93ba53dcd741d201781298d441067699f5f3c2f303b868a96c5135761ab33008",
+      "matches_inventory": true,
+      "lines": 32,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/ExtendedLengthInfo.cs",
+      "sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+      "matches_inventory": true,
+      "lines": 73,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/GeneralFeatureManagement.cs",
+      "sha256": "6812033c5dfd3bceb683a04a4cd107783fa5e707294c8be2919f68f69c103a94",
+      "matches_inventory": true,
+      "lines": 32,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/GenerationTimes.cs",
+      "sha256": "9c2e0ebaaf0c233d542663298af34a4ea71e21d086a155fe45f4e8cad8645339",
+      "matches_inventory": true,
+      "lines": 51,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+      "sha256": "83e52989b212393b2971d5098c8939924fa8ce25f627281351e81c0ed85614e3",
+      "matches_inventory": true,
+      "lines": 451,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C001",
+        "PGP-C002",
+        "PGP-C003",
+        "PGP-C004",
+        "PGP-C005",
+        "PGP-C006",
+        "PGP-C007",
+        "PGP-C008",
+        "PGP-C009",
+        "PGP-C010",
+        "PGP-C011",
+        "PGP-C012",
+        "PGP-C013",
+        "PGP-C014",
+        "PGP-C015",
+        "PGP-C016",
+        "PGP-C017",
+        "PGP-C018",
+        "PGP-C019"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+      "matches_inventory": true,
+      "lines": 78,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/Ins.cs",
+      "sha256": "512ecc1908428b5d93d31ccba7e2858081fcf8a574458dfa4e2811dcfda5a7fd",
+      "matches_inventory": true,
+      "lines": 38,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/Kdf.cs",
+      "sha256": "583ac6bd355794537455b480e47e1e37a991a87e3308c5d6125a01a2f6695cd8",
+      "matches_inventory": true,
+      "lines": 344,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C001",
+        "PGP-C002",
+        "PGP-C003",
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/KeyFingerprints.cs",
+      "sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+      "matches_inventory": true,
+      "lines": 51,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/KeyInformation.cs",
+      "sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+      "matches_inventory": true,
+      "lines": 51,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/KeyRef.cs",
+      "sha256": "35dfbbadb87fe5537c8e6e9696c00ebb754823d5d282fae028735a766173b075",
+      "matches_inventory": true,
+      "lines": 90,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/KeyStatus.cs",
+      "sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+      "matches_inventory": true,
+      "lines": 36,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpAid.cs",
+      "sha256": "c8c1b93de0564e47a8fb0658a46986f6397144d6639e63a0eb4006592a969085",
+      "matches_inventory": true,
+      "lines": 92,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpInvalidPinException.cs",
+      "sha256": "57233b660e9d7ee04cd28d1c0570625d997e8987bb9bcba5975c9aba77cc97a0",
+      "matches_inventory": true,
+      "lines": 65,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C001",
+        "PGP-C019"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Certificates.cs",
+      "sha256": "0d5ad3295feb9cb698d52261620252e258976e311fd83a4f4477728300f6c449",
+      "matches_inventory": true,
+      "lines": 144,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C010",
+        "PGP-C012"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "sha256": "f176214e30852ddfa860a1412301925138f3bd3acb2807a5030da4f677ba1448",
+      "matches_inventory": true,
+      "lines": 251,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C002",
+        "PGP-C003",
+        "PGP-C009",
+        "PGP-C010"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+      "sha256": "adcae7368ae1e4e7701f877e1d8f2cb7cd6ec5e1bc2e9ce0eb91f4e7bec7a209",
+      "matches_inventory": true,
+      "lines": 401,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C006",
+        "PGP-C007",
+        "PGP-C008",
+        "PGP-C009"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+      "sha256": "c56026f1202824d41de16bf786dee05c5fe3690a68dbeb88464d12fc5be91756",
+      "matches_inventory": true,
+      "lines": 276,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C009",
+        "PGP-C010",
+        "PGP-C011",
+        "PGP-C012",
+        "PGP-C013",
+        "PGP-C014"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+      "sha256": "b195c385a306696be5f7d676917331cd58e4cc9a56fc70f4f318fc8f3bd6477e",
+      "matches_inventory": true,
+      "lines": 366,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C001",
+        "PGP-C002",
+        "PGP-C010",
+        "PGP-C012",
+        "PGP-C019"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+      "sha256": "1e22d15b6647a67f6fc09d094c7467e25ad75481b8a21595c7cef47e204f2050",
+      "matches_inventory": true,
+      "lines": 94,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C003",
+        "PGP-C004",
+        "PGP-C005"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.cs",
+      "sha256": "47676d54085f3ba943785e90886ea96790036c2a7e66c78feac0ffc5e6e7a31e",
+      "matches_inventory": true,
+      "lines": 410,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C003",
+        "PGP-C005",
+        "PGP-C009",
+        "PGP-C010",
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/PinPolicy.cs",
+      "sha256": "5fae6376f3ee15cf1ae1a2a98dea8045b3d52ac4bb63fd45fc1800ab1969f6f8",
+      "matches_inventory": true,
+      "lines": 31,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+      "sha256": "24b0597793ebe450e2bb4c70cfee587427b880a2200a85754e30da3fc2f3a8d8",
+      "matches_inventory": true,
+      "lines": 198,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C014"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+      "sha256": "4d925736452b745ad5779dc427e0ebe99a3cede7609fbb45567af31a51bd7183",
+      "matches_inventory": true,
+      "lines": 242,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches_inventory": true,
+      "lines": 1,
+      "category": "api-snapshot",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/PublicAPI.Unshipped.txt",
+      "sha256": "51a2c4de21868278f00f7d012e7d1bb12907e70bd5e6a8dfad2ea5fbb85be9e9",
+      "matches_inventory": true,
+      "lines": 425,
+      "category": "api-snapshot",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/Pw.cs",
+      "sha256": "c90d9d85ec96cb1c5208d6f7cad20747dca7b6109ddafcf4fc50f82ef9a5bf96",
+      "matches_inventory": true,
+      "lines": 36,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C001"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/PwStatus.cs",
+      "sha256": "3a4e872190e7a4e182ee023d48774189e70931511e71010a75fe59f34ccc0ad0",
+      "matches_inventory": true,
+      "lines": 122,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/RsaImportFormat.cs",
+      "sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+      "matches_inventory": true,
+      "lines": 41,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/RsaSize.cs",
+      "sha256": "c7759cb429158cce387450a5cfa581f171089f3bb1e32d39c0af68333b496bdf",
+      "matches_inventory": true,
+      "lines": 25,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/SecuritySupportTemplate.cs",
+      "sha256": "986b4850d9f2488a6e60bae32333040cba315a35a355adb8c654119b91cc127d",
+      "matches_inventory": true,
+      "lines": 55,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/SupportedAlgorithm.cs",
+      "sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+      "matches_inventory": true,
+      "lines": 37,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/Uif.cs",
+      "sha256": "d4dfbc0f3a22564b6b9a6e7a72a9dc159af4bbd2573deb2bf3ba9bc2cd23c546",
+      "matches_inventory": true,
+      "lines": 76,
+      "category": "api-internal",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C004",
+        "PGP-C010"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+      "sha256": "34662c67febedf12e697a58bbc4ce872ccdd50f67080cb432d4c4c4cfba0d00a",
+      "matches_inventory": true,
+      "lines": 20,
+      "category": "project-runner",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C017"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/CLAUDE.md",
+      "sha256": "f91706d227c7a7df549dc2d5fbc5914251428fa10f614badd6c5d1ee903dae13",
+      "matches_inventory": true,
+      "lines": 12,
+      "category": "narrative",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpAdvancedTests.cs",
+      "sha256": "6d40972ed1fb5387b39ba2701f00d97f5b567a70a26fe692eb851978a760c59f",
+      "matches_inventory": true,
+      "lines": 172,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C002",
+        "PGP-C003",
+        "PGP-C016"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpDecryptTests.cs",
+      "sha256": "47b50e6f7adaeebb820b4d9cd88f687348a47e4693ca62743404c0f0959b9daf",
+      "matches_inventory": true,
+      "lines": 82,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C011",
+        "PGP-C016"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpKeyImportTests.cs",
+      "sha256": "40e28e90438253162a0e1d55002fbad0956d4ac6430f4cdd302ab1db04dc0d09",
+      "matches_inventory": true,
+      "lines": 190,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C011",
+        "PGP-C016",
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpMultiCurveTests.cs",
+      "sha256": "5880b1541e5f79eab983f56475793b77935a342b9d970112d820c407b1611e83",
+      "matches_inventory": true,
+      "lines": 94,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C010",
+        "PGP-C016"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+      "sha256": "fa1736d01a01cec8d8472b0fcd8ada8f26b2484ffdc77000c1cccd1990e7f3e2",
+      "matches_inventory": true,
+      "lines": 171,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C016",
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+      "sha256": "9398ff19ed5da0721766a9a737b155277036ff5c15a54e053d49e12cfac98467",
+      "matches_inventory": true,
+      "lines": 574,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C011",
+        "PGP-C012",
+        "PGP-C016"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+      "sha256": "46b64ad9428a58959eba21df42fb5778c60b5b0e60461083e9ffd66f2c1f6c4e",
+      "matches_inventory": true,
+      "lines": 75,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C005",
+        "PGP-C016"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj",
+      "sha256": "6744bd61272f01d8a9af9050b0aa4e1463eece747ebbb354252515d96b698846",
+      "matches_inventory": true,
+      "lines": 43,
+      "category": "project-runner",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/xunit.runner.json",
+      "sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c",
+      "matches_inventory": true,
+      "lines": 6,
+      "category": "project-runner",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AlgorithmAttributesTests.cs",
+      "sha256": "4226ccd36ca46fef9826d7ac667ac3215f5e483c990a02bc320ac25dea634118",
+      "matches_inventory": true,
+      "lines": 131,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/ApplicationRelatedDataTests.cs",
+      "sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f",
+      "matches_inventory": true,
+      "lines": 245,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AuditV2/OpenPgpAuditReproTests.cs",
+      "sha256": "1582e439e7c235e72d37444f574169ed28121e2ceae38250cdf54167a7ce9077",
+      "matches_inventory": true,
+      "lines": 142,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/BcdHelperTests.cs",
+      "sha256": "568be427fe9a635459e08777ba7c39349e7dc290e699b1b3e352bf431f7c03c4",
+      "matches_inventory": true,
+      "lines": 68,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/CurveOidTests.cs",
+      "sha256": "3294fdece45a60c199112bb8839539dfd9b29de3ee0e48424799d77edf04695d",
+      "matches_inventory": true,
+      "lines": 88,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/DigestInfoTests.cs",
+      "sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+      "matches_inventory": true,
+      "lines": 92,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/KdfTests.cs",
+      "sha256": "ff763440884972fca0fbc1469fa5155894ec113488aee94febf46fe02b826e5a",
+      "matches_inventory": true,
+      "lines": 236,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpAidTests.cs",
+      "sha256": "cae003ca497e9d4c5c630a0e07755b273edc298513bc821c544c1eb759995a18",
+      "matches_inventory": true,
+      "lines": 111,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpCollectionContractTests.cs",
+      "sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e",
+      "matches_inventory": true,
+      "lines": 35,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+      "sha256": "37ce64fa7863f45a05e1238436087ceba8ab144580d411b0be845d61d13c97ed",
+      "matches_inventory": true,
+      "lines": 327,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C001",
+        "PGP-C019"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+      "sha256": "de35e4db3018b2a8bf3cf320418aee1c50e2b7981bc8c41c725b99dd0bc5c2cf",
+      "matches_inventory": true,
+      "lines": 247,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+      "sha256": "8b3fdcc86cbbfe9272ecd0bd7c832caa0b5fd8222bfcaff5a706fd3fe06d6bc4",
+      "matches_inventory": true,
+      "lines": 1059,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C001",
+        "PGP-C008",
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs",
+      "sha256": "903c855d48cac642ab855c46ef8d63fa8dd6abbba0b5dec6c7f47e4c519a1831",
+      "matches_inventory": true,
+      "lines": 191,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PwStatusTests.cs",
+      "sha256": "cc30c1a61e32e60c5ce3613117a55d50341ec15205824c3b0c34cfabc8bb04df",
+      "matches_inventory": true,
+      "lines": 75,
+      "category": "internal-test",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "finding-bearing",
+      "candidates": [
+        "PGP-C018"
+      ],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj",
+      "sha256": "eec7d8b986d4cfba471ee689d8d83347d6bd41bd6b40eba9500e7e6bfbf576f0",
+      "matches_inventory": true,
+      "lines": 31,
+      "category": "project-runner",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/xunit.runner.json",
+      "sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+      "matches_inventory": true,
+      "lines": 3,
+      "category": "project-runner",
+      "semantic_read": "complete",
+      "reviewed_scope": "entire file, including comments/XML, executable behavior and assertions where present",
+      "disposition": "investigator-clean",
+      "candidates": [],
+      "review_status": "awaiting-independent-review"
+    }
+  ],
+  "reconciliation": {
+    "public_type_count": 39,
+    "public_types": [
+      "Yubico.YubiKit.OpenPgp.AlgorithmAttributes",
+      "Yubico.YubiKit.OpenPgp.ApplicationRelatedData",
+      "Yubico.YubiKit.OpenPgp.Credentials.OpenPgpCredentialOptions",
+      "Yubico.YubiKit.OpenPgp.Crt",
+      "Yubico.YubiKit.OpenPgp.CurveOid",
+      "Yubico.YubiKit.OpenPgp.CurveOidExtensions",
+      "Yubico.YubiKit.OpenPgp.DataObject",
+      "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects",
+      "Yubico.YubiKit.OpenPgp.EcAttributes",
+      "Yubico.YubiKit.OpenPgp.EcImportFormat",
+      "Yubico.YubiKit.OpenPgp.ExtendedCapabilities",
+      "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+      "Yubico.YubiKit.OpenPgp.ExtendedLengthInfo",
+      "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+      "Yubico.YubiKit.OpenPgp.GenerationTimes",
+      "Yubico.YubiKit.OpenPgp.IOpenPgpSession",
+      "Yubico.YubiKit.OpenPgp.IYubiKeyExtensions",
+      "Yubico.YubiKit.OpenPgp.Kdf",
+      "Yubico.YubiKit.OpenPgp.KdfHashAlgorithm",
+      "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k",
+      "Yubico.YubiKit.OpenPgp.KdfNone",
+      "Yubico.YubiKit.OpenPgp.KeyFingerprints",
+      "Yubico.YubiKit.OpenPgp.KeyInformation",
+      "Yubico.YubiKit.OpenPgp.KeyRef",
+      "Yubico.YubiKit.OpenPgp.KeyRefExtensions",
+      "Yubico.YubiKit.OpenPgp.KeyStatus",
+      "Yubico.YubiKit.OpenPgp.OpenPgpAid",
+      "Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException",
+      "Yubico.YubiKit.OpenPgp.OpenPgpSession",
+      "Yubico.YubiKit.OpenPgp.PinPolicy",
+      "Yubico.YubiKit.OpenPgp.Pw",
+      "Yubico.YubiKit.OpenPgp.PwStatus",
+      "Yubico.YubiKit.OpenPgp.RsaAttributes",
+      "Yubico.YubiKit.OpenPgp.RsaImportFormat",
+      "Yubico.YubiKit.OpenPgp.RsaSize",
+      "Yubico.YubiKit.OpenPgp.SecuritySupportTemplate",
+      "Yubico.YubiKit.OpenPgp.SupportedAlgorithm",
+      "Yubico.YubiKit.OpenPgp.Uif",
+      "Yubico.YubiKit.OpenPgp.UifExtensions"
+    ],
+    "snapshot_entry_count": 423,
+    "snapshot_reconciliation": "evidence/api-entry-reconciliation.json",
+    "interface_operation_count": 40,
+    "interface_operations": [
+      {
+        "name": "GetApplicationRelatedDataAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetDataAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "PutDataAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetChallengeAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetSignatureCounterAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetPinStatusAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "VerifyPinAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "VerifyAdminAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "UnverifyPinAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "ChangePinAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "ChangeAdminAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "SetResetCodeAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "ResetPinUsingResetCodeAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "ResetPinUsingAdminAuthenticationAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "SetPinAttemptsAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "SetSignaturePinPolicyAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GenerateKeyAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "PutKeyAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "DeleteKeyAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetPublicKeyAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "AttestKeyAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "ListKeyInformationAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetKeyFingerprintsAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetGenerationTimesAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "SetKeyFingerprintAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "SetGenerationTimeAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetCertificateAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "PutCertificateAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "DeleteCertificateAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetUifAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "SetUifAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetAlgorithmAttributesAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "SetAlgorithmAttributesAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetSupportedAlgorithmsAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "GetKdfAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "SetKdfAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "SignAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "DecryptAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "AuthenticateAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      },
+      {
+        "name": "ResetAsync",
+        "semantic_read": "complete with implementation and callers",
+        "contract_location": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "review_status": "awaiting-independent-review"
+      }
+    ],
+    "partial_class": "seven declarations; one shipping OpenPgpSession type",
+    "extension": "extension container/member and lowered static method share one public creation contract",
+    "effective_accessibility": "internal private-key templates/import/backend members excluded from public count; Crt/DataObject included",
+    "generated": "implicit constructors and accessor entries share owning type/property contract"
+  },
+  "clean_semantic_unit_definition": "each complete clean prose/source/test file, plus specifically bounded clean contracts in finding-bearing/shared files; duplicate file/subunit overlaps counted once; snapshots/project-runner syntax excluded from prose denominator",
+  "eligible_clean_semantic_units": 40,
+  "minimum_sample_required": 4,
+  "clean_semantic_units": [
+    {
+      "id": "PGP-FILE-CLEAN-002",
+      "path": "src/OpenPgp/PACKAGE_README.md",
+      "lines": "1-24",
+      "category": "narrative",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-004",
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangeAdminPinCommand.cs",
+      "lines": "1-49",
+      "category": "example",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "7ff369f8579c47fcdaf2524e9ae80474aded01f90b44450fe6ac4976f56a5532",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-005",
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangePinCommand.cs",
+      "lines": "1-49",
+      "category": "example",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-006",
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetResetCodeCommand.cs",
+      "lines": "1-50",
+      "category": "example",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "cafab235d7fa46edf85db375bc7e4b3a85777c8c79d7e40c28667a6e6e08650a",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-007",
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetRetriesCommand.cs",
+      "lines": "1-57",
+      "category": "example",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "ad911419163de36ea121584ca0b0454aea371133ffeaf9f596fb83318c94d213",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-008",
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessUnblockPinCommand.cs",
+      "lines": "1-49",
+      "category": "example",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "da02efebfe500148ace77a80777fb1f17015ede7a8067bcf535c01d14bcbf0d3",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-009",
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesDeleteCommand.cs",
+      "lines": "1-58",
+      "category": "example",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "7d8a1b892e46000910c5c39ae4d26c1c2c5472ae38467f71e36bbb87801f33b2",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-019",
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Output/OutputHelpers.cs",
+      "lines": "1-65",
+      "category": "example",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "0a7bc56e6b7aeaefec99531c23a08db9d76f70c40df72b5a572cb40a05227244",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-026",
+      "path": "src/OpenPgp/src/Backend/IOpenPgpBackend.cs",
+      "lines": "1-27",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "4340a3d888e757c06fc08d5975229285a9884ecdef9daebcea334a73f32cc398",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-027",
+      "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+      "lines": "1-93",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "2158b42ab9c5dd247a194609ff3e327703ca84a589c94e2866c9f8e89f208f9a",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-028",
+      "path": "src/OpenPgp/src/BcdHelper.cs",
+      "lines": "1-56",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-033",
+      "path": "src/OpenPgp/src/DigestInfo.cs",
+      "lines": "1-69",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-035",
+      "path": "src/OpenPgp/src/EcImportFormat.cs",
+      "lines": "1-31",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-036",
+      "path": "src/OpenPgp/src/ExtendedCapabilities.cs",
+      "lines": "1-92",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "f3a97caaa79f73f2bdeddaeb763bc1243f3e8dd0df14fc07ffc074ecc97c2aa1",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-037",
+      "path": "src/OpenPgp/src/ExtendedCapabilityFlags.cs",
+      "lines": "1-32",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "93ba53dcd741d201781298d441067699f5f3c2f303b868a96c5135761ab33008",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-038",
+      "path": "src/OpenPgp/src/ExtendedLengthInfo.cs",
+      "lines": "1-73",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-039",
+      "path": "src/OpenPgp/src/GeneralFeatureManagement.cs",
+      "lines": "1-32",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "6812033c5dfd3bceb683a04a4cd107783fa5e707294c8be2919f68f69c103a94",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-040",
+      "path": "src/OpenPgp/src/GenerationTimes.cs",
+      "lines": "1-51",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "9c2e0ebaaf0c233d542663298af34a4ea71e21d086a155fe45f4e8cad8645339",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-042",
+      "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "lines": "1-78",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-043",
+      "path": "src/OpenPgp/src/Ins.cs",
+      "lines": "1-38",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "512ecc1908428b5d93d31ccba7e2858081fcf8a574458dfa4e2811dcfda5a7fd",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-045",
+      "path": "src/OpenPgp/src/KeyFingerprints.cs",
+      "lines": "1-51",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-046",
+      "path": "src/OpenPgp/src/KeyInformation.cs",
+      "lines": "1-51",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-047",
+      "path": "src/OpenPgp/src/KeyRef.cs",
+      "lines": "1-90",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "35dfbbadb87fe5537c8e6e9696c00ebb754823d5d282fae028735a766173b075",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-048",
+      "path": "src/OpenPgp/src/KeyStatus.cs",
+      "lines": "1-36",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-058",
+      "path": "src/OpenPgp/src/PinPolicy.cs",
+      "lines": "1-31",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "5fae6376f3ee15cf1ae1a2a98dea8045b3d52ac4bb63fd45fc1800ab1969f6f8",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-065",
+      "path": "src/OpenPgp/src/RsaImportFormat.cs",
+      "lines": "1-41",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-066",
+      "path": "src/OpenPgp/src/RsaSize.cs",
+      "lines": "1-25",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "c7759cb429158cce387450a5cfa581f171089f3bb1e32d39c0af68333b496bdf",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-068",
+      "path": "src/OpenPgp/src/SupportedAlgorithm.cs",
+      "lines": "1-37",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-071",
+      "path": "src/OpenPgp/tests/CLAUDE.md",
+      "lines": "1-12",
+      "category": "narrative",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "f91706d227c7a7df549dc2d5fbc5914251428fa10f614badd6c5d1ee903dae13",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-082",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/ApplicationRelatedDataTests.cs",
+      "lines": "1-245",
+      "category": "internal-test",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-084",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/BcdHelperTests.cs",
+      "lines": "1-68",
+      "category": "internal-test",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "568be427fe9a635459e08777ba7c39349e7dc290e699b1b3e352bf431f7c03c4",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-085",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/CurveOidTests.cs",
+      "lines": "1-88",
+      "category": "internal-test",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "3294fdece45a60c199112bb8839539dfd9b29de3ee0e48424799d77edf04695d",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-086",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/DigestInfoTests.cs",
+      "lines": "1-92",
+      "category": "internal-test",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-087",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/KdfTests.cs",
+      "lines": "1-236",
+      "category": "internal-test",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "ff763440884972fca0fbc1469fa5155894ec113488aee94febf46fe02b826e5a",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-088",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpAidTests.cs",
+      "lines": "1-111",
+      "category": "internal-test",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "cae003ca497e9d4c5c630a0e07755b273edc298513bc821c544c1eb759995a18",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-089",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpCollectionContractTests.cs",
+      "lines": "1-35",
+      "category": "internal-test",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-091",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+      "lines": "1-247",
+      "category": "internal-test",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "de35e4db3018b2a8bf3cf320418aee1c50e2b7981bc8c41c725b99dd0bc5c2cf",
+      "disposition": "investigator-clean",
+      "sample_status": "unsampled"
+    },
+    {
+      "id": "PGP-CLEAN-007",
+      "category": "narrative-example",
+      "path": "src/OpenPgp/README.md",
+      "lines": "66-80",
+      "semantic_unit": "metadata lookup fragment and named read-only collection explanation",
+      "source_sha256": "7f02b14413a0d3b6c7f2a344f4e166da94be52773bcf9fdefc5cdd73452d4025",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-008",
+      "category": "narrative",
+      "path": "README.md",
+      "lines": "64-64",
+      "semantic_unit": "OpenPGP package table row",
+      "source_sha256": "b058f30c22d4ed663a863cb0b384a187b76249da79dd48eecf6854817b494606",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-014",
+      "category": "api",
+      "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+      "lines": "311-333",
+      "semantic_unit": "precise certificate absence/read/parse distinction and disposal",
+      "source_sha256": "83e52989b212393b2971d5098c8939924fa8ce25f627281351e81c0ed85614e3",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    }
+  ],
+  "clean_unit_nominees": [
+    {
+      "id": "PGP-CLEAN-001",
+      "category": "api",
+      "path": "src/OpenPgp/src/GenerationTimes.cs",
+      "lines": "19-50",
+      "semantic_unit": "read-only dictionary contract and Unix-second values",
+      "source_sha256": "9c2e0ebaaf0c233d542663298af34a4ea71e21d086a155fe45f4e8cad8645339",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-002",
+      "category": "api",
+      "path": "src/OpenPgp/src/KeyInformation.cs",
+      "lines": "19-50",
+      "semantic_unit": "key status read-only dictionary contract",
+      "source_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-003",
+      "category": "api",
+      "path": "src/OpenPgp/src/KeyFingerprints.cs",
+      "lines": "19-50",
+      "semantic_unit": "20-byte fingerprint read-only dictionary contract",
+      "source_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-004",
+      "category": "api",
+      "path": "src/OpenPgp/src/SupportedAlgorithm.cs",
+      "lines": "17-36",
+      "semantic_unit": "one supported algorithm entry; immutable properties",
+      "source_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-005",
+      "category": "api",
+      "path": "src/OpenPgp/src/KeyRef.cs",
+      "lines": "48-89",
+      "semantic_unit": "ordinary Sig/Dec/Aut data-object mappings; ATT CRT excluded by C013",
+      "source_sha256": "35dfbbadb87fe5537c8e6e9696c00ebb754823d5d282fae028735a766173b075",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-006",
+      "category": "narrative",
+      "path": "src/OpenPgp/PACKAGE_README.md",
+      "lines": "1-24",
+      "semantic_unit": "package purpose, alpha qualification, installation and doc links",
+      "source_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-007",
+      "category": "narrative-example",
+      "path": "src/OpenPgp/README.md",
+      "lines": "66-80",
+      "semantic_unit": "metadata lookup fragment and named read-only collection explanation",
+      "source_sha256": "7f02b14413a0d3b6c7f2a344f4e166da94be52773bcf9fdefc5cdd73452d4025",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-008",
+      "category": "narrative",
+      "path": "README.md",
+      "lines": "64-64",
+      "semantic_unit": "OpenPGP package table row",
+      "source_sha256": "b058f30c22d4ed663a863cb0b384a187b76249da79dd48eecf6854817b494606",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-009",
+      "category": "internal-test",
+      "path": "src/OpenPgp/src/BcdHelper.cs",
+      "lines": "22-55",
+      "semantic_unit": "decode and checked serial nibble interpretation; caller-size scope",
+      "source_sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-010",
+      "category": "internal-test",
+      "path": "src/OpenPgp/src/DigestInfo.cs",
+      "lines": "29-67",
+      "semantic_unit": "four DER headers and header+digest builder",
+      "source_sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-011",
+      "category": "internal-test",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/DigestInfoTests.cs",
+      "lines": "21-91",
+      "semantic_unit": "exact header and concatenation assertions",
+      "source_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-012",
+      "category": "internal-test",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpCollectionContractTests.cs",
+      "lines": "21-34",
+      "semantic_unit": "actual read-only-interface/no-public-constructor assertions",
+      "source_sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-013",
+      "category": "internal-test",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/ApplicationRelatedDataTests.cs",
+      "lines": "153-204",
+      "semantic_unit": "lookup/unknown-status/independent-fingerprint-storage assertions",
+      "source_sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    },
+    {
+      "id": "PGP-CLEAN-014",
+      "category": "api",
+      "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+      "lines": "311-333",
+      "semantic_unit": "precise certificate absence/read/parse distinction and disposal",
+      "source_sha256": "83e52989b212393b2971d5098c8939924fa8ce25f627281351e81c0ed85614e3",
+      "disposition": "investigator-clean",
+      "sample_status": "nominee-unsampled",
+      "final_eligibility": "remove if editor changes this unit; coordinator samples exact final hash"
+    }
+  ],
+  "sampling_status": "coordinator pending; 14 nominees supplied; sample at least 10% of final eligible units with minimum3, across categories, removing edited overlaps and avoiding duplicate samples",
+  "shared_sections": [
+    {
+      "path": "README.md",
+      "section": "OpenPGP row64",
+      "disposition": "clean",
+      "semantic_read": "complete assigned section"
+    },
+    {
+      "path": "docs/v2-highlights.md",
+      "section": "OpenPGP32-36; package/prompt references",
+      "disposition": "C020 chronology qualification",
+      "semantic_read": "complete assigned section"
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "section": "OpenPGP exception/secret/new module references125-161",
+      "disposition": "C019,C020",
+      "semantic_read": "complete assigned section"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "section": "OpenPGP factory/PIN rename/return tables and752-759",
+      "disposition": "C019,C020",
+      "semantic_read": "complete assigned section"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "section": "OpenPGP package, exception, return/typed-result records",
+      "disposition": "C019,C020",
+      "semantic_read": "complete assigned section"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "section": "OpenPGP occurrences29,34,372,381 and historical framing",
+      "disposition": "C020 current/historical qualification",
+      "semantic_read": "complete assigned section"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "section": "OpenPGP operation row and policy/lifetime165-219",
+      "disposition": "clean behavior; useful module link C020",
+      "semantic_read": "complete assigned section"
+    },
+    {
+      "path": "docs/architecture/physical-device-model.md",
+      "section": "OpenPGP transport168",
+      "disposition": "clean",
+      "semantic_read": "complete assigned section"
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "section": "OpenPGP dependency/transport/session shape",
+      "disposition": "clean",
+      "semantic_read": "complete assigned section"
+    },
+    {
+      "path": "docs/NATIVE-AOT.md",
+      "section": "OpenPGP support scope/link-only evidence1-40, future-work mention",
+      "disposition": "clean; runtime remains unqualified",
+      "semantic_read": "complete assigned section"
+    }
+  ],
+  "exclusions": [
+    "Core and other-module source/docs investigation deferred; only referenced-target existence checked",
+    "historical changelogs/planning/research retain historical meaning; no active-code edits",
+    "license boilerplate, compiler-generated representations, API snapshots and runner syntax accounted without invented prose",
+    "validation outputs independently owned; no build/test/hardware execution by investigator"
+  ],
+  "hardware": {
+    "methods": 49,
+    "slow_traits": 2,
+    "user_presence_traits": 0,
+    "reset_before_requests": 49,
+    "firmware_early_return_methods": 4,
+    "helper_post_reset": false,
+    "manifest": "evidence/hardware-methods.json"
+  },
+  "unfinished_markers": {
+    "pattern": "TODO|FIXME|HACK|XXX",
+    "scope": "src/OpenPgp C#/Markdown",
+    "hits": 0,
+    "meaning": "marker absence only; candidate ledger retains implicit unfinished behavior"
+  },
+  "candidate_ids": [
+    "PGP-C001",
+    "PGP-C002",
+    "PGP-C003",
+    "PGP-C004",
+    "PGP-C005",
+    "PGP-C006",
+    "PGP-C007",
+    "PGP-C008",
+    "PGP-C009",
+    "PGP-C010",
+    "PGP-C011",
+    "PGP-C012",
+    "PGP-C013",
+    "PGP-C014",
+    "PGP-C015",
+    "PGP-C016",
+    "PGP-C017",
+    "PGP-C018",
+    "PGP-C019",
+    "PGP-C020",
+    "PGP-C021"
+  ],
+  "execution_steer": {
+    "source": "coordinator message; investigator performed no device I/O",
+    "direct_python_session_version": "0.0.1",
+    "cli_application_version": "5.8.0",
+    "card_version": "3.4",
+    "device_metadata": "5.8 beta",
+    "mutation_status": "coordinator started 48 non-KDF methods including Slow; results pending",
+    "att_public_certificate_baseline": "complete in hardware/vendor-baseline-v2.json; explicit APDU reads; all four actual UIF Off",
+    "att_certificate_der_sha256": "94afb703099edb4aaaee443c6e197c379f7f909d23f717f0868ef73057e4a16a",
+    "attestation_mode": "supplemental probe extended; existing tests ordinary; exclusivity unproven",
+    "dependency": "PGP-DEP-021",
+    "interpretation": "version provenance and effective feature override compatibility question; no SDK defect presumed"
+  }
+}

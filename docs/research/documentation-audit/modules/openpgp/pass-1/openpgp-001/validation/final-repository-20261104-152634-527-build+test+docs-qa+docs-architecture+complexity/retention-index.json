@@ -1,0 +1,131 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-152634-527-build+test+docs-qa+docs-architecture+complexity",
+  "files": [
+    {
+      "path": "01-clean.log",
+      "bytes": 727893,
+      "sha256": "c840ce08cef22c61510e4c2a914f2c6dcd49027f6b47eda2e6fd2fc22fd0258b",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "02-build.log",
+      "bytes": 7225,
+      "sha256": "e2ddd0345ea21916937df2a368b0d76cbf658d11aaed9cb331cacea42d78d7e9",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "03-test-Cli.Commands.UnitTests.log",
+      "bytes": 712,
+      "sha256": "7ea09300f7d6b42010cecd5be60b57403c533b92358dc3856803e6dbab1fe6ec",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "04-test-Cli.Shared.UnitTests.log",
+      "bytes": 494,
+      "sha256": "8146f6f7bfd5370f5b28fc85a19553e418b2f55355d53d890ff7073a9f8f6b76",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "05-test-Core.UnitTests.log",
+      "bytes": 2623,
+      "sha256": "79886619bda2c9f869555e6384108323ca665614ca15050a20f1e511b7eacab2",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "06-test-Ctap2.UnitTests.log",
+      "bytes": 466,
+      "sha256": "f9106f727d829ca03a5234d7de828c4ba702e47428251fa35f5f417437d8852c",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "07-test-Management.UnitTests.log",
+      "bytes": 494,
+      "sha256": "20b04f19e651da786ea99c3afab8fbaacd6c05734f18abc06cc637105ecddcc7",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "08-test-Oath.UnitTests.log",
+      "bytes": 39208,
+      "sha256": "db8ad57086fe981253abb2da2b7bdaf18f9aa076263218950fa3cdb519d78641",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "09-test-OpenPgp.UnitTests.log",
+      "bytes": 478,
+      "sha256": "19b6ea9cd3ca4666be303d98c430472bdafbed1da76994df268fa343371d08d6",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "10-test-Piv.UnitTests.log",
+      "bytes": 454,
+      "sha256": "dd0e45fdfca0780b2d46fd015b4650c7bb93fb98e4fa99af9a28289356a02eaf",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "11-test-PublicApi.UnitTests.log",
+      "bytes": 488,
+      "sha256": "444d2f4b7518f2fde667de261ac1c59f4da716520ed57aff45f5b596f0232da2",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "12-test-SecurityDomain.UnitTests.log",
+      "bytes": 518,
+      "sha256": "9310e04c0645c27aa40f8825dad8051491ea707d0c9fcf4c961022dad30ef37f",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "13-test-WebAuthn.UnitTests.log",
+      "bytes": 484,
+      "sha256": "7d00e1e3e14792b6d7384d2ba227326824f27e0b82dcf37abdf19153690cd52d",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "14-test-YubiHsm.UnitTests.log",
+      "bytes": 476,
+      "sha256": "e190106614c6a3076413dfb5bf86df1031d0b4914e1270d44539bd143eaab922",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "15-test-YubiOtp.UnitTests.log",
+      "bytes": 478,
+      "sha256": "24fa323ac496a59da986b6e88913b31e73af17e4d608e382e0bf0fa472c34681",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 6054,
+      "sha256": "ec0b5e449f59261dd0886f3a22d511d72ea6b30bfb2da88daaee5c7eb1396868",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 1619,
+      "sha256": "e3d39bbb531dfd5fa0ccdede600c22ed78ebea0ebf77a7c7e7622b3cfa599da5",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 8751,
+      "sha256": "2d1b96b0aa849ae9e104a0748f54998d8cdf569ed942b277feeb7574eb0ae833",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

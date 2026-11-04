@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>    <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>     <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>     <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<title>Card edit</title>
+<meta content="" name="description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="/vendor/font-awesome/css/all.min.css" rel="stylesheet"/>
+<link href="/vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="/css/main.css" rel="stylesheet"/>
+<link href="/css/pygments.css" rel="stylesheet"/>
+<link href="/css/pygmentsmaterial.css" rel="stylesheet"/>
+<link href="/css/code-tabs.css" rel="stylesheet"/>
+<link href="/css/asciidoc.css" rel="stylesheet"/>
+<link href="/vendor/vanilla-cookieconsent/dist/cookieconsent.css" rel="stylesheet"/>
+<link href="/css/cookieconsent-yubicostyle.css" rel="stylesheet"/>
+<link href="/vendor/jquery.tablesorter/dist/css/theme.default.min.css" rel="stylesheet"/>
+<link href="/favicon-192x192.png" rel="icon" sizes="192x192"/>
+<!--<script src="/vendor/modernizr/dist/modernizr-build.js"></script>-->
+<!-- Google Tag Manager -->
+<script data-cookiecategory="analytics" type="text/plain">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KRP726L');</script>
+<!-- End Google Tag Manager -->
+<!-- Hotjar Tracking Code for www.yubico.com -->
+<script data-cookiecategory="analytics" type="text/plain">
+      (function(h,o,t,j,a,r){
+          h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+          h._hjSettings={hjid:835276,hjsv:6};
+          a=o.getElementsByTagName('head')[0];
+          r=o.createElement('script');r.async=1;
+          r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+          a.appendChild(r);
+      })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    </script>
+</head>
+<body>
+<!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+<nav class="navbar navbar-expand-lg navbar-top navbar-dark">
+<div class="container">
+<a class="navbar-brand" href="/"><img src="/logo.png"/></a>
+<button aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarToggler" data-bs-toggle="collapse" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="navbar-collapse collapse" id="navbarToggler">
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+<li class="nav-item"><a "="" class="nav-link fw-bold" href="/Passkeys">Passkeys</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/WebAuthn">WebAuthn</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/CTAP">CTAP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/OTP">OTP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/OATH">OATH</a></li><li class="nav-item"><a "="" aria-current="page" class="nav-link active fw-bold" href="/PGP">PGP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/PIV">PIV</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Secure_Domain">Secure Domain</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/YubiHSM2">YubiHSM2</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Software_Projects">Software Projects</a></li>
+</ul>
+<!-- Google Custom Search Engine -->
+<div class="navbar-form navbar-right" id="search-box">
+<script data-cookiecategory="functional" type="text/plain">
+          (function() {
+            var cx = '4d44ab063517e6a2e';
+            var gcse = document.createElement('script');
+            gcse.type = 'text/javascript';
+            gcse.async = true;
+            gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+            '//www.google.com/cse/cse.js?cx=' + cx;
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(gcse, s);
+          })();
+          </script>
+<gcse:searchbox-only></gcse:searchbox-only>
+</div>
+<!-- End Google Custom Search Engine -->
+</div><!--/.navbar-collapse -->
+</div>
+</nav>
+<div class="container">
+<div class="row bg-light">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="/PGP">PGP</a></li>
+<li class="breadcrumb-item active">Card edit</li>
+</ol>
+</div>
+<div class="row">
+<div class="col-md-4" style="padding-left: 0;">
+<!-- Sidebar -->
+<ul class="nav nav-side card card-body bg-light">
+<li class="active"><a href="/PGP">PGP</a><ul class="">
+<li><a href="/PGP/Importing_keys.html">Importing keys</a></li>
+<li class="active"><a href="/PGP/Card_edit.html">Card edit</a>
+<li><a href="/PGP/SSH_authentication">SSH authentication</a></li>
+<li><a href="/PGP/PGP_Walk-Through.html">PGP Walk-Through</a></li>
+<li><a href="/PGP/Attestation.html">Attestation</a></li>
+<li><a href="/PGP/Git_signing.html">Git signing</a></li>
+<li><a href="/PGP/PGP_PIN_Change_Behavior.html">PGP PIN Change Behavior</a></li>
+<li><a href="/PGP/YubiKey_5.2.3_Enhancements_to_OpenPGP_3.4.html">YubiKey 5.2.3 Enhancements to OpenPGP 3.4</a></li>
+</li></ul>
+</li></ul>
+<!-- End sidebar -->
+</div>
+<div class="col-md-8">
+<!-- Main content -->
+<div class="sidelinks">
+<ul></ul>
+</div>
+<div id="page-content"><h1>Card edit</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph"><p>Yubico has learned of a security issue with the OpenPGP Card applet project that is used in the YubiKey NEO. This vulnerability applies to you only if you are using OpenPGP, and you have the OpenPGP applet version 1.0.9 or earlier.
+<a href="/ykneo-openpgp/SecurityAdvisory%202015-04-14.html">SecurityAdvisory 2015-04-14</a></p></div>
+</td>
+</tr></table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>To configure the OpenPGP application on a YubiKey you can use <a href="https://www.gnupg.org" rel="noopener noreferrer" target="_blank">GnuPG</a>.</p></div>
+<div class="paragraph"><p>The documentation in this section assumes the reader has a general understanding of how GnuPG works.
+For more in-depth documentation see the <a href="https://www.gnupg.org/documentation/" rel="noopener noreferrer" target="_blank">GnuPG documentation</a>,
+especially the parts on the usage and setting of the PIN and reset codes may be useful.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites">Prerequisites</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Installed the <a href="/yubikey-personalization/Manuals/ykpersonalize.1.html">Yubikey personalization tool</a>.</p></div>
+<div class="paragraph"><p>Verify that your YubiKey has a firmware version 3.1.8 or later.</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>
+<span class="sh-dollar"></span>lsusb -v
+...
+</pre>
+</div></div>
+<div class="paragraph"><p>Make sure that your device is in OTP/CCID or CCID mode, you can use ykpersonalize to switch
+to OTP/U2F/CCID:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>
+<span class="sh-dollar"></span>ykpersonalize -m6
+...
+</pre>
+</div></div>
+<div class="paragraph"><p>Check that your libccid version is 1.4.10 or later so that
+/etc/libccid_Info.plist contains the YubiKey USB PID/VID.</p></div>
+<div class="paragraph"><p>Check that your PCSCD setup is working.  Use "pcsc_scan" to check for
+card readers, it should show "Yubikey" somewhere in the output.</p></div>
+<div class="paragraph"><p>You need to use the GnuPG agent with scdaemon, and we recommend using
+version 2.0.22 or later for full functionality.</p></div>
+<div class="paragraph"><p>To check the application version you may run, after inserting your YubiKey:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>
+<span class="sh-dollar"></span>gpg-connect-agent --hex "scd apdu 00 f1 00 00" /bye
+D[0000]  01 00 05 90 00                                     .....
+OK
+</pre>
+</div></div>
+<div class="paragraph"><p>Where "01 00 05" means version 1.0.5. (see security advisory above if version &lt; 1.0.10)</p></div>
+<div class="paragraph"><p>Note that for YubiKey 4 and 5 series, this number will always be
+equal to the firmware version.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_yubikey_touch">YubiKey touch</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>YubiKey 4 and 5 series support a <em>touch</em> feature that allows to protect the
+use of the private keys with an additional layer. When this
+functionality is enabled, the result of a cryptographic operation
+involving a private key (signature, decryption or authentication) is
+released only if the correct user PIN is provided <strong>and</strong> the YubiKey
+touch sensor is triggered. This request of user presence ensures that
+no malware can issue commands to the YubiKey without the user
+noticing.<br/>
+The YubiKey signals a request for a touch event by blinking for up to
+15 seconds. If no touch is provided within this period, the operation
+will fail.</p></div>
+<div class="paragraph"><p>There are three possible values for the touch parameter:</p></div>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+off
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+touch is disabled;
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+on 
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+touch is enabled;
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+fix
+<br/>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+touch is enabled and can not be disabled unless a new private
+  key is generated or imported.
+</p>
+</td>
+</tr>
+</table></div>
+<div class="paragraph"><p>The touch parameter can be individually set on each one of the three
+private keys and requires the use of the admin PIN.</p></div>
+<div class="paragraph"><p>In order to activate this functionality, you can use the
+<a href="/yubikey-manager/">YubiKey Manager CLI</a>
+to set the touch ID policy.  See the
+<a href="https://docs.yubico.com/software/yubikey/tools/ykman/OpenPGP_Commands.html#ykman-openpgp-keys-set-touch-options-key-policy" rel="noopener noreferrer" target="_blank">ykman openpgp documentation</a>
+for more information.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_example">Example</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The following demonstrate setting all the parameters in the OpenPGP
+applet on a YubiKey.</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>user@debian:~$ gpg --card-edit
+
+Application ID ...: D2760001240102000060000000420000
+Version ..........: 2.0
+Manufacturer .....: unknown
+Serial number ....: 00000042
+Name of cardholder: [not set]
+Language prefs ...: [not set]
+Sex ..............: unspecified
+URL of public key : [not set]
+Login data .......: [not set]
+Signature PIN ....: forced
+Key attributes ...: 2048R 2048R 2048R
+Max. PIN lengths .: 127 127 127
+PIN retry counter : 3 3 3
+Signature counter : 0
+Signature key ....: [none]
+Encryption key....: [none]
+Authentication key: [none]
+General key info..: [none]
+
+gpg/card&gt; admin
+Admin commands are allowed
+
+gpg/card&gt; passwd
+gpg: OpenPGP card no. D2760001240102000060000000420000 detected
+
+1 - change PIN
+2 - unblock PIN
+3 - change Admin PIN
+4 - set the Reset Code
+Q - quit
+
+Your selection? 3
+PIN changed.
+
+1 - change PIN
+2 - unblock PIN
+3 - change Admin PIN
+4 - set the Reset Code
+Q - quit
+
+Your selection? 1
+PIN changed.
+
+1 - change PIN
+2 - unblock PIN
+3 - change Admin PIN
+4 - set the Reset Code
+Q - quit
+
+Your selection? q
+
+gpg/card&gt; name
+Cardholder's surname: Josefsson
+Cardholder's given name: Simon
+
+gpg/card&gt; lang
+Language preferences: sv
+
+gpg/card&gt; url
+URL to retrieve public key: https://josefsson.org/1c5c4717.txt
+
+gpg/card&gt; sex
+Sex ((M)ale, (F)emale or space): m
+
+gpg/card&gt; login
+Login data (account name): jas
+
+gpg/card&gt;
+
+Application ID ...: D2760001240102000060000000420000
+Version ..........: 2.0
+Manufacturer .....: unknown
+Serial number ....: 00000042
+Name of cardholder: Simon Josefsson
+Language prefs ...: sv
+Sex ..............: male
+URL of public key : https://josefsson.org/1c5c4717.txt
+Login data .......: jas
+Signature PIN ....: forced
+Key attributes ...: 2048R 2048R 2048R
+Max. PIN lengths .: 127 127 127
+PIN retry counter : 3 3 3
+Signature counter : 0
+Signature key ....: [none]
+Encryption key....: [none]
+Authentication key: [none]
+General key info..: [none]
+
+gpg/card&gt; quit
+user@debian:~$</pre>
+</div></div>
+<div class="paragraph"><p>The following example is YubiKey 4 specific and shows how to set touch
+on the signature key:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>
+<span class="sh-dollar"></span>./yubitouch.sh sig on
+All done!
+</pre>
+</div></div>
+</div>
+</div>
+</div>
+<!-- End main content -->
+</div>
+</div>
+</div>
+<footer class="container">
+<div class="row" style="margin-top:30px;padding-top:20px;border-top:1px solid #eee;">
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%">
+<strong><a href="/" style="color:#000">DEV.YUBICO</a></strong><br/>
+<a href="/Passkeys">Passkeys</a><br/>
+<a href="/WebAuthn">WebAuthn</a><br/>
+<a href="/CTAP">CTAP</a><br/>
+<a href="/OTP">OTP</a><br/>
+<a href="/OATH">OATH</a><br/>
+<a href="/PGP">PGP</a><br/>
+<a href="/PIV">PIV</a><br/>
+<a href="/Secure_Domain">Secure Domain</a><br/>
+<a href="/YubiHSM2">YubiHSM2</a><br/>
+<a href="/Software_Projects">Software Projects</a><br/>
+</p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong>RESOURCES</strong><br/>
+<a href="https://www.yubico.com/store/" rel="noopener noreferrer" target="_blank">Buy YubiKeys</a><br/>
+<a href="https://www.yubico.com/blog/" rel="noopener noreferrer" target="_blank">Blog</a><br/>
+<a href="https://www.yubico.com/email-subscription/" rel="noopener noreferrer" target="_blank">Newsletter</a><br/>
+<a href="https://forum.yubico.com/" rel="noopener noreferrer" target="_blank">Yubico Forum Archive</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong><a href="https://www.yubico.com/" rel="noopener noreferrer" style="color:#000" target="_blank">YUBICO.COM</a></strong><br/>
+<a href="https://www.yubico.com/why-yubico/" rel="noopener noreferrer" target="_blank">Why Yubico</a><br/>
+<a href="https://www.yubico.com/about/about-us/" rel="noopener noreferrer" target="_blank">About Yubico</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/cookie-notice/" rel="noopener noreferrer" target="_blank">Cookie</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/" rel="noopener noreferrer" target="_blank">Legal</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/privacy-notice/" rel="noopener noreferrer" target="_blank">Privacy</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/yubico-website-terms-conditions/" rel="noopener noreferrer" target="_blank">Terms of use</a><br/>
+<a href="https://www.yubico.com/trust/" rel="noopener noreferrer" target="_blank">Trust</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:1em;font-size:90%"> </p>
+<table align="right" cellpadding="0" cellspacing="0" style="color:#9aca3c">
+<tbody>
+<tr>
+<td style="padding:10px"><a href="https://www.yubico.com/feed/" rel="noopener noreferrer" target="_blank" title="Blog RSS"><i class="fa fa-rss"></i></a></td>
+<td style="padding:10px"><a href="https://twitter.com/yubico" rel="noopener noreferrer" target="_blank" title="Twitter"><i class="fa-brands fa-twitter"></i></a></td>
+<td style="padding:10px"><a href="https://www.facebook.com/Yubikey" rel="noopener noreferrer" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a></td>
+<td style="padding:10px"><a href="https://www.youtube.com/c/Yubico" rel="noopener noreferrer" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a></td>
+<td style="padding:10px 0 10px 10px"><a href="https://github.com/Yubico" rel="noopener noreferrer" target="_blank" title="GitHub"><i class="fa-brands fa-github"></i></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</footer>
+<script src="/vendor/jquery/dist/jquery.min.js"></script>
+<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/vendor/jquery.tablesorter/dist/js/jquery.tablesorter.min.js"></script>
+<script src="/js/code-tabs.js"></script>
+<script src="/js/main.js"></script>
+<!-- Cookie Consent -->
+<script defer="" src="/vendor/vanilla-cookieconsent/dist/cookieconsent.js"></script>
+<script defer="" src="/js/cookieconsent-init.js"></script>
+<!-- End Cookie Consent -->
+</body>
+</html>

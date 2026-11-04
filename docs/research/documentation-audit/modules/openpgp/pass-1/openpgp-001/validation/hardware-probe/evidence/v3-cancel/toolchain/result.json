@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditPgp001.Hardware.IntegrationTests --filter FullyQualifiedName~CancelSign_NoTouch_ObserveTerminalThenFreshRecoveryBeforeReset",
+  "started": "2026-11-04T15:09:33.8010604+01:00",
+  "durationSeconds": 20.8,
+  "runDirectory": "artifacts/toolchain/runs/20261104-150933-801-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 20.7,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditPgp001.Hardware.IntegrationTests",
+      "outcome": "passed",
+      "reason": "1 executed, 0 skipped",
+      "executed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261104-150933-801-test/01-test-AuditPgp001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

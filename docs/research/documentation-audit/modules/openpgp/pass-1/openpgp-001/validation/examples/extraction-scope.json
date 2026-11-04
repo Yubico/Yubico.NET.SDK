@@ -1,0 +1,132 @@
+{
+  "editor_complete": true,
+  "formatter_complete": true,
+  "reviewer_complete": true,
+  "notification": "Coordinator released final post-editor/reviewer/formatter extraction: 59 accepted paths, 49 whitespace-only C# transforms with unchanged imports; twelve complete README bodies remain unchanged. Compilation and execution gates remain separate.",
+  "editor_report": {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/edit-corrections.md",
+    "bytes": 11873,
+    "sha256": "306152bb41b0d150f37087467a4a64df1bdcb19a2431fc80cacec2baaf29085d"
+  },
+  "edited_paths": [
+    "README.md",
+    "docs/migration/v1-to-v2-gaps.md",
+    "docs/migration/v1-to-v2-map.yml",
+    "docs/migration/v1-to-v2.md",
+    "docs/usage/user-interaction.md",
+    "docs/v1-to-v2-comparison.md",
+    "docs/v2-highlights.md",
+    "src/OpenPgp/CLAUDE.md",
+    "src/OpenPgp/README.md",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesExportCommand.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesImportCommand.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/InfoCommand.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysAttestCommand.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysGenerateCommand.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysImportCommand.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysSetTouchCommand.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/OpenPgpDeviceSelector.cs",
+    "src/OpenPgp/src/AlgorithmAttributes.cs",
+    "src/OpenPgp/src/ApplicationRelatedData.cs",
+    "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+    "src/OpenPgp/src/Crt.cs",
+    "src/OpenPgp/src/CurveOid.cs",
+    "src/OpenPgp/src/DataObject.cs",
+    "src/OpenPgp/src/DiscretionaryDataObjects.cs",
+    "src/OpenPgp/src/ExtendedCapabilities.cs",
+    "src/OpenPgp/src/GenerationTimes.cs",
+    "src/OpenPgp/src/IOpenPgpSession.cs",
+    "src/OpenPgp/src/Kdf.cs",
+    "src/OpenPgp/src/KeyRef.cs",
+    "src/OpenPgp/src/OpenPgpAid.cs",
+    "src/OpenPgp/src/OpenPgpInvalidPinException.cs",
+    "src/OpenPgp/src/OpenPgpSession.Config.cs",
+    "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+    "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+    "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+    "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+    "src/OpenPgp/src/OpenPgpSession.cs",
+    "src/OpenPgp/src/PinPolicy.cs",
+    "src/OpenPgp/src/PrivateKeyImport.cs",
+    "src/OpenPgp/src/PrivateKeyTemplate.cs",
+    "src/OpenPgp/src/Pw.cs",
+    "src/OpenPgp/src/PwStatus.cs",
+    "src/OpenPgp/src/RsaSize.cs",
+    "src/OpenPgp/src/SecuritySupportTemplate.cs",
+    "src/OpenPgp/src/Uif.cs",
+    "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpAdvancedTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpDecryptTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpKeyImportTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AlgorithmAttributesTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AuditV2/OpenPgpAuditReproTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs"
+  ],
+  "shared_paths": [
+    "README.md",
+    "docs/migration/v1-to-v2-gaps.md",
+    "docs/migration/v1-to-v2-map.yml",
+    "docs/migration/v1-to-v2.md",
+    "docs/usage/user-interaction.md",
+    "docs/v1-to-v2-comparison.md",
+    "docs/v2-highlights.md"
+  ],
+  "whole_shared_paths": [
+    "docs/usage/user-interaction.md"
+  ],
+  "shared_sections": {
+    "README.md": [
+      "Packages"
+    ],
+    "docs/migration/v1-to-v2.md": [
+      "OpenPGP"
+    ],
+    "docs/migration/v1-to-v2-gaps.md": [
+      "Cross-cutting Developer Experience"
+    ],
+    "docs/v1-to-v2-comparison.md": [
+      "New in v2"
+    ],
+    "docs/v2-highlights.md": [
+      "OpenPGP"
+    ]
+  },
+  "shared_policy": "Assigned OpenPGP sections plus generic user-presence callback/wording dependencies; explicit PIV/WebAuthn ceremonies are excluded. Other shared fences receive outside-applet dispositions; no other-applet implementation investigation.",
+  "final_review": {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/reviewed-files.json",
+    "bytes": 20965,
+    "sha256": "c1f9b31ba2773bd4b59faa3060820d193bd483d7aed5cdca4c498baebcdc0ff6"
+  },
+  "accepted_review": {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/evidence/review-accepted.json",
+    "bytes": 14333,
+    "sha256": "fced852141bced96663c590805afa9de5de76dcf10cbb05f2c8701a1364cc834"
+  },
+  "formatter_transform": {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/format-transform.json",
+    "bytes": 16180,
+    "sha256": "961aadba31e4ef367223ca967b3586f170840a882fcf0a49a7120c61a3e57300"
+  },
+  "original_editor_report": {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/edit-report.md",
+    "bytes": 30645,
+    "sha256": "5f91b64a4ad7f8309eee0731714b06e48c528d7c42f8a2efd2b9100e2013698c"
+  },
+  "correction_acceptance": {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-corrections.md",
+    "bytes": 7822,
+    "sha256": "251ebf21e7ca073e4eec5d407887a4df1c9604afee4ed5dd1637bec26e2c0ff7"
+  },
+  "package_description": {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/package-description.json",
+    "bytes": 619,
+    "sha256": "233d7f43735a564228e96cd947c16c4bab7476a8fcf4d184874cf98da56a2681"
+  }
+}

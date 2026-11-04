@@ -370,6 +370,11 @@ v2 location: `src/Management/src/**`
   **Severity**: Blocker (for that segment) | **Confidence**: High
 
 - **Exception hierarchy**: v1 has 10 dedicated exception types (`ApduException`, `TlvException`, `SCardException`, `PlatformApiException`, `Ctap2DataException`, `Fido2Exception`, `KeyboardConnectionException`, `MalformedYubiKeyResponseException`, `SecureChannelException` ×2). v2 has 8 (`BadResponseException`, `PlatformInteropException`, `SCardException`, `PlatformApiException`, `ApduException`, `CtapException`, `InvalidPinException`, `WebAuthnClientError`). No v2 equivalent for `TlvException`, `KeyboardConnectionException`, or either `SecureChannelException`; `Fido2Exception`/`Ctap2DataException`'s two-level hierarchy collapses into one flat `CtapException`. SecurityDomain, YubiOtp, OpenPgp, Management, YubiHsm, and Oath have **zero** dedicated exception types.
+  **Current OpenPGP qualification**: The zero-type statement above describes the historical snapshot.
+  Current `OpenPgpInvalidPinException` exposes nullable retry counts for User/Admin VERIFY responses, including
+  non-PIN failures under the present broad mapping. Extended-mode 6982 fallback can report Reset Code attempts;
+  query fresh PIN status for `AttemptsUser` before interpreting blocking, and diagnose before retrying. Change/
+  recovery commands still propagate general APDU exceptions. See the [OpenPGP guide](../../src/OpenPgp/README.md).
   **User impact**: Consumers catching specific v1 exception types lose that precision and fall back to broad/generic catching.
   **Severity**: Major | **Confidence**: High
 

@@ -31,6 +31,11 @@ public enum KdfHashAlgorithm : byte
 ///     Base class for OpenPGP Key Derivation Function (KDF) configuration.
 ///     Dispatches parsing to <see cref="KdfNone" /> or <see cref="KdfIterSaltedS2k" />.
 /// </summary>
+/// <remarks>
+///     Standalone instances are caller-owned and disposable. A session retains the same object supplied
+///     to SetKdfAsync or returned by GetKdfAsync and disposes its current cache during teardown. Keep that
+///     object undisposed while the session uses it; retain outer cleanup scopes for replaced/reset objects.
+/// </remarks>
 public abstract class Kdf : IDisposable
 {
     /// <summary>
@@ -54,6 +59,7 @@ public abstract class Kdf : IDisposable
     /// <summary>
     ///     Serializes the KDF configuration to its wire format (concatenated TLVs).
     /// </summary>
+    /// <returns>Caller-owned bytes, potentially containing initial PIN hashes; clear after transmission/use.</returns>
     public abstract byte[] ToBytes();
 
     /// <inheritdoc />
@@ -62,6 +68,11 @@ public abstract class Kdf : IDisposable
     /// <summary>
     ///     Parses a KDF configuration from the encoded TLV data (DO 0xF9).
     /// </summary>
+    /// <remarks>
+    ///     Algorithm 3 requires the modeled S2K fields; absent/other identifiers currently produce KdfNone.
+    ///     Malformed TLV or missing required S2K fields can fail parsing. Retain raw F9 data when inspecting
+    ///     identifiers beyond the model. The returned object is owned by the caller unless retained by a session.
+    /// </remarks>
     public static Kdf Parse(ReadOnlySpan<byte> encoded)
     {
         var data = TlvHelper.DecodeDictionary(encoded);
@@ -108,13 +119,12 @@ public sealed class KdfNone : Kdf
 ///         <c>IterationCount</c> is the total number of bytes fed to one hash computation, not a number
 ///         of rounds; the card stores it as an unsigned 32-bit value. The salt followed by the PIN is
 ///         repeated until that many bytes have been hashed, then the hash is finalised once. When the
-///         count is smaller than salt plus PIN, one full copy is hashed anyway: "at least one copy of
-///         the full salt plus passphrase will be provided as input to each hash context regardless of
-///         the octet count" (RFC 9580 §3.7.1.3). This is what GnuPG computes (libgcrypt
-///         <c>GCRY_KDF_ITERSALTED_S2K</c>), so PINs set by either side verify on the other.
+///         count is smaller than salt plus PIN, one full copy is hashed anyway, as required by
+///         RFC 9580 §3.7.1.3. That citation defines the derivation primitive; Card specification 3.4.1
+///         §4.3.2 defines F9 fields and assigns credential/configuration alignment to terminal software.
 ///     </para>
 ///     <para>
-///         This is not PBKDF2. The algorithm is:
+///         The iterated-salted S2K calculation is:
 ///         <code>
 ///         data = salt + pin_bytes
 ///         total = max(iteration_count, len(data))
@@ -130,8 +140,7 @@ public sealed class KdfIterSaltedS2k : Kdf
     internal const int KdfAlgorithm = 3;
 
     // Backing fields — KdfIterSaltedS2k always owns these arrays.
-    // The init setters clone caller-provided memory so Dispose() can safely
-    // zero them without risk of zeroing buffers owned by the caller (T12).
+    // Init setters clone input so this instance can clear its own storage on disposal.
     private byte[] _saltUser = [];
     private byte[]? _saltReset;
     private byte[]? _saltAdmin;
@@ -147,7 +156,8 @@ public sealed class KdfIterSaltedS2k : Kdf
     public KdfHashAlgorithm HashAlgorithm { get; init; }
 
     /// <summary>
-    ///     The total number of bytes to feed into the hash function, 0 to <see cref="uint.MaxValue" />.
+    ///     The expanded input-byte count, 0 to <see cref="uint.MaxValue" />; derivation hashes at least
+    ///     one full salt-plus-PIN copy. F9 encodes this as four bytes, unlike RFC packet S2K's coded octet.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">The value does not fit the card's unsigned 32-bit field.</exception>
     public long IterationCount
@@ -191,7 +201,7 @@ public sealed class KdfIterSaltedS2k : Kdf
     }
 
     /// <summary>
-    ///     Pre-computed hash of the default User PIN. Null if not stored.
+    ///     Initial User PIN hash used for provisioning. Null if absent.
     ///     <para>The setter copies the provided memory — this instance owns the backing array.</para>
     /// </summary>
     public ReadOnlyMemory<byte>? InitialHashUser
@@ -201,7 +211,7 @@ public sealed class KdfIterSaltedS2k : Kdf
     }
 
     /// <summary>
-    ///     Pre-computed hash of the default Admin PIN. Null if not stored.
+    ///     Initial Admin PIN hash used for provisioning. Null if absent.
     ///     <para>The setter copies the provided memory — this instance owns the backing array.</para>
     /// </summary>
     public ReadOnlyMemory<byte>? InitialHashAdmin

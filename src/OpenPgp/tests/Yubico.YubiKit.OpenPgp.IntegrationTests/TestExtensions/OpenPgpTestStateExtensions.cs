@@ -32,7 +32,9 @@ public static class OpenPgpTestStateExtensions
         ///     the OpenPGP applet before use.
         /// </summary>
         /// <param name="resetBeforeUse">
-        ///     When <c>true</c>, performs a factory reset of the OpenPGP applet before running the test.
+        ///     When true, calls ResetAsync before the action. Its return supplies no full reset postcondition;
+        ///     the helper leaves post-action state in place and performs no final reset/readback. ATT material
+        ///     survives a successful YubiKey application reset.
         /// </param>
         /// <param name="action">The async action to execute with the session.</param>
         /// <param name="configuration">Optional protocol configuration.</param>

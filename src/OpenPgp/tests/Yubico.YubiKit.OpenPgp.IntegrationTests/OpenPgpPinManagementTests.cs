@@ -75,7 +75,7 @@ public class OpenPgpPinManagementTests
                 var signature = await session.SignAsync(message, System.Security.Cryptography.HashAlgorithmName.SHA256);
                 Assert.True(signature.Length > 0);
 
-                // Unverify PIN — clears verification state
+                // The following signing failure probes signature state; other-operation state is untested here.
                 await session.UnverifyPinAsync();
 
                 // Signing should now fail because PIN is no longer verified
@@ -102,7 +102,7 @@ public class OpenPgpPinManagementTests
                 await session.VerifyAdminAsync(DefaultAdminPin);
                 await session.SetSignaturePinPolicyAsync(PinPolicy.Always);
 
-                // Read back and verify
+                // Check stored policy bytes; this case leaves repeated-signature enforcement untested.
                 var statusAfter = await session.GetPinStatusAsync();
                 Assert.Equal(PinPolicy.Always, statusAfter.SignaturePinPolicy);
 
@@ -159,9 +159,8 @@ public class OpenPgpPinManagementTests
                 // that Admin PIN (PW3) has been verified beforehand.
                 await session.VerifyAdminAsync(DefaultAdminPin);
 
-                // Use a PIN that satisfies PIN complexity requirements (FW 5.7+
-                // requires at least 2 unique characters; "111111" would fail with
-                // SW=0x6985 "Conditions of use not satisfied").
+                // Use varied digits for compatibility with device credential policies.
+                // This test checks acceptance of this value, rather than a universal firmware complexity rule.
                 byte[] newPin = "654321"u8.ToArray();
                 await session.ResetPinUsingAdminAuthenticationAsync(newPin);
 

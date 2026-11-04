@@ -1,0 +1,46 @@
+$ dotnet test docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~TouchSign_P256_HostVerifies"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests -> /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.06]   Discovering: Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (app domain = off, method display = ClassAndMethod, method display options = None)
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (7 test cases to be run)
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (parallel test collections = off, stop on fail = off, explicit = off)
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.44]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] HYPOTHESIS OpenPgp.Sign with ordinary On touch policy completes and verifies under the generated P-256 public key; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T14:04:21.1076413+00:00
+[xUnit.net 00:00:00.47]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:00.48]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:01.06]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.63]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PRESENCE requested operation=OpenPgp.Sign basis=PolicyRequires elapsed-ms=588 action=TOUCH WHEN LED FLASHES
+OpenPGP serial 103: touch for OpenPgp.Sign when the LED flashes.
+[xUnit.net 00:00:02.59]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PRESENCE resolved outcome=Completed elapsed-ms=1546 token-none=True
+[xUnit.net 00:00:02.60]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ORACLE operation=OpenPgp.Sign ECDSA-P256-SHA256=host-verified; touch-policy=On
+[xUnit.net 00:00:02.61]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:02.61]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [PASS]
+[xUnit.net 00:00:02.61]       Output:
+[xUnit.net 00:00:02.61]         HYPOTHESIS OpenPgp.Sign with ordinary On touch policy completes and verifies under the generated P-256 public key; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T14:04:21.1076413+00:00
+[xUnit.net 00:00:02.61]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:02.61]         PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:02.61]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:02.61]         PRESENCE requested operation=OpenPgp.Sign basis=PolicyRequires elapsed-ms=588 action=TOUCH WHEN LED FLASHES
+[xUnit.net 00:00:02.61]         PRESENCE resolved outcome=Completed elapsed-ms=1546 token-none=True
+[xUnit.net 00:00:02.61]         ORACLE operation=OpenPgp.Sign ECDSA-P256-SHA256=host-verified; touch-policy=On
+[xUnit.net 00:00:02.61]         FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:02.62]   Finished:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests
+  Passed Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchSign_P256_HostVerifies(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [2 s]
+
+Test Run Successful.
+Total tests: 1
+     Passed: 1
+ Total time: 2.9524 Seconds

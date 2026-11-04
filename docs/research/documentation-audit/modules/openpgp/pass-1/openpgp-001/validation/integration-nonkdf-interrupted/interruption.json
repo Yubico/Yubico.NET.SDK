@@ -1,0 +1,43 @@
+{
+  "cause": "Coordinator shell timeout at120000ms; all test/runner child processes absent on inspection; no final RESULT",
+  "retained_files": [
+    {
+      "path": "01-test-OpenPgp.IntegrationTests.log",
+      "bytes": 6259,
+      "sha256": "80c4fc412a1a207689acda021274bc7407719b6ad69a7d9c27736ae2632e70fe"
+    },
+    {
+      "path": "run.log",
+      "bytes": 1345,
+      "sha256": "989126c535cb1965f2e487ba0f0408210aae7e4aa57e57c2e013fd600668f8af"
+    }
+  ],
+  "reported_passes": 24,
+  "passed_lines": [
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpAdvancedTests.GenerateEcKey_Ed25519_ThenSign_ProducesSignature(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpAdvancedTests.GenerateEcKey_X25519_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [829 ms]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpAdvancedTests.GenerateRsaKey_4096_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [56 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpAdvancedTests.GenerateRsaKey_3072_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [30 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpMultiCurveTests.SetPinAttempts_CustomValues_ReflectedInStatus(state: YubiKey(Placeholder #0: Conn=SmartCard)) [644 ms]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpMultiCurveTests.GenerateEcKey_P384_ThenSign_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpMultiCurveTests.GenerateEcKey_BrainpoolP256R1_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportRsaKey_2048_ThenSign_VerifiesWithTheHostPublicKey(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_P384_ThenSign_VerifiesWithTheHostPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_Ed25519_CardReportsTheTestVectorPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_P256_ToAuth_ThenAuthenticate_VerifiesWithTheHostPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_X25519_ToDec_CardReportsTheTestVectorPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [835 ms]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_P256_ThenSign_VerifiesWithTheHostPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GetSignatureCounter_DefaultState_ReturnsZero(state: YubiKey(Placeholder #0: Conn=SmartCard)) [566 ms]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GetAlgorithmAttributes_DefaultState_ReturnsRsa2048(state: YubiKey(Placeholder #0: Conn=SmartCard)) [581 ms]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.Certificate_PutGetDelete_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.Sign_EcP256_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GenerateRsaKey_2048_Succeeds(state: YubiKey(Placeholder #0: Conn=SmartCard)) [4 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.AttestKey_RequiresUserPin_AndReplacesCardholderCertificate(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GetApplicationRelatedData_ReturnsValidData(state: YubiKey(Placeholder #0: Conn=SmartCard)) [569 ms]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.DeleteKey_AfterGenerate_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.Reset_RestoresDefaultState(state: YubiKey(Placeholder #0: Conn=SmartCard)) [568 ms]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GetFingerprints_AfterReset_ReturnsFourEntries(state: YubiKey(Placeholder #0: Conn=SmartCard)) [573 ms]",
+    "  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.Sign_Rsa2048_ProducesSignature(state: YubiKey(Placeholder #0: Conn=SmartCard)) [2 s]"
+  ],
+  "active_test_processes": []
+}

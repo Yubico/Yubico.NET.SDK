@@ -1,0 +1,20 @@
+commit 9654350803d6fcce2e6a0c432a063989fbce0922
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Mon Jan 9 18:08:11 2023 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Mon Jan 9 18:08:11 2023 +0100
+
+    Add version check to unverify_pin.
+
+diff --git a/yubikit/openpgp.py b/yubikit/openpgp.py
+index 888b2750..8c352208 100644
+--- a/yubikit/openpgp.py
++++ b/yubikit/openpgp.py
+@@ -1146,6 +1146,7 @@ class OpenPgpSession:
+         self._verify(PW.ADMIN, admin_pin)
+ 
+     def unverify_pin(self, pw: PW) -> None:
++        require_version(self.version, (5, 6, 0))
+         logger.debug(f"Resetting verification for {pw.name} PIN")
+         self.protocol.send_apdu(0, INS.VERIFY, 0xFF, pw)
+ 

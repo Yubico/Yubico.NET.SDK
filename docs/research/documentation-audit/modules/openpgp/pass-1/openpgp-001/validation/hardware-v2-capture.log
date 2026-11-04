@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/capture-compiler.py v2-build
+Retained compiler evidence and 227 dependency identities at /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/evidence/v2-build; no binaries copied.
+
+EXIT=0

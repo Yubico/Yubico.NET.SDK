@@ -1,0 +1,29 @@
+{
+  "baseline": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+  "files": [
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+      "git_sha256": "2baa72e241543d1d55a251d4b5d89ae6cfab979144731e1625c26818d8e629f9",
+      "working_sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b",
+      "reason": "line-ending normalization only"
+    },
+    {
+      "path": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+      "git_sha256": "667447705c9fbc815f475a6571169e75de04b0a356a397f1401788c4fe3216b3",
+      "working_sha256": "34662c67febedf12e697a58bbc4ce872ccdd50f67080cb432d4c4c4cfba0d00a",
+      "reason": "line-ending normalization only"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj",
+      "git_sha256": "a0a02203ba907cdb03ce76ef6c6789d159d23ff0eb81df14fd98d93905f44ea0",
+      "working_sha256": "6744bd61272f01d8a9af9050b0aa4e1463eece747ebbb354252515d96b698846",
+      "reason": "line-ending normalization only"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj",
+      "git_sha256": "29f79c403700f2336ff048d292b4b99f47655a6da8e76fcfb8b3611472c53163",
+      "working_sha256": "eec7d8b986d4cfba471ee689d8d83347d6bd41bd6b40eba9500e7e6bfbf576f0",
+      "reason": "line-ending normalization only"
+    }
+  ]
+}

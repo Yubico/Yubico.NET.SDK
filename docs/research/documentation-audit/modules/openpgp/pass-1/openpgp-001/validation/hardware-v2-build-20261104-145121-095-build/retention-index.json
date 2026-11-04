@@ -1,0 +1,40 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-145121-095-build",
+  "files": [
+    {
+      "path": "01-clean-AuditPgp001.Hardware.IntegrationTests.log",
+      "bytes": 17027,
+      "sha256": "6201e17cc2fac54806018dcc46fd7db68e08801d3f6d3f5cf08ab96a2f8dc59a",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "02-build-AuditPgp001.Hardware.IntegrationTests.log",
+      "bytes": 1126,
+      "sha256": "d1f25d26f2cbddf7b21af951e11a20f8ac1f39011be802dc507a9eecd0110f29",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 729,
+      "sha256": "56d8d1df45ed65757712a4aab55d7674fbeb9d91346af4b01b6699da8db62c6a",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 454,
+      "sha256": "de2ce3ce52e39d91e387878ca8d5b0d22a65de1ca8796b16e969b26ab319a116",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2351,
+      "sha256": "112d882dcb80d69edcd2cd1b79a69c0e50c74b5ceb6cbbbb0e0bb73e3353c58d",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

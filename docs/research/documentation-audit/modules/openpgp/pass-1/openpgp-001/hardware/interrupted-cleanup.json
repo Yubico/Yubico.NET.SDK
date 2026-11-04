@@ -1,0 +1,2259 @@
+{
+  "baseline_file_sha256": "0e4c68ccf1b1f1a629a8f19f7e10c955b15ecd416b863eca7656d9ca6a33b480",
+  "factory_pin_verification": {
+    "admin": {
+      "status": "ok",
+      "value": null
+    },
+    "pin_status_after": {
+      "status": "ok",
+      "value": {
+        "attempts_admin": 3,
+        "attempts_reset": 0,
+        "attempts_user": 3,
+        "max_len_admin": 127,
+        "max_len_reset": 127,
+        "max_len_user": 127,
+        "pin_policy_user": {
+          "name": "ONCE",
+          "value": 1
+        }
+      }
+    },
+    "user_extended": {
+      "status": "ok",
+      "value": null
+    },
+    "user_sign": {
+      "status": "ok",
+      "value": null
+    }
+  },
+  "helper_revision": 2,
+  "helper_source_sha256": "538bf77580da120f31f7867a38cae072b75904c3b1d3d0d63142e8a2c9f768a3",
+  "mode": "cleanup",
+  "post_verification_state": {
+    "aid": "d2760001240103040006000001030000",
+    "algorithm_attributes": {
+      "ATT": {
+        "status": "ok",
+        "value": {
+          "algorithm_id": 1,
+          "e_len": 17,
+          "import_format": {
+            "name": "STANDARD",
+            "value": 0
+          },
+          "n_len": 2048
+        }
+      },
+      "AUT": {
+        "status": "ok",
+        "value": {
+          "algorithm_id": 1,
+          "e_len": 17,
+          "import_format": {
+            "name": "STANDARD",
+            "value": 0
+          },
+          "n_len": 2048
+        }
+      },
+      "DEC": {
+        "status": "ok",
+        "value": {
+          "algorithm_id": 1,
+          "e_len": 17,
+          "import_format": {
+            "name": "STANDARD",
+            "value": 0
+          },
+          "n_len": 2048
+        }
+      },
+      "SIG": {
+        "status": "ok",
+        "value": {
+          "algorithm_id": 1,
+          "e_len": 17,
+          "import_format": {
+            "name": "STANDARD",
+            "value": 0
+          },
+          "n_len": 2048
+        }
+      }
+    },
+    "application_version": "0.0.1",
+    "ca_fingerprints": {
+      "status": "ok",
+      "value": {
+        "ATT": "0000000000000000000000000000000000000000",
+        "AUT": "0000000000000000000000000000000000000000",
+        "DEC": "0000000000000000000000000000000000000000",
+        "SIG": "0000000000000000000000000000000000000000"
+      }
+    },
+    "certificates": {
+      "ATT": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "FC",
+            "response_length": 793,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "der_sha256": "94afb703099edb4aaaee443c6e197c379f7f909d23f717f0868ef73057e4a16a",
+        "direct_session_version": "0.0.1",
+        "framing_version": "5.8.0.beta.0",
+        "framing_version_source": "fresh-serial-103-management-metadata",
+        "length": 793,
+        "read_path": "explicit-public-apdu",
+        "serial_number_hex": "3CA5F73F686B447ED8CF372BF0320FC98C5115C1",
+        "spki_sha256": "b5ba3032f18969b8ba2a9dc85136404bdb977f2e342e2f3e31b6df2799ee0113",
+        "status": "ok"
+      },
+      "AUT": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "60045c027f21",
+            "ins": "A5",
+            "p1": "00",
+            "p2": "04",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          },
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "7F",
+            "p2": "21",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "direct_session_version": "0.0.1",
+        "framing_version": "5.8.0.beta.0",
+        "framing_version_source": "fresh-serial-103-management-metadata",
+        "read_path": "explicit-public-apdu",
+        "reason": "successful GET DATA returned zero certificate octets",
+        "status": "absent"
+      },
+      "DEC": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "60045c027f21",
+            "ins": "A5",
+            "p1": "01",
+            "p2": "04",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          },
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "7F",
+            "p2": "21",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "direct_session_version": "0.0.1",
+        "framing_version": "5.8.0.beta.0",
+        "framing_version_source": "fresh-serial-103-management-metadata",
+        "read_path": "explicit-public-apdu",
+        "reason": "successful GET DATA returned zero certificate octets",
+        "status": "absent"
+      },
+      "SIG": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "60045c027f21",
+            "ins": "A5",
+            "p1": "02",
+            "p2": "04",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          },
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "7F",
+            "p2": "21",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "direct_session_version": "0.0.1",
+        "framing_version": "5.8.0.beta.0",
+        "framing_version_source": "fresh-serial-103-management-metadata",
+        "read_path": "explicit-public-apdu",
+        "reason": "successful GET DATA returned zero certificate octets",
+        "status": "absent"
+      }
+    },
+    "complete": true,
+    "device": {
+      "config": {
+        "auto_eject_timeout": 0,
+        "challenge_response_timeout": 15,
+        "device_flags": {
+          "name": null,
+          "value": 0
+        },
+        "enabled_capabilities": {
+          "NFC": {
+            "name": "OTP|U2F|FIDO2|OATH|PIV|OPENPGP|HSMAUTH|1028",
+            "value": 1855
+          },
+          "USB": {
+            "name": "OTP|U2F|FIDO2|OATH|PIV|OPENPGP|HSMAUTH|5124",
+            "value": 5951
+          }
+        },
+        "nfc_restricted": false
+      },
+      "fips_approved": {
+        "name": null,
+        "value": 0
+      },
+      "fips_capable": {
+        "name": null,
+        "value": 0
+      },
+      "form_factor": {
+        "name": "USB_A_KEYCHAIN",
+        "value": 1
+      },
+      "fps_version": null,
+      "is_fips": false,
+      "is_locked": false,
+      "is_sky": false,
+      "part_number": "78CLUFX5000P",
+      "pin_complexity": true,
+      "reset_blocked": {
+        "name": null,
+        "value": 0
+      },
+      "serial": 103,
+      "stm_version": null,
+      "supported_capabilities": {
+        "NFC": {
+          "name": "OTP|U2F|FIDO2|OATH|PIV|OPENPGP|HSMAUTH|1028",
+          "value": 1855
+        },
+        "USB": {
+          "name": "OTP|U2F|FIDO2|OATH|PIV|OPENPGP|HSMAUTH|5124",
+          "value": 5951
+        }
+      },
+      "version": [
+        5,
+        8,
+        0
+      ],
+      "version_qualifier": {
+        "iteration": 0,
+        "type": {
+          "name": "BETA",
+          "value": 1
+        },
+        "version": [
+          5,
+          8,
+          0
+        ]
+      }
+    },
+    "device_version_name": "5.8.0.beta.0",
+    "extended_capabilities": {
+      "status": "ok",
+      "value": {
+        "certificate_max_length": 2048,
+        "challenge_max_length": 3070,
+        "flags": {
+          "name": "KDF|ALGORITHM_ATTRIBUTES_CHANGEABLE|PRIVATE_USE|PW_STATUS_CHANGEABLE|KEY_IMPORT|GET_CHALLENGE",
+          "value": 125
+        },
+        "mse_command": false,
+        "pin_block_2_format": false,
+        "sm_algorithm": 0,
+        "special_do_max_length": 255
+      }
+    },
+    "fingerprints": {
+      "status": "ok",
+      "value": {
+        "ATT": "0000000000000000000000000000000000000000",
+        "AUT": "0000000000000000000000000000000000000000",
+        "DEC": "0000000000000000000000000000000000000000",
+        "SIG": "0000000000000000000000000000000000000000"
+      }
+    },
+    "generation_times": {
+      "status": "ok",
+      "value": {
+        "ATT": 0,
+        "AUT": 0,
+        "DEC": 0,
+        "SIG": 0
+      }
+    },
+    "kdf": {
+      "status": "ok",
+      "value": {
+        "algorithm": 0,
+        "type": "KdfNone"
+      }
+    },
+    "key_information": {
+      "status": "ok",
+      "value": {
+        "ATT": {
+          "name": "IMPORTED",
+          "value": 2
+        },
+        "AUT": {
+          "name": "NONE",
+          "value": 0
+        },
+        "DEC": {
+          "name": "NONE",
+          "value": 0
+        },
+        "SIG": {
+          "name": "NONE",
+          "value": 0
+        }
+      }
+    },
+    "openpgp_card_version": [
+      3,
+      4
+    ],
+    "pin_status": {
+      "status": "ok",
+      "value": {
+        "attempts_admin": 3,
+        "attempts_reset": 0,
+        "attempts_user": 3,
+        "max_len_admin": 127,
+        "max_len_reset": 127,
+        "max_len_user": 127,
+        "pin_policy_user": {
+          "name": "ONCE",
+          "value": 1
+        }
+      }
+    },
+    "signature_counter": {
+      "status": "ok",
+      "value": 0
+    },
+    "supported_algorithms": {
+      "status": "ok",
+      "value": {
+        "ATT": [
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 3072
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 4096
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2a8648ce3d030107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040022"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040023"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b8104000a"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b2403030208010107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010b"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010d"
+          }
+        ],
+        "AUT": [
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 3072
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 4096
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2a8648ce3d030107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040022"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040023"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b8104000a"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b2403030208010107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010b"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010d"
+          },
+          {
+            "algorithm_id": 22,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b06010401da470f01"
+          }
+        ],
+        "DEC": [
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 3072
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 4096
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2a8648ce3d030107"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040022"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040023"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b8104000a"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b2403030208010107"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010b"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010d"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b060104019755010501"
+          }
+        ],
+        "SIG": [
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 3072
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 4096
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2a8648ce3d030107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040022"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040023"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b8104000a"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b2403030208010107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010b"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010d"
+          },
+          {
+            "algorithm_id": 22,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b06010401da470f01"
+          }
+        ]
+      }
+    },
+    "uif": {
+      "ATT": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "D9",
+            "response_length": 2,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "read_path": "explicit-public-apdu-installed-UIF-parser",
+        "status": "ok",
+        "value": {
+          "name": "OFF",
+          "value": 0
+        }
+      },
+      "AUT": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "D8",
+            "response_length": 2,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "read_path": "explicit-public-apdu-installed-UIF-parser",
+        "status": "ok",
+        "value": {
+          "name": "OFF",
+          "value": 0
+        }
+      },
+      "DEC": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "D7",
+            "response_length": 2,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "read_path": "explicit-public-apdu-installed-UIF-parser",
+        "status": "ok",
+        "value": {
+          "name": "OFF",
+          "value": 0
+        }
+      },
+      "SIG": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "D6",
+            "response_length": 2,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "read_path": "explicit-public-apdu-installed-UIF-parser",
+        "status": "ok",
+        "value": {
+          "name": "OFF",
+          "value": 0
+        }
+      }
+    },
+    "version_interpretation": {
+      "development_mismatch_certificate_path": true,
+      "direct_session_version_preserved": "0.0.1",
+      "fresh_management_version": "5.8.0.beta.0",
+      "private_version_override": false,
+      "uif_vendor_version_fallback_bypassed": true
+    }
+  },
+  "reset_checks": {
+    "AUT_ca_fingerprint_zero": true,
+    "AUT_certificate_absent": true,
+    "AUT_fingerprint_zero": true,
+    "AUT_generation_time_zero": true,
+    "AUT_key_absent": true,
+    "AUT_uif_off": true,
+    "DEC_ca_fingerprint_zero": true,
+    "DEC_certificate_absent": true,
+    "DEC_fingerprint_zero": true,
+    "DEC_generation_time_zero": true,
+    "DEC_key_absent": true,
+    "DEC_uif_off": true,
+    "SIG_ca_fingerprint_zero": true,
+    "SIG_certificate_absent": true,
+    "SIG_fingerprint_zero": true,
+    "SIG_generation_time_zero": true,
+    "SIG_key_absent": true,
+    "SIG_uif_off": true,
+    "attestation_certificate_identity_preserved": true,
+    "device_configuration_preserved": true,
+    "kdf_disabled": true,
+    "pin_attempts_3_0_3": true,
+    "signature_counter_zero": true,
+    "signature_pin_policy_once": true,
+    "supported_algorithms_preserved": true
+  },
+  "reset_exception_observations": {
+    "algorithm_attributes": {
+      "baseline": {
+        "ATT": {
+          "status": "ok",
+          "value": {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          }
+        },
+        "AUT": {
+          "status": "ok",
+          "value": {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          }
+        },
+        "DEC": {
+          "status": "ok",
+          "value": {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          }
+        },
+        "SIG": {
+          "status": "ok",
+          "value": {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          }
+        }
+      },
+      "final": {
+        "ATT": {
+          "status": "ok",
+          "value": {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          }
+        },
+        "AUT": {
+          "status": "ok",
+          "value": {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          }
+        },
+        "DEC": {
+          "status": "ok",
+          "value": {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          }
+        },
+        "SIG": {
+          "status": "ok",
+          "value": {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          }
+        }
+      },
+      "unchanged": true
+    },
+    "certificates": {
+      "baseline": {
+        "ATT": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "FC",
+              "response_length": 793,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "der_sha256": "94afb703099edb4aaaee443c6e197c379f7f909d23f717f0868ef73057e4a16a",
+          "direct_session_version": "0.0.1",
+          "framing_version": "5.8.0.beta.0",
+          "framing_version_source": "fresh-serial-103-management-metadata",
+          "length": 793,
+          "read_path": "explicit-public-apdu",
+          "serial_number_hex": "3CA5F73F686B447ED8CF372BF0320FC98C5115C1",
+          "spki_sha256": "b5ba3032f18969b8ba2a9dc85136404bdb977f2e342e2f3e31b6df2799ee0113",
+          "status": "ok"
+        },
+        "AUT": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "60045c027f21",
+              "ins": "A5",
+              "p1": "00",
+              "p2": "04",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            },
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "7F",
+              "p2": "21",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "direct_session_version": "0.0.1",
+          "framing_version": "5.8.0.beta.0",
+          "framing_version_source": "fresh-serial-103-management-metadata",
+          "read_path": "explicit-public-apdu",
+          "reason": "successful GET DATA returned zero certificate octets",
+          "status": "absent"
+        },
+        "DEC": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "60045c027f21",
+              "ins": "A5",
+              "p1": "01",
+              "p2": "04",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            },
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "7F",
+              "p2": "21",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "direct_session_version": "0.0.1",
+          "framing_version": "5.8.0.beta.0",
+          "framing_version_source": "fresh-serial-103-management-metadata",
+          "read_path": "explicit-public-apdu",
+          "reason": "successful GET DATA returned zero certificate octets",
+          "status": "absent"
+        },
+        "SIG": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "60045c027f21",
+              "ins": "A5",
+              "p1": "02",
+              "p2": "04",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            },
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "7F",
+              "p2": "21",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "direct_session_version": "0.0.1",
+          "framing_version": "5.8.0.beta.0",
+          "framing_version_source": "fresh-serial-103-management-metadata",
+          "read_path": "explicit-public-apdu",
+          "reason": "successful GET DATA returned zero certificate octets",
+          "status": "absent"
+        }
+      },
+      "final": {
+        "ATT": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "FC",
+              "response_length": 793,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "der_sha256": "94afb703099edb4aaaee443c6e197c379f7f909d23f717f0868ef73057e4a16a",
+          "direct_session_version": "0.0.1",
+          "framing_version": "5.8.0.beta.0",
+          "framing_version_source": "fresh-serial-103-management-metadata",
+          "length": 793,
+          "read_path": "explicit-public-apdu",
+          "serial_number_hex": "3CA5F73F686B447ED8CF372BF0320FC98C5115C1",
+          "spki_sha256": "b5ba3032f18969b8ba2a9dc85136404bdb977f2e342e2f3e31b6df2799ee0113",
+          "status": "ok"
+        },
+        "AUT": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "60045c027f21",
+              "ins": "A5",
+              "p1": "00",
+              "p2": "04",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            },
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "7F",
+              "p2": "21",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "direct_session_version": "0.0.1",
+          "framing_version": "5.8.0.beta.0",
+          "framing_version_source": "fresh-serial-103-management-metadata",
+          "read_path": "explicit-public-apdu",
+          "reason": "successful GET DATA returned zero certificate octets",
+          "status": "absent"
+        },
+        "DEC": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "60045c027f21",
+              "ins": "A5",
+              "p1": "01",
+              "p2": "04",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            },
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "7F",
+              "p2": "21",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "direct_session_version": "0.0.1",
+          "framing_version": "5.8.0.beta.0",
+          "framing_version_source": "fresh-serial-103-management-metadata",
+          "read_path": "explicit-public-apdu",
+          "reason": "successful GET DATA returned zero certificate octets",
+          "status": "absent"
+        },
+        "SIG": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "60045c027f21",
+              "ins": "A5",
+              "p1": "02",
+              "p2": "04",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            },
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "7F",
+              "p2": "21",
+              "response_length": 0,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "direct_session_version": "0.0.1",
+          "framing_version": "5.8.0.beta.0",
+          "framing_version_source": "fresh-serial-103-management-metadata",
+          "read_path": "explicit-public-apdu",
+          "reason": "successful GET DATA returned zero certificate octets",
+          "status": "absent"
+        }
+      },
+      "unchanged": true
+    },
+    "fingerprints": {
+      "baseline": {
+        "status": "ok",
+        "value": {
+          "ATT": "0000000000000000000000000000000000000000",
+          "AUT": "0000000000000000000000000000000000000000",
+          "DEC": "0000000000000000000000000000000000000000",
+          "SIG": "0000000000000000000000000000000000000000"
+        }
+      },
+      "final": {
+        "status": "ok",
+        "value": {
+          "ATT": "0000000000000000000000000000000000000000",
+          "AUT": "0000000000000000000000000000000000000000",
+          "DEC": "0000000000000000000000000000000000000000",
+          "SIG": "0000000000000000000000000000000000000000"
+        }
+      },
+      "unchanged": true
+    },
+    "generation_times": {
+      "baseline": {
+        "status": "ok",
+        "value": {
+          "ATT": 0,
+          "AUT": 0,
+          "DEC": 0,
+          "SIG": 0
+        }
+      },
+      "final": {
+        "status": "ok",
+        "value": {
+          "ATT": 0,
+          "AUT": 0,
+          "DEC": 0,
+          "SIG": 0
+        }
+      },
+      "unchanged": true
+    },
+    "key_information": {
+      "baseline": {
+        "status": "ok",
+        "value": {
+          "ATT": {
+            "name": "IMPORTED",
+            "value": 2
+          },
+          "AUT": {
+            "name": "NONE",
+            "value": 0
+          },
+          "DEC": {
+            "name": "NONE",
+            "value": 0
+          },
+          "SIG": {
+            "name": "NONE",
+            "value": 0
+          }
+        }
+      },
+      "final": {
+        "status": "ok",
+        "value": {
+          "ATT": {
+            "name": "IMPORTED",
+            "value": 2
+          },
+          "AUT": {
+            "name": "NONE",
+            "value": 0
+          },
+          "DEC": {
+            "name": "NONE",
+            "value": 0
+          },
+          "SIG": {
+            "name": "NONE",
+            "value": 0
+          }
+        }
+      },
+      "unchanged": true
+    },
+    "uif": {
+      "baseline": {
+        "ATT": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "D9",
+              "response_length": 2,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "read_path": "explicit-public-apdu-installed-UIF-parser",
+          "status": "ok",
+          "value": {
+            "name": "OFF",
+            "value": 0
+          }
+        },
+        "AUT": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "D8",
+              "response_length": 2,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "read_path": "explicit-public-apdu-installed-UIF-parser",
+          "status": "ok",
+          "value": {
+            "name": "OFF",
+            "value": 0
+          }
+        },
+        "DEC": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "D7",
+              "response_length": 2,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "read_path": "explicit-public-apdu-installed-UIF-parser",
+          "status": "ok",
+          "value": {
+            "name": "OFF",
+            "value": 0
+          }
+        },
+        "SIG": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "D6",
+              "response_length": 2,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "read_path": "explicit-public-apdu-installed-UIF-parser",
+          "status": "ok",
+          "value": {
+            "name": "OFF",
+            "value": 0
+          }
+        }
+      },
+      "final": {
+        "ATT": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "D9",
+              "response_length": 2,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "read_path": "explicit-public-apdu-installed-UIF-parser",
+          "status": "ok",
+          "value": {
+            "name": "OFF",
+            "value": 0
+          }
+        },
+        "AUT": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "D8",
+              "response_length": 2,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "read_path": "explicit-public-apdu-installed-UIF-parser",
+          "status": "ok",
+          "value": {
+            "name": "OFF",
+            "value": 0
+          }
+        },
+        "DEC": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "D7",
+              "response_length": 2,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "read_path": "explicit-public-apdu-installed-UIF-parser",
+          "status": "ok",
+          "value": {
+            "name": "OFF",
+            "value": 0
+          }
+        },
+        "SIG": {
+          "commands": [
+            {
+              "cla": "00",
+              "data_hex": "",
+              "ins": "CA",
+              "p1": "00",
+              "p2": "D6",
+              "response_length": 2,
+              "status": "ok",
+              "sw": "9000"
+            }
+          ],
+          "read_path": "explicit-public-apdu-installed-UIF-parser",
+          "status": "ok",
+          "value": {
+            "name": "OFF",
+            "value": 0
+          }
+        }
+      },
+      "unchanged": true
+    }
+  },
+  "safe_reset": {
+    "status": "ok"
+  },
+  "serial_guard": 103,
+  "state": {
+    "aid": "d2760001240103040006000001030000",
+    "algorithm_attributes": {
+      "ATT": {
+        "status": "ok",
+        "value": {
+          "algorithm_id": 1,
+          "e_len": 17,
+          "import_format": {
+            "name": "STANDARD",
+            "value": 0
+          },
+          "n_len": 2048
+        }
+      },
+      "AUT": {
+        "status": "ok",
+        "value": {
+          "algorithm_id": 1,
+          "e_len": 17,
+          "import_format": {
+            "name": "STANDARD",
+            "value": 0
+          },
+          "n_len": 2048
+        }
+      },
+      "DEC": {
+        "status": "ok",
+        "value": {
+          "algorithm_id": 1,
+          "e_len": 17,
+          "import_format": {
+            "name": "STANDARD",
+            "value": 0
+          },
+          "n_len": 2048
+        }
+      },
+      "SIG": {
+        "status": "ok",
+        "value": {
+          "algorithm_id": 1,
+          "e_len": 17,
+          "import_format": {
+            "name": "STANDARD",
+            "value": 0
+          },
+          "n_len": 2048
+        }
+      }
+    },
+    "application_version": "0.0.1",
+    "ca_fingerprints": {
+      "status": "ok",
+      "value": {
+        "ATT": "0000000000000000000000000000000000000000",
+        "AUT": "0000000000000000000000000000000000000000",
+        "DEC": "0000000000000000000000000000000000000000",
+        "SIG": "0000000000000000000000000000000000000000"
+      }
+    },
+    "certificates": {
+      "ATT": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "FC",
+            "response_length": 793,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "der_sha256": "94afb703099edb4aaaee443c6e197c379f7f909d23f717f0868ef73057e4a16a",
+        "direct_session_version": "0.0.1",
+        "framing_version": "5.8.0.beta.0",
+        "framing_version_source": "fresh-serial-103-management-metadata",
+        "length": 793,
+        "read_path": "explicit-public-apdu",
+        "serial_number_hex": "3CA5F73F686B447ED8CF372BF0320FC98C5115C1",
+        "spki_sha256": "b5ba3032f18969b8ba2a9dc85136404bdb977f2e342e2f3e31b6df2799ee0113",
+        "status": "ok"
+      },
+      "AUT": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "60045c027f21",
+            "ins": "A5",
+            "p1": "00",
+            "p2": "04",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          },
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "7F",
+            "p2": "21",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "direct_session_version": "0.0.1",
+        "framing_version": "5.8.0.beta.0",
+        "framing_version_source": "fresh-serial-103-management-metadata",
+        "read_path": "explicit-public-apdu",
+        "reason": "successful GET DATA returned zero certificate octets",
+        "status": "absent"
+      },
+      "DEC": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "60045c027f21",
+            "ins": "A5",
+            "p1": "01",
+            "p2": "04",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          },
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "7F",
+            "p2": "21",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "direct_session_version": "0.0.1",
+        "framing_version": "5.8.0.beta.0",
+        "framing_version_source": "fresh-serial-103-management-metadata",
+        "read_path": "explicit-public-apdu",
+        "reason": "successful GET DATA returned zero certificate octets",
+        "status": "absent"
+      },
+      "SIG": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "60045c027f21",
+            "ins": "A5",
+            "p1": "02",
+            "p2": "04",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          },
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "7F",
+            "p2": "21",
+            "response_length": 0,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "direct_session_version": "0.0.1",
+        "framing_version": "5.8.0.beta.0",
+        "framing_version_source": "fresh-serial-103-management-metadata",
+        "read_path": "explicit-public-apdu",
+        "reason": "successful GET DATA returned zero certificate octets",
+        "status": "absent"
+      }
+    },
+    "complete": true,
+    "device": {
+      "config": {
+        "auto_eject_timeout": 0,
+        "challenge_response_timeout": 15,
+        "device_flags": {
+          "name": null,
+          "value": 0
+        },
+        "enabled_capabilities": {
+          "NFC": {
+            "name": "OTP|U2F|FIDO2|OATH|PIV|OPENPGP|HSMAUTH|1028",
+            "value": 1855
+          },
+          "USB": {
+            "name": "OTP|U2F|FIDO2|OATH|PIV|OPENPGP|HSMAUTH|5124",
+            "value": 5951
+          }
+        },
+        "nfc_restricted": false
+      },
+      "fips_approved": {
+        "name": null,
+        "value": 0
+      },
+      "fips_capable": {
+        "name": null,
+        "value": 0
+      },
+      "form_factor": {
+        "name": "USB_A_KEYCHAIN",
+        "value": 1
+      },
+      "fps_version": null,
+      "is_fips": false,
+      "is_locked": false,
+      "is_sky": false,
+      "part_number": "78CLUFX5000P",
+      "pin_complexity": true,
+      "reset_blocked": {
+        "name": null,
+        "value": 0
+      },
+      "serial": 103,
+      "stm_version": null,
+      "supported_capabilities": {
+        "NFC": {
+          "name": "OTP|U2F|FIDO2|OATH|PIV|OPENPGP|HSMAUTH|1028",
+          "value": 1855
+        },
+        "USB": {
+          "name": "OTP|U2F|FIDO2|OATH|PIV|OPENPGP|HSMAUTH|5124",
+          "value": 5951
+        }
+      },
+      "version": [
+        5,
+        8,
+        0
+      ],
+      "version_qualifier": {
+        "iteration": 0,
+        "type": {
+          "name": "BETA",
+          "value": 1
+        },
+        "version": [
+          5,
+          8,
+          0
+        ]
+      }
+    },
+    "device_version_name": "5.8.0.beta.0",
+    "extended_capabilities": {
+      "status": "ok",
+      "value": {
+        "certificate_max_length": 2048,
+        "challenge_max_length": 3070,
+        "flags": {
+          "name": "KDF|ALGORITHM_ATTRIBUTES_CHANGEABLE|PRIVATE_USE|PW_STATUS_CHANGEABLE|KEY_IMPORT|GET_CHALLENGE",
+          "value": 125
+        },
+        "mse_command": false,
+        "pin_block_2_format": false,
+        "sm_algorithm": 0,
+        "special_do_max_length": 255
+      }
+    },
+    "fingerprints": {
+      "status": "ok",
+      "value": {
+        "ATT": "0000000000000000000000000000000000000000",
+        "AUT": "0000000000000000000000000000000000000000",
+        "DEC": "0000000000000000000000000000000000000000",
+        "SIG": "0000000000000000000000000000000000000000"
+      }
+    },
+    "generation_times": {
+      "status": "ok",
+      "value": {
+        "ATT": 0,
+        "AUT": 0,
+        "DEC": 0,
+        "SIG": 0
+      }
+    },
+    "kdf": {
+      "status": "ok",
+      "value": {
+        "algorithm": 0,
+        "type": "KdfNone"
+      }
+    },
+    "key_information": {
+      "status": "ok",
+      "value": {
+        "ATT": {
+          "name": "IMPORTED",
+          "value": 2
+        },
+        "AUT": {
+          "name": "NONE",
+          "value": 0
+        },
+        "DEC": {
+          "name": "NONE",
+          "value": 0
+        },
+        "SIG": {
+          "name": "NONE",
+          "value": 0
+        }
+      }
+    },
+    "openpgp_card_version": [
+      3,
+      4
+    ],
+    "pin_status": {
+      "status": "ok",
+      "value": {
+        "attempts_admin": 3,
+        "attempts_reset": 0,
+        "attempts_user": 3,
+        "max_len_admin": 127,
+        "max_len_reset": 127,
+        "max_len_user": 127,
+        "pin_policy_user": {
+          "name": "ONCE",
+          "value": 1
+        }
+      }
+    },
+    "signature_counter": {
+      "status": "ok",
+      "value": 0
+    },
+    "supported_algorithms": {
+      "status": "ok",
+      "value": {
+        "ATT": [
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 3072
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 4096
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2a8648ce3d030107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040022"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040023"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b8104000a"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b2403030208010107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010b"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010d"
+          }
+        ],
+        "AUT": [
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 3072
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 4096
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2a8648ce3d030107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040022"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040023"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b8104000a"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b2403030208010107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010b"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010d"
+          },
+          {
+            "algorithm_id": 22,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b06010401da470f01"
+          }
+        ],
+        "DEC": [
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 3072
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 4096
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2a8648ce3d030107"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040022"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040023"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b8104000a"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b2403030208010107"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010b"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010d"
+          },
+          {
+            "algorithm_id": 18,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b060104019755010501"
+          }
+        ],
+        "SIG": [
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 2048
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 3072
+          },
+          {
+            "algorithm_id": 1,
+            "e_len": 17,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "n_len": 4096
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2a8648ce3d030107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040022"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b81040023"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b8104000a"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b2403030208010107"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010b"
+          },
+          {
+            "algorithm_id": 19,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b240303020801010d"
+          },
+          {
+            "algorithm_id": 22,
+            "import_format": {
+              "name": "STANDARD",
+              "value": 0
+            },
+            "oid": "2b06010401da470f01"
+          }
+        ]
+      }
+    },
+    "uif": {
+      "ATT": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "D9",
+            "response_length": 2,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "read_path": "explicit-public-apdu-installed-UIF-parser",
+        "status": "ok",
+        "value": {
+          "name": "OFF",
+          "value": 0
+        }
+      },
+      "AUT": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "D8",
+            "response_length": 2,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "read_path": "explicit-public-apdu-installed-UIF-parser",
+        "status": "ok",
+        "value": {
+          "name": "OFF",
+          "value": 0
+        }
+      },
+      "DEC": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "D7",
+            "response_length": 2,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "read_path": "explicit-public-apdu-installed-UIF-parser",
+        "status": "ok",
+        "value": {
+          "name": "OFF",
+          "value": 0
+        }
+      },
+      "SIG": {
+        "commands": [
+          {
+            "cla": "00",
+            "data_hex": "",
+            "ins": "CA",
+            "p1": "00",
+            "p2": "D6",
+            "response_length": 2,
+            "status": "ok",
+            "sw": "9000"
+          }
+        ],
+        "read_path": "explicit-public-apdu-installed-UIF-parser",
+        "status": "ok",
+        "value": {
+          "name": "OFF",
+          "value": 0
+        }
+      }
+    },
+    "version_interpretation": {
+      "development_mismatch_certificate_path": true,
+      "direct_session_version_preserved": "0.0.1",
+      "fresh_management_version": "5.8.0.beta.0",
+      "private_version_override": false,
+      "uif_vendor_version_fallback_bypassed": true
+    }
+  },
+  "success": true,
+  "utc": "2026-11-04T13:45:16.889240+00:00",
+  "vendor_sources": {
+    "OpenPgpSession": {
+      "path": "/usr/lib/python3.14/site-packages/yubikit/openpgp.py",
+      "sha256": "bcd266e53411a9611ee133ed5f33e2907294fbe374aa56a19672a151e86a2926"
+    },
+    "safe_reset": {
+      "path": "/usr/lib/python3.14/site-packages/ykman/openpgp.py",
+      "sha256": "b4ea934a4eb70b1c726dee7ddc9f63c2a4e95326678d9935a4083a57113a9c8c"
+    }
+  },
+  "vendor_version": "5.9.2"
+}

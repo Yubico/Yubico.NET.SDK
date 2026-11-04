@@ -1,0 +1,33 @@
+{
+  "source": "artifacts/toolchain/runs/20261104-144848-250-test",
+  "files": [
+    {
+      "path": "01-test-OpenPgp.IntegrationTests.log",
+      "bytes": 2404,
+      "sha256": "868b62a888d5f0fb1f657a3520cac937ccbb9aca025962ca710ad044a15a7746",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 1003,
+      "sha256": "cdfc98db65e5209f8affe62e141ee82e120935884d3da529040df25d45c9d3e4",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 663,
+      "sha256": "392b54756466697805e00c67f6768fdaedd54221d970e47bcffb27035321ac48",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2098,
+      "sha256": "f1ff3c201bca8bd87f77237450e0cf118deb5ac5d4d839027926916ef55ead4d",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

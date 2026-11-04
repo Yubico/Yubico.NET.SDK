@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/capture.py v1 openpgptool first
+PASS: openpgptool/first: 22 actual Csc sources, 208 references, 10 analyzers; source/config/assets text retained.
+
+EXIT=0

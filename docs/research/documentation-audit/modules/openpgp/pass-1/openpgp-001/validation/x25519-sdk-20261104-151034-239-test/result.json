@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditPgp001.Hardware.IntegrationTests --filter FullyQualifiedName~X25519Decipher_Rfc7748AliceBob_MatchesSharedSecret",
+  "started": "2026-11-04T15:10:34.2395265+01:00",
+  "durationSeconds": 6.2,
+  "runDirectory": "artifacts/toolchain/runs/20261104-151034-239-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 6.2,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditPgp001.Hardware.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.X25519Decipher_Rfc7748AliceBob_MatchesSharedSecret(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter))",
+          "message": "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException : APDU command failed: Incorrect data in command data field (SW=0x6A80)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261104-151034-239-test/01-test-AuditPgp001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project AuditPgp001.Hardware.IntegrationTests --filter \"FullyQualifiedName~Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.X25519Decipher_Rfc7748AliceBob_MatchesSharedSecret\""
+  ]
+}

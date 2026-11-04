@@ -198,7 +198,8 @@ public sealed partial class OpenPgpSession
         await PutDataAsync(DataObject.Kdf, kdf.ToBytes(), cancellationToken)
             .ConfigureAwait(false);
 
-        // Invalidate cached KDF
+        // Retain the supplied instance: later PIN operations derive with this same object.
+        // Replacement currently drops the old reference without disposing it.
         _kdf = kdf;
     }
 
@@ -207,8 +208,8 @@ public sealed partial class OpenPgpSession
     /// <summary>
     ///     Fixes invalid Curve25519 entries in algorithm information for firmware &lt; 5.6.1.
     ///     Pre-5.6.1 firmware reports X25519 with EdDSA algorithm ID, which is invalid.
-    ///     The fix removes invalid entries and ensures correct Curve25519 assignments:
-    ///     Ed25519/EdDSA for SIG/AUT, X25519/ECDH for DEC.
+    ///     Replaces encountered X25519/EdDSA DEC entries with X25519/ECDH and removes invalid
+    ///     Ed25519 DEC/ATT entries. Missing entries remain missing; list multiplicity is preserved.
     /// </summary>
     private static List<SupportedAlgorithm> FixCurve25519AlgorithmInfo(
         List<SupportedAlgorithm> entries)

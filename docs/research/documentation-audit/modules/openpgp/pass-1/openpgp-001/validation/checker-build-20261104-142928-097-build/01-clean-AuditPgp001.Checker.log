@@ -1,0 +1,12 @@
+$ dotnet clean docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/checker/src/Yubico.YubiKit.AuditPgp001.Checker.csproj -c Release
+Build started 11/4/2026 2:29:28 PM.
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/checker/src/Yubico.YubiKit.AuditPgp001.Checker.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Creating directory "/tmp/opencode/openpgp-001-doccheck/obj/Release/net10.0/".
+     1>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/checker/src/Yubico.YubiKit.AuditPgp001.Checker.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.23

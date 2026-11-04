@@ -1,0 +1,20 @@
+$ ykman --device 103 info
+UTC 2026-11-04T13:27:39.544464+00:00
+Device type: YubiKey 5 NFC - Enhanced PIN
+Serial number: 103
+Firmware version: 5.8.0.beta.0
+Form factor: Keychain (USB-A)
+Enabled USB interfaces: OTP, FIDO, CCID
+NFC transport is enabled
+PIN complexity is enforced
+
+Applications	USB    	NFC    
+Yubico OTP  	Enabled	Enabled
+FIDO U2F    	Enabled	Enabled
+FIDO2       	Enabled	Enabled
+OATH        	Enabled	Enabled
+PIV         	Enabled	Enabled
+OpenPGP     	Enabled	Enabled
+YubiHSM Auth	Enabled	Enabled
+
+EXIT=0

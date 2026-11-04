@@ -1,0 +1,29 @@
+{
+  "operation": "Read-only source/provenance capture; no hardware/build/test execution",
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-state.py",
+      "retained": "vendor-state-v1.py.snapshot",
+      "bytes": 11776,
+      "sha256": "a6c3a68598b9d7b9d785ece4b92b2fcdab89ce4edc9cb3473bfaf40922533eeb"
+    },
+    {
+      "source": "/usr/lib/python3.14/site-packages/yubikit/openpgp.py",
+      "retained": "installed-yubikit-openpgp.py.snapshot",
+      "bytes": 60103,
+      "sha256": "bcd266e53411a9611ee133ed5f33e2907294fbe374aa56a19672a151e86a2926"
+    },
+    {
+      "source": "/usr/lib/python3.14/site-packages/ykman/openpgp.py",
+      "retained": "installed-ykman-openpgp.py.snapshot",
+      "bytes": 5455,
+      "sha256": "b4ea934a4eb70b1c726dee7ddc9f63c2a4e95326678d9935a4083a57113a9c8c"
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-baseline.json",
+      "preserved_in_place": true,
+      "bytes": 15366,
+      "sha256": "bc8b3dbe5ca92ae1a1370cf5af4f26af43cde6ecbcb12e162e3fb9282dbd9b28"
+    }
+  ]
+}

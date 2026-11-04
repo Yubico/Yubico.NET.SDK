@@ -1,0 +1,9 @@
+$ python3 docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/verify-preparation.py
+PASS: Python syntax parsed for 6 tools; inspection creates no bytecode caches.
+PASS: four checker and four utility copies reconcile with final frozen YubiHSM manifest rows, source/target hashes and exact substitutions.
+PASS: two current-run baseline record hashes and preparation-generator hash reconcile.
+PASS: 3 XML files parse; recursive project-filename discovery finds exactly one AuditPgp001.Checker match.
+PASS: empty primary-PDF allowlist, unfrozen preparation, source/configuration/text artifacts and zero import-removal approvals.
+PENDING: .NET build, token/API checks, archive/user-file preservation gate, final record review, examples, tests, formatter and hardware.
+
+EXIT=0

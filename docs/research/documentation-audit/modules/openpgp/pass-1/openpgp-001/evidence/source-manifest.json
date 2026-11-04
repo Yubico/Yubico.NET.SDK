@@ -1,0 +1,104 @@
+[
+  {
+    "path": "openpgp-card-3.4.pdf",
+    "url": "https://gnupg.org/ftp/specs/OpenPGP-smart-card-application-3.4.pdf",
+    "accessed": "2026-11-04",
+    "bytes": 1156819,
+    "sha256": "2d2652a2bd690a6784c733ba6d88539e2af1f6e075f3a3d0af81eb5f68432782"
+  },
+  {
+    "path": "rfc9580.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc9580.txt",
+    "accessed": "2026-11-04",
+    "bytes": 404977,
+    "sha256": "36540e57b63d24c0b17be0748b704bdeed3d643ce99a4fb1abb6469c1eb1ff18"
+  },
+  {
+    "path": "rfc8017.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc8017.txt",
+    "accessed": "2026-11-04",
+    "bytes": 154696,
+    "sha256": "1e72dc473d18df3fc5598cdc12795a9f18f36f1aef15abc23a55eb0d58151d11"
+  },
+  {
+    "path": "rfc8032.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc8032.txt",
+    "accessed": "2026-11-04",
+    "bytes": 103210,
+    "sha256": "ed63657ff389301282b169b0abde9b5dd2c7e4d524fdfa5da6ff3094fc93c4c3"
+  },
+  {
+    "path": "rfc7748.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc7748.txt",
+    "accessed": "2026-11-04",
+    "bytes": 39298,
+    "sha256": "279ca0ecc5e92e2962e27b846986aeb74729d9dd34bd4a04a362f80dcb596ad3"
+  },
+  {
+    "path": "ykman-yubikit-openpgp.py",
+    "url": "https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/openpgp.py",
+    "revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "accessed": "2026-11-04",
+    "bytes": 60103,
+    "sha256": "bcd266e53411a9611ee133ed5f33e2907294fbe374aa56a19672a151e86a2926"
+  },
+  {
+    "path": "ykman-ykman-_cli-openpgp.py",
+    "url": "https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/ykman/_cli/openpgp.py",
+    "revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "accessed": "2026-11-04",
+    "bytes": 20757,
+    "sha256": "074cf73b1d91b2bbf3d8a495fc3ff947e100f88db5c9647dc938f0a608b5151b"
+  },
+  {
+    "path": "ykman-tests-device-test_openpgp.py",
+    "url": "https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/tests/device/test_openpgp.py",
+    "revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "accessed": "2026-11-04",
+    "bytes": 11417,
+    "sha256": "37238f8d5dd2a16864deebdaad33f30b737c230b591ec0f1ec9ee2d0ae59dcc9"
+  },
+  {
+    "path": "ykman-tests-device-cli-test_openpgp.py",
+    "url": "https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/tests/device/cli/test_openpgp.py",
+    "revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "accessed": "2026-11-04",
+    "bytes": 5585,
+    "sha256": "c55880a50b737392678d78d7dac1993eedca7df62e1aa107347901502ed90bbc"
+  },
+  {
+    "path": "vendor-attestation.html",
+    "url": "https://developers.yubico.com/PGP/Attestation.html",
+    "accessed": "2026-11-04",
+    "bytes": 29224,
+    "sha256": "77da864a47a8ed09c62a61c8981b7ebfbc9f79ee930cffe108fc7344a46c1683"
+  },
+  {
+    "path": "vendor-openpgp-commands.html",
+    "url": "https://docs.yubico.com/software/yubikey/tools/ykman/OpenPGP_Commands.html",
+    "accessed": "2026-11-04",
+    "bytes": 53224,
+    "sha256": "3a1d3dc61574ca6ffe60eb48c8df320c462c6c5ef1221022235884d7ad4fc03a"
+  },
+  {
+    "path": "vendor-card-edit.html",
+    "url": "https://developers.yubico.com/PGP/Card_edit.html",
+    "accessed": "2026-11-04",
+    "bytes": 17367,
+    "sha256": "f13c1ea397cdf9abdd10721de9121b39b734041cacb9d12b8aff07f82ac1e7f5"
+  },
+  {
+    "path": "vendor-technical-manual.html",
+    "url": "https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-openpgp.html",
+    "accessed": "2026-11-04",
+    "bytes": 11501,
+    "sha256": "2c058bd424032e3b8f4f57de2259e5aaf3d1816a9c114ab9266ddf8ae5260297"
+  },
+  {
+    "path": "vendor-ysa-2017-01.html",
+    "url": "https://www.yubico.com/support/security-advisories/ysa-2017-01/",
+    "accessed": "2026-11-04",
+    "bytes": 501815,
+    "sha256": "8a1eb0d0d5dd1a40b8cd43f0d7b8c03ef093ec7c8ae7117a32aae5a93d0bdcb1"
+  }
+]

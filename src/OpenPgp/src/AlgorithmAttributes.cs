@@ -20,6 +20,12 @@ namespace Yubico.YubiKit.OpenPgp;
 ///     Base class for OpenPGP key algorithm attributes. Dispatches parsing to
 ///     <see cref="RsaAttributes" /> or <see cref="EcAttributes" /> based on the algorithm ID.
 /// </summary>
+/// <remarks>
+///     Prefer the concrete Create factories for request construction: direct property initialization leaves
+///     the algorithm identifier at its default unless set by a derived type. Parsing requires a known
+///     algorithm/curve; unknown required attributes can prevent session initialization. Raw data access
+///     preserves an inspection route for fields outside the model. Attribute writes can erase or disable a key.
+/// </remarks>
 public abstract class AlgorithmAttributes
 {
     /// <summary>
@@ -142,6 +148,10 @@ public sealed class EcAttributes : AlgorithmAttributes
     ///     The algorithm ID is automatically determined:
     ///     Ed25519 → EdDSA (0x16), X25519 → ECDH (0x12), DEC slot → ECDH (0x12), others → ECDSA (0x13).
     /// </summary>
+    /// <remarks>
+    ///     This factory chooses an identifier; the caller checks that the curve/slot combination is supported
+    ///     by the card. In particular, Ed25519 is a signing/authentication algorithm and X25519 is for agreement.
+    /// </remarks>
     public static EcAttributes Create(KeyRef keyRef, CurveOid oid) =>
         new()
         {

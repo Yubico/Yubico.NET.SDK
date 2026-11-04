@@ -1,0 +1,99 @@
+$ dotnet test docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests -> /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.06]   Discovering: Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (app domain = off, method display = ClassAndMethod, method display options = None)
+[xUnit.net 00:00:00.12]   Discovered:  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (7 test cases to be run)
+[xUnit.net 00:00:00.14]   Starting:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (parallel test collections = off, stop on fail = off, explicit = off)
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.46]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] HYPOTHESIS Decrypt requires extended User VERIFY and On touch policy, then recovers the host-encrypted known plaintext; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T14:05:26.2384676+00:00
+[xUnit.net 00:00:00.49]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:00.50]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:01.06]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:06.98]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ERROR phase=ordinary-user-decrypt-control type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException HResult=0x80131500
+[xUnit.net 00:00:06.98]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] APDU phase=ordinary-user-decrypt-control SW=0x6982 CLA=00 INS=2A P1=80 P2=86
+[xUnit.net 00:00:07.01]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PRESENCE requested operation=OpenPgp.Decrypt basis=PolicyRequires elapsed-ms=5963 action=TOUCH WHEN LED FLASHES
+OpenPGP serial 103: touch for OpenPgp.Decrypt when the LED flashes.
+[xUnit.net 00:00:21.26]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PRESENCE resolved outcome=Failed elapsed-ms=20218 token-none=True
+[xUnit.net 00:00:21.27]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ERROR phase=body type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException HResult=0x80131500
+[xUnit.net 00:00:21.27]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] APDU phase=body SW=0x6600 CLA=00 INS=2A P1=80 P2=86
+[xUnit.net 00:00:21.27]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:21.28]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [FAIL]
+[xUnit.net 00:00:21.28]       Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException : APDU command failed: Security error (SW=0x6600) (SW=0x6600)
+[xUnit.net 00:00:21.28]       Stack Trace:
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs(135,0): at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.TransmitAndReceiveAsync(ApduCommand command, Boolean throwOnError, CancellationToken cancellationToken)
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.cs(298,0): at Yubico.YubiKit.OpenPgp.OpenPgpSession.TransmitWithResponseAsync(ApduCommand command, CancellationToken cancellationToken)
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Crypto.cs(87,0): at Yubico.YubiKit.OpenPgp.OpenPgpSession.<>c__DisplayClass15_0.<<DecryptAsync>b__0>d.MoveNext()
+[xUnit.net 00:00:21.28]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs(146,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.<>c__DisplayClass37_0`1.<<RunWithUserPresenceNotificationAsync>b__0>d.MoveNext()
+[xUnit.net 00:00:21.28]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs(181,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceResolutionAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken)
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs(198,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceResolutionAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken)
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs(141,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceNotificationAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken)
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Crypto.cs(83,0): at Yubico.YubiKit.OpenPgp.OpenPgpSession.DecryptAsync(ReadOnlyMemory`1 ciphertext, CancellationToken cancellationToken)
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(224,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary>b__8_0(ProbeScope probe, CancellationToken token)
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(233,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary>b__8_0(ProbeScope probe, CancellationToken token)
+[xUnit.net 00:00:21.28]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/ProbeSupport.cs(62,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.ProbeScope.RunAsync(YubiKeyTestState state, ITestOutputHelper output, String hypothesis, Func`3 action, Boolean requireKdf)
+[xUnit.net 00:00:21.28]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:21.28]       Output:
+[xUnit.net 00:00:21.28]         HYPOTHESIS Decrypt requires extended User VERIFY and On touch policy, then recovers the host-encrypted known plaintext; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T14:05:26.2384676+00:00
+[xUnit.net 00:00:21.28]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:21.28]         PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:21.28]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:21.28]         ERROR phase=ordinary-user-decrypt-control type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException HResult=0x80131500
+[xUnit.net 00:00:21.28]         APDU phase=ordinary-user-decrypt-control SW=0x6982 CLA=00 INS=2A P1=80 P2=86
+[xUnit.net 00:00:21.28]         PRESENCE requested operation=OpenPgp.Decrypt basis=PolicyRequires elapsed-ms=5963 action=TOUCH WHEN LED FLASHES
+[xUnit.net 00:00:21.28]         PRESENCE resolved outcome=Failed elapsed-ms=20218 token-none=True
+[xUnit.net 00:00:21.28]         ERROR phase=body type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException HResult=0x80131500
+[xUnit.net 00:00:21.28]         APDU phase=body SW=0x6600 CLA=00 INS=2A P1=80 P2=86
+[xUnit.net 00:00:21.28]         FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:21.29]   Finished:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests
+  Failed Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [21 s]
+  Error Message:
+   Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException : APDU command failed: Security error (SW=0x6600) (SW=0x6600)
+  Stack Trace:
+     at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.TransmitAndReceiveAsync(ApduCommand command, Boolean throwOnError, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs:line 135
+   at Yubico.YubiKit.OpenPgp.OpenPgpSession.TransmitWithResponseAsync(ApduCommand command, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.cs:line 298
+   at Yubico.YubiKit.OpenPgp.OpenPgpSession.<>c__DisplayClass15_0.<<DecryptAsync>b__0>d.MoveNext() in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Crypto.cs:line 87
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.<>c__DisplayClass37_0`1.<<RunWithUserPresenceNotificationAsync>b__0>d.MoveNext() in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs:line 146
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceResolutionAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs:line 181
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceResolutionAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs:line 198
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.RunWithUserPresenceNotificationAsync[TResult](UserPresenceNotification notification, Func`2 operation, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Sessions/ApplicationSession.cs:line 141
+   at Yubico.YubiKit.OpenPgp.OpenPgpSession.DecryptAsync(ReadOnlyMemory`1 ciphertext, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Crypto.cs:line 83
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary>b__8_0(ProbeScope probe, CancellationToken token) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 224
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<TouchDecrypt_Rsa_KnownPlaintextAndModeBoundary>b__8_0(ProbeScope probe, CancellationToken token) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 233
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.ProbeScope.RunAsync(YubiKeyTestState state, ITestOutputHelper output, String hypothesis, Func`3 action, Boolean requireKdf) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/ProbeSupport.cs:line 62
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ HYPOTHESIS Decrypt requires extended User VERIFY and On touch policy, then recovers the host-encrypted known plaintext; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T14:05:26.2384676+00:00
+ OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+ PREMUTATION applet-KDF-capability=True; gate=application-related-data
+ OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+ ERROR phase=ordinary-user-decrypt-control type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException HResult=0x80131500
+ APDU phase=ordinary-user-decrypt-control SW=0x6982 CLA=00 INS=2A P1=80 P2=86
+ PRESENCE requested operation=OpenPgp.Decrypt basis=PolicyRequires elapsed-ms=5963 action=TOUCH WHEN LED FLASHES
+ PRESENCE resolved outcome=Failed elapsed-ms=20218 token-none=True
+ ERROR phase=body type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException HResult=0x80131500
+ APDU phase=body SW=0x6600 CLA=00 INS=2A P1=80 P2=86
+ FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+
+
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 21.6222 Seconds

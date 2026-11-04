@@ -60,7 +60,7 @@ public class AlgorithmAttributesTests
     [Fact]
     public void RsaAttributes_Parse_FromWireFormat()
     {
-        // RSA 4096, e=17, CRT format
+        // RSA 4096, exponent length 17 bits (e=65537), CRT format
         byte[] wire = [0x01, 0x10, 0x00, 0x00, 0x11, 0x02];
         var parsed = AlgorithmAttributes.Parse(wire);
 

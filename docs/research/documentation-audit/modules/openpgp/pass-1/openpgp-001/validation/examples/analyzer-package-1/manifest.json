@@ -1,0 +1,352 @@
+{
+  "id": "analyzer-package-1",
+  "baseline": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+  "scope": "Capture/verification evidence guard correction only; no rebuild, source/configuration/output edit or analyzer disablement.",
+  "base_extraction": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/manifest.json",
+    "bytes": 474150,
+    "sha256": "5b7879c41ca57ea03f88739db3f2ba10468a7221f5bea8a76bd538809b11a2c4"
+  },
+  "canonical_package": {
+    "package": "Microsoft.CodeAnalysis.NetAnalyzers",
+    "version": "9.0.0",
+    "builtin_selection": "false: duplicate SDK analyzers replaced by the explicit canonical NuGet package",
+    "assemblies": [
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+        "bytes": 129808,
+        "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+      },
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+        "bytes": 2495248,
+        "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+      }
+    ],
+    "shared_sources": [
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.props",
+        "bytes": 8270,
+        "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.targets",
+        "bytes": 2665,
+        "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Packages.props",
+        "bytes": 3142,
+        "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+      },
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+        "bytes": 3677,
+        "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+      },
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/DisableNETAnalyzersForNuGetPackage.props",
+        "bytes": 468,
+        "sha256": "83fe2cae0a46132ad1f1bfa3b8048a8dab4830e87f71dfafb2bc5b5022468252"
+      },
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+        "bytes": 90446,
+        "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+      },
+      {
+        "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.props",
+        "bytes": 11765,
+        "sha256": "87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48"
+      }
+    ],
+    "project_sources": [
+      {
+        "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/obj/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj.nuget.g.props",
+        "bytes": 1814,
+        "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+      },
+      {
+        "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/obj/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj.nuget.g.targets",
+        "bytes": 1367,
+        "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+      }
+    ],
+    "assets": {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/obj/project.assets.json",
+      "bytes": 119121,
+      "sha256": "b6d98bc1c4b9fd3688bed1511d9d15f38f8bc0bd25057cace84398a11554c7be"
+    },
+    "package_sha512": "JajbvkrBgtdRghavIjcJuNHMOja4lqBmEezbhZyqWPYh2cpLhT5mPpfC7NQVDO4IehWQum9t/nwF4v+qQGtYWg==",
+    "analyzer_count": 10,
+    "csc_analyzer_membership_exact": true,
+    "warning_arguments": [
+      "/nowarn:CS1591,CA1848,1701,1702,8002",
+      "/warn:9999",
+      "/warnaserror+",
+      "/warnaserror+:NU1605,SYSLIB0011"
+    ]
+  },
+  "original_failure": "Analyzers skipped: EnableNETAnalyzers=false selects the canonical pinned NuGet replacements, not skipped analyzer execution.",
+  "preserved": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/manifest.json",
+      "bytes": 474150,
+      "sha256": "5b7879c41ca57ea03f88739db3f2ba10468a7221f5bea8a76bd538809b11a2c4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/tooling-provenance.json",
+      "bytes": 22020,
+      "sha256": "602ee3086f54ec93728c71149c2ecdebc6646b9f1cb5648a07a2807d5da8d488"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/capture.py",
+      "bytes": 10807,
+      "sha256": "490c3c564ede73ae147937af4ab9a3af7daa3a297dd1ecce7003e1bef44875f1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/verify.py",
+      "bytes": 9502,
+      "sha256": "0348b7bfea6d314d12a0a8514a8cca95afd006dd275332b7e90f5f3dd6d2e6c0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/evidence/first/analyzer-configs.txt",
+      "bytes": 355,
+      "sha256": "32b9319d3d8319b20c712e41754eedc2e0ff8fc5966ce88a8360daed4e05316f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/evidence/first/analyzers.txt",
+      "bytes": 1466,
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/evidence/first/capture-failure.json",
+      "bytes": 189,
+      "sha256": "fba37dd8008412aad8f6ce3ad12fcee344f806c8963241f071df4246343a1ec7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/evidence/first/compile-inputs.txt",
+      "bytes": 537,
+      "sha256": "2722caf5641b877e872df9dc95dcab40f53cdf89aff2f97e58800745d8b2ef0e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/evidence/first/csc-command-line.txt",
+      "bytes": 28696,
+      "sha256": "66fb678b813f7bcc638f93ff1b2f630b8003d3182b008dde7127735d71d75581"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/evidence/first/imported-projects.txt",
+      "bytes": 268,
+      "sha256": "740375ccd59122822b68e4e91b5eb8988d0ffa7f865af88e9ccede9620a7da47"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/evidence/first/policy-final.txt",
+      "bytes": 786,
+      "sha256": "745b80d1cf7116ec36462586d2560114313bd2b23938afd63a9dcdeb7c99d262"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/evidence/first/resolved-references.txt",
+      "bytes": 39588,
+      "sha256": "d751187719b71862a4c37a097c7a24e17f3589032dea52166f4e99fc349f4669"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples-v1-consumer-capture.log",
+      "bytes": 1005,
+      "sha256": "233d4087e75f4614c9e84f206f9a04c155d92c00b201fa77e81a4ba3128ee0ec"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples-v1-consumer-build.log",
+      "bytes": 1963,
+      "sha256": "0047d73cf9ea8967df7452764c5ca262d45f54d4f0dc7a00ccaffb6a6b29860c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/before/capture.py.snapshot",
+      "bytes": 10807,
+      "sha256": "490c3c564ede73ae147937af4ab9a3af7daa3a297dd1ecce7003e1bef44875f1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/before/verify.py.snapshot",
+      "bytes": 9502,
+      "sha256": "0348b7bfea6d314d12a0a8514a8cca95afd006dd275332b7e90f5f3dd6d2e6c0"
+    }
+  ],
+  "proof_snapshots": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/proof/444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133-Microsoft.CodeAnalysis.NetAnalyzers.props.snapshot",
+      "bytes": 3677,
+      "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/proof/83fe2cae0a46132ad1f1bfa3b8048a8dab4830e87f71dfafb2bc5b5022468252-DisableNETAnalyzersForNuGetPackage.props.snapshot",
+      "bytes": 468,
+      "sha256": "83fe2cae0a46132ad1f1bfa3b8048a8dab4830e87f71dfafb2bc5b5022468252"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/proof/859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f-Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj.nuget.g.props.snapshot",
+      "bytes": 1814,
+      "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/proof/87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48-Microsoft.Common.props.snapshot",
+      "bytes": 11765,
+      "sha256": "87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/proof/935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea-Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj.nuget.g.targets.snapshot",
+      "bytes": 1367,
+      "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/proof/bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e-Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/proof/ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3-Directory.Packages.props.snapshot",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/proof/df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100-Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/proof/f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da-Microsoft.CodeAnalysis.NetAnalyzers.targets.snapshot",
+      "bytes": 90446,
+      "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+    }
+  ],
+  "tools": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/analyzer_policy.py",
+      "bytes": 9129,
+      "sha256": "cef301784921c7d856e67d95df07681c8ee9fa40aafe2505b7a6503a46f8f2fd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/capture.py",
+      "bytes": 11419,
+      "sha256": "7010402d6ea2079dbe181aaeecadaf65f2105952bd76dbc8a8f7caa628830b24"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/prepare.py",
+      "bytes": 9084,
+      "sha256": "0646eaf3fc1e46165be4a06ecc0ab16e54dc79147ecc8660ecf2f162dc0418b7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/verify.py",
+      "bytes": 9700,
+      "sha256": "9e213c1df78619868e370edfa03a8233ed27457b6e61d85ed47ecae7fec460f9"
+    }
+  ],
+  "workspace_root": "/tmp/opencode/openpgp-001-examples-v1-consumer",
+  "workspace": [
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/compile-inputs.txt",
+      "bytes": 537,
+      "sha256": "2722caf5641b877e872df9dc95dcab40f53cdf89aff2f97e58800745d8b2ef0e"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/resolved-references.txt",
+      "bytes": 39588,
+      "sha256": "d751187719b71862a4c37a097c7a24e17f3589032dea52166f4e99fc349f4669"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/analyzers.txt",
+      "bytes": 1466,
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/analyzer-configs.txt",
+      "bytes": 355,
+      "sha256": "32b9319d3d8319b20c712e41754eedc2e0ff8fc5966ce88a8360daed4e05316f"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/policy-final.txt",
+      "bytes": 786,
+      "sha256": "745b80d1cf7116ec36462586d2560114313bd2b23938afd63a9dcdeb7c99d262"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/csc-command-line.txt",
+      "bytes": 28696,
+      "sha256": "66fb678b813f7bcc638f93ff1b2f630b8003d3182b008dde7127735d71d75581"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/imported-projects.txt",
+      "bytes": 268,
+      "sha256": "740375ccd59122822b68e4e91b5eb8988d0ffa7f865af88e9ccede9620a7da47"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/obj/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj.nuget.g.props",
+      "bytes": 1814,
+      "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/obj/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj.nuget.g.targets",
+      "bytes": 1367,
+      "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-examples-v1-consumer/obj/project.assets.json",
+      "bytes": 119121,
+      "sha256": "b6d98bc1c4b9fd3688bed1511d9d15f38f8bc0bd25057cace84398a11554c7be"
+    }
+  ],
+  "transformations": [
+    {
+      "source": "capture.py",
+      "before_snapshot": "before/capture.py.snapshot",
+      "target": "capture.py",
+      "substitutions": {
+        "sys.dont_write_bytecode = True": "sys.dont_write_bytecode = True\nsys.path.insert(0, str(Path(__file__).resolve().parents[1]))\nimport analyzer_policy as _analyzer_policy",
+        "require(policy['RunAnalyzersDuringBuild'] == 'true' and policy['SkipAnalyzers'].lower() != 'true' and policy['RunAnalyzers'].lower() != 'false' and policy['EnableNETAnalyzers'] == 'true', 'Analyzers skipped')": "require(policy['RunAnalyzersDuringBuild'] == 'true' and policy['SkipAnalyzers'].lower() != 'true' and policy['RunAnalyzers'].lower() != 'false', 'Analyzers skipped')",
+        "if len(sys.argv) != 4": "_analyzer_policy.receipt()\n\nif len(sys.argv) != 4",
+        "require(any('Microsoft.CodeAnalysis.NetAnalyzers.dll' in name for name in analyzers), 'Canonical .NET analyzers missing')": "require(any('Microsoft.CodeAnalysis.NetAnalyzers.dll' in name for name in analyzers), 'Canonical .NET analyzers missing')\n    analyzer_package = _analyzer_policy.prove(policy, args, analyzers, actual_project)\n    _analyzer_policy.validate_proof(analyzer_package)\n    for source in analyzer_package['shared_sources'] + analyzer_package['project_sources']:\n        retained.append(retain(Path(source['path']), 'analyzer-package/' + source['sha256'] + '-' + Path(source['path']).name + '.snapshot'))",
+        "retained=retained, extraction_manifest_sha256=": "analyzer_package=analyzer_package, analyzer_package_correction_sha256=_analyzer_policy.identity(_analyzer_policy.HERE / 'manifest.json')['sha256'], retained=retained, extraction_manifest_sha256="
+      },
+      "substitution_counts": {
+        "sys.dont_write_bytecode = True": 1,
+        "require(policy['RunAnalyzersDuringBuild'] == 'true' and policy['SkipAnalyzers'].lower() != 'true' and policy['RunAnalyzers'].lower() != 'false' and policy['EnableNETAnalyzers'] == 'true', 'Analyzers skipped')": 1,
+        "if len(sys.argv) != 4": 1,
+        "require(any('Microsoft.CodeAnalysis.NetAnalyzers.dll' in name for name in analyzers), 'Canonical .NET analyzers missing')": 1,
+        "retained=retained, extraction_manifest_sha256=": 1
+      },
+      "source_identity": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/capture.py",
+        "bytes": 10807,
+        "sha256": "490c3c564ede73ae147937af4ab9a3af7daa3a297dd1ecce7003e1bef44875f1"
+      },
+      "target_identity": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/capture.py",
+        "bytes": 11419,
+        "sha256": "7010402d6ea2079dbe181aaeecadaf65f2105952bd76dbc8a8f7caa628830b24"
+      }
+    },
+    {
+      "source": "verify.py",
+      "before_snapshot": "before/verify.py.snapshot",
+      "target": "verify.py",
+      "substitutions": {
+        "sys.dont_write_bytecode = True": "sys.dont_write_bytecode = True\nsys.path.insert(0, str(Path(__file__).resolve().parents[1]))\nimport analyzer_policy as _analyzer_policy",
+        "parser = argparse.ArgumentParser(description=__doc__)": "_analyzer_policy.receipt()\nparser = argparse.ArgumentParser(description=__doc__)",
+        "require(data['extraction_manifest_sha256'] == sha(manifest_path.read_bytes()), 'Capture binds another extraction manifest')": "require(data['extraction_manifest_sha256'] == sha(manifest_path.read_bytes()), 'Capture binds another extraction manifest')\n        _analyzer_policy.verify_capture(data, evidence, args.live)"
+      },
+      "substitution_counts": {
+        "sys.dont_write_bytecode = True": 1,
+        "parser = argparse.ArgumentParser(description=__doc__)": 1,
+        "require(data['extraction_manifest_sha256'] == sha(manifest_path.read_bytes()), 'Capture binds another extraction manifest')": 1
+      },
+      "source_identity": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/verify.py",
+        "bytes": 9502,
+        "sha256": "0348b7bfea6d314d12a0a8514a8cca95afd006dd275332b7e90f5f3dd6d2e6c0"
+      },
+      "target_identity": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/verify.py",
+        "bytes": 9700,
+        "sha256": "9e213c1df78619868e370edfa03a8233ed27457b6e61d85ed47ecae7fec460f9"
+      }
+    }
+  ],
+  "lineage": "Original v1 tools and extraction retain their identities. Versioned before-tool snapshots and corrected concrete tool sources replace only the overstrict built-in-selection guard and add canonical-package proof/receipt bindings. Existing source/reference/analyzer/config/assets membership, SDK-default and native-output algorithms remain intact."
+}

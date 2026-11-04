@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/reconcile-final.py
+PASS:59 accepted-to-final hashes,49 whitespace-only C# transforms,Description-only project change,96 module dispositions,11/32 final clean samples.
+
+EXIT=0

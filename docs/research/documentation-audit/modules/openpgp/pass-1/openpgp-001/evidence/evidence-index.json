@@ -1,0 +1,192 @@
+[
+  {
+    "path": "evidence/api-entry-reconciliation.json",
+    "bytes": 127771,
+    "sha256": "6f27424b664da554e71dcb44b7d993b9e43c86d6aeafb71c7f3878ca17ebe82b"
+  },
+  {
+    "path": "evidence/collect-history.py",
+    "bytes": 869,
+    "sha256": "340249ad8058e478777647221d703484e9147225a9c8f6d8d109b12158f4088e"
+  },
+  {
+    "path": "evidence/collect-sources.py",
+    "bytes": 3379,
+    "sha256": "ebb886336abc59f08ae2c24dc604f3d1045ea34b0c36de60177fb255a83c1bf2"
+  },
+  {
+    "path": "evidence/hardware-methods.json",
+    "bytes": 114413,
+    "sha256": "e3505605da01fa3689e19f7b42ce96ee53878e931d8b63bf1bf9ce7406cf20ed"
+  },
+  {
+    "path": "evidence/local-link-existence.json",
+    "bytes": 2102,
+    "sha256": "15fc88baa0320d195ee8aaebc224a22840581c684fd2a3ac18f3a2f1963acc06"
+  },
+  {
+    "path": "evidence/make-coverage.py",
+    "bytes": 15954,
+    "sha256": "037e0cacb680791d32e7137a398b087b24a7356c368f02794f4c067fa8e8e3ec"
+  },
+  {
+    "path": "evidence/openpgp-card-3.4.pdf",
+    "bytes": 1156819,
+    "sha256": "2d2652a2bd690a6784c733ba6d88539e2af1f6e075f3a3d0af81eb5f68432782"
+  },
+  {
+    "path": "evidence/openpgp-card-3.4.txt",
+    "bytes": 175807,
+    "sha256": "1cf55026521edd672e98d23ddfedb5c424e5349d2a4c37ac8b5a28af3733177a"
+  },
+  {
+    "path": "evidence/rfc7748.txt",
+    "bytes": 39298,
+    "sha256": "279ca0ecc5e92e2962e27b846986aeb74729d9dd34bd4a04a362f80dcb596ad3"
+  },
+  {
+    "path": "evidence/rfc8017.txt",
+    "bytes": 154696,
+    "sha256": "1e72dc473d18df3fc5598cdc12795a9f18f36f1aef15abc23a55eb0d58151d11"
+  },
+  {
+    "path": "evidence/rfc8032.txt",
+    "bytes": 103210,
+    "sha256": "ed63657ff389301282b169b0abde9b5dd2c7e4d524fdfa5da6ff3094fc93c4c3"
+  },
+  {
+    "path": "evidence/rfc9580.txt",
+    "bytes": 404977,
+    "sha256": "36540e57b63d24c0b17be0748b704bdeed3d643ce99a4fb1abb6469c1eb1ff18"
+  },
+  {
+    "path": "evidence/source-analysis.md",
+    "bytes": 15230,
+    "sha256": "b08ad3783a227c7d8d9d59a26377c59a2bbdc39fc889bb8d10dc725cec9832da"
+  },
+  {
+    "path": "evidence/source-manifest.json",
+    "bytes": 3949,
+    "sha256": "d1b5ec84fdc63cefed1e663435bb3cf12695e89eaee30d5593f935e66b6e1ecb"
+  },
+  {
+    "path": "evidence/vendor-attestation.html",
+    "bytes": 29224,
+    "sha256": "77da864a47a8ed09c62a61c8981b7ebfbc9f79ee930cffe108fc7344a46c1683"
+  },
+  {
+    "path": "evidence/vendor-card-edit.html",
+    "bytes": 17367,
+    "sha256": "f13c1ea397cdf9abdd10721de9121b39b734041cacb9d12b8aff07f82ac1e7f5"
+  },
+  {
+    "path": "evidence/vendor-openpgp-commands.html",
+    "bytes": 53224,
+    "sha256": "3a1d3dc61574ca6ffe60eb48c8df320c462c6c5ef1221022235884d7ad4fc03a"
+  },
+  {
+    "path": "evidence/vendor-technical-manual.html",
+    "bytes": 11501,
+    "sha256": "2c058bd424032e3b8f4f57de2259e5aaf3d1816a9c114ab9266ddf8ae5260297"
+  },
+  {
+    "path": "evidence/vendor-ysa-2017-01.html",
+    "bytes": 501815,
+    "sha256": "8a1eb0d0d5dd1a40b8cd43f0d7b8c03ef093ec7c8ae7117a32aae5a93d0bdcb1"
+  },
+  {
+    "path": "evidence/ykman-development-version-history.md",
+    "bytes": 2832,
+    "sha256": "3b7f95a53851bebacf2dcfe89a022deadeb64965228b603163ebb9b2e48c6440"
+  },
+  {
+    "path": "evidence/ykman-history-0611c18f4012.patch",
+    "bytes": 3986,
+    "sha256": "76a64c23c3d9f0a3cb821ee332bab8a554ae1b2a02f775f6ae498f053dca4e37"
+  },
+  {
+    "path": "evidence/ykman-history-0ba0ad0e3fd2.patch",
+    "bytes": 1078,
+    "sha256": "d738550a5ed9f42be906a9d4b1badbd48d8e861bb0b5aa6bfc9c2e72de418ab7"
+  },
+  {
+    "path": "evidence/ykman-history-11b6c36e85dc.patch",
+    "bytes": 2540,
+    "sha256": "edcae1abd8033b79b8ceb57185014cb77d8d03e291b610cb0deae296e7f08191"
+  },
+  {
+    "path": "evidence/ykman-history-1e44cf75fc92.patch",
+    "bytes": 2163,
+    "sha256": "afcdf566a690da42bf4870a81e0ba52ba5859619ad6de735364e6bf0fbad7378"
+  },
+  {
+    "path": "evidence/ykman-history-31459ea393e1.patch",
+    "bytes": 1648,
+    "sha256": "62cf41d7038e18ca6e17f9e1cb0f551b40667eb980035d989c837573daf16823"
+  },
+  {
+    "path": "evidence/ykman-history-4a2d6abba44f.patch",
+    "bytes": 18628,
+    "sha256": "c3c39aee60be46c3c12325807ad100c6719d7fb1fb53098d58bc7587f14d3f35"
+  },
+  {
+    "path": "evidence/ykman-history-6870378ce2c4.patch",
+    "bytes": 2766,
+    "sha256": "d5361428cbd9b1badf4a022345b8109bcdb44b84384e2281b9b90e058eca0d98"
+  },
+  {
+    "path": "evidence/ykman-history-69b535096f60.patch",
+    "bytes": 1810,
+    "sha256": "5b2131062a576a466896e4373c0ed9da81ba3cdd83a2d94ee53742d21f122a9a"
+  },
+  {
+    "path": "evidence/ykman-history-9654350803d6.patch",
+    "bytes": 705,
+    "sha256": "98087bc18eae17b22284a85eadef5bcd60d4fdfecac76c69f096987817220d2f"
+  },
+  {
+    "path": "evidence/ykman-history-9c0a0999d615.patch",
+    "bytes": 1375,
+    "sha256": "a6cf67f381ffb29c4912f649a390fa1e87f06d126461f22357065d1397fb7611"
+  },
+  {
+    "path": "evidence/ykman-history-ab83e4424963.patch",
+    "bytes": 1769,
+    "sha256": "de321235719edf2b371af5da063dfe8587532a9b48069a4b3bff8fd2478c540b"
+  },
+  {
+    "path": "evidence/ykman-history-c089ec47b7b7.patch",
+    "bytes": 5648,
+    "sha256": "2c325c71ab757581ebc999eb2e24db82eb066fe952a52cae4f8986b1882a2a0e"
+  },
+  {
+    "path": "evidence/ykman-history-c883b926a9de.patch",
+    "bytes": 1801,
+    "sha256": "4c979fd2bab716dec1ed69b73e9057dc9815a324fe5b57e3013f2f65e2df92f5"
+  },
+  {
+    "path": "evidence/ykman-history-fe09b795f1ad.patch",
+    "bytes": 1687,
+    "sha256": "6a218ff1de75807acb700a38d93e74193bf4a31d218c35a78dead4a0a069eb7a"
+  },
+  {
+    "path": "evidence/ykman-tests-device-cli-test_openpgp.py",
+    "bytes": 5585,
+    "sha256": "c55880a50b737392678d78d7dac1993eedca7df62e1aa107347901502ed90bbc"
+  },
+  {
+    "path": "evidence/ykman-tests-device-test_openpgp.py",
+    "bytes": 11417,
+    "sha256": "37238f8d5dd2a16864deebdaad33f30b737c230b591ec0f1ec9ee2d0ae59dcc9"
+  },
+  {
+    "path": "evidence/ykman-ykman-_cli-openpgp.py",
+    "bytes": 20757,
+    "sha256": "074cf73b1d91b2bbf3d8a495fc3ff947e100f88db5c9647dc938f0a608b5151b"
+  },
+  {
+    "path": "evidence/ykman-yubikit-openpgp.py",
+    "bytes": 60103,
+    "sha256": "bcd266e53411a9611ee133ed5f33e2907294fbe374aa56a19672a151e86a2926"
+  }
+]

@@ -188,7 +188,8 @@ public sealed partial class OpenPgpSession
 
     /// <summary>
     ///     Formats an owned Sign or Authenticate response, resolves completion, and transfers the signature.
-    ///     EC signatures are DER-encoded from the raw (r || s) concatenation; abandoned buffers are cleared.
+    ///     ECDSA signatures are DER-encoded from raw (r || s); RSA/EdDSA transfer successful raw storage.
+    ///     Abandoned buffers are cleared after formatting or completion-resolution failure.
     /// </summary>
     internal static async Task<ReadOnlyMemory<byte>> FormatResolveAndTransferSignatureAsync(
         AlgorithmAttributes attrs,
@@ -250,6 +251,8 @@ public sealed partial class OpenPgpSession
         AlgorithmAttributes attrs,
         ReadOnlySpan<byte> ciphertext)
     {
+        // The current X25519 branch sends input directly, omitting the EC cipher DO wrapper.
+        // Card §7.2.11 defines A6 { 7F49 { 86 point } }; public-key import tests leave agreement untested.
         return attrs switch
         {
             RsaAttributes => FormatRsaDecryptPayload(ciphertext),

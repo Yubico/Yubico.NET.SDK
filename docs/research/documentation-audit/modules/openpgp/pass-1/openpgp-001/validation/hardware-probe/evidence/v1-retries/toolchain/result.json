@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditPgp001.Hardware.IntegrationTests --filter FullyQualifiedName~ExtendedWrongPin_ReportsUserRetryCounter",
+  "started": "2026-11-04T14:50:24.5058749+01:00",
+  "durationSeconds": 5.6,
+  "runDirectory": "artifacts/toolchain/runs/20261104-145024-505-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 5.5,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditPgp001.Hardware.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter))",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 2 | Actual:   0"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261104-145024-505-test/01-test-AuditPgp001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project AuditPgp001.Hardware.IntegrationTests --filter \"FullyQualifiedName~Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter\""
+  ]
+}

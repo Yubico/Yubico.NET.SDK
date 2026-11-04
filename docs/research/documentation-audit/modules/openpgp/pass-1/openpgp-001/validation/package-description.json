@@ -1,0 +1,10 @@
+{
+  "path": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+  "baseline_sha256": "667447705c9fbc815f475a6571169e75de04b0a356a397f1401788c4fe3216b3",
+  "final_sha256": "d150bc39c7c4545e4cf9b87ed2ad25e967c6116211d66f6026638306a0ac68af",
+  "description": {
+    "before": "OpenPGP support for YubiKey devices including key management, encryption, decryption, signing, and authentication operations.",
+    "after": "OpenPGP card support for YubiKey devices including key management, raw deciphering and key agreement, signing, authentication, certificates, and PIN administration."
+  },
+  "all_other_xml_identical": true
+}

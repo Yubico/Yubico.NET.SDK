@@ -1,0 +1,108 @@
+commit 0611c18f40122ad115829e1f59920bf69d1062db
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Tue Dec 6 14:45:02 2016 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Tue Dec 6 14:45:02 2016 +0100
+
+    Better error handling.
+
+diff --git a/ykman/cli/__main__.py b/ykman/cli/__main__.py
+index 92754d73..cbdd192c 100644
+--- a/ykman/cli/__main__.py
++++ b/ykman/cli/__main__.py
+@@ -40,6 +40,7 @@ from .slot import slot
+ from .opgp import openpgp
+ import usb.core
+ import click
++import sys
+ 
+ 
+ COMMANDS = (info, mode, slot, openpgp)
+@@ -107,8 +108,12 @@ for cmd in COMMANDS:
+ 
+ 
+ def main():
+-    cli(obj={})
++    try:
++        cli(obj={})
++    except ValueError as e:
++        print('Error:', e)
++        return 1
+ 
+ 
+ if __name__ == '__main__':
+-    main()
++    sys.exit(main())
+diff --git a/ykman/cli/opgp.py b/ykman/cli/opgp.py
+index 0de05f79..52cb6cc7 100644
+--- a/ykman/cli/opgp.py
++++ b/ykman/cli/opgp.py
+@@ -140,8 +140,6 @@ def touch(ctx, key, policy, admin_pin, force):
+     POLICY  Touch policy to set (on, off or fixed).
+     """
+     controller = ctx.obj['controller']
+-    if controller.version <= (4, 2, 0):
+-        ctx.fail('Setting a touch policy is not supported on this YubiKey.')
+     old_policy = controller.get_touch(key)
+     click.echo('Current touch policy of {.name} key is {.name}.'.format(
+         key, old_policy))
+@@ -175,10 +173,6 @@ def set_pin_retries(ctx, pw_attempts, admin_pin, force):
+     attempts for the PIN, Reset Code, and Admin PIN, respectively.
+     """
+     controller = ctx.obj['controller']
+-    if controller.version <= (1, 0, 7) or \
+-            (4, 0, 0) <= controller.version < (4, 3, 0):
+-        ctx.fail('Changing the number of PIN retries is not supported on this '
+-                 'YubiKey.')
+     resets_pins = controller.version < (4, 0, 0)
+     if resets_pins:
+         click.echo('WARNING: Setting PIN retries will reset the values for all '
+diff --git a/ykman/opgp.py b/ykman/opgp.py
+index 3d23fe45..801e8a06 100644
+--- a/ykman/opgp.py
++++ b/ykman/opgp.py
+@@ -94,14 +94,13 @@ class OpgpController(object):
+             self.send_apdu(0, INS.VERIFY, 0, PW3, INVALID_PIN, check=None)
+ 
+     def reset(self):
++        if self.version < (1, 0, 6):
++            raise ValueError('Resetting OpenPGP data requires version 1.0.6 or '
++                             'later.')
+         self._block_pins()
+         self.send_apdu(0, INS.TERMINATE, 0, 0)
+         self.send_apdu(0, INS.ACTIVATE, 0, 0)
+ 
+-    def get_touch(self, key_slot):
+-        data = self.send_apdu(0, INS.GET_DATA, 0, key_slot)
+-        return TOUCH_MODE(byte2int(data[0]))
+-
+     def _verify(self, pw, pin):
+         try:
+             self.send_apdu(0, INS.VERIFY, 0, pw, pin)
+@@ -110,12 +109,26 @@ class OpgpController(object):
+             raise ValueError('Invalid PIN, {} tries remaining.'.format(
+                 pw_remaining))
+ 
++    def get_touch(self, key_slot):
++        if self.version < (4, 2, 0):
++            raise ValueError('Touch policy is available on YubiKey 4 or later.')
++        data = self.send_apdu(0, INS.GET_DATA, 0, key_slot)
++        return TOUCH_MODE(byte2int(data[0]))
++
+     def set_touch(self, key_slot, mode, pin):
++        if self.version < (4, 2, 0):
++            raise ValueError('Touch policy is available on YubiKey 4 or later.')
+         self._verify(PW3, pin)
+         self.send_apdu(
+             0, INS.PUT_DATA, 0, key_slot, int2byte(mode) + b'\x20')
+ 
+     def set_pin_retries(self, pw1_tries, pw2_tries, pw3_tries, pin):
++        if self.version < (1, 0, 7):  # For YubiKey NEO
++            raise ValueError('Setting PIN retry counters requires version '
++                             '1.0.7 or later.')
++        if (4, 0, 0) <= self.version < (4, 3, 1):  # For YubiKey 4
++            raise ValueError('Setting PIN retry counters requires version '
++                             '4.3.1 or later.')
+         self._verify(PW3, pin)
+         self.send_apdu(
+             0, INS.SET_PIN_RETRIES, 0, 0,

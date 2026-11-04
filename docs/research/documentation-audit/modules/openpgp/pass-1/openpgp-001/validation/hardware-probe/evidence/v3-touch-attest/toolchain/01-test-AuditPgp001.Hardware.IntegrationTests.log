@@ -1,0 +1,48 @@
+$ dotnet test docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests -> /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (app domain = off, method display = ClassAndMethod, method display options = None)
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (9 test cases to be run)
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (parallel test collections = off, stop on fail = off, explicit = off)
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.43]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] HYPOTHESIS Attestation with existing Att key and regular On policy binds a generated key to a certificate signed by the preserved issuer; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T14:09:05.4861582+00:00
+[xUnit.net 00:00:00.46]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:00.47]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:01.03]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.04]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ATT issuer-public-certificate-sha256=94AFB703099EDB4AAAEE443C6E197C379F7F909D23F717F0868EF73057E4A16A
+[xUnit.net 00:00:01.61]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PRESENCE requested operation=OpenPgp.AttestKey basis=PolicyRequires elapsed-ms=597 action=TOUCH WHEN LED FLASHES
+OpenPGP serial 103: touch for OpenPgp.AttestKey when the LED flashes.
+[xUnit.net 00:00:04.19]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PRESENCE resolved outcome=Completed elapsed-ms=3172 token-none=True
+[xUnit.net 00:00:04.20]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ORACLE attestation-certificate-signature=issuer-verified; certified-SPKI=generated-key; Att-certificate=unchanged; no Att-key replacement
+[xUnit.net 00:00:04.21]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:04.21]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [PASS]
+[xUnit.net 00:00:04.21]       Output:
+[xUnit.net 00:00:04.21]         HYPOTHESIS Attestation with existing Att key and regular On policy binds a generated key to a certificate signed by the preserved issuer; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T14:09:05.4861582+00:00
+[xUnit.net 00:00:04.21]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:04.21]         PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:04.21]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:04.21]         ATT issuer-public-certificate-sha256=94AFB703099EDB4AAAEE443C6E197C379F7F909D23F717F0868EF73057E4A16A
+[xUnit.net 00:00:04.21]         PRESENCE requested operation=OpenPgp.AttestKey basis=PolicyRequires elapsed-ms=597 action=TOUCH WHEN LED FLASHES
+[xUnit.net 00:00:04.21]         PRESENCE resolved outcome=Completed elapsed-ms=3172 token-none=True
+[xUnit.net 00:00:04.21]         ORACLE attestation-certificate-signature=issuer-verified; certified-SPKI=generated-key; Att-certificate=unchanged; no Att-key replacement
+[xUnit.net 00:00:04.21]         FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:04.22]   Finished:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests
+  Passed Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.TouchAttest_PreservedIssuerSignsGeneratedKeyCertificate(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [4 s]
+
+Test Run Successful.
+Total tests: 1
+     Passed: 1
+ Total time: 4.5580 Seconds

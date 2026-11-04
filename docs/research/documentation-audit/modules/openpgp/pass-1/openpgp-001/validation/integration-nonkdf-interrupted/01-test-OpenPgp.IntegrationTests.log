@@ -1,0 +1,44 @@
+$ dotnet test src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName!~SetKdf_IterSaltedS2k_ThenVerifyPin_Succeeds"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.OpenPgp.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.IntegrationTests.dll
+Test run for /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.OpenPgp.IntegrationTests
+[xUnit.net 00:00:00.13]   Discovered:  Yubico.YubiKit.OpenPgp.IntegrationTests
+[xUnit.net 00:00:00.16]   Starting:    Yubico.YubiKit.OpenPgp.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpAdvancedTests.GenerateEcKey_Ed25519_ThenSign_ProducesSignature(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpAdvancedTests.GenerateEcKey_X25519_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [829 ms]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpAdvancedTests.GenerateRsaKey_4096_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [56 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpAdvancedTests.GenerateRsaKey_3072_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [30 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpMultiCurveTests.SetPinAttempts_CustomValues_ReflectedInStatus(state: YubiKey(Placeholder #0: Conn=SmartCard)) [644 ms]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpMultiCurveTests.GenerateEcKey_P384_ThenSign_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpMultiCurveTests.GenerateEcKey_BrainpoolP256R1_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportRsaKey_2048_ThenSign_VerifiesWithTheHostPublicKey(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_P384_ThenSign_VerifiesWithTheHostPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_Ed25519_CardReportsTheTestVectorPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_P256_ToAuth_ThenAuthenticate_VerifiesWithTheHostPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_X25519_ToDec_CardReportsTheTestVectorPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [835 ms]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpKeyImportTests.ImportEcKey_P256_ThenSign_VerifiesWithTheHostPublicKey(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GetSignatureCounter_DefaultState_ReturnsZero(state: YubiKey(Placeholder #0: Conn=SmartCard)) [566 ms]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GetAlgorithmAttributes_DefaultState_ReturnsRsa2048(state: YubiKey(Placeholder #0: Conn=SmartCard)) [581 ms]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.Certificate_PutGetDelete_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.Sign_EcP256_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GenerateRsaKey_2048_Succeeds(state: YubiKey(Placeholder #0: Conn=SmartCard)) [4 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.AttestKey_RequiresUserPin_AndReplacesCardholderCertificate(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GetApplicationRelatedData_ReturnsValidData(state: YubiKey(Placeholder #0: Conn=SmartCard)) [569 ms]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.DeleteKey_AfterGenerate_Succeeds(state: YubiKey(Placeholder #0: FW>=5.2.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.Reset_RestoresDefaultState(state: YubiKey(Placeholder #0: Conn=SmartCard)) [568 ms]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.GetFingerprints_AfterReset_ReturnsFourEntries(state: YubiKey(Placeholder #0: Conn=SmartCard)) [573 ms]
+  Passed Yubico.YubiKit.OpenPgp.IntegrationTests.OpenPgpSessionTests.Sign_Rsa2048_ProducesSignature(state: YubiKey(Placeholder #0: Conn=SmartCard)) [2 s]

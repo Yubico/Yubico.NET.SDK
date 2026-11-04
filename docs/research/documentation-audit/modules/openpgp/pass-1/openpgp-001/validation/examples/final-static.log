@@ -1,0 +1,28 @@
+PASS: original source hashes, complete unchanged source segments, Python/XML syntax, pinned SDK policy and text-only preparation reconcile.
+{
+  "groups": 17,
+  "dispositions": 407,
+  "statuses": {
+    "other-applet": 29,
+    "compile": 17,
+    "non-csharp": 4,
+    "symbolic": 351,
+    "noncompiling-by-design": 1,
+    "non-executable": 5
+  },
+  "inventory": {
+    "documents": 11,
+    "fences": 46,
+    "inline": 335,
+    "xml": 22,
+    "xml_documents": 84,
+    "mappings": 4
+  },
+  "prepared_files": 30,
+  "tool_sources": 7,
+  "dependencies": 110,
+  "approach_provenance": 11,
+  "manifest_sha256": "5b7879c41ca57ea03f88739db3f2ba10468a7221f5bea8a76bd538809b11a2c4",
+  "generated_source_sha256": "8248882041e14b263bed7b16633e43d1a49bdc34d85bc7ef5ebcced075b457d6"
+}
+No .NET compilation, tests or hardware invoked.

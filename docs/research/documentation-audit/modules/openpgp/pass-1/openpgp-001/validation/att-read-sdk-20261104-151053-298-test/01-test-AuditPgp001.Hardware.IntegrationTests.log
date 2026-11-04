@@ -1,0 +1,64 @@
+$ dotnet test docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests -> /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.07]   Discovering: Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (app domain = off, method display = ClassAndMethod, method display options = None)
+[xUnit.net 00:00:00.13]   Discovered:  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (9 test cases to be run)
+[xUnit.net 00:00:00.14]   Starting:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (parallel test collections = off, stop on fail = off, explicit = off)
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.47]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:00.48]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ATT_READ read-only=true reset=false authentication=false issuer-DER-SHA256=94AFB703099EDB4AAAEE443C6E197C379F7F909D23F717F0868EF73057E4A16A; next=SDK-GetPublicKeyAsync-Att
+[xUnit.net 00:00:00.49]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ERROR phase=att-public-key-read-only type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException HResult=0x80131500
+[xUnit.net 00:00:00.49]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] APDU phase=att-public-key-read-only SW=0x6A80 CLA=00 INS=47 P1=81 P2=00
+[xUnit.net 00:00:00.49]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ATT_READ FINALLY read-only-session-disposed; no reset, PIN verification, generation, import or configuration write requested
+[xUnit.net 00:00:00.51]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [FAIL]
+[xUnit.net 00:00:00.51]       Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException : APDU command failed: Incorrect data in command data field (SW=0x6A80)
+[xUnit.net 00:00:00.51]       Stack Trace:
+[xUnit.net 00:00:00.51]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs(135,0): at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.TransmitAndReceiveAsync(ApduCommand command, Boolean throwOnError, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.51]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.cs(298,0): at Yubico.YubiKit.OpenPgp.OpenPgpSession.TransmitWithResponseAsync(ApduCommand command, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.51]         /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Keys.cs(143,0): at Yubico.YubiKit.OpenPgp.OpenPgpSession.GetPublicKeyAsync(KeyRef keyRef, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.51]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/DecipherAndAttReadProbes.cs(88,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(YubiKeyTestState state)
+[xUnit.net 00:00:00.51]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/DecipherAndAttReadProbes.cs(93,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(YubiKeyTestState state)
+[xUnit.net 00:00:00.51]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.51]       Output:
+[xUnit.net 00:00:00.51]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:00.51]         ATT_READ read-only=true reset=false authentication=false issuer-DER-SHA256=94AFB703099EDB4AAAEE443C6E197C379F7F909D23F717F0868EF73057E4A16A; next=SDK-GetPublicKeyAsync-Att
+[xUnit.net 00:00:00.51]         ERROR phase=att-public-key-read-only type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException HResult=0x80131500
+[xUnit.net 00:00:00.51]         APDU phase=att-public-key-read-only SW=0x6A80 CLA=00 INS=47 P1=81 P2=00
+[xUnit.net 00:00:00.51]         ATT_READ FINALLY read-only-session-disposed; no reset, PIN verification, generation, import or configuration write requested
+[xUnit.net 00:00:00.52]   Finished:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests
+  Failed Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [323 ms]
+  Error Message:
+   Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException : APDU command failed: Incorrect data in command data field (SW=0x6A80)
+  Stack Trace:
+     at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.TransmitAndReceiveAsync(ApduCommand command, Boolean throwOnError, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs:line 135
+   at Yubico.YubiKit.OpenPgp.OpenPgpSession.TransmitWithResponseAsync(ApduCommand command, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.cs:line 298
+   at Yubico.YubiKit.OpenPgp.OpenPgpSession.GetPublicKeyAsync(KeyRef keyRef, CancellationToken cancellationToken) in /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/OpenPgpSession.Keys.cs:line 143
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(YubiKeyTestState state) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/DecipherAndAttReadProbes.cs:line 88
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.AttPublicKey_ReadOnly_MatchesPreservedIssuerSpki(YubiKeyTestState state) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/DecipherAndAttReadProbes.cs:line 93
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+ ATT_READ read-only=true reset=false authentication=false issuer-DER-SHA256=94AFB703099EDB4AAAEE443C6E197C379F7F909D23F717F0868EF73057E4A16A; next=SDK-GetPublicKeyAsync-Att
+ ERROR phase=att-public-key-read-only type=Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException HResult=0x80131500
+ APDU phase=att-public-key-read-only SW=0x6A80 CLA=00 INS=47 P1=81 P2=00
+ ATT_READ FINALLY read-only-session-disposed; no reset, PIN verification, generation, import or configuration write requested
+
+
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 0.8857 Seconds

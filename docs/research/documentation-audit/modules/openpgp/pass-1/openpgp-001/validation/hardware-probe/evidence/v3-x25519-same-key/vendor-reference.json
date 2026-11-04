@@ -1,0 +1,50 @@
+{
+  "baseline_sha256": "0e4c68ccf1b1f1a629a8f19f7e10c955b15ecd416b863eca7656d9ca6a33b480",
+  "configuration_write": false,
+  "decipher": {
+    "rfc_shared_secret_match": true,
+    "status": "ok",
+    "vendor_call_completed": true
+  },
+  "decipher_profile": {
+    "api": "OpenPgpSession.decrypt",
+    "command_data_octets": 39,
+    "data_template": "A6{7F49{86 peer-public-point}}",
+    "header": "00 2A 80 86",
+    "public_point_octets": 32,
+    "source": "installed method source corroborates Card 3.4.1 section 7.2.11 and pinned Python profile"
+  },
+  "device_version_name": "5.8.0.beta.0",
+  "direct_application_version": "0.0.1",
+  "guarded_state_helper_sha256": "538bf77580da120f31f7867a38cae072b75904c3b1d3d0d63142e8a2c9f768a3",
+  "helper_source_sha256": "9902551ab8e733fff9801384f8a5dc14bd2f73c4eaae8477fdaf9e148241858f",
+  "installed_decrypt_source_sha256": "6d50eeb18655edf48e473c972267ef9f84c5ccdf1adda73a958a321ebcd73381",
+  "installed_openpgp_source_sha256": "bcd266e53411a9611ee133ed5f33e2907294fbe374aa56a19672a151e86a2926",
+  "key_import_or_generation": false,
+  "mode": "x25519",
+  "owned_mutable_secret_buffers_cleared": true,
+  "phase": "complete",
+  "pin_retries_before": {
+    "admin": 3,
+    "reset": 0,
+    "user": 3
+  },
+  "preconditions": {
+    "alice_public_point_match": true,
+    "dec_uif": "OFF",
+    "fixture": "RFC7748-section-6.1-Alice-Bob",
+    "kdf": "disabled",
+    "status": "ok"
+  },
+  "public_commands": [],
+  "python_memory_qualification": "Vendor immutable response bytes cannot be securely erased by this Python caller; no byte values or derived-output hashes are logged.",
+  "reset": false,
+  "serial_guard": 103,
+  "success": true,
+  "user_extended_verification": {
+    "credential_source": "published-fixed-factory-test-credential",
+    "status": "ok"
+  },
+  "utc": "2026-11-04T14:10:40.634308+00:00",
+  "vendor_version": "5.9.2"
+}

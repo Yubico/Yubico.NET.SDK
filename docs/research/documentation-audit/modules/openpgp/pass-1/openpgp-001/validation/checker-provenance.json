@@ -1,0 +1,83 @@
+{
+  "baseline": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+  "source_archive": {
+    "manifest": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/record-manifest.json",
+    "manifest_sha256": "9a32ac8f9d2443a65864dbe44432c6d4b1dd40ad7f00b676a6c0ecae950631dc",
+    "checked": 477
+  },
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/checker/src/Program.cs",
+      "source_sha256": "60b8867f4fba83a18b4154651484cc6bd5c998940abb4c77aa7cf787f0e402dc",
+      "target": "checker/src/Program.cs",
+      "target_sha256": "e160a62ca74ab5de682dcc3915317253deff653b655571018a14b1ca541c7dc8",
+      "replacements": {
+        "a74792facb657413e98223e059876d8b213ffff3": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+        "modules/yubihsm/pass-1/yubihsm-001/": "modules/openpgp/pass-1/openpgp-001/",
+        "/tmp/opencode/yubihsm-001-doccheck": "/tmp/opencode/openpgp-001-doccheck",
+        "Yubico.YubiKit.AuditHsm001.Checker": "Yubico.YubiKit.AuditPgp001.Checker"
+      },
+      "substitution_counts": {
+        "a74792facb657413e98223e059876d8b213ffff3": 4,
+        "modules/yubihsm/pass-1/yubihsm-001/": 1,
+        "/tmp/opencode/yubihsm-001-doccheck": 0,
+        "Yubico.YubiKit.AuditHsm001.Checker": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/checker/Directory.Build.props",
+      "source_sha256": "8afde3a37736e810277b345a75b5b4075cc6d98614882d06b81abade0848ee1a",
+      "target": "checker/Directory.Build.props",
+      "target_sha256": "db83f187988d3dcaeb481e39f995e6728e51af0e35fa026bd1e7e26aea930412",
+      "replacements": {
+        "a74792facb657413e98223e059876d8b213ffff3": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+        "modules/yubihsm/pass-1/yubihsm-001/": "modules/openpgp/pass-1/openpgp-001/",
+        "/tmp/opencode/yubihsm-001-doccheck": "/tmp/opencode/openpgp-001-doccheck",
+        "Yubico.YubiKit.AuditHsm001.Checker": "Yubico.YubiKit.AuditPgp001.Checker"
+      },
+      "substitution_counts": {
+        "a74792facb657413e98223e059876d8b213ffff3": 0,
+        "modules/yubihsm/pass-1/yubihsm-001/": 0,
+        "/tmp/opencode/yubihsm-001-doccheck": 1,
+        "Yubico.YubiKit.AuditHsm001.Checker": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/checker/Directory.Build.targets",
+      "source_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a",
+      "target": "checker/Directory.Build.targets",
+      "target_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a",
+      "replacements": {
+        "a74792facb657413e98223e059876d8b213ffff3": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+        "modules/yubihsm/pass-1/yubihsm-001/": "modules/openpgp/pass-1/openpgp-001/",
+        "/tmp/opencode/yubihsm-001-doccheck": "/tmp/opencode/openpgp-001-doccheck",
+        "Yubico.YubiKit.AuditHsm001.Checker": "Yubico.YubiKit.AuditPgp001.Checker"
+      },
+      "substitution_counts": {
+        "a74792facb657413e98223e059876d8b213ffff3": 0,
+        "modules/yubihsm/pass-1/yubihsm-001/": 0,
+        "/tmp/opencode/yubihsm-001-doccheck": 0,
+        "Yubico.YubiKit.AuditHsm001.Checker": 0
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/checker/src/Yubico.YubiKit.AuditHsm001.Checker.csproj",
+      "source_sha256": "c4e7414b46ceed2a821ab49663ee2557d3672e1f2f5cc0b9c8ca6c7a3e0aedb5",
+      "target": "checker/src/Yubico.YubiKit.AuditPgp001.Checker.csproj",
+      "target_sha256": "c07aa0fe34dc7cbff1476b513b4943ecd3314c697a68a434b6ac5f18f4d7349f",
+      "replacements": {
+        "a74792facb657413e98223e059876d8b213ffff3": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+        "modules/yubihsm/pass-1/yubihsm-001/": "modules/openpgp/pass-1/openpgp-001/",
+        "/tmp/opencode/yubihsm-001-doccheck": "/tmp/opencode/openpgp-001-doccheck",
+        "Yubico.YubiKit.AuditHsm001.Checker": "Yubico.YubiKit.AuditPgp001.Checker"
+      },
+      "substitution_counts": {
+        "a74792facb657413e98223e059876d8b213ffff3": 0,
+        "modules/yubihsm/pass-1/yubihsm-001/": 0,
+        "/tmp/opencode/yubihsm-001-doccheck": 0,
+        "Yubico.YubiKit.AuditHsm001.Checker": 1
+      }
+    }
+  ],
+  "policy": "Roslyn token/directive/API algorithms and compile subcommand unchanged; only baseline/run-path/output-path/checker-identity substitutions. No examples or import-removal approvals copied."
+}

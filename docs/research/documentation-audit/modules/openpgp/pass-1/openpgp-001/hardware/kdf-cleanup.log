@@ -1,0 +1,5 @@
+$ /usr/bin/python3 -B docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-state.py cleanup --authorize-reset-serial-103 --baseline docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-baseline-v2.json --output docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/kdf-cleanup.json
+UTC 2026-11-04T13:49:32.707403+00:00
+{"output": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/kdf-cleanup.json", "success": true}
+
+EXIT=0

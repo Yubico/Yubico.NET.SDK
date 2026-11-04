@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>    <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>     <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>     <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<title>Attestation</title>
+<meta content="" name="description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="/vendor/font-awesome/css/all.min.css" rel="stylesheet"/>
+<link href="/vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="/css/main.css" rel="stylesheet"/>
+<link href="/css/pygments.css" rel="stylesheet"/>
+<link href="/css/pygmentsmaterial.css" rel="stylesheet"/>
+<link href="/css/code-tabs.css" rel="stylesheet"/>
+<link href="/css/asciidoc.css" rel="stylesheet"/>
+<link href="/vendor/vanilla-cookieconsent/dist/cookieconsent.css" rel="stylesheet"/>
+<link href="/css/cookieconsent-yubicostyle.css" rel="stylesheet"/>
+<link href="/vendor/jquery.tablesorter/dist/css/theme.default.min.css" rel="stylesheet"/>
+<link href="/favicon-192x192.png" rel="icon" sizes="192x192"/>
+<!--<script src="/vendor/modernizr/dist/modernizr-build.js"></script>-->
+<!-- Google Tag Manager -->
+<script data-cookiecategory="analytics" type="text/plain">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KRP726L');</script>
+<!-- End Google Tag Manager -->
+<!-- Hotjar Tracking Code for www.yubico.com -->
+<script data-cookiecategory="analytics" type="text/plain">
+      (function(h,o,t,j,a,r){
+          h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+          h._hjSettings={hjid:835276,hjsv:6};
+          a=o.getElementsByTagName('head')[0];
+          r=o.createElement('script');r.async=1;
+          r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+          a.appendChild(r);
+      })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    </script>
+</head>
+<body>
+<!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+<nav class="navbar navbar-expand-lg navbar-top navbar-dark">
+<div class="container">
+<a class="navbar-brand" href="/"><img src="/logo.png"/></a>
+<button aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarToggler" data-bs-toggle="collapse" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="navbar-collapse collapse" id="navbarToggler">
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+<li class="nav-item"><a "="" class="nav-link fw-bold" href="/Passkeys">Passkeys</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/WebAuthn">WebAuthn</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/CTAP">CTAP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/OTP">OTP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/OATH">OATH</a></li><li class="nav-item"><a "="" aria-current="page" class="nav-link active fw-bold" href="/PGP">PGP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/PIV">PIV</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Secure_Domain">Secure Domain</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/YubiHSM2">YubiHSM2</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Software_Projects">Software Projects</a></li>
+</ul>
+<!-- Google Custom Search Engine -->
+<div class="navbar-form navbar-right" id="search-box">
+<script data-cookiecategory="functional" type="text/plain">
+          (function() {
+            var cx = '4d44ab063517e6a2e';
+            var gcse = document.createElement('script');
+            gcse.type = 'text/javascript';
+            gcse.async = true;
+            gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+            '//www.google.com/cse/cse.js?cx=' + cx;
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(gcse, s);
+          })();
+          </script>
+<gcse:searchbox-only></gcse:searchbox-only>
+</div>
+<!-- End Google Custom Search Engine -->
+</div><!--/.navbar-collapse -->
+</div>
+</nav>
+<div class="container">
+<div class="row bg-light">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="/PGP">PGP</a></li>
+<li class="breadcrumb-item active">Attestation</li>
+</ol>
+</div>
+<div class="row">
+<div class="col-md-4" style="padding-left: 0;">
+<!-- Sidebar -->
+<ul class="nav nav-side card card-body bg-light">
+<li class="active"><a href="/PGP">PGP</a><ul class="">
+<li><a href="/PGP/Importing_keys.html">Importing keys</a></li>
+<li><a href="/PGP/Card_edit.html">Card edit</a></li>
+<li><a href="/PGP/SSH_authentication">SSH authentication</a></li>
+<li><a href="/PGP/PGP_Walk-Through.html">PGP Walk-Through</a></li>
+<li class="active"><a href="/PGP/Attestation.html">Attestation</a>
+<li><a href="/PGP/Git_signing.html">Git signing</a></li>
+<li><a href="/PGP/PGP_PIN_Change_Behavior.html">PGP PIN Change Behavior</a></li>
+<li><a href="/PGP/YubiKey_5.2.3_Enhancements_to_OpenPGP_3.4.html">YubiKey 5.2.3 Enhancements to OpenPGP 3.4</a></li>
+</li></ul>
+</li></ul>
+<!-- End sidebar -->
+</div>
+<div class="col-md-8">
+<!-- Main content -->
+<div class="sidelinks">
+<ul></ul>
+</div>
+<div id="page-content">
+<div class="sect1">
+<h1 id="_openpgp_attestation">OpenPGP Attestation</h1>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_introduction">Introduction</h3>
+<div class="paragraph"><p>This document describes the attestation feature added to the OpenPGP module in YubiKey 5.2. For generating attestation certificates, you can use <a href="https://www.yubico.com/products/services-software/download/yubikey-manager/" rel="noopener noreferrer" target="_blank">YubiKey Manager CLI</a> (ykman) version 3.1.0 or higher.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_purpose">Purpose</h3>
+<div class="paragraph"><p>The concept of attestation is to cryptographically certify that a certain asymmetric key has been generated on device, and not imported. This can be used to prove that no other copies of the asymmetric key exist.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_terminology">Terminology</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-rows" style="
+width:100%;
+">
+<col style="width:28%;"/>
+<col style="width:71%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Attestation Key</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Private signature key to sign the generated Attestation Statement (also called Attesting Key)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Attestation Certificate</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">X.509 certificate for the Attestation Key, used as template for Attestation Statement</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Attested Key</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OpenPGP signature, decryption, or authentication key to attest was generated on device</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Attestation Statement</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generated X.509 certificate specifying the Attested Key details, signed by the Attestation Key</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_implementation">Implementation</h3>
+<div class="paragraph"><p>Attestation generates a new X.509 certificate (the Attestation Statement) for the key that is to be attested (Attested Key). The certificate is based on a template X.509 certificate issued by a CA (Attestation Certificate), and signed by the matching Attestation Key. An attestation certificate can only be generated if the attested key has been generated on device. This certificate should only be used for the purpose of verifying that the key was generated in device, not for any other purposes.</p></div>
+<div class="paragraph"><p>Attestation is based on chain of trust:</p></div>
+<div class="imageblock mscgen">
+<div class="content">
+<img alt="Attestation__1.png" src="Attestation__1.png">
+</img></div>
+</div>
+<div class="paragraph"><p>When an attestation statement is generated, it is placed in the OpenPGP cardholder certificate slot for the attested key.  For example, if the signature key is attested, the attestation statement is placed in the SIG cardholder certificate slot (index 2 of DO 0x7F21).  Any data currently stored in the cardholder certificate slot is overwritten.</p></div>
+<div class="paragraph"><p>The YubiKey is pre-loaded with an attestation certificate and matching attestation key issued by the Yubico CA. The template and key are replaceable, which permits an individual or organization to issue attestations verifiable with their own CA if they prefer. If replaced, the Yubico template can never be restored. The attestation key and certificate will not be cleared out by a reset of the device.</p></div>
+<div class="paragraph"><p>The attestation key can use any supported algorithm except curve25519. All keys, including curve25519, can be attested.</p></div>
+<div class="paragraph"><p>Attestation Statements are verified by validating the certificate chain in reverse:</p></div>
+<div class="imageblock mscgen">
+<div class="content">
+<img alt="Attestation__2.png" src="Attestation__2.png"/>
+</div>
+</div>
+<div class="paragraph"><p>Some features of the generated Attestation Statement:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Serial will be a random 16 byte integer
+</p>
+</li>
+<li>
+<p>
+Issuer will be the subject of the template Attestation Certificate
+</p>
+</li>
+<li>
+<p>
+Dates will be copied from the template Attestation Certificate
+</p>
+</li>
+<li>
+<p>
+Subject will be the string "YubiKey OPGP Attestation " with the attested slot appended ("SIG", "DEC", or "AUT")
+</p>
+</li>
+<li>
+<p>
+If the attestation key is RSA the signature will be SHA256-PKCS#1v1.5
+</p>
+</li>
+<li>
+<p>
+If the attestation key is EC the signature will be ECDSA-SHA256
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Extensions in the generated certificate:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:25%;"/>
+<col style="width:25%;"/>
+<col style="width:50%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">OID</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UTF-8 String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cardholder name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Attested key’s source<br/>
+<span class="monospaced">- 0x00:</span> imported (not permitted)<br/>
+<span class="monospaced">- 0x01:</span> generated on device</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Octet String (3)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YubiKey version number<br/>
+ex: <code>050303</code> = 5.3.3</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.4</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Octet String (20)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Attested key’s fingerprint</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Octet String (4)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Attested key’s generation date</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Attested key’s signature counter (if applicable)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.7</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YubiKey’s serial number</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.8</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Octet String (1)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User Interaction Flag (UIF)<br/>
+<span class="monospaced">- 0x00:</span> touch disabled<br/>
+<span class="monospaced">- 0x01:</span> touch enabled<br/>
+<span class="monospaced">- 0x02:</span> touch permanent<br/>
+<span class="monospaced">- 0x03:</span> touch cached<br/>
+<span class="monospaced">- 0x04:</span> touch permanent, cached</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.9</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Octet String (1)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Form Factor<br/>
+<span class="monospaced">- 0x00:</span> Unspecified<br/>
+<span class="monospaced">- 0x01:</span> USB-A Keychain<br/>
+<span class="monospaced">- 0x02:</span> USB-A Nano<br/>
+<span class="monospaced">- 0x03:</span> USB-C Keychain<br/>
+<span class="monospaced">- 0x04:</span> USB-C Nano<br/>
+<span class="monospaced">- 0x05:</span> USB-C/Lightning Keychain</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.10</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Octet String (1)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FIPS Certified YubiKey</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.3.6.1.4.1.41482.5.11</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Octet String (1)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CSPN Certified YubiKey</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">Cardholder name, fingerprint, and generation date can be overwritten with the admin PIN (PW3).  When verifying attestation statements, these fields should not be trusted.  Always verify the public key, and regenerate the PGP fingerprint if needed.</td>
+</tr></table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_yubico_ca">Yubico CA</h3>
+<div class="paragraph"><p>The pre-loaded attestation certificate is signed by a <a href="/PKI/yubico-ca-certs.txt">Yubico OPGP CA</a>.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">If you have a YubiKey Preview device, the attestation certificate will
+instead be signed by our <a href="/PKI/preview/yubico-preview-ca-certs.txt">Yubico OPGP Preview CA</a>.</td>
+</tr></table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_yubico_root_ca_update">Yubico Root CA Update</h3>
+<div class="paragraph"><p>Yubico is updating the root CA in 2025, and YubiKeys with firmware version 5.7.4 and later will be signed by our new root CA.  These certificates are linked to the <a href="/PKI/yubico-ca-certs.txt">Root Certificate Authority (Root CA)</a> through intermediate certificates, ensuring the integrity and trustworthiness of the YubiKey.</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="/PKI/yubico-ca-1.pem">Yubico Attestation Root 1</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">5.7.4+</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="/PKI/yubico-opgp-ca-1.pem">Yubico OpenPGP Attestation CA</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="/PKI/yubico-intermediate.pem">Intermediate Certificates</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_protocol_specification">Protocol Specification</h3>
+<div class="paragraph"><p>OpenPGP Attestation is an extension to the <a href="https://gnupg.org/ftp/specs/" rel="noopener noreferrer" target="_blank">OpenPGP application on ISO Smart Card Operating Systems</a> specification.  The new tags and instructions are reserved from version 3.4 of the spec.  Their usage is defined here.</p></div>
+<div class="sect3">
+<h4 id="_attestation_key_data_objects">Attestation Key (Data Objects)</h4>
+<div class="paragraph"><p>The Attestation Key (ATT key), an asymmetric keypair of any supported algorithm except curve25519, is added as a fourth key (in addition to the existing SIG, DEC, and AUT).  Importing or generating an ATT key uses the same underlying commands as the other keys.</p></div>
+<div class="paragraph"><p>Import and generation commands specify which key to load via a Control Reference Template (CRT).  Since the ATT key is a second <em>signature</em> key, it must be addressed by using the <em>complex</em> CRT format, which allows specifying a Key ID.</p></div>
+<div class="paragraph"><p>Attestation Key identifiers:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Identifier </th>
+<th class="tableblock halign-left valign-top"> Value (hex)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">81</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CRT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">B6 03 84 01 81</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>New Data Objects tags for Attestation Key metadata:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Data Object </th>
+<th class="tableblock halign-left valign-top"> Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xDA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Algorithm Attributes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xDB</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key Fingerprint</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xDC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CA Fingerprint</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xDD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key Generation Date</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xD9</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User Interaction Flag (UIF)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>Setting the attestation key requires the administration PIN (PW3).</p></div>
+</div>
+<div class="sect3">
+<h4 id="_attestation_certificate_data_object">Attestation Certificate (Data Object)</h4>
+<div class="paragraph"><p>The Attestation Certificate is stored in a dedicated DO with tag <span class="monospaced">0xFC</span>, accessible via standard PUT DATA and GET DATA instructions.</p></div>
+<div class="paragraph"><p>The maximum size of the certificate is 2048 bytes.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_generate_attestation_instruction">Generate Attestation (Instruction)</h4>
+<div class="paragraph"><p>A new instruction is added to generate the Attestation Statement.  Note that the class is 0x80, indicating that it is not an ISO interindustry standard instruction.</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:25%;"/>
+<col style="width:75%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">APDU Field </th>
+<th class="tableblock halign-left valign-top"> Value(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x80</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xFB</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x01 (SIG), 0x02 (DEC), 0x03 (AUT)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">None</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>There is no response data.</p></div>
+<div class="paragraph"><p>Upon successful completion (SW 0x9000), the Attestation Statement is written to the corresponding Cardholder Certificate slot.  The Attestation Statement can be retrieved via the normal GET DATA instruction to DO tag 0x7F21.</p></div>
+<div class="paragraph"><p>Note that the order is non-standard in the cardholder certificate DO, so the mapping is as follows:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">P1 Value </th>
+<th class="tableblock halign-left valign-top"> DO 7F21 Index </th>
+<th class="tableblock halign-left valign-top"> Key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SIG</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DEC</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AUT</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_protocol_diagram">Protocol Diagram</h4>
+<div class="paragraph"><p>The diagram below illustrates a rough overview of what happens when the YubiKey Manager creates and fetches an Attestation Statement:</p></div>
+<div class="imageblock mscgen">
+<div class="content">
+<img alt="Attestation__3.png" src="Attestation__3.png"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- End main content -->
+</div>
+</div>
+</div>
+<footer class="container">
+<div class="row" style="margin-top:30px;padding-top:20px;border-top:1px solid #eee;">
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%">
+<strong><a href="/" style="color:#000">DEV.YUBICO</a></strong><br/>
+<a href="/Passkeys">Passkeys</a><br/>
+<a href="/WebAuthn">WebAuthn</a><br/>
+<a href="/CTAP">CTAP</a><br/>
+<a href="/OTP">OTP</a><br/>
+<a href="/OATH">OATH</a><br/>
+<a href="/PGP">PGP</a><br/>
+<a href="/PIV">PIV</a><br/>
+<a href="/Secure_Domain">Secure Domain</a><br/>
+<a href="/YubiHSM2">YubiHSM2</a><br/>
+<a href="/Software_Projects">Software Projects</a><br/>
+</p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong>RESOURCES</strong><br/>
+<a href="https://www.yubico.com/store/" rel="noopener noreferrer" target="_blank">Buy YubiKeys</a><br/>
+<a href="https://www.yubico.com/blog/" rel="noopener noreferrer" target="_blank">Blog</a><br/>
+<a href="https://www.yubico.com/email-subscription/" rel="noopener noreferrer" target="_blank">Newsletter</a><br/>
+<a href="https://forum.yubico.com/" rel="noopener noreferrer" target="_blank">Yubico Forum Archive</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong><a href="https://www.yubico.com/" rel="noopener noreferrer" style="color:#000" target="_blank">YUBICO.COM</a></strong><br/>
+<a href="https://www.yubico.com/why-yubico/" rel="noopener noreferrer" target="_blank">Why Yubico</a><br/>
+<a href="https://www.yubico.com/about/about-us/" rel="noopener noreferrer" target="_blank">About Yubico</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/cookie-notice/" rel="noopener noreferrer" target="_blank">Cookie</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/" rel="noopener noreferrer" target="_blank">Legal</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/privacy-notice/" rel="noopener noreferrer" target="_blank">Privacy</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/yubico-website-terms-conditions/" rel="noopener noreferrer" target="_blank">Terms of use</a><br/>
+<a href="https://www.yubico.com/trust/" rel="noopener noreferrer" target="_blank">Trust</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:1em;font-size:90%"> </p>
+<table align="right" cellpadding="0" cellspacing="0" style="color:#9aca3c">
+<tbody>
+<tr>
+<td style="padding:10px"><a href="https://www.yubico.com/feed/" rel="noopener noreferrer" target="_blank" title="Blog RSS"><i class="fa fa-rss"></i></a></td>
+<td style="padding:10px"><a href="https://twitter.com/yubico" rel="noopener noreferrer" target="_blank" title="Twitter"><i class="fa-brands fa-twitter"></i></a></td>
+<td style="padding:10px"><a href="https://www.facebook.com/Yubikey" rel="noopener noreferrer" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a></td>
+<td style="padding:10px"><a href="https://www.youtube.com/c/Yubico" rel="noopener noreferrer" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a></td>
+<td style="padding:10px 0 10px 10px"><a href="https://github.com/Yubico" rel="noopener noreferrer" target="_blank" title="GitHub"><i class="fa-brands fa-github"></i></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</footer>
+<script src="/vendor/jquery/dist/jquery.min.js"></script>
+<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/vendor/jquery.tablesorter/dist/js/jquery.tablesorter.min.js"></script>
+<script src="/js/code-tabs.js"></script>
+<script src="/js/main.js"></script>
+<!-- Cookie Consent -->
+<script defer="" src="/vendor/vanilla-cookieconsent/dist/cookieconsent.js"></script>
+<script defer="" src="/js/cookieconsent-init.js"></script>
+<!-- End Cookie Consent -->
+</body>
+</html>

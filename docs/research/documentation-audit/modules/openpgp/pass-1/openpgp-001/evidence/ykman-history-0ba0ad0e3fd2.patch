@@ -1,0 +1,29 @@
+commit 0ba0ad0e3fd23059367415b7e7c116cb3c05a175
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Thu Apr 8 13:30:48 2021 +0200
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Thu Apr 8 13:30:48 2021 +0200
+
+    Prefix length byte in APDU when needed (see #403).
+
+diff --git a/ykman/openpgp.py b/ykman/openpgp.py
+index 1381e772..d71f6e4f 100755
+--- a/ykman/openpgp.py
++++ b/ykman/openpgp.py
+@@ -333,12 +333,11 @@ class OpenPgpController(object):
+         self._app.send_apdu(0, INS.PUT_DATA, do >> 8, do & 0xFF, data)
+ 
+     def _select_certificate(self, key_slot):
++        data = Tlv(0x60, Tlv(0x5C, b"\x7f\x21"))
++        if self.version <= (5, 4, 3):  # These use a non-standard byte in the command.
++            data = b"\x06" + data  # 6 is the length of the data.
+         self._app.send_apdu(
+-            0,
+-            INS.SELECT_DATA,
+-            3 - key_slot.index,
+-            0x04,
+-            Tlv(0, Tlv(0x60, Tlv(0x5C, b"\x7f\x21")))[1:],
++            0, INS.SELECT_DATA, 3 - key_slot.index, 0x04, data,
+         )
+ 
+     def _read_version(self):

@@ -1,0 +1,38 @@
+{
+  "baseline_sha256": "0e4c68ccf1b1f1a629a8f19f7e10c955b15ecd416b863eca7656d9ca6a33b480",
+  "final_sha256": "aecd4f5433271b6a88339c24ed95afd2019fb76bacbadbf6610faac161295df8",
+  "all_public_state_fields_match_baseline": true,
+  "post_verification_fresh_state_matches": true,
+  "all_four_uif_off": true,
+  "normal_keys_and_certificates_empty": true,
+  "factory_pins_verified": {
+    "admin": {
+      "status": "ok",
+      "value": null
+    },
+    "pin_status_after": {
+      "status": "ok",
+      "value": {
+        "attempts_admin": 3,
+        "attempts_reset": 0,
+        "attempts_user": 3,
+        "max_len_admin": 127,
+        "max_len_reset": 127,
+        "max_len_user": 127,
+        "pin_policy_user": {
+          "name": "ONCE",
+          "value": 1
+        }
+      }
+    },
+    "user_extended": {
+      "status": "ok",
+      "value": null
+    },
+    "user_sign": {
+      "status": "ok",
+      "value": null
+    }
+  },
+  "attestation_identity_preserved": true
+}

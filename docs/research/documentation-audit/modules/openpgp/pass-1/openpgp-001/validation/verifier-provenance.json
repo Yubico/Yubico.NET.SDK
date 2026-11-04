@@ -1,0 +1,27 @@
+{
+  "source_archive": {
+    "manifest": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/record-manifest.json",
+    "manifest_sha256": "9a32ac8f9d2443a65864dbe44432c6d4b1dd40ad7f00b676a6c0ecae950631dc",
+    "checked": 477
+  },
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/verify-preparation.py",
+      "source_sha256": "1398b44185b63736c8cfe64b120143e3eaa151288a65b4565be2941d51909abb",
+      "target": "verify-preparation.py",
+      "target_sha256": "5df7917a8a0874dadb75d4641395a40aba0761358d170e09ab7f696a62e14c23",
+      "replacements": {
+        "a74792facb657413e98223e059876d8b213ffff3": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+        "== 433": "== 477",
+        "frozen YubiOTP manifest rows": "final frozen YubiHSM manifest rows",
+        "AuditHsm001.Checker": "AuditPgp001.Checker"
+      },
+      "substitution_counts": {
+        "a74792facb657413e98223e059876d8b213ffff3": 1,
+        "== 433": 1,
+        "frozen YubiOTP manifest rows": 1,
+        "AuditHsm001.Checker": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "att_certificate": {
+    "baseline_identity_match": true,
+    "der_sha256": "94afb703099edb4aaaee443c6e197c379f7f909d23f717f0868ef73057e4a16a",
+    "spki_sha256": "b5ba3032f18969b8ba2a9dc85136404bdb977f2e342e2f3e31b6df2799ee0113",
+    "status": "ok"
+  },
+  "att_public_key": {
+    "certificate_spki_match": true,
+    "correct_crt": "B603840181",
+    "spki_sha256": "b5ba3032f18969b8ba2a9dc85136404bdb977f2e342e2f3e31b6df2799ee0113",
+    "status": "ok",
+    "structure": "7F49/RSA-81-modulus-82-exponent"
+  },
+  "baseline_sha256": "0e4c68ccf1b1f1a629a8f19f7e10c955b15ecd416b863eca7656d9ca6a33b480",
+  "configuration_write": false,
+  "device_version_name": "5.8.0.beta.0",
+  "direct_application_version": "0.0.1",
+  "guarded_state_helper_sha256": "538bf77580da120f31f7867a38cae072b75904c3b1d3d0d63142e8a2c9f768a3",
+  "helper_source_sha256": "9902551ab8e733fff9801384f8a5dc14bd2f73c4eaae8477fdaf9e148241858f",
+  "installed_decrypt_source_sha256": "6d50eeb18655edf48e473c972267ef9f84c5ccdf1adda73a958a321ebcd73381",
+  "installed_openpgp_source_sha256": "bcd266e53411a9611ee133ed5f33e2907294fbe374aa56a19672a151e86a2926",
+  "key_import_or_generation": false,
+  "mode": "att",
+  "phase": "complete",
+  "public_commands": [
+    {
+      "cla": "00",
+      "data_hex": "",
+      "ins": "CA",
+      "p1": "00",
+      "p2": "FC",
+      "response_length": 793,
+      "status": "ok",
+      "sw": "9000"
+    },
+    {
+      "cla": "00",
+      "data_hex": "b603840181",
+      "ins": "47",
+      "p1": "81",
+      "p2": "00",
+      "response_length": 270,
+      "status": "ok",
+      "sw": "9000"
+    }
+  ],
+  "reset": false,
+  "serial_guard": 103,
+  "success": true,
+  "utc": "2026-11-04T14:11:18.501705+00:00",
+  "vendor_version": "5.9.2"
+}

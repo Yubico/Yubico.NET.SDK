@@ -1,0 +1,5 @@
+{
+  "type": "ValueError",
+  "error": "Analyzers skipped",
+  "scope": "Capture/provenance failure; classify separately from matching compiler diagnostics. Earlier text captures retained."
+}

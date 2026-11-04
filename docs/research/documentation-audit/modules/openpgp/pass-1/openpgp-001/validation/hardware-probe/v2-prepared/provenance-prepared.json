@@ -1,0 +1,100 @@
+{
+  "revision": "two-additions-prepared-only",
+  "live_authored_source_count": 3,
+  "expected_authored_source_count_after_coordinator_install": 4,
+  "prepared_file_outside_implicit_compile_scope": true,
+  "coordinator_install_required": true,
+  "source_identities": [
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "bytes": 17841,
+      "sha256": "3735107b1aedd3c6aa6baacddc5838d114fb5666969817bc0ea4d3bb83b61b91"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/ProbeSupport.cs",
+      "bytes": 8913,
+      "sha256": "b29d200b8ede6c459a6dddafa1c506b4fe4406948c2bf532abf2324a87e38b7c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/CancellationProbe.cs",
+      "bytes": 5760,
+      "sha256": "cb1def01a3953e450e04d345bfe19874882cfab310fd7c7a95a3c5491f6f64e2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj",
+      "bytes": 1873,
+      "sha256": "be2a105d01e6a584a40a7dfd1a1e61cfb607a12f7f3e57b3a55f1bdfd97131d7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/v2-prepared/DecipherAndAttReadProbes.cs.snapshot",
+      "bytes": 6632,
+      "sha256": "51c8cf6b2553ec713fa3424efc7e49924b702f1a2c55eb4ce28ffc5dc16d767a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/vendor-reference-v2.py",
+      "bytes": 9755,
+      "sha256": "9902551ab8e733fff9801384f8a5dc14bd2f73c4eaae8477fdaf9e148241858f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/evidence/source-analysis.md",
+      "bytes": 15230,
+      "sha256": "b08ad3783a227c7d8d9d59a26377c59a2bbdc39fc889bb8d10dc725cec9832da"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/evidence/source-manifest.json",
+      "bytes": 3949,
+      "sha256": "d1b5ec84fdc63cefed1e663435bb3cf12695e89eaee30d5593f935e66b6e1ecb"
+    }
+  ],
+  "existing_compiler_identity_comparisons": [
+    {
+      "manifest": {
+        "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/evidence/final-inputs-v1/manifest.json",
+        "bytes": 8946,
+        "sha256": "65da6803c2669c41c781ecfd56c2a2ef31ff1ed5d9c749ad32ceddcdc5f658d2"
+      },
+      "original_source_checks": [
+        {
+          "source": "HardwareProbeTests.cs",
+          "recorded": true,
+          "matches_current": false
+        },
+        {
+          "source": "ProbeSupport.cs",
+          "recorded": true,
+          "matches_current": true
+        },
+        {
+          "source": "CancellationProbe.cs",
+          "recorded": true,
+          "matches_current": true
+        }
+      ]
+    },
+    {
+      "manifest": {
+        "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/evidence/final-inputs-v2/manifest.json",
+        "bytes": 8946,
+        "sha256": "74e8110375bd1b3c0320166d843429895735f687a09fdd953e2a1e36fa4f6fdb"
+      },
+      "original_source_checks": [
+        {
+          "source": "HardwareProbeTests.cs",
+          "recorded": true,
+          "matches_current": true
+        },
+        {
+          "source": "ProbeSupport.cs",
+          "recorded": true,
+          "matches_current": true
+        },
+        {
+          "source": "CancellationProbe.cs",
+          "recorded": true,
+          "matches_current": true
+        }
+      ]
+    }
+  ],
+  "scope": "Static source/provenance capture only. No builds, tests, device operations, formatter, agents, commits, or changes to original three host C# sources/project."
+}

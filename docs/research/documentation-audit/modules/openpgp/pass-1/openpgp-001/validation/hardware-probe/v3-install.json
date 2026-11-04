@@ -1,0 +1,7 @@
+{
+  "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/v2-prepared/DecipherAndAttReadProbes.cs.snapshot",
+  "destination": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/DecipherAndAttReadProbes.cs",
+  "bytes": 6632,
+  "sha256": "51c8cf6b2553ec713fa3424efc7e49924b702f1a2c55eb4ce28ffc5dc16d767a",
+  "other_change": "HardwareProbeTests: attestation extended-only verification replaced by ordinary verification after preserved v2 6982 failure; full v2 source retained in final-inputs-v2"
+}

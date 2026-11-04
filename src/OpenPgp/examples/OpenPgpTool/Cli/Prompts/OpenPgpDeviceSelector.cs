@@ -25,6 +25,7 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Prompts;
 /// In non-interactive mode, auto-selects the first available device.
 /// Emits error to stderr when no devices found in non-interactive mode.
 /// </summary>
+/// <remarks>The command base currently uses the separate static DeviceSelector rather than this class.</remarks>
 public sealed class OpenPgpDeviceSelector : DeviceSelectorBase
 {
     /// <summary>

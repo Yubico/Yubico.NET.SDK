@@ -1,0 +1,4 @@
+$ /usr/bin/python3 -B /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/vendor-reference-v2.py x25519 --baseline /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/vendor-baseline-v2.json --output /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/evidence/v3-x25519-same-key/vendor-reference.json
+{"output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/evidence/v3-x25519-same-key/vendor-reference.json", "success": true, "phase": "complete"}
+
+EXIT=0

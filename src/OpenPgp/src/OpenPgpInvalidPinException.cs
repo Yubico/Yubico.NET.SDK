@@ -17,23 +17,25 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     Exception thrown when OpenPGP User, Admin, or Reset Code PIN verification fails.
+///     Reports an unsuccessful User or Admin VERIFY response with an optional retry count.
 /// </summary>
 /// <remarks>
 ///     <para>
 ///         Thrown by <see cref="IOpenPgpSession.VerifyPinAsync" /> and
-///         <see cref="IOpenPgpSession.VerifyAdminAsync" /> whenever the card rejects the
-///         supplied PIN, regardless of which status word the card used to report it: a
-///         standard retry-counted failure (SW 0x63Cx), "security status not satisfied"
-///         (SW 0x6982, returned by some 5.8.0-alpha firmware instead of 0x63Cx), or the PIN
-///         already being permanently blocked (SW 0x6983).
+///         <see cref="IOpenPgpSession.VerifyAdminAsync" /> for every unsuccessful VERIFY response.
+///         SW 63Cx supplies a retry count, 6983 reports a blocked credential, and 6982 triggers a
+///         PIN-status query. Other command/security failures also currently become this exception;
+///         inspect <see cref="ApduException.SW" /> before interpreting the failure as a wrong PIN.
+///         PIN change and recovery methods propagate general APDU exceptions.
 ///     </para>
 ///     <para>
-///         <see cref="RetriesRemaining" /> exposes the parsed retry count as a typed value so
-///         callers do not need to parse <see cref="Exception.Message" /> or separately query
-///         <see cref="IOpenPgpSession.GetPinStatusAsync" />. It is <c>0</c> when the PIN is
-///         already blocked, a positive count when retries remain, and <c>null</c> only when the
-///         card's failure status carries no retry count and a fallback status query also failed.
+///         <see cref="RetriesRemaining" /> carries the count from 63Cx, zero from 6983, or the result
+///         of a fallback status query for 6982. It is null when the count is unavailable.
+///         Current extended User verification selects Reset Code identity for that
+///         query, so its count can describe the Reset Code rather than the User PIN. Query fresh
+///         <see cref="IOpenPgpSession.GetPinStatusAsync" /> and inspect <see cref="PwStatus.AttemptsUser" />
+///         after an extended-mode failure; typed zero alone is insufficient to establish User blocking.
+///         Diagnose uncertainty before retrying. User recovery remains available through Reset Code/Admin.
 ///     </para>
 ///     <para>
 ///         This type derives from <see cref="ApduException" /> so existing code that catches
@@ -44,17 +46,21 @@ namespace Yubico.YubiKit.OpenPgp;
 public sealed class OpenPgpInvalidPinException : ApduException
 {
     /// <summary>
-    ///     Gets the number of verification attempts remaining before the PIN is blocked, or
-    ///     <c>null</c> if the card did not report a retry count and it could not otherwise be
-    ///     determined.
+    ///     Gets the available reported retry count, or <c>null</c> when unavailable.
     /// </summary>
+    /// <remarks>
+    ///     Extended-mode 6982 fallback currently selects Reset Code attempts. Query fresh
+    ///     <see cref="IOpenPgpSession.GetPinStatusAsync" /> and inspect <see cref="PwStatus.AttemptsUser" />
+    ///     before deciding User PIN recovery; a reported zero alone does not establish User blocking.
+    ///     Diagnose the cause before another verification attempt.
+    /// </remarks>
     public int? RetriesRemaining { get; }
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="OpenPgpInvalidPinException" /> class.
     /// </summary>
     /// <param name="retriesRemaining">
-    ///     The number of remaining verification attempts, or <c>null</c> if unknown.
+    ///     The reported retry count, or <c>null</c> if unknown.
     /// </param>
     /// <param name="message">The message that describes the error.</param>
     public OpenPgpInvalidPinException(int? retriesRemaining, string message)

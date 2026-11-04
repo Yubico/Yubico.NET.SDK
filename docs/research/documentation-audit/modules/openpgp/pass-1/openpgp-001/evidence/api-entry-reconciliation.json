@@ -1,0 +1,2540 @@
+[
+  {
+    "line": 2,
+    "entry": "Yubico.YubiKit.OpenPgp.AlgorithmAttributes",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 3,
+    "entry": "Yubico.YubiKit.OpenPgp.AlgorithmAttributes.AlgorithmAttributes() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 4,
+    "entry": "Yubico.YubiKit.OpenPgp.AlgorithmAttributes.AlgorithmId.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 5,
+    "entry": "Yubico.YubiKit.OpenPgp.AlgorithmAttributes.AlgorithmId.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 6,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 7,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.Aid.get -> Yubico.YubiKit.OpenPgp.OpenPgpAid!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 8,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.Aid.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 9,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.ApplicationRelatedData() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 10,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.Discretionary.get -> Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 11,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.Discretionary.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 12,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.ExtendedLengthInfo.get -> Yubico.YubiKit.OpenPgp.ExtendedLengthInfo?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 13,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.ExtendedLengthInfo.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 14,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.GeneralFeatures.get -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 15,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.GeneralFeatures.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 16,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.HistoricalBytes.get -> System.ReadOnlyMemory<byte>",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 17,
+    "entry": "Yubico.YubiKit.OpenPgp.ApplicationRelatedData.HistoricalBytes.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 18,
+    "entry": "Yubico.YubiKit.OpenPgp.Credentials.OpenPgpCredentialOptions",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 19,
+    "entry": "Yubico.YubiKit.OpenPgp.Crt",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 20,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 21,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid.BrainpoolP256R1 = 4 -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 22,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid.BrainpoolP384R1 = 5 -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 23,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid.BrainpoolP512R1 = 6 -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 24,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid.Ed25519 = 8 -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 25,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid.Secp256K1 = 1 -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 26,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid.Secp256R1 = 0 -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 27,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid.Secp384R1 = 2 -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 28,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid.Secp521R1 = 3 -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 29,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOid.X25519 = 7 -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 30,
+    "entry": "Yubico.YubiKit.OpenPgp.CurveOidExtensions",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 31,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 32,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.Aid = 79 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 33,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.AlgorithmAttributesAtt = 218 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 34,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.AlgorithmAttributesAut = 195 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 35,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.AlgorithmAttributesDec = 194 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 36,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.AlgorithmAttributesSig = 193 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 37,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.AlgorithmInformation = 250 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 38,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.ApplicationRelatedData = 110 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 39,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.AttCertificate = 252 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 40,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.CaFingerprint1 = 202 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 41,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.CaFingerprint2 = 203 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 42,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.CaFingerprint3 = 204 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 43,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.CaFingerprint4 = 220 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 44,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.CaFingerprints = 198 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 45,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.CardholderCertificate = 32545 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 46,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.CardholderRelatedData = 101 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 47,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.DiscretionaryDataObjects = 115 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 48,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.ExtendedCapabilitiesTag = 192 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 49,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.ExtendedLengthInfo = 32614 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 50,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.FingerprintAtt = 219 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 51,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.FingerprintAut = 201 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 52,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.FingerprintDec = 200 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 53,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.FingerprintSig = 199 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 54,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.Fingerprints = 197 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 55,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.GeneralFeatureManagement = 32628 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 56,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.GenerationTimeAtt = 221 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 57,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.GenerationTimeAut = 208 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 58,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.GenerationTimeDec = 207 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 59,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.GenerationTimeSig = 206 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 60,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.GenerationTimes = 205 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 61,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.HistoricalBytes = 24402 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 62,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.Kdf = 249 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 63,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.KeyInformation = 222 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 64,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.Language = 24365 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 65,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.LoginData = 94 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 66,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.Name = 91 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 67,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.PrivateUse1 = 257 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 68,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.PrivateUse2 = 258 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 69,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.PrivateUse3 = 259 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 70,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.PrivateUse4 = 260 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 71,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.PwStatusBytes = 196 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 72,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.ResettingCode = 211 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 73,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.SecuritySupportTemplate = 122 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 74,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.Sex = 24373 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 75,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.SignatureCounter = 147 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 76,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.UifAtt = 217 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 77,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.UifAut = 216 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 78,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.UifDec = 215 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 79,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.UifSig = 214 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 80,
+    "entry": "Yubico.YubiKit.OpenPgp.DataObject.Url = 24400 -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 81,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 82,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.AlgorithmAttributesAtt.get -> Yubico.YubiKit.OpenPgp.AlgorithmAttributes?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 83,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.AlgorithmAttributesAtt.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 84,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.AlgorithmAttributesAut.get -> Yubico.YubiKit.OpenPgp.AlgorithmAttributes!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 85,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.AlgorithmAttributesAut.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 86,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.AlgorithmAttributesDec.get -> Yubico.YubiKit.OpenPgp.AlgorithmAttributes!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 87,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.AlgorithmAttributesDec.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 88,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.AlgorithmAttributesSig.get -> Yubico.YubiKit.OpenPgp.AlgorithmAttributes!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 89,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.AlgorithmAttributesSig.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 90,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.CaKeyFingerprints.get -> Yubico.YubiKit.OpenPgp.KeyFingerprints!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 91,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.CaKeyFingerprints.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 92,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.DiscretionaryDataObjects() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 93,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.ExtendedCapabilities.get -> Yubico.YubiKit.OpenPgp.ExtendedCapabilities!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 94,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.ExtendedCapabilities.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 95,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.GenerationTimes.get -> Yubico.YubiKit.OpenPgp.GenerationTimes!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 96,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.GenerationTimes.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 97,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.KeyFingerprints.get -> Yubico.YubiKit.OpenPgp.KeyFingerprints!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 98,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.KeyFingerprints.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 99,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.KeyInformation.get -> Yubico.YubiKit.OpenPgp.KeyInformation!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 100,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.KeyInformation.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 101,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.PwStatus.get -> Yubico.YubiKit.OpenPgp.PwStatus!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 102,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.PwStatus.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 103,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.UifAtt.get -> Yubico.YubiKit.OpenPgp.Uif?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 104,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.UifAtt.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 105,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.UifAut.get -> Yubico.YubiKit.OpenPgp.Uif?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 106,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.UifAut.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 107,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.UifDec.get -> Yubico.YubiKit.OpenPgp.Uif?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 108,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.UifDec.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 109,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.UifSig.get -> Yubico.YubiKit.OpenPgp.Uif?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 110,
+    "entry": "Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.UifSig.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 111,
+    "entry": "Yubico.YubiKit.OpenPgp.EcAttributes",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 112,
+    "entry": "Yubico.YubiKit.OpenPgp.EcAttributes.EcAttributes() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 113,
+    "entry": "Yubico.YubiKit.OpenPgp.EcAttributes.ImportFormat.get -> Yubico.YubiKit.OpenPgp.EcImportFormat",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 114,
+    "entry": "Yubico.YubiKit.OpenPgp.EcAttributes.ImportFormat.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 115,
+    "entry": "Yubico.YubiKit.OpenPgp.EcAttributes.Oid.get -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 116,
+    "entry": "Yubico.YubiKit.OpenPgp.EcAttributes.Oid.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 117,
+    "entry": "Yubico.YubiKit.OpenPgp.EcImportFormat",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 118,
+    "entry": "Yubico.YubiKit.OpenPgp.EcImportFormat.Standard = 0 -> Yubico.YubiKit.OpenPgp.EcImportFormat",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 119,
+    "entry": "Yubico.YubiKit.OpenPgp.EcImportFormat.StandardWithPubkey = 255 -> Yubico.YubiKit.OpenPgp.EcImportFormat",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 120,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 121,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.CertificateMaxLength.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 122,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.CertificateMaxLength.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 123,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.ChallengeMaxLength.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 124,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.ChallengeMaxLength.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 125,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.ExtendedCapabilities() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 126,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.Flags.get -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 127,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.Flags.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 128,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.MseCommand.get -> bool",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 129,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.MseCommand.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 130,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.PinBlock2Format.get -> bool",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 131,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.PinBlock2Format.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 132,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.SmAlgorithm.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 133,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.SmAlgorithm.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 134,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.SpecialDoMaxLength.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 135,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilities.SpecialDoMaxLength.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 136,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 137,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags.AlgorithmAttributesChangeable = 4 -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 138,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags.GetChallenge = 64 -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 139,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags.Kdf = 1 -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 140,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags.KeyImport = 32 -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 141,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags.None = 0 -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 142,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags.PrivateUse = 8 -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 143,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags.PsoDecEncAes = 2 -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 144,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags.PwStatusChangeable = 16 -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 145,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags.SecureMessaging = 128 -> Yubico.YubiKit.OpenPgp.ExtendedCapabilityFlags",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 146,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedLengthInfo",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 147,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedLengthInfo.ExtendedLengthInfo() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 148,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedLengthInfo.RequestMaxBytes.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 149,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedLengthInfo.RequestMaxBytes.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 150,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedLengthInfo.ResponseMaxBytes.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 151,
+    "entry": "Yubico.YubiKit.OpenPgp.ExtendedLengthInfo.ResponseMaxBytes.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 152,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 153,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.Biometric = 64 -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 154,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.Button = 32 -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 155,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.Display = 128 -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 156,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.Keypad = 16 -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 157,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.Led = 8 -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 158,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.Loudspeaker = 4 -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 159,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.Microphone = 2 -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 160,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.None = 0 -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 161,
+    "entry": "Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.Touchscreen = 1 -> Yubico.YubiKit.OpenPgp.GeneralFeatureManagement",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 162,
+    "entry": "Yubico.YubiKit.OpenPgp.GenerationTimes",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 163,
+    "entry": "Yubico.YubiKit.OpenPgp.GenerationTimes.ContainsKey(Yubico.YubiKit.OpenPgp.KeyRef key) -> bool",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 164,
+    "entry": "Yubico.YubiKit.OpenPgp.GenerationTimes.Count.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 165,
+    "entry": "Yubico.YubiKit.OpenPgp.GenerationTimes.GetEnumerator() -> System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<Yubico.YubiKit.OpenPgp.KeyRef, int>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 166,
+    "entry": "Yubico.YubiKit.OpenPgp.GenerationTimes.Keys.get -> System.Collections.Generic.IEnumerable<Yubico.YubiKit.OpenPgp.KeyRef>!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 167,
+    "entry": "Yubico.YubiKit.OpenPgp.GenerationTimes.TryGetValue(Yubico.YubiKit.OpenPgp.KeyRef key, out int value) -> bool",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 168,
+    "entry": "Yubico.YubiKit.OpenPgp.GenerationTimes.Values.get -> System.Collections.Generic.IEnumerable<int>!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 169,
+    "entry": "Yubico.YubiKit.OpenPgp.GenerationTimes.this[Yubico.YubiKit.OpenPgp.KeyRef key].get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 170,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 171,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.AttestKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 172,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.AuthenticateAsync(System.ReadOnlyMemory<byte> data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 173,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.ChangeAdminAsync(System.ReadOnlyMemory<byte> currentPin, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 174,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.ChangePinAsync(System.ReadOnlyMemory<byte> currentPin, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 175,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.DecryptAsync(System.ReadOnlyMemory<byte> ciphertext, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 176,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.DeleteCertificateAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 177,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.DeleteKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 178,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GenerateKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.AlgorithmAttributes! attributes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 179,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetAlgorithmAttributesAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.AlgorithmAttributes!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 180,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetApplicationRelatedDataAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.ApplicationRelatedData!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 181,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetCertificateAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2?>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 182,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetChallengeAsync(int length, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 183,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetDataAsync(Yubico.YubiKit.OpenPgp.DataObject dataObject, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 184,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetGenerationTimesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.GenerationTimes!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 185,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetKdfAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.Kdf!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 186,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetKeyFingerprintsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.KeyFingerprints!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 187,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetPinStatusAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.PwStatus!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 188,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetPublicKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 189,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetSignatureCounterAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 190,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetSupportedAlgorithmsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.OpenPgp.SupportedAlgorithm!>!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 191,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.GetUifAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.Uif>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 192,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.ListKeyInformationAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.KeyInformation!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 193,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.PutCertificateAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Security.Cryptography.X509Certificates.X509Certificate2! certificate, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 194,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.PutDataAsync(Yubico.YubiKit.OpenPgp.DataObject dataObject, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 195,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 196,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.ResetPinUsingAdminAuthenticationAsync(System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 197,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.ResetPinUsingResetCodeAsync(System.ReadOnlyMemory<byte> resetCode, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 198,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetAlgorithmAttributesAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.AlgorithmAttributes! attributes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 199,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetGenerationTimeAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, int timestamp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 200,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetKdfAsync(Yubico.YubiKit.OpenPgp.Kdf! kdf, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 201,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetKeyFingerprintAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.ReadOnlyMemory<byte> fingerprint, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 202,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetPinAttemptsAsync(int userAttempts, int resetAttempts, int adminAttempts, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 203,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetResetCodeAsync(System.ReadOnlyMemory<byte> resetCode, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 204,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetSignaturePinPolicyAsync(Yubico.YubiKit.OpenPgp.PinPolicy policy, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 205,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetUifAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.Uif uif, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 206,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.SignAsync(System.ReadOnlyMemory<byte> message, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 207,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.UnverifyPinAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 208,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.VerifyAdminAsync(System.ReadOnlyMemory<byte> pin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 209,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.VerifyPinAsync(System.ReadOnlyMemory<byte> pin, bool extended = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 210,
+    "entry": "Yubico.YubiKit.OpenPgp.IYubiKeyExtensions",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 211,
+    "entry": "Yubico.YubiKit.OpenPgp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!)",
+    "kind": "extension-container",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 212,
+    "entry": "Yubico.YubiKit.OpenPgp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CreateOpenPgpSessionAsync(Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.OpenPgpSession!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 213,
+    "entry": "Yubico.YubiKit.OpenPgp.Kdf",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 214,
+    "entry": "Yubico.YubiKit.OpenPgp.Kdf.Kdf() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 215,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfHashAlgorithm",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 216,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfHashAlgorithm.Sha256 = 8 -> Yubico.YubiKit.OpenPgp.KdfHashAlgorithm",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 217,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfHashAlgorithm.Sha512 = 10 -> Yubico.YubiKit.OpenPgp.KdfHashAlgorithm",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 218,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 219,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.GetSalt(Yubico.YubiKit.OpenPgp.Pw pw) -> System.ReadOnlyMemory<byte>",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 220,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.HashAlgorithm.get -> Yubico.YubiKit.OpenPgp.KdfHashAlgorithm",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 221,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.HashAlgorithm.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 222,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.InitialHashAdmin.get -> System.ReadOnlyMemory<byte>?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 223,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.InitialHashAdmin.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 224,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.InitialHashUser.get -> System.ReadOnlyMemory<byte>?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 225,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.InitialHashUser.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 226,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.IterationCount.get -> long",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 227,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.IterationCount.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 228,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.KdfIterSaltedS2k() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 229,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.SaltAdmin.get -> System.ReadOnlyMemory<byte>?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 230,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.SaltAdmin.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 231,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.SaltReset.get -> System.ReadOnlyMemory<byte>?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 232,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.SaltReset.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 233,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.SaltUser.get -> System.ReadOnlyMemory<byte>",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 234,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.SaltUser.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 235,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfNone",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 236,
+    "entry": "Yubico.YubiKit.OpenPgp.KdfNone.KdfNone() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 237,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyFingerprints",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 238,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyFingerprints.ContainsKey(Yubico.YubiKit.OpenPgp.KeyRef key) -> bool",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 239,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyFingerprints.Count.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 240,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyFingerprints.GetEnumerator() -> System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<Yubico.YubiKit.OpenPgp.KeyRef, System.ReadOnlyMemory<byte>>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 241,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyFingerprints.Keys.get -> System.Collections.Generic.IEnumerable<Yubico.YubiKit.OpenPgp.KeyRef>!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 242,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyFingerprints.TryGetValue(Yubico.YubiKit.OpenPgp.KeyRef key, out System.ReadOnlyMemory<byte> value) -> bool",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 243,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyFingerprints.Values.get -> System.Collections.Generic.IEnumerable<System.ReadOnlyMemory<byte>>!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 244,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyFingerprints.this[Yubico.YubiKit.OpenPgp.KeyRef key].get -> System.ReadOnlyMemory<byte>",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 245,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyInformation",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 246,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyInformation.ContainsKey(Yubico.YubiKit.OpenPgp.KeyRef key) -> bool",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 247,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyInformation.Count.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 248,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyInformation.GetEnumerator() -> System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<Yubico.YubiKit.OpenPgp.KeyRef, Yubico.YubiKit.OpenPgp.KeyStatus>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 249,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyInformation.Keys.get -> System.Collections.Generic.IEnumerable<Yubico.YubiKit.OpenPgp.KeyRef>!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 250,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyInformation.TryGetValue(Yubico.YubiKit.OpenPgp.KeyRef key, out Yubico.YubiKit.OpenPgp.KeyStatus value) -> bool",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 251,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyInformation.Values.get -> System.Collections.Generic.IEnumerable<Yubico.YubiKit.OpenPgp.KeyStatus>!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 252,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyInformation.this[Yubico.YubiKit.OpenPgp.KeyRef key].get -> Yubico.YubiKit.OpenPgp.KeyStatus",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 253,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyRef",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 254,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyRef.Att = 129 -> Yubico.YubiKit.OpenPgp.KeyRef",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 255,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyRef.Aut = 3 -> Yubico.YubiKit.OpenPgp.KeyRef",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 256,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyRef.Dec = 2 -> Yubico.YubiKit.OpenPgp.KeyRef",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 257,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyRef.Sig = 1 -> Yubico.YubiKit.OpenPgp.KeyRef",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 258,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyRefExtensions",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 259,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyStatus",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 260,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyStatus.Generated = 1 -> Yubico.YubiKit.OpenPgp.KeyStatus",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 261,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyStatus.Imported = 2 -> Yubico.YubiKit.OpenPgp.KeyStatus",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 262,
+    "entry": "Yubico.YubiKit.OpenPgp.KeyStatus.None = 0 -> Yubico.YubiKit.OpenPgp.KeyStatus",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 263,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpAid",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 264,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpAid.Manufacturer.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 265,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpAid.Raw.get -> System.ReadOnlyMemory<byte>",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 266,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpAid.Serial.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 267,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpAid.Version.get -> (int Major, int Minor)",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 268,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 269,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException.OpenPgpInvalidPinException(int? retriesRemaining, string! message) -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 270,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpInvalidPinException.RetriesRemaining.get -> int?",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 271,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 272,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.AttestKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 273,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.AuthenticateAsync(System.ReadOnlyMemory<byte> data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 274,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.ChangeAdminAsync(System.ReadOnlyMemory<byte> currentPin, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 275,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.ChangePinAsync(System.ReadOnlyMemory<byte> currentPin, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 276,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.DecryptAsync(System.ReadOnlyMemory<byte> ciphertext, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 277,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.DeleteCertificateAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 278,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.DeleteKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 279,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GenerateKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.AlgorithmAttributes! attributes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 280,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetAlgorithmAttributesAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.AlgorithmAttributes!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 281,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetApplicationRelatedDataAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.ApplicationRelatedData!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 282,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetCertificateAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2?>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 283,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetChallengeAsync(int length, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 284,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetDataAsync(Yubico.YubiKit.OpenPgp.DataObject dataObject, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 285,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetGenerationTimesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.GenerationTimes!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 286,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetKdfAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.Kdf!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 287,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetKeyFingerprintsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.KeyFingerprints!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 288,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetPinStatusAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.PwStatus!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 289,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetPublicKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 290,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetSignatureCounterAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 291,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetSupportedAlgorithmsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.OpenPgp.SupportedAlgorithm!>!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 292,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.GetUifAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.Uif>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 293,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.ListKeyInformationAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.KeyInformation!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 294,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.PutCertificateAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Security.Cryptography.X509Certificates.X509Certificate2! certificate, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 295,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.PutDataAsync(Yubico.YubiKit.OpenPgp.DataObject dataObject, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 296,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 297,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.ResetPinUsingAdminAuthenticationAsync(System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 298,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.ResetPinUsingResetCodeAsync(System.ReadOnlyMemory<byte> resetCode, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 299,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.SetAlgorithmAttributesAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.AlgorithmAttributes! attributes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 300,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.SetGenerationTimeAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, int timestamp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 301,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.SetKdfAsync(Yubico.YubiKit.OpenPgp.Kdf! kdf, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 302,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.SetKeyFingerprintAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.ReadOnlyMemory<byte> fingerprint, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 303,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.SetPinAttemptsAsync(int userAttempts, int resetAttempts, int adminAttempts, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 304,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.SetResetCodeAsync(System.ReadOnlyMemory<byte> resetCode, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 305,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.SetSignaturePinPolicyAsync(Yubico.YubiKit.OpenPgp.PinPolicy policy, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 306,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.SetUifAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.Uif uif, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 307,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.SignAsync(System.ReadOnlyMemory<byte> message, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 308,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.UnverifyPinAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 309,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.VerifyAdminAsync(System.ReadOnlyMemory<byte> pin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 310,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.VerifyPinAsync(System.ReadOnlyMemory<byte> pin, bool extended = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 311,
+    "entry": "Yubico.YubiKit.OpenPgp.PinPolicy",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 312,
+    "entry": "Yubico.YubiKit.OpenPgp.PinPolicy.Always = 0 -> Yubico.YubiKit.OpenPgp.PinPolicy",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 313,
+    "entry": "Yubico.YubiKit.OpenPgp.PinPolicy.Once = 1 -> Yubico.YubiKit.OpenPgp.PinPolicy",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 314,
+    "entry": "Yubico.YubiKit.OpenPgp.Pw",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 315,
+    "entry": "Yubico.YubiKit.OpenPgp.Pw.Admin = 131 -> Yubico.YubiKit.OpenPgp.Pw",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 316,
+    "entry": "Yubico.YubiKit.OpenPgp.Pw.Reset = 130 -> Yubico.YubiKit.OpenPgp.Pw",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 317,
+    "entry": "Yubico.YubiKit.OpenPgp.Pw.User = 129 -> Yubico.YubiKit.OpenPgp.Pw",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 318,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 319,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.AttemptsAdmin.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 320,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.AttemptsAdmin.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 321,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.AttemptsReset.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 322,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.AttemptsReset.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 323,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.AttemptsUser.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 324,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.AttemptsUser.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 325,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.GetAttempts(Yubico.YubiKit.OpenPgp.Pw pw) -> int",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 326,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.GetMaxLen(Yubico.YubiKit.OpenPgp.Pw pw) -> int",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 327,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.MaxLenAdmin.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 328,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.MaxLenAdmin.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 329,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.MaxLenReset.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 330,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.MaxLenReset.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 331,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.MaxLenUser.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 332,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.MaxLenUser.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 333,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.PwStatus() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 334,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.SignaturePinPolicy.get -> Yubico.YubiKit.OpenPgp.PinPolicy",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 335,
+    "entry": "Yubico.YubiKit.OpenPgp.PwStatus.SignaturePinPolicy.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 336,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaAttributes",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 337,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaAttributes.ELen.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 338,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaAttributes.ELen.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 339,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaAttributes.ImportFormat.get -> Yubico.YubiKit.OpenPgp.RsaImportFormat",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 340,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaAttributes.ImportFormat.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 341,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaAttributes.NLen.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 342,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaAttributes.NLen.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 343,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaAttributes.RsaAttributes() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 344,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaImportFormat",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 345,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaImportFormat.Crt = 2 -> Yubico.YubiKit.OpenPgp.RsaImportFormat",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 346,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaImportFormat.CrtWithModulus = 3 -> Yubico.YubiKit.OpenPgp.RsaImportFormat",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 347,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaImportFormat.Standard = 0 -> Yubico.YubiKit.OpenPgp.RsaImportFormat",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 348,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaImportFormat.StandardWithModulus = 1 -> Yubico.YubiKit.OpenPgp.RsaImportFormat",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 349,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaSize",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 350,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaSize.Rsa2048 = 2048 -> Yubico.YubiKit.OpenPgp.RsaSize",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 351,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaSize.Rsa3072 = 3072 -> Yubico.YubiKit.OpenPgp.RsaSize",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 352,
+    "entry": "Yubico.YubiKit.OpenPgp.RsaSize.Rsa4096 = 4096 -> Yubico.YubiKit.OpenPgp.RsaSize",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 353,
+    "entry": "Yubico.YubiKit.OpenPgp.SecuritySupportTemplate",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 354,
+    "entry": "Yubico.YubiKit.OpenPgp.SecuritySupportTemplate.SecuritySupportTemplate() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 355,
+    "entry": "Yubico.YubiKit.OpenPgp.SecuritySupportTemplate.SignatureCounter.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 356,
+    "entry": "Yubico.YubiKit.OpenPgp.SecuritySupportTemplate.SignatureCounter.init -> void",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 357,
+    "entry": "Yubico.YubiKit.OpenPgp.SupportedAlgorithm",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 358,
+    "entry": "Yubico.YubiKit.OpenPgp.SupportedAlgorithm.Attributes.get -> Yubico.YubiKit.OpenPgp.AlgorithmAttributes!",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 359,
+    "entry": "Yubico.YubiKit.OpenPgp.SupportedAlgorithm.KeyRef.get -> Yubico.YubiKit.OpenPgp.KeyRef",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 360,
+    "entry": "Yubico.YubiKit.OpenPgp.Uif",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 361,
+    "entry": "Yubico.YubiKit.OpenPgp.Uif.Cached = 3 -> Yubico.YubiKit.OpenPgp.Uif",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 362,
+    "entry": "Yubico.YubiKit.OpenPgp.Uif.CachedFixed = 4 -> Yubico.YubiKit.OpenPgp.Uif",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 363,
+    "entry": "Yubico.YubiKit.OpenPgp.Uif.Fixed = 2 -> Yubico.YubiKit.OpenPgp.Uif",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 364,
+    "entry": "Yubico.YubiKit.OpenPgp.Uif.Off = 0 -> Yubico.YubiKit.OpenPgp.Uif",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 365,
+    "entry": "Yubico.YubiKit.OpenPgp.Uif.On = 1 -> Yubico.YubiKit.OpenPgp.Uif",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 366,
+    "entry": "Yubico.YubiKit.OpenPgp.UifExtensions",
+    "kind": "type",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 367,
+    "entry": "abstract Yubico.YubiKit.OpenPgp.AlgorithmAttributes.ToBytes() -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 368,
+    "entry": "abstract Yubico.YubiKit.OpenPgp.Kdf.Algorithm.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 369,
+    "entry": "abstract Yubico.YubiKit.OpenPgp.Kdf.Process(Yubico.YubiKit.OpenPgp.Pw pw, System.ReadOnlySpan<byte> pin) -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 370,
+    "entry": "abstract Yubico.YubiKit.OpenPgp.Kdf.ToBytes() -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 371,
+    "entry": "override Yubico.YubiKit.OpenPgp.EcAttributes.ToBytes() -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 372,
+    "entry": "override Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.Algorithm.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 373,
+    "entry": "override Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.Dispose() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 374,
+    "entry": "override Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.Process(Yubico.YubiKit.OpenPgp.Pw pw, System.ReadOnlySpan<byte> pin) -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 375,
+    "entry": "override Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.ToBytes() -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 376,
+    "entry": "override Yubico.YubiKit.OpenPgp.KdfNone.Algorithm.get -> int",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 377,
+    "entry": "override Yubico.YubiKit.OpenPgp.KdfNone.Process(Yubico.YubiKit.OpenPgp.Pw pw, System.ReadOnlySpan<byte> pin) -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 378,
+    "entry": "override Yubico.YubiKit.OpenPgp.KdfNone.ToBytes() -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 379,
+    "entry": "override Yubico.YubiKit.OpenPgp.RsaAttributes.ToBytes() -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 380,
+    "entry": "static Yubico.YubiKit.OpenPgp.AlgorithmAttributes.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.AlgorithmAttributes!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 381,
+    "entry": "static Yubico.YubiKit.OpenPgp.ApplicationRelatedData.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.ApplicationRelatedData!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 382,
+    "entry": "static Yubico.YubiKit.OpenPgp.Credentials.OpenPgpCredentialOptions.ForOpenPgpAdminPin() -> Yubico.YubiKit.Core.Credentials.CredentialReaderOptions!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 383,
+    "entry": "static Yubico.YubiKit.OpenPgp.Credentials.OpenPgpCredentialOptions.ForOpenPgpPin() -> Yubico.YubiKit.Core.Credentials.CredentialReaderOptions!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 384,
+    "entry": "static Yubico.YubiKit.OpenPgp.Credentials.OpenPgpCredentialOptions.ForOpenPgpResetCode() -> Yubico.YubiKit.Core.Credentials.CredentialReaderOptions!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 385,
+    "entry": "static Yubico.YubiKit.OpenPgp.Crt.Att.get -> System.ReadOnlyMemory<byte>",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 386,
+    "entry": "static Yubico.YubiKit.OpenPgp.Crt.Aut.get -> System.ReadOnlyMemory<byte>",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 387,
+    "entry": "static Yubico.YubiKit.OpenPgp.Crt.Dec.get -> System.ReadOnlyMemory<byte>",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 388,
+    "entry": "static Yubico.YubiKit.OpenPgp.Crt.Sig.get -> System.ReadOnlyMemory<byte>",
+    "kind": "property-accessor",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 389,
+    "entry": "static Yubico.YubiKit.OpenPgp.CurveOidExtensions.FromOidBytes(System.ReadOnlySpan<byte> oidBytes) -> Yubico.YubiKit.OpenPgp.CurveOid",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 390,
+    "entry": "static Yubico.YubiKit.OpenPgp.CurveOidExtensions.GetOidBytes(this Yubico.YubiKit.OpenPgp.CurveOid curveOid) -> System.ReadOnlySpan<byte>",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 391,
+    "entry": "static Yubico.YubiKit.OpenPgp.CurveOidExtensions.ToDottedString(this Yubico.YubiKit.OpenPgp.CurveOid curveOid) -> string!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 392,
+    "entry": "static Yubico.YubiKit.OpenPgp.CurveOidExtensions.ToEcCurve(this Yubico.YubiKit.OpenPgp.CurveOid curveOid) -> System.Security.Cryptography.ECCurve",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 393,
+    "entry": "static Yubico.YubiKit.OpenPgp.CurveOidExtensions.TryFromOidBytes(System.ReadOnlySpan<byte> oidBytes, out Yubico.YubiKit.OpenPgp.CurveOid curveOid) -> bool",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 394,
+    "entry": "static Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.DiscretionaryDataObjects!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 395,
+    "entry": "static Yubico.YubiKit.OpenPgp.EcAttributes.Create(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.CurveOid oid) -> Yubico.YubiKit.OpenPgp.EcAttributes!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 396,
+    "entry": "static Yubico.YubiKit.OpenPgp.ExtendedCapabilities.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.ExtendedCapabilities!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 397,
+    "entry": "static Yubico.YubiKit.OpenPgp.ExtendedLengthInfo.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.ExtendedLengthInfo!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 398,
+    "entry": "static Yubico.YubiKit.OpenPgp.IYubiKeyExtensions.CreateOpenPgpSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.OpenPgpSession!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 399,
+    "entry": "static Yubico.YubiKit.OpenPgp.Kdf.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.Kdf!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 400,
+    "entry": "static Yubico.YubiKit.OpenPgp.KeyRefExtensions.AlgorithmAttributesDo(this Yubico.YubiKit.OpenPgp.KeyRef keyRef) -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 401,
+    "entry": "static Yubico.YubiKit.OpenPgp.KeyRefExtensions.GenerationTimeDo(this Yubico.YubiKit.OpenPgp.KeyRef keyRef) -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 402,
+    "entry": "static Yubico.YubiKit.OpenPgp.KeyRefExtensions.GetCrt(this Yubico.YubiKit.OpenPgp.KeyRef keyRef) -> System.ReadOnlyMemory<byte>",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 403,
+    "entry": "static Yubico.YubiKit.OpenPgp.KeyRefExtensions.KeyFingerprintDo(this Yubico.YubiKit.OpenPgp.KeyRef keyRef) -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 404,
+    "entry": "static Yubico.YubiKit.OpenPgp.KeyRefExtensions.UifDo(this Yubico.YubiKit.OpenPgp.KeyRef keyRef) -> Yubico.YubiKit.OpenPgp.DataObject",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 405,
+    "entry": "static Yubico.YubiKit.OpenPgp.OpenPgpAid.Parse(System.ReadOnlySpan<byte> aidBytes) -> Yubico.YubiKit.OpenPgp.OpenPgpAid!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 406,
+    "entry": "static Yubico.YubiKit.OpenPgp.OpenPgpSession.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection! connection, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.OpenPgp.OpenPgpSession!>!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 407,
+    "entry": "static Yubico.YubiKit.OpenPgp.PwStatus.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.PwStatus!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 408,
+    "entry": "static Yubico.YubiKit.OpenPgp.RsaAttributes.Create(Yubico.YubiKit.OpenPgp.RsaSize keySize, Yubico.YubiKit.OpenPgp.RsaImportFormat importFormat = Yubico.YubiKit.OpenPgp.RsaImportFormat.Standard) -> Yubico.YubiKit.OpenPgp.RsaAttributes!",
+    "kind": "enum-value",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 409,
+    "entry": "static Yubico.YubiKit.OpenPgp.SecuritySupportTemplate.Parse(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.SecuritySupportTemplate!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 410,
+    "entry": "static Yubico.YubiKit.OpenPgp.UifExtensions.IsCached(this Yubico.YubiKit.OpenPgp.Uif uif) -> bool",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 411,
+    "entry": "static Yubico.YubiKit.OpenPgp.UifExtensions.IsFixed(this Yubico.YubiKit.OpenPgp.Uif uif) -> bool",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 412,
+    "entry": "static Yubico.YubiKit.OpenPgp.UifExtensions.ParseUif(System.ReadOnlySpan<byte> encoded) -> Yubico.YubiKit.OpenPgp.Uif",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 413,
+    "entry": "static Yubico.YubiKit.OpenPgp.UifExtensions.ToBytes(this Yubico.YubiKit.OpenPgp.Uif uif) -> byte[]!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 414,
+    "entry": "static readonly Yubico.YubiKit.OpenPgp.OpenPgpSession.FeatureAlgorithmInfo -> Yubico.YubiKit.Core.Devices.Feature",
+    "kind": "feature-field",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 415,
+    "entry": "static readonly Yubico.YubiKit.OpenPgp.OpenPgpSession.FeatureAttestation -> Yubico.YubiKit.Core.Devices.Feature",
+    "kind": "feature-field",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 416,
+    "entry": "static readonly Yubico.YubiKit.OpenPgp.OpenPgpSession.FeatureCertificates -> Yubico.YubiKit.Core.Devices.Feature",
+    "kind": "feature-field",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 417,
+    "entry": "static readonly Yubico.YubiKit.OpenPgp.OpenPgpSession.FeatureEc -> Yubico.YubiKit.Core.Devices.Feature",
+    "kind": "feature-field",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 418,
+    "entry": "static readonly Yubico.YubiKit.OpenPgp.OpenPgpSession.FeatureReset -> Yubico.YubiKit.Core.Devices.Feature",
+    "kind": "feature-field",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 419,
+    "entry": "static readonly Yubico.YubiKit.OpenPgp.OpenPgpSession.FeatureSelectDataFix -> Yubico.YubiKit.Core.Devices.Feature",
+    "kind": "feature-field",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 420,
+    "entry": "static readonly Yubico.YubiKit.OpenPgp.OpenPgpSession.FeatureUif -> Yubico.YubiKit.Core.Devices.Feature",
+    "kind": "feature-field",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 421,
+    "entry": "static readonly Yubico.YubiKit.OpenPgp.OpenPgpSession.FeatureUnverify -> Yubico.YubiKit.Core.Devices.Feature",
+    "kind": "feature-field",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 422,
+    "entry": "virtual Yubico.YubiKit.OpenPgp.Kdf.Dispose() -> void",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 424,
+    "entry": "Yubico.YubiKit.OpenPgp.IOpenPgpSession.PutKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.Core.Cryptography.IPrivateKey! privateKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  },
+  {
+    "line": 425,
+    "entry": "Yubico.YubiKit.OpenPgp.OpenPgpSession.PutKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.Core.Cryptography.IPrivateKey! privateKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!",
+    "kind": "callable-or-extension-representation",
+    "semantic_disposition": "read; share owning type/property/member-family contract; preserve snapshot"
+  }
+]

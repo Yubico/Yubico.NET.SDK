@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project OpenPgp.IntegrationTests --filter FullyQualifiedName~SetKdf_IterSaltedS2k_ThenVerifyPin_Succeeds",
+  "started": "2026-11-04T14:48:48.2501395+01:00",
+  "durationSeconds": 5.6,
+  "runDirectory": "artifacts/toolchain/runs/20261104-144848-250-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 5.5,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "OpenPgp.IntegrationTests",
+      "outcome": "passed",
+      "reason": "1 executed, 0 skipped",
+      "executed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261104-144848-250-test/01-test-OpenPgp.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

@@ -1,0 +1,65 @@
+{
+  "serial": 103,
+  "purpose": "restore initial Att UIF Off after authorized On probe",
+  "private_key_replacement": false,
+  "commands": [
+    {
+      "cla": "00",
+      "ins": "DA",
+      "p1": "00",
+      "p2": "D9",
+      "data_hex": "0020",
+      "status": "ok",
+      "sw": "9000",
+      "response_length": 0
+    }
+  ],
+  "installed_set_uif_source": "    def set_uif(self, key_ref: KEY_REF, uif: UIF) -> None:\n        \"\"\"Set the User Interaction Flag (touch requirement) for a key.\n\n        Requires Admin PIN verification.\n\n        :param key_ref: The key slot.\n        :param uif: The User Interaction Flag.\n        \"\"\"\n        require_version(self.version, (4, 2, 0))\n        if key_ref == KEY_REF.ATT:\n            require_version(\n                self.version,\n                (5, 2, 1),\n                \"Attestation key requires YubiKey 5.2.1 or later.\",\n            )\n        if uif.is_cached:\n            require_version(\n                self.version,\n                (5, 2, 1),\n                \"Cached UIF values require YubiKey 5.2.1 or later.\",\n            )\n\n        logger.debug(f\"Setting UIF for {key_ref.name} to {uif.name}\")\n        if self.get_uif(key_ref).is_fixed:\n            raise ValueError(\"Cannot change UIF when set to FIXED.\")\n\n        self.put_data(key_ref.uif_do, uif)\n        logger.info(f\"UIF changed for {key_ref.name}\")\n",
+  "installed_uif_encoding_source": "@unique\nclass UIF(IntEnum):  # noqa: N801\n    OFF = 0x00\n    ON = 0x01\n    FIXED = 0x02\n    CACHED = 0x03\n    CACHED_FIXED = 0x04\n\n    @classmethod\n    def parse(cls, encoded: bytes):\n        return cls(encoded[0])\n\n    def __bytes__(self) -> bytes:\n        return struct.pack(\">BB\", self, GENERAL_FEATURE_MANAGEMENT.BUTTON)\n\n    @property\n    def is_fixed(self) -> bool:\n        return self in (UIF.FIXED, UIF.CACHED_FIXED)\n\n    @property\n    def is_cached(self) -> bool:\n        return self in (UIF.CACHED, UIF.CACHED_FIXED)\n\n    def __str__(self):\n        if self == UIF.FIXED:\n            return \"On (fixed)\"\n        if self == UIF.CACHED_FIXED:\n            return \"Cached (fixed)\"\n        return self.name[0] + self.name[1:].lower()\n",
+  "baseline_sha256": "0e4c68ccf1b1f1a629a8f19f7e10c955b15ecd416b863eca7656d9ca6a33b480",
+  "before": {
+    "status": "ok",
+    "value": {
+      "name": "ON",
+      "value": 1
+    },
+    "read_path": "explicit-public-apdu-installed-UIF-parser",
+    "commands": [
+      {
+        "cla": "00",
+        "ins": "CA",
+        "p1": "00",
+        "p2": "D9",
+        "data_hex": "",
+        "status": "ok",
+        "sw": "9000",
+        "response_length": 2
+      }
+    ]
+  },
+  "version": {
+    "direct_application": "0.0.1",
+    "metadata": "5.8.0.beta.0"
+  },
+  "fresh_after": {
+    "status": "ok",
+    "value": {
+      "name": "OFF",
+      "value": 0
+    },
+    "read_path": "explicit-public-apdu-installed-UIF-parser",
+    "commands": [
+      {
+        "cla": "00",
+        "ins": "CA",
+        "p1": "00",
+        "p2": "D9",
+        "data_hex": "",
+        "status": "ok",
+        "sw": "9000",
+        "response_length": 2
+      }
+    ]
+  },
+  "att_certificate_preserved": true
+}

@@ -28,6 +28,8 @@ public class OpenPgpSessionTests
     private static readonly byte[] DefaultUserPin = Encoding.UTF8.GetBytes("123456");
     private static readonly byte[] DefaultAdminPin = Encoding.UTF8.GetBytes("12345678");
 
+    // Reset coverage here checks three retry counters; full erasure/default/ATT preservation
+    // needs independent key, certificate, credential, KDF and policy readback.
     // ── Reset & Clean State ──────────────────────────────────────────
 
     [SkippableTheory]
@@ -207,7 +209,9 @@ public class OpenPgpSessionTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GenerateRsaKey_2048_Succeeds(YubiKeyTestState state)
     {
-        // Skip firmware 4.2.0–4.3.5 (RSA generation unreliable)
+        // This current condition returns before setup/assertions on 4.2.0–4.3.5 inclusive.
+        // ROCA advisory YSA-2017-01 identifies generated RSA on 4.2.6–4.3.4; 4.3.5 is corrected.
+        // Preserve the executable boundary here while its applicability/reporting is reviewed separately.
         if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
             state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
         {
@@ -230,7 +234,7 @@ public class OpenPgpSessionTests
             });
     }
 
-    // ── Sign & Verify: EC ────────────────────────────────────────────
+    // ── Signature response shape: EC ─────────────────────────────────
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
@@ -250,17 +254,19 @@ public class OpenPgpSessionTests
                 var signature = await session.SignAsync(message, HashAlgorithmName.SHA256);
                 Assert.True(signature.Length > 0);
 
-                // Verify the signature using the public key from the card
+                // Check that public-key data is readable; this test has no host signature verification.
                 var pubKeyData = await session.GetPublicKeyAsync(KeyRef.Sig);
                 Assert.True(pubKeyData.Length > 0);
             });
 
-    // ── Sign & Verify: RSA ───────────────────────────────────────────
+    // ── Signature response shape: RSA ────────────────────────────────
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task Sign_Rsa2048_ProducesSignature(YubiKeyTestState state)
     {
+        // Early-return range is inclusive of corrected 4.3.5; the body performs no assertions there.
+        // ROCA concerns on-device RSA generation, rather than signature-output length.
         if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
             state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
         {
@@ -361,14 +367,14 @@ public class OpenPgpSessionTests
                 // per ykman canonical: verify_pin(pin) before attest_key(key)
                 await session.VerifyPinAsync(DefaultUserPin);
                 var attestCert = await session.AttestKeyAsync(KeyRef.Sig);
+                // Nonempty decoded certificate only; key binding and trusted-chain verification are separate.
                 Assert.NotNull(attestCert);
                 Assert.True(attestCert.RawData.Length > 0);
             });
 
     /// <summary>
-    ///     Pins the two facts the AttestKeyAsync docs state. GET_ATTESTATION needs
-    ///     User PIN verification (Admin alone is not enough), and the attestation statement replaces the
-    ///     cardholder certificate stored for that key.
+    ///     Checks rejection under Admin-only authorization, then ordinary User authorization and
+    ///     replacement of stored certificate bytes. This case leaves chain trust and key binding unverified.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
@@ -456,7 +462,8 @@ public class OpenPgpSessionTests
                 var fingerprints = await session.GetKeyFingerprintsAsync();
                 Assert.NotNull(fingerprints);
 
-                // Verify all four key slots are present with 20-byte fingerprints
+                // This case expects a four-slot profile; historical three-slot cards need separate applicability.
+                // Fingerprint lengths establish field shape rather than key presence.
                 Assert.Contains(KeyRef.Sig, fingerprints.Keys);
                 Assert.Contains(KeyRef.Dec, fingerprints.Keys);
                 Assert.Contains(KeyRef.Aut, fingerprints.Keys);
@@ -478,7 +485,7 @@ public class OpenPgpSessionTests
                 var times = await session.GetGenerationTimesAsync();
                 Assert.NotNull(times);
 
-                // Verify all four key slots are present
+                // This case expects four reported slots; it leaves historical three-slot applicability open.
                 Assert.Contains(KeyRef.Sig, times.Keys);
                 Assert.Contains(KeyRef.Dec, times.Keys);
                 Assert.Contains(KeyRef.Aut, times.Keys);
@@ -568,7 +575,7 @@ public class OpenPgpSessionTests
 
                 Assert.Equal(16, challenge1.Length);
                 Assert.Equal(16, challenge2.Length);
-                // Two random challenges should almost certainly differ
+                // Unequal samples establish this pair differs; they provide no statistical RNG qualification.
                 Assert.False(challenge1.Span.SequenceEqual(challenge2.Span));
             });
 }

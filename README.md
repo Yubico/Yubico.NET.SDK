@@ -61,7 +61,7 @@ call, then covers the common operations. For applet specifics and features, see 
 | [Yubico.YubiKit.WebAuthn](src/WebAuthn/README.md) | WebAuthn client API over CTAP2 |
 | [Yubico.YubiKit.Oath](src/Oath/README.md) | TOTP and HOTP credentials |
 | [Yubico.YubiKit.YubiOtp](src/YubiOtp/README.md) | OTP slot configuration and challenge-response |
-| [Yubico.YubiKit.OpenPgp](src/OpenPgp/README.md) | OpenPGP card keys, PINs, signing, decryption |
+| [Yubico.YubiKit.OpenPgp](src/OpenPgp/README.md) | OpenPGP card keys, PINs, signatures, raw decipher/agreement, certificates |
 | [Yubico.YubiKit.SecurityDomain](src/SecurityDomain/README.md) | Secure channel (SCP03/SCP11) key management |
 | [Yubico.YubiKit.YubiHsm](src/YubiHsm/README.md) | YubiHSM Auth applet on a YubiKey |
 | [Yubico.YubiKit.Management](src/Management/README.md) | Device information and configuration |

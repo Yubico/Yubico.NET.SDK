@@ -41,6 +41,9 @@ public sealed partial class OpenPgpSession
         await BlockPinAsync((byte)Pw.Admin, status.AttemptsAdmin, cancellationToken)
             .ConfigureAwait(false);
 
+        // TERMINATE/ACTIVATE statuses are currently ignored. A later successful SELECT/read
+        // establishes access, rather than a complete reset postcondition; callers need state readback.
+        // YubiKey's proprietary ATT key/certificate survive application reset.
         // Step 4: TERMINATE
         _logger.LogDebug("Sending TERMINATE");
         var terminateCmd = new ApduCommand(0x00, (int)Ins.Terminate, 0x00, 0x00);
@@ -63,6 +66,7 @@ public sealed partial class OpenPgpSession
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
         _updatedUifs.Clear();
+        // The previous KDF reference is dropped without disposal; its owner needs a later cleanup scope.
         _kdf = null;
 
         _logger.LogInformation("OpenPGP factory reset complete");

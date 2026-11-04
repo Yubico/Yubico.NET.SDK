@@ -1,0 +1,20 @@
+{
+  "sdk_version": "10.0.403",
+  "sdk_root": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403",
+  "default_target": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/vCurrent/Custom.Before.Microsoft.Common.props",
+  "target_exists": false,
+  "default_expression": "$(MSBuildExtensionsPath)\\v$(MSBuildToolsVersion)\\Custom.Before.$(MSBuildThisFile)",
+  "import_condition": "'$(CustomBeforeMicrosoftCommonProps)' != '' and Exists('$(CustomBeforeMicrosoftCommonProps)')",
+  "sdk_sources": [
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.props",
+      "bytes": 11765,
+      "sha256": "87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/Sdk/Sdk.props",
+      "bytes": 2487,
+      "sha256": "41dc552e294cd1f0c6e640c302c112b0788fa8776ecac73e7fa013382a3bf713"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+$ dotnet test docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~ExtendedWrongPin_ReportsUserRetryCounter"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests -> /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/openpgp-001-hardware/bin/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (app domain = off, method display = ClassAndMethod, method display options = None)
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (7 test cases to be run)
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests (parallel test collections = off, stop on fail = off, explicit = off)
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.40]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] HYPOTHESIS A failed extended User VERIFY consumes and reports the User retry counter, while Reset Code retries stay unchanged; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T13:50:29.3400590+00:00
+[xUnit.net 00:00:00.44]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:00.44]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:01.00]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.02]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] RETRY_IDENTITY user-before=3 user-after=2 reset-before=0 reset-after=0 typed-retries=0
+[xUnit.net 00:00:01.02]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] ERROR phase=body type=Xunit.Sdk.EqualException HResult=0x80131500
+[xUnit.net 00:00:01.03]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [OUTPUT] FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:01.04]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:00:01.04]       Expected: 2
+[xUnit.net 00:00:01.04]       Actual:   0
+[xUnit.net 00:00:01.04]       Stack Trace:
+[xUnit.net 00:00:01.04]     Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [FAIL]
+[xUnit.net 00:00:01.04]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(121,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<ExtendedWrongPin_ReportsUserRetryCounter>b__4_0(ProbeScope probe, CancellationToken token)
+[xUnit.net 00:00:01.04]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs(121,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<ExtendedWrongPin_ReportsUserRetryCounter>b__4_0(ProbeScope probe, CancellationToken token)
+[xUnit.net 00:00:01.04]         /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/ProbeSupport.cs(62,0): at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.ProbeScope.RunAsync(YubiKeyTestState state, ITestOutputHelper output, String hypothesis, Func`3 action, Boolean requireKdf)
+[xUnit.net 00:00:01.04]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:01.04]       Output:
+[xUnit.net 00:00:01.04]         HYPOTHESIS A failed extended User VERIFY consumes and reports the User retry counter, while Reset Code retries stay unchanged; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T13:50:29.3400590+00:00
+[xUnit.net 00:00:01.04]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.04]         PREMUTATION applet-KDF-capability=True; gate=application-related-data
+[xUnit.net 00:00:01.04]         OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+[xUnit.net 00:00:01.04]         RETRY_IDENTITY user-before=3 user-after=2 reset-before=0 reset-after=0 typed-retries=0
+[xUnit.net 00:00:01.04]         ERROR phase=body type=Xunit.Sdk.EqualException HResult=0x80131500
+[xUnit.net 00:00:01.04]         FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+[xUnit.net 00:00:01.05]   Finished:    Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests
+  Failed Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.ExtendedWrongPin_ReportsUserRetryCounter(state: YubiKey(Placeholder #0: FW>=5.6.0,USB,Conn=SmartCard,Filter=Serial103Filter)) [885 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 2
+Actual:   0
+  Stack Trace:
+     at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<ExtendedWrongPin_ReportsUserRetryCounter>b__4_0(ProbeScope probe, CancellationToken token) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 121
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.HardwareProbeTests.<ExtendedWrongPin_ReportsUserRetryCounter>b__4_0(ProbeScope probe, CancellationToken token) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs:line 121
+   at Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.ProbeScope.RunAsync(YubiKeyTestState state, ITestOutputHelper output, String hypothesis, Func`3 action, Boolean requireKdf) in /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/ProbeSupport.cs:line 62
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ HYPOTHESIS A failed extended User VERIFY consumes and reports the User retry counter, while Reset Code retries stay unchanged; serial=103 version-name=5.8.0.beta.0 UTC=2026-11-04T13:50:29.3400590+00:00
+ OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+ PREMUTATION applet-KDF-capability=True; gate=application-related-data
+ OPEN serial=103 transport=SmartCard effective-firmware=0.0.1
+ RETRY_IDENTITY user-before=3 user-after=2 reset-before=0 reset-after=0 typed-retries=0
+ ERROR phase=body type=Xunit.Sdk.EqualException HResult=0x80131500
+ FINALLY sessions-disposing=true; independent-vendor-cleanup=coordinator-runner-finally; preserve-original-failure=true
+
+
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 1.3873 Seconds

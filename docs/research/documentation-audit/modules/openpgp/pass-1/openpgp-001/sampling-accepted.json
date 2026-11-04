@@ -1,0 +1,140 @@
+{
+  "actor": "Astra",
+  "baseline": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+  "samples": [
+    {
+      "id": "PGP-FILE-CLEAN-046",
+      "path": "src/OpenPgp/src/KeyInformation.cs",
+      "lines": "1-51",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-068",
+      "path": "src/OpenPgp/src/SupportedAlgorithm.cs",
+      "lines": "1-37",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-042",
+      "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "lines": "1-78",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-065",
+      "path": "src/OpenPgp/src/RsaImportFormat.cs",
+      "lines": "1-41",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-045",
+      "path": "src/OpenPgp/src/KeyFingerprints.cs",
+      "lines": "1-51",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-035",
+      "path": "src/OpenPgp/src/EcImportFormat.cs",
+      "lines": "1-31",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-038",
+      "path": "src/OpenPgp/src/ExtendedLengthInfo.cs",
+      "lines": "1-73",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-048",
+      "path": "src/OpenPgp/src/KeyStatus.cs",
+      "lines": "1-36",
+      "category": "api-internal",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-002",
+      "path": "src/OpenPgp/PACKAGE_README.md",
+      "lines": "1-24",
+      "category": "narrative",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-086",
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/DigestInfoTests.cs",
+      "lines": "1-92",
+      "category": "internal-test",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    },
+    {
+      "id": "PGP-FILE-CLEAN-005",
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangePinCommand.cs",
+      "lines": "1-49",
+      "category": "example",
+      "semantic_unit": "complete clean file; generated boilerplate is not a separate unit",
+      "source_sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+      "disposition": "investigator-clean",
+      "sample_status": "coordinator-semantic-pass",
+      "checked_sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+      "read_scope": "complete file; related module/source clauses described in sampling.md"
+    }
+  ],
+  "material_miss": "GenerationTimes.cs zero sentinel/signed carrier independently confirmed PGP-REV-005; exclude after edit",
+  "expansion": "Five initial API units after editor PinPolicy miss, then four more after timestamp miss; eight API plus narrative/example/internal-test remain clean"
+}

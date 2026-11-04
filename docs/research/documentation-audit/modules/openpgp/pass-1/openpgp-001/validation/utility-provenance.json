@@ -1,0 +1,69 @@
+{
+  "source_archive": {
+    "manifest": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/record-manifest.json",
+    "manifest_sha256": "9a32ac8f9d2443a65864dbe44432c6d4b1dd40ad7f00b676a6c0ecae950631dc",
+    "checked": 477
+  },
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/run-command.py",
+      "source_sha256": "d3bcebc73f3543b5bdaeaec4928ff3daec72003b774f57fb5eb077e116514300",
+      "target": "run-command.py",
+      "target_sha256": "94bfa5f5992649231c9b817e94502af0ff4bb6ed99b67efd4aaf2e3047233db8",
+      "replacements": {
+        "Reused from frozen YubiOTP validation/run-command.py.": "Reused from final frozen YubiHSM validation/run-command.py."
+      },
+      "substitution_counts": {
+        "Reused from frozen YubiOTP validation/run-command.py.": 1
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/check-preserved.py",
+      "source_sha256": "34f882a66fd8953f262a4e7256e9046fb41a9f761744d6fde83b8c0cb0853efd",
+      "target": "check-preserved.py",
+      "target_sha256": "b39f93bc94e25b63353065a9862288b84db2b182430c72b89090737610622fe3",
+      "replacements": {
+        "[784, 402, 534, 164, 433]": "[784, 402, 534, 164, 433, 477]"
+      },
+      "substitution_counts": {
+        "[784, 402, 534, 164, 433]": 1
+      }
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/check-records.py",
+      "source_sha256": "68132bb297be13519f196739dfc754953025755511f2baa262c6ae1ff49bc137",
+      "target": "check-records.py",
+      "target_sha256": "68132bb297be13519f196739dfc754953025755511f2baa262c6ae1ff49bc137",
+      "replacements": {},
+      "substitution_counts": {}
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/manifest.py",
+      "source_sha256": "556c28a58f635e684ea62b55ecb44478745c7327ba1259735ef8969655ac2b8a",
+      "target": "manifest.py",
+      "target_sha256": "ee22c3e37d1f366f1483bd6313ad9c00ad7409c45d50bb9dc957ed1c90973413",
+      "replacements": {
+        "a74792facb657413e98223e059876d8b213ffff3": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+        "'yubihsm-001'": "'openpgp-001'"
+      },
+      "substitution_counts": {
+        "a74792facb657413e98223e059876d8b213ffff3": 1,
+        "'yubihsm-001'": 2
+      }
+    }
+  ],
+  "baselines": [
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/prior-archive-baseline.json",
+      "sha256": "4a671e40343eae767e91b2396dc69d47e3848062b1f2e0509fab88337c735edf"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/user-work-baseline.json",
+      "sha256": "8515cd743225e2c74b1249d0b7dc41226575f8a4d006835bafab3c25b0c95dc8"
+    }
+  ],
+  "generator": {
+    "path": "prepare-tools.py",
+    "sha256": "fc09866011c47ac72f91c87e2501d475263a827d30e35a40ae3ef344afcd92be"
+  }
+}

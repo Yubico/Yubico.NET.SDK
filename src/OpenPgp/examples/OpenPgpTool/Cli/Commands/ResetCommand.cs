@@ -9,8 +9,13 @@ using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 
 /// <summary>
-///     Resets all OpenPGP data (openpgp reset).
+///     Attempts the OpenPGP application reset sequence (openpgp reset).
 /// </summary>
+/// <remarks>
+///     Successful YubiKey reset preserves ATT key/certificate and fixed ATT policy. Current UI strings
+///     overstate that scope, and ResetAsync's unchecked lifecycle statuses require independent state
+///     readback before treating its normal return as verified erasure.
+/// </remarks>
 public sealed class ResetCommand : OpenPgpCommand<ResetCommand.Settings>
 {
     public sealed class Settings : CommandSettings

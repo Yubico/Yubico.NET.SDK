@@ -1,0 +1,12 @@
+<RunSettings>
+  <RunConfiguration>
+    <TestSessionTimeout>120000</TestSessionTimeout>
+  </RunConfiguration>
+  <LoggerRunSettings>
+    <Loggers>
+      <Logger friendlyName="console" enabled="true">
+        <Configuration><Verbosity>detailed</Verbosity></Configuration>
+      </Logger>
+    </Loggers>
+  </LoggerRunSettings>
+</RunSettings>

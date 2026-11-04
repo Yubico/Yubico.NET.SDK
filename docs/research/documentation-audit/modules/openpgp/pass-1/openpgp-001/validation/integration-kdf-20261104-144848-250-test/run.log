@@ -1,0 +1,37 @@
+# dotnet toolchain.cs -- test --integration --project OpenPgp.IntegrationTests --filter FullyQualifiedName~SetKdf_IterSaltedS2k_ThenVerifyPin_Succeeds
+# started:   2026-11-04 14:48:48 +01:00
+# directory: /home/rupicola/Code/y/Yubico.Yubikit.NET
+# git:       yubikit-docs-audit @ fe180282 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261104-144848-250-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit + integration tests ===
+
+
+=== Testing: OpenPgp.IntegrationTests ===
+▶ RUN dotnet test src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj -c Release --list-tests --filter FullyQualifiedName~SetKdf_IterSaltedS2k_ThenVerifyPin_Succeeds (output captured)
+▶ RUN dotnet test src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~SetKdf_IterSaltedS2k_ThenVerifyPin_Succeeds"
+  output: artifacts/toolchain/runs/20261104-144848-250-test/01-test-OpenPgp.IntegrationTests.log
+✓ PASS (1 executed, 0 skipped)
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- test --integration --project OpenPgp.IntegrationTests --filter FullyQualifiedName~SetKdf_IterSaltedS2k_ThenVerifyPin_Succeeds)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ test                       5.5s
+Projects (test):
+  ✓ PASS      OpenPgp.IntegrationTests  1 executed, 0 skipped
+Totals: projects: 1 passed, 0 failed, 0 with no tests executed; tests: 1 executed, 0 failed, 0 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-144848-250-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

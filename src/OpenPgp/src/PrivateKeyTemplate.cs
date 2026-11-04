@@ -18,8 +18,8 @@ using Yubico.YubiKit.Core.Utilities;
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     The key components of a private key import (PUT DATA ODD, INS 0xDB). The slot is not part of the
-///     template; <see cref="ToBytes" /> takes it, so one import names its slot once.
+///     Borrows key-component memory for private key import (PUT DATA ODD, INS 0xDB).
+///     Keep source buffers valid through serialization; the import owner clears its copied components.
 /// </summary>
 /// <remarks>
 ///     Wire format:
@@ -42,6 +42,7 @@ internal abstract class PrivateKeyTemplate
     /// <summary>
     ///     Serializes the private key template to its wire format for PUT_DATA_ODD, addressed to <paramref name="keyRef" />.
     /// </summary>
+    /// <returns>Caller-owned encoded private material; clear after transmission, including failure paths.</returns>
     public byte[] ToBytes(KeyRef keyRef)
     {
         var crtBytes = keyRef.GetCrt();
@@ -210,7 +211,7 @@ internal sealed class RsaCrtKeyTemplate : RsaKeyTemplate
 internal sealed class EcKeyTemplate : PrivateKeyTemplate
 {
     /// <summary>
-    ///     The EC private key scalar.
+    ///     Borrowed EC private material: a scalar for conventional EC or a seed for Ed25519 import.
     /// </summary>
     public ReadOnlyMemory<byte> PrivateKey { get; }
 

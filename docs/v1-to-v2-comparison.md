@@ -156,7 +156,8 @@ Not differences at all — v1 never had these:
 
 - **WebAuthn** (`Yubico.YubiKit.WebAuthn`) — client-side registration and authentication
   orchestration over CTAP2; the RP still supplies options and verifies responses.
-- **OpenPGP** (`Yubico.YubiKit.OpenPgp`) — OpenPGP applet support.
+- **OpenPGP** (`Yubico.YubiKit.OpenPgp`) — card key management, signing, raw decipher/agreement and
+  certificates; see the [task guide](../src/OpenPgp/README.md) for credential, firmware and ownership conditions.
 
 [What's new in v2](v2-highlights.md) covers both in more detail.
 

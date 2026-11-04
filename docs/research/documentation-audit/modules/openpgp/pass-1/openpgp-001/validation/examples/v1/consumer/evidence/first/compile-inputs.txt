@@ -1,0 +1,4 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/src/Examples.cs
+/tmp/opencode/openpgp-001-examples-v1-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.GlobalUsings.g.cs
+/tmp/opencode/openpgp-001-examples-v1-consumer/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/openpgp-001-examples-v1-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.AssemblyInfo.cs

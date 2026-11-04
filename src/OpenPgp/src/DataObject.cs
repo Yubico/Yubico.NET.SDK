@@ -15,8 +15,12 @@
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     OpenPGP Data Object tags used in GET DATA and PUT DATA commands.
+///     Identifies OpenPGP data objects and nested response fields.
 /// </summary>
+/// <remarks>
+///     Tag support, access conditions and direct GET/PUT addressability depend on the object and card profile.
+///     Container membership alone establishes no direct-access rule; use typed APIs for modeled operations.
+/// </remarks>
 public enum DataObject
 {
     PrivateUse1 = 0x0101,
@@ -58,7 +62,7 @@ public enum DataObject
     AlgorithmInformation = 0xFA,
     AttCertificate = 0xFC,
 
-    // Composite tags used within DiscretionaryDataObjects (not directly addressable via GET DATA)
+    // Containers and fields parsed from application/security data; direct access is object-specific.
     DiscretionaryDataObjects = 0x73,
     ExtendedCapabilitiesTag = 0xC0,
     Fingerprints = 0xC5,
@@ -68,7 +72,7 @@ public enum DataObject
     SignatureCounter = 0x93,
 
     /// <summary>
-    ///     Language preference, encoded as two bytes within the cardholder data.
+    ///     Language preferences: one to four lowercase ISO 639-1 pairs (2–8 bytes), highest priority first.
     /// </summary>
     Language = 0x5F2D,
 

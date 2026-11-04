@@ -1,0 +1,478 @@
+commit 4a2d6abba44ffbb8d0a33639765beffc9506f475
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Sun Jan 8 13:22:17 2023 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Mon Jan 9 17:39:15 2023 +0100
+
+    Compatibility fixes and tests.
+
+diff --git a/tests/device/test_openpgp.py b/tests/device/test_openpgp.py
+index 791f92de..1354308f 100644
+--- a/tests/device/test_openpgp.py
++++ b/tests/device/test_openpgp.py
+@@ -1,12 +1,13 @@
+ from cryptography.hazmat.backends import default_backend
+-from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+-from cryptography.hazmat.primitives.asymmetric import ec, rsa
+-from ykman._openpgp import OpenPgpController, KEY_SLOT
++from cryptography.hazmat.primitives.asymmetric import ec, rsa, ed25519, x25519, padding
++from cryptography.hazmat.primitives import hashes
++from yubikit.openpgp import OpenPgpSession, KEY_REF, RSA_SIZE, OID
+ from yubikit.management import CAPABILITY
+ from yubikit.core.smartcard import ApduError
+ from . import condition
+ 
+ import pytest
++import time
+ 
+ 
+ E = 65537
+@@ -18,8 +19,8 @@ NON_DEFAULT_ADMIN_PIN = "87654321"
+ 
+ @pytest.fixture
+ @condition.capability(CAPABILITY.OPENPGP)
+-def controller(ccid_connection):
+-    pgp = OpenPgpController(ccid_connection)
++def session(ccid_connection):
++    pgp = OpenPgpSession(ccid_connection)
+     pgp.reset()
+     return pgp
+ 
+@@ -29,91 +30,160 @@ def not_roca(version):
+     return not ((4, 2, 0) <= version < (4, 3, 5))
+ 
+ 
+-@condition.check(not_roca)
+-def test_generate_requires_admin(controller):
++def test_import_requires_admin(session):
++    priv = rsa.generate_private_key(E, RSA_SIZE.RSA2048, default_backend())
+     with pytest.raises(ApduError):
+-        controller.generate_rsa_key(KEY_SLOT.SIG, 2048)
++        session.put_key(KEY_REF.SIG, priv)
+ 
+ 
+ @condition.check(not_roca)
+-def test_generate_rsa2048(controller):
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    pub = controller.generate_rsa_key(KEY_SLOT.SIG, 2048)
+-    assert pub.key_size == 2048
+-    controller.delete_key(KEY_SLOT.SIG)
+-
+-
+-@condition.check(not_roca)
+-@condition.min_version(4)
+-@condition.yk4_fips(False)
+-def test_generate_rsa4096(controller):
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    pub = controller.generate_rsa_key(KEY_SLOT.SIG, 4096)
+-    assert pub.key_size == 4096
+-
+-
+-@condition.min_version(5, 2)
+-def test_generate_secp256r1(controller):
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    pub = controller.generate_ec_key(KEY_SLOT.SIG, "secp256r1")
+-    assert pub.key_size == 256
+-    assert pub.curve.name == "secp256r1"
+-
+-
+-@condition.min_version(5, 2)
+-def test_generate_ed25519(controller):
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    pub = controller.generate_ec_key(KEY_SLOT.SIG, "ed25519")
+-    assert len(pub.public_bytes(Encoding.Raw, PublicFormat.Raw)) == 32
+-
+-
+-@condition.min_version(5, 2)
+-def test_generate_x25519(controller):
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    pub = controller.generate_ec_key(KEY_SLOT.ENC, "x25519")
+-    assert len(pub.public_bytes(Encoding.Raw, PublicFormat.Raw)) == 32
+-
+-
+-def test_import_requires_admin(controller):
+-    priv = rsa.generate_private_key(E, 2048, default_backend())
++def test_generate_requires_admin(session):
+     with pytest.raises(ApduError):
+-        controller.import_key(KEY_SLOT.SIG, priv)
+-
+-
+-def test_import_rsa2048(controller):
+-    priv = rsa.generate_private_key(E, 2048, default_backend())
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    controller.import_key(KEY_SLOT.SIG, priv)
+-
+-
+-@condition.min_version(4)
+-@condition.yk4_fips(False)
+-def test_import_rsa4096(controller):
+-    priv = rsa.generate_private_key(E, 4096, default_backend())
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    controller.import_key(KEY_SLOT.SIG, priv)
++        session.generate_rsa_key(KEY_REF.SIG, RSA_SIZE.RSA2048)
+ 
+ 
+ @condition.min_version(5, 2)
+-def test_import_secp256r1(controller):
+-    priv = ec.generate_private_key(ec.SECP256R1(), default_backend())
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    controller.import_key(KEY_SLOT.SIG, priv)
++@pytest.mark.parametrize("oid", [x for x in OID if "25519" not in x.name])
++def test_import_sign_ecdsa(session, oid):
++    priv = ec.generate_private_key(getattr(ec, oid.name)())
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    session.put_key(KEY_REF.SIG, priv)
++    message = b"Hello world"
++    session.verify_pin(DEFAULT_PIN)
++    sig = session.sign(message, hashes.SHA256())
++    priv.public_key().verify(sig, message, ec.ECDSA(hashes.SHA256()))
+ 
+ 
+ @condition.min_version(5, 2)
+-def test_import_ed25519(controller):
+-    from cryptography.hazmat.primitives.asymmetric import ed25519
+-
++def test_import_sign_eddsa(session):
+     priv = ed25519.Ed25519PrivateKey.generate()
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    controller.import_key(KEY_SLOT.SIG, priv)
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    session.put_key(KEY_REF.SIG, priv)
++    message = b"Hello world"
++    session.verify_pin(DEFAULT_PIN)
++    sig = session.sign(message, hashes.SHA256())
++    priv.public_key().verify(sig, message)
+ 
+ 
+ @condition.min_version(5, 2)
+-def test_import_x25519(controller):
+-    from cryptography.hazmat.primitives.asymmetric import x25519
++@pytest.mark.parametrize("oid", [x for x in OID if "25519" not in x.name])
++def test_import_ecdh(session, oid):
++    priv = ec.generate_private_key(getattr(ec, oid.name)())
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    session.put_key(KEY_REF.DEC, priv)
++    e_priv = ec.generate_private_key(getattr(ec, oid.name)())
++    shared1 = e_priv.exchange(ec.ECDH(), priv.public_key())
++    session.verify_pin(DEFAULT_PIN, extended=True)
++    shared2 = session.decrypt(e_priv.public_key())
+ 
++    assert shared1 == shared2
++
++
++@condition.min_version(5, 2)
++def test_import_ecdh_x25519(session):
+     priv = x25519.X25519PrivateKey.generate()
+-    controller.verify_admin(DEFAULT_ADMIN_PIN)
+-    controller.import_key(KEY_SLOT.ENC, priv)
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    session.put_key(KEY_REF.DEC, priv)
++    e_priv = x25519.X25519PrivateKey.generate()
++    shared1 = e_priv.exchange(priv.public_key())
++    session.verify_pin(DEFAULT_PIN, extended=True)
++    shared2 = session.decrypt(e_priv.public_key())
++
++    assert shared1 == shared2
++
++
++@pytest.mark.parametrize("key_size", [2048, 3072, 4096])
++def test_import_sign_rsa(session, key_size, info):
++    if key_size != 2048:
++        if session.version[0] < 4:
++            pytest.skip(f"RSA {key_size} requires YuibKey 4 or later")
++        elif session.version[0] == 4 and info.is_fips:
++            pytest.skip(f"RSA {key_size} not supported on YubiKey 4 FIPS")
++    priv = rsa.generate_private_key(E, key_size, default_backend())
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    session.put_key(KEY_REF.SIG, priv)
++    if session.version[0] < 5:
++        # Keys don't work without a generation time (or fingerprint)
++        session.set_generation_time(KEY_REF.SIG, int(time.time()))
++
++    message = b"Hello world"
++    session.verify_pin(DEFAULT_PIN)
++    sig = session.sign(message, hashes.SHA256())
++    priv.public_key().verify(sig, message, padding.PKCS1v15(), hashes.SHA256())
++
++
++@pytest.mark.parametrize("key_size", [2048, 3072, 4096])
++def test_import_decrypt_rsa(session, key_size, info):
++    if key_size != 2048:
++        if session.version[0] < 4:
++            pytest.skip(f"RSA {key_size} requires YuibKey 4 or later")
++        elif session.version[0] == 4 and info.is_fips:
++            pytest.skip(f"RSA {key_size} not supported on YubiKey 4 FIPS")
++    priv = rsa.generate_private_key(E, key_size, default_backend())
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    session.put_key(KEY_REF.DEC, priv)
++    if session.version[0] < 5:
++        # Keys don't work without a generation time (or fingerprint)
++        session.set_generation_time(KEY_REF.DEC, int(time.time()))
++
++    message = b"Hello world"
++    cipher = priv.public_key().encrypt(message, padding.PKCS1v15())
++    session.verify_pin(DEFAULT_PIN, extended=True)
++    plain = session.decrypt(cipher)
++
++    assert message == plain
++
++
++@pytest.mark.parametrize("key_size", [2048, 3072, 4096])
++def test_generate_rsa(session, key_size, info):
++    if key_size != 2048:
++        if session.version[0] < 4:
++            pytest.skip(f"RSA {key_size} requires YuibKey 4 or later")
++        elif session.version[0] == 4 and info.is_fips:
++            pytest.skip(f"RSA {key_size} not supported on YubiKey 4 FIPS")
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    pub = session.generate_rsa_key(KEY_REF.SIG, RSA_SIZE(key_size))
++    if session.version[0] < 5:
++        # Keys don't work without a generation time (or fingerprint)
++        session.set_generation_time(KEY_REF.SIG, int(time.time()))
++
++    assert pub.key_size == key_size
++
++    message = b"Hello world"
++    session.verify_pin(DEFAULT_PIN)
++    sig = session.sign(message, hashes.SHA256())
++    pub.verify(sig, message, padding.PKCS1v15(), hashes.SHA256())
++
++
++@condition.min_version(5, 2)
++@pytest.mark.parametrize("oid", [x for x in OID if "25519" not in x.name])
++def test_generate_ecdsa(session, oid):
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    pub = session.generate_ec_key(KEY_REF.SIG, oid)
++    message = b"Hello world"
++    session.verify_pin(DEFAULT_PIN)
++    sig = session.sign(message, hashes.SHA256())
++    pub.verify(sig, message, ec.ECDSA(hashes.SHA256()))
++
++
++@condition.min_version(5, 2)
++def test_generate_ed25519(session):
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    pub = session.generate_ec_key(KEY_REF.SIG, OID.Ed25519)
++    message = b"Hello world"
++    session.verify_pin(DEFAULT_PIN)
++    sig = session.sign(message, hashes.SHA256())
++    pub.verify(sig, message)
++
++
++@condition.min_version(5, 2)
++def test_generate_x25519(session):
++    session.verify_admin(DEFAULT_ADMIN_PIN)
++    pub = session.generate_ec_key(KEY_REF.DEC, OID.X25519)
++
++    e_priv = x25519.X25519PrivateKey.generate()
++    shared1 = e_priv.exchange(pub)
++    session.verify_pin(DEFAULT_PIN, extended=True)
++    shared2 = session.decrypt(e_priv.public_key())
++
++    assert shared1 == shared2
+diff --git a/yubikit/openpgp.py b/yubikit/openpgp.py
+index f937a954..888b2750 100644
+--- a/yubikit/openpgp.py
++++ b/yubikit/openpgp.py
+@@ -440,8 +440,12 @@ class RsaAttributes(AlgorithmAttributes):
+     import_format: RSA_IMPORT_FORMAT
+ 
+     @classmethod
+-    def create(cls, n_len: RSA_SIZE) -> "RsaAttributes":
+-        return cls(0x01, n_len, 17, RSA_IMPORT_FORMAT.STANDARD)
++    def create(
++        cls,
++        n_len: RSA_SIZE,
++        import_format: RSA_IMPORT_FORMAT = RSA_IMPORT_FORMAT.STANDARD,
++    ) -> "RsaAttributes":
++        return cls(0x01, n_len, 17, import_format)
+ 
+     @classmethod
+     def _parse_data(cls, alg, encoded) -> "RsaAttributes":
+@@ -518,7 +522,7 @@ class EcAttributes(AlgorithmAttributes):
+     @classmethod
+     def create(cls, key_ref: KEY_REF, oid: CurveOid) -> "EcAttributes":
+         if oid == OID.Ed25519:
+-            alg = 0x16  # ED
++            alg = 0x16  # EdDSA
+         elif key_ref == KEY_REF.DEC:
+             alg = 0x12  # ECDH
+         else:
+@@ -623,7 +627,8 @@ class ApplicationRelatedData:
+ 
+     @classmethod
+     def parse(cls, encoded: bytes) -> "ApplicationRelatedData":
+-        data = Tlv.parse_dict(Tlv.unpack(DO.APPLICATION_RELATED_DATA, encoded))
++        outer = Tlv.unpack(DO.APPLICATION_RELATED_DATA, encoded)
++        data = Tlv.parse_dict(outer)
+         return cls(
+             OpenPgpAid(data[DO.AID]),
+             data[DO.HISTORICAL_BYTES],
+@@ -639,7 +644,8 @@ class ApplicationRelatedData:
+                 if DO.GENERAL_FEATURE_MANAGEMENT in data
+                 else None
+             ),
+-            DiscretionaryDataObjects.parse(data[TAG_DISCRETIONARY]),
++            # Older keys have data in outer dict
++            DiscretionaryDataObjects.parse(data[TAG_DISCRETIONARY] or outer),
+         )
+ 
+ 
+@@ -822,17 +828,17 @@ class RsaKeyTemplate(PrivateKeyTemplate):
+ 
+ @dataclass
+ class RsaCrtKeyTemplate(RsaKeyTemplate):
++    iqmp: bytes
+     dmp1: bytes
+     dmq1: bytes
+-    iqmp: bytes
+     n: bytes
+ 
+     def _get_template(self):
+         return (
+             *super()._get_template(),
+-            Tlv(0x94, self.dmp1),
+-            Tlv(0x95, self.dmq1),
+-            Tlv(0x96, self.iqmp),
++            Tlv(0x94, self.iqmp),
++            Tlv(0x95, self.dmp1),
++            Tlv(0x96, self.dmq1),
+             Tlv(0x97, self.n),
+         )
+ 
+@@ -851,12 +857,17 @@ class EcKeyTemplate(PrivateKeyTemplate):
+ 
+ 
+ def _get_key_attributes(
+-    private_key: PrivateKey, key_ref: KEY_REF
++    private_key: PrivateKey, key_ref: KEY_REF, version: Version
+ ) -> AlgorithmAttributes:
+     if isinstance(private_key, rsa.RSAPrivateKeyWithSerialization):
+         if private_key.private_numbers().public_numbers.e != 65537:
+             raise ValueError("RSA keys with e != 65537 are not supported!")
+-        return RsaAttributes.create(RSA_SIZE(private_key.key_size))
++        return RsaAttributes.create(
++            RSA_SIZE(private_key.key_size),
++            RSA_IMPORT_FORMAT.CRT_W_MOD
++            if version < (4, 0, 0)
++            else RSA_IMPORT_FORMAT.STANDARD,
++        )
+     return EcAttributes.create(key_ref, OID._from_key(private_key))
+ 
+ 
+@@ -877,7 +888,7 @@ def _get_key_template(
+             dq = int2bytes(rsa_numbers.dmq1, ln)
+             qinv = int2bytes(rsa_numbers.iqmp, ln)
+             n = int2bytes(rsa_numbers.public_numbers.n, 2 * ln)
+-            return RsaCrtKeyTemplate(key_ref.crt, e, p, q, dp, dq, qinv, n)
++            return RsaCrtKeyTemplate(key_ref.crt, e, p, q, qinv, dp, dq, n)
+ 
+     elif isinstance(private_key, ec.EllipticCurvePrivateKeyWithSerialization):
+         ec_numbers = private_key.private_numbers()
+@@ -967,7 +978,6 @@ class OpenPgpSession:
+         # Note: This value is cached!
+         # Do not rely on contained information that can change!
+         self._app_data = self.get_application_related_data()
+-
+         logger.debug(f"OpenPGP session initialized (version={self.version})")
+ 
+     def _read_version(self) -> Version:
+@@ -1224,6 +1234,21 @@ class OpenPgpSession:
+             not in self.extended_capabilities.flags
+         ):
+             raise NotSupportedError("Writing Algorithm Attributes is not supported")
++
++        if self.version < (5, 2, 0):
++            sizes = [RSA_SIZE.RSA2048]
++            if self.version < (4, 0, 0):  # Neo needs CRT
++                fmt = RSA_IMPORT_FORMAT.CRT_W_MOD
++            else:
++                fmt = RSA_IMPORT_FORMAT.STANDARD
++                if self.version[:2] != (4, 4):  # Non-FIPS
++                    sizes.extend([RSA_SIZE.RSA3072, RSA_SIZE.RSA4096])
++            return {
++                KEY_REF.SIG: [RsaAttributes.create(size, fmt) for size in sizes],
++                KEY_REF.DEC: [RsaAttributes.create(size, fmt) for size in sizes],
++                KEY_REF.AUT: [RsaAttributes.create(size, fmt) for size in sizes],
++            }
++
+         logger.debug("Getting supported Algorithm Information")
+         buf = self.get_data(DO.ALGORITHM_INFORMATION)
+         try:
+@@ -1238,18 +1263,20 @@ class OpenPgpSession:
+                 AlgorithmAttributes.parse(tlv.value)
+             )
+ 
+-        # Fix for invalid entries:
+-        # Remove X25519 with EdDSA
+-        invalid_cv25519 = EcAttributes(0x16, OID.X25519, EC_IMPORT_FORMAT.STANDARD)
+-        for values in data.values():
+-            values.remove(invalid_cv25519)
+-        cv25519 = EcAttributes(0x12, OID.X25519, EC_IMPORT_FORMAT.STANDARD)
+-        # Add X25519 ECDH for DEC
+-        if cv25519 not in data[KEY_REF.DEC]:
+-            data[KEY_REF.DEC].append(cv25519)
+-        # Remove EdDSA from DEC
+-        ed25519_attr = EcAttributes(0x16, OID.Ed25519, EC_IMPORT_FORMAT.STANDARD)
+-        data[KEY_REF.DEC].remove(ed25519_attr)
++        if self.version < (5, 6, 1):
++            # Fix for invalid Curve25519 entries:
++            # Remove X25519 with EdDSA from all keys
++            invalid_x25519 = EcAttributes(0x16, OID.X25519, EC_IMPORT_FORMAT.STANDARD)
++            for values in data.values():
++                values.remove(invalid_x25519)
++            x25519 = EcAttributes(0x12, OID.X25519, EC_IMPORT_FORMAT.STANDARD)
++            # Add X25519 ECDH for DEC
++            if x25519 not in data[KEY_REF.DEC]:
++                data[KEY_REF.DEC].append(x25519)
++            # Remove EdDSA from DEC, ATT
++            ed25519_attr = EcAttributes(0x16, OID.Ed25519, EC_IMPORT_FORMAT.STANDARD)
++            data[KEY_REF.DEC].remove(ed25519_attr)
++            data[KEY_REF.ATT].remove(ed25519_attr)
+ 
+         return data
+ 
+@@ -1320,7 +1347,7 @@ class OpenPgpSession:
+         """
+         logger.debug(f"Setting key generation timestamp for {key_ref.name}")
+         self.put_data(key_ref.generation_time_do, struct.pack(">I", timestamp))
+-        logger.info("Key generation timestamp set for {key_ref.name}")
++        logger.info(f"Key generation timestamp set for {key_ref.name}")
+ 
+     def get_fingerprints(self) -> Fingerprints:
+         """Get key fingerprints."""
+@@ -1399,7 +1426,7 @@ class OpenPgpSession:
+         """
+ 
+         logger.debug(f"Importing a private key for {key_ref.name}")
+-        attributes = _get_key_attributes(private_key, key_ref)
++        attributes = _get_key_attributes(private_key, key_ref, self.version)
+         if (
+             EXTENDED_CAPABILITY_FLAGS.ALGORITHM_ATTRIBUTES_CHANGEABLE
+             in self.extended_capabilities.flags
+@@ -1416,6 +1443,25 @@ class OpenPgpSession:
+         self.protocol.send_apdu(0, INS.PUT_DATA_ODD, 0x3F, 0xFF, bytes(template))
+         logger.info(f"Private key imported for {key_ref.name}")
+ 
++    def delete_key(self, key_ref: KEY_REF) -> None:
++        """Deletes the contents of a key slot.
++
++        Requires Admin PIN verification.
++        """
++        if self.version < (4, 0, 0):
++            # Import over the key
++            self.put_key(
++                key_ref, rsa.generate_private_key(65537, 2048, default_backend())
++            )
++        else:
++            # Delete key by changing the key attributes twice.
++            self.put_data(  # Use put_data to avoid checking for RSA 4096 support
++                key_ref.algorithm_attributes_do, RsaAttributes.create(RSA_SIZE.RSA4096)
++            )
++            self.set_algorithm_attributes(
++                key_ref, RsaAttributes.create(RSA_SIZE.RSA2048)
++            )
++
+     def _select_certificate(self, key_ref: KEY_REF) -> None:
+         logger.debug(f"Selecting certificate for key {key_ref.name}")
+         try:

@@ -1,0 +1,149 @@
+{
+  "records": [
+    {
+      "kind": "analyzer-configs.txt",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "retained": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3-.editorconfig.snapshot"
+    },
+    {
+      "kind": "analyzer-configs.txt",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig",
+      "bytes": 15007,
+      "sha256": "f23ec2c89e959e21eb6135674b3108b5cb78601b9e5e14de4252fd7fffaaffb9",
+      "retained": "f23ec2c89e959e21eb6135674b3108b5cb78601b9e5e14de4252fd7fffaaffb9-analysislevelstyle_recommended.globalconfig.snapshot"
+    },
+    {
+      "kind": "analyzer-configs.txt",
+      "path": "/tmp/opencode/openpgp-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+      "bytes": 869,
+      "sha256": "1d69e787affcdc7744610414f4c307fc5033155b9c87e80214348289189e348e",
+      "retained": "1d69e787affcdc7744610414f4c307fc5033155b9c87e80214348289189e348e-Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/CancellationProbe.cs",
+      "bytes": 5760,
+      "sha256": "cb1def01a3953e450e04d345bfe19874882cfab310fd7c7a95a3c5491f6f64e2",
+      "retained": "cb1def01a3953e450e04d345bfe19874882cfab310fd7c7a95a3c5491f6f64e2-CancellationProbe.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "bytes": 17841,
+      "sha256": "3735107b1aedd3c6aa6baacddc5838d114fb5666969817bc0ea4d3bb83b61b91",
+      "retained": "3735107b1aedd3c6aa6baacddc5838d114fb5666969817bc0ea4d3bb83b61b91-HardwareProbeTests.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/ProbeSupport.cs",
+      "bytes": 8913,
+      "sha256": "b29d200b8ede6c459a6dddafa1c506b4fe4406948c2bf532abf2324a87e38b7c",
+      "retained": "b29d200b8ede6c459a6dddafa1c506b4fe4406948c2bf532abf2324a87e38b7c-ProbeSupport.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+      "bytes": 218,
+      "sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a",
+      "retained": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a-Microsoft.NET.Test.Sdk.Program.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/tmp/opencode/openpgp-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.GlobalUsings.g.cs",
+      "bytes": 251,
+      "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f",
+      "retained": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f-Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.GlobalUsings.g.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/tmp/opencode/openpgp-001-hardware/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb",
+      "retained": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot"
+    },
+    {
+      "kind": "compile-inputs.txt",
+      "path": "/tmp/opencode/openpgp-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.AssemblyInfo.cs",
+      "bytes": 1266,
+      "sha256": "e643e105ae84a1771693b48479aae6f73016491df833c3317f1cf7cb38919829",
+      "retained": "e643e105ae84a1771693b48479aae6f73016491df833c3317f1cf7cb38919829-Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.AssemblyInfo.cs.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.props",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "retained": "Directory.Build.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.targets",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "retained": "Directory.Build.targets.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Packages.props",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3",
+      "retained": "Directory.Packages.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/global.json",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "retained": "global.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "retained": ".editorconfig.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/Directory.Build.props",
+      "bytes": 628,
+      "sha256": "b7d7d5df212f45b5eaf3574beeb74e4be12bef3b55b694f33bbb77835ab39353",
+      "retained": "b7d7d5df212f45b5eaf3574beeb74e4be12bef3b55b694f33bbb77835ab39353-Directory.Build.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/Directory.Build.targets",
+      "bytes": 1977,
+      "sha256": "842f04ecb7a80cbb441b8d9c5042f56a5ececf3417e08a959892d80915037679",
+      "retained": "842f04ecb7a80cbb441b8d9c5042f56a5ececf3417e08a959892d80915037679-Directory.Build.targets.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj",
+      "bytes": 1873,
+      "sha256": "be2a105d01e6a584a40a7dfd1a1e61cfb607a12f7f3e57b3a55f1bdfd97131d7",
+      "retained": "be2a105d01e6a584a40a7dfd1a1e61cfb607a12f7f3e57b3a55f1bdfd97131d7-Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests.csproj.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/xunit.runner.json",
+      "bytes": 231,
+      "sha256": "d48da09acfe33a769cd481c898c2e74d72b23c02e320b2290175bee621df58c7",
+      "retained": "d48da09acfe33a769cd481c898c2e74d72b23c02e320b2290175bee621df58c7-xunit.runner.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPgp001.Hardware.IntegrationTests/src/probe.runsettings",
+      "bytes": 338,
+      "sha256": "98f8ad4a21cc28519d80cff5e8aae14b642d386742cdc465ad2b5e5e7ee79e86",
+      "retained": "98f8ad4a21cc28519d80cff5e8aae14b642d386742cdc465ad2b5e5e7ee79e86-probe.runsettings.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/appsettings.json",
+      "bytes": 1016,
+      "sha256": "6500728c3ad148f7231b52db4a33c22a3c274b5e7ff8612aa5c1e61ecd04c414",
+      "retained": "6500728c3ad148f7231b52db4a33c22a3c274b5e7ff8612aa5c1e61ecd04c414-appsettings.json.snapshot"
+    },
+    {
+      "path": "/tmp/opencode/openpgp-001-hardware/obj/project.assets.json",
+      "bytes": 192443,
+      "sha256": "e03cdb126c7771865b87f34d31761ba6cae0d62f5f565e5860262faa10ca941a",
+      "retained": "project.assets.json.snapshot"
+    }
+  ],
+  "checked_dependencies": 227,
+  "capture": "v2-build",
+  "evidence": "Actual Csc source/reference/analyzer/config sets reconcile; compiler/analyzers enabled; full dependency identities match at late capture; source/config/assets text retained; no binary copies or test execution."
+}

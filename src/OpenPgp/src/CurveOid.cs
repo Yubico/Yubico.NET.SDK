@@ -62,7 +62,7 @@ public static class CurveOidExtensions
     };
 
     /// <summary>
-    ///     Gets the DER-encoded OID bytes for this curve.
+    ///     Gets the DER OID value octets for this curve, without tag or length.
     /// </summary>
     public static ReadOnlySpan<byte> GetOidBytes(this CurveOid curveOid) =>
         OidBytes[curveOid];
@@ -89,7 +89,7 @@ public static class CurveOidExtensions
         };
 
     /// <summary>
-    ///     Attempts to parse a <see cref="CurveOid" /> from DER-encoded OID bytes.
+    ///     Attempts to parse a <see cref="CurveOid" /> from DER OID value octets, without tag or length.
     /// </summary>
     public static bool TryFromOidBytes(ReadOnlySpan<byte> oidBytes, out CurveOid curveOid)
     {
@@ -107,7 +107,7 @@ public static class CurveOidExtensions
     }
 
     /// <summary>
-    ///     Parses a <see cref="CurveOid" /> from DER-encoded OID bytes.
+    ///     Parses a <see cref="CurveOid" /> from DER OID value octets, without tag or length.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the OID bytes do not match a known curve.</exception>
     public static CurveOid FromOidBytes(ReadOnlySpan<byte> oidBytes) =>

@@ -22,11 +22,9 @@ using Yubico.YubiKit.Tests.Shared;
 namespace Yubico.YubiKit.OpenPgp.UnitTests;
 
 /// <summary>
-///     Proves ISC-44: OpenPGP PIN verification failures — previously a plain
-///     <see cref="ApduException" /> with the retry count only embedded in
-///     <see cref="Exception.Message" /> text — now surface a typed, structured
-///     <see cref="OpenPgpInvalidPinException.RetriesRemaining" /> for every status word the card
-///     can use to report the failure (0x63Cx, 0x6982, and 0x6983).
+///     Checks typed retry reporting for simulated VERIFY responses 63Cx, 6982 and 6983.
+///     Fake responses establish mapping behavior; device authorization and unsupported-status
+///     classification require separate evidence.
 /// </summary>
 public sealed class OpenPgpInvalidPinExceptionTests
 {
@@ -75,7 +73,7 @@ public sealed class OpenPgpInvalidPinExceptionTests
     [Fact]
     public async Task VerifyPinAsync_WhenPinAlreadyBlocked_ExposesZeroRetriesRemainingWithoutStatusQuery()
     {
-        // SW 6983 (Authentication Method Blocked): the PIN is already permanently blocked.
+        // SW 6983 (Authentication Method Blocked): the addressed credential has zero attempts.
         // Unlike 0x6982, this status word unambiguously means zero retries remain, so no
         // extra GET DATA status query should be issued.
         var connection = CreateInitializedConnection(KdfNotFoundResponse(), [0x69, 0x83]);
@@ -142,10 +140,9 @@ public sealed class OpenPgpInvalidPinExceptionTests
     [Fact]
     public async Task VerifyPinAsync_ExtendedWhenSecurityStatusNotSatisfied_FallsBackToResetAttemptsFromPinStatusQuery()
     {
-        // SW 6982 (Security Status Not Satisfied) for an extended-mode (Pw.Reset) verify: the
-        // fallback must resolve AttemptsReset, not AttemptsUser or AttemptsAdmin. The only route
-        // that reaches VerifyPwAsync with Pw.Reset is VerifyPinAsync(pin, extended: true, ...).
-        // Distinct attempt counts in PwStatusResponse make a wrong arm mapping fail loudly.
+        // Records the current extended-mode defect: VERIFY P2=82 still addresses User PIN,
+        // but the implementation queries AttemptsReset through Pw.Reset identity. This assertion
+        // preserves observed behavior for a later fix; the correct logical counter is AttemptsUser.
         var connection = CreateInitializedConnection(
             KdfNotFoundResponse(),
             [0x69, 0x82],
@@ -215,8 +212,9 @@ public sealed class OpenPgpInvalidPinExceptionTests
     // OpenPGP version response: BCD 5.8.0 followed by SW 9000.
     private static byte[] VersionResponse() => [0x05, 0x08, 0x00, 0x90, 0x00];
 
-    // GET DATA for the KDF object returns "Referenced data not found" — no KDF configured,
-    // so VerifyPwAsync falls back to sending raw PIN bytes through KdfNone.
+    // Simulated F9 GET DATA returns 6A82: file or application not found (Card §7.9).
+    // The current broad APDU-error fallback caches KdfNone and sends raw PIN bytes;
+    // these response bytes establish that fallback behavior, rather than actual KDF absence.
     private static byte[] KdfNotFoundResponse() => [0x6A, 0x82];
 
     private static byte[] PwStatusResponse(int attemptsUser, int attemptsReset = 0, int attemptsAdmin = 3) =>

@@ -1,0 +1,34 @@
+$ dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+skipped Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp.Scp11Tests.Scp11a_WithAllowList_FullFlow_Succeeds (0ms)
+  Requires SecurityDomain session and YubiKey hardware
+skipped Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp.Scp11Tests.Scp11b_FullAuthentication_WithRealDevice_Succeeds (0ms)
+  Requires actual YubiKey hardware with firmware >= 5.7.2
+skipped Yubico.YubiKit.Core.UnitTests.Native.Windows.CfgMgr32InteropTests.WindowsHidDeviceListener_Start_RegistersNotification (0ms)
+  Windows-only
+[+1444/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - 7 tests running (3s)
+
+[+1489/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - 3 tests running (6s)
+
+[+1525/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.PcscConnectionLifetimeTests.BuiltInPcscConnection_DroppedLiveWrapper_FinalizerRequestsCheckedShutdown (9s)
+
+[+1612/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryIdentityReaderTests.TryReadAsync_ConnectNeverCompletes_ReturnsNullWithinBoundedTime (12s)
+
+[+1627/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysFaultInjectionTests.FindAllAsync_SaturatedWorkersBeyondBudget_IdentityDegradesToNull_BoundPreserved (15s)
+
+[+1635/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysFaultInjectionTests.FindAllAsync_ConsumedIdentityBudget_DoesNotAddMetadataOpenAndRetriesLater (18s)
+
+[+1641/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysFaultInjectionTests.FindAllAsync_InterfaceDisappearance_EvictsIdentityCacheEntries_Pin (21s)
+
+[+1648/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.PcscDiscoveryLifetimeTests.BuiltInPcscDiscovery_UnprovenDisconnectRetainsOriginalClaimAndNativeRoot (24s)
+
+skipped Yubico.YubiKit.Core.UnitTests.AuditV2.CoreScpAuditReproTests.YESDK1631_ChildBody_OneToFiveByteResponse_ThrowsBadResponse (0ms)
+  Child-process body; executed only via ChildProcessTestRunner.
+
+Test run summary: Passed! - /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64)
+  total: 1747
+  failed: 0
+  succeeded: 1743
+  skipped: 4
+  duration: 26s 582ms

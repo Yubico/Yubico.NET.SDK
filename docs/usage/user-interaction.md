@@ -190,6 +190,13 @@ The source of that certainty differs by applet and transport:
   unknown touch value on a found YubiHSM Auth credential produce `PolicyMayRequire`. A missing YubiHSM
   Auth credential remains silent. No smart-card timeout is inferred from these notifications.
 
+For OpenPGP, attestation reports scope `Att` because ATT performs the private-key operation. The session
+uses cached UIF, reads the slot directly if that entry is absent, and reports `PolicyMayRequire` on a failed
+lookup other than cancellation. `Off` and firmware without UIF support stay silent. Device APDU errors resolve as
+`Failed`, including 6600 under the current classification. After cancellation, await operation drain and inspect state before retrying a mutation.
+See the [OpenPGP guide](../../src/OpenPgp/README.md#configure-touch-and-signature-policy) for fixed-policy recovery
+and the ATT reset exception.
+
 For YubiHSM Auth, a configured prompt causes a LIST policy lookup before CALCULATE. Cancellation of that
 lookup propagates; other lookup failures produce the advisory notification. With no prompt, the session
 sends CALCULATE directly. See the [module guide](../../src/YubiHsm/README.md#user-interaction) for its

@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditPgp001.Hardware.IntegrationTests --filter FullyQualifiedName~TouchAuthenticate_P256_OrdinaryVerifyIsInsufficient",
+  "started": "2026-11-04T15:04:42.8009011+01:00",
+  "durationSeconds": 15.1,
+  "runDirectory": "artifacts/toolchain/runs/20261104-150442-800-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 15.1,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditPgp001.Hardware.IntegrationTests",
+      "outcome": "passed",
+      "reason": "1 executed, 0 skipped",
+      "executed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261104-150442-800-test/01-test-AuditPgp001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

@@ -1,0 +1,2 @@
+/tmp/opencode/openpgp-001-examples-v1-consumer/obj/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj.nuget.g.targets
+/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.targets/ImportAfter/Microsoft.TestPlatform.ImportAfter.targets

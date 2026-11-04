@@ -49,7 +49,9 @@ public sealed class KeysSetTouchCommand : OpenPgpCommand<KeysSetTouchCommand.Set
                 $"Invalid policy: {settings.Policy}. Must be on, off, fixed, cached, or cached-fixed.")
         };
 
-        // Check if current policy is fixed
+        // The current messages overstate factory-reset recovery. Ordinary fixed policy clears on key
+        // replacement/deletion or reset; fixed ATT policy survives reset and needs ATT key replacement.
+        // Replacing factory ATT material irreversibly loses its private-key provenance.
         var current = await session.GetUifAsync(keyRef);
         if (current.IsFixed())
         {

@@ -109,10 +109,9 @@ public sealed partial class OpenPgpSession
 
         _logger.LogInformation("Deleting key from {Slot}", keyRef);
 
-        // Python canonical: delete key by changing algorithm attributes twice.
-        // First set to RSA 4096 (forces key deletion), then back to RSA 2048.
-        // Use PutDataAsync directly (bypassing SetAlgorithmAttributesAsync checks)
-        // to avoid RSA 4096 support verification.
+        // Attribute switching is destructive and can leave partial state between writes.
+        // NEO's vendor deletion path instead overwrites a key; this sequence needs separate
+        // old-family qualification. Certificate and host metadata management remain separate.
         var rsa4096 = RsaAttributes.Create(RsaSize.Rsa4096);
         var rsa2048 = RsaAttributes.Create(RsaSize.Rsa2048);
 

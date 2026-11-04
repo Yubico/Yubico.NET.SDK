@@ -349,10 +349,10 @@ try
     var publicKey = await piv.GenerateKeyAsync(
         Slot.Authentication,
         KeyType.ECP256,
-        new PivKeyCreationOptions
+        new KeyCreationOptions
         {
-            PinPolicy = PivPinPolicy.Default,
-            TouchPolicy = PivTouchPolicy.Default
+            PinPolicy = PinPolicy.Default,
+            TouchPolicy = TouchPolicy.Default
         },
         cancellationToken);
 }
@@ -560,7 +560,7 @@ try
 {
     await piv.AuthenticateAsync(managementKey, cancellationToken);
     await piv.SetPinOnlyModeAsync(
-        PivPinOnlyMode.PinProtected,
+        PinOnlyMode.PinProtected,
         pin,
         managementKey,
         cancellationToken);

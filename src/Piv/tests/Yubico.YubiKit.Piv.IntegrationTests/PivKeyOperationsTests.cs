@@ -134,11 +134,10 @@ public class PivKeyOperationsTests
         var privateKey = ECPrivateKey.CreateFromPkcs8(pkcs8);
 
         // Import to YubiKey
-        var detectedAlgorithm = await session.ImportKeyAsync(
+        await session.ImportKeyAsync(
             Slot.Authentication,
             privateKey);
 
-        Assert.Equal(KeyType.ECP256, detectedAlgorithm);
 
         // Sign with YubiKey
         await session.VerifyPinAsync(DefaultPin);
@@ -190,10 +189,10 @@ public class PivKeyOperationsTests
         try
         {
             // Write data to Printed object
-            await session.PutObjectAsync(PivDataObject.PrintedInformation, testData);
+            await session.PutObjectAsync(DataObject.PrintedInformation, testData);
 
             // Read it back
-            var readData = await session.GetObjectAsync(PivDataObject.PrintedInformation);
+            var readData = await session.GetObjectAsync(DataObject.PrintedInformation);
 
             Assert.False(readData.IsEmpty);
             Assert.Equal(testData, readData.ToArray());
@@ -203,7 +202,7 @@ public class PivKeyOperationsTests
             // Clean up by deleting the object (write null/empty)
             try
             {
-                await session.PutObjectAsync(PivDataObject.PrintedInformation, ReadOnlyMemory<byte>.Empty);
+                await session.PutObjectAsync(DataObject.PrintedInformation, ReadOnlyMemory<byte>.Empty);
             }
             catch
             {

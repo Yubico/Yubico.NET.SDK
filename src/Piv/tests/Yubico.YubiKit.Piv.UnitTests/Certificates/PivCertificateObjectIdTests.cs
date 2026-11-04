@@ -18,41 +18,41 @@ namespace Yubico.YubiKit.Piv.UnitTests.Certificates;
 
 /// <summary>
 /// Exact-value coverage for the <c>Slot</c> to PIV certificate data-object-id mapping in
-/// <see cref="PivCertificateProtocol.GetCertificateObjectId(Slot)"/>. Each mapped slot arm
-/// asserts the specific <see cref="PivDataObject"/> constant it must resolve to, so that changing
+/// <see cref="CertificateProtocol.GetCertificateObjectId(Slot)"/>. Each mapped slot arm
+/// asserts the specific <see cref="DataObject"/> constant it must resolve to, so that changing
 /// any single arm's mapping fails a test.
 /// </summary>
 public class PivCertificateObjectIdTests
 {
     [Theory]
-    [InlineData(Slot.Authentication, PivDataObject.Authentication)]
-    [InlineData(Slot.Signature, PivDataObject.Signature)]
-    [InlineData(Slot.KeyManagement, PivDataObject.KeyManagement)]
-    [InlineData(Slot.CardAuthentication, PivDataObject.CardAuthentication)]
-    [InlineData(Slot.Attestation, PivDataObject.Attestation)]
-    [InlineData(Slot.Retired1, PivDataObject.Retired1)]
-    [InlineData(Slot.Retired2, PivDataObject.Retired2)]
-    [InlineData(Slot.Retired3, PivDataObject.Retired3)]
-    [InlineData(Slot.Retired4, PivDataObject.Retired4)]
-    [InlineData(Slot.Retired5, PivDataObject.Retired5)]
-    [InlineData(Slot.Retired6, PivDataObject.Retired6)]
-    [InlineData(Slot.Retired7, PivDataObject.Retired7)]
-    [InlineData(Slot.Retired8, PivDataObject.Retired8)]
-    [InlineData(Slot.Retired9, PivDataObject.Retired9)]
-    [InlineData(Slot.Retired10, PivDataObject.Retired10)]
-    [InlineData(Slot.Retired11, PivDataObject.Retired11)]
-    [InlineData(Slot.Retired12, PivDataObject.Retired12)]
-    [InlineData(Slot.Retired13, PivDataObject.Retired13)]
-    [InlineData(Slot.Retired14, PivDataObject.Retired14)]
-    [InlineData(Slot.Retired15, PivDataObject.Retired15)]
-    [InlineData(Slot.Retired16, PivDataObject.Retired16)]
-    [InlineData(Slot.Retired17, PivDataObject.Retired17)]
-    [InlineData(Slot.Retired18, PivDataObject.Retired18)]
-    [InlineData(Slot.Retired19, PivDataObject.Retired19)]
-    [InlineData(Slot.Retired20, PivDataObject.Retired20)]
+    [InlineData(Slot.Authentication, DataObject.Authentication)]
+    [InlineData(Slot.Signature, DataObject.Signature)]
+    [InlineData(Slot.KeyManagement, DataObject.KeyManagement)]
+    [InlineData(Slot.CardAuthentication, DataObject.CardAuthentication)]
+    [InlineData(Slot.Attestation, DataObject.Attestation)]
+    [InlineData(Slot.Retired1, DataObject.Retired1)]
+    [InlineData(Slot.Retired2, DataObject.Retired2)]
+    [InlineData(Slot.Retired3, DataObject.Retired3)]
+    [InlineData(Slot.Retired4, DataObject.Retired4)]
+    [InlineData(Slot.Retired5, DataObject.Retired5)]
+    [InlineData(Slot.Retired6, DataObject.Retired6)]
+    [InlineData(Slot.Retired7, DataObject.Retired7)]
+    [InlineData(Slot.Retired8, DataObject.Retired8)]
+    [InlineData(Slot.Retired9, DataObject.Retired9)]
+    [InlineData(Slot.Retired10, DataObject.Retired10)]
+    [InlineData(Slot.Retired11, DataObject.Retired11)]
+    [InlineData(Slot.Retired12, DataObject.Retired12)]
+    [InlineData(Slot.Retired13, DataObject.Retired13)]
+    [InlineData(Slot.Retired14, DataObject.Retired14)]
+    [InlineData(Slot.Retired15, DataObject.Retired15)]
+    [InlineData(Slot.Retired16, DataObject.Retired16)]
+    [InlineData(Slot.Retired17, DataObject.Retired17)]
+    [InlineData(Slot.Retired18, DataObject.Retired18)]
+    [InlineData(Slot.Retired19, DataObject.Retired19)]
+    [InlineData(Slot.Retired20, DataObject.Retired20)]
     public void GetCertificateObjectId_MappedSlot_ReturnsExpectedObjectId(Slot slot, int expectedObjectId)
     {
-        int actual = PivCertificateProtocol.GetCertificateObjectId(slot);
+        int actual = CertificateProtocol.GetCertificateObjectId(slot);
 
         Assert.Equal(expectedObjectId, actual);
     }
@@ -62,7 +62,7 @@ public class PivCertificateObjectIdTests
     {
         var slot = (Slot)0x00;
 
-        var exception = Assert.Throws<ArgumentException>(() => PivCertificateProtocol.GetCertificateObjectId(slot));
+        var exception = Assert.Throws<ArgumentException>(() => CertificateProtocol.GetCertificateObjectId(slot));
 
         Assert.Equal("slot", exception.ParamName);
         Assert.StartsWith("Slot 0x00 does not support certificates", exception.Message);

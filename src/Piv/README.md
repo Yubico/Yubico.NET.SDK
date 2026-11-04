@@ -70,7 +70,7 @@ finally
 {
     CryptographicOperations.ZeroMemory(managementKey);
 }
-var keyOptions = new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never };
+var keyOptions = new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never };
 IPublicKey publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, keyOptions);
 ```
 
@@ -82,7 +82,7 @@ Storing needs management-key authentication, so continue on the `session` from t
 
 ```csharp
 using var certificate = X509CertificateLoader.LoadCertificateFromFile("authentication.cer");
-await session.StoreCertificateAsync(Slot.Authentication, certificate, PivCertificateCompression.Automatic);
+await session.StoreCertificateAsync(Slot.Authentication, certificate, CertificateCompression.Automatic);
 using X509Certificate2? stored = await session.GetCertificateAsync(Slot.Authentication);
 ```
 
@@ -109,10 +109,10 @@ needs firmware 5.3.0; older keys need the overload that takes an explicit `KeyTy
 
 ## User interaction
 
-- Verify the PIN before private-key operations in slots created with `PivPinPolicy.Once` or `Always`.
+- Verify the PIN before private-key operations in slots created with `PinPolicy.Once` or `Always`.
 - Authenticate the management key before key or certificate writes, retry-limit changes, and key move or delete.
   Retry-limit changes (`SetPinAttemptsAsync`) also need a verified PIN.
-- Touch follows the slot's `PivTouchPolicy`. `VerifyUvAsync` does fingerprint verification on biometric keys.
+- Touch follows the slot's `TouchPolicy`. `VerifyUvAsync` does fingerprint verification on biometric keys.
 
 Supply an `IUserPresencePrompt` to learn when an operation needs a touch.
 
@@ -130,7 +130,7 @@ await using var session = await device.CreatePivSessionAsync(options);
 ```
 
 The prompt receives one request immediately before the private-key command and one resolution after the
-response is validated. `PivTouchPolicy.Always` maps to `UserPresenceBasis.PolicyRequires`; `Cached` and
+response is validated. `TouchPolicy.Always` maps to `UserPresenceBasis.PolicyRequires`; `Cached` and
 unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is not observable. `Never`,
 `Default`, and an empty slot are silent. Pass a `CancellationToken` to abandon a wait.
 
@@ -154,8 +154,11 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
   operations enforce their own prerequisites. Queries evaluate known firmware compatibility, not authorization
   or a guarantee that a command will succeed. Compatibility overrides affect these gates, not the physical
   factory-default management-key algorithm used after reset.
-- `PivAlgorithm` → `Core.Cryptography.KeyType`, including `ImportKeyAsync`'s inferred return type. Never cast
-  a `KeyType` to a PIV byte. The SDK maps identifiers explicitly.
+- `PivAlgorithm` → `Core.Cryptography.KeyType`. `ImportKeyAsync` returns `Task`: the caller already knows
+  `privateKey.KeyType`. Never cast a `KeyType` to a PIV byte. The SDK maps identifiers explicitly.
+- PIV-local model/policy prefixes are removed: for example `PinPolicy`, `TouchPolicy`, `PinMetadata`,
+  `SlotMetadata`, `KeyCreationOptions`, and `DataObjects.AdminData`. Session entrypoints remain `PivSession`
+  and `IPivSession`. CLI key selectors use `--key-type` and key-type result fields are named `KeyType`.
 - Slot metadata exposes nullable `KeyType`, `RawAlgorithmId`, and complete `RawData`. Unknown identifiers
   remain readable, while using an unrecognized key algorithm throws `NotSupportedException`.
 - `EnsureSupports` is protected session implementation machinery, no longer a public interface member.

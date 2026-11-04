@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Piv.Backend;
+using Yubico.YubiKit.Piv.Backends;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Piv.UnitTests;
@@ -71,16 +71,16 @@ public class SessionConsistencyTests
     }
 
     [Theory]
-    [InlineData(PivPinPolicy.MatchOnce)]
-    [InlineData(PivPinPolicy.MatchAlways)]
-    public async Task Generate_BiometricPolicyOnNonBioKey_DoesNotMutate(PivPinPolicy policy)
+    [InlineData(PinPolicy.MatchOnce)]
+    [InlineData(PinPolicy.MatchAlways)]
+    public async Task Generate_BiometricPolicyOnNonBioKey_DoesNotMutate(PinPolicy policy)
     {
         var connection = Connection([0x6A, 0x88]);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
 
         await Assert.ThrowsAsync<NotSupportedException>(() => session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256,
-            new PivKeyCreationOptions { PinPolicy = policy }, TestContext.Current.CancellationToken));
+            new KeyCreationOptions { PinPolicy = policy }, TestContext.Current.CancellationToken));
 
         Assert.Equal(0xF7, connection.TransmittedCommands[^1][1]);
         Assert.Equal(0x96, connection.TransmittedCommands[^1][3]);
@@ -134,24 +134,24 @@ public class SessionConsistencyTests
     }
 
     [Theory]
-    [InlineData(3, 4, 0, KeyType.ECP384, PivPinPolicy.Default, PivTouchPolicy.Default)]
-    [InlineData(3, 4, 0, KeyType.ECP256, PivPinPolicy.Once, PivTouchPolicy.Default)]
-    [InlineData(4, 2, 9, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Cached)]
-    [InlineData(5, 6, 9, KeyType.Ed25519, PivPinPolicy.Default, PivTouchPolicy.Default)]
-    [InlineData(5, 6, 9, KeyType.X25519, PivPinPolicy.Default, PivTouchPolicy.Default)]
-    [InlineData(5, 6, 9, KeyType.RSA3072, PivPinPolicy.Default, PivTouchPolicy.Default)]
-    [InlineData(5, 6, 9, KeyType.RSA4096, PivPinPolicy.Default, PivTouchPolicy.Default)]
-    [InlineData(5, 7, 0, KeyType.ECP521, PivPinPolicy.Default, PivTouchPolicy.Default)]
-    [InlineData(5, 7, 0, KeyType.AES256, PivPinPolicy.Default, PivTouchPolicy.Default)]
+    [InlineData(3, 4, 0, KeyType.ECP384, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(3, 4, 0, KeyType.ECP256, PinPolicy.Once, TouchPolicy.Default)]
+    [InlineData(4, 2, 9, KeyType.ECP256, PinPolicy.Default, TouchPolicy.Cached)]
+    [InlineData(5, 6, 9, KeyType.Ed25519, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(5, 6, 9, KeyType.X25519, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(5, 6, 9, KeyType.RSA3072, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(5, 6, 9, KeyType.RSA4096, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(5, 7, 0, KeyType.ECP521, PinPolicy.Default, TouchPolicy.Default)]
+    [InlineData(5, 7, 0, KeyType.AES256, PinPolicy.Default, TouchPolicy.Default)]
     public async Task Generate_UnsupportedKeyOrPolicy_DoesNotTransmit(int major, int minor, int patch,
-        KeyType keyType, PivPinPolicy pinPolicy, PivTouchPolicy touchPolicy)
+        KeyType keyType, PinPolicy pinPolicy, TouchPolicy touchPolicy)
     {
         var connection = Connection();
         await using var session = await PivSession.CreateAsync(connection,
             new SessionCreationOptions { FirmwareVersionOverride = new(major, minor, patch) }, TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<NotSupportedException>(() => session.GenerateKeyAsync(Slot.Authentication, keyType,
-            new PivKeyCreationOptions { PinPolicy = pinPolicy, TouchPolicy = touchPolicy }, TestContext.Current.CancellationToken));
+            new KeyCreationOptions { PinPolicy = pinPolicy, TouchPolicy = touchPolicy }, TestContext.Current.CancellationToken));
 
         Assert.Equal(3, connection.TransmittedCommands.Count);
     }
@@ -166,8 +166,8 @@ public class SessionConsistencyTests
         using var rsa = RSA.Create(2048);
         using var privateKey = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(true));
 
-        Assert.Equal(KeyType.RSA2048, await session.ImportKeyAsync(Slot.Authentication, privateKey,
-            cancellationToken: TestContext.Current.CancellationToken));
+        await session.ImportKeyAsync(Slot.Authentication, privateKey,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xFE && command[2] == 0x07);
     }
@@ -193,7 +193,7 @@ public class SessionConsistencyTests
         var connection = Connection([.. raw, 0x90, 0x00], [.. raw, 0x90, 0x00]);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
 
-        var metadata = Assert.IsType<PivSlotMetadata>(await session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken));
+        var metadata = Assert.IsType<SlotMetadata>(await session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken));
 
         Assert.Null(metadata.KeyType);
         Assert.Equal(0xF1, metadata.RawAlgorithmId);
@@ -211,7 +211,7 @@ public class SessionConsistencyTests
         byte[] raw = [0x01, 0x01, 0xF1, 0x02, 0x02, 0x02, 0x01, 0x03, 0x01, 0x01, 0x04, 0x00];
         var connection = Connection([.. raw, 0x90, 0x00]);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
-        var metadata = Assert.IsType<PivSlotMetadata>(await session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken));
+        var metadata = Assert.IsType<SlotMetadata>(await session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken));
 
         var exception = Assert.Throws<NotSupportedException>(() =>
         {
@@ -322,10 +322,10 @@ public class SessionConsistencyTests
         [new byte[] { 0x90, 0x00 }, new byte[] { 0x05, 0x07, 0x00, 0x90, 0x00 },
             new byte[] { 0x01, 0x01, 0x0A, 0x02, 0x02, 0x00, 0x00, 0x05, 0x01, 0x01, 0x90, 0x00 }, .. responses]);
 
-    private sealed class CancelledBackend : IPivBackend
+    private sealed class CancelledBackend : IBackend
     {
         public List<ApduCommand> Commands { get; } = [];
-        public Task<PivInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<Initialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError = true, CancellationToken cancellationToken = default)
         {

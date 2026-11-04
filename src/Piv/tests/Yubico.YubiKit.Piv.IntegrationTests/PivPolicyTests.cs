@@ -52,14 +52,14 @@ public class PivPolicyTests
         var publicKey = await session.GenerateKeyAsync(
             Slot.Authentication,
             KeyType.ECP256,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Never });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Never });
 
         Assert.NotNull(publicKey);
 
         // Verify metadata reflects the PIN policy
         var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.NotNull(metadata);
-        Assert.Equal(PivPinPolicy.Never, metadata.Value.PinPolicy);
+        Assert.Equal(PinPolicy.Never, metadata.Value.PinPolicy);
 
         // Sign WITHOUT verifying PIN first (should succeed with Never policy)
         var hash = SHA256.HashData("no-pin-required"u8);
@@ -87,14 +87,14 @@ public class PivPolicyTests
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
             KeyType.ECP256,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Always });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Always });
 
         Assert.NotNull(publicKey);
 
         // Verify metadata reflects the PIN policy
         var metadata = await session.GetSlotMetadataAsync(Slot.Signature);
         Assert.NotNull(metadata);
-        Assert.Equal(PivPinPolicy.Always, metadata.Value.PinPolicy);
+        Assert.Equal(PinPolicy.Always, metadata.Value.PinPolicy);
 
         // Verify PIN and sign
         await session.VerifyPinAsync(DefaultPin);

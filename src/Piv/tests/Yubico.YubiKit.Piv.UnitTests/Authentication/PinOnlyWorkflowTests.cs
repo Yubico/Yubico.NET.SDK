@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
-using Yubico.YubiKit.Piv.Backend;
+using Yubico.YubiKit.Piv.Backends;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Piv.UnitTests.Authentication;
@@ -15,7 +15,7 @@ public class PinOnlyWorkflowTests
         using var backend = new WorkflowBackend();
         await using var session = await CreateSessionAsync(backend);
 
-        await Assert.ThrowsAsync<ArgumentException>(() => session.SetPinOnlyModeAsync(PivPinOnlyMode.PinProtected,
+        await Assert.ThrowsAsync<ArgumentException>(() => session.SetPinOnlyModeAsync(PinOnlyMode.PinProtected,
             "123"u8.ToArray(), backend.Key, TestContext.Current.CancellationToken));
 
         Assert.Empty(backend.Commands);
@@ -28,7 +28,7 @@ public class PinOnlyWorkflowTests
         using var backend = new WorkflowBackend();
         await using var session = await CreateSessionAsync(backend);
 
-        await session.SetPinOnlyModeAsync(PivPinOnlyMode.PinProtected, "123456"u8.ToArray(), backend.Key,
+        await session.SetPinOnlyModeAsync(PinOnlyMode.PinProtected, "123456"u8.ToArray(), backend.Key,
             TestContext.Current.CancellationToken);
 
         Assert.Equal(new byte[] { 0x87, 0x87, 0x20, 0xDB, 0x2C, 0xCB, 0xDB }, backend.Commands.Select(c => c.Ins));
@@ -45,7 +45,7 @@ public class PinOnlyWorkflowTests
         using var backend = new WorkflowBackend { FailedInstruction = (byte)failedInstruction };
         await using var session = await CreateSessionAsync(backend);
 
-        await Assert.ThrowsAsync<ApduException>(() => session.SetPinOnlyModeAsync(PivPinOnlyMode.PinProtected,
+        await Assert.ThrowsAsync<ApduException>(() => session.SetPinOnlyModeAsync(PinOnlyMode.PinProtected,
             "123456"u8.ToArray(), backend.Key, TestContext.Current.CancellationToken));
 
         Assert.Equal(failedInstruction, backend.Commands[^1].Ins);
@@ -63,7 +63,7 @@ public class PinOnlyWorkflowTests
         using var backend = new WorkflowBackend { HasProtectedMode = true };
         await using var session = await CreateSessionAsync(backend, type);
 
-        await session.SetPinOnlyModeAsync(PivPinOnlyMode.None, ReadOnlyMemory<byte>.Empty,
+        await session.SetPinOnlyModeAsync(PinOnlyMode.None, ReadOnlyMemory<byte>.Empty,
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(new byte[] { 0xCB, 0xFF, 0xDB, 0xDB }, backend.Commands.Select(c => c.Ins));
@@ -87,7 +87,7 @@ public class PinOnlyWorkflowTests
         using var backend = new WorkflowBackend { HasProtectedMode = true, FailedInstruction = (byte)failedInstruction, FailedCommandNumber = commandCount };
         await using var session = await CreateSessionAsync(backend);
 
-        await Assert.ThrowsAsync<ApduException>(() => session.SetPinOnlyModeAsync(PivPinOnlyMode.None,
+        await Assert.ThrowsAsync<ApduException>(() => session.SetPinOnlyModeAsync(PinOnlyMode.None,
             ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(commandCount, backend.Commands.Count);
@@ -99,7 +99,7 @@ public class PinOnlyWorkflowTests
         using var backend = new WorkflowBackend();
         await using var session = await CreateSessionAsync(backend);
 
-        await session.SetPinOnlyModeAsync(PivPinOnlyMode.None, ReadOnlyMemory<byte>.Empty,
+        await session.SetPinOnlyModeAsync(PinOnlyMode.None, ReadOnlyMemory<byte>.Empty,
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(0xCB, Assert.Single(backend.Commands).Ins);
@@ -117,7 +117,7 @@ public class PinOnlyWorkflowTests
 
         var result = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivPinOnlyMode.PinDerived, result);
+        Assert.Equal(PinOnlyMode.PinDerived, result);
         Assert.True(session.IsManagementKeyAuthenticated);
         Assert.Equal(new byte[] { 0xCB, 0xCB, 0x20, 0x87, 0x87 }, backend.Commands.Select(c => c.Ins));
         Assert.All(backend.SecretBuffers, buffer => Assert.All(buffer.ToArray(), b => Assert.Equal(0, b)));
@@ -133,7 +133,7 @@ public class PinOnlyWorkflowTests
         return session;
     }
 
-    private sealed class WorkflowBackend : IPivBackend, IDisposable
+    private sealed class WorkflowBackend : IBackend, IDisposable
     {
         public static ReadOnlySpan<byte> Salt => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
         public byte[] Key { get; } = Enumerable.Range(1, 24).Select(i => (byte)i).ToArray();
@@ -145,7 +145,7 @@ public class PinOnlyWorkflowTests
         public List<byte[]> CommandData { get; } = [];
         public List<ReadOnlyMemory<byte>> SecretBuffers { get; } = [];
         public List<ApduResponse> AuthenticationResponses { get; } = [];
-        public Task<PivInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<Initialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
         public Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError = true, CancellationToken cancellationToken = default)
         {

@@ -305,10 +305,10 @@ public class PivSessionTests
         _ = await session.GenerateKeyAsync(
             Slot.Signature,
             KeyType.ECP256,
-            new PivKeyCreationOptions
+            new KeyCreationOptions
             {
-                PinPolicy = PivPinPolicy.Once,
-                TouchPolicy = PivTouchPolicy.Never
+                PinPolicy = PinPolicy.Once,
+                TouchPolicy = TouchPolicy.Never
             },
             TestContext.Current.CancellationToken);
 
@@ -321,8 +321,8 @@ public class PivSessionTests
         Assert.Equal([
             0xAC, 0x09,
             0x80, 0x01, 0x11,
-            0xAA, 0x01, (byte)PivPinPolicy.Once,
-            0xAB, 0x01, (byte)PivTouchPolicy.Never
+            0xAA, 0x01, (byte)PinPolicy.Once,
+            0xAB, 0x01, (byte)TouchPolicy.Never
         ], CommandData(command).ToArray());
     }
 
@@ -506,7 +506,7 @@ public class PivSessionTests
     [Fact]
     public async Task ResetAsync_BlocksPinAndPukThenResets()
     {
-        // Regression test for the BlockPukAsync -> PivAuthenticationProtocol.BlockPukAsync extraction:
+        // Regression test for the BlockPukAsync -> AuthenticationProtocol.BlockPukAsync extraction:
         // the APDU sequence (PIN metadata, VERIFY-until-blocked, RESET RETRY-until-blocked P2=0x80,
         // RESET, re-fetch management key metadata) must be unchanged.
         var connection = CreateInitializedConnection(
@@ -756,7 +756,7 @@ public class PivSessionTests
         PivManagementKeyType keyType = PivManagementKeyType.TripleDes) =>
     [
         0x01, 0x01, (byte)keyType,
-        0x02, 0x02, 0x00, (byte)PivTouchPolicy.Default,
+        0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
         0x05, 0x01, 0x01,
         0x90, 0x00
     ];

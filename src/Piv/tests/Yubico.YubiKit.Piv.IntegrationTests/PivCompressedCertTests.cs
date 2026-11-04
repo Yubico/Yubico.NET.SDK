@@ -73,7 +73,7 @@ public class PivCompressedCertTests
             DateTimeOffset.UtcNow.AddYears(1));
 
         // Store with explicit compression enabled
-        await session.StoreCertificateAsync(Slot.Authentication, cert, PivCertificateCompression.Always);
+        await session.StoreCertificateAsync(Slot.Authentication, cert, CertificateCompression.Always);
 
         // Read the certificate back
         var retrieved = await session.GetCertificateAsync(Slot.Authentication);

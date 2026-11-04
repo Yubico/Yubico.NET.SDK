@@ -23,24 +23,24 @@ public class PivPinOnlyWorkflowTests
                 await session.AuthenticateAsync(defaultKey);
                 await session.SetManagementKeyAsync(session.ManagementKeyType, activeKey);
 
-                await session.SetPinOnlyModeAsync(PivPinOnlyMode.PinProtected, pin, activeKey);
+                await session.SetPinOnlyModeAsync(PinOnlyMode.PinProtected, pin, activeKey);
 
-                Assert.Equal(PivPinOnlyMode.PinProtected, await session.GetPinOnlyModeAsync());
+                Assert.Equal(PinOnlyMode.PinProtected, await session.GetPinOnlyModeAsync());
                 Assert.Equal(0, (await session.GetPukMetadataAsync()).RetriesRemaining);
             }
 
             await using (var recovered = await state.Device.CreatePivSessionAsync())
             {
                 Assert.False(recovered.IsManagementKeyAuthenticated);
-                Assert.Equal(PivPinOnlyMode.PinProtected, await recovered.RecoverPinOnlyModeAsync(pin));
+                Assert.Equal(PinOnlyMode.PinProtected, await recovered.RecoverPinOnlyModeAsync(pin));
                 Assert.True(recovered.IsManagementKeyAuthenticated);
 
-                await recovered.SetPinOnlyModeAsync(PivPinOnlyMode.None, pin);
+                await recovered.SetPinOnlyModeAsync(PinOnlyMode.None, pin);
 
                 Assert.True(recovered.IsManagementKeyAuthenticated);
-                Assert.Equal(PivPinOnlyMode.None, await recovered.GetPinOnlyModeAsync());
-                Assert.True((await recovered.GetObjectAsync(PivDataObject.PrintedInformation)).IsEmpty);
-                Assert.True((await recovered.GetObjectAsync(PivDataObject.AdminData)).IsEmpty);
+                Assert.Equal(PinOnlyMode.None, await recovered.GetPinOnlyModeAsync());
+                Assert.True((await recovered.GetObjectAsync(DataObject.PrintedInformation)).IsEmpty);
+                Assert.True((await recovered.GetObjectAsync(DataObject.AdminData)).IsEmpty);
                 await recovered.AuthenticateAsync(defaultKey);
                 Assert.True((await recovered.GetManagementKeyMetadataAsync()).IsDefault);
             }

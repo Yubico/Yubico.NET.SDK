@@ -314,9 +314,9 @@ internal static class CliRunner
         Dictionary<string, string?> flags, int? serial, bool useJson, CancellationToken ct)
     {
         var slot = DeviceHelper.ParseSlot(DeviceHelper.GetFlag(flags, "slot"));
-        var algorithm = DeviceHelper.ParseKeyAlgorithm(DeviceHelper.GetFlag(flags, "algorithm"));
+        var keyType = DeviceHelper.ParseKeyAlgorithm(DeviceHelper.GetFlag(flags, "algorithm"));
         var key = DeviceHelper.ParseHex(DeviceHelper.GetFlag(flags, "management-key"), "management-key");
-        if (slot is null || algorithm is null || key is null) { ZeroAndReturn(key); return 1; }
+        if (slot is null || keyType is null || key is null) { ZeroAndReturn(key); return 1; }
 
         var pinPolicy = DeviceHelper.ParsePinPolicy(DeviceHelper.GetFlag(flags, "pin-policy"));
         var touchPolicy = DeviceHelper.ParseTouchPolicy(DeviceHelper.GetFlag(flags, "touch-policy"));
@@ -336,7 +336,7 @@ internal static class CliRunner
             }
 
             var result = await KeyGeneration.GenerateKeyAsync(
-                session, slot.Value, algorithm.Value, pinPolicy, touchPolicy, ct);
+                session, slot.Value, keyType.Value, pinPolicy, touchPolicy, ct);
 
             if (useJson)
             {
@@ -346,7 +346,7 @@ internal static class CliRunner
             {
                 Console.WriteLine($"Success:    {result.Success}");
                 Console.WriteLine($"Slot:       {result.Slot}");
-                Console.WriteLine($"Algorithm:  {result.Algorithm}");
+                Console.WriteLine($"Key type:  {result.KeyType}");
                 if (result.PublicKey.Length > 0)
                 {
                     Console.WriteLine($"Public Key: {Convert.ToBase64String(result.PublicKey.Span)}");
@@ -894,9 +894,9 @@ internal static class CliRunner
             foreach (var s in result.Slots)
             {
                 Console.WriteLine($"Slot {s.Slot} ({s.Name}): HasKey={s.HasKey} HasCert={s.HasCertificate}");
-                if (s.Metadata is PivSlotMetadata m)
+                if (s.Metadata is SlotMetadata m)
                 {
-                    Console.WriteLine($"  Algorithm:   {m.KeyType}");
+                    Console.WriteLine($"  Key type:   {m.KeyType}");
                     Console.WriteLine($"  PIN Policy:  {m.PinPolicy}");
                     Console.WriteLine($"  Touch Policy:{m.TouchPolicy}");
                     Console.WriteLine($"  Generated:   {m.IsGenerated}");
@@ -965,8 +965,8 @@ internal static class CliRunner
               pin-retries
               mgmt-key-auth       --management-key <hex>
               mgmt-key-change     --management-key <hex> --new-management-key <hex>
-                                  [--algorithm 3des|aes128|aes192|aes256] [--require-touch]
-              key-generate        --slot <9a|9c|9d|9e> --algorithm <rsa2048|rsa3072|rsa4096|eccp256|eccp384|ed25519|x25519>
+                                  [--key-type 3des|aes128|aes192|aes256] [--require-touch]
+              key-generate        --slot <9a|9c|9d|9e> --key-type <rsa2048|rsa3072|rsa4096|eccp256|eccp384|ed25519|x25519>
                                   --management-key <hex>
                                   [--pin-policy default|never|once|always]
                                   [--touch-policy default|never|always|cached]
@@ -991,7 +991,7 @@ internal static class CliRunner
             EXAMPLES:
               PivTool device-info --json
               PivTool pin-verify --pin 123456 --json
-              PivTool key-generate --slot 9a --algorithm eccp256 --management-key 010203040506070801020304050607080102030405060708 --json
+              PivTool key-generate --slot 9a --key-type eccp256 --management-key 010203040506070801020304050607080102030405060708 --json
               PivTool cert-self-sign --slot 9a --management-key 010203040506070801020304050607080102030405060708 --pin 123456 --json
               PivTool slot-info --json
               PivTool reset --force --json

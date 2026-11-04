@@ -48,7 +48,7 @@ public class PivDataObjectsTests
     [Fact]
     public void Chuid_TryDecode_GoldenVector_ProducesExpectedFields()
     {
-        Assert.True(PivCardholderUniqueId.TryDecode(ChuidGoldenVector(), out var chuid));
+        Assert.True(CardholderUniqueId.TryDecode(ChuidGoldenVector(), out var chuid));
 
         Assert.False(chuid.IsEmpty);
         Assert.Equal(FixedFascNumber, chuid.FascNumber.ToArray());
@@ -60,7 +60,7 @@ public class PivDataObjectsTests
     public void Chuid_Encode_RoundTripsGoldenVectorExactly()
     {
         var golden = ChuidGoldenVector();
-        Assert.True(PivCardholderUniqueId.TryDecode(golden, out var chuid));
+        Assert.True(CardholderUniqueId.TryDecode(golden, out var chuid));
 
         Assert.Equal(golden, chuid.Encode().ToArray());
     }
@@ -68,7 +68,7 @@ public class PivDataObjectsTests
     [Fact]
     public void Chuid_TryDecode_Empty_ReturnsEmptyInstance()
     {
-        Assert.True(PivCardholderUniqueId.TryDecode(ReadOnlyMemory<byte>.Empty, out var chuid));
+        Assert.True(CardholderUniqueId.TryDecode(ReadOnlyMemory<byte>.Empty, out var chuid));
         Assert.True(chuid.IsEmpty);
         Assert.Equal(ReadOnlyMemory<byte>.Empty.ToArray(), chuid.Encode().ToArray());
     }
@@ -78,14 +78,14 @@ public class PivDataObjectsTests
     {
         var bad = ChuidGoldenVector();
         bad[2] ^= 0xFF; // corrupt first FASC-N byte
-        Assert.False(PivCardholderUniqueId.TryDecode(bad, out var chuid));
+        Assert.False(CardholderUniqueId.TryDecode(bad, out var chuid));
         Assert.True(chuid.IsEmpty);
     }
 
     [Fact]
     public void Chuid_Create_WrongGuidLength_Throws()
     {
-        Assert.Throws<ArgumentException>(() => PivCardholderUniqueId.Create(new byte[15]));
+        Assert.Throws<ArgumentException>(() => CardholderUniqueId.Create(new byte[15]));
     }
 
     // === CCC (ISC-19) ===
@@ -113,7 +113,7 @@ public class PivDataObjectsTests
     [Fact]
     public void Ccc_TryDecode_GoldenVector_ProducesExpectedFields()
     {
-        Assert.True(PivCardCapabilityContainer.TryDecode(CccGoldenVector(), out var ccc));
+        Assert.True(CardCapabilityContainer.TryDecode(CccGoldenVector(), out var ccc));
 
         Assert.False(ccc.IsEmpty);
         Assert.Equal(CardId14, ccc.CardIdentifier.ToArray());
@@ -128,7 +128,7 @@ public class PivDataObjectsTests
     public void Ccc_Encode_RoundTripsGoldenVectorExactly()
     {
         var golden = CccGoldenVector();
-        Assert.True(PivCardCapabilityContainer.TryDecode(golden, out var ccc));
+        Assert.True(CardCapabilityContainer.TryDecode(golden, out var ccc));
 
         Assert.Equal(golden, ccc.Encode().ToArray());
     }
@@ -138,14 +138,14 @@ public class PivDataObjectsTests
     {
         var bad = CccGoldenVector();
         bad[2] = 0xFF; // corrupt GSC-RID byte inside the fixed AID
-        Assert.False(PivCardCapabilityContainer.TryDecode(bad, out var ccc));
+        Assert.False(CardCapabilityContainer.TryDecode(bad, out var ccc));
         Assert.True(ccc.IsEmpty);
     }
 
     [Fact]
     public void Ccc_Create_WrongCardIdLength_Throws()
     {
-        Assert.Throws<ArgumentException>(() => PivCardCapabilityContainer.Create(new byte[13]));
+        Assert.Throws<ArgumentException>(() => CardCapabilityContainer.Create(new byte[13]));
     }
 
     // === AdminData (ISC-20) ===
@@ -159,7 +159,7 @@ public class PivDataObjectsTests
         // 80 03 [81 01 03] -- PukBlocked (bit 0) and PinProtected (bit 1) both set, no salt/date.
         byte[] golden = [0x80, 0x03, 0x81, 0x01, 0x03];
 
-        Assert.True(PivAdminData.TryDecode(golden, out var adminData));
+        Assert.True(AdminData.TryDecode(golden, out var adminData));
 
         Assert.False(adminData.IsEmpty);
         Assert.True(adminData.PukBlocked);
@@ -172,7 +172,7 @@ public class PivDataObjectsTests
     public void AdminData_Encode_BitFieldOnly_RoundTripsGoldenVectorExactly()
     {
         byte[] golden = [0x80, 0x03, 0x81, 0x01, 0x03];
-        Assert.True(PivAdminData.TryDecode(golden, out var adminData));
+        Assert.True(AdminData.TryDecode(golden, out var adminData));
 
         Assert.Equal(golden, adminData.Encode().ToArray());
     }
@@ -180,7 +180,7 @@ public class PivDataObjectsTests
     [Fact]
     public void AdminData_WithSalt_RoundTripsExactly()
     {
-        var adminData = PivAdminData.Create(pukBlocked: true, pinProtected: false, salt: Salt16);
+        var adminData = AdminData.Create(pukBlocked: true, pinProtected: false, salt: Salt16);
 
         var encoded = adminData.Encode().ToArray();
 
@@ -188,7 +188,7 @@ public class PivDataObjectsTests
         byte[] expected = [0x80, 0x15, 0x81, 0x01, 0x01, 0x82, 0x10, .. Salt16];
         Assert.Equal(expected, encoded);
 
-        Assert.True(PivAdminData.TryDecode(encoded, out var decoded));
+        Assert.True(AdminData.TryDecode(encoded, out var decoded));
         Assert.True(decoded.PukBlocked);
         Assert.False(decoded.PinProtected);
         Assert.Equal(Salt16, decoded.Salt!.Value.ToArray());
@@ -198,10 +198,10 @@ public class PivDataObjectsTests
     public void AdminData_WithPinLastUpdated_RoundTripsExactly()
     {
         var updated = DateTimeOffset.FromUnixTimeSeconds(1_700_000_000);
-        var adminData = PivAdminData.Create(pukBlocked: false, pinProtected: false, pinLastUpdated: updated);
+        var adminData = AdminData.Create(pukBlocked: false, pinProtected: false, pinLastUpdated: updated);
 
         var encoded = adminData.Encode();
-        Assert.True(PivAdminData.TryDecode(encoded, out var decoded));
+        Assert.True(AdminData.TryDecode(encoded, out var decoded));
 
         Assert.Equal(updated, decoded.PinLastUpdated);
     }
@@ -209,7 +209,7 @@ public class PivDataObjectsTests
     [Fact]
     public void AdminData_TryDecode_Empty_ReturnsEmptyInstance()
     {
-        Assert.True(PivAdminData.TryDecode(ReadOnlyMemory<byte>.Empty, out var adminData));
+        Assert.True(AdminData.TryDecode(ReadOnlyMemory<byte>.Empty, out var adminData));
         Assert.True(adminData.IsEmpty);
     }
 
@@ -217,14 +217,14 @@ public class PivDataObjectsTests
     public void AdminData_TryDecode_WrongOuterTag_Fails()
     {
         byte[] bad = [0x81, 0x03, 0x81, 0x01, 0x03];
-        Assert.False(PivAdminData.TryDecode(bad, out var adminData));
+        Assert.False(AdminData.TryDecode(bad, out var adminData));
         Assert.True(adminData.IsEmpty);
     }
 
     [Fact]
     public void AdminData_Create_WrongSaltLength_Throws()
     {
-        Assert.Throws<ArgumentException>(() => PivAdminData.Create(false, false, new byte[10]));
+        Assert.Throws<ArgumentException>(() => AdminData.Create(false, false, new byte[10]));
     }
 
     [Fact]
@@ -235,7 +235,7 @@ public class PivDataObjectsTests
         // would silently keep only the last occurrence, which is a strictness regression.
         byte[] duplicateBitField = [0x80, 0x06, 0x81, 0x01, 0x03, 0x81, 0x01, 0x00];
 
-        Assert.False(PivAdminData.TryDecode(duplicateBitField, out var adminData));
+        Assert.False(AdminData.TryDecode(duplicateBitField, out var adminData));
         Assert.True(adminData.IsEmpty);
     }
 
@@ -249,7 +249,7 @@ public class PivDataObjectsTests
             0x82, 0x10, .. Salt16
         ];
 
-        Assert.False(PivAdminData.TryDecode(duplicateSalt, out var adminData));
+        Assert.False(AdminData.TryDecode(duplicateSalt, out var adminData));
         Assert.True(adminData.IsEmpty);
     }
 
@@ -260,7 +260,7 @@ public class PivDataObjectsTests
         // field/salt/date). v1's TryDecode has a `_ => false` default case for unknown tags.
         byte[] unrecognizedTag = [0x80, 0x05, 0x81, 0x01, 0x03, 0x84, 0x00];
 
-        Assert.False(PivAdminData.TryDecode(unrecognizedTag, out var adminData));
+        Assert.False(AdminData.TryDecode(unrecognizedTag, out var adminData));
         Assert.True(adminData.IsEmpty);
     }
 
@@ -271,7 +271,7 @@ public class PivDataObjectsTests
     {
         byte[] golden = [0xC1, 0x01, 0x02, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00];
 
-        Assert.True(PivKeyHistory.TryDecode(golden, out var keyHistory));
+        Assert.True(KeyHistory.TryDecode(golden, out var keyHistory));
 
         Assert.False(keyHistory.IsEmpty);
         Assert.Equal(2, keyHistory.OnCardCertificates);
@@ -283,7 +283,7 @@ public class PivDataObjectsTests
     public void KeyHistory_Encode_NoUrl_RoundTripsGoldenVectorExactly()
     {
         byte[] golden = [0xC1, 0x01, 0x02, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00];
-        Assert.True(PivKeyHistory.TryDecode(golden, out var keyHistory));
+        Assert.True(KeyHistory.TryDecode(golden, out var keyHistory));
 
         Assert.Equal(golden, keyHistory.Encode().ToArray());
     }
@@ -292,10 +292,10 @@ public class PivDataObjectsTests
     public void KeyHistory_WithUrl_RoundTripsExactly()
     {
         var url = new Uri("https://example.com/certs");
-        var keyHistory = PivKeyHistory.Create(1, 2, url);
+        var keyHistory = KeyHistory.Create(1, 2, url);
 
         var encoded = keyHistory.Encode();
-        Assert.True(PivKeyHistory.TryDecode(encoded, out var decoded));
+        Assert.True(KeyHistory.TryDecode(encoded, out var decoded));
 
         Assert.Equal(1, decoded.OnCardCertificates);
         Assert.Equal(2, decoded.OffCardCertificates);
@@ -305,7 +305,7 @@ public class PivDataObjectsTests
     [Fact]
     public void KeyHistory_TryDecode_Empty_ReturnsEmptyInstance()
     {
-        Assert.True(PivKeyHistory.TryDecode(ReadOnlyMemory<byte>.Empty, out var keyHistory));
+        Assert.True(KeyHistory.TryDecode(ReadOnlyMemory<byte>.Empty, out var keyHistory));
         Assert.True(keyHistory.IsEmpty);
     }
 
@@ -313,7 +313,7 @@ public class PivDataObjectsTests
     public void KeyHistory_Create_UrlTooLong_Throws()
     {
         string longUrl = "https://example.com/" + new string('a', 118);
-        Assert.Throws<ArgumentException>(() => PivKeyHistory.Create(0, 0, new Uri(longUrl)));
+        Assert.Throws<ArgumentException>(() => KeyHistory.Create(0, 0, new Uri(longUrl)));
     }
 
     // === ISC-22 / ISC-22.1: typed read/write match raw GetObjectAsync/PutObjectAsync ===
@@ -341,7 +341,7 @@ public class PivDataObjectsTests
         int transmissionsBeforeOperation = connection.TransmittedCommands.Count;
 
         var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
-            () => session.GetObjectAsync(PivDataObject.Chuid, TestContext.Current.CancellationToken));
+            () => session.GetObjectAsync(DataObject.Chuid, TestContext.Current.CancellationToken));
 
         Assert.Equal(typeof(PivSession).FullName, exception.ObjectName);
         Assert.Equal(transmissionsBeforeOperation, connection.TransmittedCommands.Count);
@@ -351,7 +351,7 @@ public class PivDataObjectsTests
     public async Task SetCardholderUniqueIdAsync_TransmitsSameDataAsRawPutObjectAsync()
     {
         var golden = ChuidGoldenVector();
-        Assert.True(PivCardholderUniqueId.TryDecode(golden, out var chuid));
+        Assert.True(CardholderUniqueId.TryDecode(golden, out var chuid));
 
         var typedConnection = CreateInitializedConnection([0x90, 0x00]);
         await using var typedSession = await PivSession.CreateAsync(typedConnection, cancellationToken: TestContext.Current.CancellationToken);
@@ -361,7 +361,7 @@ public class PivDataObjectsTests
         var rawConnection = CreateInitializedConnection([0x90, 0x00]);
         await using var rawSession = await PivSession.CreateAsync(rawConnection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(rawSession);
-        await rawSession.PutObjectAsync(PivDataObject.Chuid, golden, TestContext.Current.CancellationToken);
+        await rawSession.PutObjectAsync(DataObject.Chuid, golden, TestContext.Current.CancellationToken);
 
         Assert.Equal(rawConnection.TransmittedCommands[^1], typedConnection.TransmittedCommands[^1]);
     }
@@ -419,7 +419,7 @@ public class PivDataObjectsTests
     private static byte[] ManagementKeyMetadataResponse() =>
     [
         0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
-        0x02, 0x02, 0x00, (byte)PivTouchPolicy.Default,
+        0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
         0x05, 0x01, 0x01,
         0x90, 0x00
     ];

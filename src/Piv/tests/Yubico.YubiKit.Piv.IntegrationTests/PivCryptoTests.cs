@@ -51,7 +51,7 @@ public class PivCryptoTests
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
             KeyType.ECP256,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = SHA256.HashData("test data"u8);
@@ -109,7 +109,7 @@ public class PivCryptoTests
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
             KeyType.Ed25519,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "test data"u8.ToArray();
@@ -152,7 +152,7 @@ public class PivCryptoTests
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
             KeyType.ECP384,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         // P384 uses SHA384 (48-byte hash)
@@ -241,7 +241,7 @@ public class PivCryptoTests
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
             KeyType.RSA2048,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "test data for RSA"u8.ToArray();
@@ -274,7 +274,7 @@ public class PivCryptoTests
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
             KeyType.RSA1024,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "test data for RSA 1024"u8.ToArray();
@@ -307,7 +307,7 @@ public class PivCryptoTests
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
             KeyType.RSA3072,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "test data for RSA 3072"u8.ToArray();
@@ -340,7 +340,7 @@ public class PivCryptoTests
         var publicKey = await session.GenerateKeyAsync(
             Slot.Signature,
             KeyType.RSA4096,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "test data for RSA 4096"u8.ToArray();

@@ -19,7 +19,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
-using Yubico.YubiKit.Piv.Backend;
+using Yubico.YubiKit.Piv.Backends;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Piv.UnitTests.Authentication;
@@ -38,7 +38,7 @@ public class PivPinOnlyModeSessionTests
 
         var result = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivPinOnlyMode.PinProtected, result);
+        Assert.Equal(PinOnlyMode.PinProtected, result);
         Assert.True(session.IsManagementKeyAuthenticated);
         Assert.Single(connection.TransmittedCommands, command => command[1] == 0x20);
         Assert.Equal(3, connection.TransmittedCommands.Count(command => command[1] == 0xCB));
@@ -84,7 +84,7 @@ public class PivPinOnlyModeSessionTests
 
         var mode = await session.GetPinOnlyModeAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivPinOnlyMode.None, mode);
+        Assert.Equal(PinOnlyMode.None, mode);
         Assert.Contains(connection.TransmittedCommands, c => c[1] == 0xCB); // GET DATA
     }
 
@@ -95,7 +95,7 @@ public class PivPinOnlyModeSessionTests
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => session.SetPinOnlyModeAsync(
-            PivPinOnlyMode.PinProtected,
+            PinOnlyMode.PinProtected,
             "123456"u8.ToArray(),
             new byte[24],
             TestContext.Current.CancellationToken));
@@ -109,7 +109,7 @@ public class PivPinOnlyModeSessionTests
         MarkAuthenticated(session);
 
         await Assert.ThrowsAsync<ArgumentException>(() => session.SetPinOnlyModeAsync(
-            PivPinOnlyMode.PinDerived,
+            PinOnlyMode.PinDerived,
             "123456"u8.ToArray(),
             new byte[24],
             TestContext.Current.CancellationToken));
@@ -128,7 +128,7 @@ public class PivPinOnlyModeSessionTests
         int initializationCommandCount = connection.TransmittedCommands.Count;
 
         var exception = await Assert.ThrowsAsync<ApduException>(() => session.SetPinOnlyModeAsync(
-            PivPinOnlyMode.PinProtected,
+            PinOnlyMode.PinProtected,
             "123456"u8.ToArray(),
             new byte[24],
             TestContext.Current.CancellationToken));
@@ -153,7 +153,7 @@ public class PivPinOnlyModeSessionTests
 
         var mode = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivPinOnlyMode.None, mode);
+        Assert.Equal(PinOnlyMode.None, mode);
         Assert.DoesNotContain(connection.TransmittedCommands, c => c[1] == 0x87); // no GENERAL AUTHENTICATE
         Assert.DoesNotContain(connection.TransmittedCommands, c => c[1] == 0x20); // no VERIFY
     }
@@ -167,7 +167,7 @@ public class PivPinOnlyModeSessionTests
 
         var mode = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivPinOnlyMode.PinProtected, mode);
+        Assert.Equal(PinOnlyMode.PinProtected, mode);
         Assert.True(session.IsManagementKeyAuthenticated);
         Assert.Equal(3, connection.AuthenticationAttempts);
         Assert.Equal([1, 2, 3], connection.WitnessSubmissionAttempts);
@@ -184,7 +184,7 @@ public class PivPinOnlyModeSessionTests
 
         var mode = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivPinOnlyMode.None, mode);
+        Assert.Equal(PinOnlyMode.None, mode);
         Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal(3, connection.AuthenticationAttempts);
         Assert.Equal([1, 2, 3], connection.WitnessSubmissionAttempts);
@@ -218,17 +218,17 @@ public class PivPinOnlyModeSessionTests
     {
         var field = typeof(PivSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new InvalidOperationException("PIV backend field not found.");
-        var captured = new AuthenticationBufferCapture(Assert.IsAssignableFrom<IPivBackend>(field.GetValue(session)));
+        var captured = new AuthenticationBufferCapture(Assert.IsAssignableFrom<IBackend>(field.GetValue(session)));
         field.SetValue(session, captured);
         return captured;
     }
 
-    private sealed class AuthenticationBufferCapture(IPivBackend backend) : IPivBackend
+    private sealed class AuthenticationBufferCapture(IBackend backend) : IBackend
     {
         private readonly List<ReadOnlyMemory<byte>> _payloads = [];
         private readonly List<ReadOnlyMemory<byte>> _responses = [];
 
-        public Task<PivInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
+        public Task<Initialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
             backend.ReadInitialStateAsync(cancellationToken);
 
         public async Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError = true, CancellationToken cancellationToken = default)
@@ -265,7 +265,7 @@ public class PivPinOnlyModeSessionTests
     private static byte[] ManagementKeyMetadataResponse() =>
     [
         0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
-        0x02, 0x02, 0x00, (byte)PivTouchPolicy.Default,
+        0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
         0x05, 0x01, 0x01,
         0x90, 0x00
     ];

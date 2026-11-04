@@ -90,7 +90,7 @@ public static class Certificates
     /// 
     /// var certData = await File.ReadAllBytesAsync("certificate.pem", ct);
     /// var result = await Certificates.ImportCertificateAsync(
-    ///     session, Slot.Authentication, certData, PivCertificateCompression.Automatic, ct);
+    ///     session, Slot.Authentication, certData, CertificateCompression.Automatic, ct);
     /// </code>
     /// </example>
     public static async Task<CertificateResult> ImportCertificateAsync(
@@ -112,7 +112,7 @@ public static class Certificates
             await session.StoreCertificateAsync(
                 slot,
                 cert,
-                compress ? PivCertificateCompression.Always : PivCertificateCompression.Automatic,
+                compress ? CertificateCompression.Always : CertificateCompression.Automatic,
                 cancellationToken);
             return CertificateResult.Stored();
         }
@@ -302,7 +302,7 @@ public static class Certificates
             await session.StoreCertificateAsync(
                 slot,
                 newCert,
-                PivCertificateCompression.Automatic,
+                CertificateCompression.Automatic,
                 cancellationToken);
             return CertificateResult.Succeeded(newCert);
         }
@@ -411,7 +411,7 @@ public static class Certificates
 internal sealed class YubiKeyRsaSignatureGenerator(
     IPivSession session,
     Slot slot,
-    KeyType algorithm,
+    KeyType keyType,
     RSA publicKey) : X509SignatureGenerator
 {
     public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
@@ -459,7 +459,7 @@ internal sealed class YubiKeyRsaSignatureGenerator(
         byte[] padded = ApplyPkcs1Padding(digestInfo, keySize);
 
         // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
-        var signature = session.SignOrDecryptAsync(slot, algorithm, padded).GetAwaiter().GetResult();
+        var signature = session.SignOrDecryptAsync(slot, keyType, padded).GetAwaiter().GetResult();
 
         return signature.ToArray();
     }
@@ -517,7 +517,7 @@ internal sealed class YubiKeyRsaSignatureGenerator(
 internal sealed class YubiKeyEcdsaSignatureGenerator(
     IPivSession session,
     Slot slot,
-    KeyType algorithm,
+    KeyType keyType,
     ECDsa publicKey) : X509SignatureGenerator
 {
     public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
@@ -552,7 +552,7 @@ internal sealed class YubiKeyEcdsaSignatureGenerator(
         // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
         // YubiKey returns ECDSA signatures in DER format (RFC 3279 SEQUENCE { INTEGER r, INTEGER s }).
         // X.509 CSR signature fields also expect DER, so no conversion is needed.
-        var signatureMemory = session.SignOrDecryptAsync(slot, algorithm, hash).GetAwaiter().GetResult();
+        var signatureMemory = session.SignOrDecryptAsync(slot, keyType, hash).GetAwaiter().GetResult();
         return signatureMemory.ToArray();
     }
 

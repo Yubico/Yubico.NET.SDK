@@ -34,7 +34,7 @@ public sealed record SlotInfo
     /// <summary>
     /// Gets the slot metadata if a key is present.
     /// </summary>
-    public PivSlotMetadata? Metadata { get; init; }
+    public SlotMetadata? Metadata { get; init; }
 
     /// <summary>
     /// Gets the certificate stored in the slot.

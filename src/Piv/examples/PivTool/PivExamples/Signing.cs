@@ -91,9 +91,9 @@ public static class Signing
             };
 
             // Sign using explicit algorithm from the already-fetched metadata.
-            var algorithm = metadata.Value.KeyType ?? throw new NotSupportedException(
+            var keyType = metadata.Value.KeyType ?? throw new NotSupportedException(
                 $"Unknown PIV algorithm 0x{metadata.Value.RawAlgorithmId:X2}.");
-            var signature = await session.SignOrDecryptAsync(slot, algorithm, hash, cancellationToken);
+            var signature = await session.SignOrDecryptAsync(slot, keyType, hash, cancellationToken);
 
             stopwatch.Stop();
             return SigningResult.Succeeded(signature, stopwatch.ElapsedMilliseconds);

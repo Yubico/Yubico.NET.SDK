@@ -77,7 +77,7 @@ public class PivSessionContentionTests
     {
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(firmware));
-        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
     }
 

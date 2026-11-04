@@ -118,7 +118,7 @@ public class PivDiscoveryContentionTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var digest = SHA256.HashData("discovery contention"u8);

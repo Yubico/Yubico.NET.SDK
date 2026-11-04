@@ -159,7 +159,7 @@ internal static class DeviceHelper
         if (value is null)
         {
             Console.Error.WriteLine(
-                "Error: --algorithm is required. Valid: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519");
+                "Error: --key-type is required. Valid: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519");
             return null;
         }
 
@@ -178,7 +178,7 @@ internal static class DeviceHelper
         if (alg is null)
         {
             Console.Error.WriteLine(
-                $"Error: Invalid --algorithm '{value}'. Valid: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519");
+                $"Error: Invalid --key-type '{value}'. Valid: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519");
         }
 
         return alg;
@@ -187,25 +187,25 @@ internal static class DeviceHelper
     /// <summary>
     /// Parses a PIN policy string.
     /// </summary>
-    internal static PivPinPolicy ParsePinPolicy(string? value) =>
+    internal static PinPolicy ParsePinPolicy(string? value) =>
         value?.ToLowerInvariant() switch
         {
-            "never" => PivPinPolicy.Never,
-            "once" => PivPinPolicy.Once,
-            "always" => PivPinPolicy.Always,
-            _ => PivPinPolicy.Default
+            "never" => PinPolicy.Never,
+            "once" => PinPolicy.Once,
+            "always" => PinPolicy.Always,
+            _ => PinPolicy.Default
         };
 
     /// <summary>
     /// Parses a touch policy string.
     /// </summary>
-    internal static PivTouchPolicy ParseTouchPolicy(string? value) =>
+    internal static TouchPolicy ParseTouchPolicy(string? value) =>
         value?.ToLowerInvariant() switch
         {
-            "never" => PivTouchPolicy.Never,
-            "always" => PivTouchPolicy.Always,
-            "cached" => PivTouchPolicy.Cached,
-            _ => PivTouchPolicy.Default
+            "never" => TouchPolicy.Never,
+            "always" => TouchPolicy.Always,
+            "cached" => TouchPolicy.Cached,
+            _ => TouchPolicy.Default
         };
 
     /// <summary>

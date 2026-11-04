@@ -111,7 +111,7 @@ public static class SlotInfoQuery
         string name,
         CancellationToken cancellationToken)
     {
-        PivSlotMetadata? metadata = null;
+        SlotMetadata? metadata = null;
         try
         {
             metadata = await session.GetSlotMetadataAsync(slot, cancellationToken);

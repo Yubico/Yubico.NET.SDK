@@ -39,7 +39,7 @@ public class PivTypesTests
     [InlineData(KeyType.X25519, 0xE1)]
     public void PivAlgorithmId_HasCorrectValue(KeyType algo, byte expected)
     {
-        Assert.Equal(expected, PivAlgorithmId.Encode(algo));
+        Assert.Equal(expected, KeyTypeEncoding.Encode(algo));
     }
 
     [Theory]
@@ -69,21 +69,21 @@ public class PivTypesTests
     }
 
     [Theory]
-    [InlineData(PivPinPolicy.Default, 0x00)]
-    [InlineData(PivPinPolicy.Never, 0x01)]
-    [InlineData(PivPinPolicy.Once, 0x02)]
-    [InlineData(PivPinPolicy.Always, 0x03)]
-    public void PivPinPolicy_HasCorrectValue(PivPinPolicy policy, byte expected)
+    [InlineData(PinPolicy.Default, 0x00)]
+    [InlineData(PinPolicy.Never, 0x01)]
+    [InlineData(PinPolicy.Once, 0x02)]
+    [InlineData(PinPolicy.Always, 0x03)]
+    public void PivPinPolicy_HasCorrectValue(PinPolicy policy, byte expected)
     {
         Assert.Equal(expected, (byte)policy);
     }
 
     [Theory]
-    [InlineData(PivTouchPolicy.Default, 0x00)]
-    [InlineData(PivTouchPolicy.Never, 0x01)]
-    [InlineData(PivTouchPolicy.Always, 0x02)]
-    [InlineData(PivTouchPolicy.Cached, 0x03)]
-    public void PivTouchPolicy_HasCorrectValue(PivTouchPolicy policy, byte expected)
+    [InlineData(TouchPolicy.Default, 0x00)]
+    [InlineData(TouchPolicy.Never, 0x01)]
+    [InlineData(TouchPolicy.Always, 0x02)]
+    [InlineData(TouchPolicy.Cached, 0x03)]
+    public void PivTouchPolicy_HasCorrectValue(TouchPolicy policy, byte expected)
     {
         Assert.Equal(expected, (byte)policy);
     }

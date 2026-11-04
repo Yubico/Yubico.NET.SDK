@@ -27,7 +27,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenTouchPolicyAlways_RequestsBeforeApduAndResolvesCompleted()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt(() => connection.TransmittedCommands.Count);
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -54,7 +54,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_InsideIntentScope_ReportsIntentAfterMetadataLookup()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -78,7 +78,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_AutoDetect_ReusesLoadedMetadata()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -103,7 +103,7 @@ public class TouchNotificationTests
     public async Task DecryptAsync_ReusesMetadataAndResolvesCompletedBeforePostProcessingFails()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.RSA1024, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.RSA1024, TouchPolicy.Always),
             [0x7C, 0x02, 0x82, 0x00, 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt(() => connection.TransmittedCommands.Count);
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -131,7 +131,7 @@ public class TouchNotificationTests
     public async Task CalculateSecretAsync_WhenTouchPolicyCached_RequestsConservatively()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Cached),
+            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Cached),
             [0x7C, 0x22, 0x82, 0x20, .. new byte[32], 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -152,9 +152,9 @@ public class TouchNotificationTests
     }
 
     [Theory]
-    [InlineData(PivTouchPolicy.Default)]
-    [InlineData(PivTouchPolicy.Never)]
-    public async Task SignOrDecryptAsync_WhenTouchPolicyDoesNotRequireTouch_RemainsSilent(PivTouchPolicy touchPolicy)
+    [InlineData(TouchPolicy.Default)]
+    [InlineData(TouchPolicy.Never)]
+    public async Task SignOrDecryptAsync_WhenTouchPolicyDoesNotRequireTouch_RemainsSilent(TouchPolicy touchPolicy)
     {
         var connection = CreateInitializedConnection(
             SlotMetadataResponse(KeyType.ECP256, touchPolicy),
@@ -176,7 +176,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenTouchPolicyIsUnknown_RequestsConservatively()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, (PivTouchPolicy)0x7F),
+            SlotMetadataResponse(KeyType.ECP256, (TouchPolicy)0x7F),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -220,7 +220,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenPromptThrows_DoesNotTransmitOrResolve()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt
         {
@@ -245,7 +245,7 @@ public class TouchNotificationTests
     {
         using var cancellationSource = new CancellationTokenSource();
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt
         {
@@ -272,7 +272,7 @@ public class TouchNotificationTests
     {
         var expected = new InvalidOperationException("resolution failed");
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt { ResolutionException = expected };
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -291,7 +291,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenSuccessResponseIsMalformed_ResolvesFailedAndPreservesParseError()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
             [0x7D, 0x00, 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt
         {
@@ -317,7 +317,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenApduAndResolutionFail_PreservesApduException()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, TouchPolicy.Always),
             [0x69, 0x82]);
         var prompt = new RecordingUserPresencePrompt
         {
@@ -354,15 +354,15 @@ public class TouchNotificationTests
     private static byte[] ManagementKeyMetadataResponse() =>
     [
         0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
-        0x02, 0x02, 0x00, (byte)PivTouchPolicy.Default,
+        0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
         0x05, 0x01, 0x01,
         0x90, 0x00
     ];
 
-    private static byte[] SlotMetadataResponse(KeyType algorithm, PivTouchPolicy touchPolicy) =>
+    private static byte[] SlotMetadataResponse(KeyType keyType, TouchPolicy touchPolicy) =>
     [
-        0x01, 0x01, PivAlgorithmId.Encode(algorithm),
-        0x02, 0x02, (byte)PivPinPolicy.Default, (byte)touchPolicy,
+        0x01, 0x01, KeyTypeEncoding.Encode(keyType),
+        0x02, 0x02, (byte)PinPolicy.Default, (byte)touchPolicy,
         0x03, 0x01, 0x01,
         0x90, 0x00
     ];

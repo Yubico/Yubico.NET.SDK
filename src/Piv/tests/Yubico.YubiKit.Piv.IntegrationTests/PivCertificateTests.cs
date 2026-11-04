@@ -90,7 +90,7 @@ public class PivCertificateTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
 
-        var data = await session.GetObjectAsync(PivDataObject.Chuid);
+        var data = await session.GetObjectAsync(DataObject.Chuid);
 
         Assert.True(data.IsEmpty);
     }

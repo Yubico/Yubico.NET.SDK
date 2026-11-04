@@ -52,7 +52,7 @@ public static class SlotOverviewMenu
             .AddColumn("Slot")
             .AddColumn("Name")
             .AddColumn("Key")
-            .AddColumn("Algorithm")
+            .AddColumn("Key type")
             .AddColumn("Certificate")
             .AddColumn("Subject");
 
@@ -60,7 +60,7 @@ public static class SlotOverviewMenu
         {
             var keyStatus = slot.HasKey ? "[green]Yes[/]" : "[grey]No[/]";
             var certStatus = slot.HasCertificate ? "[green]Yes[/]" : "[grey]No[/]";
-            var algorithm = slot.Metadata?.KeyType.ToString() ?? "-";
+            var keyType = slot.Metadata?.KeyType.ToString() ?? "-";
             var subject = slot.Certificate?.Subject ?? "-";
 
             // Truncate long subjects
@@ -73,7 +73,7 @@ public static class SlotOverviewMenu
                 $"0x{(byte)slot.Slot:X2}",
                 slot.Name,
                 keyStatus,
-                algorithm,
+                keyType,
                 certStatus,
                 subject);
         }

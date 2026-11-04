@@ -103,7 +103,7 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
         {
             await session.ResetAsync();
             await session.AuthenticateAsync(GetDefaultManagementKey(keyA.FirmwareVersion));
-            _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
             await session.VerifyPinAsync(DefaultPin);
 
             var digest = SHA256.HashData("multi-key contention"u8);
@@ -156,7 +156,7 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
         {
             await session.ResetAsync();
             await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-            _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new KeyCreationOptions { PinPolicy = PinPolicy.Once });
             await session.VerifyPinAsync(DefaultPin);
         }
 
@@ -211,7 +211,7 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
                 _ = await session.GenerateKeyAsync(
                     Slot.Authentication,
                     KeyType.ECP256,
-                    new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never });
+                    new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never });
                 await session.VerifyPinAsync(DefaultPin);
             }
 

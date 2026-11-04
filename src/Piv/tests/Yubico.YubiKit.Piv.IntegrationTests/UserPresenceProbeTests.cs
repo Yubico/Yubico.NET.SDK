@@ -33,9 +33,9 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
         await using var session = await state.Device.CreatePivSessionAsync(
             new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 
-        PivManagementKeyMetadata managementKey = await session.GetManagementKeyMetadataAsync();
-        PivPinMetadata pin = await session.GetPinMetadataAsync();
-        PivSlotMetadata? retired20 = await session.GetSlotMetadataAsync(Slot.Retired20);
+        ManagementKeyMetadata managementKey = await session.GetManagementKeyMetadataAsync();
+        PinMetadata pin = await session.GetPinMetadataAsync();
+        SlotMetadata? retired20 = await session.GetSlotMetadataAsync(Slot.Retired20);
 
         output.WriteLine($"Firmware={state.FirmwareVersion}");
         output.WriteLine(
@@ -62,8 +62,8 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
                 UserPresencePrompt = prompt
             });
 
-        PivManagementKeyMetadata managementKeyMetadata = await session.GetManagementKeyMetadataAsync();
-        PivSlotMetadata? existingSlotMetadata = await session.GetSlotMetadataAsync(Slot.Retired20);
+        ManagementKeyMetadata managementKeyMetadata = await session.GetManagementKeyMetadataAsync();
+        SlotMetadata? existingSlotMetadata = await session.GetSlotMetadataAsync(Slot.Retired20);
 
         output.WriteLine(
             $"Prerequisites: Firmware={state.FirmwareVersion}, ManagementKeyIsDefault={managementKeyMetadata.IsDefault}, " +
@@ -75,7 +75,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             !managementKeyMetadata.IsDefault,
             "The PIV management key is not the known default; refusing to authenticate or mutate the applet.");
         Skip.If(
-            managementKeyMetadata.TouchPolicy is not PivTouchPolicy.Default and not PivTouchPolicy.Never,
+            managementKeyMetadata.TouchPolicy is not TouchPolicy.Default and not TouchPolicy.Never,
             $"The management key touch policy is {managementKeyMetadata.TouchPolicy}; refusing an unrelated touch " +
             "during prerequisite authentication.");
         Skip.If(
@@ -110,10 +110,10 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             IPublicKey generatedPublicKey = await session.GenerateKeyAsync(
                 Slot.Retired20,
                 KeyType.ECP256,
-                new PivKeyCreationOptions
+                new KeyCreationOptions
                 {
-                    PinPolicy = PivPinPolicy.Never,
-                    TouchPolicy = PivTouchPolicy.Always
+                    PinPolicy = PinPolicy.Never,
+                    TouchPolicy = TouchPolicy.Always
                 });
             keyCreated = true;
             ECPublicKey publicKey = Assert.IsType<ECPublicKey>(generatedPublicKey);
@@ -149,13 +149,13 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             Assert.Equal(CancellationToken.None, resolved.CancellationToken);
 
             using var followUpCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            PivSlotMetadata? slotMetadata = await session.GetSlotMetadataAsync(
+            SlotMetadata? slotMetadata = await session.GetSlotMetadataAsync(
                 Slot.Retired20,
                 followUpCts.Token);
             Assert.NotNull(slotMetadata);
             Assert.Equal(KeyType.ECP256, slotMetadata.Value.KeyType);
-            Assert.Equal(PivPinPolicy.Never, slotMetadata.Value.PinPolicy);
-            Assert.Equal(PivTouchPolicy.Always, slotMetadata.Value.TouchPolicy);
+            Assert.Equal(PinPolicy.Never, slotMetadata.Value.PinPolicy);
+            Assert.Equal(TouchPolicy.Always, slotMetadata.Value.TouchPolicy);
             Assert.Equal(state.SerialNumber, await session.GetSerialNumberAsync(followUpCts.Token));
         }
         finally

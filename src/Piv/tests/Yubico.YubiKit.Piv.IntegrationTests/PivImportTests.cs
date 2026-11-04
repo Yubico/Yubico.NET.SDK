@@ -50,14 +50,12 @@ public class PivImportTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         using var softwareKey = RSA.Create(2048);
-        var pkcs8 = softwareKey.ExportPkcs8PrivateKey();
-        var privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8);
+        using var privateKey = ExportForImport(softwareKey);
 
-        var detectedAlgorithm = await session.ImportKeyAsync(
+        await session.ImportKeyAsync(
             Slot.Authentication,
             privateKey);
 
-        Assert.Equal(KeyType.RSA2048, detectedAlgorithm);
 
         // Sign with YubiKey
         await session.VerifyPinAsync(DefaultPin);
@@ -93,26 +91,25 @@ public class PivImportTests
         // Verify the raw RSA signature with the software public key
         Assert.False(signature.IsEmpty);
         Assert.Equal(256, signature.Length);
+        Assert.True(softwareKey.VerifyData(dataToSign, signature.Span, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
     }
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     [Trait(TestCategories.Category, TestCategories.Slow)]
-    public async Task ImportKeyAsync_Rsa3072_ReturnsCorrectAlgorithm(YubiKeyTestState state)
+    public async Task ImportKeyAsync_Rsa3072_MetadataMatchesImportedKey(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         using var softwareKey = RSA.Create(3072);
-        var pkcs8 = softwareKey.ExportPkcs8PrivateKey();
-        var privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8);
+        using var privateKey = ExportForImport(softwareKey);
 
-        var detectedAlgorithm = await session.ImportKeyAsync(
+        await session.ImportKeyAsync(
             Slot.Signature,
             privateKey);
 
-        Assert.Equal(KeyType.RSA3072, detectedAlgorithm);
 
         // Verify slot metadata shows key is present
         var metadata = await session.GetSlotMetadataAsync(Slot.Signature);
@@ -136,11 +133,10 @@ public class PivImportTests
                 ed25519Bytes,
                 Core.Cryptography.KeyType.Ed25519);
 
-            var detectedAlgorithm = await session.ImportKeyAsync(
+            await session.ImportKeyAsync(
                 Slot.Authentication,
                 privateKey);
 
-            Assert.Equal(KeyType.Ed25519, detectedAlgorithm);
 
             await session.VerifyPinAsync(DefaultPin);
             var dataToSign = SHA256.HashData("Ed25519 import test"u8);
@@ -150,6 +146,10 @@ public class PivImportTests
                 dataToSign);
 
             Assert.False(signature.IsEmpty);
+            var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
+            Assert.NotNull(metadata);
+            Assert.Equal(KeyType.Ed25519, metadata.Value.KeyType);
+            Assert.False(metadata.Value.IsGenerated);
         }
         finally
         {
@@ -159,7 +159,7 @@ public class PivImportTests
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
-    public async Task ImportKeyAsync_X25519_ReturnsCorrectAlgorithm(YubiKeyTestState state)
+    public async Task ImportKeyAsync_X25519_MetadataMatchesImportedKey(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
@@ -173,11 +173,10 @@ public class PivImportTests
                 x25519Bytes,
                 Core.Cryptography.KeyType.X25519);
 
-            var detectedAlgorithm = await session.ImportKeyAsync(
+            await session.ImportKeyAsync(
                 Slot.KeyManagement,
                 privateKey);
 
-            Assert.Equal(KeyType.X25519, detectedAlgorithm);
 
             // Verify slot metadata
             var metadata = await session.GetSlotMetadataAsync(Slot.KeyManagement);
@@ -187,6 +186,18 @@ public class PivImportTests
         finally
         {
             CryptographicOperations.ZeroMemory(x25519Bytes);
+        }
+    }
+    private static RSAPrivateKey ExportForImport(RSA rsa)
+    {
+        byte[] encoded = rsa.ExportPkcs8PrivateKey();
+        try
+        {
+            return RSAPrivateKey.CreateFromPkcs8(encoded);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(encoded);
         }
     }
 }

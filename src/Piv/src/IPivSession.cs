@@ -100,10 +100,10 @@ public interface IPivSession : IApplicationSession
     /// for secure disposal of PIN data.
     /// </para>
     /// </remarks>
-    /// <param name="pinUtf8">PIN as UTF-8 bytes.</param>
+    /// <param name="pin">PIN as UTF-8 bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">PIN incorrect. Check RetriesRemaining property.</exception>
-    Task VerifyPinAsync(ReadOnlyMemory<byte> pinUtf8, CancellationToken cancellationToken = default);
+    Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Verify biometric authentication and optionally get temporary PIN.
@@ -113,7 +113,7 @@ public interface IPivSession : IApplicationSession
     /// <returns>16-byte temporary PIN if requested; null otherwise. Caller must zero returned bytes.</returns>
     /// <exception cref="NotSupportedException">Biometric authentication not available.</exception>
     Task<Memory<byte>?> VerifyUvAsync(
-        PivUserVerification userVerification = PivUserVerification.Verify,
+        UserVerification userVerification = UserVerification.Verify,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -131,29 +131,29 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Change PIN from old PIN to new PIN.
     /// </summary>
-    /// <param name="currentPinUtf8">Current PIN as UTF-8 bytes.</param>
-    /// <param name="newPinUtf8">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
+    /// <param name="currentPin">Current PIN as UTF-8 bytes.</param>
+    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">Old PIN incorrect.</exception>
-    Task ChangePinAsync(ReadOnlyMemory<byte> currentPinUtf8, ReadOnlyMemory<byte> newPinUtf8, CancellationToken cancellationToken = default);
+    Task ChangePinAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Change PUK from old PUK to new PUK.
     /// </summary>
-    /// <param name="currentPukUtf8">Current PUK as UTF-8 bytes.</param>
-    /// <param name="newPukUtf8">New PUK as UTF-8 bytes (6-8 ASCII characters).</param>
+    /// <param name="currentPuk">Current PUK as UTF-8 bytes.</param>
+    /// <param name="newPuk">New PUK as UTF-8 bytes (6-8 ASCII characters).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">Old PUK incorrect.</exception>
-    Task ChangePukAsync(ReadOnlyMemory<byte> currentPukUtf8, ReadOnlyMemory<byte> newPukUtf8, CancellationToken cancellationToken = default);
+    Task ChangePukAsync(ReadOnlyMemory<byte> currentPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Unblock PIN using PUK and set new PIN.
     /// </summary>
-    /// <param name="pukUtf8">PUK as UTF-8 bytes.</param>
-    /// <param name="newPinUtf8">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
+    /// <param name="puk">PUK as UTF-8 bytes.</param>
+    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">PUK incorrect.</exception>
-    Task UnblockPinAsync(ReadOnlyMemory<byte> pukUtf8, ReadOnlyMemory<byte> newPinUtf8, CancellationToken cancellationToken = default);
+    Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Sets the PIN and PUK retry limits (Yubico SET PIN RETRIES, INS FA). Requires management key
@@ -192,15 +192,15 @@ public interface IPivSession : IApplicationSession
     /// </para>
     /// </remarks>
     /// <param name="slot">PIV slot for key storage.</param>
-    /// <param name="algorithm">Key algorithm and size.</param>
+    /// <param name="keyType">Key algorithm and size.</param>
     /// <param name="options">Optional key-use policies.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Generated public key.</returns>
     /// <exception cref="NotSupportedException">Algorithm not supported on this YubiKey version.</exception>
     Task<IPublicKey> GenerateKeyAsync(
         Slot slot,
-        KeyType algorithm,
-        PivKeyCreationOptions? options = null,
+        KeyType keyType,
+        KeyCreationOptions? options = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -213,11 +213,11 @@ public interface IPivSession : IApplicationSession
     /// <param name="privateKey">Private key to import.</param>
     /// <param name="options">Optional key-use policies.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Algorithm of imported key.</returns>
-    Task<KeyType> ImportKeyAsync(
+    /// <returns>A task that completes after the device imports the key. Its type is already available on the caller's private key.</returns>
+    Task ImportKeyAsync(
         Slot slot,
         IPrivateKey privateKey,
-        PivKeyCreationOptions? options = null,
+        KeyCreationOptions? options = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -275,7 +275,7 @@ public interface IPivSession : IApplicationSession
     /// </para>
     /// </remarks>
     /// <param name="slot">PIV slot containing private key.</param>
-    /// <param name="algorithm">Key algorithm (must match slot contents).</param>
+    /// <param name="keyType">Key algorithm (must match slot contents).</param>
     /// <param name="data">Data to sign or decrypt.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Signature or decrypted data.</returns>
@@ -283,7 +283,7 @@ public interface IPivSession : IApplicationSession
 #pragma warning disable RS0026
     Task<Memory<byte>> SignOrDecryptAsync(
         Slot slot,
-        KeyType algorithm,
+        KeyType keyType,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default);
 
@@ -385,7 +385,7 @@ public interface IPivSession : IApplicationSession
     Task StoreCertificateAsync(
         Slot slot,
         X509Certificate2 certificate,
-        PivCertificateCompression compression = PivCertificateCompression.Automatic,
+        CertificateCompression compression = CertificateCompression.Automatic,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -404,7 +404,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>PIN metadata.</returns>
     /// <exception cref="NotSupportedException">YubiKey does not support metadata retrieval.</exception>
-    Task<PivPinMetadata> GetPinMetadataAsync(CancellationToken cancellationToken = default);
+    Task<PinMetadata> GetPinMetadataAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get PUK metadata information.
@@ -412,7 +412,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>PUK metadata.</returns>
     /// <exception cref="NotSupportedException">YubiKey does not support metadata retrieval.</exception>
-    Task<PivPukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default);
+    Task<PukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get management key metadata information.
@@ -420,7 +420,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Management key metadata.</returns>
     /// <exception cref="NotSupportedException">YubiKey does not support metadata retrieval.</exception>
-    Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default);
+    Task<ManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get slot metadata information.
@@ -429,7 +429,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Slot metadata or null if slot is empty.</returns>
     /// <exception cref="NotSupportedException">YubiKey does not support metadata retrieval.</exception>
-    Task<PivSlotMetadata?> GetSlotMetadataAsync(Slot slot, CancellationToken cancellationToken = default);
+    Task<SlotMetadata?> GetSlotMetadataAsync(Slot slot, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get biometric metadata information.
@@ -437,7 +437,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Biometric metadata.</returns>
     /// <exception cref="NotSupportedException">YubiKey does not support biometrics.</exception>
-    Task<PivBioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default);
+    Task<BioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default);
 
     // Data objects
 
@@ -464,9 +464,9 @@ public interface IPivSession : IApplicationSession
     /// Get the typed CHUID (CardHolder Unique Identifier) object.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The CHUID, or <see cref="PivCardholderUniqueId.Empty"/> if not present.</returns>
+    /// <returns>The CHUID, or <see cref="CardholderUniqueId.Empty"/> if not present.</returns>
     /// <exception cref="ApduException">The stored object is not encoded as a valid CHUID.</exception>
-    Task<PivCardholderUniqueId> GetCardholderUniqueIdAsync(CancellationToken cancellationToken = default);
+    Task<CardholderUniqueId> GetCardholderUniqueIdAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Set the typed CHUID (CardHolder Unique Identifier) object.
@@ -474,15 +474,15 @@ public interface IPivSession : IApplicationSession
     /// <remarks>Requires management key authentication.</remarks>
     /// <param name="cardholderUniqueId">The CHUID to store.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task SetCardholderUniqueIdAsync(PivCardholderUniqueId cardholderUniqueId, CancellationToken cancellationToken = default);
+    Task SetCardholderUniqueIdAsync(CardholderUniqueId cardholderUniqueId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get the typed CCC (Card Capability Container) object.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The CCC, or <see cref="PivCardCapabilityContainer.Empty"/> if not present.</returns>
+    /// <returns>The CCC, or <see cref="CardCapabilityContainer.Empty"/> if not present.</returns>
     /// <exception cref="ApduException">The stored object is not encoded as a valid CCC.</exception>
-    Task<PivCardCapabilityContainer> GetCardCapabilityContainerAsync(CancellationToken cancellationToken = default);
+    Task<CardCapabilityContainer> GetCardCapabilityContainerAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Set the typed CCC (Card Capability Container) object.
@@ -490,15 +490,15 @@ public interface IPivSession : IApplicationSession
     /// <remarks>Requires management key authentication.</remarks>
     /// <param name="cardCapabilityContainer">The CCC to store.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task SetCardCapabilityContainerAsync(PivCardCapabilityContainer cardCapabilityContainer, CancellationToken cancellationToken = default);
+    Task SetCardCapabilityContainerAsync(CardCapabilityContainer cardCapabilityContainer, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get the typed ADMIN DATA object, which records PIN-only mode state.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The ADMIN DATA, or <see cref="PivAdminData.Empty"/> if not present.</returns>
+    /// <returns>The ADMIN DATA, or <see cref="AdminData.Empty"/> if not present.</returns>
     /// <exception cref="ApduException">The stored object is not encoded as valid ADMIN DATA.</exception>
-    Task<PivAdminData> GetAdminDataAsync(CancellationToken cancellationToken = default);
+    Task<AdminData> GetAdminDataAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Set the typed ADMIN DATA object.
@@ -509,15 +509,15 @@ public interface IPivSession : IApplicationSession
     /// </remarks>
     /// <param name="adminData">The ADMIN DATA to store.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task SetAdminDataAsync(PivAdminData adminData, CancellationToken cancellationToken = default);
+    Task SetAdminDataAsync(AdminData adminData, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get the typed Key History object.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The Key History, or <see cref="PivKeyHistory.Empty"/> if not present.</returns>
+    /// <returns>The Key History, or <see cref="KeyHistory.Empty"/> if not present.</returns>
     /// <exception cref="ApduException">The stored object is not encoded as a valid Key History.</exception>
-    Task<PivKeyHistory> GetKeyHistoryAsync(CancellationToken cancellationToken = default);
+    Task<KeyHistory> GetKeyHistoryAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Set the typed Key History object.
@@ -525,7 +525,7 @@ public interface IPivSession : IApplicationSession
     /// <remarks>Requires management key authentication.</remarks>
     /// <param name="keyHistory">The Key History to store.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task SetKeyHistoryAsync(PivKeyHistory keyHistory, CancellationToken cancellationToken = default);
+    Task SetKeyHistoryAsync(KeyHistory keyHistory, CancellationToken cancellationToken = default);
 
     // PIN-only mode
 
@@ -536,12 +536,12 @@ public interface IPivSession : IApplicationSession
     /// <remarks>
     /// This does not authenticate the management key; it only inspects ADMIN DATA. If ADMIN DATA
     /// is present but not encoded as expected (for example, overwritten by another application),
-    /// both <see cref="PivPinOnlyMode.PinProtectedUnavailable"/> and
-    /// <see cref="PivPinOnlyMode.PinDerivedUnavailable"/> are set.
+    /// both <see cref="PinOnlyMode.PinProtectedUnavailable"/> and
+    /// <see cref="PinOnlyMode.PinDerivedUnavailable"/> are set.
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The detected PIN-only mode.</returns>
-    Task<PivPinOnlyMode> GetPinOnlyModeAsync(CancellationToken cancellationToken = default);
+    Task<PinOnlyMode> GetPinOnlyModeAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Attempt to authenticate the management key using PIN-protected and/or PIN-derived data
@@ -558,18 +558,18 @@ public interface IPivSession : IApplicationSession
     /// <para>
     /// If a later PIN-derived candidate fails after PIN-protected authentication succeeded, the
     /// PIN-protected key is reauthenticated before that success is returned. If restoration fails,
-    /// the method returns <see cref="PivPinOnlyMode.None"/> and leaves the session unauthenticated.
+    /// the method returns <see cref="PinOnlyMode.None"/> and leaves the session unauthenticated.
     /// </para>
     /// <para>
     /// The PIN-derived candidate key is discarded and zeroed after each attempt; it is never
     /// retained by the session.
     /// </para>
     /// </remarks>
-    /// <param name="pinUtf8">PIN as UTF-8 bytes, used if PRINTED is PIN-gated or PIN-derived data is present.</param>
+    /// <param name="pin">PIN as UTF-8 bytes, used if PRINTED is PIN-gated or PIN-derived data is present.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The PIN-only mode(s) successfully authenticated. <see cref="PivPinOnlyMode.None"/> if neither succeeded.</returns>
+    /// <returns>The PIN-only mode(s) successfully authenticated. <see cref="PinOnlyMode.None"/> if neither succeeded.</returns>
     /// <exception cref="InvalidPinException">PIN verification is required and the supplied PIN is incorrect.</exception>
-    Task<PivPinOnlyMode> RecoverPinOnlyModeAsync(ReadOnlyMemory<byte> pinUtf8, CancellationToken cancellationToken = default);
+    Task<PinOnlyMode> RecoverPinOnlyModeAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Enable or disable PIN-protected management key mode.
@@ -577,7 +577,7 @@ public interface IPivSession : IApplicationSession
     /// <remarks>
     /// <para>
     /// Requires the management key to already be authenticated (<see cref="AuthenticateAsync"/>).
-    /// Only <see cref="PivPinOnlyMode.None"/> (disable) and <see cref="PivPinOnlyMode.PinProtected"/>
+    /// Only <see cref="PinOnlyMode.None"/> (disable) and <see cref="PinOnlyMode.PinProtected"/>
     /// (enable) are supported; PIN-derived management keys are a deprecated, weaker mechanism and
     /// cannot be enabled through this method (existing PIN-derived state can still be detected via
     /// <see cref="GetPinOnlyModeAsync"/> and recovered via <see cref="RecoverPinOnlyModeAsync"/>).
@@ -591,8 +591,8 @@ public interface IPivSession : IApplicationSession
     /// </para>
     /// <para><paramref name="managementKey"/> is NOT zeroed by this method - caller is responsible for secure disposal.</para>
     /// </remarks>
-    /// <param name="pinOnlyMode"><see cref="PivPinOnlyMode.None"/> to disable, or <see cref="PivPinOnlyMode.PinProtected"/> to enable.</param>
-    /// <param name="pinUtf8">PIN as UTF-8 bytes. Required (and verified) when enabling PIN-protected mode; ignored when disabling.</param>
+    /// <param name="pinOnlyMode"><see cref="PinOnlyMode.None"/> to disable, or <see cref="PinOnlyMode.PinProtected"/> to enable.</param>
+    /// <param name="pin">PIN as UTF-8 bytes. Required (and verified) when enabling PIN-protected mode; ignored when disabling.</param>
     /// <param name="managementKey">
     /// The active management key to authenticate and protect. Required when enabling PIN-protected mode;
     /// its length must match <see cref="ManagementKeyType"/>. Ignored when disabling.
@@ -603,8 +603,8 @@ public interface IPivSession : IApplicationSession
     /// <exception cref="ArgumentNullException"><paramref name="managementKey"/> is required but not supplied.</exception>
     /// <exception cref="InvalidPinException">The supplied PIN is incorrect.</exception>
     Task SetPinOnlyModeAsync(
-        PivPinOnlyMode pinOnlyMode,
-        ReadOnlyMemory<byte> pinUtf8,
+        PinOnlyMode pinOnlyMode,
+        ReadOnlyMemory<byte> pin,
         ReadOnlyMemory<byte>? managementKey = null,
         CancellationToken cancellationToken = default);
 

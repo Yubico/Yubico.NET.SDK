@@ -35,7 +35,7 @@ public class PivAuditHardwareReproTests
             await setup.AuthenticateAsync(ManagementKey);
             publicKey = (ECPublicKey)await setup.GenerateKeyAsync(Slot.Authentication,
                 KeyType.ECP256,
-                new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never });
+                new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never });
         }
 
         // The 6982 baseline proves the key is not usable without verification after reset.
@@ -81,7 +81,7 @@ public class PivAuditHardwareReproTests
         await session.AuthenticateAsync(ManagementKey);
         var publicKey = (Curve25519PublicKey)await session.GenerateKeyAsync(Slot.Authentication,
             KeyType.Ed25519,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never });
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never });
         await session.VerifyPinAsync("123456"u8.ToArray());
 
         foreach (int length in new[] { 10, 64 })

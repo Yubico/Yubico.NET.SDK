@@ -30,7 +30,7 @@ public static class KeyGenerationMenu
         var slot = SlotSelector.SelectSlot("Select slot for key generation:");
 
         // Select algorithm
-        var algorithm = AnsiConsole.Prompt(
+        var keyType = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Select algorithm:")
                 .AddChoices(
@@ -44,7 +44,7 @@ public static class KeyGenerationMenu
                     "X25519 (YubiKey 5.7+)"
                 ]));
 
-        var pivAlgorithm = algorithm switch
+        var pivAlgorithm = keyType switch
         {
             "RSA 2048" => KeyType.RSA2048,
             "RSA 3072" => KeyType.RSA3072,
@@ -62,10 +62,10 @@ public static class KeyGenerationMenu
                 .Title("Select PIN policy:")
                 .AddChoices(["Default", "Never", "Once", "Always"])) switch
         {
-            "Never" => PivPinPolicy.Never,
-            "Once" => PivPinPolicy.Once,
-            "Always" => PivPinPolicy.Always,
-            _ => PivPinPolicy.Default
+            "Never" => PinPolicy.Never,
+            "Once" => PinPolicy.Once,
+            "Always" => PinPolicy.Always,
+            _ => PinPolicy.Default
         };
 
         // Select touch policy
@@ -74,10 +74,10 @@ public static class KeyGenerationMenu
                 .Title("Select touch policy:")
                 .AddChoices(["Default", "Never", "Always", "Cached"])) switch
         {
-            "Never" => PivTouchPolicy.Never,
-            "Always" => PivTouchPolicy.Always,
-            "Cached" => PivTouchPolicy.Cached,
-            _ => PivTouchPolicy.Default
+            "Never" => TouchPolicy.Never,
+            "Always" => TouchPolicy.Always,
+            "Cached" => TouchPolicy.Cached,
+            _ => TouchPolicy.Default
         };
 
         // Authenticate management key
@@ -108,7 +108,7 @@ public static class KeyGenerationMenu
                 if (result.Success)
                 {
                     OutputHelpers.WriteSuccess($"Key generated in slot {result.Slot}");
-                    OutputHelpers.WriteKeyValue("Algorithm", result.Algorithm.ToString());
+                    OutputHelpers.WriteKeyValue("Key type", result.KeyType.ToString());
                     OutputHelpers.WriteKeyValue("Public Key Size", $"{result.PublicKey.Length} bytes");
                 }
                 else

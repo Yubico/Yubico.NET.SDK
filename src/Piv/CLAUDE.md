@@ -109,7 +109,7 @@ Allowed helper pattern:
 
 ```text
 PivSession.GenerateKeyAsync
-  -> PivKeyProtocol.GenerateKeyAsync
+  -> KeyProtocol.GenerateKeyAsync
   -> builds key-generation TLV/APDU visibly
   -> parses returned public key
 ```
@@ -140,8 +140,8 @@ Common async operations include:
 Check `IPivSession.cs` before adding or documenting public surface.
 
 Key generation and import keep required domain inputs positional while policy modifiers live in
-`PivKeyCreationOptions`. User-verification mode uses `PivUserVerification`; certificate storage uses
-`PivCertificateCompression` instead of mode-switch booleans.
+`KeyCreationOptions`. User-verification mode uses `UserVerification`; certificate storage uses
+`CertificateCompression` instead of mode-switch booleans.
 
 ## Test Infrastructure
 
@@ -176,7 +176,7 @@ What still needs a human is presence and timing, not destruction — touch-polic
 Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of duplicating version checks. Be careful to distinguish device firmware from applet-reported firmware when beta hardware reports sentinel applet versions.
 
 `Features` is a public standalone PIV catalog; `IsSupported` stays public and `EnsureSupports` is protected.
-`Slot` replaces `PivSlot`; shared Core `KeyType` replaces `PivAlgorithm`. Only internal `PivAlgorithmId`
+`Slot` replaces `PivSlot`; shared Core `KeyType` replaces `PivAlgorithm`. Only internal `KeyTypeEncoding`
 maps Core key types to protocol bytes. Never cast `KeyType` to byte. Metadata preserves unknown algorithm
 identifiers through `RawAlgorithmId`, nullable `KeyType`, and complete `RawData`; malformed required fields
 still fail. The README records source-pinned support boundaries and Android/Python differences.

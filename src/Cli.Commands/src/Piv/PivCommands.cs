@@ -66,9 +66,9 @@ public sealed class PivManagementKeySettings : GlobalSettings
     [Description("New management key (hex).")]
     public string? NewManagementKey { get; set; }
 
-    [CommandOption("--algorithm <ALGORITHM>")]
+    [CommandOption("--key-type <KEY_TYPE>")]
     [Description("Key algorithm: 3des, aes128, aes192, aes256 (default: 3des).")]
-    public string? Algorithm { get; set; }
+    public string? KeyType { get; set; }
 
     [CommandOption("--require-touch")]
     [Description("Require touch for management key operations.")]
@@ -88,9 +88,9 @@ public sealed class PivKeyGenerateSettings : GlobalSettings
     [Description("PIV slot: 9a, 9c, 9d, 9e, or 82-95.")]
     public string Slot { get; init; } = "";
 
-    [CommandOption("--algorithm <ALGORITHM>")]
+    [CommandOption("--key-type <KEY_TYPE>")]
     [Description("Key algorithm: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519.")]
-    public string? Algorithm { get; set; }
+    public string? KeyType { get; set; }
 
     [CommandOption("--management-key <HEX>")]
     [Description("Management key (hex).")]
@@ -167,14 +167,14 @@ public static class PivHelpers
 
     public static string FormatSlot(Slot slot) => $"0x{(byte)slot:X2}";
 
-    public static KeyType ParseAlgorithm(string? algorithm)
+    public static KeyType ParseKeyType(string? keyType)
     {
-        if (string.IsNullOrEmpty(algorithm))
+        if (string.IsNullOrEmpty(keyType))
         {
-            throw new ArgumentException("--algorithm is required.");
+            throw new ArgumentException("--key-type is required.");
         }
 
-        return algorithm.ToLowerInvariant() switch
+        return keyType.ToLowerInvariant() switch
         {
             "rsa2048" => KeyType.RSA2048,
             "rsa3072" => KeyType.RSA3072,
@@ -184,38 +184,38 @@ public static class PivHelpers
             "ed25519" => KeyType.Ed25519,
             "x25519" => KeyType.X25519,
             _ => throw new ArgumentException(
-                $"Unknown algorithm: {algorithm}. Use rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519.")
+                $"Unknown algorithm: {keyType}. Use rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519.")
         };
     }
 
-    public static PivPinPolicy ParsePinPolicy(string? policy) =>
+    public static PinPolicy ParsePinPolicy(string? policy) =>
         policy?.ToLowerInvariant() switch
         {
-            null or "default" => PivPinPolicy.Default,
-            "never" => PivPinPolicy.Never,
-            "once" => PivPinPolicy.Once,
-            "always" => PivPinPolicy.Always,
+            null or "default" => PinPolicy.Default,
+            "never" => PinPolicy.Never,
+            "once" => PinPolicy.Once,
+            "always" => PinPolicy.Always,
             _ => throw new ArgumentException($"Unknown pin policy: {policy}. Use default, never, once, always.")
         };
 
-    public static PivTouchPolicy ParseTouchPolicy(string? policy) =>
+    public static TouchPolicy ParseTouchPolicy(string? policy) =>
         policy?.ToLowerInvariant() switch
         {
-            null or "default" => PivTouchPolicy.Default,
-            "never" => PivTouchPolicy.Never,
-            "always" => PivTouchPolicy.Always,
-            "cached" => PivTouchPolicy.Cached,
+            null or "default" => TouchPolicy.Default,
+            "never" => TouchPolicy.Never,
+            "always" => TouchPolicy.Always,
+            "cached" => TouchPolicy.Cached,
             _ => throw new ArgumentException($"Unknown touch policy: {policy}. Use default, never, always, cached.")
         };
 
-    public static PivManagementKeyType ParseManagementKeyType(string? algorithm) =>
-        algorithm?.ToLowerInvariant() switch
+    public static PivManagementKeyType ParseManagementKeyType(string? keyType) =>
+        keyType?.ToLowerInvariant() switch
         {
             null or "3des" => PivManagementKeyType.TripleDes,
             "aes128" => PivManagementKeyType.Aes128,
             "aes192" => PivManagementKeyType.Aes192,
             "aes256" => PivManagementKeyType.Aes256,
-            _ => throw new ArgumentException($"Unknown key type: {algorithm}. Use 3des, aes128, aes192, aes256.")
+            _ => throw new ArgumentException($"Unknown key type: {keyType}. Use 3des, aes128, aes192, aes256.")
         };
 
     public static byte[]? ParseHex(string? hex, string name)
@@ -460,7 +460,7 @@ public sealed class PivAccessSetManagementKeyCommand : YkCommandBase<PivManageme
             return ExitCode.GenericError;
         }
 
-        var keyType = PivHelpers.ParseManagementKeyType(settings.Algorithm);
+        var keyType = PivHelpers.ParseManagementKeyType(settings.KeyType);
 
         try
         {
@@ -488,7 +488,7 @@ public sealed class PivKeysGenerateCommand : YkCommandBase<PivKeyGenerateSetting
         CommandContext context, PivKeyGenerateSettings settings, YkDeviceContext deviceContext)
     {
         var slot = PivHelpers.ParseSlot(settings.Slot);
-        var algorithm = PivHelpers.ParseAlgorithm(settings.Algorithm);
+        var keyType = PivHelpers.ParseKeyType(settings.KeyType);
         var pinPolicy = PivHelpers.ParsePinPolicy(settings.PinPolicy);
         var touchPolicy = PivHelpers.ParseTouchPolicy(settings.TouchPolicy);
 
@@ -506,8 +506,8 @@ public sealed class PivKeysGenerateCommand : YkCommandBase<PivKeyGenerateSetting
 
             var publicKey = await session.GenerateKeyAsync(
                 slot,
-                algorithm,
-                new PivKeyCreationOptions
+                keyType,
+                new KeyCreationOptions
                 {
                     PinPolicy = pinPolicy,
                     TouchPolicy = touchPolicy
@@ -515,7 +515,7 @@ public sealed class PivKeysGenerateCommand : YkCommandBase<PivKeyGenerateSetting
 
             OutputHelpers.WriteSuccess(
                 $"Key pair generated in slot {PivHelpers.FormatSlot(slot)}.");
-            OutputHelpers.WriteKeyValue("Algorithm", algorithm.ToString());
+            OutputHelpers.WriteKeyValue("Key type", keyType.ToString());
             OutputHelpers.WriteKeyValue("PIN Policy", pinPolicy.ToString());
             OutputHelpers.WriteKeyValue("Touch Policy", touchPolicy.ToString());
 

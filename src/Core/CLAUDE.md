@@ -355,6 +355,23 @@ Use `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` when absence i
 cached `FindAllAsync`; they do not wait for insertion, and callers must not treat discovery order as stable. The
 token is passed to discovery, but a cached result may complete without observing cancellation.
 
+`YubiKeyManager.ScanAsync(scope, cancellationToken)` is a separate one-shot path, not a manager rescan.
+It constructs `FindYubiKeys.CreateForScope` per call with an immutable concrete scope; no manager/cache,
+repository publication, watcher events, or monitor lifecycle participates. Keep `FindYubiKeys.Create()`
+all-interface and `IFindYubiKeys.FindAllAsync(type, ...)` a post-merge result filter. Never reuse a finder
+across different scopes: its cache eviction treats unobserved members as absent. Excluded backend
+factories are not called. Filter HID by concrete type before slot creation/topology/protocol reads;
+OTP and FIDO necessarily share OS descriptor enumeration. Ignore undefined scope bits like `Matches`.
+Do not reinterpret partial scope as PID completeness or import sibling slots from prior scans.
+
+One-shot exit terminally retires its read scope in `finally`, including cancellation and budget expiry.
+This cancels queued identity admission and prevents later opens; already-open native work keeps its
+worker and registry lease until teardown. Do not dispose admission/lease owners at the wait boundary.
+No global registry identity aliases are added: all/scoped views exclude connections only when their
+known member-ID sets overlap; disjoint CCID/FIDO views remain uncoordinated even with matching serials.
+`FindYubiKeysScopeTests` pins filtering, partial same-PID grouping, evidence isolation, retirement, and
+the ownership bound; `YubiKeyManagerStaticTests` pins no initialization/publication/monitor interference.
+
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
 handles; they are not `IYubiKey` objects. Only the internal `LocalYubiKey` implementation is published by
 production discovery; manager, repository, and monitor types keep their separate roles.

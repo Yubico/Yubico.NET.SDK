@@ -68,6 +68,7 @@ Documented bound: if no listener event reports the change, staleness detection d
 absence. A forced scan only after replugging does not invalidate same-interface cache entries. Consumers
 driving `FindAllAsync` directly across a physical swap they orchestrated themselves should force a scan
 while the slot is empty before replugging, or restart `YubiKeyManager` to discard the caches.
+Alternatively, `YubiKeyManager.ScanAsync` uses new evidence per call without changing the manager's cache.
 
 Hardware evidence and its limit: an operator-coordinated port swap of two same-model keys (the
 reader-name-reuse shape behind the substitution hazard) re-published both under their correct serial
@@ -76,6 +77,33 @@ absence also fires; the between-scan timing that only the event-driven eviction 
 deterministically by the fault-injection vectors above, and repository republication on fresh contradictory
 serial evidence is pinned by
 `UpdateCache_DifferentKnownSerials_RepublishesDifferentDevice`.
+
+## Independent scoped observations
+
+`YubiKeyManager.ScanAsync(scope, cancellationToken)` creates a fresh finder per call. Its immutable scope
+limits enumeration and probes, not just returned devices. Excluded transport backends are not constructed;
+SmartCard-only skips HID enumeration and HID-only skips PC/SC enumeration. OTP and FIDO still share OS HID
+descriptor enumeration, but excluded interfaces are filtered before slots, topology, or protocol reads.
+`ScopedFinder_OnlyEnumeratesRequestedFamiliesAndBuildsRequestedSlots` pins the call boundaries.
+
+A partial scope is not a complete physical-interface census: PID-only merging still requires the PID's
+full expected interface set. No sibling slots or evidence are imported from earlier scans. Partial views
+can therefore fragment more than full scans, and do not accumulate identity evidence between calls.
+Pinned by `ScopedFinder_PartialTriplePidWithoutIdentity_DoesNotTreatScopeAsPidCompleteness`, the two
+`ScopedFinder_TwoSamePidKeys*` vectors, `ScanAsync_ChangingScopeNeverImportsSiblingSlotsFromPriorScan`, and
+`ScanAsync_RepeatScansRereadMetadataAndIdentityRatherThanSharingEvidence` in `FindYubiKeysScopeTests`.
+The existing complementary-partial G2 bound still applies; scope does not strengthen identity evidence.
+
+The one-shot result never enters the manager repository and does not initialize or constrain monitoring
+(`YubiKeyManagerStaticTests.ScanAsync_DoesNotPublishPartialViewsOrChangeAnActiveManagersRepository`).
+On exit the read scope is retired, preventing queued identity reads from opening later. Already-open reads
+retain their native-worker admission and registry lease until teardown; caller cancellation does not prove
+native drain (`ScanAsync_ExitRetiresQueuedIdentityReadsBeforeLaterWorkerAdmission` and
+`ScanAsync_CancellationRetainsOpenedReadOwnershipUntilBackgroundTeardown`). Concurrent scans do not join
+each other's reads, but still coordinate overlapping interface claims
+(`ScanAsync_ConcurrentCallsHaveIndependentReadScopesButShareInterfaceOwnership`). Disjoint member sets do
+not provide physical-key exclusion, even with matching serials; see the
+[ownership grouping bound](connection-ownership-and-contention.md#grouping-bound).
 
 ## Device identity: what `DeviceId` does and does not promise
 

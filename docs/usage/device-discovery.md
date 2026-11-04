@@ -25,7 +25,8 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
 | Method | Description |
 |--------|-------------|
 | `FindAllAsync()` | Find all connected YubiKeys |
-| `FindAllAsync(ConnectionType)` | Find YubiKeys by connection type (SmartCard, HID, or All) |
+| `FindAllAsync(ConnectionType)` | Filter full-device cached results by connection type |
+| `ScanAsync(scope, cancellationToken)` | Independent fresh scan limited to the requested interfaces; no repository updates |
 | `FindFirstAsync(predicate, cancellationToken)` | Find the first match, or throw `InvalidOperationException` |
 | `FindFirstOrDefaultAsync(predicate, cancellationToken)` | Find the first match, or return `null` |
 
@@ -69,6 +70,53 @@ They do not wait for a YubiKey to be inserted, and discovery ordering is not sta
 `WatchAsync` when the application needs to wait for device changes. They inherit `FindAllAsync`
 cancellation behavior: the token is passed to discovery, but a cached result may complete without
 observing cancellation.
+
+## Independent Scoped Scans
+
+Use `ScanAsync` when you need a one-shot view without the manager's cache or monitoring lifecycle:
+
+```csharp
+// Enumerate and probe only SmartCard interfaces; never enumerate HID.
+var smartCardViews = await YubiKeyManager.ScanAsync(ConnectionType.SmartCard, cancellationToken);
+
+// Enumerate HID descriptors, but create slots and probe metadata only for FIDO interfaces.
+var fidoViews = await YubiKeyManager.ScanAsync(ConnectionType.HidFido, cancellationToken);
+
+// Fresh evidence across all interfaces, still without publishing into the manager repository.
+var allViews = await YubiKeyManager.ScanAsync(cancellationToken: cancellationToken);
+```
+
+Each call creates a new finder with independent identity/metadata evidence. It does **not** initialize
+the manager, return its cached objects, update its repository, emit `WatchAsync` events, or start
+monitoring. A monitor already running is neither stopped nor restricted by the scope. `FindAllAsync`,
+including `forceRescan: true`, retains its existing full-scan/result-filter behavior and repository updates.
+
+`scope` supports concrete combinations of `SmartCard`, `HidFido`, and `HidOtp`. `Hid` expands to
+`HidFido | HidOtp`; `All` includes all three; `Unknown` scans nothing. Undefined bits are ignored, as
+with discovery result filtering; a value containing only undefined bits scans nothing.
+
+- SmartCard-only never enumerates HID, and HID-only never enumerates PC/SC. Excluded backends are not
+  constructed.
+- OTP and FIDO share OS HID descriptor enumeration. The OS may therefore expose excluded descriptors,
+  but they receive no connection slots, topology queries, or identity/metadata protocol probes.
+- Returned `AvailableConnections` contains only observed in-scope interfaces. A scoped view does not gain
+  sibling slots from an earlier scan or the repository. PID completeness still means the PID's **full**
+  expected interface set, not the requested subset. Ambiguous partial observations can split one key
+  into several results.
+- Metadata is best-effort, and each returned object can retain historical `CachedDeviceInfo`. Separate
+  scans need not produce equal `DeviceId` values or the same grouping. Use known serials for durable
+  identity, not scan objects or their identifiers.
+
+**Ownership bound:** repeat scans and views sharing any known member interface ID exclude overlapping
+connections in-process. Disjoint scoped views, such as SmartCard-only and FIDO-only, do not share claims,
+even when their serials match. Coordinate them explicitly; do not treat them as safe parallel access to
+one key. A scan can also probe unclaimed sibling interfaces while a scoped connection is live. See
+[connection ownership](../architecture/connection-ownership-and-contention.md#grouping-bound).
+
+Cancellation is checked before constructing the finder. Read budgets and cancellation bound the caller's
+wait, not already-dispatched native calls. On scan exit, queued identity reads are retired so they cannot
+open later; already-open reads keep their registry claim and worker admission until background teardown.
+Native enumeration can also continue after cancellation; cancellation is not proof of native drain.
 
 ## Cached Device Metadata
 

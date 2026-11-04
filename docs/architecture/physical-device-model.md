@@ -21,7 +21,7 @@ See also: [device identity and physical-device correlation](./device-identity.md
 `IYubiKey` (defined in `src/Core/src/Abstractions/IYubiKey.cs`) is intentionally small:
 
 - `string DeviceId` — a human-readable correlation identifier. Once a device object is published through
-  `YubiKeyManager`, its `DeviceId` remains stable for that uninterrupted physical presence while its
+  the `YubiKeyManager` repository, its `DeviceId` remains stable for that uninterrupted physical presence while its
   physical interface identity and `AvailableConnections` remain unchanged. The repository retains the
   originally published object across evidence-tier flips so its eventual `Removed` event correlates with
   the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
@@ -98,6 +98,16 @@ current device configuration matters.
 `WatchAsync` events are emitted from repository diffs after a full rescan, not directly from native listener
 hints. These APIs inherit the conservative grouping bounds in
 [Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
+
+For an independent one-shot view, use `YubiKeyManager.ScanAsync(scope, cancellationToken)`. It uses fresh
+evidence without initializing the manager, changing the repository, emitting events, or starting monitoring.
+Unlike `FindAllAsync`'s result filter, scope limits enumeration/probes and returned connection slots.
+SmartCard-only skips HID, HID-only skips PC/SC, and OTP/FIDO share descriptor enumeration but not excluded
+interface probes. A view contains only observed in-scope interfaces; partial scope does not relax the
+PID-completeness rule. Existing monitors run unchanged. See
+[independent scoped scans](../usage/device-discovery.md#independent-scoped-scans) for examples and lifetime
+bounds. Connections exclude other views only through overlapping known member interface IDs: disjoint
+scoped views cannot promise physical-key exclusion even with matching serials. Coordinate them explicitly.
 
 ### Platform Support For HID Discovery
 

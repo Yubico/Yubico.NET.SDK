@@ -26,6 +26,11 @@ internal static class ConnectionTypeExtensions
     /// <summary>True when the filter requests scanning any HID interface.</summary>
     public static bool IncludesHidScan(this ConnectionType filter) => (filter & HidGroup) != 0;
 
+    /// <summary>Expands the HID group and ignores undefined bits, like discovery result filtering.</summary>
+    public static ConnectionType ToConcreteScope(this ConnectionType scope) =>
+        (scope & ConcreteConnections) |
+        ((scope & ConnectionType.Hid) != 0 ? ConnectionType.HidFido | ConnectionType.HidOtp : ConnectionType.Unknown);
+
     /// <summary>
     ///     Whether a device whose available connections are <paramref name="available"/> can open the
     ///     <paramref name="requested"/> connection. Only concrete openable types are valid requests;

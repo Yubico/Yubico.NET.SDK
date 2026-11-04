@@ -48,6 +48,11 @@ namespace Yubico.YubiKit.Core.Devices;
 ///         for the process lifetime: this is bounded by unique interface IDs observed and avoids unsafe
 ///         remove/recreate races between lease acquisition and dictionary eviction.
 ///     </para>
+///     <para>
+///         Exclusion requires an overlapping member ID. Disjoint scoped scan views (for example CCID-only
+///         and FIDO-only) have disjoint claims, even if they report the same serial or topology key.
+///         No global physical-identity alias is registered; callers must coordinate such views themselves.
+///     </para>
 /// </remarks>
 internal static class DeviceConnectionRegistry
 {

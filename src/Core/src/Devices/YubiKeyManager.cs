@@ -23,6 +23,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <para><strong>Caching Behavior:</strong> By default, <see cref="FindAllAsync(CancellationToken)"/>
 /// returns cached results after the first call. Use <c>forceRescan: true</c> to always perform a fresh
 /// device scan, or call <see cref="ShutdownAsync"/> to clear the cache.</para>
+/// <para>Use <see cref="ScanAsync(ConnectionType, CancellationToken)"/> for an independent one-shot scan limited to selected interfaces,
+/// without using or updating the manager's cache.</para>
 /// </remarks>
 /// <example>
 /// <para><strong>Simple Device Discovery:</strong></para>
@@ -288,7 +290,7 @@ public static class YubiKeyManager
     /// <summary>
     /// Finds all connected YubiKey devices, with options for connection type and rescan behavior.
     /// </summary>
-    /// <param name="type">The connection type to filter by. <see cref="ConnectionType.Hid"/> includes both HID FIDO and HID OTP devices. Default is <see cref="ConnectionType.All"/>.</param>
+    /// <param name="type">The connection type to filter full-device results by, not an enumeration scope. <see cref="ConnectionType.Hid"/> includes both HID FIDO and HID OTP devices. Default is <see cref="ConnectionType.All"/>.</param>
     /// <param name="forceRescan">
     /// If <c>true</c>, always performs a fresh device scan.
     /// If <c>false</c> (default), returns cached results unless cache is empty.
@@ -344,6 +346,57 @@ public static class YubiKeyManager
         bool forceRescan = false,
         CancellationToken cancellationToken = default)
         => EnsureManager().FindAllAsync(type, forceRescan, cancellationToken);
+
+    /// <summary>
+    /// Performs an independent one-shot scan using only the requested interfaces.
+    /// </summary>
+    /// <param name="scope">
+    /// Interfaces to enumerate and probe. <see cref="ConnectionType.Hid"/> includes FIDO and OTP;
+    /// <see cref="ConnectionType.Unknown"/> scans nothing. Undefined bits are ignored.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token to cancel the scan's wait.</param>
+    /// <returns>New device views containing only observed in-scope interfaces.</returns>
+    /// <exception cref="OperationCanceledException">The cancellation token is canceled.</exception>
+    /// <exception cref="PlatformInteropException">A requested platform API fails.</exception>
+    /// <remarks>
+    /// <para>Each call uses fresh identity and metadata evidence. It does not initialize the manager, use
+    /// or update its repository, emit device events, or start monitoring. Existing monitors run unchanged.
+    /// Unlike <see cref="FindAllAsync(ConnectionType, bool, CancellationToken)"/>, scope limits discovery
+    /// work rather than filtering a full-device result.</para>
+    /// <para>SmartCard-only scans never enumerate HID; HID-only scans never enumerate PC/SC. OTP and FIDO
+    /// share OS HID descriptor enumeration, but excluded interfaces receive no slots or protocol probes.
+    /// Partial observations can split one physical key into multiple results; scope does not relax PID
+    /// completeness checks. Metadata remains best-effort and may be unavailable.</para>
+    /// <para>Connection exclusion is in-process and based on known member interface IDs. Overlapping
+    /// views exclude each other; disjoint scoped views cannot guarantee physical-key exclusion, even
+    /// with matching serials. Coordinate such views rather than opening them concurrently.</para>
+    /// <para>Cancellation and read budgets bound waits, not already-dispatched native work. On exit,
+    /// queued identity reads are retired; already-open reads retain ownership until background teardown.
+    /// Independently obtained objects and their identifiers are not durable physical-identity records.</para>
+    /// </remarks>
+    public static Task<IReadOnlyList<IYubiKey>> ScanAsync(
+        ConnectionType scope = ConnectionType.All,
+        CancellationToken cancellationToken = default) =>
+        ScanAsync(scope, cancellationToken, FindYubiKeys.CreateForScope);
+
+    // Per-call factory seam keeps no mutable global test configuration and exercises the same one-shot
+    // lifetime as the public entry point without invoking native enumeration in unit tests.
+    internal static async Task<IReadOnlyList<IYubiKey>> ScanAsync(
+        ConnectionType scope,
+        CancellationToken cancellationToken,
+        Func<ConnectionType, FindYubiKeys> createFinder)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var finder = createFinder(scope);
+        try
+        {
+            return await finder.FindAllAsync(ConnectionType.All, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            finder.RetireReadScope();
+        }
+    }
 
     /// <summary>
     /// Finds the first connected YubiKey that satisfies an optional predicate.

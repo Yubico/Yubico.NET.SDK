@@ -2,7 +2,8 @@
 
 This document defines the SDK's in-process ownership contract:
 
-> A physical YubiKey has at most one live connection, which hosts at most one live session.
+> A grouped physical YubiKey has at most one live connection across its known member interfaces,
+> and a connection hosts at most one live session.
 > Connections and sessions are reused sequentially; overlapping ownership attempts throw.
 
 Cross-process contention is outside this registry's scope. Another process holding PC/SC may still
@@ -26,7 +27,8 @@ opening another native handle.
 
 The hardware investigation also established that Management can communicate over HID while CCID is
 held. That remains useful protocol evidence, but it is no longer a supported parallel ownership mode.
-The product contract is one connection for the physical key, regardless of interface.
+The supported usage contract remains one connection for the physical key, regardless of interface;
+enforcement is bounded by the known-member scope described below.
 
 ## One physical device, one connection
 
@@ -53,6 +55,18 @@ Physical-device exclusivity is only as strong as discovery's evidence. When disc
 that standalone records belong to one key, it does not guess. Each record then has a one-element lease
 scope, so protection degrades conservatively to per-interface exclusion. See
 [Device Discovery Guarantees](device-discovery-guarantees.md).
+
+The same bound applies to `YubiKeyManager.ScanAsync`: a scoped view deliberately knows only in-scope
+members. Repeated scans and all/scoped views with any shared member ID exclude each other's connections
+in either acquisition order. Two disjoint views, such as SmartCard-only and FIDO-only, have **no shared
+claim**, even if they report the same serial or topology key. The registry does not register global
+serial/topology aliases or import membership from earlier scans. A prior all-interface observation does
+not itself expand later views' claims. Coordinate disjoint views explicitly; their independent claims
+are a documented limit, not a recommendation to use one physical key concurrently. Discovery leases are
+also per-interface: a scan can still probe an unclaimed sibling while a scoped connection holds another
+interface of that key. Pinned by
+`ScopedViews_OverlappingAllAndScopedConnectionsExcludeEachOtherInBothDirections` and
+`ScopedViews_DisjointMembersEvenWithSameSerial_HaveOnlyPerInterfaceExclusion` in `FindYubiKeysScopeTests`.
 
 ## One connection, one session
 

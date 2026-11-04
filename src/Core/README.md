@@ -56,6 +56,24 @@ Discovery needs no PIN, touch, or open session. Later snippets assume these dire
 
 ## Common operations
 
+### Scan selected interfaces without the manager cache
+
+```csharp
+var smartCardViews = await YubiKeyManager.ScanAsync(ConnectionType.SmartCard, cancellationToken);
+var fidoViews = await YubiKeyManager.ScanAsync(ConnectionType.HidFido, cancellationToken);
+```
+
+Each call uses fresh discovery evidence without initializing the manager, changing its repository, or
+starting monitoring. Scope limits enumeration/probes and returned connection slots, unlike `FindAllAsync`'s
+full-device result filter. HID-only skips PC/SC; SmartCard-only skips HID. OTP/FIDO share HID descriptor
+enumeration, but excluded interfaces are not probed. Existing monitors run unchanged.
+
+Partial views can split one physical key. Connection exclusion covers overlapping known interface IDs,
+not disjoint scoped views, even if serials match; coordinate those views rather than opening them in
+parallel. Cancellation does not prove native work drained. See
+[independent scoped scans](../../docs/usage/device-discovery.md#independent-scoped-scans) for scope,
+metadata, identity, and lifetime bounds.
+
 ### Read last-known device metadata without I/O
 
 ```csharp

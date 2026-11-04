@@ -32,6 +32,11 @@ See also: [device identity and physical-device correlation](./device-identity.md
   `SmartCard`, `HidFido`, and `HidOtp`. It never contains the `Hid` group flag or `All`.
   This is the union of observed transport interfaces, not proof that every applet is enabled on every
   interface or that every combination is safe to use concurrently.
+- `int? SerialNumber` — discovery's independently latched durable hardware identity, when known; see
+  [device identity](device-identity.md). It is not derived from the latest metadata snapshot.
+- `DeviceInfo? CachedDeviceInfo` — last-known read-only metadata, available without I/O. It can be null or
+  stale; existing discovery/repository updates may replace it without a device event. The default interface
+  implementation returns null for custom implementations.
 - `bool SupportsConnection(ConnectionType)` — whether a given interface is present on this device. The
   concrete values (`SmartCard`, `HidFido`, `HidOtp`) test a specific openable interface; the `Hid` group
   flag returns true when either HID interface is present; `Unknown`, `All`, and mixed/combined values
@@ -88,7 +93,8 @@ Discovery populates best-effort metadata for every published device shape, inclu
 NFC records. Grouping does not depend on those metadata results, but the bounded reads are awaited and may
 delay scan completion by up to their budget. When a later scan obtains metadata for an otherwise unchanged
 physical device, the repository copies it onto the object it originally published without emitting `Added`
-or `Removed`. Request fresh Management data explicitly when current device configuration matters.
+or `Removed`; callers see it through `CachedDeviceInfo`. Request fresh Management data explicitly when
+current device configuration matters.
 `WatchAsync` events are emitted from repository diffs after a full rescan, not directly from native listener
 hints. These APIs inherit the conservative grouping bounds in
 [Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
@@ -135,8 +141,20 @@ interface device, use the typed overload above or an applet session extension (b
 
 Read-only physical-device metadata lives in **Core** (`Yubico.YubiKit.Core.Devices`): `DeviceInfo`,
 `FormFactor`, `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`, and `VersionQualifierType`. This lets
-Core describe a physical device without depending on the Management module. Reading the metadata from a
-device uses the Management extension, which opens a transient session:
+Core describe a physical device without depending on the Management module. `IYubiKey.CachedDeviceInfo`
+exposes `LocalYubiKey`'s existing atomically published snapshot, not a second cache:
+
+```csharp
+DeviceInfo? lastKnown = device.CachedDeviceInfo; // No I/O or presence check.
+```
+
+Null means unavailable. Failed metadata reads do not clear a successful snapshot, and returned values do
+not change when a later discovery/repository update replaces it. The data is not guaranteed current and
+can remain historical on retained objects after configuration changes or disconnection. A replacement
+object does not inherit its predecessor's snapshot. `SerialNumber` keeps its independent identity contract
+even if the latest snapshot has no serial. See [cached device metadata](../usage/device-discovery.md#cached-device-metadata).
+
+A live read uses the Management extension, which opens a transient session:
 
 ```csharp
 using Yubico.YubiKit.Management;
@@ -145,6 +163,9 @@ DeviceInfo info = await device.GetDeviceInfoAsync();
 int? serial = info.SerialNumber;
 FirmwareVersion firmware = info.FirmwareVersion;
 ```
+
+`ManagementSession.GetDeviceInfoAsync` and the convenience extension above do not promise to update
+discovery metadata.
 
 **Mutating** operations — device configuration, reset, lock, reboot, and mode changes — remain owned by the
 Management module (`ManagementSession`). Core owns only read-only metadata and the connection/discovery

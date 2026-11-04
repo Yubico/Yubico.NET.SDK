@@ -17,6 +17,7 @@ Yubico.YubiKit.Core.Abstractions.IDevice
 Yubico.YubiKit.Core.Abstractions.IDevice.ReaderName.get -> string!
 Yubico.YubiKit.Core.Abstractions.IYubiKey
 Yubico.YubiKit.Core.Abstractions.IYubiKey.AvailableConnections.get -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Abstractions.IYubiKey.CachedDeviceInfo.get -> Yubico.YubiKit.Core.Devices.DeviceInfo?
 Yubico.YubiKit.Core.Abstractions.IYubiKey.ConnectAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Abstractions.IConnection!>!
 Yubico.YubiKit.Core.Abstractions.IYubiKey.ConnectAsync<TConnection>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TConnection!>!
 Yubico.YubiKit.Core.Abstractions.IYubiKey.DeviceId.get -> string!

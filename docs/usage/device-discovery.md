@@ -70,6 +70,42 @@ They do not wait for a YubiKey to be inserted, and discovery ordering is not sta
 cancellation behavior: the token is passed to discovery, but a cached result may complete without
 observing cancellation.
 
+## Cached Device Metadata
+
+`IYubiKey.CachedDeviceInfo` returns the last successfully observed Core `DeviceInfo` snapshot without
+opening a connection or session, performing I/O, or checking whether the device is still present:
+
+```csharp
+var device = await YubiKeyManager.FindFirstAsync();
+if (device.CachedDeviceInfo is { } info)
+{
+    Console.WriteLine($"Last observed firmware: {info.FirmwareVersion}");
+    Console.WriteLine($"Last observed USB capabilities: {info.UsbEnabled}");
+}
+else
+{
+    Console.WriteLine("Device metadata is unavailable.");
+}
+```
+
+No Management package is needed to read this property. `null` means metadata is unavailable, not that
+the device lacks a capability or has disconnected. Custom `IYubiKey` implementations can omit this member;
+the default implementation returns `null`.
+
+This is **last-known data, not guaranteed-current state**. Existing discovery/repository updates can
+replace the snapshot on a retained object without emitting a device event; a failed metadata read does
+not erase the last successful value. A snapshot already returned to your code does not change. Metadata
+can be stale after configuration changes, and a retained object can still expose historical data after
+disconnection. Reading the property does not refresh it, and there is no freshness or presence guarantee.
+
+When current configuration matters, use the existing Management live-read API,
+`ManagementSession.GetDeviceInfoAsync` (or the `device.GetDeviceInfoAsync()` convenience extension from
+`Yubico.YubiKit.Management`). A live read does **not** promise to update discovery metadata.
+
+Keep using `device.SerialNumber` for durable physical identity. Its independent identity contract is
+unchanged: once known, it remains known on that object even if the latest cached metadata omits the serial.
+Do not substitute `device.CachedDeviceInfo?.SerialNumber` for it.
+
 ## Device Monitoring
 
 For applications that need to react to device connections and disconnections. The SDK has **no

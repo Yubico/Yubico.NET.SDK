@@ -114,6 +114,34 @@ public interface IYubiKey
     int? SerialNumber => null;
 
     /// <summary>
+    ///     The last successfully observed device metadata, or <see langword="null" /> when unavailable.
+    ///     Reading this property performs no I/O and does not open a connection or session.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         This is a last-known snapshot, not guaranteed-current device state. Existing discovery and
+    ///         repository updates may replace it without a device event; a failed metadata read does not
+    ///         clear a previously successful snapshot. A value already returned to a caller does not change.
+    ///     </para>
+    ///     <para>
+    ///         Metadata may be stale after configuration changes or disconnection. A retained device object
+    ///         can continue to expose historical metadata; this getter neither checks presence nor refreshes
+    ///         the snapshot. Use <c>ManagementSession.GetDeviceInfoAsync</c> for a live read. That operation
+    ///         does not promise to update discovery metadata.
+    ///     </para>
+    ///     <para>
+    ///         <see cref="SerialNumber" /> retains its independent identity contract. In particular, it can
+    ///         remain known even when the latest metadata snapshot does not contain a serial number. Use
+    ///         that property, not the serial in this snapshot, for durable physical identity.
+    ///     </para>
+    ///     <para>
+    ///         The default implementation returns <see langword="null" /> so existing custom device
+    ///         implementations need not provide metadata.
+    ///     </para>
+    /// </remarks>
+    DeviceInfo? CachedDeviceInfo => null;
+
+    /// <summary>
     ///     Answers whether this reference and <paramref name="other" /> describe the same physical key.
     ///     Reference identity is evaluated first. Distinct references are then compared by serial number,
     ///     with <see cref="DeviceCorrelation.Unknown" /> returned when either serial is unknown.

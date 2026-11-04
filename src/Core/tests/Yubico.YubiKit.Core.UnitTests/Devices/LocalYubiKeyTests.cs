@@ -206,6 +206,60 @@ public class LocalYubiKeyTests
     }
 
     [Fact]
+    public void CachedDeviceInfo_CustomImplementationWithoutOverride_ReturnsNull()
+    {
+        IYubiKey device = new ThirdPartyYubiKey("third-party:metadata");
+
+        Assert.Null(device.CachedDeviceInfo);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CachedDeviceInfo_ReadingSnapshot_DoesNotOpenAnyConnection(bool metadataAvailable)
+    {
+        DeviceInfo? metadata = metadataAvailable
+            ? default(DeviceInfo) with { SerialNumber = 103, FirmwareVersion = new FirmwareVersion(5, 7, 2) }
+            : null;
+        IYubiKey device = FullKey(out var smartCard, out var fido, out var otp, metadata);
+
+        Assert.Equal(metadata, device.CachedDeviceInfo);
+        Assert.Equal(metadata, device.CachedDeviceInfo);
+
+        Assert.Equal(0, smartCard.ConnectCalls);
+        Assert.Equal(0, fido.ConnectCalls);
+        Assert.Equal(0, otp.ConnectCalls);
+    }
+
+    [Fact]
+    public void CachedDeviceInfo_MetadataChanges_TracksSnapshotWithoutRegressingSerialNumber()
+    {
+        var initial = default(DeviceInfo) with
+        {
+            SerialNumber = 103,
+            FirmwareVersion = new FirmwareVersion(5, 7, 2),
+            UsbEnabled = DeviceCapabilities.Piv
+        };
+        var local = FullKey(out _, out _, out _, initial);
+        IYubiKey device = local;
+        var retainedSnapshot = device.CachedDeviceInfo;
+        Assert.Equal(initial, retainedSnapshot);
+
+        var updated = initial with { SerialNumber = null, UsbEnabled = DeviceCapabilities.Fido2, IsLocked = true };
+        local.DeviceInfo = updated;
+
+        Assert.Equal(updated, device.CachedDeviceInfo);
+        Assert.Null(device.CachedDeviceInfo?.SerialNumber);
+        Assert.Equal(103, device.SerialNumber);
+        Assert.Equal(initial, retainedSnapshot);
+
+        local.DeviceInfo = null;
+
+        Assert.Equal(updated, device.CachedDeviceInfo);
+        Assert.Equal(103, device.SerialNumber);
+    }
+
+    [Fact]
     public void DeviceInfo_NullUpdate_DoesNotClearSuccessfulSnapshot()
     {
         var device = FullKey(out _, out _, out _);
@@ -248,12 +302,13 @@ public class LocalYubiKeyTests
     private static LocalYubiKey FullKey(
         out RecordingSlot smartCard,
         out RecordingSlot fido,
-        out RecordingSlot otp)
+        out RecordingSlot otp,
+        DeviceInfo? deviceInfo = null)
     {
         smartCard = new RecordingSlot(ConnectionType.SmartCard);
         fido = new RecordingSlot(ConnectionType.HidFido);
         otp = new RecordingSlot(ConnectionType.HidOtp);
-        return new LocalYubiKey("ykphysical:103", smartCard, fido, otp, deviceInfo: null);
+        return new LocalYubiKey("ykphysical:103", smartCard, fido, otp, deviceInfo);
     }
 
     private sealed class RecordingSlot(ConnectionType connection) : IYubiKeyConnectionSlot

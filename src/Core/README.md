@@ -56,6 +56,24 @@ Discovery needs no PIN, touch, or open session. Later snippets assume these dire
 
 ## Common operations
 
+### Read last-known device metadata without I/O
+
+```csharp
+if (device.CachedDeviceInfo is { } info)
+{
+    Console.WriteLine($"Last observed firmware: {info.FirmwareVersion}, form factor: {info.FormFactor}");
+}
+```
+
+`CachedDeviceInfo` is a nullable Core `DeviceInfo` snapshot. Reading it opens no connection or session;
+`null` means metadata is unavailable, including for custom `IYubiKey` implementations that use the default.
+Existing discovery/repository updates may replace the snapshot without a device event, but it is not
+guaranteed current and can remain historical after configuration changes or disconnection. A failed read
+does not clear the last successful snapshot. Use `ManagementSession.GetDeviceInfoAsync` for a live read;
+it does not promise to update discovery metadata. Continue using `device.SerialNumber` for durable
+identity: its independent contract can retain a known serial even when the latest snapshot omits it.
+See [cached device metadata](../../docs/usage/device-discovery.md#cached-device-metadata) for details.
+
 ### PC/SC sharing policy and migration
 
 Built-in PC/SC connections default to strict `SmartCardSharing.Exclusive`. If another smart-card client

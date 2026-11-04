@@ -339,6 +339,17 @@ substitution and emits `Removed` for the predecessor followed by `Added` for a n
 serials never trigger identity-based republication. If no listener event invalidates discovery caches and no scan
 observes absence, same-interface substitution remains unknowable from cached evidence.
 
+`IYubiKey.CachedDeviceInfo` exposes the existing nullable Core `DeviceInfo` snapshot without I/O; its default
+interface implementation returns `null` for custom implementations. `LocalYubiKey` delegates directly to
+`DeviceInfo`, whose getter reads the atomically published `DeviceInfoSnapshot` reference. Do not introduce a
+second cache or infer freshness from this property. Existing discovery/repository updates replace the
+snapshot without a device event, and null updates preserve the last successful value. Retained objects can
+expose stale metadata after configuration changes or disconnect. `ManagementSession.GetDeviceInfoAsync` is
+the live-read API and does not promise to update discovery metadata. The independent `SerialNumber` latch
+and identity contract remain unchanged, even if a newer metadata snapshot omits its serial. No-hardware
+coverage is in `LocalYubiKeyTests` (no connection on access, snapshot replacement, default implementations,
+serial independence) and `YubiKeyDeviceRepositoryCompositeTests` (retention and replacement isolation).
+
 Use `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` when absence is exceptional and
 `FindFirstOrDefaultAsync(predicate, cancellationToken)` when it is not. They are thin, one-shot selections over
 cached `FindAllAsync`; they do not wait for insertion, and callers must not treat discovery order as stable. The

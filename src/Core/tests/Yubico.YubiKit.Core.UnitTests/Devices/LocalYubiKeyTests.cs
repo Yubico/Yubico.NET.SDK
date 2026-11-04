@@ -20,7 +20,7 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
-public class YubiKeyDeviceTests
+public class LocalYubiKeyTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
@@ -40,7 +40,7 @@ public class YubiKeyDeviceTests
     public void Constructor_WithNoSlots_RejectsUnopenablePublishedDevice()
     {
         var exception = Assert.Throws<ArgumentException>(() =>
-            new YubiKeyDevice("ykphysical:empty", null, null, null, deviceInfo: null));
+            new LocalYubiKey("ykphysical:empty", null, null, null, deviceInfo: null));
 
         Assert.Contains("at least one connection slot", exception.Message, StringComparison.Ordinal);
         Assert.Null(exception.ParamName);
@@ -50,7 +50,7 @@ public class YubiKeyDeviceTests
     public void Constructor_WithWrongSlotShape_RejectsMismatchedConnection()
     {
         var exception = Assert.Throws<ArgumentException>(() =>
-            new YubiKeyDevice(
+            new LocalYubiKey(
                 "ykphysical:wrong-slot",
                 smartCard: null,
                 hidFido: new RecordingSlot(ConnectionType.SmartCard | ConnectionType.HidFido),
@@ -131,7 +131,7 @@ public class YubiKeyDeviceTests
     {
         IYubiKey thirdParty = new ThirdPartyYubiKey("third-party:1");
 
-        Assert.Equal("13:third-party:1", YubiKeyDevice.PhysicalIdentityKeyFor(thirdParty));
+        Assert.Equal("13:third-party:1", LocalYubiKey.PhysicalIdentityKeyFor(thirdParty));
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class YubiKeyDeviceTests
     [Fact]
     public async Task ConnectAsync_RequestedConnectionAbsent_ThrowsNotSupported()
     {
-        var device = new YubiKeyDevice(
+        var device = new LocalYubiKey(
             "ykphysical:smart-card-only",
             new RecordingSlot(ConnectionType.SmartCard),
             hidFido: null,
@@ -164,7 +164,7 @@ public class YubiKeyDeviceTests
     public async Task ConnectAsync_SlotCannotRawOpen_PropagatesOrdinaryNotSupported()
     {
         var expected = new NotSupportedException("The slot cannot open a raw connection.");
-        var device = new YubiKeyDevice(
+        var device = new LocalYubiKey(
             "ykphysical:unsupported-raw",
             new UnsupportedRawSlot(expected),
             hidFido: null,
@@ -181,7 +181,7 @@ public class YubiKeyDeviceTests
     public async Task DiscoveryConnectAsync_GenuineRawOpenNotSupported_PropagatesUnchanged()
     {
         var expected = new NotSupportedException("The native smart-card connection rejected this raw open.");
-        var device = new YubiKeyDevice(
+        var device = new LocalYubiKey(
             "ykphysical:genuine-unsupported-raw",
             new UnsupportedRawSlot(expected),
             hidFido: null,
@@ -226,17 +226,17 @@ public class YubiKeyDeviceTests
     ///     and disposing a connection obtained through it must not tear down the slot that opened it.
     /// </summary>
     [Fact]
-    public async Task YubiKeyDevice_OwnsNoDisposableState()
+    public async Task LocalYubiKey_OwnsNoDisposableState()
     {
         Assert.False(
-            typeof(IDisposable).IsAssignableFrom(typeof(YubiKeyDevice)),
-            "YubiKeyDevice must not be IDisposable: devices are repository-retained snapshots, not resource owners.");
+            typeof(IDisposable).IsAssignableFrom(typeof(LocalYubiKey)),
+            "LocalYubiKey must not be IDisposable: devices are repository-retained snapshots, not resource owners.");
         Assert.False(
-            typeof(IAsyncDisposable).IsAssignableFrom(typeof(YubiKeyDevice)),
-            "YubiKeyDevice must not be IAsyncDisposable: devices are repository-retained snapshots, not resource owners.");
+            typeof(IAsyncDisposable).IsAssignableFrom(typeof(LocalYubiKey)),
+            "LocalYubiKey must not be IAsyncDisposable: devices are repository-retained snapshots, not resource owners.");
 
         var slot = new DisposalRecordingSlot();
-        var device = new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+        var device = new LocalYubiKey(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
 
         var connection = await device.ConnectAsync<ISmartCardConnection>(Ct);
         await connection.DisposeAsync();
@@ -245,7 +245,7 @@ public class YubiKeyDeviceTests
         Assert.Equal(0, slot.DisposeCalls);
     }
 
-    private static YubiKeyDevice FullKey(
+    private static LocalYubiKey FullKey(
         out RecordingSlot smartCard,
         out RecordingSlot fido,
         out RecordingSlot otp)
@@ -253,7 +253,7 @@ public class YubiKeyDeviceTests
         smartCard = new RecordingSlot(ConnectionType.SmartCard);
         fido = new RecordingSlot(ConnectionType.HidFido);
         otp = new RecordingSlot(ConnectionType.HidOtp);
-        return new YubiKeyDevice("ykphysical:103", smartCard, fido, otp, deviceInfo: null);
+        return new LocalYubiKey("ykphysical:103", smartCard, fido, otp, deviceInfo: null);
     }
 
     private sealed class RecordingSlot(ConnectionType connection) : IYubiKeyConnectionSlot

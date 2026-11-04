@@ -135,7 +135,7 @@ public class DiscoverySingleFlightTests
         var slot = new PcscConnectionSlot(
             new PcscDevice { ReaderName = $"wrapped-reader-{Guid.NewGuid():N}", Atr = null },
             factory);
-        var inner = new YubiKeyDevice(
+        var inner = new LocalYubiKey(
             slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
         using var wrapper = new TransparentYubiKey(inner);
 
@@ -170,7 +170,7 @@ public class DiscoverySingleFlightTests
     {
         var smartCard = new UnsupportedDiscoveryYubiKey(ConnectionType.SmartCard);
         var hid = new UnsupportedDiscoveryYubiKey(ConnectionType.HidFido);
-        var composite = new YubiKeyDevice(
+        var composite = new LocalYubiKey(
             $"composite:{Guid.NewGuid():N}", smartCard, hid, hidOtp: null, deviceInfo: null);
 
         var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>

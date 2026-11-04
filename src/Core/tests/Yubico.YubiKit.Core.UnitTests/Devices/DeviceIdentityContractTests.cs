@@ -115,7 +115,7 @@ public class DeviceIdentityContractTests
     {
         using var repository = new YubiKeyDeviceRepository();
         using var cts = new CancellationTokenSource(Bound);
-        var withSerial = new YubiKeyDevice(
+        var withSerial = new LocalYubiKey(
             "ykphysical:103",
             new FakeSlot("pcsc:a", ConnectionType.SmartCard),
             new FakeSlot("hid-fido:a", ConnectionType.HidFido),
@@ -126,7 +126,7 @@ public class DeviceIdentityContractTests
         await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Same interface set, different connection set, no metadata on the fresh scan object.
-        var republished = new YubiKeyDevice(
+        var republished = new LocalYubiKey(
             "ykphysical:pid:0405",
             new FakeSlot("pcsc:a", ConnectionType.SmartCard),
             hidFido: null,
@@ -250,7 +250,7 @@ public class DeviceIdentityContractTests
             SerialNumber = serial
         };
 
-    private static YubiKeyDevice Published(DeviceInfo? deviceInfo) =>
+    private static LocalYubiKey Published(DeviceInfo? deviceInfo) =>
         new(
             "ykphysical:pid:0407",
             new FakeSlot("pcsc:a", ConnectionType.SmartCard),

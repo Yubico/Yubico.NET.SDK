@@ -37,7 +37,7 @@ public class PcscDiscoveryLifetimeTests
         };
         var factory = new SmartCardConnectionFactory(api);
         var slot = new PcscConnectionSlot(pcscDevice, factory);
-        var device = new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+        var device = new LocalYubiKey(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
 
         try
         {

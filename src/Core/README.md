@@ -49,6 +49,8 @@ foreach (var each in await YubiKeyManager.FindAllAsync())
 
 One `IYubiKey` is one physical YubiKey, even when it exposes several interfaces at once. `SerialNumber` is
 the durable identity; it is `null` on devices that do not report one, such as the Security Key series.
+Discovery returns `IYubiKey` objects backed by the internal `LocalYubiKey` implementation; use the public
+interface rather than depending on that implementation type.
 Discovery needs no PIN, touch, or open session. Later snippets assume these directives and a `device` obtained the same way;
 `Yubico.YubiKit.Piv` is referenced only to show an application session.
 

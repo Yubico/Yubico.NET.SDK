@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     The single production device shape published by discovery, with at most one slot for each concrete
 ///     connection type.
 /// </summary>
-internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
+internal sealed class LocalYubiKey : IYubiKey, IDiscoveryConnectionProvider
 {
     private readonly IYubiKeyConnectionSlot? _smartCard;
     private readonly IYubiKeyConnectionSlot? _hidFido;
@@ -33,7 +33,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     private DeviceInfoSnapshot? _deviceInfo;
     private object? _serialNumber; // boxed int, published atomically as a reference
 
-    internal YubiKeyDevice(
+    internal LocalYubiKey(
         string deviceId,
         IYubiKeyConnectionSlot? smartCard,
         IYubiKeyConnectionSlot? hidFido,
@@ -121,7 +121,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     ///     changes; broader identity-policy comparisons belong in the architecture documentation.
     /// </remarks>
     internal static string PhysicalIdentityKeyFor(IYubiKey device) =>
-        device is YubiKeyDevice published
+        device is LocalYubiKey published
             ? published.PhysicalIdentityKey
             : EncodeInterfaceIds([device.DeviceId]);
 

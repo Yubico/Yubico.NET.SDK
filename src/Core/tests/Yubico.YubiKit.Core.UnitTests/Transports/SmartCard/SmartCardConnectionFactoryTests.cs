@@ -117,7 +117,7 @@ public class SmartCardConnectionFactoryTests
         };
         var factory = new SmartCardConnectionFactory();
         var slot = new PcscConnectionSlot(pcscDevice, factory);
-        var device = new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+        var device = new LocalYubiKey(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
         using var logging = YubiKitLogging.UseTemporary(new ThrowingLoggerFactory());
 
         _ = await Assert.ThrowsAsync<InvalidOperationException>(

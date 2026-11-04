@@ -34,7 +34,7 @@ The product contract is one connection for the physical key, regardless of inter
 A composite ID describes the evidence tier that formed a group and can change between scans. Member
 IDs (PC/SC reader names and HID paths) are the stable ownership records.
 
-When discovery proves that interfaces belong to one flat `YubiKeyDevice`, it stores the interfaces in
+When discovery proves that interfaces belong to one flat `LocalYubiKey`, it stores the interfaces in
 optional SmartCard, HID FIDO, and HID OTP slots with one sorted lease scope. Opening any slot atomically
 claims all IDs in that scope. Therefore:
 

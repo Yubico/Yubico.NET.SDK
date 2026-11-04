@@ -8,7 +8,7 @@ policy (retry-every-scan, measured and pinned — see the stage D' section of
 
 `IYubiKey.DeviceId` is public, but it names the evidence tier that discovery used to group interfaces.
 It can therefore change while the physical key remains attached. The repository avoids false removals by
-diffing on `YubiKeyDevice.PhysicalIdentityKeyFor`, an internal fingerprint of the observed interface
+diffing on `LocalYubiKey.PhysicalIdentityKeyFor`, an internal fingerprint of the observed interface
 identifiers. Consumers cannot use that fingerprint; the durable identity they can use is
 `IYubiKey.SerialNumber` (D2), when the hardware reports one.
 

@@ -22,7 +22,7 @@ public class MacOSOtpRouteTests
             Usage = 6
         };
         var slot = new HidConnectionSlot(new MacOSHidInterface(42, descriptor), otpLifetime: native);
-        var device = new YubiKeyDevice(slot.InterfaceId, smartCard: null, hidFido: null,
+        var device = new LocalYubiKey(slot.InterfaceId, smartCard: null, hidFido: null,
             hidOtp: slot, deviceInfo: null);
 
         try

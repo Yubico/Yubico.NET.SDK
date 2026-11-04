@@ -345,7 +345,8 @@ cached `FindAllAsync`; they do not wait for insertion, and callers must not trea
 token is passed to discovery, but a cached result may complete without observing cancellation.
 
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
-handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by production discovery.
+handles; they are not `IYubiKey` objects. Only the internal `LocalYubiKey` implementation is published by
+production discovery; manager, repository, and monitor types keep their separate roles.
 
 `IYubiKey` models the physical key; `IHidInterface` models one operating-system-exposed HID report
 interface discovered by `FindHidInterfaces`. `IHidConnection` is an opened report connection, while

@@ -91,7 +91,7 @@ public class FindYubiKeysFaultInjectionTests
         Assert.All(scan1, d => Assert.Equal(Dual, d.AvailableConnections));
         var keyB1 = Assert.Single(scan1, d => d.DeviceId == "ykphysical:222");
         Assert.Contains(
-            Assert.IsType<YubiKeyDevice>(keyB1).InterfaceIds,
+            Assert.IsType<LocalYubiKey>(keyB1).InterfaceIds,
             id => id.EndsWith(OtpB, StringComparison.Ordinal));
 
         var otpAConnectsAfterScan1 = factory.ConnectCalls(OtpA);
@@ -145,7 +145,7 @@ public class FindYubiKeysFaultInjectionTests
         var scan3 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
         Assert.Equal(3, scan3.Count);
-        var keyA = Assert.Single(scan3, d => Assert.IsType<YubiKeyDevice>(d).InterfaceIds.Count > 1);
+        var keyA = Assert.Single(scan3, d => Assert.IsType<LocalYubiKey>(d).InterfaceIds.Count > 1);
         Assert.Equal("ykphysical:111", keyA.DeviceId);
         Assert.Equal(Dual, keyA.AvailableConnections);
         Assert.DoesNotContain(scan3, d => d.DeviceId == "ykphysical:222");
@@ -204,7 +204,7 @@ public class FindYubiKeysFaultInjectionTests
         Assert.All(scan2, d => Assert.Equal(Dual, d.AvailableConnections));
         var keyA = Assert.Single(scan2, d => d.DeviceId == "ykphysical:111");
         Assert.Contains(
-            Assert.IsType<YubiKeyDevice>(keyA).InterfaceIds,
+            Assert.IsType<LocalYubiKey>(keyA).InterfaceIds,
             id => id.EndsWith(ReaderARenamed, StringComparison.Ordinal));
         Assert.True(
             factory.ConnectCalls(ReaderARenamed) > 0,
@@ -314,7 +314,7 @@ public class FindYubiKeysFaultInjectionTests
             factory.Create);
 
         var scan1 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
-        Assert.Equal(333, Assert.IsType<YubiKeyDevice>(Assert.Single(scan1)).DeviceInfo?.SerialNumber);
+        Assert.Equal(333, Assert.IsType<LocalYubiKey>(Assert.Single(scan1)).DeviceInfo?.SerialNumber);
         var connectsAfterScan1 = factory.ConnectCalls(fidoPath);
 
         // Same-model key swapped into the same slot between scans: identical interface id, different
@@ -324,7 +324,7 @@ public class FindYubiKeysFaultInjectionTests
 
         var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
-        Assert.Equal(999, Assert.IsType<YubiKeyDevice>(Assert.Single(scan2)).DeviceInfo?.SerialNumber);
+        Assert.Equal(999, Assert.IsType<LocalYubiKey>(Assert.Single(scan2)).DeviceInfo?.SerialNumber);
         Assert.True(
             factory.ConnectCalls(fidoPath) > connectsAfterScan1,
             "Transport activity must invalidate cached metadata: serving the old key's DeviceInfo for the " +
@@ -466,7 +466,7 @@ public class FindYubiKeysFaultInjectionTests
 
         Assert.Equal(
             999,
-            Assert.IsType<YubiKeyDevice>(Assert.Single(scan2)).DeviceInfo?.SerialNumber);
+            Assert.IsType<LocalYubiKey>(Assert.Single(scan2)).DeviceInfo?.SerialNumber);
     }
 
     /// <summary>
@@ -527,7 +527,7 @@ public class FindYubiKeysFaultInjectionTests
 
         var published = Assert.Single(result);
         Assert.Equal(ConnectionType.HidFido, published.AvailableConnections);
-        Assert.Equal(333, Assert.IsType<YubiKeyDevice>(published).DeviceInfo?.SerialNumber);
+        Assert.Equal(333, Assert.IsType<LocalYubiKey>(published).DeviceInfo?.SerialNumber);
         Assert.Equal(1, factory.ConnectCalls(fidoPath));
     }
 
@@ -550,7 +550,7 @@ public class FindYubiKeysFaultInjectionTests
 
         var published = Assert.Single(result);
         Assert.Equal(ConnectionType.SmartCard, published.AvailableConnections);
-        Assert.Equal(444, Assert.IsType<YubiKeyDevice>(published).DeviceInfo?.SerialNumber);
+        Assert.Equal(444, Assert.IsType<LocalYubiKey>(published).DeviceInfo?.SerialNumber);
         Assert.Equal(1, factory.ConnectCalls(readerName));
     }
 
@@ -665,7 +665,7 @@ public class FindYubiKeysFaultInjectionTests
         }
 
         Assert.Equal(6, result.Count);
-        Assert.All(result, d => Assert.Single(Assert.IsType<YubiKeyDevice>(d).InterfaceIds));
+        Assert.All(result, d => Assert.Single(Assert.IsType<LocalYubiKey>(d).InterfaceIds));
         Assert.Equal(4, connectsAtScanEnd); // bound preserved: hung native calls never multiply workers
         Assert.True(
             allSixEventuallyConnected,

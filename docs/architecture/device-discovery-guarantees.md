@@ -198,7 +198,7 @@ This SDK's merger contains no firmware-version logic, and none should be added f
 | G9 | Topology-read failure degrades safely | yes — becomes macOS semantics | n/a | n/a |
 
 `AvailableConnections` is the union of the supported concrete interfaces observed for the published device;
-`YubiKeyDeviceTests.FlatSlots_ExposeCombinedConnectionsAndSortedInterfaceIds` pins that structural rule. It is
+`LocalYubiKeyTests.FlatSlots_ExposeCombinedConnectionsAndSortedInterfaceIds` pins that structural rule. It is
 transport availability only. It does not prove that every applet or capability is enabled over every
 interface, nor that interfaces or operations are safe to use concurrently. Applet capability and
 connection-ownership rules remain separate contracts. Yubico HID reports that cannot be classified as FIDO

@@ -27,7 +27,7 @@ See also: [device identity and physical-device correlation](./device-identity.md
   the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
   (`ykphysical:topology:*`, `ykphysical:{serial}`, or `ykphysical:pid:*`) different from an earlier scan;
   do not treat independently created scan objects as durable identity records. The repository correlates
-  physical presence by interface set (`YubiKeyDevice.PhysicalIdentityKeyFor`, internal).
+  physical presence by interface set (`LocalYubiKey.PhysicalIdentityKeyFor`, internal).
 - `ConnectionType AvailableConnections` — the concrete interfaces this device exposes, any combination of
   `SmartCard`, `HidFido`, and `HidOtp`. It never contains the `Hid` group flag or `All`.
   This is the union of observed transport interfaces, not proof that every applet is enabled on every

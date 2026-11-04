@@ -812,7 +812,7 @@ public class CompositeDeviceMergerVectorTests
         new(new FakeSlot(deviceId, connection), connection, isUsb, pid, serial, DeviceInfo: null, topologyKey);
 
     private static IReadOnlyList<string> InterfaceIdsOf(IYubiKey device) =>
-        Assert.IsType<YubiKeyDevice>(device).InterfaceIds;
+        Assert.IsType<LocalYubiKey>(device).InterfaceIds;
 
     private static string Describe(IReadOnlyList<IYubiKey> result) =>
         string.Join("; ", result.Select(d =>

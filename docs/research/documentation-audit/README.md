@@ -27,7 +27,7 @@ remains the editorial reference. Repository and module instructions still govern
 | Management | Complete: cycle `management-001`, committed/pushed at `bac07ee7`; independent review and validation accepted | Deferred until the campaign's second sweep | [Management handoff](management.md) |
 | CTAP2 | Complete, committed/pushed at `3bc3e409`: cycle `ctap2-001`, dedicated CTAP/WebAuthn consistency review and verified gates | Deferred until the campaign's second sweep | [CTAP2 handoff](ctap2.md) |
 | Security Domain | Complete, committed/pushed at `7f762359`: module-focused `security-domain-001`, independent review and verified gates | Deferred until the campaign's second sweep | [Security Domain handoff](security-domain.md) |
-| YubiOTP | Content, independent reviews and gates complete: `yubiotp-001`; 16 integration methods + four probes passed, publication pending | Deferred until the campaign's second sweep | [YubiOTP handoff](yubiotp.md) |
+| YubiOTP | Complete, committed/pushed at `f4419397`: `yubiotp-001`; 16 integration methods + four probes passed | Deferred until the campaign's second sweep | [YubiOTP handoff](yubiotp.md) |
 | PIV | Reserved for the final part of the first sweep | Deferred until the campaign's second sweep | Scope/inventory at selection |
 | Core | Final target; detailed scope and per-applet cross-module boundary reviews to be planned then | Discovery/SCP follow-ups retain their separate scope | Existing module checkpoints and future Core plan |
 | Other remaining applets | Not yet scheduled within the first sweep | Deferred until the campaign's second sweep | Apply the workflow when selected |

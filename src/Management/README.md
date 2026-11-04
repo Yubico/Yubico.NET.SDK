@@ -187,6 +187,13 @@ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.cspro
 
 ## Related
 
+For read-only discovery and metadata validation without configuration changes, run only
+`ScopedDiscoveryReadOnlyTests` as described in the
+[discovery hardware checks](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+It compares public `IYubiKey.CachedDeviceInfo` snapshots with sequential live Management reads across the
+supported scopes on every attached authorized serial-bearing USB key. Other Management integration tests
+can mutate configuration; a broad project run is not equivalent to this read-only filter.
+
 - [../Core/README.md](../Core/README.md) - device discovery, connections, and the `Core.Devices` metadata types.
 - [../Piv/README.md](../Piv/README.md), [../Oath/README.md](../Oath/README.md), [../Ctap2/README.md](../Ctap2/README.md) - applications this module toggles.
 - [user-interaction.md](../../docs/usage/user-interaction.md) and

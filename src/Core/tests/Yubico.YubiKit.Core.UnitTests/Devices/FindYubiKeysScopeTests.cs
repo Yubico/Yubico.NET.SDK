@@ -152,6 +152,30 @@ public class FindYubiKeysScopeTests
         Assert.Equal(ConnectionType.SmartCard, Assert.Single(ccid).AvailableConnections);
     }
 
+    [Theory]
+    [InlineData(ConnectionType.SmartCard)]
+    [InlineData(ConnectionType.All)]
+    public async Task ScanAsync_ReturnedViewCanConnectSequentiallyAfterDiscoveryScopeRetires(ConnectionType scope)
+    {
+        var rig = new ScopeRig();
+        var device = Assert.Single(await YubiKeyManager.ScanAsync(scope, TestContext.Current.CancellationToken, rig.CreateFinder));
+        var snapshot = device.CachedDeviceInfo;
+        Assert.NotNull(snapshot);
+        var discoveryOpens = rig.OpenCalls.Values.Sum();
+
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            await using var connection = await device.ConnectAsync<ISmartCardConnection>(TestContext.Current.CancellationToken);
+            Assert.Equal(ConnectionType.SmartCard, connection.Type);
+            Assert.Equal(snapshot, device.CachedDeviceInfo);
+            await Assert.ThrowsAsync<ConnectionInUseException>(() => device.ConnectAsync<ISmartCardConnection>(TestContext.Current.CancellationToken));
+        }
+
+        Assert.Equal(discoveryOpens + 2, rig.OpenCalls.Values.Sum());
+        Assert.All(rig.Connections, connection => Assert.Equal(1, connection.DisposeCount));
+        Assert.Equal(snapshot, device.CachedDeviceInfo);
+    }
+
     [Fact]
     public async Task ScanAsync_ConcurrentCallsHaveIndependentReadScopesButShareInterfaceOwnership()
     {

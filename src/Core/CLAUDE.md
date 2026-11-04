@@ -371,6 +371,14 @@ No global registry identity aliases are added: all/scoped views exclude connecti
 known member-ID sets overlap; disjoint CCID/FIDO views remain uncoordinated even with matching serials.
 `FindYubiKeysScopeTests` pins filtering, partial same-PID grouping, evidence isolation, retirement, and
 the ownership bound; `YubiKeyManagerStaticTests` pins no initialization/publication/monitor interference.
+`ScanAsync_ReturnedViewCanConnectSequentiallyAfterDiscoveryScopeRetires` additionally pins that retiring
+one-shot discovery does not retire the returned view's public connection slots. The public hardware
+companion is `ScopedDiscoveryReadOnlyTests` in Management's integration project (the appropriate place
+for its live-read dependency), not Core's unit tests. It uses all attached authorized serial-bearing USB
+fixtures, permits conservative fragments, and compares metadata over sequential concrete connections.
+Keep native disjoint-view races out of hardware coverage; use the deterministic ownership vectors above.
+Fixture requirements and the explicit read-only filter are in
+[device discovery testing](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
 handles; they are not `IYubiKey` objects. Only the internal `LocalYubiKey` implementation is published by

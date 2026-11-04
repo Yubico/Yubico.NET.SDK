@@ -370,6 +370,12 @@ device with `Yubico.YubiKit.SecurityDomain`.
 
 ## Related
 
+For repeatable `ScanAsync`/`CachedDeviceInfo` hardware validation, use the
+[targeted read-only discovery checks](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+They cover every attached authorized serial-bearing USB key, use sequential connections only, and keep the
+live-read Management dependency in its integration project. Scope exclusion and disjoint ownership limits
+are checked deterministically rather than by racing native hardware connections.
+
 - Application modules: [Management](../Management/README.md), [PIV](../Piv/README.md),
   [CTAP2](../Ctap2/README.md), [WebAuthn](../WebAuthn/README.md), [OATH](../Oath/README.md),
   [YubiOTP](../YubiOtp/README.md), [OpenPGP](../OpenPgp/README.md),

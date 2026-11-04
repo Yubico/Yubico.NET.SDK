@@ -401,6 +401,16 @@ public async Task MyTest(YubiKeyTestState state) =>
 
 ### 1. Read-Only Device Information Tests
 
+`ScopedDiscoveryReadOnlyTests` exercises Core's public `ScanAsync` and `CachedDeviceInfo` contracts with
+independent live Management reads. Unlike `[WithYubiKey]`'s first-match binding, it loops over all attached
+allow-listed serial-bearing USB fixtures. Do not derive it from `IntegrationTestBase`: that base starts
+monitoring, which can probe disjoint sibling interfaces while a scoped connection is held. Finish scans
+before opening any live connection, then asynchronously dispose each borrowed session and connection
+before the next one. Its bounded retries report missing metadata and connection contention without
+swallowing unrelated errors. Excluded native call counts and disjoint ownership limits belong in Core's
+deterministic scope tests, not concurrent hardware experiments. The canonical read-only filter and fixture
+requirements are in [device discovery testing](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+
 ```csharp
 [SkippableTheory]
 [WithYubiKey]

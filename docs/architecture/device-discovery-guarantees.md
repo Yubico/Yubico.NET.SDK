@@ -105,6 +105,15 @@ each other's reads, but still coordinate overlapping interface claims
 not provide physical-key exclusion, even with matching serials; see the
 [ownership grouping bound](connection-ownership-and-contention.md#grouping-bound).
 
+The public one-shot result remains connectable after its discovery scope retires
+(`ScanAsync_ReturnedViewCanConnectSequentiallyAfterDiscoveryScopeRetires`). Hardware coverage lives in
+Management's `ScopedDiscoveryReadOnlyTests`: scoped/full views are correlated by serial, cached metadata is
+compared with sequential live reads on every exposed concrete connection, and default/explicit All use
+independent objects. It accepts conservative fragmentation rather than equating view count with key count.
+These idle-fixture checks do not prove exclusion of native calls or safety of disjoint simultaneous access;
+those scope and ownership boundaries remain pinned by deterministic tests above. See the
+[targeted read-only command and fixture requirements](../usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+
 ## Device identity: what `DeviceId` does and does not promise
 
 See [device identity and physical-device correlation](./device-identity.md) for the architecture decision

@@ -274,6 +274,47 @@ catch (PlatformInteropException ex)
 
 ## Testing Pattern
 
+### Read-only scoped discovery hardware checks
+
+From the repository root, explicitly select the read-only cases:
+
+```bash
+dotnet toolchain.cs -- test --integration --project Management --filter "FullyQualifiedName~ScopedDiscoveryReadOnlyTests"
+```
+
+These tests live in the Management integration project only because they compare discovery metadata with
+independent live `ManagementSession.GetDeviceInfoAsync` reads. Core itself needs no Management dependency.
+Configure the existing `YubiKeyTests:AllowedSerialNumbers` allow list before running them. They exercise
+**every attached authorized serial-bearing USB key**, not just the first `[WithYubiKey]` match, and do not
+hard-code a key count or serial in the source.
+
+The seven cases cover SmartCard, FIDO, OTP, HID, SmartCard+OTP, explicit All, and the default scope. They check
+in-scope connection sets, serial-based `SameDeviceAs` correlation across independent views, retained snapshots,
+and cached/live serial, firmware, form factor, and USB/NFC capability agreement. Each exposed concrete
+connection is opened, read, and asynchronously disposed before the next connection. The tests never reset,
+write configuration or credentials, request touch, or require unplugging. Do **not** substitute a broad
+Management integration run: other cases in that project change configuration or reset the key.
+
+Run on an idle serial-bearing USB fixture, without another monitor/client probing the same keys. The tests
+do not start monitoring or use its cache; a full reference scan precedes each scoped test. Consequently this
+hardware run does not prove that excluded backends were never called: the deterministic `FindYubiKeysScopeTests`
+pin those boundaries, including the distinction between shared HID descriptor enumeration and excluded
+interface protocol probes.
+
+Metadata readiness is retried up to three scans with 250 ms backoff; live connection acquisition retries only
+`ConnectionInUseException`, up to three attempts. The existing finite worker-saturation scan retry also applies.
+Each case has a 60-second cancellation budget, not a native-drain guarantee. Missing expected interfaces or
+metadata remain failures, with diagnostic output; no fixture or no supported authorized interface can skip a
+case. Check executed/skipped totals and resolve external contention before treating a failure as an SDK bug.
+For detailed firmware/count/retry output, temporarily enable xUnit's `showLiveOutput` in that project's runner
+configuration. Do not commit machine-specific serials or hardware logs.
+
+Connections through disjoint scoped views are **never** opened simultaneously in hardware tests. Overlapping
+and disjoint ownership bounds, cancellation, and queued-read retirement are tested with fakes in
+`FindYubiKeysScopeTests`; successful read-only hardware checks do not imply universal physical-key locking.
+
+### Static manager cleanup
+
 In xUnit tests, clean up static state between tests:
 
 ```csharp

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Tests.Shared;
@@ -59,7 +60,7 @@ public class PivMetadataTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
 
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
 
         Assert.Null(metadata);
     }
@@ -71,12 +72,12 @@ public class PivMetadataTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
 
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
 
         Assert.NotNull(metadata);
-        Assert.Equal(PivAlgorithm.EccP256, metadata.Value.Algorithm);
+        Assert.Equal(KeyType.ECP256, metadata.Value.KeyType);
         Assert.True(metadata.Value.IsGenerated);
     }
 

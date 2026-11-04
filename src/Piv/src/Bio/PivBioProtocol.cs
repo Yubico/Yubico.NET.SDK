@@ -43,7 +43,7 @@ internal static class PivBioProtocol
 
         // SW 0x6A82 means object/feature not found (not configured)
         // SW 0x6D00 means instruction not supported (non-Bio key)
-        if (response.SW == 0x6A82 || response.SW == 0x6D00)
+        if (response.SW is 0x6A82 or 0x6A88 or 0x6D00)
         {
             throw new NotSupportedException("Biometrics are not supported or not configured on this YubiKey");
         }

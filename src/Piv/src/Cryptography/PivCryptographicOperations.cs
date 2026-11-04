@@ -49,8 +49,8 @@ internal static class PivCryptographicOperations
     internal static Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
         IPivBackend backend,
         ILogger logger,
-        PivSlot slot,
-        PivAlgorithm algorithm,
+        Slot slot,
+        KeyType algorithm,
         ReadOnlyMemory<byte> data,
         UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default) =>
@@ -66,8 +66,8 @@ internal static class PivCryptographicOperations
     private static async Task<ReadOnlyMemory<byte>> SignOrDecryptCoreAsync(
         IPivBackend backend,
         ILogger logger,
-        PivSlot slot,
-        PivAlgorithm algorithm,
+        Slot slot,
+        KeyType algorithm,
         ReadOnlyMemory<byte> data,
         UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken)
@@ -110,7 +110,7 @@ internal static class PivCryptographicOperations
             WritePreparedData(algorithm, data.Span, commandData.AsSpan(offset, preparedLength));
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-            var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
+            var command = new ApduCommand(0x00, 0x87, PivAlgorithmId.Encode(algorithm), (byte)slot, commandData);
             await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
@@ -160,7 +160,7 @@ internal static class PivCryptographicOperations
         IPivBackend backend,
         ILogger logger,
         PivSlotMetadata? metadata,
-        PivSlot slot,
+        Slot slot,
         ReadOnlyMemory<byte> cipherText,
         RSAEncryptionPadding padding,
         UserPresenceNotification userPresenceNotification,
@@ -169,21 +169,14 @@ internal static class PivCryptographicOperations
         ArgumentNullException.ThrowIfNull(padding);
         logger.LogDebug("PIV: DecryptAsync slot 0x{Slot:X2}", (byte)slot);
 
-        if (metadata is null || !metadata.Value.Algorithm.IsRsa())
+        if (metadata is null || !metadata.Value.RequireKeyType().IsRSA())
         {
             throw new ArgumentException(
                 $"Slot 0x{(byte)slot:X2} does not contain an RSA key.", nameof(slot));
         }
 
-        var algorithm = metadata.Value.Algorithm;
-        int keyBits = algorithm switch
-        {
-            PivAlgorithm.Rsa1024 => 1024,
-            PivAlgorithm.Rsa2048 => 2048,
-            PivAlgorithm.Rsa3072 => 3072,
-            PivAlgorithm.Rsa4096 => 4096,
-            _ => throw new ArgumentException("Slot does not contain an RSA key.", nameof(slot))
-        };
+        var algorithm = metadata.Value.RequireKeyType();
+        int keyBits = algorithm.GetKeySizeBits();
 
         if (cipherText.Length != keyBits / 8)
         {
@@ -207,19 +200,16 @@ internal static class PivCryptographicOperations
         // We generate a temporary RSA key of the same size, use textbook RSA (encrypt with public key)
         // to re-wrap the raw bytes, then decrypt with the dummy private key and real padding params.
         // This lets .NET's crypto library handle PKCS#1 v1.5 and OAEP unpadding correctly.
-        using var dummy = RSA.Create(keyBits);
-        var publicParams = dummy.ExportParameters(false);
-        var n = publicParams.Modulus ?? throw new CryptographicException("RSA key export returned null modulus.");
-        var e = publicParams.Exponent ?? throw new CryptographicException("RSA key export returned null exponent.");
-
-        // rawBytes and reEncrypted are sensitive — zeroed in finally regardless of outcome.
-        // The try starts before ModPow so rawBytes is zeroed even if ModPow throws.
-        // CopyAndZeroSource also zeroes rawDecrypted's own backing array immediately, since it is a
-        // second, separate unzeroed copy of the raw RSA output once rawBytes has been derived from it.
-        var rawBytes = CopyAndZeroSource(rawDecrypted);
+        byte[]? rawBytes = null;
         byte[]? reEncrypted = null;
         try
         {
+            // Cleanup already owns the raw card output before local RSA setup can fail.
+            using var dummy = RSA.Create(keyBits);
+            var publicParams = dummy.ExportParameters(false);
+            var n = publicParams.Modulus ?? throw new CryptographicException("RSA key export returned null modulus.");
+            var e = publicParams.Exponent ?? throw new CryptographicException("RSA key export returned null exponent.");
+            rawBytes = CopyAndZeroSource(rawDecrypted);
             reEncrypted = ModPow(rawBytes, e, n, keyBits / 8);
             return dummy.Decrypt(reEncrypted, padding);
         }
@@ -230,7 +220,9 @@ internal static class PivCryptographicOperations
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(rawBytes);
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(rawDecrypted).Span);
+            if (rawBytes is not null)
+                CryptographicOperations.ZeroMemory(rawBytes);
             if (reEncrypted is not null)
             {
                 CryptographicOperations.ZeroMemory(reEncrypted);
@@ -294,7 +286,7 @@ internal static class PivCryptographicOperations
     internal static async Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
         IPivBackend backend,
         ILogger logger,
-        PivSlot slot,
+        Slot slot,
         IPublicKey peerPublicKey,
         UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default)
@@ -304,9 +296,9 @@ internal static class PivCryptographicOperations
         // Determine algorithm from public key
         var algorithm = peerPublicKey switch
         {
-            ECPublicKey ecKey when ecKey.KeyDefinition.KeyType == KeyType.ECP256 => PivAlgorithm.EccP256,
-            ECPublicKey ecKey when ecKey.KeyDefinition.KeyType == KeyType.ECP384 => PivAlgorithm.EccP384,
-            Curve25519PublicKey cv25519 when cv25519.KeyDefinition.KeyType == KeyType.X25519 => PivAlgorithm.X25519,
+            ECPublicKey ecKey when ecKey.KeyDefinition.KeyType == KeyType.ECP256 => KeyType.ECP256,
+            ECPublicKey ecKey when ecKey.KeyDefinition.KeyType == KeyType.ECP384 => KeyType.ECP384,
+            Curve25519PublicKey cv25519 when cv25519.KeyDefinition.KeyType == KeyType.X25519 => KeyType.X25519,
             _ => throw new ArgumentException("Unsupported public key type for ECDH", nameof(peerPublicKey))
         };
 
@@ -346,7 +338,7 @@ internal static class PivCryptographicOperations
             peerKeyData.CopyTo(data.AsSpan(offset));
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-            var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
+            var command = new ApduCommand(0x00, 0x87, PivAlgorithmId.Encode(algorithm), (byte)slot, data);
             await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
@@ -394,20 +386,9 @@ internal static class PivCryptographicOperations
     ///     Number of bytes TAG 81 carries for <paramref name="algorithm" /> when the caller supplies
     ///     <paramref name="dataLength" /> bytes. Pairs with <see cref="WritePreparedData" />.
     /// </summary>
-    private static int PreparedDataLength(PivAlgorithm algorithm, int dataLength) =>
-        algorithm switch
-        {
-            // RFC 8032 §5.1.6: PureEdDSA signs the message itself. Nothing is sized or hashed here;
-            // Ed25519ph is a different scheme, and the device imposes any length limit.
-            PivAlgorithm.Ed25519 => dataLength,
-            PivAlgorithm.Rsa1024 => 128,
-            PivAlgorithm.Rsa2048 => 256,
-            PivAlgorithm.Rsa3072 => 384,
-            PivAlgorithm.Rsa4096 => 512,
-            PivAlgorithm.EccP256 => 32,
-            PivAlgorithm.EccP384 => 48,
-            _ => dataLength
-        };
+    private static int PreparedDataLength(KeyType algorithm, int dataLength) =>
+        // RFC 8032: Ed25519 signs the message, not a locally padded/prehashed digest.
+        algorithm.IsRSA() || algorithm.IsECDsa() ? algorithm.GetKeySizeBytes() : dataLength;
 
     /// <summary>
     ///     Writes the TAG 81 payload for <paramref name="algorithm" /> into <paramref name="destination" />,
@@ -415,11 +396,11 @@ internal static class PivCryptographicOperations
     ///     cannot be represented without changing it.
     /// </summary>
     /// <exception cref="ArgumentException">An RSA block longer than the modulus.</exception>
-    private static void WritePreparedData(PivAlgorithm algorithm, ReadOnlySpan<byte> data, Span<byte> destination)
+    private static void WritePreparedData(KeyType algorithm, ReadOnlySpan<byte> data, Span<byte> destination)
     {
         switch (algorithm)
         {
-            case PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096:
+            case KeyType.RSA1024 or KeyType.RSA2048 or KeyType.RSA3072 or KeyType.RSA4096:
                 // The caller supplies the complete encoded block (PKCS#1 v1.5, OAEP or PSS). A shorter block
                 // is the same integer left-padded; a longer one cannot be, so it is an error, not a truncation.
                 if (data.Length > destination.Length)
@@ -429,7 +410,7 @@ internal static class PivCryptographicOperations
                 LeftPad(data, destination);
                 return;
 
-            case PivAlgorithm.EccP256 or PivAlgorithm.EccP384:
+            case KeyType.ECP256 or KeyType.ECP384:
                 // FIPS 186-5 §6.4.1: the signature uses the leftmost min(N, outlen) bits of the digest, so a
                 // longer digest is truncated from the right and a shorter one is the integer e, left-padded.
                 if (data.Length >= destination.Length)

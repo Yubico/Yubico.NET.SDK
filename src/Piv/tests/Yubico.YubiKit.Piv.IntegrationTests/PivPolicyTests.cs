@@ -50,22 +50,22 @@ public class PivPolicyTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.ECP256,
             new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Never });
 
         Assert.NotNull(publicKey);
 
         // Verify metadata reflects the PIN policy
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.NotNull(metadata);
         Assert.Equal(PivPinPolicy.Never, metadata.Value.PinPolicy);
 
         // Sign WITHOUT verifying PIN first (should succeed with Never policy)
         var hash = SHA256.HashData("no-pin-required"u8);
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.ECP256,
             hash);
 
         Assert.False(signature.IsEmpty);
@@ -85,14 +85,14 @@ public class PivPolicyTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
+            Slot.Signature,
+            KeyType.ECP256,
             new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Always });
 
         Assert.NotNull(publicKey);
 
         // Verify metadata reflects the PIN policy
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.Signature);
+        var metadata = await session.GetSlotMetadataAsync(Slot.Signature);
         Assert.NotNull(metadata);
         Assert.Equal(PivPinPolicy.Always, metadata.Value.PinPolicy);
 
@@ -100,8 +100,8 @@ public class PivPolicyTests
         await session.VerifyPinAsync(DefaultPin);
         var hash = SHA256.HashData("pin-always-test"u8);
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
+            Slot.Signature,
+            KeyType.ECP256,
             hash);
 
         Assert.False(signature.IsEmpty);

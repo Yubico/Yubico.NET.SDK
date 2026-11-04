@@ -60,7 +60,7 @@ public static class SlotOverviewMenu
         {
             var keyStatus = slot.HasKey ? "[green]Yes[/]" : "[grey]No[/]";
             var certStatus = slot.HasCertificate ? "[green]Yes[/]" : "[grey]No[/]";
-            var algorithm = slot.Metadata?.Algorithm.ToString() ?? "-";
+            var algorithm = slot.Metadata?.KeyType.ToString() ?? "-";
             var subject = slot.Certificate?.Subject ?? "-";
 
             // Truncate long subjects

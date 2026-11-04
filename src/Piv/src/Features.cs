@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Piv;
 /// <summary>
 /// PIV feature support by firmware version.
 /// </summary>
-public static class PivFeatures
+public static class Features
 {
     /// <summary>P-384 elliptic curve support.</summary>
     public static Feature P384 { get; } = new("P-384 Curve", 4, 0, 0);

@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Piv.Backend;
 using Yubico.YubiKit.Piv.Cryptography;
@@ -56,8 +57,8 @@ public class PivCryptographicOperationsTests
         var result = await PivCryptographicOperations.SignOrDecryptAsync(
             backend,
             NullLogger.Instance,
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.ECP256,
             new byte[32],
             UserPresenceNotification.None,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -87,7 +88,7 @@ public class PivCryptographicOperationsTests
         var result = await PivCryptographicOperations.CalculateSecretAsync(
             backend,
             NullLogger.Instance,
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             peerPublicKey,
             UserPresenceNotification.None,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -116,8 +117,8 @@ public class PivCryptographicOperationsTests
             PivCryptographicOperations.SignOrDecryptAsync(
                 backend,
                 NullLogger.Instance,
-                PivSlot.Authentication,
-                PivAlgorithm.EccP256,
+                Slot.Authentication,
+                KeyType.ECP256,
                 new byte[32],
                 notification,
                 TestContext.Current.CancellationToken));
@@ -150,7 +151,7 @@ public class PivCryptographicOperationsTests
             PivCryptographicOperations.CalculateSecretAsync(
                 backend,
                 NullLogger.Instance,
-                PivSlot.KeyManagement,
+                Slot.KeyManagement,
                 peerPublicKey,
                 notification,
                 TestContext.Current.CancellationToken));
@@ -185,7 +186,7 @@ public class PivCryptographicOperationsTests
     {
         Basis = UserPresenceBasis.PolicyRequires,
         Application = "PIV",
-        Scope = PivSlot.Authentication.ToString()
+        Scope = Slot.Authentication.ToString()
     };
 
     private sealed class CryptoCapturingBackend(byte[] responseWithoutSw) : IPivBackend

@@ -198,8 +198,8 @@ public interface IPivSession : IApplicationSession
     /// <returns>Generated public key.</returns>
     /// <exception cref="NotSupportedException">Algorithm not supported on this YubiKey version.</exception>
     Task<IPublicKey> GenerateKeyAsync(
-        PivSlot slot,
-        PivAlgorithm algorithm,
+        Slot slot,
+        KeyType algorithm,
         PivKeyCreationOptions? options = null,
         CancellationToken cancellationToken = default);
 
@@ -214,8 +214,8 @@ public interface IPivSession : IApplicationSession
     /// <param name="options">Optional key-use policies.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Algorithm of imported key.</returns>
-    Task<PivAlgorithm> ImportKeyAsync(
-        PivSlot slot,
+    Task<KeyType> ImportKeyAsync(
+        Slot slot,
         IPrivateKey privateKey,
         PivKeyCreationOptions? options = null,
         CancellationToken cancellationToken = default);
@@ -228,7 +228,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="destinationSlot">Destination slot (must be empty).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="NotSupportedException">YubiKey does not support key movement.</exception>
-    Task MoveKeyAsync(PivSlot sourceSlot, PivSlot destinationSlot, CancellationToken cancellationToken = default);
+    Task MoveKeyAsync(Slot sourceSlot, Slot destinationSlot, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Delete key from specified slot.
@@ -237,7 +237,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="slot">PIV slot to clear.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="NotSupportedException">YubiKey does not support key deletion.</exception>
-    Task DeleteKeyAsync(PivSlot slot, CancellationToken cancellationToken = default);
+    Task DeleteKeyAsync(Slot slot, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Generate attestation certificate for key in specified slot.
@@ -250,7 +250,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>X.509 attestation certificate.</returns>
     /// <exception cref="NotSupportedException">YubiKey does not support attestation.</exception>
-    Task<X509Certificate2> AttestKeyAsync(PivSlot slot, CancellationToken cancellationToken = default);
+    Task<X509Certificate2> AttestKeyAsync(Slot slot, CancellationToken cancellationToken = default);
 
     // Cryptographic operations
 
@@ -282,8 +282,8 @@ public interface IPivSession : IApplicationSession
     // Both declarations are established alpha entry points: explicit and metadata-driven algorithms.
 #pragma warning disable RS0026
     Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
-        PivSlot slot,
-        PivAlgorithm algorithm,
+        Slot slot,
+        KeyType algorithm,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default);
 
@@ -310,7 +310,7 @@ public interface IPivSession : IApplicationSession
     /// <exception cref="NotSupportedException">YubiKey firmware is older than 5.3 and does not support metadata retrieval.</exception>
     /// <exception cref="InvalidOperationException">Slot is empty (no key present).</exception>
     Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
-        PivSlot slot,
+        Slot slot,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default);
 #pragma warning restore RS0026
@@ -341,7 +341,7 @@ public interface IPivSession : IApplicationSession
     /// <exception cref="ArgumentException">Cipher text length does not match RSA key size, or slot has no RSA key.</exception>
     /// <exception cref="CryptographicException">Padding is malformed or decryption failed.</exception>
     Task<ReadOnlyMemory<byte>> DecryptAsync(
-        PivSlot slot,
+        Slot slot,
         ReadOnlyMemory<byte> cipherText,
         RSAEncryptionPadding padding,
         CancellationToken cancellationToken = default);
@@ -357,7 +357,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Raw shared secret (x-coordinate for ECDH, 32 bytes for X25519).</returns>
     Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
-        PivSlot slot,
+        Slot slot,
         IPublicKey peerPublicKey,
         CancellationToken cancellationToken = default);
 
@@ -369,7 +369,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="slot">PIV slot to read certificate from.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>X.509 certificate or null if slot is empty.</returns>
-    Task<X509Certificate2?> GetCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default);
+    Task<X509Certificate2?> GetCertificateAsync(Slot slot, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Store certificate in specified slot.
@@ -383,7 +383,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="compression">Certificate compression policy.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task StoreCertificateAsync(
-        PivSlot slot,
+        Slot slot,
         X509Certificate2 certificate,
         PivCertificateCompression compression = PivCertificateCompression.Automatic,
         CancellationToken cancellationToken = default);
@@ -394,7 +394,7 @@ public interface IPivSession : IApplicationSession
     /// <remarks>Requires management key authentication. Idempotent - no error if slot already empty.</remarks>
     /// <param name="slot">PIV slot to clear certificate from.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task DeleteCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default);
+    Task DeleteCertificateAsync(Slot slot, CancellationToken cancellationToken = default);
 
     // Metadata (YubiKey 5.3+)
 
@@ -429,7 +429,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Slot metadata or null if slot is empty.</returns>
     /// <exception cref="NotSupportedException">YubiKey does not support metadata retrieval.</exception>
-    Task<PivSlotMetadata?> GetSlotMetadataAsync(PivSlot slot, CancellationToken cancellationToken = default);
+    Task<PivSlotMetadata?> GetSlotMetadataAsync(Slot slot, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get biometric metadata information.

@@ -14,8 +14,7 @@
 
 using System.Text;
 using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
@@ -125,9 +124,9 @@ internal static class DeviceHelper
     }
 
     /// <summary>
-    /// Parses a slot string ("9a", "9c", "9d", "9e") into a <see cref="PivSlot"/>.
+    /// Parses a slot string ("9a", "9c", "9d", "9e") into a <see cref="Slot"/>.
     /// </summary>
-    internal static PivSlot? ParseSlot(string? value)
+    internal static Slot? ParseSlot(string? value)
     {
         if (value is null)
         {
@@ -137,10 +136,10 @@ internal static class DeviceHelper
 
         var slot = value.ToUpperInvariant() switch
         {
-            "9A" => (PivSlot?)PivSlot.Authentication,
-            "9C" => PivSlot.Signature,
-            "9D" => PivSlot.KeyManagement,
-            "9E" => PivSlot.CardAuthentication,
+            "9A" => (Slot?)Slot.Authentication,
+            "9C" => Slot.Signature,
+            "9D" => Slot.KeyManagement,
+            "9E" => Slot.CardAuthentication,
             _ => null
         };
 
@@ -153,9 +152,9 @@ internal static class DeviceHelper
     }
 
     /// <summary>
-    /// Parses a key algorithm string into a <see cref="PivAlgorithm"/>.
+    /// Parses a key algorithm string into a <see cref="KeyType"/>.
     /// </summary>
-    internal static PivAlgorithm? ParseKeyAlgorithm(string? value)
+    internal static KeyType? ParseKeyAlgorithm(string? value)
     {
         if (value is null)
         {
@@ -166,13 +165,13 @@ internal static class DeviceHelper
 
         var alg = value.ToLowerInvariant() switch
         {
-            "rsa2048" => (PivAlgorithm?)PivAlgorithm.Rsa2048,
-            "rsa3072" => PivAlgorithm.Rsa3072,
-            "rsa4096" => PivAlgorithm.Rsa4096,
-            "eccp256" => PivAlgorithm.EccP256,
-            "eccp384" => PivAlgorithm.EccP384,
-            "ed25519" => PivAlgorithm.Ed25519,
-            "x25519" => PivAlgorithm.X25519,
+            "rsa2048" => (KeyType?)KeyType.RSA2048,
+            "rsa3072" => KeyType.RSA3072,
+            "rsa4096" => KeyType.RSA4096,
+            "eccp256" => KeyType.ECP256,
+            "eccp384" => KeyType.ECP384,
+            "ed25519" => KeyType.Ed25519,
+            "x25519" => KeyType.X25519,
             _ => null
         };
 

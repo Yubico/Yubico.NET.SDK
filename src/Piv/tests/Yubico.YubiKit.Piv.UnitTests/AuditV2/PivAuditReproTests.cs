@@ -1,6 +1,7 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Piv.UnitTests.AuditV2;
@@ -22,13 +23,13 @@ public class PivAuditReproTests
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
 
         _ = await session.SignOrDecryptAsync(
-            PivSlot.Authentication, PivAlgorithm.Ed25519, message, TestContext.Current.CancellationToken);
+            Slot.Authentication, KeyType.Ed25519, message, TestContext.Current.CancellationToken);
 
         byte[] apdu = connection.TransmittedCommands[^1];
         Assert.Equal(0x87, apdu[1]);
-        Assert.Equal((byte)PivAlgorithm.Ed25519, apdu[2]);
+        Assert.Equal(0xE0, apdu[2]);
         // Entire short APDU, including the nested 7C / 82 / 81 dynamic-authentication template.
-        byte[] expected = [0x00, 0x87, (byte)PivAlgorithm.Ed25519, (byte)PivSlot.Authentication,
+        byte[] expected = [0x00, 0x87, 0xE0, (byte)Slot.Authentication,
             (byte)(messageLength + 6), 0x7C, (byte)(messageLength + 4), 0x82, 0x00,
             0x81, (byte)messageLength, .. message, 0x00 /* Le */];
         Assert.Equal(expected, apdu);
@@ -40,7 +41,7 @@ public class PivAuditReproTests
     {
         var connection = CreateConnection();
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
-        _ = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256,
+        _ = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256,
             new byte[] { 0xA1, 0xB2 }, TestContext.Current.CancellationToken);
 
         byte[] apdu = connection.TransmittedCommands[^1];
@@ -59,7 +60,7 @@ public class PivAuditReproTests
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         byte[] digest = Enumerable.Range(1, 20).Select(i => (byte)i).ToArray();
 
-        _ = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest, TestContext.Current.CancellationToken);
+        _ = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest, TestContext.Current.CancellationToken);
 
         byte[] apdu = connection.TransmittedCommands[^1];
         Assert.Equal(0x81, apdu[9]);
@@ -77,7 +78,7 @@ public class PivAuditReproTests
         var block = new byte[129];
         block[0] = 0xA1;
         await Assert.ThrowsAsync<ArgumentException>(() => session.SignOrDecryptAsync(
-            PivSlot.Authentication, PivAlgorithm.Rsa1024, block, TestContext.Current.CancellationToken));
+            Slot.Authentication, KeyType.RSA1024, block, TestContext.Current.CancellationToken));
         Assert.DoesNotContain(connection.TransmittedCommands, apdu => apdu[1] == 0x87);
     }
 

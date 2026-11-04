@@ -181,7 +181,7 @@ internal static class JsonOutput
             {
                 slotNode["metadata"] = new JsonObject
                 {
-                    ["algorithm"] = m.Algorithm.ToString(),
+                    ["algorithm"] = m.KeyType.ToString(),
                     ["pinPolicy"] = m.PinPolicy.ToString(),
                     ["touchPolicy"] = m.TouchPolicy.ToString(),
                     ["isGenerated"] = m.IsGenerated,

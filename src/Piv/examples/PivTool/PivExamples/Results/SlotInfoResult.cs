@@ -24,7 +24,7 @@ public sealed record SlotInfo
     /// <summary>
     /// Gets the PIV slot identifier.
     /// </summary>
-    public required PivSlot Slot { get; init; }
+    public required Slot Slot { get; init; }
 
     /// <summary>
     /// Gets the human-readable name of the slot.

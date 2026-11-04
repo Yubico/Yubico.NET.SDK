@@ -27,14 +27,14 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenTouchPolicyAlways_RequestsBeforeApduAndResolvesCompleted()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt(() => connection.TransmittedCommands.Count);
         await using var session = await CreateSessionAsync(connection, prompt);
 
         var result = await session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.ECP256,
             new byte[32],
             TestContext.Current.CancellationToken);
 
@@ -45,7 +45,7 @@ public class TouchNotificationTests
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyRequires,
-            PivSlot.Authentication,
+            Slot.Authentication,
             UserPresenceOutcome.Completed,
             UserPresenceOperations.Piv.SignOrDecrypt);
     }
@@ -54,7 +54,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_InsideIntentScope_ReportsIntentAfterMetadataLookup()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -62,8 +62,8 @@ public class TouchNotificationTests
         using (UserPresenceIntent.BeginScope("sign the release"))
         {
             _ = await session.SignOrDecryptAsync(
-                PivSlot.Signature,
-                PivAlgorithm.EccP256,
+                Slot.Signature,
+                KeyType.ECP256,
                 new byte[32],
                 TestContext.Current.CancellationToken);
         }
@@ -78,24 +78,24 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_AutoDetect_ReusesLoadedMetadata()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
 
         _ = await session.SignOrDecryptAsync(
-            PivSlot.Authentication,
+            Slot.Authentication,
             new byte[32],
             TestContext.Current.CancellationToken);
 
         Assert.Equal(
             1,
             connection.TransmittedCommands.Count(
-                command => command[1] == 0xF7 && command[3] == (byte)PivSlot.Authentication));
+                command => command[1] == 0xF7 && command[3] == (byte)Slot.Authentication));
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyRequires,
-            PivSlot.Authentication,
+            Slot.Authentication,
             UserPresenceOutcome.Completed);
     }
 
@@ -103,13 +103,13 @@ public class TouchNotificationTests
     public async Task DecryptAsync_ReusesMetadataAndResolvesCompletedBeforePostProcessingFails()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.Rsa1024, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.RSA1024, PivTouchPolicy.Always),
             [0x7C, 0x02, 0x82, 0x00, 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt(() => connection.TransmittedCommands.Count);
         await using var session = await CreateSessionAsync(connection, prompt);
 
         _ = await Assert.ThrowsAnyAsync<Exception>(() => session.DecryptAsync(
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             new byte[128],
             RSAEncryptionPadding.Pkcs1,
             TestContext.Current.CancellationToken));
@@ -117,11 +117,11 @@ public class TouchNotificationTests
         Assert.Equal(
             1,
             connection.TransmittedCommands.Count(
-                command => command[1] == 0xF7 && command[3] == (byte)PivSlot.KeyManagement));
+                command => command[1] == 0xF7 && command[3] == (byte)Slot.KeyManagement));
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyRequires,
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             UserPresenceOutcome.Completed,
             UserPresenceOperations.Piv.Decrypt);
         Assert.Equal(5, prompt.CommandCountAtResolution);
@@ -131,7 +131,7 @@ public class TouchNotificationTests
     public async Task CalculateSecretAsync_WhenTouchPolicyCached_RequestsConservatively()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Cached),
+            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Cached),
             [0x7C, 0x22, 0x82, 0x20, .. new byte[32], 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
@@ -139,14 +139,14 @@ public class TouchNotificationTests
         var peerPublicKey = ECPublicKey.CreateFromParameters(peer.PublicKey.ExportParameters());
 
         _ = await session.CalculateSecretAsync(
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             peerPublicKey,
             TestContext.Current.CancellationToken);
 
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyMayRequire,
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             UserPresenceOutcome.Completed,
             UserPresenceOperations.Piv.CalculateSecret);
     }
@@ -157,14 +157,14 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenTouchPolicyDoesNotRequireTouch_RemainsSilent(PivTouchPolicy touchPolicy)
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, touchPolicy),
+            SlotMetadataResponse(KeyType.ECP256, touchPolicy),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
 
         _ = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
+            Slot.Signature,
+            KeyType.ECP256,
             new byte[32],
             TestContext.Current.CancellationToken);
 
@@ -176,21 +176,21 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenTouchPolicyIsUnknown_RequestsConservatively()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, (PivTouchPolicy)0x7F),
+            SlotMetadataResponse(KeyType.ECP256, (PivTouchPolicy)0x7F),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt);
 
         _ = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
+            Slot.Signature,
+            KeyType.ECP256,
             new byte[32],
             TestContext.Current.CancellationToken);
 
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyMayRequire,
-            PivSlot.Signature,
+            Slot.Signature,
             UserPresenceOutcome.Completed);
     }
 
@@ -204,15 +204,15 @@ public class TouchNotificationTests
         await using var session = await CreateSessionAsync(connection, prompt);
 
         _ = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
+            Slot.Signature,
+            KeyType.ECP256,
             new byte[32],
             TestContext.Current.CancellationToken);
 
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyMayRequire,
-            PivSlot.Signature,
+            Slot.Signature,
             UserPresenceOutcome.Completed);
     }
 
@@ -220,7 +220,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenPromptThrows_DoesNotTransmitOrResolve()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt
         {
@@ -229,8 +229,8 @@ public class TouchNotificationTests
         await using var session = await CreateSessionAsync(connection, prompt);
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.ECP256,
             new byte[32],
             TestContext.Current.CancellationToken));
 
@@ -245,7 +245,7 @@ public class TouchNotificationTests
     {
         using var cancellationSource = new CancellationTokenSource();
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt
         {
@@ -254,8 +254,8 @@ public class TouchNotificationTests
         await using var session = await CreateSessionAsync(connection, prompt);
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.ECP256,
             new byte[32],
             cancellationSource.Token));
 
@@ -263,7 +263,7 @@ public class TouchNotificationTests
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyRequires,
-            PivSlot.Authentication,
+            Slot.Authentication,
             UserPresenceOutcome.Cancelled);
     }
 
@@ -272,15 +272,15 @@ public class TouchNotificationTests
     {
         var expected = new InvalidOperationException("resolution failed");
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
             CryptoResponse(0xAA));
         var prompt = new RecordingUserPresencePrompt { ResolutionException = expected };
         await using var session = await CreateSessionAsync(connection, prompt);
 
         InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             session.SignOrDecryptAsync(
-                PivSlot.Authentication,
-                PivAlgorithm.EccP256,
+                Slot.Authentication,
+                KeyType.ECP256,
                 new byte[32],
                 TestContext.Current.CancellationToken));
 
@@ -291,7 +291,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenSuccessResponseIsMalformed_ResolvesFailedAndPreservesParseError()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
             [0x7D, 0x00, 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt
         {
@@ -300,8 +300,8 @@ public class TouchNotificationTests
         await using var session = await CreateSessionAsync(connection, prompt);
 
         ApduException actual = await Assert.ThrowsAsync<ApduException>(() => session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.ECP256,
             new byte[32],
             TestContext.Current.CancellationToken));
 
@@ -309,7 +309,7 @@ public class TouchNotificationTests
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyRequires,
-            PivSlot.Authentication,
+            Slot.Authentication,
             UserPresenceOutcome.Failed);
     }
 
@@ -317,7 +317,7 @@ public class TouchNotificationTests
     public async Task SignOrDecryptAsync_WhenApduAndResolutionFail_PreservesApduException()
     {
         var connection = CreateInitializedConnection(
-            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            SlotMetadataResponse(KeyType.ECP256, PivTouchPolicy.Always),
             [0x69, 0x82]);
         var prompt = new RecordingUserPresencePrompt
         {
@@ -327,8 +327,8 @@ public class TouchNotificationTests
 
         InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             session.SignOrDecryptAsync(
-                PivSlot.Authentication,
-                PivAlgorithm.EccP256,
+                Slot.Authentication,
+                KeyType.ECP256,
                 new byte[32],
                 TestContext.Current.CancellationToken));
 
@@ -359,9 +359,9 @@ public class TouchNotificationTests
         0x90, 0x00
     ];
 
-    private static byte[] SlotMetadataResponse(PivAlgorithm algorithm, PivTouchPolicy touchPolicy) =>
+    private static byte[] SlotMetadataResponse(KeyType algorithm, PivTouchPolicy touchPolicy) =>
     [
-        0x01, 0x01, (byte)algorithm,
+        0x01, 0x01, PivAlgorithmId.Encode(algorithm),
         0x02, 0x02, (byte)PivPinPolicy.Default, (byte)touchPolicy,
         0x03, 0x01, 0x01,
         0x90, 0x00
@@ -373,7 +373,7 @@ public class TouchNotificationTests
     private static void AssertNotification(
         RecordingUserPresencePrompt prompt,
         UserPresenceBasis basis,
-        PivSlot slot,
+        Slot slot,
         UserPresenceOutcome outcome,
         string operation = UserPresenceOperations.Piv.SignOrDecrypt)
     {

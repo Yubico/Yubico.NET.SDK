@@ -143,22 +143,12 @@ public class PivSessionTests
     [Fact]
     public async Task SignOrDecryptAsync_WithoutAlgorithm_OnOldFirmware_ThrowsNotSupportedException()
     {
-        // Arrange: Create session with firmware < 5.3
-        var mockConnection = Substitute.For<ISmartCardConnection>();
-        mockConnection.Transport.Returns(Transport.Usb);
-
-        var session = new PivSession(mockConnection, null);
-
-        // Default FirmwareVersion is 0.0.0 which is treated as alpha/beta (latest).
-        // Set an explicit old firmware version via the protected setter to simulate old hardware.
-        typeof(PivSession).BaseType!
-            .GetProperty(nameof(session.FirmwareVersion))!
-            .GetSetMethod(nonPublic: true)!
-            .Invoke(session, [new FirmwareVersion(4, 0, 0)]);
+        var connection = CreateInitializedConnectionWithVersion([4, 0, 0, 0x90, 0x00]);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<NotSupportedException>(
-            () => session.SignOrDecryptAsync(PivSlot.Authentication, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            () => session.SignOrDecryptAsync(Slot.Authentication, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
 
         Assert.Contains("5.3", exception.Message);
         Assert.Contains("firmware", exception.Message, StringComparison.OrdinalIgnoreCase);
@@ -283,10 +273,10 @@ public class PivSessionTests
         var connection = CreateInitializedConnection([0x6A, 0x82]);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
 
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication, TestContext.Current.CancellationToken);
+        var metadata = await session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken);
 
         Assert.Null(metadata);
-        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xF7 && command[3] == (byte)PivSlot.Authentication);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xF7 && command[3] == (byte)Slot.Authentication);
     }
 
     [Fact]
@@ -313,8 +303,8 @@ public class PivSessionTests
         MarkAuthenticated(session);
 
         _ = await session.GenerateKeyAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
+            Slot.Signature,
+            KeyType.ECP256,
             new PivKeyCreationOptions
             {
                 PinPolicy = PivPinPolicy.Once,
@@ -326,11 +316,11 @@ public class PivSessionTests
         // APDU header: INS=Generate Asymmetric, P1=0, P2=target slot.
         Assert.Equal(0x47, command[1]);
         Assert.Equal(0x00, command[2]);
-        Assert.Equal((byte)PivSlot.Signature, command[3]);
+        Assert.Equal((byte)Slot.Signature, command[3]);
         // Data: AC template containing algorithm(80), PIN policy(AA), and touch policy(AB) TLVs.
         Assert.Equal([
             0xAC, 0x09,
-            0x80, 0x01, (byte)PivAlgorithm.EccP256,
+            0x80, 0x01, 0x11,
             0xAA, 0x01, (byte)PivPinPolicy.Once,
             0xAB, 0x01, (byte)PivTouchPolicy.Never
         ], CommandData(command).ToArray());
@@ -347,8 +337,8 @@ public class PivSessionTests
         data[31] = 0xCC;
 
         var result = await session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.ECP256,
             data,
             TestContext.Current.CancellationToken);
 
@@ -356,8 +346,8 @@ public class PivSessionTests
         var command = LastCommand(connection);
         // APDU header: INS=GENERAL AUTHENTICATE, P1=algorithm, P2=target slot.
         Assert.Equal(0x87, command[1]);
-        Assert.Equal((byte)PivAlgorithm.EccP256, command[2]);
-        Assert.Equal((byte)PivSlot.Authentication, command[3]);
+        Assert.Equal(0x11, command[2]);
+        Assert.Equal((byte)Slot.Authentication, command[3]);
         var commandData = CommandData(command);
         // Short APDU data length: 7C template + empty 82 response tag + 32-byte 81 challenge.
         Assert.Equal(0x26, commandData.Length);
@@ -374,8 +364,8 @@ public class PivSessionTests
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.ECP256,
             new byte[32],
             TestContext.Current.CancellationToken));
 
@@ -383,8 +373,8 @@ public class PivSessionTests
         Assert.Contains("Security status", exception.Message);
         var command = LastCommand(connection);
         Assert.Equal(0x87, command[1]);
-        Assert.Equal((byte)PivAlgorithm.EccP256, command[2]);
-        Assert.Equal((byte)PivSlot.Authentication, command[3]);
+        Assert.Equal(0x11, command[2]);
+        Assert.Equal((byte)Slot.Authentication, command[3]);
     }
 
     [Fact]
@@ -397,15 +387,15 @@ public class PivSessionTests
         var peerPublicKey = ECPublicKey.CreateFromParameters(peer.PublicKey.ExportParameters());
 
         _ = await session.CalculateSecretAsync(
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             peerPublicKey,
             TestContext.Current.CancellationToken);
 
         var command = LastCommand(connection);
         // APDU header: INS=GENERAL AUTHENTICATE, P1=algorithm, P2=target slot.
         Assert.Equal(0x87, command[1]);
-        Assert.Equal((byte)PivAlgorithm.EccP256, command[2]);
-        Assert.Equal((byte)PivSlot.KeyManagement, command[3]);
+        Assert.Equal(0x11, command[2]);
+        Assert.Equal((byte)Slot.KeyManagement, command[3]);
         var commandData = CommandData(command);
         // Short APDU data length: 7C template + empty 82 response tag + 65-byte 85 public key.
         Assert.Equal(0x47, commandData.Length);
@@ -516,7 +506,7 @@ public class PivSessionTests
     [Fact]
     public async Task ResetAsync_BlocksPinAndPukThenResets()
     {
-        // Regression test for the BlockPukAsync -> PivMetadataProtocol.BlockPukAsync extraction:
+        // Regression test for the BlockPukAsync -> PivAuthenticationProtocol.BlockPukAsync extraction:
         // the APDU sequence (PIN metadata, VERIFY-until-blocked, RESET RETRY-until-blocked P2=0x80,
         // RESET, re-fetch management key metadata) must be unchanged.
         var connection = CreateInitializedConnection(
@@ -627,7 +617,6 @@ public class PivSessionTests
 
     [Theory]
     [InlineData(0x6A80)]
-    [InlineData(0x6A88)]
     public async Task ResetAsync_WhenMetadataRefreshUnexpectedlyFails_UsesReliableFirmwareFallbackBeforePropagating(
         int statusWord)
     {
@@ -701,7 +690,7 @@ public class PivSessionTests
 
         var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
             () => session.SignOrDecryptAsync(
-                PivSlot.Authentication,
+                Slot.Authentication,
                 ReadOnlyMemory<byte>.Empty,
                 TestContext.Current.CancellationToken));
 

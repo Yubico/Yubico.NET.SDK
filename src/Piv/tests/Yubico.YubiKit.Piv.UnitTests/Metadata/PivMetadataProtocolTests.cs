@@ -15,8 +15,8 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Piv.Authentication;
 using Yubico.YubiKit.Piv.Backend;
-using Yubico.YubiKit.Piv.Metadata;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Piv.UnitTests.Metadata;
@@ -28,7 +28,7 @@ public class PivMetadataProtocolTests
     {
         var (backend, connection) = CreateBackend([0x6A, 0x80]);
 
-        var exception = await Assert.ThrowsAsync<ApduException>(() => PivMetadataProtocol.BlockPukAsync(
+        var exception = await Assert.ThrowsAsync<ApduException>(() => PivAuthenticationProtocol.BlockPukAsync(
             backend,
             NullLogger.Instance,
             TestContext.Current.CancellationToken));
@@ -45,7 +45,7 @@ public class PivMetadataProtocolTests
             [0x63, 0xC1],
             [0x63, 0xC0]);
 
-        await PivMetadataProtocol.BlockPukAsync(
+        await PivAuthenticationProtocol.BlockPukAsync(
             backend,
             NullLogger.Instance,
             TestContext.Current.CancellationToken);
@@ -63,7 +63,7 @@ public class PivMetadataProtocolTests
     {
         var (backend, connection) = CreateBackend([0x69, 0x83]);
 
-        await PivMetadataProtocol.BlockPukAsync(
+        await PivAuthenticationProtocol.BlockPukAsync(
             backend,
             NullLogger.Instance,
             TestContext.Current.CancellationToken);

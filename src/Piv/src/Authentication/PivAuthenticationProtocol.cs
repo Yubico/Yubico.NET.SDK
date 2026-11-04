@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
@@ -120,19 +121,15 @@ internal static class PivAuthenticationProtocol
             var witnessCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, witnessRequest);
             var witnessResponse = await backend.SendAsync(witnessCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
-            if (!witnessResponse.IsOK())
-            {
-                throw ApduException.FromStatusWord(witnessResponse.SW, "Management key authentication failed - witness request");
-            }
-
             // Parse witness response: 7C [len] 80 [len] [witness data]
-            var witnessBytes = ParseAuthResponse(witnessResponse.Data.Span, TagAuthWitness, challengeLength);
+            var witnessBytes = ParseAndClearAuthResponse(witnessResponse, TagAuthWitness, challengeLength);
 
             // Step 2: Decrypt witness with our key
             byte[]? decryptedWitness = null;
             byte[]? challenge = null;
             byte[]? responseBuffer = null;
             byte[]? expectedResponse = null;
+            byte[]? encryptedChallenge = null;
 
             try
             {
@@ -152,14 +149,9 @@ internal static class PivAuthenticationProtocol
                 var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseBuffer.AsMemory(0, bytesWritten));
                 var challengeResponse = await backend.SendAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
-                if (!challengeResponse.IsOK())
-                {
-                    throw ApduException.FromStatusWord(challengeResponse.SW, "Management key authentication failed - challenge response");
-                }
-
                 // Step 5: Verify device's response (encrypted challenge)
                 // Response: 7C [len] 82 [len] [encrypted challenge]
-                var encryptedChallenge = ParseAuthResponse(challengeResponse.Data.Span, 0x82, challengeLength);
+                encryptedChallenge = ParseAndClearAuthResponse(challengeResponse, 0x82, challengeLength);
 
                 // Encrypt our challenge and compare
                 expectedResponse = ArrayPool<byte>.Shared.Rent(challengeLength);
@@ -174,6 +166,9 @@ internal static class PivAuthenticationProtocol
             }
             finally
             {
+                CryptographicOperations.ZeroMemory(witnessBytes);
+                if (encryptedChallenge is not null)
+                    CryptographicOperations.ZeroMemory(encryptedChallenge);
                 // Zero all sensitive intermediate buffers
                 if (decryptedWitness is not null)
                 {
@@ -203,6 +198,20 @@ internal static class PivAuthenticationProtocol
             // Zero sensitive data
             CryptographicOperations.ZeroMemory(keyBytes.AsSpan(0, expectedKeyLength));
             ArrayPool<byte>.Shared.Return(keyBytes);
+        }
+    }
+
+    private static byte[] ParseAndClearAuthResponse(ApduResponse response, byte expectedTag, int expectedLength)
+    {
+        try
+        {
+            if (!response.IsOK())
+                throw ApduException.FromStatusWord(response.SW, "Management key authentication failed");
+            return ParseAuthResponse(response.Data.Span, expectedTag, expectedLength);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
         }
     }
 
@@ -503,26 +512,11 @@ internal static class PivAuthenticationProtocol
     internal static async Task<int> GetPinAttemptsAsync(
         IPivBackend backend,
         ILogger logger,
-        bool metadataSupported,
-        Func<CancellationToken, Task<PivPinMetadata>> getPinMetadataAsync,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Getting PIN attempt count");
 
-        // Try metadata approach first if supported
-        if (metadataSupported)
-        {
-            try
-            {
-                var metadata = await getPinMetadataAsync(cancellationToken).ConfigureAwait(false);
-                return metadata.RetriesRemaining;
-            }
-            catch (Exception ex)
-            {
-                logger.LogDebug(ex, "PIV: Metadata approach failed, falling back to empty verify");
-            }
-        }
-
+        cancellationToken.ThrowIfCancellationRequested();
         // Fallback: empty PIN verify to get retry count
         var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
@@ -538,8 +532,9 @@ internal static class PivAuthenticationProtocol
             return 0;
         }
 
-        // Default to 3 if we can't determine
-        return 3;
+        if (response.IsOK())
+            throw new InvalidOperationException("The PIN is already verified; the device did not report a retry count.");
+        throw ApduException.FromStatusWord(response.SW, "Unable to determine PIN attempts remaining");
     }
 
     /// <summary>
@@ -609,5 +604,252 @@ internal static class PivAuthenticationProtocol
             CryptographicOperations.ZeroMemory(pinData.AsSpan(0, 16));
             ArrayPool<byte>.Shared.Return(pinData);
         }
+    }
+
+    /// <summary>
+    /// Sets the management key (requires authentication with old key).
+    /// </summary>
+    internal static async Task<PivManagementKeyType> SetManagementKeyAsync(
+        IPivBackend backend,
+        ILogger logger,
+        PivManagementKeyType keyType,
+        ReadOnlyMemory<byte> newKey,
+        bool requireTouch = false,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("PIV: Setting management key, type {KeyType}", keyType);
+
+        // Validate key length
+        int expectedLength = keyType switch
+        {
+            PivManagementKeyType.TripleDes => 24,
+            PivManagementKeyType.Aes128 => 16,
+            PivManagementKeyType.Aes192 => 24,
+            PivManagementKeyType.Aes256 => 32,
+            _ => throw new ArgumentException($"Unsupported key type: {keyType}", nameof(keyType))
+        };
+
+        if (newKey.Length != expectedLength)
+        {
+            throw new ArgumentException(
+                $"Invalid key length {newKey.Length} for {keyType}. Expected {expectedLength} bytes.",
+                nameof(newKey));
+        }
+
+        // Build data: [algorithm] [slot 0x9B] [length] [key data]
+        // Format per Yubico PIV spec: algorithm byte, slot byte, length byte, key bytes
+        var dataLength = 3 + newKey.Length; // header (3 bytes) + key
+        var data = new byte[dataLength];
+        try
+        {
+            data[0] = (byte)keyType;      // Algorithm byte (0x03=3DES, 0x08=AES128, 0x0A=AES192, 0x0C=AES256)
+            data[1] = 0x9B;               // Slot 9B (management key slot)
+            data[2] = (byte)newKey.Length; // Key length
+            newKey.Span.CopyTo(data.AsSpan(3));
+
+            // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF
+            // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
+            byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
+            var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, data);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsOK())
+            {
+                throw ApduException.FromStatusWord(response.SW, "Failed to set management key");
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(data);
+        }
+
+        return keyType;
+    }
+
+    /// <summary>
+    /// Changes the PUK from old PUK to new PUK.
+    /// </summary>
+    internal static async Task ChangePukAsync(
+        IPivBackend backend,
+        ILogger logger,
+        ReadOnlyMemory<byte> oldPuk,
+        ReadOnlyMemory<byte> newPuk,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("PIV: Changing PUK");
+
+        // Build data: [8-byte old PUK padded with 0xFF] [8-byte new PUK padded with 0xFF]
+        byte[] pukPair = PivPinUtilities.EncodePinPairBytes(oldPuk.Span, newPuk.Span);
+        try
+        {
+            // INS 0x24 (CHANGE REFERENCE DATA), P2=0x81 (PUK reference)
+            var command = new ApduCommand(0x00, 0x24, 0x00, 0x81, pukPair);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            if (response.SW == 0x6D00)
+                throw new NotSupportedException("Changing the PUK is not supported by this YubiKey.");
+
+            if (!response.IsOK())
+            {
+                int retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining >= 0)
+                {
+                    throw new InvalidPinException(retriesRemaining, "Invalid PUK");
+                }
+                throw ApduException.FromStatusWord(response.SW, "Failed to change PUK");
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pukPair);
+        }
+    }
+
+    /// <summary>
+    /// Unblocks the PIN using the PUK and sets a new PIN.
+    /// </summary>
+    internal static async Task UnblockPinAsync(
+        IPivBackend backend,
+        ILogger logger,
+        ReadOnlyMemory<byte> puk,
+        ReadOnlyMemory<byte> newPin,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("PIV: Unblocking PIN with PUK");
+
+        // Build data: [8-byte PUK padded with 0xFF] [8-byte new PIN padded with 0xFF]
+        byte[] pukPinPair = PivPinUtilities.EncodePinPairBytes(puk.Span, newPin.Span);
+        try
+        {
+            // INS 0x2C (RESET RETRY COUNTER), P2=0x80 (PIN reference)
+            var command = new ApduCommand(0x00, 0x2C, 0x00, 0x80, pukPinPair);
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            if (response.SW == 0x6D00)
+                throw new NotSupportedException("Unblocking the PIN is not supported by this YubiKey.");
+
+            if (!response.IsOK())
+            {
+                // 0x6983 = PUK blocked
+                if (response.SW == 0x6983)
+                {
+                    throw new InvalidPinException(0, "PUK is blocked");
+                }
+
+                int retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining >= 0)
+                {
+                    throw new InvalidPinException(retriesRemaining, "Invalid PUK");
+                }
+                throw ApduException.FromStatusWord(response.SW, "Failed to unblock PIN");
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pukPinPair);
+        }
+    }
+
+    /// <summary>
+    /// Blocks the PUK by repeatedly calling RESET RETRY with empty credentials until blocked.
+    /// </summary>
+    /// <remarks>
+    /// Shared by <see cref="PivSession.ResetAsync"/> and PIN-only mode setup (enabling a PIN-only
+    /// mode requires the PUK to be blocked, since it can no longer be used to unblock a PIN that
+    /// is protected by a management key the PUK holder may not know).
+    /// </remarks>
+    internal static async Task BlockPukAsync(
+        IPivBackend backend,
+        ILogger logger,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("PIV: Blocking PUK");
+
+        // PUK blocking uses INS_RESET_RETRY (0x2C) with P2=0x80 (PIN_P2, not PUK_P2!)
+        // Data is 16 bytes: 8-byte empty PUK + 8-byte empty PIN (both all 0xFF)
+        byte[] emptyPukPin = PivPinUtilities.EncodePinPair(ReadOnlySpan<char>.Empty, ReadOnlySpan<char>.Empty);
+        try
+        {
+            int retriesRemaining = 1; // Start with 1 to enter loop
+            while (retriesRemaining > 0)
+            {
+                var pukCommand = new ApduCommand(0x00, 0x2C, 0x00, 0x80, emptyPukPin);
+                var response = await backend.SendAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+                retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining < 0)
+                {
+                    throw ApduException.FromStatusWord(response.SW, "Failed to block PUK");
+                }
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(emptyPukPin);
+        }
+
+        logger.LogDebug("PIV: PUK blocked");
+    }
+
+    /// <summary>
+    /// Sets the PIN and PUK retry limits.
+    /// </summary>
+    /// <remarks>
+    /// The session checks management key authentication here; the card also requires a verified PIN,
+    /// which the SDK cannot observe. See <see cref="IPivSession.SetPinAttemptsAsync" /> for the
+    /// credential reset this command performs.
+    /// </remarks>
+    internal static async Task SetPinAttemptsAsync(
+        IPivBackend backend,
+        ILogger logger,
+        int pinAttempts,
+        int pukAttempts,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("PIV: Setting PIN attempts to {PinAttempts}, PUK attempts to {PukAttempts}", pinAttempts, pukAttempts);
+
+        if (pinAttempts is < 1 or > 255)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pinAttempts), "PIN attempts must be 1-255");
+        }
+
+        if (pukAttempts is < 1 or > 255)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pukAttempts), "PUK attempts must be 1-255");
+        }
+
+        // INS 0xFA (SET PIN RETRIES), P1=PIN retries, P2=PUK retries, no data
+        var command = new ApduCommand(0x00, 0xFA, (byte)pinAttempts, (byte)pukAttempts);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        if (response.SW == 0x6D00)
+            throw new NotSupportedException("Setting PIN/PUK retries is not supported by this YubiKey.");
+
+        if (!response.IsOK())
+        {
+            throw ApduException.FromStatusWord(response.SW, "Failed to set PIN/PUK retry limits");
+        }
+    }
+
+    internal static async Task BlockPinAsync(IPivBackend backend, int retriesRemaining, CancellationToken cancellationToken)
+    {
+        // Empty PIN encodes as 8 bytes of 0xFF
+        byte[] emptyPin = PivPinUtilities.EncodePinBytes(ReadOnlySpan<char>.Empty);
+        try
+        {
+            while (retriesRemaining > 0)
+            {
+                var pinCommand = new ApduCommand(0x00, 0x20, 0x00, 0x80, emptyPin);
+                var response = await backend.SendAsync(pinCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+
+                retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
+                if (retriesRemaining < 0)
+                {
+                    throw ApduException.FromStatusWord(response.SW, "Failed to block PIN");
+                }
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(emptyPin);
+        }
+
     }
 }

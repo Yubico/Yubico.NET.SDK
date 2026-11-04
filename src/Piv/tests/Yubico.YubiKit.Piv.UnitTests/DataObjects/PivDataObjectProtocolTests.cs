@@ -36,7 +36,6 @@ public class PivDataObjectProtocolTests
 
         await PivDataObjectProtocol.PutObjectAsync(
             backend,
-            isAuthenticated: true,
             PivDataObject.PrintedInformation,
             managementKeyLikeData,
             TestContext.Current.CancellationToken);
@@ -62,7 +61,6 @@ public class PivDataObjectProtocolTests
 
         await PivDataObjectProtocol.PutObjectAsync(
             backend,
-            isAuthenticated: true,
             PivDataObject.PrintedInformation,
             managementKeyLikeData,
             TestContext.Current.CancellationToken);
@@ -80,7 +78,6 @@ public class PivDataObjectProtocolTests
 
         var exception = await Record.ExceptionAsync(() => PivDataObjectProtocol.PutObjectAsync(
             backend,
-            isAuthenticated: true,
             PivDataObject.Chuid,
             new byte[] { 0x30, 0x02, 0xAA, 0xBB },
             TestContext.Current.CancellationToken));
@@ -95,7 +92,6 @@ public class PivDataObjectProtocolTests
 
         var exception = await Record.ExceptionAsync(() => PivDataObjectProtocol.PutObjectAsync(
             backend,
-            isAuthenticated: true,
             PivDataObject.Chuid,
             data: null,
             TestContext.Current.CancellationToken));

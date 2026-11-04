@@ -12,36 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
+
 namespace Yubico.YubiKit.Piv.UnitTests;
 
-public class PivAlgorithmExtensionsTests
+public class PivKeyClassificationTests
 {
     [Theory]
-    [InlineData(PivAlgorithm.Rsa1024, true)]
-    [InlineData(PivAlgorithm.Rsa2048, true)]
-    [InlineData(PivAlgorithm.Rsa3072, true)]
-    [InlineData(PivAlgorithm.Rsa4096, true)]
-    [InlineData(PivAlgorithm.EccP256, false)]
-    [InlineData(PivAlgorithm.EccP384, false)]
-    [InlineData(PivAlgorithm.Ed25519, false)]
-    [InlineData(PivAlgorithm.X25519, false)]
-    public void IsRsa_ReturnsCorrectValue(PivAlgorithm algorithm, bool expected)
+    [InlineData(KeyType.RSA1024, true)]
+    [InlineData(KeyType.RSA2048, true)]
+    [InlineData(KeyType.RSA3072, true)]
+    [InlineData(KeyType.RSA4096, true)]
+    [InlineData(KeyType.ECP256, false)]
+    [InlineData(KeyType.ECP384, false)]
+    [InlineData(KeyType.Ed25519, false)]
+    [InlineData(KeyType.X25519, false)]
+    public void IsRsa_ReturnsCorrectValue(KeyType algorithm, bool expected)
     {
-        Assert.Equal(expected, algorithm.IsRsa());
+        Assert.Equal(expected, algorithm.IsRSA());
     }
 
     [Theory]
-    [InlineData(PivAlgorithm.Rsa1024, false)]
-    [InlineData(PivAlgorithm.Rsa2048, false)]
-    [InlineData(PivAlgorithm.Rsa3072, false)]
-    [InlineData(PivAlgorithm.Rsa4096, false)]
-    [InlineData(PivAlgorithm.EccP256, true)]
-    [InlineData(PivAlgorithm.EccP384, true)]
-    [InlineData(PivAlgorithm.Ed25519, true)]
-    [InlineData(PivAlgorithm.X25519, true)]
-    public void IsEcc_ReturnsCorrectValue(PivAlgorithm algorithm, bool expected)
+    [InlineData(KeyType.RSA1024, false)]
+    [InlineData(KeyType.RSA2048, false)]
+    [InlineData(KeyType.RSA3072, false)]
+    [InlineData(KeyType.RSA4096, false)]
+    [InlineData(KeyType.ECP256, true)]
+    [InlineData(KeyType.ECP384, true)]
+    [InlineData(KeyType.Ed25519, true)]
+    [InlineData(KeyType.X25519, true)]
+    public void IsEcc_ReturnsCorrectValue(KeyType algorithm, bool expected)
     {
-        Assert.Equal(expected, algorithm.IsEcc());
+        Assert.Equal(expected, algorithm.IsEllipticCurve());
     }
 }
 
@@ -52,7 +54,7 @@ public class PivSlotMetadataExtensionsTests
     {
         // Arrange: Create metadata with ECC algorithm
         var metadata = new PivSlotMetadata(
-            Algorithm: PivAlgorithm.EccP256,
+            KeyType: KeyType.ECP256,
             PinPolicy: PivPinPolicy.Default,
             TouchPolicy: PivTouchPolicy.Default,
             IsGenerated: true,
@@ -61,7 +63,7 @@ public class PivSlotMetadataExtensionsTests
         // Act & Assert
         var exception = Assert.Throws<InvalidOperationException>(() => metadata.GetRsaPublicKey());
         Assert.Contains("RSA", exception.Message);
-        Assert.Contains("EccP256", exception.Message);
+        Assert.Contains("0x11", exception.Message);
     }
 
     [Fact]
@@ -69,7 +71,7 @@ public class PivSlotMetadataExtensionsTests
     {
         // Arrange: Create metadata with RSA algorithm
         var metadata = new PivSlotMetadata(
-            Algorithm: PivAlgorithm.Rsa2048,
+            KeyType: KeyType.RSA2048,
             PinPolicy: PivPinPolicy.Default,
             TouchPolicy: PivTouchPolicy.Default,
             IsGenerated: true,
@@ -78,17 +80,17 @@ public class PivSlotMetadataExtensionsTests
         // Act & Assert
         var exception = Assert.Throws<InvalidOperationException>(() => metadata.GetECDsaPublicKey());
         Assert.Contains("ECC", exception.Message);
-        Assert.Contains("Rsa2048", exception.Message);
+        Assert.Contains("0x07", exception.Message);
     }
 
     [Theory]
-    [InlineData(PivAlgorithm.Ed25519)]
-    [InlineData(PivAlgorithm.X25519)]
-    public void GetECDsaPublicKey_WithCurve25519Algorithm_ThrowsInvalidOperationException(PivAlgorithm algorithm)
+    [InlineData(KeyType.Ed25519)]
+    [InlineData(KeyType.X25519)]
+    public void GetECDsaPublicKey_WithCurve25519Algorithm_ThrowsInvalidOperationException(KeyType algorithm)
     {
         // Arrange: Create metadata with Curve25519 algorithm
         var metadata = new PivSlotMetadata(
-            Algorithm: algorithm,
+            KeyType: algorithm,
             PinPolicy: PivPinPolicy.Default,
             TouchPolicy: PivTouchPolicy.Default,
             IsGenerated: true,

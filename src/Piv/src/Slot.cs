@@ -15,9 +15,10 @@
 namespace Yubico.YubiKit.Piv;
 
 /// <summary>
-/// PIV key slots for storing private keys and certificates.
+/// PIV asymmetric key slots (key references in NIST SP 800-73) and their certificates.
 /// </summary>
-public enum PivSlot : byte
+/// <remarks>Attestation (F9) is a Yubico extension, not a standard asymmetric key reference.</remarks>
+public enum Slot : byte
 {
     /// <summary>PIV Authentication slot (9A).</summary>
     Authentication = 0x9A,

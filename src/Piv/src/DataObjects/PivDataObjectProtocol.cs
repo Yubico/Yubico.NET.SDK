@@ -101,16 +101,10 @@ internal static class PivDataObjectProtocol
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     internal static async Task PutObjectAsync(
         IPivBackend backend,
-        bool isAuthenticated,
         int objectId,
         ReadOnlyMemory<byte>? data,
         CancellationToken cancellationToken = default)
     {
-        if (!isAuthenticated)
-        {
-            throw new InvalidOperationException("Management key authentication required to write data objects");
-        }
-
         // Build command data: TAG 0x5C [ object ID ] + TAG 0x53 [ data ]
         var objectIdBytes = EncodeObjectId(objectId);
         int dataLen = data.HasValue && !data.Value.IsEmpty ? data.Value.Length : 0;

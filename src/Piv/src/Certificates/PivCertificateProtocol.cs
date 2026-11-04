@@ -35,7 +35,7 @@ internal static class PivCertificateProtocol
     internal static async Task<X509Certificate2?> GetCertificateAsync(
         IPivBackend backend,
         ILogger logger,
-        PivSlot slot,
+        Slot slot,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Getting certificate from slot 0x{Slot:X2}", (byte)slot);
@@ -93,18 +93,12 @@ internal static class PivCertificateProtocol
     internal static async Task StoreCertificateAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
-        PivSlot slot,
+        Slot slot,
         X509Certificate2 certificate,
         PivCertificateCompression compression = PivCertificateCompression.Automatic,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Storing certificate in slot 0x{Slot:X2}", (byte)slot);
-
-        if (!isAuthenticated)
-        {
-            throw new InvalidOperationException("Management key authentication required to store certificates");
-        }
 
         var certBytes = certificate.RawData;
         bool shouldCompress = compression == PivCertificateCompression.Always || certBytes.Length > 1856;
@@ -143,7 +137,7 @@ internal static class PivCertificateProtocol
 
         // Write to object
         int objectId = GetCertificateObjectId(slot);
-        await PivDataObjectProtocol.PutObjectAsync(backend, isAuthenticated, objectId, writer.WrittenMemory, cancellationToken).ConfigureAwait(false);
+        await PivDataObjectProtocol.PutObjectAsync(backend, objectId, writer.WrittenMemory, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -152,50 +146,44 @@ internal static class PivCertificateProtocol
     internal static async Task DeleteCertificateAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
-        PivSlot slot,
+        Slot slot,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Deleting certificate from slot 0x{Slot:X2}", (byte)slot);
 
-        if (!isAuthenticated)
-        {
-            throw new InvalidOperationException("Management key authentication required to delete certificates");
-        }
-
         int objectId = GetCertificateObjectId(slot);
-        await PivDataObjectProtocol.PutObjectAsync(backend, isAuthenticated, objectId, null, cancellationToken).ConfigureAwait(false);
+        await PivDataObjectProtocol.PutObjectAsync(backend, objectId, null, cancellationToken).ConfigureAwait(false);
     }
 
-    internal static int GetCertificateObjectId(PivSlot slot)
+    internal static int GetCertificateObjectId(Slot slot)
     {
         return slot switch
         {
-            PivSlot.Authentication => PivDataObject.Authentication,
-            PivSlot.Signature => PivDataObject.Signature,
-            PivSlot.KeyManagement => PivDataObject.KeyManagement,
-            PivSlot.CardAuthentication => PivDataObject.CardAuthentication,
-            PivSlot.Attestation => PivDataObject.Attestation,
-            PivSlot.Retired1 => PivDataObject.Retired1,
-            PivSlot.Retired2 => PivDataObject.Retired2,
-            PivSlot.Retired3 => PivDataObject.Retired3,
-            PivSlot.Retired4 => PivDataObject.Retired4,
-            PivSlot.Retired5 => PivDataObject.Retired5,
-            PivSlot.Retired6 => PivDataObject.Retired6,
-            PivSlot.Retired7 => PivDataObject.Retired7,
-            PivSlot.Retired8 => PivDataObject.Retired8,
-            PivSlot.Retired9 => PivDataObject.Retired9,
-            PivSlot.Retired10 => PivDataObject.Retired10,
-            PivSlot.Retired11 => PivDataObject.Retired11,
-            PivSlot.Retired12 => PivDataObject.Retired12,
-            PivSlot.Retired13 => PivDataObject.Retired13,
-            PivSlot.Retired14 => PivDataObject.Retired14,
-            PivSlot.Retired15 => PivDataObject.Retired15,
-            PivSlot.Retired16 => PivDataObject.Retired16,
-            PivSlot.Retired17 => PivDataObject.Retired17,
-            PivSlot.Retired18 => PivDataObject.Retired18,
-            PivSlot.Retired19 => PivDataObject.Retired19,
-            PivSlot.Retired20 => PivDataObject.Retired20,
+            Slot.Authentication => PivDataObject.Authentication,
+            Slot.Signature => PivDataObject.Signature,
+            Slot.KeyManagement => PivDataObject.KeyManagement,
+            Slot.CardAuthentication => PivDataObject.CardAuthentication,
+            Slot.Attestation => PivDataObject.Attestation,
+            Slot.Retired1 => PivDataObject.Retired1,
+            Slot.Retired2 => PivDataObject.Retired2,
+            Slot.Retired3 => PivDataObject.Retired3,
+            Slot.Retired4 => PivDataObject.Retired4,
+            Slot.Retired5 => PivDataObject.Retired5,
+            Slot.Retired6 => PivDataObject.Retired6,
+            Slot.Retired7 => PivDataObject.Retired7,
+            Slot.Retired8 => PivDataObject.Retired8,
+            Slot.Retired9 => PivDataObject.Retired9,
+            Slot.Retired10 => PivDataObject.Retired10,
+            Slot.Retired11 => PivDataObject.Retired11,
+            Slot.Retired12 => PivDataObject.Retired12,
+            Slot.Retired13 => PivDataObject.Retired13,
+            Slot.Retired14 => PivDataObject.Retired14,
+            Slot.Retired15 => PivDataObject.Retired15,
+            Slot.Retired16 => PivDataObject.Retired16,
+            Slot.Retired17 => PivDataObject.Retired17,
+            Slot.Retired18 => PivDataObject.Retired18,
+            Slot.Retired19 => PivDataObject.Retired19,
+            Slot.Retired20 => PivDataObject.Retired20,
             _ => throw new ArgumentException($"Slot 0x{(byte)slot:X2} does not support certificates", nameof(slot))
         };
     }

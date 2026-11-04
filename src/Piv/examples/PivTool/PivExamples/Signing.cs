@@ -50,7 +50,7 @@ public static class Signing
     /// 
     /// var result = await Signing.SignDataAsync(
     ///     session, 
-    ///     PivSlot.Signature, 
+    ///     Slot.Signature,
     ///     dataBytes,
     ///     HashAlgorithmName.SHA256,
     ///     ct);
@@ -63,7 +63,7 @@ public static class Signing
     /// </example>
     public static async Task<SigningResult> SignDataAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         ReadOnlyMemory<byte> dataToSign,
         HashAlgorithmName hashAlgorithm,
         CancellationToken cancellationToken = default)
@@ -91,8 +91,8 @@ public static class Signing
             };
 
             // Sign using explicit algorithm from the already-fetched metadata.
-            // The auto-detect overload checks PIV app version (0.0.1), not device firmware.
-            var algorithm = metadata.Value.Algorithm;
+            var algorithm = metadata.Value.KeyType ?? throw new NotSupportedException(
+                $"Unknown PIV algorithm 0x{metadata.Value.RawAlgorithmId:X2}.");
             var signature = await session.SignOrDecryptAsync(slot, algorithm, hash, cancellationToken);
 
             stopwatch.Stop();

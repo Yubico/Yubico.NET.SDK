@@ -36,7 +36,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
 
         PivManagementKeyMetadata managementKey = await session.GetManagementKeyMetadataAsync();
         PivPinMetadata pin = await session.GetPinMetadataAsync();
-        PivSlotMetadata? retired20 = await session.GetSlotMetadataAsync(PivSlot.Retired20);
+        PivSlotMetadata? retired20 = await session.GetSlotMetadataAsync(Slot.Retired20);
 
         output.WriteLine($"Firmware={state.FirmwareVersion}");
         output.WriteLine(
@@ -64,7 +64,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             });
 
         PivManagementKeyMetadata managementKeyMetadata = await session.GetManagementKeyMetadataAsync();
-        PivSlotMetadata? existingSlotMetadata = await session.GetSlotMetadataAsync(PivSlot.Retired20);
+        PivSlotMetadata? existingSlotMetadata = await session.GetSlotMetadataAsync(Slot.Retired20);
 
         output.WriteLine(
             $"Prerequisites: Firmware={state.FirmwareVersion}, ManagementKeyIsDefault={managementKeyMetadata.IsDefault}, " +
@@ -109,8 +109,8 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
         try
         {
             IPublicKey generatedPublicKey = await session.GenerateKeyAsync(
-                PivSlot.Retired20,
-                PivAlgorithm.EccP256,
+                Slot.Retired20,
+                KeyType.ECP256,
                 new PivKeyCreationOptions
                 {
                     PinPolicy = PivPinPolicy.Never,
@@ -127,8 +127,8 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
 
             using var operationCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             signature = await session.SignOrDecryptAsync(
-                PivSlot.Retired20,
-                PivAlgorithm.EccP256,
+                Slot.Retired20,
+                KeyType.ECP256,
                 digest,
                 operationCts.Token);
 
@@ -141,7 +141,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             UserPresenceContext requested = Assert.Single(prompt.Requested);
             Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Basis);
             Assert.Equal("PIV", requested.Application);
-            Assert.Equal(PivSlot.Retired20.ToString(), requested.Scope);
+            Assert.Equal(Slot.Retired20.ToString(), requested.Scope);
 
             (UserPresenceContext Context, UserPresenceOutcome Outcome, CancellationToken CancellationToken) resolved =
                 Assert.Single(prompt.Resolved);
@@ -151,10 +151,10 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
 
             using var followUpCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             PivSlotMetadata? slotMetadata = await session.GetSlotMetadataAsync(
-                PivSlot.Retired20,
+                Slot.Retired20,
                 followUpCts.Token);
             Assert.NotNull(slotMetadata);
-            Assert.Equal(PivAlgorithm.EccP256, slotMetadata.Value.Algorithm);
+            Assert.Equal(KeyType.ECP256, slotMetadata.Value.KeyType);
             Assert.Equal(PivPinPolicy.Never, slotMetadata.Value.PinPolicy);
             Assert.Equal(PivTouchPolicy.Always, slotMetadata.Value.TouchPolicy);
             Assert.Equal(state.SerialNumber, await session.GetSerialNumberAsync(followUpCts.Token));
@@ -169,8 +169,8 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
 
             if (keyCreated)
             {
-                await session.DeleteKeyAsync(PivSlot.Retired20);
-                Assert.Null(await session.GetSlotMetadataAsync(PivSlot.Retired20));
+                await session.DeleteKeyAsync(Slot.Retired20);
+                Assert.Null(await session.GetSlotMetadataAsync(Slot.Retired20));
                 output.WriteLine("Cleanup: deleted the test-created key from PIV slot Retired20.");
             }
         }

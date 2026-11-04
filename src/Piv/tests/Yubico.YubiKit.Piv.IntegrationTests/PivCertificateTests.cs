@@ -14,6 +14,7 @@
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -46,13 +47,13 @@ public class PivCertificateTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        var publicKey = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
 
         // Create a self-signed certificate (uses software key)
         var cert = CreateSelfSignedCertificate();
 
-        await session.StoreCertificateAsync(PivSlot.Authentication, cert);
-        var retrieved = await session.GetCertificateAsync(PivSlot.Authentication);
+        await session.StoreCertificateAsync(Slot.Authentication, cert);
+        var retrieved = await session.GetCertificateAsync(Slot.Authentication);
 
         Assert.NotNull(retrieved);
         Assert.Equal(cert.Thumbprint, retrieved.Thumbprint);
@@ -65,7 +66,7 @@ public class PivCertificateTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
 
-        var cert = await session.GetCertificateAsync(PivSlot.Authentication);
+        var cert = await session.GetCertificateAsync(Slot.Authentication);
 
         Assert.Null(cert);
     }
@@ -78,8 +79,8 @@ public class PivCertificateTests
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
-        await session.DeleteCertificateAsync(PivSlot.Authentication);
-        await session.DeleteCertificateAsync(PivSlot.Authentication);
+        await session.DeleteCertificateAsync(Slot.Authentication);
+        await session.DeleteCertificateAsync(Slot.Authentication);
     }
 
     [SkippableTheory]

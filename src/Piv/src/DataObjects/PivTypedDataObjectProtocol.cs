@@ -45,14 +45,13 @@ internal static class PivTypedDataObjectProtocol
     internal static Task SetCardholderUniqueIdAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
         PivCardholderUniqueId cardholderUniqueId,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Setting CHUID");
         var encoded = cardholderUniqueId.Encode();
         return PivDataObjectProtocol.PutObjectAsync(
-            backend, isAuthenticated, PivDataObject.Chuid, encoded.IsEmpty ? null : encoded, cancellationToken);
+            backend, PivDataObject.Chuid, encoded.IsEmpty ? null : encoded, cancellationToken);
     }
 
     internal static async Task<PivCardCapabilityContainer> GetCardCapabilityContainerAsync(
@@ -74,14 +73,13 @@ internal static class PivTypedDataObjectProtocol
     internal static Task SetCardCapabilityContainerAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
         PivCardCapabilityContainer cardCapabilityContainer,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Setting CCC");
         var encoded = cardCapabilityContainer.Encode();
         return PivDataObjectProtocol.PutObjectAsync(
-            backend, isAuthenticated, PivDataObject.Capability, encoded.IsEmpty ? null : encoded, cancellationToken);
+            backend, PivDataObject.Capability, encoded.IsEmpty ? null : encoded, cancellationToken);
     }
 
     internal static async Task<PivAdminData> GetAdminDataAsync(
@@ -103,14 +101,13 @@ internal static class PivTypedDataObjectProtocol
     internal static Task SetAdminDataAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
         PivAdminData adminData,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Setting ADMIN DATA");
         var encoded = adminData.Encode();
         return PivDataObjectProtocol.PutObjectAsync(
-            backend, isAuthenticated, PivDataObject.AdminData, encoded.IsEmpty ? null : encoded, cancellationToken);
+            backend, PivDataObject.AdminData, encoded.IsEmpty ? null : encoded, cancellationToken);
     }
 
     internal static async Task<PivKeyHistory> GetKeyHistoryAsync(
@@ -132,13 +129,12 @@ internal static class PivTypedDataObjectProtocol
     internal static Task SetKeyHistoryAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
         PivKeyHistory keyHistory,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Setting Key History");
         var encoded = keyHistory.Encode();
         return PivDataObjectProtocol.PutObjectAsync(
-            backend, isAuthenticated, PivDataObject.KeyHistory, encoded.IsEmpty ? null : encoded, cancellationToken);
+            backend, PivDataObject.KeyHistory, encoded.IsEmpty ? null : encoded, cancellationToken);
     }
 }

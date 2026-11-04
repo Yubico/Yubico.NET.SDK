@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Tests.Shared;
@@ -193,7 +194,7 @@ public class PivManagementKeyTests
 
             // Key generation is management-key privileged and proves SET left the new key
             // authenticated in this same physical card session without reauthentication.
-            _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+            _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
 
             await session.ResetAsync();
 

@@ -120,8 +120,8 @@ public class PivSigningAlgorithmTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Signature,
-            PivAlgorithm.Rsa2048,
+            Slot.Signature,
+            KeyType.RSA2048,
             new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
@@ -133,8 +133,8 @@ public class PivSigningAlgorithmTests
         var paddedData = CreatePkcs1v15SigningPadding(Sha1DigestInfo, hash, KeyDefinitions.RSA2048.LengthInBytes);
 
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.Rsa2048,
+            Slot.Signature,
+            KeyType.RSA2048,
             paddedData);
 
         Assert.Equal(KeyDefinitions.RSA2048.LengthInBytes, signature.Length);
@@ -155,8 +155,8 @@ public class PivSigningAlgorithmTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Signature,
-            PivAlgorithm.Rsa2048,
+            Slot.Signature,
+            KeyType.RSA2048,
             new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
@@ -166,8 +166,8 @@ public class PivSigningAlgorithmTests
         var paddedData = CreatePkcs1v15SigningPadding(Sha384DigestInfo, hash, KeyDefinitions.RSA2048.LengthInBytes);
 
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.Rsa2048,
+            Slot.Signature,
+            KeyType.RSA2048,
             paddedData);
 
         Assert.Equal(KeyDefinitions.RSA2048.LengthInBytes, signature.Length);
@@ -186,8 +186,8 @@ public class PivSigningAlgorithmTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Signature,
-            PivAlgorithm.Rsa2048,
+            Slot.Signature,
+            KeyType.RSA2048,
             new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
@@ -197,8 +197,8 @@ public class PivSigningAlgorithmTests
         var paddedData = CreatePkcs1v15SigningPadding(Sha512DigestInfo, hash, KeyDefinitions.RSA2048.LengthInBytes);
 
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.Rsa2048,
+            Slot.Signature,
+            KeyType.RSA2048,
             paddedData);
 
         Assert.Equal(KeyDefinitions.RSA2048.LengthInBytes, signature.Length);
@@ -221,8 +221,8 @@ public class PivSigningAlgorithmTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.KeyManagement,
-            PivAlgorithm.Rsa2048);
+            Slot.KeyManagement,
+            KeyType.RSA2048);
         await session.VerifyPinAsync(DefaultPin);
 
         var plaintext = "OAEP SHA-1 test"u8.ToArray();
@@ -231,7 +231,7 @@ public class PivSigningAlgorithmTests
         var ciphertext = rsa.Encrypt(plaintext, RSAEncryptionPadding.OaepSHA1);
 
         var decrypted = await session.DecryptAsync(
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             ciphertext,
             RSAEncryptionPadding.OaepSHA1);
 
@@ -251,8 +251,8 @@ public class PivSigningAlgorithmTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
+            Slot.Signature,
+            KeyType.ECP256,
             new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
@@ -260,8 +260,8 @@ public class PivSigningAlgorithmTests
         var hash = SHA256.HashData(dataToSign);
 
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
+            Slot.Signature,
+            KeyType.ECP256,
             hash);
 
         Assert.False(signature.IsEmpty);
@@ -283,8 +283,8 @@ public class PivSigningAlgorithmTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP384,
+            Slot.Signature,
+            KeyType.ECP384,
             new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
@@ -292,8 +292,8 @@ public class PivSigningAlgorithmTests
         var hash = SHA384.HashData(dataToSign);
 
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP384,
+            Slot.Signature,
+            KeyType.ECP384,
             hash);
 
         Assert.False(signature.IsEmpty);

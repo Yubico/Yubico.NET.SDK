@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -58,7 +59,7 @@ public class PivConnectionConcurrencyTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+        _ = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         // A ~2.5KB object makes the read a large multi-frame exchange on the wire.
@@ -72,7 +73,7 @@ public class PivConnectionConcurrencyTests
         {
             var readTask = session.GetObjectAsync(PivDataObject.Retired1);
             await Assert.ThrowsAsync<InvalidOperationException>(
-                async () => await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest));
+                async () => await session.SignOrDecryptAsync(Slot.Authentication, KeyType.ECP256, digest));
             var readBack = await readTask;
             Assert.Equal(storedObject, readBack.ToArray());
         }

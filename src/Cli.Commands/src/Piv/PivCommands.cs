@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Output;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Piv;
 
@@ -149,24 +150,24 @@ public sealed class PivCertDeleteSettings : GlobalSettings
 
 public static class PivHelpers
 {
-    public static PivSlot ParseSlot(string slotStr)
+    public static Slot ParseSlot(string slotStr)
     {
         var normalized = slotStr.ToUpperInvariant().TrimStart('0').TrimStart('X');
         return normalized switch
         {
-            "9A" => PivSlot.Authentication,
-            "9C" => PivSlot.Signature,
-            "9D" => PivSlot.KeyManagement,
-            "9E" => PivSlot.CardAuthentication,
+            "9A" => Slot.Authentication,
+            "9C" => Slot.Signature,
+            "9D" => Slot.KeyManagement,
+            "9E" => Slot.CardAuthentication,
             _ when byte.TryParse(normalized, System.Globalization.NumberStyles.HexNumber, null, out var b)
-                   && b is >= 0x82 and <= 0x95 => (PivSlot)b,
+                   && b is >= 0x82 and <= 0x95 => (Slot)b,
             _ => throw new ArgumentException($"Invalid PIV slot: {slotStr}. Use 9a, 9c, 9d, 9e, or 82-95.")
         };
     }
 
-    public static string FormatSlot(PivSlot slot) => $"0x{(byte)slot:X2}";
+    public static string FormatSlot(Slot slot) => $"0x{(byte)slot:X2}";
 
-    public static PivAlgorithm ParseAlgorithm(string? algorithm)
+    public static KeyType ParseAlgorithm(string? algorithm)
     {
         if (string.IsNullOrEmpty(algorithm))
         {
@@ -175,13 +176,13 @@ public static class PivHelpers
 
         return algorithm.ToLowerInvariant() switch
         {
-            "rsa2048" => PivAlgorithm.Rsa2048,
-            "rsa3072" => PivAlgorithm.Rsa3072,
-            "rsa4096" => PivAlgorithm.Rsa4096,
-            "eccp256" or "ecp256" or "p256" => PivAlgorithm.EccP256,
-            "eccp384" or "ecp384" or "p384" => PivAlgorithm.EccP384,
-            "ed25519" => PivAlgorithm.Ed25519,
-            "x25519" => PivAlgorithm.X25519,
+            "rsa2048" => KeyType.RSA2048,
+            "rsa3072" => KeyType.RSA3072,
+            "rsa4096" => KeyType.RSA4096,
+            "eccp256" or "ecp256" or "p256" => KeyType.ECP256,
+            "eccp384" or "ecp384" or "p384" => KeyType.ECP384,
+            "ed25519" => KeyType.Ed25519,
+            "x25519" => KeyType.X25519,
             _ => throw new ArgumentException(
                 $"Unknown algorithm: {algorithm}. Use rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519.")
         };
@@ -286,7 +287,7 @@ public sealed class PivInfoCommand : YkCommandBase<GlobalSettings>
         AnsiConsole.WriteLine();
         OutputHelpers.WriteHeader("Slot Overview");
 
-        PivSlot[] knownSlots = [PivSlot.Authentication, PivSlot.Signature, PivSlot.KeyManagement, PivSlot.CardAuthentication];
+        Slot[] knownSlots = [Slot.Authentication, Slot.Signature, Slot.KeyManagement, Slot.CardAuthentication];
         string[] slotNames = ["Authentication (9a)", "Signing (9c)", "Key Management (9d)", "Card Auth (9e)"];
 
         for (int i = 0; i < knownSlots.Length; i++)
@@ -298,7 +299,7 @@ public sealed class PivInfoCommand : YkCommandBase<GlobalSettings>
                 {
                     OutputHelpers.WriteKeyValueMarkup(
                         slotNames[i],
-                        $"[green]{m.Algorithm}[/] PIN={m.PinPolicy} Touch={m.TouchPolicy}");
+                        $"[green]{m.KeyType}[/] PIN={m.PinPolicy} Touch={m.TouchPolicy}");
                 }
                 else
                 {

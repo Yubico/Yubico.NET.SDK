@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Piv;
@@ -36,17 +37,17 @@ public static class PivSlotMetadataExtensions
     /// </remarks>
     /// <example>
     /// <code>
-    /// var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+    /// var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
     /// using var rsa = metadata.Value.GetRsaPublicKey();
     /// var request = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
     /// </code>
     /// </example>
     public static RSA GetRsaPublicKey(this PivSlotMetadata metadata)
     {
-        if (!metadata.Algorithm.IsRsa())
+        if (metadata.KeyType is not { } keyType || !keyType.IsRSA())
         {
             throw new InvalidOperationException(
-                $"Slot contains {metadata.Algorithm} key, not an RSA key. Use GetECDsaPublicKey() for ECC keys.");
+                $"Slot contains PIV algorithm 0x{metadata.RawAlgorithmId:X2}, not a known RSA key.");
         }
 
         // PivSlotMetadata.PublicKey stores the raw PIV TLV-encoded RSA public key:
@@ -94,23 +95,23 @@ public static class PivSlotMetadataExtensions
     /// </remarks>
     /// <example>
     /// <code>
-    /// var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+    /// var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
     /// using var ecdsa = metadata.Value.GetECDsaPublicKey();
     /// var request = new CertificateRequest("CN=Test", ecdsa, HashAlgorithmName.SHA256);
     /// </code>
     /// </example>
     public static ECDsa GetECDsaPublicKey(this PivSlotMetadata metadata)
     {
-        if (!metadata.Algorithm.IsEcc())
+        if (metadata.KeyType is not { } keyType || !keyType.IsEllipticCurve())
         {
             throw new InvalidOperationException(
-                $"Slot contains {metadata.Algorithm} key, not an ECC key. Use GetRsaPublicKey() for RSA keys.");
+                $"Slot contains PIV algorithm 0x{metadata.RawAlgorithmId:X2}, not a known ECC key.");
         }
 
-        if (metadata.Algorithm is PivAlgorithm.Ed25519 or PivAlgorithm.X25519)
+        if (keyType.IsCurve25519())
         {
             throw new InvalidOperationException(
-                $"Slot contains {metadata.Algorithm} key which is not supported by .NET ECDsa. " +
+                $"Slot contains {keyType} key which is not supported by .NET ECDsa. " +
                 "Curve25519 keys (Ed25519, X25519) require specialized handling.");
         }
 
@@ -138,7 +139,7 @@ public static class PivSlotMetadataExtensions
         var x = ecPoint[1..(1 + coordinateSize)].ToArray();
         var y = ecPoint[(1 + coordinateSize)..].ToArray();
 
-        var curve = metadata.Algorithm == PivAlgorithm.EccP384
+        var curve = keyType == KeyType.ECP384
             ? ECCurve.NamedCurves.nistP384
             : ECCurve.NamedCurves.nistP256;
 
@@ -150,35 +151,4 @@ public static class PivSlotMetadataExtensions
 
         return ECDsa.Create(ecParams);
     }
-}
-
-/// <summary>
-/// Extension methods for <see cref="PivAlgorithm"/> to check algorithm type.
-/// </summary>
-public static class PivAlgorithmExtensions
-{
-    /// <summary>
-    /// Determines if the algorithm is an RSA algorithm.
-    /// </summary>
-    /// <param name="algorithm">The algorithm to check.</param>
-    /// <returns><c>true</c> if the algorithm is RSA (1024, 2048, 3072, or 4096 bits); otherwise, <c>false</c>.</returns>
-    public static bool IsRsa(this PivAlgorithm algorithm) =>
-        algorithm is PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or
-                     PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096;
-
-    /// <summary>
-    /// Determines if the algorithm is an elliptic curve algorithm.
-    /// </summary>
-    /// <param name="algorithm">The algorithm to check.</param>
-    /// <returns><c>true</c> if the algorithm is ECC (P-256, P-384, Ed25519, or X25519); otherwise, <c>false</c>.</returns>
-    /// <remarks>
-    /// <para>
-    /// Note that Ed25519 and X25519 are Curve25519-based algorithms that are not compatible with
-    /// .NET's <see cref="ECDsa"/> class. Use this method to check for any elliptic curve algorithm,
-    /// but be aware that only P-256 and P-384 work with <see cref="ECDsa"/>.
-    /// </para>
-    /// </remarks>
-    public static bool IsEcc(this PivAlgorithm algorithm) =>
-        algorithm is PivAlgorithm.EccP256 or PivAlgorithm.EccP384 or
-                     PivAlgorithm.Ed25519 or PivAlgorithm.X25519;
 }

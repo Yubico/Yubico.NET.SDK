@@ -46,7 +46,7 @@ public static class Verification
     /// 
     /// var result = await Verification.VerifySignatureAsync(
     ///     session,
-    ///     PivSlot.Signature,
+    ///     Slot.Signature,
     ///     originalData,
     ///     signatureBytes,
     ///     HashAlgorithmName.SHA256,
@@ -60,7 +60,7 @@ public static class Verification
     /// </example>
     public static async Task<VerificationResult> VerifySignatureAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         ReadOnlyMemory<byte> originalData,
         ReadOnlyMemory<byte> signature,
         HashAlgorithmName hashAlgorithm,

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -82,13 +83,13 @@ public class PivResetTests
 
         // Generate a key in a slot
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
 
         // Reset again
         await session.ResetAsync();
 
         // Verify slot is empty via metadata (null means no key)
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.Null(metadata);
     }
 }

@@ -40,25 +40,13 @@ internal static class PivKeyProtocol
     internal static async Task<IPublicKey> GenerateKeyAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
-        PivSlot slot,
-        PivAlgorithm algorithm,
+        Slot slot,
+        KeyType algorithm,
         PivPinPolicy pinPolicy = PivPinPolicy.Default,
         PivTouchPolicy touchPolicy = PivTouchPolicy.Default,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Generating key in slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
-
-        if (!isAuthenticated)
-        {
-            throw new InvalidOperationException("Management key authentication required to generate keys");
-        }
-
-        // NOTE: Algorithm support is determined by firmware version, but PIV GET VERSION returns
-        // the PIV application version (typically 0.0.1), not the firmware version.
-        // Rather than incorrectly gate features, we let the commands fail with appropriate SW codes
-        // if the algorithm is not supported. The device will return SW 0x6A86 (incorrect parameters)
-        // or 0x6D00 (instruction not supported) for unsupported algorithms.
 
         // Build the command data: TAG 0xAC [ TAG 0x80 (algorithm) + optional policies ]
         // Pre-compute size: 0xAC + len + (0x80,0x01,algo) + optional (0xAA,0x01,pin) + optional (0xAB,0x01,touch)
@@ -80,7 +68,7 @@ internal static class PivKeyProtocol
             // TAG 0x80 (Algorithm)
             data[offset++] = 0x80;
             data[offset++] = 0x01;
-            data[offset++] = (byte)algorithm;
+            data[offset++] = PivAlgorithmId.Encode(algorithm);
 
             // TAG 0xAA (PIN policy) - only if not default
             if (pinPolicy != PivPinPolicy.Default)
@@ -100,6 +88,8 @@ internal static class PivKeyProtocol
 
             var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            if (response.SW == 0x6D00)
+                throw new NotSupportedException("PIV key generation is not supported by this YubiKey.");
 
             if (!response.IsOK())
             {
@@ -126,11 +116,10 @@ internal static class PivKeyProtocol
     /// <returns>The algorithm of the imported key.</returns>
     /// <exception cref="InvalidOperationException">If session is not authenticated.</exception>
     /// <exception cref="NotSupportedException">If the key type is not supported.</exception>
-    internal static async Task<PivAlgorithm> ImportKeyAsync(
+    internal static async Task<KeyType> ImportKeyAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
-        PivSlot slot,
+        Slot slot,
         IPrivateKey privateKey,
         PivPinPolicy pinPolicy = PivPinPolicy.Default,
         PivTouchPolicy touchPolicy = PivTouchPolicy.Default,
@@ -140,24 +129,8 @@ internal static class PivKeyProtocol
 
         logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, privateKey.KeyType);
 
-        if (!isAuthenticated)
-        {
-            throw new InvalidOperationException("Management key authentication required to import keys");
-        }
-
-        // Determine algorithm from key type
-        var algorithm = privateKey.KeyType switch
-        {
-            KeyType.RSA1024 => PivAlgorithm.Rsa1024,
-            KeyType.RSA2048 => PivAlgorithm.Rsa2048,
-            KeyType.RSA3072 => PivAlgorithm.Rsa3072,
-            KeyType.RSA4096 => PivAlgorithm.Rsa4096,
-            KeyType.ECP256 => PivAlgorithm.EccP256,
-            KeyType.ECP384 => PivAlgorithm.EccP384,
-            KeyType.Ed25519 => PivAlgorithm.Ed25519,
-            KeyType.X25519 => PivAlgorithm.X25519,
-            _ => throw new NotSupportedException($"Key type {privateKey.KeyType} is not supported for PIV import")
-        };
+        var algorithm = privateKey.KeyType;
+        byte algorithmId = PivAlgorithmId.Encode(algorithm);
 
         // Build TLV-encoded key data based on algorithm
         byte[]? keyData = null;
@@ -186,8 +159,10 @@ internal static class PivKeyProtocol
             }
 
             // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
-            var command = new ApduCommand(0x00, 0xFE, (byte)algorithm, (byte)slot, keyData);
+            var command = new ApduCommand(0x00, 0xFE, algorithmId, (byte)slot, keyData);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            if (response.SW == 0x6D00)
+                throw new NotSupportedException("PIV key import is not supported by this YubiKey.");
 
             if (!response.IsOK())
             {
@@ -276,7 +251,7 @@ internal static class PivKeyProtocol
     /// Encodes EC private key D value as TLV for PIV import.
     /// ECC format: TLV(0x06, D)
     /// </summary>
-    private static byte[] EncodeEcPrivateKey(ECPrivateKey ecKey, PivAlgorithm algorithm)
+    private static byte[] EncodeEcPrivateKey(ECPrivateKey ecKey, KeyType algorithm)
     {
         var parameters = ecKey.Parameters;
 
@@ -286,7 +261,7 @@ internal static class PivKeyProtocol
         }
 
         // D should be padded to the curve size
-        var curveSize = algorithm == PivAlgorithm.EccP256 ? 32 : 48;
+        var curveSize = algorithm.GetKeySizeBytes();
         using var dTlv = new Tlv(0x06, PadToLength(parameters.D, curveSize));
 
         return dTlv.AsSpan().ToArray();
@@ -331,23 +306,14 @@ internal static class PivKeyProtocol
     internal static async Task MoveKeyAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
-        PivSlot sourceSlot,
-        PivSlot destinationSlot,
+        Slot sourceSlot,
+        Slot destinationSlot,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Moving key from slot 0x{Source:X2} to slot 0x{Dest:X2}",
             (byte)sourceSlot, (byte)destinationSlot);
 
-        if (!isAuthenticated)
-        {
-            throw new InvalidOperationException("Management key authentication required to move keys");
-        }
-
-        // MoveKey is supported on firmware 5.7.0+. Rather than check version (which uses PIV app
-        // version, not firmware version), we try the command and let it fail with appropriate SW.
-
-        if (sourceSlot == PivSlot.Attestation)
+        if (sourceSlot == Slot.Attestation)
         {
             throw new InvalidOperationException("Cannot move attestation key");
         }
@@ -355,6 +321,8 @@ internal static class PivKeyProtocol
         // INS 0xF6, P1 = destination slot, P2 = source slot, NO DATA
         var command = new ApduCommand(0x00, 0xF6, (byte)destinationSlot, (byte)sourceSlot);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        if (response.SW == 0x6D00)
+            throw new NotSupportedException("PIV key move is not supported by this YubiKey.");
 
         if (!response.IsOK())
         {
@@ -369,23 +337,16 @@ internal static class PivKeyProtocol
     internal static async Task DeleteKeyAsync(
         IPivBackend backend,
         ILogger logger,
-        bool isAuthenticated,
-        PivSlot slot,
+        Slot slot,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Deleting key from slot 0x{Slot:X2}", (byte)slot);
 
-        if (!isAuthenticated)
-        {
-            throw new InvalidOperationException("Management key authentication required to delete keys");
-        }
-
-        // Delete key is supported on firmware 5.7.0+. Rather than check version,
-        // we let the command fail with appropriate SW.
-
         // INS 0xF6, P1 = 0xFF (delete), P2 = slot to delete, NO DATA
         var command = new ApduCommand(0x00, 0xF6, 0xFF, (byte)slot);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        if (response.SW == 0x6D00)
+            throw new NotSupportedException("PIV key deletion is not supported by this YubiKey.");
 
         if (!response.IsOK())
         {
@@ -400,18 +361,17 @@ internal static class PivKeyProtocol
     internal static async Task<X509Certificate2> AttestKeyAsync(
         IPivBackend backend,
         ILogger logger,
-        PivSlot slot,
+        Slot slot,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Attesting key in slot 0x{Slot:X2}", (byte)slot);
-
-        // Key attestation is supported on firmware 4.3.0+. Rather than check version (which uses PIV app
-        // version, not firmware version), we try the command and let it fail with appropriate SW.
 
         // INS 0xF9 (ATTEST), P1 = slot, P2 = 0, NO DATA, no explicit Le
         // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
         var command = new ApduCommand(0x00, 0xF9, (byte)slot, 0x00);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        if (response.SW == 0x6D00)
+            throw new NotSupportedException("PIV key attestation is not supported by this YubiKey.");
 
         if (!response.IsOK())
         {
@@ -425,7 +385,7 @@ internal static class PivKeyProtocol
 #pragma warning restore SYSLIB0057
     }
 
-    private static IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, PivAlgorithm algorithm)
+    private static IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, KeyType algorithm)
     {
         // Parse 0x7F49 (Public key template) - Tlv handles 2-byte tags
         using var template = Tlv.Create(data.Span);
@@ -439,15 +399,15 @@ internal static class PivKeyProtocol
         // Parse based on algorithm
         return algorithm switch
         {
-            PivAlgorithm.EccP256 or PivAlgorithm.EccP384 => ParseEccPublicKey(keyData, algorithm),
-            PivAlgorithm.Ed25519 or PivAlgorithm.X25519 => ParseCurve25519PublicKey(keyData, algorithm),
-            PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096
+            KeyType.ECP256 or KeyType.ECP384 => ParseEccPublicKey(keyData, algorithm),
+            KeyType.Ed25519 or KeyType.X25519 => ParseCurve25519PublicKey(keyData, algorithm),
+            KeyType.RSA1024 or KeyType.RSA2048 or KeyType.RSA3072 or KeyType.RSA4096
                 => ParseRsaPublicKey(keyData),
             _ => throw new NotSupportedException($"Unsupported algorithm: {algorithm}")
         };
     }
 
-    private static IPublicKey ParseEccPublicKey(ReadOnlySpan<byte> data, PivAlgorithm algorithm)
+    private static IPublicKey ParseEccPublicKey(ReadOnlySpan<byte> data, KeyType algorithm)
     {
         // ECC public key format: TAG 0x86 (EC point)
         if (data.Length < 2 || data[0] != 0x86)
@@ -462,7 +422,7 @@ internal static class PivKeyProtocol
         var point = data.Slice(offset, length);
 
         // Convert to ECPublicKey using the Core cryptography types
-        var curve = algorithm == PivAlgorithm.EccP256
+        var curve = algorithm == KeyType.ECP256
             ? ECCurve.NamedCurves.nistP256
             : ECCurve.NamedCurves.nistP384;
 
@@ -479,7 +439,7 @@ internal static class PivKeyProtocol
         return ECPublicKey.CreateFromParameters(parameters);
     }
 
-    private static IPublicKey ParseCurve25519PublicKey(ReadOnlySpan<byte> data, PivAlgorithm algorithm)
+    private static IPublicKey ParseCurve25519PublicKey(ReadOnlySpan<byte> data, KeyType algorithm)
     {
         // Curve25519 public key format: TAG 0x86 (point)
         if (data.Length < 2 || data[0] != 0x86)
@@ -493,7 +453,7 @@ internal static class PivKeyProtocol
 
         var point = data.Slice(offset, length);
 
-        var keyType = algorithm == PivAlgorithm.Ed25519 ? KeyType.Ed25519 : KeyType.X25519;
+        var keyType = algorithm == KeyType.Ed25519 ? KeyType.Ed25519 : KeyType.X25519;
         return Curve25519PublicKey.CreateFromValue(point.ToArray(), keyType);
     }
 

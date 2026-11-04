@@ -29,6 +29,46 @@ namespace Yubico.YubiKit.Piv.UnitTests.Authentication;
 public class PivPinOnlyModeSessionTests
 {
     [Fact]
+    public async Task RecoverPinOnlyModeAsync_ProtectedReadRequiresPin_VerifiesOnceAndReusesForDerivedCandidate()
+    {
+        await using var connection = new MixedPinOnlyRecoveryConnection(true, requirePinForPrinted: true);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        var result = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
+
+        Assert.Equal(PivPinOnlyMode.PinProtected, result);
+        Assert.True(session.IsManagementKeyAuthenticated);
+        Assert.Single(connection.TransmittedCommands, command => command[1] == 0x20);
+        Assert.Equal(3, connection.TransmittedCommands.Count(command => command[1] == 0xCB));
+    }
+    [Fact]
+    public async Task RecoverPinOnlyModeAsync_CancelledDerivedAuthentication_DoesNotAttemptRestoration()
+    {
+        await using var connection = new MixedPinOnlyRecoveryConnection(true, cancelDerived: true);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() => session.RecoverPinOnlyModeAsync(
+            "123456"u8.ToArray(), TestContext.Current.CancellationToken));
+
+        Assert.Equal(2, connection.AuthenticationAttempts);
+        Assert.False(session.IsManagementKeyAuthenticated);
+    }
+    [Theory]
+    [InlineData(0x6A80)]
+    [InlineData(0x6D00)]
+    public async Task RecoverPinOnlyModeAsync_UnexpectedDerivedAuthenticationFailure_PropagatesWithoutRestoration(int status)
+    {
+        await using var connection = new MixedPinOnlyRecoveryConnection(true, (ushort)status);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+
+        var exception = await Assert.ThrowsAsync<ApduException>(() => session.RecoverPinOnlyModeAsync(
+            "123456"u8.ToArray(), TestContext.Current.CancellationToken));
+
+        Assert.True(status == exception.SW);
+        Assert.Equal(2, connection.AuthenticationAttempts);
+        Assert.False(session.IsManagementKeyAuthenticated);
+    }
+    [Fact]
     public async Task GetPinOnlyModeAsync_NoAdminData_ReturnsNone()
     {
         var connection = CreateInitializedConnection([0x6A, 0x82]);
@@ -156,7 +196,7 @@ public class PivPinOnlyModeSessionTests
         0x90, 0x00
     ];
 
-    private sealed class MixedPinOnlyRecoveryConnection(bool restoreProtectedAuthentication) : ISmartCardConnection
+    private sealed class MixedPinOnlyRecoveryConnection(bool restoreProtectedAuthentication, ushort rejectionStatus = 0x6982, bool cancelDerived = false, bool requirePinForPrinted = false) : ISmartCardConnection
     {
         private readonly byte[] _managementKey =
         [
@@ -172,6 +212,7 @@ public class PivPinOnlyModeSessionTests
         ];
 
         private readonly bool _restoreProtectedAuthentication = restoreProtectedAuthentication;
+        private bool _printedReadRejected;
 
         public int AuthenticationAttempts { get; private set; }
 
@@ -223,6 +264,11 @@ public class PivPinOnlyModeSessionTests
             ReadOnlySpan<byte> commandData = command.AsSpan(5, command[4]);
             if (commandData.IndexOf(new byte[] { 0x5C, 0x03, 0x5F, 0xC1, 0x09 }) >= 0)
             {
+                if (requirePinForPrinted && !_printedReadRejected)
+                {
+                    _printedReadRejected = true;
+                    return [0x69, 0x82];
+                }
                 return [0x53, 0x1C, 0x88, 0x1A, 0x89, 0x18, .. _managementKey, 0x90, 0x00];
             }
 
@@ -241,11 +287,13 @@ public class PivPinOnlyModeSessionTests
             if (commandData.SequenceEqual(new byte[] { 0x7C, 0x02, 0x80, 0x00 }))
             {
                 AuthenticationAttempts++;
+                if (cancelDerived && AuthenticationAttempts == 2)
+                    throw new OperationCanceledException();
                 bool succeeds = AuthenticationAttempts == 1 ||
                     (AuthenticationAttempts == 3 && _restoreProtectedAuthentication);
                 if (!succeeds)
                 {
-                    return [0x69, 0x82];
+                    return [(byte)(rejectionStatus >> 8), (byte)rejectionStatus];
                 }
 
                 ReadOnlySpan<byte> witness = [0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58];

@@ -54,10 +54,10 @@ public class PivImportTests
         var privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8);
 
         var detectedAlgorithm = await session.ImportKeyAsync(
-            PivSlot.Authentication,
+            Slot.Authentication,
             privateKey);
 
-        Assert.Equal(PivAlgorithm.Rsa2048, detectedAlgorithm);
+        Assert.Equal(KeyType.RSA2048, detectedAlgorithm);
 
         // Sign with YubiKey
         await session.VerifyPinAsync(DefaultPin);
@@ -86,8 +86,8 @@ public class PivImportTests
         digestInfo.CopyTo(padded.AsSpan(3 + paddingLength));
 
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.Rsa2048,
+            Slot.Authentication,
+            KeyType.RSA2048,
             padded);
 
         // Verify the raw RSA signature with the software public key
@@ -109,15 +109,15 @@ public class PivImportTests
         var privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8);
 
         var detectedAlgorithm = await session.ImportKeyAsync(
-            PivSlot.Signature,
+            Slot.Signature,
             privateKey);
 
-        Assert.Equal(PivAlgorithm.Rsa3072, detectedAlgorithm);
+        Assert.Equal(KeyType.RSA3072, detectedAlgorithm);
 
         // Verify slot metadata shows key is present
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.Signature);
+        var metadata = await session.GetSlotMetadataAsync(Slot.Signature);
         Assert.NotNull(metadata);
-        Assert.Equal(PivAlgorithm.Rsa3072, metadata.Value.Algorithm);
+        Assert.Equal(KeyType.RSA3072, metadata.Value.KeyType);
     }
 
     [SkippableTheory]
@@ -137,16 +137,16 @@ public class PivImportTests
                 Core.Cryptography.KeyType.Ed25519);
 
             var detectedAlgorithm = await session.ImportKeyAsync(
-                PivSlot.Authentication,
+                Slot.Authentication,
                 privateKey);
 
-            Assert.Equal(PivAlgorithm.Ed25519, detectedAlgorithm);
+            Assert.Equal(KeyType.Ed25519, detectedAlgorithm);
 
             await session.VerifyPinAsync(DefaultPin);
             var dataToSign = SHA256.HashData("Ed25519 import test"u8);
             var signature = await session.SignOrDecryptAsync(
-                PivSlot.Authentication,
-                PivAlgorithm.Ed25519,
+                Slot.Authentication,
+                KeyType.Ed25519,
                 dataToSign);
 
             Assert.False(signature.IsEmpty);
@@ -174,15 +174,15 @@ public class PivImportTests
                 Core.Cryptography.KeyType.X25519);
 
             var detectedAlgorithm = await session.ImportKeyAsync(
-                PivSlot.KeyManagement,
+                Slot.KeyManagement,
                 privateKey);
 
-            Assert.Equal(PivAlgorithm.X25519, detectedAlgorithm);
+            Assert.Equal(KeyType.X25519, detectedAlgorithm);
 
             // Verify slot metadata
-            var metadata = await session.GetSlotMetadataAsync(PivSlot.KeyManagement);
+            var metadata = await session.GetSlotMetadataAsync(Slot.KeyManagement);
             Assert.NotNull(metadata);
-            Assert.Equal(PivAlgorithm.X25519, metadata.Value.Algorithm);
+            Assert.Equal(KeyType.X25519, metadata.Value.KeyType);
         }
         finally
         {

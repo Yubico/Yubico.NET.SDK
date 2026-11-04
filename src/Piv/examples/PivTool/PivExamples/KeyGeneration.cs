@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples.Results;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
@@ -48,8 +49,8 @@ public static class KeyGeneration
     /// 
     /// var result = await KeyGeneration.GenerateKeyAsync(
     ///     session,
-    ///     PivSlot.Authentication,
-    ///     PivAlgorithm.EccP256,
+    ///     Slot.Authentication,
+    ///     KeyType.ECP256,
     ///     PivPinPolicy.Once,
     ///     PivTouchPolicy.Cached,
     ///     ct);
@@ -62,8 +63,8 @@ public static class KeyGeneration
     /// </example>
     public static async Task<KeyGenerationResult> GenerateKeyAsync(
         IPivSession session,
-        PivSlot slot,
-        PivAlgorithm algorithm,
+        Slot slot,
+        KeyType algorithm,
         PivPinPolicy pinPolicy = PivPinPolicy.Default,
         PivTouchPolicy touchPolicy = PivTouchPolicy.Default,
         CancellationToken cancellationToken = default)

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
+
 namespace Yubico.YubiKit.Piv;
 
 /// <summary>
@@ -42,11 +44,21 @@ public readonly record struct PivManagementKeyMetadata(
 /// PIV slot metadata information.
 /// </summary>
 public readonly record struct PivSlotMetadata(
-    PivAlgorithm Algorithm,
+    KeyType? KeyType,
     PivPinPolicy PinPolicy,
     PivTouchPolicy TouchPolicy,
     bool IsGenerated,
-    ReadOnlyMemory<byte> PublicKey);
+    ReadOnlyMemory<byte> PublicKey)
+{
+    /// <summary>Gets the PIV algorithm identifier, including identifiers not yet modeled by the SDK.</summary>
+    public byte RawAlgorithmId { get; init; } = KeyType is { } value ? PivAlgorithmId.Encode(value) : (byte)0;
+
+    /// <summary>Gets the complete metadata response TLV sequence, including unknown fields.</summary>
+    public ReadOnlyMemory<byte> RawData { get; init; }
+
+    internal KeyType RequireKeyType() => KeyType ?? throw new NotSupportedException(
+        $"PIV algorithm 0x{RawAlgorithmId:X2} is not supported by this SDK.");
+}
 
 /// <summary>
 /// PIV biometric metadata information.

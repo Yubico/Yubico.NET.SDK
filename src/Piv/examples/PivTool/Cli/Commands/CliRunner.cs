@@ -896,7 +896,7 @@ internal static class CliRunner
                 Console.WriteLine($"Slot {s.Slot} ({s.Name}): HasKey={s.HasKey} HasCert={s.HasCertificate}");
                 if (s.Metadata is PivSlotMetadata m)
                 {
-                    Console.WriteLine($"  Algorithm:   {m.Algorithm}");
+                    Console.WriteLine($"  Algorithm:   {m.KeyType}");
                     Console.WriteLine($"  PIN Policy:  {m.PinPolicy}");
                     Console.WriteLine($"  Touch Policy:{m.TouchPolicy}");
                     Console.WriteLine($"  Generated:   {m.IsGenerated}");

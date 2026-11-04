@@ -14,6 +14,7 @@
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -48,7 +49,7 @@ public class PivCompressedCertTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         // Generate a key in the slot first
-        await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
 
         // Create a self-signed certificate
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -72,10 +73,10 @@ public class PivCompressedCertTests
             DateTimeOffset.UtcNow.AddYears(1));
 
         // Store with explicit compression enabled
-        await session.StoreCertificateAsync(PivSlot.Authentication, cert, PivCertificateCompression.Always);
+        await session.StoreCertificateAsync(Slot.Authentication, cert, PivCertificateCompression.Always);
 
         // Read the certificate back
-        var retrieved = await session.GetCertificateAsync(PivSlot.Authentication);
+        var retrieved = await session.GetCertificateAsync(Slot.Authentication);
 
         Assert.NotNull(retrieved);
         Assert.Equal(cert.Thumbprint, retrieved.Thumbprint);

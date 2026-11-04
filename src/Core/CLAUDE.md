@@ -425,7 +425,10 @@ before creating the next session over the same connection; sequential reuse is s
 only after teardown completes. `IsAuthenticated` describes application-protocol authentication (for
 example, SCP); applet-specific authentication is exposed by the concrete applet session.
 
-Prefer using `IsSupported(feature)` / `EnsureSupports(feature)` on `IApplicationSession` rather than duplicating firmware gates in each module.
+`IApplicationSession.IsSupported(feature)` is a public known-firmware compatibility query, not a runtime
+success guarantee. `ApplicationSession.EnsureSupports(feature)` is protected enforcement machinery for
+derived session operations and is not on the public interface. Operations enforce their own prerequisites;
+consumers do not need to preflight them. Major-zero development versions retain permissive feature checks.
 
 Applet factories snapshot `SessionCreationOptions` without retaining the options object. Secure-channel parameters
 remain borrowed. A session retains the caller-owned `UserPresencePrompt` service reference for its lifetime but

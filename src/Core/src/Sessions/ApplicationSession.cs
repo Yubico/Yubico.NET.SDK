@@ -419,10 +419,13 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         }
     }
 
+    /// <summary>Evaluates known firmware compatibility without guaranteeing runtime operation success.</summary>
+    /// <remarks>Authentication, device configuration, and actual command support are checked by operations.</remarks>
     public bool IsSupported(Feature feature) =>
         feature.IsSupportedByFirmware(FirmwareVersion);
 
-    public void EnsureSupports(Feature feature)
+    /// <summary>Enforces a firmware prerequisite within a derived session operation.</summary>
+    protected void EnsureSupports(Feature feature)
     {
         if (!IsSupported(feature))
             throw new NotSupportedException($"{feature.Name} requires firmware {feature.Version}+");

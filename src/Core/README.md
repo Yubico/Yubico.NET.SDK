@@ -9,6 +9,14 @@ comes with it.
 > The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
 > constraints.
 
+## Preview session feature-query migration
+
+`IApplicationSession.IsSupported(feature)` remains public for optional compatibility/UI queries. It evaluates
+known firmware support, not runtime authentication, device configuration, or guaranteed command success.
+`EnsureSupports(feature)` is now protected on `ApplicationSession` and removed from `IApplicationSession`;
+derived applet sessions use it internally. Consumers should invoke operations directly and handle their
+reported errors rather than calling an enforcement method first.
+
 ## Requirements
 
 - .NET 10 on Windows, macOS, or Linux; Linux also needs PC/SC and udev rules ([Linux setup](../../docs/linux-setup.md)).

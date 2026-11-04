@@ -2,7 +2,6 @@
 
 Yubico.YubiKit.Core.Abstractions.IApplicationSession
 Yubico.YubiKit.Core.Abstractions.IApplicationSession.ConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType
-Yubico.YubiKit.Core.Abstractions.IApplicationSession.EnsureSupports(Yubico.YubiKit.Core.Devices.Feature feature) -> void
 Yubico.YubiKit.Core.Abstractions.IApplicationSession.FirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
 Yubico.YubiKit.Core.Abstractions.IApplicationSession.IsAuthenticated.get -> bool
 Yubico.YubiKit.Core.Abstractions.IApplicationSession.IsInitialized.get -> bool

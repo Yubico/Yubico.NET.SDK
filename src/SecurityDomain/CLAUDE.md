@@ -12,9 +12,9 @@ This file provides Claude-specific guidance for working with the Security Domain
 
 ## Module Context
 
-Core key identity/metadata cleanup uses `KeyType.P256` and `IsRsa`; the sole shared catalog is
-`KeyDefinitions`. Keep SCP11's explicit curve/profile validation separate from optional COSE mappings.
-See [key metadata migration](../../docs/migration/key-metadata.md); SCP wire IDs are unchanged.
+The shared catalog is Core's `CryptographicDefinitions.Keys/Curves/Algorithms`; key objects expose `KeyInfo`.
+Keep SCP11's explicit P-256/profile validation separate from catalog applicability and optional COSE mappings.
+See [Core catalog](../Core/README.md#cryptographic-metadata); SCP wire IDs remain protocol-owned.
 
 The Security Domain module manages YubiKey's root security application, which controls secure channel establishment using SCP (Secure Channel Protocol). This is a **low-level security module** that requires careful handling of cryptographic keys and secure sessions.
 

@@ -156,7 +156,7 @@ public class PivSlotOverwriteTests
         var hash = SHA256.HashData(dataToSign);
 
         // Build PKCS#1 v1.5 padding
-        var padded = new byte[KeyDefinitions.Rsa2048.LengthInBytes];
+        var padded = new byte[CryptographicDefinitions.Keys.Rsa2048.KeySizeBytes];
         padded[0] = 0x00;
         padded[1] = 0x01;
         var paddingLength = padded.Length - 3 - sha256DigestInfo.Length - hash.Length;
@@ -173,7 +173,7 @@ public class PivSlotOverwriteTests
             PivAlgorithm.Rsa2048,
             padded);
 
-        Assert.Equal(KeyDefinitions.Rsa2048.LengthInBytes, signature.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.Rsa2048.KeySizeBytes, signature.Length);
 
         using var rsa = RSA.Create();
         rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)rsaPublicKey).ExportSubjectPublicKeyInfo(), out _);

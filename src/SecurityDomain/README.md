@@ -132,9 +132,9 @@ than other operations.
 
 ## Constraints
 
-Shared Core metadata now names concrete curves `KeyType.P256/P384/P521` and uses PascalCase key/OID
-names. `DisplayName` is for human output; COSE mappings do not expand SCP11's P-256 requirements.
-See [key metadata migration](../../docs/migration/key-metadata.md).
+Shared Core [cryptographic metadata](../Core/README.md#cryptographic-metadata) uses `KeyType` concrete
+identities and `KeyInfo` on key objects. Catalog representation/applicability and COSE mappings do not
+expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
 
 - SmartCard transport only. Requesting another transport through
   `SessionCreationOptions { PreferredConnectionType = ... }` throws.

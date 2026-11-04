@@ -286,33 +286,75 @@ await using var raw = await device.CreateRawSmartCardSessionAsync(scp, firmwareV
 `Scp03KeyParameters.Default` carries the well-known factory keys for test devices. Manage the keys on the
 device with `Yubico.YubiKit.SecurityDomain`.
 
-## Key identities and metadata
+## Cryptographic metadata
 
-Use `KeyType` for a concrete variant and `KeyDefinitions` for its shared metadata:
+`CryptographicDefinitions` is an immediately usable, thread-safe catalog with three routes. `KeyType`
+identifies concrete keys, curves have stable string identities, and algorithms describe operations:
 
 ```csharp
 using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.Core.Cryptography.Cose;
+using static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions;
 
-KeyDefinition definition = KeyType.P256.GetKeyDefinition();
-Console.WriteLine(definition.DisplayName); // P-256
-CoseKeyType? family = KeyType.Rsa2048.GetCoseKeyType(); // Rsa
-CoseEcCurve? curve = KeyDefinitions.Rsa2048.CoseKeyDefinition?.CurveIdentifier; // null
-bool mapped = KeyType.TripleDes.HasCoseMapping(); // false
+KeyInfo keyInfo = Keys.Get(KeyType.P256); // same instance as Keys.P256
+Console.WriteLine(keyInfo.DisplayName); // P-256
+Console.WriteLine(keyInfo.Curve?.FieldSizeBits); // 256
+Console.WriteLine(keyInfo.Asn1?.AlgorithmOid); // 1.2.840.10045.2.1 (id-ecPublicKey)
+Console.WriteLine(keyInfo.Asn1?.NamedCurveOid); // 1.2.840.10045.3.1.7
+
+CurveInfo curveInfo = Curves.GetByOid("1.2.840.10045.3.1.7"); // named curves only
+foreach (KeyInfo construction in Keys.FindByCurve(curveInfo))
+    Console.WriteLine(construction.DisplayName); // a curve can have multiple concrete constructions
+foreach (AlgorithmInfo algorithmInfo in Algorithms.FindForKey(keyInfo))
+    Console.WriteLine(algorithmInfo.DisplayName); // multiple ECDSA choices, ECDH, ...
+
+if (Keys.TryGet((KeyType)999, out KeyInfo? unknown))
+    Console.WriteLine(unknown.DisplayName); // non-null on success
+bool found = Curves.TryGetByOid("1.2.3.4.5", out _); // false
+var matches = Algorithms.FindByOid(Oids.RsaPss); // generic + parameterized RSA-PSS
+CurveInfo? rsaCurve = Keys.Rsa2048.Curve; // null
+CurveInfo? aesCurve = Keys.Aes256.Curve; // null
+Asn1KeyInfo? aesAsn1 = Keys.Aes256.Asn1; // null; CBC is an operation, not a bare key
 ```
 
-COSE family and curve identifiers describe representation, not an algorithm, codec, applet, or hardware
-capability. Choose the algorithm through the operation/profile; decoded CTAP2 keys retain their received
-algorithm. RSA sizes and AES sizes have COSE families without curves. Triple DES has no registered mapping
-in this catalog. Invalid `KeyType` lookups throw rather than returning an absent mapping.
+`All` on each route is immutable and deterministically ordered. `Get`/`GetBy` return one result or throw
+with the missing identity; `TryGet`/`TryGetBy` return false for expected misses, and `Find` returns an empty
+collection if nothing matches. There is no registration step and no default algorithm on a key.
+`Keys.GetByCurve` is an exactly-one convenience: it throws if multiple constructions share the curve;
+use `Keys.FindByCurve` to select explicitly instead of assuming that curve identity determines a key.
+`IKeyBase.KeyInfo` gives the same metadata on public/private keys. Use `DisplayName` for human output;
+enum `ToString()` is not a persistence format.
 
-`DisplayName` is for human output; `KeyType` is symbolic identity. Do not persist enum `ToString()` names.
-The catalog is read-only, and COSE metadata is immutable and value-equal. RSA's shared algorithm OID and
-id-ecPublicKey do not identify a key size/curve. Symmetric OIDs retain their **CBC-mode-specific** mappings,
-not a mode-independent key identity or operation default.
+**Do not conflate identifier domains.** A named-curve OID selects a mathematical curve; id-ecPublicKey
+requires that curve as a parameter. RSA's rsaEncryption OID alone does not select a modulus size.
+X25519/Ed25519 have mathematical curves but RFC 8410 ASN.1 identifiers with **absent** parameters. Operation
+OIDs (including `Oids.Aes256Cbc` and `Oids.TripleDesCbc`) belong to `Algorithms`, not bare key metadata.
+COSE `keyInfo.Cose` keeps kty/crv separate from the operation's numeric alg.
+Decoders reject extra AlgorithmIdentifier fields: EC requires exactly one named-curve OID and Ed/X
+requires none. RSA accepts absent or single NULL parameters on input and continues to encode NULL.
 
-Earlier v2 names were removed without aliases. See [key metadata migration](../../docs/migration/key-metadata.md)
-for the PascalCase names, namespace move, removed algorithm property, and display-name migration.
+**Applicability is not capability or recommendation.** `FindForKey` reports structural compatibility,
+not hardware/provider support, applet/slot/profile support, security guidance, or an exclusive choice.
+ES256 itself is not restricted to P-256; protocol profiles can impose that restriction. The catalog includes
+historical algorithms such as SHA-1 and Triple DES to describe existing SDK behavior, not recommend them.
+Each applicability alternative combines its fields with AND; alternatives are combined with OR.
+Fully specified Ed25519/X25519 operations constrain the concrete construction, not just its curve.
+`HashAlgorithm == null` means no separately selected hash: it can describe an unspecified hash (generic
+ECDSA), an intrinsic hash construction (Ed25519), or an operation without a hash parameter (CBC).
+Numeric COSE mappings are not complete codec/profile contracts: COSE AES-CBC still requires RFC 9459's
+PKCS#7 padding, IV handling and companion integrity protection. A generic CBC mode entry selects none of
+those operation inputs for the caller.
+
+Sizes have explicit units: `KeySizeBytes` is the RSA modulus width, ordinary EC coordinate width,
+or stored symmetric/25519 width. `KeySizeBits` preserves the corresponding nominal size (25519 storage =
+256 bits; Triple DES includes parity), not security strength. Use `Curve.FieldSizeBits`/`OrderSizeBits`
+for mathematics and `PrivateValueLengthBytes`/`PublicValueLengthBytes` for scalar/seed and public encodings.
+The 25519 field has 255 bits despite its 32-byte storage. Ordinary EC points are uncompressed `04 || X || Y`.
+
+The modeled ordinary curves include NIST P-256/P-384/P-521, secp256k1, and Brainpool P256r1/P384r1/P512r1.
+Host providers need not implement every curve; ASN metadata is not a promise of cryptographic provider support.
+COSE mappings exist only for verified registered representations (Brainpool P256/P384/P512 = 256/258/259).
+Protocol-owned OpenPGP
+metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp package is referenced.
 
 ## Constraints
 

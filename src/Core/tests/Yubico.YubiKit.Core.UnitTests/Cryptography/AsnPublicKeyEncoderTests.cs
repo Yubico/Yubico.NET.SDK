@@ -252,7 +252,7 @@ public class AsnPublicKeyEncoderTests
     [InlineData(Oids.X25519)]
     [InlineData(Oids.Ed25519)]
     [InlineData(Oids.Aes256Cbc)]
-    [InlineData("1.3.132.0.10")] // secp256k1
+    [InlineData("1.3.132.0.31")] // secp192k1, intentionally not modeled
     public void EncodeToSubjectPublicKeyInfo_EcParametersNotASupportedPrimeCurve_ThrowsArgumentException(string oid)
     {
         var parameters = new ECParameters

@@ -134,9 +134,9 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
 
 ## Constraints
 
-Core concrete key names are `KeyType.P256/P384/P521`, `Rsa*`, `Aes*`, and `TripleDes`.
-PIV's independent `PivAlgorithm` identifiers and firmware restrictions are unchanged; never cast from
-Core `KeyType`. See [key metadata migration](../../docs/migration/key-metadata.md).
+Core's [cryptographic catalog](../Core/README.md#cryptographic-metadata) exposes immutable `KeyInfo` on
+key objects. PIV's independent `PivAlgorithm` identifiers and firmware restrictions remain protocol-owned;
+never cast from Core `KeyType` or infer PIV support from catalog representation/applicability.
 
 - Requesting a non-SmartCard transport through `SessionCreationOptions { PreferredConnectionType = ... }` throws.
 - One live connection per physical YubiKey, and one session per connection. Whoever creates a connection

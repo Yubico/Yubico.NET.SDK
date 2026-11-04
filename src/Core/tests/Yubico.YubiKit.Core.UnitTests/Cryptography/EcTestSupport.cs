@@ -37,7 +37,7 @@ internal static class EcTestSupport
 
     /// <summary>
     /// The coordinate size of each supported prime curve, restated from the curve definitions rather
-    /// than looked up through <c>KeyDefinitions</c>, for the same reason as
+    /// than looked up through <c>CryptographicDefinitions</c>, for the same reason as
     /// <see cref="UncompressedPoint"/>. The private scalar is the same width.
     /// </summary>
     public static int CoordinateSize(string curveOid) => curveOid switch

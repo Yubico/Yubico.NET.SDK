@@ -41,45 +41,31 @@ internal class AsnPublicKeyDecoder
         var seqSubjectPublicKeyInfo = reader.ReadSequence();
         var seqAlgorithmIdentifier = seqSubjectPublicKeyInfo.ReadSequence();
 
-        var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        var keyAlgorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
         var subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out var unusedBitCount);
         if (unusedBitCount != 0)
         {
             throw new CryptographicException("Invalid subject public key encoding");
         }
 
-        switch (oidAlgorithm)
+        if (keyAlgorithmOid == Oids.Rsa && seqAlgorithmIdentifier.HasData)
         {
-            case Oids.Rsa:
-                {
-                    if (seqAlgorithmIdentifier.HasData)
-                    {
-                        seqAlgorithmIdentifier.ReadNull();
-                        seqAlgorithmIdentifier.ThrowIfNotEmpty();
-                    }
-
-                    return CreateRSAPublicKey(subjectPublicKey);
-                }
-            case Oids.EcPublicKey:
-                {
-                    var oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
-                    return CreateECPublicKey(oidCurve, subjectPublicKey);
-                }
-            case Oids.X25519:
-                {
-                    return Curve25519PublicKey.CreateFromValue(subjectPublicKey, KeyType.X25519);
-                }
-            case Oids.Ed25519:
-                {
-                    return Curve25519PublicKey.CreateFromValue(subjectPublicKey, KeyType.Ed25519);
-                }
+            // RFC 8017 specifies NULL; preserve the existing absent-parameter input tolerance.
+            seqAlgorithmIdentifier.ReadNull();
         }
 
-        throw new NotSupportedException(
-            string.Format(
-                CultureInfo.CurrentCulture,
-                "Unsupported public key algorithm OID '{0}'.",
-                oidAlgorithm));
+        // RFC 5480: one named-curve OID. RFC 8410: Ed/X parameters MUST be absent.
+        var curveOid = keyAlgorithmOid == Oids.EcPublicKey ? seqAlgorithmIdentifier.ReadObjectIdentifier() : string.Empty;
+        seqAlgorithmIdentifier.ThrowIfNotEmpty();
+
+        return keyAlgorithmOid switch
+        {
+            Oids.Rsa => CreateRSAPublicKey(subjectPublicKey),
+            Oids.EcPublicKey => CreateECPublicKey(curveOid, subjectPublicKey),
+            Oids.X25519 => Curve25519PublicKey.CreateFromValue(subjectPublicKey, KeyType.X25519),
+            Oids.Ed25519 => Curve25519PublicKey.CreateFromValue(subjectPublicKey, KeyType.Ed25519),
+            _ => throw new NotSupportedException($"Unsupported public key algorithm OID '{keyAlgorithmOid}'.")
+        };
     }
 
     private static RSAPublicKey CreateRSAPublicKey(byte[] subjectPublicKey)
@@ -104,7 +90,8 @@ internal class AsnPublicKeyDecoder
 
     private static ECPublicKey CreateECPublicKey(string curveOid, byte[] subjectPublicKey)
     {
-        if (!Oids.IsECDsaCurve(curveOid))
+        if (!CryptographicDefinitions.Curves.TryGetByOid(curveOid, out var curveInfo)
+            || curveInfo.Form != CurveForm.ShortWeierstrass)
         {
             throw new NotSupportedException(
                 string.Format(
@@ -117,13 +104,13 @@ internal class AsnPublicKeyDecoder
         // 0x04 || X coordinate || Y coordinate.
         AsnUtilities.ValidateDecodedEcPoint(subjectPublicKey, curveOid);
 
-        var coordinateSize = AsnUtilities.GetDecodedCoordinateSize(curveOid);
-        var xCoordinate = new byte[coordinateSize];
-        var yCoordinate = new byte[coordinateSize];
+        var coordinateLengthBytes = AsnUtilities.GetDecodedCoordinateLengthBytes(curveOid);
+        var xCoordinate = new byte[coordinateLengthBytes];
+        var yCoordinate = new byte[coordinateLengthBytes];
 
         // Skip the first byte (0x04 indicating uncompressed point)
-        Buffer.BlockCopy(subjectPublicKey, 1, xCoordinate, 0, coordinateSize);
-        Buffer.BlockCopy(subjectPublicKey, 1 + coordinateSize, yCoordinate, 0, coordinateSize);
+        Buffer.BlockCopy(subjectPublicKey, 1, xCoordinate, 0, coordinateLengthBytes);
+        Buffer.BlockCopy(subjectPublicKey, 1 + coordinateLengthBytes, yCoordinate, 0, coordinateLengthBytes);
 
         var curve = ECCurve.CreateFromValue(curveOid);
         var ecParams = new ECParameters

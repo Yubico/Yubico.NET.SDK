@@ -190,9 +190,8 @@ public class AsnPublicKeyDecoderTests
     [Fact]
     public void CreatePublicKey_UnsupportedCurveOid_ThrowsNotSupportedException()
     {
-        // brainpoolP256r1 (1.3.36.3.3.2.8.1.1.7) is a syntactically valid EC curve OID that is
-        // not one of P-256/P-384/P-521, which AsnPublicKeyDecoder.CreateECPublicKey rejects.
-        var spki = BuildEcSubjectPublicKeyInfo("1.3.36.3.3.2.8.1.1.7", PointWithBadPrefix(0x04, coordinateSize: 32));
+        // brainpoolP320r1 is a syntactically valid named curve outside the modeled catalog.
+        var spki = BuildEcSubjectPublicKeyInfo("1.3.36.3.3.2.8.1.1.9", PointWithBadPrefix(0x04, coordinateSize: 40));
 
         Assert.Throws<NotSupportedException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
     }

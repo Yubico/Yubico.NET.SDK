@@ -88,7 +88,7 @@ public class PivCryptoTests
             PivSlot.KeyManagement,
             peerPublicKey);
 
-        Assert.Equal(KeyDefinitions.P256.LengthInBytes, sharedSecret.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.P256.KeySizeBytes, sharedSecret.Length);
 
         // Verify shared secrets match using software ECDH
         using var deviceEcdh = ECDiffieHellman.Create();
@@ -119,10 +119,10 @@ public class PivCryptoTests
             PivAlgorithm.Ed25519,
             dataToSign);
 
-        Assert.Equal(KeyDefinitions.Ed25519.LengthInBytes * 2, signature.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.Ed25519.KeySizeBytes * 2, signature.Length);
 
         var curve25519Key = (Curve25519PublicKey)publicKey;
-        Assert.Equal(KeyDefinitions.Ed25519.LengthInBytes, curve25519Key.PublicPoint.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.Ed25519.KeySizeBytes, curve25519Key.PublicPoint.Length);
 
         // .NET has no Ed25519 verifier, so use determinism (RFC 8032 §8.2) to show the message reaches
         // the key unchanged: a message and its zero-padded form, and two long messages sharing their
@@ -183,7 +183,7 @@ public class PivCryptoTests
         await session.VerifyPinAsync(DefaultPin);
 
         var curve25519Key = (Curve25519PublicKey)publicKey;
-        Assert.Equal(KeyDefinitions.Ed25519.LengthInBytes, curve25519Key.PublicPoint.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.Ed25519.KeySizeBytes, curve25519Key.PublicPoint.Length);
 
         // NOTE: Software verification of X25519 shared secret would require
         // creating a compatible peer X25519 key and comparing raw secrets.
@@ -248,14 +248,14 @@ public class PivCryptoTests
         var hash = SHA256.HashData(dataToSign);
 
         // PIV RSA performs raw RSA - we need PKCS#1 v1.5 padding
-        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, KeyDefinitions.Rsa2048.LengthInBytes);
+        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, CryptographicDefinitions.Keys.Rsa2048.KeySizeBytes);
 
         var signature = await session.SignOrDecryptAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa2048,
             paddedData);
 
-        Assert.Equal(KeyDefinitions.Rsa2048.LengthInBytes, signature.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.Rsa2048.KeySizeBytes, signature.Length);
 
         // Verify signature using RSA
         using var rsa = RSA.Create();
@@ -280,14 +280,14 @@ public class PivCryptoTests
         var dataToSign = "test data for RSA 1024"u8.ToArray();
         var hash = SHA256.HashData(dataToSign);
 
-        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, KeyDefinitions.Rsa1024.LengthInBytes);
+        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, CryptographicDefinitions.Keys.Rsa1024.KeySizeBytes);
 
         var signature = await session.SignOrDecryptAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa1024,
             paddedData);
 
-        Assert.Equal(KeyDefinitions.Rsa1024.LengthInBytes, signature.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.Rsa1024.KeySizeBytes, signature.Length);
 
         // Verify signature using RSA
         using var rsa = RSA.Create();
@@ -313,14 +313,14 @@ public class PivCryptoTests
         var dataToSign = "test data for RSA 3072"u8.ToArray();
         var hash = SHA256.HashData(dataToSign);
 
-        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, KeyDefinitions.Rsa3072.LengthInBytes);
+        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, CryptographicDefinitions.Keys.Rsa3072.KeySizeBytes);
 
         var signature = await session.SignOrDecryptAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa3072,
             paddedData);
 
-        Assert.Equal(KeyDefinitions.Rsa3072.LengthInBytes, signature.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.Rsa3072.KeySizeBytes, signature.Length);
 
         // Verify signature using RSA
         using var rsa = RSA.Create();
@@ -346,14 +346,14 @@ public class PivCryptoTests
         var dataToSign = "test data for RSA 4096"u8.ToArray();
         var hash = SHA256.HashData(dataToSign);
 
-        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, KeyDefinitions.Rsa4096.LengthInBytes);
+        var paddedData = CreatePkcs1v15SigningPadding(Sha256DigestInfo, hash, CryptographicDefinitions.Keys.Rsa4096.KeySizeBytes);
 
         var signature = await session.SignOrDecryptAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa4096,
             paddedData);
 
-        Assert.Equal(KeyDefinitions.Rsa4096.LengthInBytes, signature.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.Rsa4096.KeySizeBytes, signature.Length);
 
         // Verify signature using RSA
         using var rsa = RSA.Create();

@@ -1,6 +1,7 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
@@ -65,7 +66,7 @@ public class OpenPgpPinManagementTests
             {
                 // Generate a signing key so we can test PIN-gated operations
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256));
 
                 // Verify PIN for signing
                 await session.VerifyPinAsync(DefaultUserPin);
@@ -125,7 +126,7 @@ public class OpenPgpPinManagementTests
                 // Attempt key generation without verifying Admin PIN
                 // The card should reject the operation with a security status error
                 await Assert.ThrowsAsync<ApduException>(
-                    () => session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1)));
+                    () => session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256)));
             });
 
     // ── Reset PIN via Admin PIN ─────────────────────────────────────

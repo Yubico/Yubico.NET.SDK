@@ -38,15 +38,15 @@ namespace Yubico.YubiKit.Core.Cryptography
         public ECParameters Parameters { get; }
 
         /// <summary>
-        /// Gets the key definition associated with this EC private key.
+        /// Gets the metadata associated with this EC private key.
         /// </summary>
         /// <value>
-        /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
+        /// A <see cref="KeyInfo"/> object that describes the key's representation.
         /// </value>
-        public KeyDefinition KeyDefinition { get; }
+        public override KeyInfo KeyInfo { get; }
 
         /// <inheritdoc />
-        public override KeyType KeyType => KeyDefinition.KeyType;
+        public override KeyType KeyType => KeyInfo.KeyType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ECPrivateKey"/> class.
@@ -71,9 +71,11 @@ namespace Yubico.YubiKit.Core.Cryptography
                 throw new ArgumentException("Parameters must contain private key data (D value)", nameof(parameters));
             }
 
+            var curveInfo = CryptographicDefinitions.Curves.GetByOid(parameters.Curve.Oid.Value ?? string.Empty);
+            KeyInfo = CryptographicDefinitions.Keys.GetNamedEcByCurve(curveInfo);
+            AsnUtilities.ValidateEcPrivateScalarArgument(parameters.D,
+                curveInfo.NamedCurveOid ?? throw new NotSupportedException("An ordinary EC key requires a named-curve OID."), nameof(parameters));
             PrivateKeyConsistency.ThrowIfPublicPointDoesNotMatch(parameters);
-
-            KeyDefinition = KeyDefinitions.GetByOid(parameters.Curve.Oid);
             Parameters = parameters.DeepCopy();
             try
             {
@@ -228,15 +230,13 @@ namespace Yubico.YubiKit.Core.Cryptography
             KeyType keyType,
             Action<ECParameters>? parametersCreated)
         {
-            var keyDefinition = keyType.GetKeyDefinition();
-            if (keyDefinition.AlgorithmOid is not Oids.EcPublicKey)
+            var keyInfo = keyType.GetKeyInfo();
+            if (!keyInfo.IsShortWeierstrass || keyInfo.Asn1?.NamedCurveOid is not { } curveOid)
             {
-                throw new ArgumentException("Only P-256, P-384 and P-521 are supported.", nameof(keyType));
+                throw new ArgumentException("An ordinary EC key requires a modeled short-Weierstrass curve.", nameof(keyType));
             }
 
-            var curveOid = keyDefinition.CurveOid ??
-                           throw new ArgumentException("The key definition for this key type has no Curve OID is null.");
-
+            AsnUtilities.ValidateEcPrivateScalarArgument(privateValue.Span, curveOid, nameof(privateValue));
             var curve = ECCurve.CreateFromValue(curveOid);
             var parameters = new ECParameters
             {

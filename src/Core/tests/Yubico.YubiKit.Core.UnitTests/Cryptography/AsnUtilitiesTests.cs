@@ -121,7 +121,7 @@ public class AsnUtilitiesTests
     #region Curve resolution
 
     /// <summary>
-    /// OIDs that <see cref="KeyDefinitions.GetByOid"/> happily resolves but that are not EC prime
+    /// Key/operation OIDs that must not be resolved as ordinary EC named curves, even when key
     /// curves. Resolving through it would hand back a coordinate size for a non-EC algorithm.
     /// </summary>
     public static TheoryData<string> NonEcCurveOids => new()
@@ -135,7 +135,7 @@ public class AsnUtilitiesTests
     /// <summary>Well-formed EC curve OIDs that this SDK does not support.</summary>
     public static TheoryData<string> UnsupportedCurveOids => new()
     {
-        "1.3.132.0.10", // secp256k1
+        "1.3.132.0.31", // secp192k1, intentionally not modeled
         "1.2.840.10045.3.1.1", // secp192r1 / P-192
         "1.2.3.4.5.6.7" // not an algorithm OID at all
     };
@@ -144,11 +144,11 @@ public class AsnUtilitiesTests
     [InlineData(Oids.P256, 32)]
     [InlineData(Oids.P384, 48)]
     [InlineData(Oids.P521, 66)]
-    public void GetDecodedCoordinateSize_SupportedCurve_ReturnsExpectedSize(string curveOid, int expectedSize)
+    public void GetDecodedCoordinateLengthBytes_SupportedCurve_ReturnsExpectedLength(string curveOid, int expectedLengthBytes)
     {
-        var size = AsnUtilities.GetDecodedCoordinateSize(curveOid);
+        var coordinateLengthBytes = AsnUtilities.GetDecodedCoordinateLengthBytes(curveOid);
 
-        Assert.Equal(expectedSize, size);
+        Assert.Equal(expectedLengthBytes, coordinateLengthBytes);
     }
 
     // The two theories below exercise a backstop, not a reachable production path. Both decoders
@@ -162,8 +162,8 @@ public class AsnUtilitiesTests
     [Theory]
     [MemberData(nameof(NonEcCurveOids))]
     [MemberData(nameof(UnsupportedCurveOids))]
-    public void GetDecodedCoordinateSize_NotASupportedPrimeCurve_ThrowsCryptographicException(string oid) =>
-        Assert.Throws<CryptographicException>(() => AsnUtilities.GetDecodedCoordinateSize(oid));
+    public void GetDecodedCoordinateLengthBytes_NotASupportedPrimeCurve_ThrowsCryptographicException(string curveOid) =>
+        Assert.Throws<CryptographicException>(() => AsnUtilities.GetDecodedCoordinateLengthBytes(curveOid));
 
     [Theory]
     [MemberData(nameof(NonEcCurveOids))]

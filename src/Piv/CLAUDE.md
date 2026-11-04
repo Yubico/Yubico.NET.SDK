@@ -4,10 +4,10 @@ This file provides Claude-specific guidance for working with the PIV module. **R
 
 ## Documentation Maintenance
 
-Core key metadata migration: concrete identities use `KeyType.P256/P384/P521`, `Rsa*`, `Aes*`,
-`TripleDes`, and helpers `IsRsa`/`GetByRsaLength`. Keep the explicit `PivAlgorithm` mappings and independent
-protocol values; a COSE mapping never implies PIV operation support. See
-[key metadata migration](../../docs/migration/key-metadata.md).
+Core's `CryptographicDefinitions.Keys` provides immutable `KeyInfo` on key objects. Keep the explicit
+`PivAlgorithm` mappings and independent protocol values; catalog representation or algorithm applicability
+never implies PIV operation support or broadens its supported curves. See
+[Core catalog](../Core/README.md#cryptographic-metadata).
 
 When working on this module:
 

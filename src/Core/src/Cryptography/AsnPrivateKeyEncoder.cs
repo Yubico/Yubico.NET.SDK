@@ -31,25 +31,19 @@ internal static class AsnPrivateKeyEncoder
     /// <param name="keyType">The type of the key.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key.</returns>
     /// <remarks>
-    /// Unlike <see cref="EncodeToPkcs8(ECParameters)"/>, the EC branch here does not length-check
-    /// <paramref name="privateKey"/> against the curve. It takes raw values rather than a structure
-    /// that names its own curve, and Curve25519 — the only key types any production caller reaches
-    /// this overload with — is checked exactly in <c>EncodeCurve25519Key</c>. The EC branch is
-    /// exercised only by tests today; if a production caller appears, it should be brought under
-    /// the same scalar check as the <see cref="ECParameters"/> path.
+    /// Both EC overloads validate scalar width against the named curve. Curve25519 encodings retain
+    /// the exact imported 32 bytes and RFC 8410's absent algorithm parameters.
     /// </remarks>
     public static byte[] EncodeToPkcs8(
         ReadOnlyMemory<byte> privateKey,
         ReadOnlyMemory<byte>? publicPoint,
         KeyType keyType)
     {
-        return keyType switch
+        var keyInfo = keyType.GetKeyInfo();
+        return keyInfo.Asn1 switch
         {
-            KeyType.P256 => EncodeECKey(privateKey, Oids.P256, publicPoint),
-            KeyType.P384 => EncodeECKey(privateKey, Oids.P384, publicPoint),
-            KeyType.P521 => EncodeECKey(privateKey, Oids.P521, publicPoint),
-            KeyType.X25519 => EncodeCurve25519Key(privateKey.Span, Oids.X25519),
-            KeyType.Ed25519 => EncodeCurve25519Key(privateKey.Span, Oids.Ed25519),
+            { ParameterKind: Asn1ParameterKind.NamedCurve, NamedCurveOid: { } curveOid } when keyInfo.IsShortWeierstrass => EncodeECKey(privateKey, curveOid, publicPoint),
+            { ParameterKind: Asn1ParameterKind.Absent, AlgorithmOid: var keyAlgorithmOid } when keyType.IsCurve25519() => EncodeCurve25519Key(privateKey.Span, keyAlgorithmOid),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
     }
@@ -147,7 +141,7 @@ internal static class AsnPrivateKeyEncoder
     /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
     /// <exception cref="ArgumentException">
     /// The private key parameter D is null or is not the curve's coordinate size, the curve is not
-    /// one of P-256, P-384 or P-521, or the public point is half supplied (exactly one of
+    /// a modeled short-Weierstrass curve, or the public point is half supplied (exactly one of
     /// <c>Q.X</c> and <c>Q.Y</c> is null).
     /// </exception>
     public static byte[] EncodeToPkcs8(ECParameters parameters)
@@ -203,6 +197,7 @@ internal static class AsnPrivateKeyEncoder
         string curveOid,
         ReadOnlyMemory<byte>? publicPoint)
     {
+        AsnUtilities.ValidateEcPrivateScalarArgument(privateKey.Span, curveOid, nameof(privateKey));
         if (publicPoint.HasValue)
         {
             AsnUtilities.ValidateEcPointArgument(publicPoint.Value.Span, curveOid, nameof(publicPoint));
@@ -255,21 +250,11 @@ internal static class AsnPrivateKeyEncoder
         return writer.Encode();
     }
 
-    private static byte[] EncodeCurve25519Key(ReadOnlySpan<byte> privateKey, string algorithmOid)
+    private static byte[] EncodeCurve25519Key(ReadOnlySpan<byte> privateKey, string keyAlgorithmOid)
     {
         if (privateKey.Length != 32)
         {
             throw new ArgumentException("Curve25519 key must be 32 bytes.", nameof(privateKey));
-        }
-
-        if (algorithmOid is null)
-        {
-            throw new ArgumentException("Curve OID is null.");
-        }
-
-        if (!Oids.IsCurve25519Algorithm(algorithmOid))
-        {
-            throw new ArgumentException("Algorithm OID is not supported.", nameof(algorithmOid));
         }
 
         // Create the PKCS#8 PrivateKeyInfo structure
@@ -283,7 +268,7 @@ internal static class AsnPrivateKeyEncoder
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(algorithmOid);
+        writer.WriteObjectIdentifier(keyAlgorithmOid);
         writer.PopSequence();
 
         // PrivateKey as OCTET STRING

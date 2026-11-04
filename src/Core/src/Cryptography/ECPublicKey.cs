@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// </summary>
 /// <remarks>
 ///     This class encapsulates EC public key parameters and provides cryptographic operations
-///     for NIST elliptic curves and provides factory methods for creating instances from EC parameters or DER-encoded
+///     for modeled short-Weierstrass curves and provides factory methods for creating instances from EC parameters or DER-encoded
 ///     data.
 /// </remarks>
 public class ECPublicKey : PublicKey
@@ -48,11 +48,11 @@ public class ECPublicKey : PublicKey
             throw new ArgumentException(
                 "Parameters must contain public key data (Q.X and Q.Y values)", nameof(parameters));
 
+        var curveInfo = CryptographicDefinitions.Curves.GetByOid(parameters.Curve.Oid.Value ?? string.Empty);
+        KeyInfo = CryptographicDefinitions.Keys.GetNamedEcByCurve(curveInfo);
+        _publicPointBytes = AsnUtilities.BuildUncompressedEcPoint(parameters.Q.X, parameters.Q.Y,
+            curveInfo.NamedCurveOid ?? throw new NotSupportedException("An ordinary EC key requires a named-curve OID."), nameof(parameters));
         Parameters = parameters.DeepCopy();
-        KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
-
-        // Format identifier (uncompressed point): 0x04
-        _publicPointBytes = parameters.ToUncompressedPoint();
     }
 
     /// <summary>
@@ -65,12 +65,12 @@ public class ECPublicKey : PublicKey
     public ECParameters Parameters { get; }
 
     /// <summary>
-    ///     Gets the key definition associated with this EC public key.
+    ///     Gets the metadata associated with this EC public key.
     /// </summary>
     /// <value>
-    ///     A <see cref="KeyDefinition" /> object that describes the key's properties, including its type and length.
+    ///     A <see cref="KeyInfo" /> object that describes the key's representation.
     /// </value>
-    public KeyDefinition KeyDefinition { get; }
+    public override KeyInfo KeyInfo { get; }
 
     /// <summary>
     ///     Gets the bytes representing the public key coordinates.
@@ -79,7 +79,7 @@ public class ECPublicKey : PublicKey
     public ReadOnlyMemory<byte> PublicPoint => _publicPointBytes;
 
     /// <inheritdoc />
-    public override KeyType KeyType => KeyDefinition.KeyType;
+    public override KeyType KeyType => KeyInfo.KeyType;
 
     /// <inheritdoc />
     public override byte[] ExportSubjectPublicKeyInfo() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(Parameters);
@@ -137,19 +137,20 @@ public class ECPublicKey : PublicKey
     /// </exception>
     public static ECPublicKey CreateFromValue(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
     {
-        var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-        if (keyDefinition.AlgorithmOid is not Oids.EcPublicKey)
-            throw new ArgumentException("Only P-256, P-384 and P-521 are supported.", nameof(keyType));
+        var keyInfo = keyType.GetKeyInfo();
+        if (!keyInfo.IsShortWeierstrass || keyInfo.Asn1?.NamedCurveOid is not { } curveOid)
+            throw new ArgumentException("An ordinary EC key requires a modeled short-Weierstrass curve.", nameof(keyType));
 
-        var coordinateLength = keyDefinition.LengthInBytes;
-        var curve = ECCurve.CreateFromValue(keyDefinition.CurveOid!);
+        AsnUtilities.ValidateEcPointArgument(publicPoint.Span, curveOid, nameof(publicPoint));
+        var coordinateLengthBytes = keyInfo.KeySizeBytes;
+        var curve = ECCurve.CreateFromValue(curveOid);
         var ecParameters = new ECParameters
         {
             Curve = curve,
             Q = new ECPoint
             {
-                X = publicPoint.Slice(1, coordinateLength).ToArray(),
-                Y = publicPoint.Slice(coordinateLength + 1, coordinateLength).ToArray()
+                X = publicPoint.Slice(1, coordinateLengthBytes).ToArray(),
+                Y = publicPoint.Slice(coordinateLengthBytes + 1, coordinateLengthBytes).ToArray()
             }
         };
 
@@ -170,10 +171,7 @@ public class ECPublicKey : PublicKey
         ecdh.ImportSubjectPublicKeyInfo(subjectPublicKeyInfo.Span, out var bytesRead);
         if (bytesRead != subjectPublicKeyInfo.Length)
             throw new CryptographicException("Invalid SubjectPublicKeyInfo data.");
-        return CreateFromParameters(ecdh.ExportParameters(false)); // TODO verify this works as expected
-        // return AsnPublicKeyDecoder
-        //     .CreatePublicKey(subjectPublicKeyInfo)
-        //     .Cast<ECPublicKey>();
+        return CreateFromParameters(ecdh.ExportParameters(false));
     }
 
     /// <summary>

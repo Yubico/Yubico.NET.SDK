@@ -473,9 +473,10 @@ if (!Ctap2Session.FeatureBioEnrollment.IsSupportedByFirmware(firmwareVersion))
 Use Core `Cryptography.Cose.CoseKeyType` for readable known family constants, while retaining open `int`
 wire families in active `CoseKey` and `CoseOtherKey` raw preservation. Do not cast Core concrete `KeyType`
 values to wire IDs. `CoseAlgorithm` and unknown conversions remain open. Core `CoseAlgorithmIdentifier`
-names are PascalCase; `CoseKeyDefinition` has moved to `Core.Cryptography.Cose` and no longer contains an
-intrinsic algorithm. Registry mapping is not capability; preserve strict PIN/UV P-256/-25 checks.
-See [key metadata migration](../../docs/migration/key-metadata.md).
+names are PascalCase; `CryptographicDefinitions.Keys` exposes optional `Core.Cryptography.Cose.CoseKeyInfo`
+with kty/crv and no intrinsic algorithm. `Algorithms.FindForKey` is structural applicability, not CTAP2
+capability or a default. Never force decoded keys through the finite Core registry. Preserve unknown numeric
+kty/alg and opaque bytes, and strict PIN/UV P-256/-25 checks. See [Core catalog](../Core/README.md#cryptographic-metadata).
 
 - [CTAP 2.1 Specification](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html)
 - [WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/)

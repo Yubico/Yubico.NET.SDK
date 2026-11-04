@@ -15,12 +15,16 @@
 namespace Yubico.YubiKit.Core.Cryptography;
 
 /// <summary>
-/// Contains OIDs for cryptographic algorithms used in key operations.
+/// Contains standard ASN.1 key algorithm, named-curve and operation OID constants.
 /// </summary>
+/// <remarks>
+/// These are different identifier domains. Use <see cref="CryptographicDefinitions"/> for metadata and
+/// domain-specific lookups. A key algorithm OID alone does not select an RSA size or an ordinary EC curve.
+/// </remarks>
 public static class Oids
 {
     /// <summary>
-    /// RSA Encryption algorithm OID (PKCS#1)
+    /// The rsaEncryption key algorithm identifier (PKCS#1), not a size or signature-padding selection.
     /// </summary>
     public const string Rsa = "1.2.840.113549.1.1.1";
 
@@ -30,12 +34,12 @@ public static class Oids
     public const string EcPublicKey = "1.2.840.10045.2.1";
 
     /// <summary>
-    /// Represents the OID for X25519 (Curve25519) used for key exchange
+    /// The RFC 8410 X25519 key/agreement algorithm identifier, with absent ASN.1 parameters.
     /// </summary>
     public const string X25519 = "1.3.101.110";
 
     /// <summary>
-    /// Represents the OID for Ed25519 (Edwards25519) used for signatures
+    /// The RFC 8410 Ed25519 key/signature algorithm identifier, with absent ASN.1 parameters.
     /// </summary>
     public const string Ed25519 = "1.3.101.112";
 
@@ -55,35 +59,49 @@ public static class Oids
     public const string P521 = "1.3.132.0.35";
 
     /// <summary>
-    /// Represents the OID for AES-128 in CBC mode
+    /// The AES-128-CBC operation OID, not a mode-independent AES key identifier.
     /// </summary>
     public const string Aes128Cbc = "2.16.840.1.101.3.4.1.2";
 
     /// <summary>
-    /// Represents the OID for AES-192 in CBC mode
+    /// The AES-192-CBC operation OID, not a mode-independent AES key identifier.
     /// </summary>
     public const string Aes192Cbc = "2.16.840.1.101.3.4.1.22";
 
     /// <summary>
-    /// Represents the OID for AES-256 in CBC mode
+    /// The AES-256-CBC operation OID, not a mode-independent AES key identifier.
     /// </summary>
     public const string Aes256Cbc = "2.16.840.1.101.3.4.1.42";
 
     /// <summary>
-    /// Represents the OID for Triple DES in CBC mode
+    /// The Triple DES CBC operation OID, not a mode-independent key identifier.
     /// </summary>
     public const string TripleDesCbc = "1.2.840.113549.3.7";
 
-    /// <summary>
-    /// Gets the algorithm and curve OIDs for a specific key type
-    /// </summary>
-    public static (string AlgorithmOid, string? CurveOid) GetOidsByKeyType(KeyType keyType)
-    {
-        var definition = keyType.GetKeyDefinition();
-        return (definition.AlgorithmOid, definition.CurveOid);
-    }
-
-    public static bool IsECDsaCurve(string? curveOid) => curveOid is P256 or P384 or P521;
-
-    public static bool IsCurve25519Algorithm(string? algorithmOid) => algorithmOid is X25519 or Ed25519;
+    /// <summary>The secp256k1 named-curve OID (SEC 2).</summary>
+    public const string Secp256k1 = "1.3.132.0.10";
+    /// <summary>The brainpoolP256r1 named-curve OID (RFC 5639).</summary>
+    public const string BrainpoolP256r1 = "1.3.36.3.3.2.8.1.1.7";
+    /// <summary>The brainpoolP384r1 named-curve OID (RFC 5639).</summary>
+    public const string BrainpoolP384r1 = "1.3.36.3.3.2.8.1.1.11";
+    /// <summary>The brainpoolP512r1 named-curve OID (RFC 5639).</summary>
+    public const string BrainpoolP512r1 = "1.3.36.3.3.2.8.1.1.13";
+    /// <summary>The ecdsa-with-SHA1 signature operation OID, not id-ecPublicKey (RFC 3279).</summary>
+    public const string EcdsaSha1 = "1.2.840.10045.4.1";
+    /// <summary>The ecdsa-with-SHA256 signature operation OID (RFC 5758).</summary>
+    public const string EcdsaSha256 = "1.2.840.10045.4.3.2";
+    /// <summary>The ecdsa-with-SHA384 signature operation OID (RFC 5758).</summary>
+    public const string EcdsaSha384 = "1.2.840.10045.4.3.3";
+    /// <summary>The ecdsa-with-SHA512 signature operation OID (RFC 5758).</summary>
+    public const string EcdsaSha512 = "1.2.840.10045.4.3.4";
+    /// <summary>The RSASSA-PSS signature OID; hash, MGF1 and salt parameters select a concrete operation.</summary>
+    public const string RsaPss = "1.2.840.113549.1.1.10";
+    /// <summary>The sha1WithRSAEncryption PKCS#1 v1.5 signature operation OID.</summary>
+    public const string RsaSha1 = "1.2.840.113549.1.1.5";
+    /// <summary>The sha256WithRSAEncryption PKCS#1 v1.5 signature operation OID.</summary>
+    public const string RsaSha256 = "1.2.840.113549.1.1.11";
+    /// <summary>The sha384WithRSAEncryption PKCS#1 v1.5 signature operation OID.</summary>
+    public const string RsaSha384 = "1.2.840.113549.1.1.12";
+    /// <summary>The sha512WithRSAEncryption PKCS#1 v1.5 signature operation OID.</summary>
+    public const string RsaSha512 = "1.2.840.113549.1.1.13";
 }

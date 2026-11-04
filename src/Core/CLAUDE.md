@@ -69,35 +69,51 @@ If using DI, configure logging explicitly from the DI-provided `ILoggerFactory` 
 
 ## Critical Patterns
 
-### Concrete key identity and metadata
+### Cryptographic catalog
 
-`KeyType` identifies only supported concrete variants, with explicit numeric values. `KeyDefinitions`
-is the sole shared metadata catalog; its `FrozenDictionary` and init-only definitions prevent mutation.
-`KeyDefinition` lives in its own file and equality/hash include all stored metadata, including `DisplayName`
-and the value-equal sealed `CoseKeyDefinition` record. `None` and invalid enum values are not asymmetric.
+`CryptographicDefinitions` is the single entry point: `.Curves`, `.Keys`, `.Algorithms`. Each nested route
+publishes named immutable records, an ordered immutable `All`, and frozen indexes with deliberate duplicate
+identity rejection. `Get`/`GetBy` return one entry or a contextual exception, `TryGet`/`TryGetBy` annotate
+nullable flow, and `Find` returns an immutable collection (possibly empty). There is no registration or DI.
+Curve relationships are one-to-many: `Keys.FindByCurve` preserves catalog order; `GetByCurve` requires
+exactly one construction and fails ambiguity. Ordinary EC parameter callers select `id-ecPublicKey`
+explicitly through `GetNamedEcByCurve`, never an arbitrary first construction sharing the curve.
+Initialization is curves → keys; algorithms reference structural constraints, never the keys initializer.
 
-Keep three concepts separate: concrete `KeyType`, COSE family (`CoseKeyType`), and operation algorithm.
-`CoseKeyDefinition` lives in `Core.Cryptography.Cose`, has required init-only `Type`, optional
-`CurveIdentifier`, and no algorithm. EC2/OKP mappings have a curve, RSA/AES mappings do not; Triple DES
-has no COSE mapping. `HasCoseMapping`/`GetCoseKeyType` are metadata queries, not capability checks.
-Known unmapped types return null; invalid lookup values throw. The COSE curve registry can contain values
-without concrete SDK support (X448/Ed448 are not `KeyType` variants).
+Keep concrete `KeyType`, mathematical `CurveInfo`, operation `AlgorithmInfo` and protocol numeric IDs distinct.
+`KeyInfo` navigates to optional `.Curve`, `.Asn1`, `.Cose`. Classification is data-driven; `None` and invalid
+key types are not asymmetric. `KeySizeBits`/`KeySizeBytes` retain nominal/stored-width meanings, not security
+strength. In particular 25519 has 32 stored bytes, a 255-bit field and a 253-bit subgroup order. Scalar/seed,
+coordinate and encoded point widths are separate. See README for caller examples.
 
-OID extensions and `Oids.GetOidsByKeyType` delegate to this catalog, never maintain a second switch.
-`Oids.EcPublicKey` is id-ecPublicKey, not an ECDSA operation identifier. Neither it nor `Oids.Rsa`
-selects a concrete variant alone. Symmetric algorithm OIDs deliberately retain the existing CBC mappings;
-they do not select a mode for an operation. Core's old COSE codec files remain commented out; active
-`Ctap2.Cose.CoseKey` preserves open wire families/algorithms and strict PIN/UV profile checks.
+`Asn1KeyInfo.AlgorithmOid` identifies a key representation: id-ecPublicKey plus named-curve parameters,
+RFC 8410 X25519/Ed25519 with absent parameters, or RSA with NULL parameters. Decoders fully consume the
+AlgorithmIdentifier: one curve OID for EC, no parameters for Ed/X, and absent or single NULL for RSA input
+compatibility (encoding remains NULL). Check before allocating decoded private data. A shared key algorithm
+OID cannot identify a curve or RSA modulus size. Only `.Curves.GetByOid` resolves named curves. Operation OIDs
+belong to `AlgorithmInfo`, including the named AES/Triple DES CBC constants. `Oids` contains constants only.
+Never size an ordinary EC coordinate from a key/operation OID. EC constructors, ASN encoders and decoders
+all use the same short-Weierstrass/named-curve boundary. Host providers can still reject modeled curves;
+private/public consistency and owned-secret cleanup must never be bypassed to make a catalog test pass.
 
-Migration: `ECP*` → `P*`, `RSA*` → `Rsa*`, `AES*` → `Aes*`, `TripleDES` → `TripleDes`,
-`IsRSA` → `IsRsa`, `GetByRSALength`/`GetByRSAModulusLength` → `GetByRsaLength`/`GetByRsaModulusLength`.
-Use `DisplayName` instead of `Name` for human output; use `KeyType` for symbolic identity and an explicit
-application contract for persistence (enum `ToString()` is not stable). No old-name aliases remain.
-Full names/namespace/algorithm migration: [key metadata migration](../../docs/migration/key-metadata.md).
+`AlgorithmInfo` includes generic and parameterized operations; `FindForKey` means structurally applicable,
+not supported by a provider, device, applet, slot, or profile, and not recommended/default. COSE ES256 does
+not itself require P-256; EdDSA is Edwards, not ECDSA or intrinsically Ed25519-only. RSA-PSS parameters
+include the hash, MGF1 hash, salt width and trailer. Its OID lookup deliberately returns multiple entries.
+Nested record equality/hash are value-based, including algorithm applicability collections.
+Within `KeyApplicability`, all fields are AND constraints; `AlgorithmInfo.Applicability` is OR alternatives.
+Fully specified Ed25519/X25519 constrain concrete `KeyType`; generic families/forms stay generic.
+An absent `HashAlgorithm` is not proof of a generic operation: Ed25519 has intrinsic hashing.
 
-Adding a future supported variant requires a new explicit `KeyType` value, catalog entry with display name,
-OID/curve/length, classification updates, optional registered COSE mapping, module-specific operation support,
-and real key/encoding vectors plus consistency tests. Registry identifiers alone never establish support.
+`CoseKeyInfo` in `Core.Cryptography.Cose` contains kty/crv, never an intrinsic alg. Only verified IANA mappings
+are present (secp256k1 = 8; Brainpool P256/P384/P512 = 256/258/259). Active `Ctap2.Cose.CoseKey` remains open-valued and preserves
+unknown wire metadata/opaque bytes; PIN/UV profile checks remain strict. OpenPGP-specific legacy 25519 OIDs,
+RSA sizes and slot choices live in OpenPgp; Core must never depend on that module.
+
+To add a variant, append an explicit `KeyType` ID, add curve/key data and relationships, and registered COSE
+metadata only when authoritative. Do not edit stable lookup/classification switches. Add independent exact
+ASN/key vectors and provider-backed private consistency checks. Add protocol representation/capability support
+in its owning module separately. New operation definitions change algorithm data/applicability, not key defaults.
 
 ### Applet session initialization
 

@@ -271,7 +271,7 @@ public class AsnPrivateKeyEncoderTests
     }
 
     [Theory]
-    [InlineData("1.3.132.0.10")] // secp256k1
+    [InlineData("1.3.132.0.31")] // secp192k1, intentionally not modeled
     [InlineData("1.2.840.10045.3.1.1")] // secp192r1
     public void EncodeToPkcs8_EcParametersUnsupportedCurveOid_ThrowsArgumentException(string oid)
     {
@@ -291,7 +291,7 @@ public class AsnPrivateKeyEncoderTests
     /// </summary>
     [Theory]
     [InlineData(Oids.X25519)]
-    [InlineData("1.3.132.0.10")] // secp256k1
+    [InlineData("1.3.132.0.31")] // secp192k1, intentionally not modeled
     public void EncodeToPkcs8_EcParametersUnsupportedCurveOidWithoutPublicPoint_ThrowsArgumentException(string oid)
     {
         var parameters = new ECParameters

@@ -31,7 +31,7 @@ internal enum EcPointDefect
     /// <summary>The point does not start with the 0x04 uncompressed-format prefix.</summary>
     NotUncompressed,
 
-    /// <summary>The point is not exactly <c>1 + 2 * coordinateSize</c> octets long.</summary>
+    /// <summary>The point is not exactly <c>1 + 2 * coordinateLengthBytes</c> octets long.</summary>
     WrongLength
 }
 
@@ -53,11 +53,11 @@ internal static class AsnUtilities
     /// each decoder's own concern and each rejects it before reaching this file:
     /// <c>AsnPublicKeyDecoder</c> throws <see cref="NotSupportedException"/> and
     /// <c>AsnPrivateKeyDecoder</c> throws <see cref="InvalidOperationException"/>. The
-    /// <see cref="CryptographicException"/> that <see cref="GetDecodedCoordinateSize"/> raises for
+    /// <see cref="CryptographicException"/> that <see cref="GetDecodedCoordinateLengthBytes"/> raises for
     /// an unsupported curve is therefore a defensive backstop, not a taxonomy this file imposes on
     /// its callers.</para>
     /// </remarks>
-    public static EcPointDefect InspectUncompressedEcPoint(ReadOnlySpan<byte> point, int coordinateSize)
+    public static EcPointDefect InspectUncompressedEcPoint(ReadOnlySpan<byte> point, int coordinateLengthBytes)
     {
         if (point.IsEmpty)
         {
@@ -69,7 +69,7 @@ internal static class AsnUtilities
             return EcPointDefect.NotUncompressed;
         }
 
-        return point.Length != GetUncompressedPointLength(coordinateSize)
+        return point.Length != GetUncompressedPointLength(coordinateLengthBytes)
             ? EcPointDefect.WrongLength
             : EcPointDefect.None;
     }
@@ -83,15 +83,12 @@ internal static class AsnUtilities
     /// </exception>
     public static void ValidateDecodedEcPoint(ReadOnlySpan<byte> point, string curveOid)
     {
-        var coordinateSize = GetDecodedCoordinateSize(curveOid);
-        switch (InspectUncompressedEcPoint(point, coordinateSize))
+        var coordinateLengthBytes = GetDecodedCoordinateLengthBytes(curveOid);
+        var defect = InspectUncompressedEcPoint(point, coordinateLengthBytes);
+        if (defect != EcPointDefect.None)
         {
-            case EcPointDefect.None:
-                return;
-            case EcPointDefect.NotUncompressed:
-                throw new CryptographicException("Unsupported EC point format");
-            default:
-                throw new CryptographicException("Invalid EC public key encoding");
+            throw new CryptographicException(defect == EcPointDefect.NotUncompressed
+                ? "Unsupported EC point format" : "Invalid EC public key encoding");
         }
     }
 
@@ -104,23 +101,23 @@ internal static class AsnUtilities
     /// </exception>
     public static void ValidateEcPointArgument(ReadOnlySpan<byte> point, string curveOid, string paramName)
     {
-        var coordinateSize = GetCoordinateSizeArgument(curveOid, paramName);
-        switch (InspectUncompressedEcPoint(point, coordinateSize))
+        var coordinateLengthBytes = GetCoordinateLengthBytesArgument(curveOid, paramName);
+        var defect = InspectUncompressedEcPoint(point, coordinateLengthBytes);
+        if (defect != EcPointDefect.None)
         {
-            case EcPointDefect.None:
-                return;
-            case EcPointDefect.WrongLength:
-                throw new ArgumentException(
+            throw defect switch
+            {
+                EcPointDefect.WrongLength => new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         "Invalid EC public point size for the specified curve. Expected {0} bytes, but got {1}.",
-                        GetUncompressedPointLength(coordinateSize),
+                        GetUncompressedPointLength(coordinateLengthBytes),
                         point.Length),
-                    paramName);
-            default:
-                throw new ArgumentException(
+                    paramName),
+                _ => new ArgumentException(
                     "EC public point must be in uncompressed format (starting with 0x04).",
-                    paramName);
+                    paramName)
+            };
         }
     }
 
@@ -141,28 +138,28 @@ internal static class AsnUtilities
         string curveOid,
         string paramName)
     {
-        var coordinateSize = GetCoordinateSizeArgument(curveOid, paramName);
-        if (xCoordinate.Length != coordinateSize || yCoordinate.Length != coordinateSize)
+        var coordinateLengthBytes = GetCoordinateLengthBytesArgument(curveOid, paramName);
+        if (xCoordinate.Length != coordinateLengthBytes || yCoordinate.Length != coordinateLengthBytes)
         {
             throw new ArgumentException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     "EC point coordinates do not match curve '{0}'. Expected {1} bytes for each of X and Y, but got {2} and {3}.",
                     curveOid,
-                    coordinateSize,
+                    coordinateLengthBytes,
                     xCoordinate.Length,
                     yCoordinate.Length),
                 paramName);
         }
 
-        var point = new byte[GetUncompressedPointLength(coordinateSize)];
+        var point = new byte[GetUncompressedPointLength(coordinateLengthBytes)];
         point[0] = UncompressedPointPrefix;
         xCoordinate.CopyTo(point.AsSpan(1));
-        yCoordinate.CopyTo(point.AsSpan(1 + coordinateSize));
+        yCoordinate.CopyTo(point.AsSpan(1 + coordinateLengthBytes));
         return point;
     }
 
-    private static int GetUncompressedPointLength(int coordinateSize) => 1 + (2 * coordinateSize);
+    private static int GetUncompressedPointLength(int coordinateLengthBytes) => 1 + (2 * coordinateLengthBytes);
 
     public static ReadOnlySpan<byte> TrimLeadingZeroes(ReadOnlySpan<byte> data)
     {
@@ -183,7 +180,7 @@ internal static class AsnUtilities
     /// </summary>
     /// <remarks>
     /// The scalar of an RFC 5915 <c>ECPrivateKey</c> is a fixed-width, left-padded integer of the
-    /// curve's coordinate size. Any other width contradicts the curve parameter sitting in the same
+    /// curve's subgroup-order width. Any other width contradicts the curve parameter sitting in the same
     /// structure. The message reports lengths only: the value being rejected is key material.
     /// </remarks>
     /// <exception cref="ArgumentException">
@@ -194,15 +191,17 @@ internal static class AsnUtilities
         string curveOid,
         string paramName)
     {
-        var coordinateSize = GetCoordinateSizeArgument(curveOid, paramName);
-        if (privateScalar.Length != coordinateSize)
+        _ = GetCoordinateLengthBytesArgument(curveOid, paramName); // preserves argument-error taxonomy and curve-form gate
+        var curveInfo = CryptographicDefinitions.Curves.GetByOid(curveOid);
+        var scalarLengthBytes = (curveInfo.OrderSizeBits + 7) / 8;
+        if (privateScalar.Length != scalarLengthBytes)
         {
             throw new ArgumentException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     "EC private scalar does not match curve '{0}'. Expected {1} bytes, but got {2}.",
                     curveOid,
-                    coordinateSize,
+                    scalarLengthBytes,
                     privateScalar.Length),
                 paramName);
         }
@@ -217,47 +216,44 @@ internal static class AsnUtilities
     /// the remarks on <see cref="InspectUncompressedEcPoint"/>.
     /// </remarks>
     /// <exception cref="CryptographicException">The curve is not a supported prime curve.</exception>
-    public static int GetDecodedCoordinateSize(string curveOid) =>
-        TryGetCoordinateSize(curveOid, out var coordinateSize)
-            ? coordinateSize
+    public static int GetDecodedCoordinateLengthBytes(string curveOid) =>
+        TryGetCoordinateLengthBytes(curveOid, out var coordinateLengthBytes)
+            ? coordinateLengthBytes
             : throw new CryptographicException(UnsupportedCurveMessage(curveOid));
 
     /// <summary>
     /// Resolves the coordinate size for a curve OID supplied by a caller of an encoder.
     /// </summary>
     /// <exception cref="ArgumentException">The curve is not a supported prime curve.</exception>
-    private static int GetCoordinateSizeArgument(string curveOid, string paramName) =>
-        TryGetCoordinateSize(curveOid, out var coordinateSize)
-            ? coordinateSize
+    private static int GetCoordinateLengthBytesArgument(string curveOid, string paramName) =>
+        TryGetCoordinateLengthBytes(curveOid, out var coordinateLengthBytes)
+            ? coordinateLengthBytes
             : throw new ArgumentException(UnsupportedCurveMessage(curveOid), paramName);
 
     /// <summary>
     /// Resolves the coordinate size of one of the EC prime curves this SDK supports.
     /// </summary>
     /// <remarks>
-    /// The curve gate is <see cref="Oids.IsECDsaCurve"/>, not
-    /// <see cref="KeyDefinitions.GetByOid(string?)"/>.
-    /// <c>GetByOid</c> resolves any algorithm or curve OID it knows, including X25519, Ed25519, AES
-    /// and Triple DES, and several of those have a 32-byte definition. Sizing an EC point against
-    /// one of them would let a non-EC algorithm's key material through a point-shape check and then
-    /// be emitted as an <c>id-ecPublicKey</c> key whose curve parameter is not a curve.
+    /// Only the named-curve index is consulted. A key algorithm or CBC operation OID must never
+    /// pass an ordinary EC point check just because its key representation has the same width.
     /// </remarks>
-    private static bool TryGetCoordinateSize(string? curveOid, out int coordinateSize)
+    private static bool TryGetCoordinateLengthBytes(string? curveOid, out int coordinateLengthBytes)
     {
-        if (!Oids.IsECDsaCurve(curveOid))
+        if (!CryptographicDefinitions.Curves.TryGetByOid(curveOid, out var curveInfo)
+            || curveInfo.Form != CurveForm.ShortWeierstrass)
         {
-            coordinateSize = 0;
+            coordinateLengthBytes = 0;
             return false;
         }
 
-        coordinateSize = KeyDefinitions.GetByOid(curveOid).LengthInBytes;
+        coordinateLengthBytes = curveInfo.CoordinateLengthBytes;
         return true;
     }
 
     private static string UnsupportedCurveMessage(string? curveOid) =>
         string.Format(
             CultureInfo.CurrentCulture,
-            "Unsupported EC curve OID '{0}'. Supported curves are P-256, P-384 and P-521.",
+            "Unsupported ordinary EC named-curve OID '{0}'.",
             curveOid);
 
     // Ensures the integer value is treated as positive by adding a leading zero if needed

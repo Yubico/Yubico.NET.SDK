@@ -36,9 +36,15 @@ public readonly record struct PukMetadata(
 /// PIV management key metadata information.
 /// </summary>
 public readonly record struct ManagementKeyMetadata(
-    PivManagementKeyType KeyType,
+    KeyType? KeyType,
     bool IsDefault,
-    TouchPolicy TouchPolicy);
+    TouchPolicy TouchPolicy)
+{
+    /// <summary>Gets the raw management-key algorithm identifier, including identifiers not yet modeled.</summary>
+    public byte RawAlgorithmId { get; init; } = KeyType is { } known ? KeyTypeEncoding.Encode(known) : (byte)0;
+    /// <summary>Gets the complete metadata response TLVs.</summary>
+    public ReadOnlyMemory<byte> RawData { get; init; }
+}
 
 /// <summary>
 /// PIV slot metadata information.
@@ -56,8 +62,13 @@ public readonly record struct SlotMetadata(
     /// <summary>Gets the complete metadata response TLV sequence, including unknown fields.</summary>
     public ReadOnlyMemory<byte> RawData { get; init; }
 
-    internal KeyType RequireKeyType() => KeyType ?? throw new NotSupportedException(
-        $"PIV algorithm 0x{RawAlgorithmId:X2} is not supported by this SDK.");
+    /// <summary>Requires a recognized mapped PIV type; operations separately enforce their asymmetric/symmetric subset.</summary>
+    internal KeyType RequireKeyType()
+    {
+        var known = KeyType ?? throw new NotSupportedException($"PIV algorithm 0x{RawAlgorithmId:X2} is not supported by this SDK.");
+        _ = KeyTypeEncoding.Encode(known);
+        return known;
+    }
 }
 
 /// <summary>

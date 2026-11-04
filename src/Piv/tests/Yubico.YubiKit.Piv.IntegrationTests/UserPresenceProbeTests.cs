@@ -79,7 +79,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             $"The management key touch policy is {managementKeyMetadata.TouchPolicy}; refusing an unrelated touch " +
             "during prerequisite authentication.");
         Skip.If(
-            managementKeyMetadata.KeyType is not PivManagementKeyType.TripleDes and not PivManagementKeyType.Aes192,
+            managementKeyMetadata.KeyType is not KeyType.TripleDES and not KeyType.AES192,
             $"The default management key cannot be used with reported key type {managementKeyMetadata.KeyType}.");
         Skip.If(
             session.ManagementKeyType != managementKeyMetadata.KeyType,

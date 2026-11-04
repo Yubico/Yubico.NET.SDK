@@ -21,7 +21,7 @@ public class PivPinOnlyWorkflowTests
             {
                 await session.ResetAsync();
                 await session.AuthenticateAsync(defaultKey);
-                await session.SetManagementKeyAsync(session.ManagementKeyType, activeKey);
+                await session.SetManagementKeyAsync(session.ManagementKeyType ?? throw new InvalidOperationException("Unknown management key type."), activeKey);
 
                 await session.SetPinOnlyModeAsync(PinOnlyMode.PinProtected, pin, activeKey);
 

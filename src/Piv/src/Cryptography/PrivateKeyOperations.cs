@@ -28,6 +28,13 @@ namespace Yubico.YubiKit.Piv.Cryptography;
 
 internal static class PrivateKeyOperations
 {
+    private const byte Cla = 0x00;
+    private const byte InsAuthenticate = 0x87;
+    private const byte TagDynamicAuth = 0x7C;
+    private const byte TagResponse = 0x82;
+    private const byte TagChallenge = 0x81;
+    private const byte TagExponentiation = 0x85;
+
     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Cryptography.PrivateKeyOperations");
 
     /// <summary>
@@ -93,24 +100,20 @@ internal static class PrivateKeyOperations
         {
             int offset = 0;
 
-            // TAG 0x7C
-            commandData[offset++] = 0x7C;
+            commandData[offset++] = TagDynamicAuth;
 
             // Template length encoding
             offset += BerLength.Write(commandData.AsSpan(offset), innerLength);
 
-            // TAG 0x82 (Expected response - empty)
-            commandData[offset++] = 0x82;
-            commandData[offset++] = 0x00;
+            commandData[offset++] = TagResponse;
+            commandData[offset++] = 0;
 
-            // TAG 0x81 (Challenge/data to sign/decrypt)
-            commandData[offset++] = 0x81;
+            commandData[offset++] = TagChallenge;
             offset += BerLength.Write(commandData.AsSpan(offset), preparedLength);
 
             WritePreparedData(keyType, data.Span, commandData.AsSpan(offset, preparedLength));
 
-            // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-            var command = new ApduCommand(0x00, 0x87, KeyTypeEncoding.Encode(keyType), (byte)slot, commandData);
+            var command = new ApduCommand(Cla, InsAuthenticate, KeyTypeEncoding.EncodeAsymmetric(keyType), (byte)slot, commandData);
             await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
@@ -120,7 +123,7 @@ internal static class PrivateKeyOperations
                 if (!response.IsOK())
                 {
                     // Check if PIN verification is required
-                    if (response.SW == 0x6982)
+                    if (response.SW == SWConstants.SecurityStatusNotSatisfied)
                     {
                         throw new InvalidOperationException(
                             "Security status not satisfied. PIN verification may be required before this operation.");
@@ -315,24 +318,20 @@ internal static class PrivateKeyOperations
         {
             int offset = 0;
 
-            // TAG 0x7C
-            data[offset++] = 0x7C;
+            data[offset++] = TagDynamicAuth;
 
             // Template length encoding
             offset += BerLength.Write(data.AsSpan(offset), innerLength);
 
-            // TAG 0x82 (Expected response - empty)
-            data[offset++] = 0x82;
-            data[offset++] = 0x00;
+            data[offset++] = TagResponse;
+            data[offset++] = 0;
 
-            // TAG 0x85 (Exponentiation data - peer public key)
-            data[offset++] = 0x85;
+            data[offset++] = TagExponentiation;
             offset += BerLength.Write(data.AsSpan(offset), peerKeyData.Length);
 
             peerKeyData.CopyTo(data.AsSpan(offset));
 
-            // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
-            var command = new ApduCommand(0x00, 0x87, KeyTypeEncoding.Encode(keyType), (byte)slot, data);
+            var command = new ApduCommand(Cla, InsAuthenticate, KeyTypeEncoding.EncodeAsymmetric(keyType), (byte)slot, data);
             await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
@@ -341,7 +340,7 @@ internal static class PrivateKeyOperations
             {
                 if (!response.IsOK())
                 {
-                    if (response.SW == 0x6982)
+                    if (response.SW == SWConstants.SecurityStatusNotSatisfied)
                     {
                         throw new InvalidOperationException(
                             "Security status not satisfied. PIN verification may be required before this operation.");
@@ -392,31 +391,25 @@ internal static class PrivateKeyOperations
     /// <exception cref="ArgumentException">An RSA block longer than the modulus.</exception>
     private static void WritePreparedData(KeyType keyType, ReadOnlySpan<byte> data, Span<byte> destination)
     {
-        switch (keyType)
+        if (keyType.IsRSA())
         {
-            case KeyType.RSA1024 or KeyType.RSA2048 or KeyType.RSA3072 or KeyType.RSA4096:
-                // The caller supplies the complete encoded block (PKCS#1 v1.5, OAEP or PSS). A shorter block
-                // is the same integer left-padded; a longer one cannot be, so it is an error, not a truncation.
-                if (data.Length > destination.Length)
-                    throw new ArgumentException(
-                        $"Data is {data.Length} bytes; an {keyType} block must be at most {destination.Length} bytes. " +
-                        "Supply the complete encoded block, not the message.", nameof(data));
-                LeftPad(data, destination);
-                return;
-
-            case KeyType.ECP256 or KeyType.ECP384:
-                // FIPS 186-5 §6.4.1: the signature uses the leftmost min(N, outlen) bits of the digest, so a
-                // longer digest is truncated from the right and a shorter one is the integer e, left-padded.
-                if (data.Length >= destination.Length)
-                    data[..destination.Length].CopyTo(destination);
-                else
-                    LeftPad(data, destination);
-                return;
-
-            default:
-                data.CopyTo(destination);
-                return;
+            // A short encoded RSA block is the same integer left-padded. A longer one cannot be
+            // represented faithfully: reject it rather than silently truncating caller input.
+            if (data.Length > destination.Length)
+                throw new ArgumentException($"Data exceeds the {keyType} encoded block size ({destination.Length} bytes).", nameof(data));
+            LeftPad(data, destination);
+            return;
         }
+        if (keyType.IsECDsa())
+        {
+            // FIPS 186-5 §6.4.1 uses the leftmost min(N, outlen) bits of the digest.
+            if (data.Length >= destination.Length)
+                data[..destination.Length].CopyTo(destination);
+            else
+                LeftPad(data, destination);
+            return;
+        }
+        data.CopyTo(destination);
     }
 
     private static void LeftPad(ReadOnlySpan<byte> data, Span<byte> destination)
@@ -429,14 +422,14 @@ internal static class PrivateKeyOperations
     {
         // Parse outer TLV (0x7C - Dynamic Auth Template)
         using var outer = Tlv.Create(data.Span);
-        if (outer.Tag != 0x7C)
+        if (outer.Tag != TagDynamicAuth)
         {
             throw new ApduException("Invalid crypto response format");
         }
 
         // Parse inner TLV (0x82 - Response data)
         using var inner = Tlv.Create(outer.Value.Span);
-        if (inner.Tag != 0x82)
+        if (inner.Tag != TagResponse)
         {
             throw new ApduException("Invalid crypto response - expected TAG 0x82");
         }

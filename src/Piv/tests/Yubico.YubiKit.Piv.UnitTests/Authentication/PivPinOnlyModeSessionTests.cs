@@ -264,7 +264,7 @@ public class PivPinOnlyModeSessionTests
 
     private static byte[] ManagementKeyMetadataResponse() =>
     [
-        0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
+        0x01, 0x01, 0x03,
         0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
         0x05, 0x01, 0x01,
         0x90, 0x00

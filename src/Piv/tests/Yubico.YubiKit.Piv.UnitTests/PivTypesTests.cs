@@ -43,13 +43,13 @@ public class PivTypesTests
     }
 
     [Theory]
-    [InlineData(PivManagementKeyType.TripleDes, 0x03)]
-    [InlineData(PivManagementKeyType.Aes128, 0x08)]
-    [InlineData(PivManagementKeyType.Aes192, 0x0A)]
-    [InlineData(PivManagementKeyType.Aes256, 0x0C)]
-    public void PivManagementKeyType_HasCorrectValue(PivManagementKeyType type, byte expected)
+    [InlineData(KeyType.TripleDES, 0x03)]
+    [InlineData(KeyType.AES128, 0x08)]
+    [InlineData(KeyType.AES192, 0x0A)]
+    [InlineData(KeyType.AES256, 0x0C)]
+    public void PivManagementKeyType_HasCorrectValue(KeyType type, byte expected)
     {
-        Assert.Equal(expected, (byte)type);
+        Assert.Equal(expected, KeyTypeEncoding.Encode(type));
     }
 
     [Fact]

@@ -29,11 +29,14 @@ namespace Yubico.YubiKit.Piv;
 /// Implements NIST SP 800-73 PIV application functionality for smart card operations
 /// including key generation, certificate management, and cryptographic operations.
 /// </para>
+/// <para>Credential inputs are caller-owned buffers. PIN/PUK inputs are UTF-8 bytes; byte-length
+/// checks do not imply ASCII-only, digit-only, or UTF-8-validity checks. Returned mutable memory is
+/// transferred to the caller, who must clear plaintext, shared secrets, and temporary PINs after use.</para>
 /// </remarks>
 public interface IPivSession : IApplicationSession
 {
-    /// <summary>PIV management key type currently in use.</summary>
-    PivManagementKeyType ManagementKeyType { get; }
+    /// <summary>Recognized management key type, or null for an unmodeled algorithm; inspect raw management-key metadata.</summary>
+    KeyType? ManagementKeyType { get; }
 
     /// <summary>
     ///     Gets a value indicating whether the session has authenticated the PIV management key.
@@ -61,17 +64,17 @@ public interface IPivSession : IApplicationSession
     /// <remarks>
     /// <para>
     /// WARNING: This permanently destroys all PIV data, keys, and certificates.
-    /// The operation requires that biometrics are not configured.
+    /// Device-specific biometric/reset restrictions may apply and are reported by the device.
     /// </para>
     /// <para>
     /// A successful reset clears management-key authentication and refreshes
     /// <see cref="ManagementKeyType"/> from post-reset metadata. If metadata is unavailable, the
-    /// session uses AES-192 only for a reliable firmware version 5.7 or later and conservatively
-    /// falls back to Triple-DES for sentinel or older versions. Unexpected metadata errors propagate.
+    /// session uses detected firmware (not a compatibility override): AES-192 for 5.7+ and development
+    /// versions, or Triple-DES for older released versions. Unexpected metadata errors propagate.
     /// </para>
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <exception cref="InvalidOperationException">Biometrics are configured - cannot reset.</exception>
+    /// <exception cref="ApduException">The device rejects reset.</exception>
     Task ResetAsync(CancellationToken cancellationToken = default);
 
     // Authentication
@@ -96,11 +99,11 @@ public interface IPivSession : IApplicationSession
     /// </summary>
     /// <remarks>
     /// <para>
-    /// PIN must be 6-8 ASCII characters. PIN is NOT zeroed by this method - caller is responsible
-    /// for secure disposal of PIN data.
+    /// PIN must be 6-8 encoded bytes. The SDK does not enforce ASCII-only or digit-only content.
+    /// PIN input is never zeroed by this method; the caller is responsible for secure disposal.
     /// </para>
     /// </remarks>
-    /// <param name="pin">PIN as UTF-8 bytes.</param>
+    /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">PIN incorrect. Check RetriesRemaining property.</exception>
     Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default);
@@ -131,8 +134,8 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Change PIN from old PIN to new PIN.
     /// </summary>
-    /// <param name="currentPin">Current PIN as UTF-8 bytes.</param>
-    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
+    /// <param name="currentPin">Current PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+    /// <param name="newPin">New PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">Old PIN incorrect.</exception>
     Task ChangePinAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
@@ -140,8 +143,8 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Change PUK from old PUK to new PUK.
     /// </summary>
-    /// <param name="currentPuk">Current PUK as UTF-8 bytes.</param>
-    /// <param name="newPuk">New PUK as UTF-8 bytes (6-8 ASCII characters).</param>
+    /// <param name="currentPuk">Current PUK as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+    /// <param name="newPuk">New PUK as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">Old PUK incorrect.</exception>
     Task ChangePukAsync(ReadOnlyMemory<byte> currentPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default);
@@ -149,8 +152,8 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Unblock PIN using PUK and set new PIN.
     /// </summary>
-    /// <param name="puk">PUK as UTF-8 bytes.</param>
-    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
+    /// <param name="puk">PUK as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+    /// <param name="newPin">New PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">PUK incorrect.</exception>
     Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
@@ -192,11 +195,11 @@ public interface IPivSession : IApplicationSession
     /// </para>
     /// </remarks>
     /// <param name="slot">PIV slot for key storage.</param>
-    /// <param name="keyType">Key algorithm and size.</param>
+    /// <param name="keyType">Shared key type, including key size.</param>
     /// <param name="options">Optional key-use policies.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Generated public key.</returns>
-    /// <exception cref="NotSupportedException">Algorithm not supported on this YubiKey version.</exception>
+    /// <exception cref="NotSupportedException">Key type not supported on this YubiKey version.</exception>
     Task<IPublicKey> GenerateKeyAsync(
         Slot slot,
         KeyType keyType,
@@ -275,7 +278,7 @@ public interface IPivSession : IApplicationSession
     /// </para>
     /// </remarks>
     /// <param name="slot">PIV slot containing private key.</param>
-    /// <param name="keyType">Key algorithm (must match slot contents).</param>
+    /// <param name="keyType">Shared key type (must match slot contents).</param>
     /// <param name="data">Data to sign or decrypt.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Signature or decrypted data.</returns>
@@ -288,16 +291,16 @@ public interface IPivSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sign data or decrypt data using private key in specified slot, auto-detecting the algorithm.
+    /// Sign data or decrypt data using private key in specified slot, auto-detecting the key type.
     /// </summary>
     /// <remarks>
     /// <para>
     /// <b>Requires YubiKey firmware 5.3+.</b> This overload queries slot metadata to determine
-    /// the key algorithm automatically, eliminating the need to track algorithms separately.
+    /// the key type automatically, eliminating the need to track key types separately.
     /// </para>
     /// <para>
     /// For YubiKeys with firmware older than 5.3, use the overload that accepts an explicit
-    /// algorithm parameter.
+    /// keyType parameter.
     /// </para>
     /// <para>
     /// May require PIN verification or touch based on key policy.
@@ -565,7 +568,7 @@ public interface IPivSession : IApplicationSession
     /// retained by the session.
     /// </para>
     /// </remarks>
-    /// <param name="pin">PIN as UTF-8 bytes, used if PRINTED is PIN-gated or PIN-derived data is present.</param>
+    /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The PIN-only mode(s) successfully authenticated. <see cref="PinOnlyMode.None"/> if neither succeeded.</returns>
     /// <exception cref="InvalidPinException">PIN verification is required and the supplied PIN is incorrect.</exception>
@@ -592,7 +595,7 @@ public interface IPivSession : IApplicationSession
     /// <para><paramref name="managementKey"/> is NOT zeroed by this method - caller is responsible for secure disposal.</para>
     /// </remarks>
     /// <param name="pinOnlyMode"><see cref="PinOnlyMode.None"/> to disable, or <see cref="PinOnlyMode.PinProtected"/> to enable.</param>
-    /// <param name="pin">PIN as UTF-8 bytes. Required (and verified) when enabling PIN-protected mode; ignored when disabling.</param>
+    /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="managementKey">
     /// The active management key to authenticate and protect. Required when enabling PIN-protected mode;
     /// its length must match <see cref="ManagementKeyType"/>. Ignored when disabling.
@@ -620,12 +623,12 @@ public interface IPivSession : IApplicationSession
     /// by this method. If the device reports that the security status is not satisfied, the session
     /// clears its recorded management authentication state; other command failures preserve it.
     /// </remarks>
-    /// <param name="keyType">Management key algorithm.</param>
+    /// <param name="keyType">A symmetric management key type: TripleDES, AES128, AES192, or AES256.</param>
     /// <param name="newKey">New management key bytes.</param>
     /// <param name="requireTouch">Require touch for management key operations.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task SetManagementKeyAsync(
-        PivManagementKeyType keyType,
+        KeyType keyType,
         ReadOnlyMemory<byte> newKey,
         bool requireTouch = false,
         CancellationToken cancellationToken = default);

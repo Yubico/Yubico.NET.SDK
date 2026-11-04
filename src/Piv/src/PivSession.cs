@@ -41,6 +41,8 @@ namespace Yubico.YubiKit.Piv;
 /// </summary>
 public sealed class PivSession : ApplicationSession, IPivSession
 {
+    private const byte Cla = 0x00;
+
     // PIV instruction bytes
     private const byte InsReset = 0xFB;
 
@@ -49,7 +51,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private FirmwareVersion _detectedFirmwareVersion = new(0, 0, 0);
 
     /// <inheritdoc />
-    public PivManagementKeyType ManagementKeyType { get; private set; } = PivManagementKeyType.TripleDes;
+    public KeyType? ManagementKeyType { get; private set; } = KeyType.TripleDES;
 
     /// <summary>
     /// Gets the well-known 24-byte factory-default PIV management key value.
@@ -187,7 +189,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         await BlockPukAsync(cancellationToken).ConfigureAwait(false);
 
         // Step 3: Send RESET command
-        var resetCommand = new ApduCommand(0x00, InsReset, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var resetCommand = new ApduCommand(Cla, InsReset, 0, Cla, ReadOnlyMemory<byte>.Empty);
         var response = await _backend.SendAsync(resetCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
@@ -217,12 +219,12 @@ public sealed class PivSession : ApplicationSession, IPivSession
     ///     beta version, which is intended: such a key is at least 5.8.0 and therefore defaults to AES-192.
     ///     Excluding it here would assume Triple-DES for a development key that does not use it.
     /// </remarks>
-    private static PivManagementKeyType GetConservativeDefaultManagementKeyType(FirmwareVersion firmwareVersion) =>
+    private static KeyType GetConservativeDefaultManagementKeyType(FirmwareVersion firmwareVersion) =>
         firmwareVersion.IsAtLeast(5, 7, 0)
-            ? PivManagementKeyType.Aes192
-            : PivManagementKeyType.TripleDes;
+            ? KeyType.AES192
+            : KeyType.TripleDES;
 
-    private async Task<PivManagementKeyType> ResolveManagementKeyTypeAsync(IBackend backend, CancellationToken cancellationToken)
+    private async Task<KeyType?> ResolveManagementKeyTypeAsync(IBackend backend, CancellationToken cancellationToken)
     {
         try
         {
@@ -233,7 +235,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         {
             return GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
         }
-        catch (ApduException ex) when (ex.SW == 0x6A88)
+        catch (ApduException ex) when (ex.SW == SWConstants.DataNotFound)
         {
             return GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
         }
@@ -296,7 +298,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         SetManagementKeyAuthenticationState(false);
         cancellationToken.ThrowIfCancellationRequested();
-        await AuthenticationProtocol.AuthenticateAsync(_backend, ManagementKeyType, managementKey, cancellationToken)
+        await AuthenticationProtocol.AuthenticateAsync(_backend, RequireManagementKeyType(), managementKey, cancellationToken)
             .ConfigureAwait(false);
         SetManagementKeyAuthenticationState(true);
     }
@@ -314,6 +316,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         if (IsSupported(Features.Metadata))
         {
+            // Choose between supported implementations, rather than requiring metadata: older keys
+            // still support the no-data VERIFY retry query. GetPinMetadataAsync itself enforces metadata.
             try
             {
                 return (await MetadataProtocol.GetPinMetadataAsync(_backend, cancellationToken)
@@ -459,13 +463,13 @@ public sealed class PivSession : ApplicationSession, IPivSession
         EnsureBackend(cancellationToken);
         ValidateSlot(slot);
 
-        Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting algorithm for slot 0x{Slot:X2}", (byte)slot);
+        Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting key type for slot 0x{Slot:X2}", (byte)slot);
 
         if (!IsSupported(Features.Metadata))
         {
             throw new NotSupportedException(
-                $"Auto-detecting algorithm requires YubiKey firmware 5.3 or later. " +
-                $"Current firmware: {FirmwareVersion}. Use the overload that accepts an explicit algorithm parameter.");
+                $"Auto-detecting key type requires YubiKey firmware 5.3 or later. " +
+                $"Current firmware: {FirmwareVersion}. Use the overload that accepts an explicit keyType parameter.");
         }
 
         var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
@@ -707,6 +711,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
         EnsureBackend(cancellationToken);
         EnsureManagementKeyAuthenticated();
 
+        // Only the protected-mode bit may be set; zero disables PIN-only mode. Derived/unavailable
+        // bits describe existing state and are not legal requests for creating a new mode.
         if ((pinOnlyMode & ~(PinOnlyMode.None | PinOnlyMode.PinProtected)) != 0)
         {
             throw new ArgumentException(
@@ -725,7 +731,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
                 throw new ArgumentNullException(nameof(managementKey), "A management key is required to enable PIN-protected mode.");
             }
 
-            int expectedKeyLength = PinOnlyProtocol.GetManagementKeyLength(ManagementKeyType);
+            int expectedKeyLength = RequireManagementKeyType().GetKeySizeBytes();
             if (keyToProtect.Length != expectedKeyLength)
             {
                 throw new ArgumentException(
@@ -740,13 +746,14 @@ public sealed class PivSession : ApplicationSession, IPivSession
     }
 
     public async Task SetManagementKeyAsync(
-        PivManagementKeyType keyType,
+        KeyType keyType,
         ReadOnlyMemory<byte> newKey,
         bool requireTouch = false,
         CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
-        if (keyType != PivManagementKeyType.TripleDes)
+        _ = KeyTypeEncoding.EncodeManagement(keyType);
+        if (keyType != KeyType.TripleDES)
             EnsureSupports(Features.AesKey);
         if (requireTouch)
             EnsureSupports(Features.UsagePolicy);
@@ -888,9 +895,16 @@ public sealed class PivSession : ApplicationSession, IPivSession
             throw new InvalidOperationException("Management key authentication required.");
     }
 
+    private KeyType RequireManagementKeyType()
+    {
+        var known = ManagementKeyType ?? throw new NotSupportedException("The management-key algorithm is not recognized. Inspect its raw metadata identifier.");
+        _ = KeyTypeEncoding.EncodeManagement(known);
+        return known;
+    }
+
     private void EnsureKeyOperationSupported(KeyType keyType, PinPolicy pinPolicy, TouchPolicy touchPolicy, bool generate)
     {
-        _ = KeyTypeEncoding.Encode(keyType);
+        _ = KeyTypeEncoding.EncodeAsymmetric(keyType);
         Feature? feature = keyType switch
         {
             KeyType.ECP384 => Features.P384,
@@ -918,6 +932,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     private async Task EnsureBiometricPolicySupportedAsync(PinPolicy policy, CancellationToken cancellationToken)
     {
+        // Probe the Bio metadata capability for MATCH policies. A successful response proves support,
+        // not fingerprint enrollment: intentionally do not reject IsConfigured == false (Python parity).
         if (policy is PinPolicy.MatchOnce or PinPolicy.MatchAlways)
             _ = await GetBioMetadataAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -1006,7 +1022,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     private async Task<bool> TryAuthenticateDerivedCandidateAsync(ReadOnlyMemory<byte> pin, ReadOnlyMemory<byte> salt, CancellationToken cancellationToken)
     {
-        int length = PinOnlyProtocol.GetManagementKeyLength(ManagementKeyType);
+        int length = RequireManagementKeyType().GetKeySizeBytes();
         byte[] candidate = ArrayPool<byte>.Shared.Rent(length);
         try
         {
@@ -1051,19 +1067,11 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
 
         Logger.LogDebug("PIV: Disabling PIN-only management key mode");
-        int defaultKeyLength = PinOnlyProtocol.GetManagementKeyLength(ManagementKeyType);
-        byte[] defaultKey = ArrayPool<byte>.Shared.Rent(defaultKeyLength);
-        try
-        {
-            PinOnlyProtocol.FillRepeatingDefaultKeyPattern(defaultKey.AsSpan(0, defaultKeyLength));
-            await SetManagementKeyAsync(ManagementKeyType, defaultKey.AsMemory(0, defaultKeyLength), false, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(defaultKey.AsSpan(0, defaultKeyLength));
-            ArrayPool<byte>.Shared.Return(defaultKey);
-        }
+        var keyType = RequireManagementKeyType();
+        // Borrow the read-only, nonsecret factory pattern. The setter owns/clears its encoded copy,
+        // never this shared default; only the type-appropriate slice is transmitted.
+        await SetManagementKeyAsync(keyType, AuthenticationProtocol.GetDefaultManagementKey(keyType), false, cancellationToken)
+            .ConfigureAwait(false);
 
         EnsureManagementKeyAuthenticated();
         await DataObjectProtocol.PutObjectAsync(_backend, DataObject.PrintedInformation, null, cancellationToken)

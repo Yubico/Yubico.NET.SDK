@@ -27,6 +27,15 @@ namespace Yubico.YubiKit.Piv.Certificates;
 
 internal static class CertificateProtocol
 {
+    private const byte TagCertificate = 0x70;
+    private const byte TagCertificateInfo = 0x71;
+    private const byte TagLrc = 0xFE;
+    private const byte CompressedCertificate = 0x01;
+    private const byte UncompressedCertificate = 0x00;
+    private const int MaximumUncompressedCertificateLength = 1856;
+    private const int CertificateInfoTlvLength = 3;
+    private const int LrcTlvLength = 2;
+
     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Certificates.CertificateProtocol");
 
     /// <summary>
@@ -57,13 +66,13 @@ internal static class CertificateProtocol
         // Note: GetObjectAsync already unwraps the outer 0x53 tag
         var tlvDict = TlvHelper.DecodeDictionary(certData.AsSpan());
 
-        byte[]? certBytes = tlvDict.TryGetValue(0x70, out var cert)
+        byte[]? certBytes = tlvDict.TryGetValue(TagCertificate, out var cert)
             ? cert.ToArray()
             : null;
 
-        bool isCompressed = tlvDict.TryGetValue(0x71, out var info)
+        bool isCompressed = tlvDict.TryGetValue(TagCertificateInfo, out var info)
             && info.Length > 0
-            && info.Span[0] == 0x01;
+            && info.Span[0] == CompressedCertificate;
 
         if (certBytes is null || certBytes.Length == 0)
         {
@@ -102,7 +111,7 @@ internal static class CertificateProtocol
         Logger.LogDebug("PIV: Storing certificate in slot 0x{Slot:X2}", (byte)slot);
 
         var certBytes = certificate.RawData;
-        bool shouldCompress = compression == CertificateCompression.Always || certBytes.Length > 1856;
+        bool shouldCompress = compression == CertificateCompression.Always || certBytes.Length > MaximumUncompressedCertificateLength;
 
         if (shouldCompress)
         {
@@ -117,23 +126,20 @@ internal static class CertificateProtocol
         // Build TLV: TAG 0x70 (cert) + TAG 0x71 (info) + TAG 0xFE (LRC)
         // Note: PutObjectAsync adds the outer 0x53 wrapper
         int certLenSize = BerLength.EncodingSize(certBytes.Length);
-        int totalSize = 1 + certLenSize + certBytes.Length + 3 + 2; // 0x70 + len + cert + 0x71 01 xx + 0xFE 00
+        int totalSize = 1 + certLenSize + certBytes.Length + CertificateInfoTlvLength + LrcTlvLength; // 0x70 + len + cert + 0x71 01 xx + 0xFE 00
         var writer = new ArrayBufferWriter<byte>(totalSize);
 
-        // TAG 0x70 (Certificate)
-        ReadOnlySpan<byte> certTag = [0x70];
+        ReadOnlySpan<byte> certTag = [TagCertificate];
         writer.Write(certTag);
         var lenSpan = writer.GetSpan(certLenSize);
         BerLength.Write(lenSpan, certBytes.Length);
         writer.Advance(certLenSize);
         writer.Write(certBytes);
 
-        // TAG 0x71 (Certificate info)
-        ReadOnlySpan<byte> infoTlv = [0x71, 0x01, (byte)(shouldCompress ? 0x01 : 0x00)];
+        ReadOnlySpan<byte> infoTlv = [TagCertificateInfo, 1, shouldCompress ? CompressedCertificate : UncompressedCertificate];
         writer.Write(infoTlv);
 
-        // TAG 0xFE (LRC - error detection)
-        ReadOnlySpan<byte> lrcTlv = [0xFE, 0x00];
+        ReadOnlySpan<byte> lrcTlv = [TagLrc, 0];
         writer.Write(lrcTlv);
 
         // Write to object
@@ -157,6 +163,9 @@ internal static class CertificateProtocol
 
     internal static int GetCertificateObjectId(Slot slot)
     {
+        // Retired key references and certificate object identifiers are parallel contiguous ranges.
+        if (slot is >= Slot.Retired1 and <= Slot.Retired20)
+            return DataObject.Retired1 + ((byte)slot - (byte)Slot.Retired1);
         return slot switch
         {
             Slot.Authentication => DataObject.Authentication,
@@ -164,26 +173,6 @@ internal static class CertificateProtocol
             Slot.KeyManagement => DataObject.KeyManagement,
             Slot.CardAuthentication => DataObject.CardAuthentication,
             Slot.Attestation => DataObject.Attestation,
-            Slot.Retired1 => DataObject.Retired1,
-            Slot.Retired2 => DataObject.Retired2,
-            Slot.Retired3 => DataObject.Retired3,
-            Slot.Retired4 => DataObject.Retired4,
-            Slot.Retired5 => DataObject.Retired5,
-            Slot.Retired6 => DataObject.Retired6,
-            Slot.Retired7 => DataObject.Retired7,
-            Slot.Retired8 => DataObject.Retired8,
-            Slot.Retired9 => DataObject.Retired9,
-            Slot.Retired10 => DataObject.Retired10,
-            Slot.Retired11 => DataObject.Retired11,
-            Slot.Retired12 => DataObject.Retired12,
-            Slot.Retired13 => DataObject.Retired13,
-            Slot.Retired14 => DataObject.Retired14,
-            Slot.Retired15 => DataObject.Retired15,
-            Slot.Retired16 => DataObject.Retired16,
-            Slot.Retired17 => DataObject.Retired17,
-            Slot.Retired18 => DataObject.Retired18,
-            Slot.Retired19 => DataObject.Retired19,
-            Slot.Retired20 => DataObject.Retired20,
             _ => throw new ArgumentException($"Slot 0x{(byte)slot:X2} does not support certificates", nameof(slot))
         };
     }

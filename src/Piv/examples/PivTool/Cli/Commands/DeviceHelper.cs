@@ -154,7 +154,7 @@ internal static class DeviceHelper
     /// <summary>
     /// Parses a key algorithm string into a <see cref="KeyType"/>.
     /// </summary>
-    internal static KeyType? ParseKeyAlgorithm(string? value)
+    internal static KeyType? ParseKeyType(string? value)
     {
         if (value is null)
         {
@@ -211,13 +211,13 @@ internal static class DeviceHelper
     /// <summary>
     /// Parses a management key algorithm type string.
     /// </summary>
-    internal static PivManagementKeyType ParseMgmtKeyType(string? value) =>
+    internal static KeyType ParseMgmtKeyType(string? value) =>
         value?.ToLowerInvariant() switch
         {
-            "aes128" => PivManagementKeyType.Aes128,
-            "aes192" => PivManagementKeyType.Aes192,
-            "aes256" => PivManagementKeyType.Aes256,
-            _ => PivManagementKeyType.TripleDes
+            "aes128" => KeyType.AES128,
+            "aes192" => KeyType.AES192,
+            "aes256" => KeyType.AES256,
+            _ => KeyType.TripleDES
         };
 
     /// <summary>

@@ -283,7 +283,7 @@ internal static class CliRunner
         var newKey = DeviceHelper.ParseHex(DeviceHelper.GetFlag(flags, "new-management-key"), "new-management-key");
         if (key is null || newKey is null) { ZeroAndReturn(key, newKey); return 1; }
 
-        var keyType = DeviceHelper.ParseMgmtKeyType(DeviceHelper.GetFlag(flags, "algorithm"));
+        var keyType = DeviceHelper.ParseMgmtKeyType(DeviceHelper.GetFlag(flags, "key-type"));
         bool requireTouch = DeviceHelper.HasFlag(flags, "require-touch");
 
         var device = await DeviceHelper.GetDeviceAsync(serial, ct);
@@ -314,7 +314,7 @@ internal static class CliRunner
         Dictionary<string, string?> flags, int? serial, bool useJson, CancellationToken ct)
     {
         var slot = DeviceHelper.ParseSlot(DeviceHelper.GetFlag(flags, "slot"));
-        var keyType = DeviceHelper.ParseKeyAlgorithm(DeviceHelper.GetFlag(flags, "algorithm"));
+        var keyType = DeviceHelper.ParseKeyType(DeviceHelper.GetFlag(flags, "key-type"));
         var key = DeviceHelper.ParseHex(DeviceHelper.GetFlag(flags, "management-key"), "management-key");
         if (slot is null || keyType is null || key is null) { ZeroAndReturn(key); return 1; }
 

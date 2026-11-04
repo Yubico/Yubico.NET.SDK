@@ -29,10 +29,10 @@ public static class KeyGenerationMenu
         // Select slot
         var slot = SlotSelector.SelectSlot("Select slot for key generation:");
 
-        // Select algorithm
-        var keyType = AnsiConsole.Prompt(
+        // Select key type
+        var keyTypeChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title("Select algorithm:")
+                .Title("Select key type:")
                 .AddChoices(
                 [
                     "RSA 2048",
@@ -44,7 +44,7 @@ public static class KeyGenerationMenu
                     "X25519 (YubiKey 5.7+)"
                 ]));
 
-        var pivAlgorithm = keyType switch
+        var keyType = keyTypeChoice switch
         {
             "RSA 2048" => KeyType.RSA2048,
             "RSA 3072" => KeyType.RSA3072,
@@ -103,7 +103,7 @@ public static class KeyGenerationMenu
             .StartAsync("Generating key...", async ctx =>
             {
                 var result = await KeyGeneration.GenerateKeyAsync(
-                    session, slot, pivAlgorithm, pinPolicy, touchPolicy, cancellationToken);
+                    session, slot, keyType, pinPolicy, touchPolicy, cancellationToken);
 
                 if (result.Success)
                 {

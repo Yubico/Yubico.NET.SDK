@@ -62,7 +62,7 @@ Yubico.YubiKit.Piv.IPivSession.GetSerialNumberAsync(System.Threading.Cancellatio
 Yubico.YubiKit.Piv.IPivSession.GetSlotMetadataAsync(Yubico.YubiKit.Piv.Slot slot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.SlotMetadata?>!
 Yubico.YubiKit.Piv.IPivSession.ImportKeyAsync(Yubico.YubiKit.Piv.Slot slot, Yubico.YubiKit.Core.Cryptography.IPrivateKey! privateKey, Yubico.YubiKit.Piv.KeyCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.IPivSession.IsManagementKeyAuthenticated.get -> bool
-Yubico.YubiKit.Piv.IPivSession.ManagementKeyType.get -> Yubico.YubiKit.Piv.PivManagementKeyType
+Yubico.YubiKit.Piv.IPivSession.ManagementKeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType?
 Yubico.YubiKit.Piv.IPivSession.MoveKeyAsync(Yubico.YubiKit.Piv.Slot sourceSlot, Yubico.YubiKit.Piv.Slot destinationSlot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.IPivSession.PutObjectAsync(int objectId, System.ReadOnlyMemory<byte>? data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.IPivSession.RecoverPinOnlyModeAsync(System.ReadOnlyMemory<byte> pin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.PinOnlyMode>!
@@ -71,7 +71,7 @@ Yubico.YubiKit.Piv.IPivSession.SetAdminDataAsync(Yubico.YubiKit.Piv.DataObjects.
 Yubico.YubiKit.Piv.IPivSession.SetCardCapabilityContainerAsync(Yubico.YubiKit.Piv.DataObjects.CardCapabilityContainer cardCapabilityContainer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.IPivSession.SetCardholderUniqueIdAsync(Yubico.YubiKit.Piv.DataObjects.CardholderUniqueId cardholderUniqueId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.IPivSession.SetKeyHistoryAsync(Yubico.YubiKit.Piv.DataObjects.KeyHistory keyHistory, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.Piv.IPivSession.SetManagementKeyAsync(Yubico.YubiKit.Piv.PivManagementKeyType keyType, System.ReadOnlyMemory<byte> newKey, bool requireTouch = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Piv.IPivSession.SetManagementKeyAsync(Yubico.YubiKit.Core.Cryptography.KeyType keyType, System.ReadOnlyMemory<byte> newKey, bool requireTouch = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.IPivSession.SetPinAttemptsAsync(int pinAttempts, int pukAttempts, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.IPivSession.SetPinOnlyModeAsync(Yubico.YubiKit.Piv.PinOnlyMode pinOnlyMode, System.ReadOnlyMemory<byte> pin, System.ReadOnlyMemory<byte>? managementKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.IPivSession.SignOrDecryptAsync(Yubico.YubiKit.Piv.Slot slot, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Memory<byte>>!
@@ -112,21 +112,16 @@ Yubico.YubiKit.Piv.KeyCreationOptions.KeyCreationOptions() -> void
 Yubico.YubiKit.Piv.KeyCreationOptions.TouchPolicy.get -> Yubico.YubiKit.Piv.TouchPolicy
 Yubico.YubiKit.Piv.KeyCreationOptions.TouchPolicy.init -> void
 Yubico.YubiKit.Piv.ManagementKeyMetadata
-Yubico.YubiKit.Piv.ManagementKeyMetadata.Deconstruct(out Yubico.YubiKit.Piv.PivManagementKeyType KeyType, out bool IsDefault, out Yubico.YubiKit.Piv.TouchPolicy TouchPolicy) -> void
+Yubico.YubiKit.Piv.ManagementKeyMetadata.Deconstruct(out Yubico.YubiKit.Core.Cryptography.KeyType? KeyType, out bool IsDefault, out Yubico.YubiKit.Piv.TouchPolicy TouchPolicy) -> void
 Yubico.YubiKit.Piv.ManagementKeyMetadata.Equals(Yubico.YubiKit.Piv.ManagementKeyMetadata other) -> bool
 Yubico.YubiKit.Piv.ManagementKeyMetadata.IsDefault.get -> bool
 Yubico.YubiKit.Piv.ManagementKeyMetadata.IsDefault.init -> void
-Yubico.YubiKit.Piv.ManagementKeyMetadata.KeyType.get -> Yubico.YubiKit.Piv.PivManagementKeyType
+Yubico.YubiKit.Piv.ManagementKeyMetadata.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType?
 Yubico.YubiKit.Piv.ManagementKeyMetadata.KeyType.init -> void
 Yubico.YubiKit.Piv.ManagementKeyMetadata.ManagementKeyMetadata() -> void
-Yubico.YubiKit.Piv.ManagementKeyMetadata.ManagementKeyMetadata(Yubico.YubiKit.Piv.PivManagementKeyType KeyType, bool IsDefault, Yubico.YubiKit.Piv.TouchPolicy TouchPolicy) -> void
+Yubico.YubiKit.Piv.ManagementKeyMetadata.ManagementKeyMetadata(Yubico.YubiKit.Core.Cryptography.KeyType? KeyType, bool IsDefault, Yubico.YubiKit.Piv.TouchPolicy TouchPolicy) -> void
 Yubico.YubiKit.Piv.ManagementKeyMetadata.TouchPolicy.get -> Yubico.YubiKit.Piv.TouchPolicy
 Yubico.YubiKit.Piv.ManagementKeyMetadata.TouchPolicy.init -> void
-Yubico.YubiKit.Piv.PivManagementKeyType
-Yubico.YubiKit.Piv.PivManagementKeyType.Aes128 = 8 -> Yubico.YubiKit.Piv.PivManagementKeyType
-Yubico.YubiKit.Piv.PivManagementKeyType.Aes192 = 10 -> Yubico.YubiKit.Piv.PivManagementKeyType
-Yubico.YubiKit.Piv.PivManagementKeyType.Aes256 = 12 -> Yubico.YubiKit.Piv.PivManagementKeyType
-Yubico.YubiKit.Piv.PivManagementKeyType.TripleDes = 3 -> Yubico.YubiKit.Piv.PivManagementKeyType
 Yubico.YubiKit.Piv.PinMetadata
 Yubico.YubiKit.Piv.PinMetadata.Deconstruct(out bool IsDefault, out int TotalRetries, out int RetriesRemaining) -> void
 Yubico.YubiKit.Piv.PinMetadata.Equals(Yubico.YubiKit.Piv.PinMetadata other) -> bool
@@ -188,7 +183,7 @@ Yubico.YubiKit.Piv.PivSession.GetSerialNumberAsync(System.Threading.Cancellation
 Yubico.YubiKit.Piv.PivSession.GetSlotMetadataAsync(Yubico.YubiKit.Piv.Slot slot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.SlotMetadata?>!
 Yubico.YubiKit.Piv.PivSession.ImportKeyAsync(Yubico.YubiKit.Piv.Slot slot, Yubico.YubiKit.Core.Cryptography.IPrivateKey! privateKey, Yubico.YubiKit.Piv.KeyCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.PivSession.IsManagementKeyAuthenticated.get -> bool
-Yubico.YubiKit.Piv.PivSession.ManagementKeyType.get -> Yubico.YubiKit.Piv.PivManagementKeyType
+Yubico.YubiKit.Piv.PivSession.ManagementKeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType?
 Yubico.YubiKit.Piv.PivSession.MoveKeyAsync(Yubico.YubiKit.Piv.Slot sourceSlot, Yubico.YubiKit.Piv.Slot destinationSlot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.PivSession.PutObjectAsync(int objectId, System.ReadOnlyMemory<byte>? data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.PivSession.RecoverPinOnlyModeAsync(System.ReadOnlyMemory<byte> pin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.PinOnlyMode>!
@@ -197,7 +192,7 @@ Yubico.YubiKit.Piv.PivSession.SetAdminDataAsync(Yubico.YubiKit.Piv.DataObjects.A
 Yubico.YubiKit.Piv.PivSession.SetCardCapabilityContainerAsync(Yubico.YubiKit.Piv.DataObjects.CardCapabilityContainer cardCapabilityContainer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.PivSession.SetCardholderUniqueIdAsync(Yubico.YubiKit.Piv.DataObjects.CardholderUniqueId cardholderUniqueId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.PivSession.SetKeyHistoryAsync(Yubico.YubiKit.Piv.DataObjects.KeyHistory keyHistory, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.Piv.PivSession.SetManagementKeyAsync(Yubico.YubiKit.Piv.PivManagementKeyType keyType, System.ReadOnlyMemory<byte> newKey, bool requireTouch = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Piv.PivSession.SetManagementKeyAsync(Yubico.YubiKit.Core.Cryptography.KeyType keyType, System.ReadOnlyMemory<byte> newKey, bool requireTouch = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.PivSession.SetPinAttemptsAsync(int pinAttempts, int pukAttempts, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.PivSession.SetPinOnlyModeAsync(Yubico.YubiKit.Piv.PinOnlyMode pinOnlyMode, System.ReadOnlyMemory<byte> pin, System.ReadOnlyMemory<byte>? managementKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.PivSession.SignOrDecryptAsync(Yubico.YubiKit.Piv.Slot slot, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Memory<byte>>!
@@ -371,3 +366,7 @@ Yubico.YubiKit.Piv.SlotMetadata.RawAlgorithmId.get -> byte
 Yubico.YubiKit.Piv.SlotMetadata.RawAlgorithmId.init -> void
 Yubico.YubiKit.Piv.SlotMetadata.RawData.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Piv.SlotMetadata.RawData.init -> void
+Yubico.YubiKit.Piv.ManagementKeyMetadata.RawAlgorithmId.get -> byte
+Yubico.YubiKit.Piv.ManagementKeyMetadata.RawAlgorithmId.init -> void
+Yubico.YubiKit.Piv.ManagementKeyMetadata.RawData.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Piv.ManagementKeyMetadata.RawData.init -> void

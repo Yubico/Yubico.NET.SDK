@@ -23,7 +23,8 @@ internal static class PinUtilities
     /// <summary>
     /// The fixed length for encoded PIN/PUK values per PIV specification.
     /// </summary>
-    public const int PinLength = 8;
+    internal const int PinLength = 8;
+    internal const byte PaddingByte = 0xFF;
 
     /// <summary>
     /// Encodes a PIN or PUK value into the 8-byte format required by PIV specification.
@@ -45,7 +46,7 @@ internal static class PinUtilities
         }
 
         // Fill with 0xFF padding first
-        destination[..PinLength].Fill(0xFF);
+        destination[..PinLength].Fill(PaddingByte);
 
         if (pin.IsEmpty)
         {
@@ -138,7 +139,7 @@ internal static class PinUtilities
         }
 
         byte[] result = new byte[PinLength * 2];
-        result.AsSpan().Fill(0xFF);
+        result.AsSpan().Fill(PaddingByte);
         currentPin.CopyTo(result.AsSpan(0, currentPin.Length));
         newPin.CopyTo(result.AsSpan(PinLength, newPin.Length));
         return result;

@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+// Copyright 2026 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -14,20 +14,11 @@
 
 namespace Yubico.YubiKit.Piv;
 
-/// <summary>
-/// PIV management key algorithm types.
-/// </summary>
-public enum PivManagementKeyType : byte
+/// <summary>Special applet references, distinct from public asymmetric-key slots.</summary>
+internal static class KeyReference
 {
-    /// <summary>3DES key (24 bytes, 8-byte challenge).</summary>
-    TripleDes = 0x03,
-
-    /// <summary>AES-128 key (16 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
-    Aes128 = 0x08,
-
-    /// <summary>AES-192 key (24 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
-    Aes192 = 0x0A,
-
-    /// <summary>AES-256 key (32 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
-    Aes256 = 0x0C
+    internal const byte Pin = 0x80;
+    internal const byte Puk = 0x81;
+    internal const byte Management = 0x9B;
+    internal const byte Bio = 0x96;
 }

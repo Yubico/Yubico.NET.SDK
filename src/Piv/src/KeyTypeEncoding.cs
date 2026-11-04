@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Frozen;
 using Yubico.YubiKit.Core.Cryptography;
 
 namespace Yubico.YubiKit.Piv;
@@ -19,29 +20,43 @@ namespace Yubico.YubiKit.Piv;
 /// <summary>Explicit PIV wire identifiers; Core KeyType values are not protocol bytes.</summary>
 internal static class KeyTypeEncoding
 {
-    internal static byte Encode(KeyType keyType) => keyType switch
+    // The single protocol table defines PIV identifiers, not numeric Core enum values.
+    private static readonly FrozenDictionary<KeyType, byte> Identifiers = new Dictionary<KeyType, byte>
     {
-        KeyType.RSA1024 => 0x06,
-        KeyType.RSA2048 => 0x07,
-        KeyType.RSA3072 => 0x05,
-        KeyType.RSA4096 => 0x16,
-        KeyType.ECP256 => 0x11,
-        KeyType.ECP384 => 0x14,
-        KeyType.Ed25519 => 0xE0,
-        KeyType.X25519 => 0xE1,
-        _ => throw new NotSupportedException($"Key type {keyType} is not supported by PIV.")
-    };
+        [KeyType.TripleDES] = 0x03,
+        [KeyType.AES128] = 0x08,
+        [KeyType.AES192] = 0x0A,
+        [KeyType.AES256] = 0x0C,
+        [KeyType.RSA1024] = 0x06,
+        [KeyType.RSA2048] = 0x07,
+        [KeyType.RSA3072] = 0x05,
+        [KeyType.RSA4096] = 0x16,
+        [KeyType.ECP256] = 0x11,
+        [KeyType.ECP384] = 0x14,
+        [KeyType.Ed25519] = 0xE0,
+        [KeyType.X25519] = 0xE1
+    }.ToFrozenDictionary();
 
-    internal static KeyType? Decode(byte algorithmId) => algorithmId switch
+    private static readonly FrozenDictionary<byte, KeyType> Types =
+        Identifiers.ToFrozenDictionary(pair => pair.Value, pair => pair.Key);
+
+    internal static byte Encode(KeyType keyType) => Identifiers.TryGetValue(keyType, out byte id)
+        ? id
+        : throw new NotSupportedException($"Key type {keyType} is not supported by PIV.");
+
+    internal static KeyType? Decode(byte algorithmId) => Types.TryGetValue(algorithmId, out var keyType) ? keyType : null;
+
+    internal static byte EncodeAsymmetric(KeyType keyType)
     {
-        0x06 => KeyType.RSA1024,
-        0x07 => KeyType.RSA2048,
-        0x05 => KeyType.RSA3072,
-        0x16 => KeyType.RSA4096,
-        0x11 => KeyType.ECP256,
-        0x14 => KeyType.ECP384,
-        0xE0 => KeyType.Ed25519,
-        0xE1 => KeyType.X25519,
-        _ => null
-    };
+        if (!keyType.IsAsymmetric())
+            throw new NotSupportedException($"Key type {keyType} is not an asymmetric PIV key type.");
+        return Encode(keyType);
+    }
+
+    internal static byte EncodeManagement(KeyType keyType)
+    {
+        if (!keyType.IsSymmetric())
+            throw new NotSupportedException($"Key type {keyType} is not a PIV management key type.");
+        return Encode(keyType);
+    }
 }

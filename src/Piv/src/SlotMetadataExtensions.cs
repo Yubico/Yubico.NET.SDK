@@ -23,6 +23,10 @@ namespace Yubico.YubiKit.Piv;
 /// </summary>
 public static class SlotMetadataExtensions
 {
+    private const byte TagRsaModulus = 0x81;
+    private const byte TagRsaExponent = 0x82;
+    private const byte TagPublicPoint = 0x86;
+    private const byte UncompressedPoint = 0x04;
     /// <summary>
     /// Gets the RSA public key from slot metadata.
     /// </summary>
@@ -58,13 +62,13 @@ public static class SlotMetadataExtensions
         var rawSpan = metadata.PublicKey.Span;
         var tlvDict = TlvHelper.DecodeDictionary(rawSpan);
 
-        if (!tlvDict.TryGetValue(0x81, out var modulusMemory))
+        if (!tlvDict.TryGetValue(TagRsaModulus, out var modulusMemory))
         {
             throw new InvalidOperationException(
                 "Public key metadata is missing RSA modulus (tag 0x81).");
         }
 
-        if (!tlvDict.TryGetValue(0x82, out var exponentMemory))
+        if (!tlvDict.TryGetValue(TagRsaExponent, out var exponentMemory))
         {
             throw new InvalidOperationException(
                 "Public key metadata is missing RSA public exponent (tag 0x82).");
@@ -122,30 +126,27 @@ public static class SlotMetadataExtensions
         // SlotMetadata.PublicKey stores the raw PIV TLV-encoded EC point:
         //   [0x86][length][0x04][X bytes][Y bytes]
         // We need to strip the TLV header and build ECParameters from the raw point.
-        var rawBytes = metadata.PublicKey.Span;
-        ReadOnlySpan<byte> ecPoint = rawBytes;
-
-        // Strip the outer TLV tag/length if present (tag 0x86 = PIV EC point)
-        if (rawBytes.Length > 2 && rawBytes[0] == 0x86)
-        {
-            int headerLength = rawBytes[1] < 0x80 ? 2 : 2 + (rawBytes[1] & 0x7F);
-            ecPoint = rawBytes[headerLength..];
-        }
+        ReadOnlyMemory<byte> pointData = metadata.PublicKey;
+        if (!pointData.IsEmpty && pointData.Span[0] == TagPublicPoint)
+            pointData = TlvHelper.GetValue(TagPublicPoint, pointData.Span);
+        ReadOnlySpan<byte> ecPoint = pointData.Span;
 
         // ecPoint should now be [0x04][X][Y] (uncompressed format)
-        if (ecPoint.Length < 3 || ecPoint[0] != 0x04)
+        if (ecPoint.Length < 3 || ecPoint[0] != UncompressedPoint)
         {
             throw new InvalidOperationException(
                 "Public key is not in expected uncompressed EC point format (0x04 prefix).");
         }
 
-        int coordinateSize = (ecPoint.Length - 1) / 2;
+        var definition = keyType.GetKeyDefinition();
+        int coordinateSize = definition.LengthInBytes;
+        if (ecPoint.Length != 1 + 2 * coordinateSize)
+            throw new InvalidOperationException("Public point length does not match the key definition.");
         var x = ecPoint[1..(1 + coordinateSize)].ToArray();
         var y = ecPoint[(1 + coordinateSize)..].ToArray();
 
-        var curve = keyType == KeyType.ECP384
-            ? ECCurve.NamedCurves.nistP384
-            : ECCurve.NamedCurves.nistP256;
+        var curve = ECCurve.CreateFromOid(new Oid(definition.CurveOid
+            ?? throw new NotSupportedException($"Key type {keyType} has no EC curve OID.")));
 
         var ecParams = new ECParameters
         {

@@ -23,6 +23,9 @@ internal readonly record struct Initialization(FirmwareVersion FirmwareVersion);
 
 internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IBackend
 {
+    private const byte Cla = 0x00;
+    private const byte InsGetVersion = 0xFD;
+
     private readonly ISmartCardProtocol _protocol =
         protocol ?? throw new ArgumentNullException(nameof(protocol));
 
@@ -30,7 +33,7 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IBackend
     {
         await SelectAsync(cancellationToken).ConfigureAwait(false);
 
-        var versionCommand = new ApduCommand(0x00, 0xFD, 0x00, 0x00);
+        var versionCommand = new ApduCommand(Cla, InsGetVersion, 0, 0);
         var versionResponse = await SendAsync(versionCommand, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 

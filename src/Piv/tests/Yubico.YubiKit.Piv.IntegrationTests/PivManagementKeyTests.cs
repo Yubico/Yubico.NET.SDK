@@ -46,8 +46,8 @@ public class PivManagementKeyTests
     {
         // Use appropriate key type based on firmware
         var newKeyType = state.FirmwareVersion >= new FirmwareVersion(5, 7, 0)
-            ? PivManagementKeyType.Aes192
-            : PivManagementKeyType.TripleDes;
+            ? KeyType.AES192
+            : KeyType.TripleDES;
         var newKey = new byte[] {
             0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x11, 0x22,
             0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x11, 0x22,
@@ -104,11 +104,11 @@ public class PivManagementKeyTests
                 await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
                 // Change to AES256
-                await session.SetManagementKeyAsync(PivManagementKeyType.Aes256, aes256Key);
+                await session.SetManagementKeyAsync(KeyType.AES256, aes256Key);
 
                 // Verify via metadata
                 var metadata = await session.GetManagementKeyMetadataAsync();
-                Assert.Equal(PivManagementKeyType.Aes256, metadata.KeyType);
+                Assert.Equal(KeyType.AES256, metadata.KeyType);
                 Assert.False(metadata.IsDefault);
             }
 
@@ -143,11 +143,11 @@ public class PivManagementKeyTests
                 await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
                 // Change to AES128
-                await session.SetManagementKeyAsync(PivManagementKeyType.Aes128, aes128Key);
+                await session.SetManagementKeyAsync(KeyType.AES128, aes128Key);
 
                 // Verify via metadata
                 var metadata = await session.GetManagementKeyMetadataAsync();
-                Assert.Equal(PivManagementKeyType.Aes128, metadata.KeyType);
+                Assert.Equal(KeyType.AES128, metadata.KeyType);
                 Assert.False(metadata.IsDefault);
             }
 
@@ -187,9 +187,9 @@ public class PivManagementKeyTests
             await session.ResetAsync();
             await session.AuthenticateAsync(DefaultManagementKey);
 
-            await session.SetManagementKeyAsync(PivManagementKeyType.Aes128, aes128Key);
+            await session.SetManagementKeyAsync(KeyType.AES128, aes128Key);
 
-            Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
+            Assert.Equal(KeyType.AES128, session.ManagementKeyType);
             Assert.True(session.IsManagementKeyAuthenticated);
 
             // Key generation is management-key privileged and proves SET left the new key
@@ -200,8 +200,8 @@ public class PivManagementKeyTests
 
             var resetMetadata = await session.GetManagementKeyMetadataAsync();
             var expectedResetType = state.FirmwareVersion >= new FirmwareVersion(5, 7, 0)
-                ? PivManagementKeyType.Aes192
-                : PivManagementKeyType.TripleDes;
+                ? KeyType.AES192
+                : KeyType.TripleDES;
             Assert.False(session.IsManagementKeyAuthenticated);
             Assert.Equal(expectedResetType, session.ManagementKeyType);
             Assert.Equal(resetMetadata.KeyType, session.ManagementKeyType);

@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Piv.Backends;
@@ -26,6 +27,28 @@ namespace Yubico.YubiKit.Piv.Authentication;
 
 internal static class AuthenticationProtocol
 {
+    private const byte Cla = 0x00;
+    private const byte InsAuthenticate = 0x87;
+    private const byte InsVerify = 0x20;
+    private const byte InsChangeReference = 0x24;
+    private const byte InsResetRetry = 0x2C;
+    private const byte InsSetRetries = 0xFA;
+    private const byte TagDynAuth = 0x7C;
+    private const byte TagAuthWitness = 0x80;
+    private const byte TagAuthChallenge = 0x81;
+    private const byte TagAuthResponse = 0x82;
+    private const byte InsSetManagementKey = 0xFF;
+    private const byte SetManagementKeyParameter = 0xFF;
+    private const byte TouchRequiredParameter = 0xFE;
+    private const byte NoTouchParameter = 0xFF;
+    private const byte ShortTlvHeaderLength = 2;
+    private const int AuthenticationHeaderLength = 6;
+    private const int ManagementKeyHeaderLength = 3;
+    private const int PinPairLength = PinUtilities.PinLength * 2;
+    private const int DesBlockSize = 8;
+    private const int AesBlockSize = 16;
+    private static readonly int DesKeyComponentLength = KeyType.TripleDES.GetKeySizeBytes() / 3;
+
     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Authentication.AuthenticationProtocol");
 
     /// <summary>
@@ -42,22 +65,22 @@ internal static class AuthenticationProtocol
     /// type determines the algorithm.
     /// </para>
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// // Authenticate with default key (for initial setup only)
-    /// await session.AuthenticateAsync(PivSession.DefaultManagementKey);
-    /// 
-    /// // Generate a new secure key and change it immediately
-    /// byte[] newKey = RandomNumberGenerator.GetBytes(24);
-    /// await session.ChangeManagementKeyAsync(newKey);
-    /// </code>
-    /// </example>
-    internal static ReadOnlySpan<byte> DefaultManagementKey =>
+    private static readonly byte[] DefaultManagementKeyBytes =
     [
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
     ];
+
+    internal static ReadOnlySpan<byte> DefaultManagementKey =>
+        DefaultManagementKeyBytes.AsSpan(0, KeyType.TripleDES.GetKeySizeBytes());
+
+    internal static ReadOnlyMemory<byte> GetDefaultManagementKey(KeyType keyType)
+    {
+        _ = KeyTypeEncoding.EncodeManagement(keyType);
+        return DefaultManagementKeyBytes.AsMemory(0, keyType.GetKeySizeBytes());
+    }
 
     /// <summary>
     /// Authenticates the session using the PIV management key.
@@ -69,7 +92,7 @@ internal static class AuthenticationProtocol
     /// <remarks>
     /// <para>
     /// Authentication uses mutual challenge-response to prove knowledge of the management key
-    /// without transmitting it. The key is automatically zeroed after use for security.
+    /// without transmitting it. Only SDK-owned working copies are cleared; caller input remains unchanged.
     /// </para>
     /// <para>
     /// Default management key bytes (Triple-DES or AES-192): 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08
@@ -77,21 +100,15 @@ internal static class AuthenticationProtocol
     /// </remarks>
     internal static async Task AuthenticateAsync(
         IBackend backend,
-        PivManagementKeyType managementKeyType,
+        KeyType managementKeyType,
         ReadOnlyMemory<byte> managementKey,
         CancellationToken cancellationToken = default)
     {
         Logger.LogDebug("PIV: Starting management key authentication with {KeyType}", managementKeyType);
 
         // Validate key length based on management key type
-        int expectedKeyLength = managementKeyType switch
-        {
-            PivManagementKeyType.TripleDes => 24,
-            PivManagementKeyType.Aes128 => 16,
-            PivManagementKeyType.Aes192 => 24,
-            PivManagementKeyType.Aes256 => 32,
-            _ => throw new ArgumentException($"Unsupported management key type: {managementKeyType}")
-        };
+        byte algorithmId = KeyTypeEncoding.EncodeManagement(managementKeyType);
+        int expectedKeyLength = managementKeyType.GetKeySizeBytes();
 
         if (managementKey.Length != expectedKeyLength)
         {
@@ -101,15 +118,8 @@ internal static class AuthenticationProtocol
         }
 
         // Challenge length: 8 bytes for 3DES, 16 bytes for AES
-        int challengeLength = managementKeyType == PivManagementKeyType.TripleDes ? 8 : 16;
+        int challengeLength = managementKeyType == KeyType.TripleDES ? DesBlockSize : AesBlockSize;
 
-        // Algorithm code for P1
-        byte algorithmCode = (byte)managementKeyType;
-
-        const byte InsAuthenticate = 0x87;
-        const byte SlotCardManagement = 0x9B;
-        const byte TagDynAuth = 0x7C;
-        const byte TagAuthWitness = 0x80;
 
         var keyBytes = ArrayPool<byte>.Shared.Rent(expectedKeyLength);
         try
@@ -118,8 +128,8 @@ internal static class AuthenticationProtocol
 
             // Step 1: Request witness from device
             // Send: 7C 02 80 00 (empty witness request)
-            byte[] witnessRequest = [TagDynAuth, 0x02, TagAuthWitness, 0x00];
-            var witnessCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, witnessRequest);
+            byte[] witnessRequest = [TagDynAuth, ShortTlvHeaderLength, TagAuthWitness, 0];
+            var witnessCommand = new ApduCommand(Cla, InsAuthenticate, algorithmId, KeyReference.Management, witnessRequest);
             var witnessResponse = await backend.SendAsync(witnessCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             // Parse witness response: 7C [len] 80 [len] [witness data]
@@ -144,15 +154,15 @@ internal static class AuthenticationProtocol
                 // Step 4: Build and send response with decrypted witness and our challenge
                 // Send: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
                 // Max size: 1 (tag) + 3 (BER len) + 1 (tag) + 3 (BER len) + challengeLength + 1 (tag) + 3 (BER len) + challengeLength
-                int responseSize = 12 + (2 * challengeLength);
+                int responseSize = AuthenticationHeaderLength + (2 * challengeLength);
                 responseBuffer = ArrayPool<byte>.Shared.Rent(responseSize);
                 int bytesWritten = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength), responseBuffer.AsSpan(0, responseSize));
-                var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseBuffer.AsMemory(0, bytesWritten));
+                var challengeCommand = new ApduCommand(Cla, InsAuthenticate, algorithmId, KeyReference.Management, responseBuffer.AsMemory(0, bytesWritten));
                 var challengeResponse = await backend.SendAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
                 // Step 5: Verify device's response (encrypted challenge)
                 // Response: 7C [len] 82 [len] [encrypted challenge]
-                encryptedChallenge = ParseAndClearAuthResponse(challengeResponse, 0x82, challengeLength);
+                encryptedChallenge = ParseAndClearAuthResponse(challengeResponse, TagAuthResponse, challengeLength);
 
                 // Encrypt our challenge and compare
                 expectedResponse = ArrayPool<byte>.Shared.Rent(challengeLength);
@@ -183,7 +193,7 @@ internal static class AuthenticationProtocol
                 }
                 if (responseBuffer is not null)
                 {
-                    int responseSize = 12 + (2 * challengeLength);
+                    int responseSize = AuthenticationHeaderLength + (2 * challengeLength);
                     CryptographicOperations.ZeroMemory(responseBuffer.AsSpan(0, responseSize));
                     ArrayPool<byte>.Shared.Return(responseBuffer);
                 }
@@ -223,7 +233,7 @@ internal static class AuthenticationProtocol
     private static byte[] ParseAuthResponse(ReadOnlySpan<byte> response, byte expectedInnerTag, int expectedLength)
     {
         using var outer = Tlv.Create(response);
-        if (outer.Tag != 0x7C)
+        if (outer.Tag != TagDynAuth)
         {
             throw new ApduException($"Invalid auth response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
         }
@@ -264,13 +274,13 @@ internal static class AuthenticationProtocol
         // Outer: 7C [len] [inner]
         int offset = 0;
 
-        destination[offset++] = 0x7C;
+        destination[offset++] = TagDynAuth;
         offset += BerLength.Write(destination[offset..], innerLen);
-        destination[offset++] = 0x80;
+        destination[offset++] = TagAuthWitness;
         offset += BerLength.Write(destination[offset..], witnessLen);
         decryptedWitness.CopyTo(destination[offset..]);
         offset += witnessLen;
-        destination[offset++] = 0x81;
+        destination[offset++] = TagAuthChallenge;
         offset += BerLength.Write(destination[offset..], challengeLen);
         challenge.CopyTo(destination[offset..]);
 
@@ -280,81 +290,43 @@ internal static class AuthenticationProtocol
     /// <summary>
     /// Encrypts a single block using ECB mode with the specified key type.
     /// </summary>
-    private static void EncryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, PivManagementKeyType keyType) =>
+    private static void EncryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, KeyType keyType) =>
         CryptoBlockCore(key, plaintext, ciphertext, keyType, encrypt: true);
 
     /// <summary>
     /// Decrypts a single block using ECB mode with the specified key type.
     /// </summary>
-    private static void DecryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext, Span<byte> plaintext, PivManagementKeyType keyType) =>
+    private static void DecryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext, Span<byte> plaintext, KeyType keyType) =>
         CryptoBlockCore(key, ciphertext, plaintext, keyType, encrypt: false);
 
     /// <summary>
     /// Shared implementation for single-block ECB encrypt/decrypt with buffer management.
     /// </summary>
-    private static void CryptoBlockCore(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType, bool encrypt)
+    private static void CryptoBlockCore(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, KeyType keyType, bool encrypt)
     {
-        byte[]? keyBuffer = null;
-        byte[]? inputBuffer = null;
-        byte[]? outputBuffer = null;
+        if (keyType == KeyType.TripleDES)
+        {
+            // Preserve explicit EDE for the public factory default, which .NET rejects as a
+            // weak TripleDES key even though PIV requires it. Each DES component is still valid.
+            if (encrypt)
+                TripleDesEncryptManual(key, input, output);
+            else
+                TripleDesDecryptManual(key, input, output);
+            return;
+        }
+        byte[] keyCopy = key.ToArray();
         try
         {
-            keyBuffer = ArrayPool<byte>.Shared.Rent(key.Length);
-            inputBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
-            outputBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
-
-            key.CopyTo(keyBuffer);
-            input.CopyTo(inputBuffer);
-
-            if (keyType == PivManagementKeyType.TripleDes)
-            {
-                if (encrypt)
-                {
-                    TripleDesEncryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), outputBuffer.AsSpan(0, input.Length));
-                }
-                else
-                {
-                    TripleDesDecryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), outputBuffer.AsSpan(0, input.Length));
-                }
-            }
+            using var aes = Aes.Create();
+            aes.Key = keyCopy;
+            if (encrypt)
+                _ = aes.EncryptEcb(input, output, PaddingMode.None);
             else
-            {
-                byte[]? aesKeyArray = null;
-                try
-                {
-                    using var aes = Aes.Create();
-                    aesKeyArray = keyBuffer.AsSpan(0, key.Length).ToArray();
-                    aes.Key = aesKeyArray;
-                    aes.Mode = CipherMode.ECB;
-                    aes.Padding = PaddingMode.None;
-                    using var transform = encrypt ? aes.CreateEncryptor() : aes.CreateDecryptor();
-                    transform.TransformBlock(inputBuffer, 0, input.Length, outputBuffer, 0);
-                }
-                finally
-                {
-                    if (aesKeyArray is not null) CryptographicOperations.ZeroMemory(aesKeyArray);
-                }
-            }
-
-            outputBuffer.AsSpan(0, input.Length).CopyTo(output);
+                _ = aes.DecryptEcb(input, output, PaddingMode.None);
         }
         finally
         {
-            if (keyBuffer is not null)
-            {
-                CryptographicOperations.ZeroMemory(keyBuffer.AsSpan(0, key.Length));
-                ArrayPool<byte>.Shared.Return(keyBuffer);
-            }
-            if (inputBuffer is not null)
-            {
-                CryptographicOperations.ZeroMemory(inputBuffer.AsSpan(0, input.Length));
-                ArrayPool<byte>.Shared.Return(inputBuffer);
-            }
-            if (outputBuffer is not null)
-            {
-                CryptographicOperations.ZeroMemory(outputBuffer.AsSpan(0, input.Length));
-                ArrayPool<byte>.Shared.Return(outputBuffer);
-            }
+            CryptographicOperations.ZeroMemory(keyCopy);
         }
     }
 
@@ -366,13 +338,13 @@ internal static class AuthenticationProtocol
     /// </summary>
     private static void TripleDesDecryptManual(ReadOnlySpan<byte> key24, ReadOnlySpan<byte> input, Span<byte> output)
     {
-        Span<byte> temp1 = stackalloc byte[8];
-        Span<byte> temp2 = stackalloc byte[8];
+        Span<byte> temp1 = stackalloc byte[DesBlockSize];
+        Span<byte> temp2 = stackalloc byte[DesBlockSize];
         try
         {
-            DesBlockOperation(key24[16..24], input, temp1, encrypt: false);
-            DesBlockOperation(key24[8..16], temp1, temp2, encrypt: true);
-            DesBlockOperation(key24[..8], temp2, output, encrypt: false);
+            DesBlockOperation(key24[(2 * DesKeyComponentLength)..], input, temp1, encrypt: false);
+            DesBlockOperation(key24[DesKeyComponentLength..(2 * DesKeyComponentLength)], temp1, temp2, encrypt: true);
+            DesBlockOperation(key24[..DesKeyComponentLength], temp2, output, encrypt: false);
         }
         finally
         {
@@ -387,13 +359,13 @@ internal static class AuthenticationProtocol
     /// </summary>
     private static void TripleDesEncryptManual(ReadOnlySpan<byte> key24, ReadOnlySpan<byte> input, Span<byte> output)
     {
-        Span<byte> temp1 = stackalloc byte[8];
-        Span<byte> temp2 = stackalloc byte[8];
+        Span<byte> temp1 = stackalloc byte[DesBlockSize];
+        Span<byte> temp2 = stackalloc byte[DesBlockSize];
         try
         {
-            DesBlockOperation(key24[..8], input, temp1, encrypt: true);
-            DesBlockOperation(key24[8..16], temp1, temp2, encrypt: false);
-            DesBlockOperation(key24[16..24], temp2, output, encrypt: true);
+            DesBlockOperation(key24[..DesKeyComponentLength], input, temp1, encrypt: true);
+            DesBlockOperation(key24[DesKeyComponentLength..(2 * DesKeyComponentLength)], temp1, temp2, encrypt: false);
+            DesBlockOperation(key24[(2 * DesKeyComponentLength)..], temp2, output, encrypt: true);
         }
         finally
         {
@@ -412,31 +384,26 @@ internal static class AuthenticationProtocol
     /// </remarks>
     private static void DesBlockOperation(ReadOnlySpan<byte> key8, ReadOnlySpan<byte> input, Span<byte> output, bool encrypt)
     {
-        byte[] keyArr = key8.ToArray();
-        byte[] inputArr = input.ToArray();
-        byte[] outputArr = new byte[8];
+        byte[] keyCopy = key8.ToArray();
         try
         {
             using var des = DES.Create();
-            des.Key = keyArr;
-            des.Mode = CipherMode.ECB;
-            des.Padding = PaddingMode.None;
-            using var transform = encrypt ? des.CreateEncryptor() : des.CreateDecryptor();
-            transform.TransformBlock(inputArr, 0, 8, outputArr, 0);
-            outputArr.AsSpan().CopyTo(output);
+            des.Key = keyCopy;
+            if (encrypt)
+                _ = des.EncryptEcb(input, output, PaddingMode.None);
+            else
+                _ = des.DecryptEcb(input, output, PaddingMode.None);
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(keyArr);
-            CryptographicOperations.ZeroMemory(inputArr);
-            CryptographicOperations.ZeroMemory(outputArr);
+            CryptographicOperations.ZeroMemory(keyCopy);
         }
     }
 
     /// <summary>
     /// Verifies the user PIN.
     /// </summary>
-    /// <param name="pin">The PIN to verify. Must be 6-8 digits/characters.</param>
+    /// <param name="pin">The caller-owned PIN as 6-8 UTF-8 encoded bytes.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="InvalidPinException">Thrown if PIN verification fails.</exception>
     /// <exception cref="ArgumentException">Thrown if PIN is invalid format.</exception>
@@ -460,19 +427,19 @@ internal static class AuthenticationProtocol
     {
         Logger.LogDebug("PIV: Verifying PIN");
 
-        if (pin.Length is < 6 or > 8)
+        if (pin.Length is < 6 or > PinUtilities.PinLength)
         {
             throw new ArgumentException("PIN must be 6-8 bytes", nameof(pin));
         }
 
-        var paddedPin = ArrayPool<byte>.Shared.Rent(8);
+        var paddedPin = ArrayPool<byte>.Shared.Rent(PinUtilities.PinLength);
         try
         {
             // Pad PIN to 8 bytes with 0xFF
             pin.Span.CopyTo(paddedPin);
-            Array.Fill(paddedPin, (byte)0xFF, pin.Length, 8 - pin.Length);
+            Array.Fill(paddedPin, PinUtilities.PaddingByte, pin.Length, PinUtilities.PinLength - pin.Length);
 
-            var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, paddedPin.AsMemory(0, 8));
+            var command = new ApduCommand(Cla, InsVerify, 0, KeyReference.Pin, paddedPin.AsMemory(0, PinUtilities.PinLength));
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (response.IsOK())
@@ -496,7 +463,7 @@ internal static class AuthenticationProtocol
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(paddedPin.AsSpan(0, 8));
+            CryptographicOperations.ZeroMemory(paddedPin.AsSpan(0, PinUtilities.PinLength));
             ArrayPool<byte>.Shared.Return(paddedPin);
         }
     }
@@ -517,7 +484,7 @@ internal static class AuthenticationProtocol
 
         cancellationToken.ThrowIfCancellationRequested();
         // Fallback: empty PIN verify to get retry count
-        var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsVerify, 0, KeyReference.Pin, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
@@ -540,12 +507,12 @@ internal static class AuthenticationProtocol
     /// Changes the PIN.
     /// </summary>
     /// <param name="currentPin">The current PIN.</param>
-    /// <param name="newPin">The new PIN (6-8 digits/characters).</param>
+    /// <param name="newPin">The caller-owned new PIN as 6-8 UTF-8 encoded bytes.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <exception cref="InvalidPinException">Thrown if current PIN is incorrect.</exception>
     /// <exception cref="ArgumentException">Thrown if PIN format is invalid.</exception>
     /// <remarks>
-    /// Both PINs are automatically zeroed after use for security.
+    /// SDK-owned encoded working copies are cleared after use; caller input buffers are never cleared.
     /// </remarks>
     internal static async Task ChangePinAsync(
         IBackend backend,
@@ -555,27 +522,27 @@ internal static class AuthenticationProtocol
     {
         Logger.LogDebug("PIV: Changing PIN");
 
-        if (currentPin.Length is < 6 or > 8)
+        if (currentPin.Length is < 6 or > PinUtilities.PinLength)
         {
             throw new ArgumentException("Current PIN must be 6-8 bytes", nameof(currentPin));
         }
 
-        if (newPin.Length is < 6 or > 8)
+        if (newPin.Length is < 6 or > PinUtilities.PinLength)
         {
             throw new ArgumentException("New PIN must be 6-8 bytes", nameof(newPin));
         }
 
-        var pinData = ArrayPool<byte>.Shared.Rent(16);
+        var pinData = ArrayPool<byte>.Shared.Rent(PinPairLength);
         try
         {
             // Format: [current PIN padded to 8][new PIN padded to 8]
             currentPin.Span.CopyTo(pinData);
-            Array.Fill(pinData, (byte)0xFF, currentPin.Length, 8 - currentPin.Length);
+            Array.Fill(pinData, PinUtilities.PaddingByte, currentPin.Length, PinUtilities.PinLength - currentPin.Length);
 
-            newPin.Span.CopyTo(pinData.AsSpan(8));
-            Array.Fill(pinData, (byte)0xFF, 8 + newPin.Length, 8 - newPin.Length);
+            newPin.Span.CopyTo(pinData.AsSpan(PinUtilities.PinLength));
+            Array.Fill(pinData, PinUtilities.PaddingByte, PinUtilities.PinLength + newPin.Length, PinUtilities.PinLength - newPin.Length);
 
-            var command = new ApduCommand(0x00, 0x24, 0x00, 0x80, pinData.AsMemory(0, 16));
+            var command = new ApduCommand(Cla, InsChangeReference, 0, KeyReference.Pin, pinData.AsMemory(0, PinPairLength));
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (response.IsOK())
@@ -599,7 +566,7 @@ internal static class AuthenticationProtocol
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(pinData.AsSpan(0, 16));
+            CryptographicOperations.ZeroMemory(pinData.AsSpan(0, PinPairLength));
             ArrayPool<byte>.Shared.Return(pinData);
         }
     }
@@ -607,9 +574,9 @@ internal static class AuthenticationProtocol
     /// <summary>
     /// Sets the management key (requires authentication with old key).
     /// </summary>
-    internal static async Task<PivManagementKeyType> SetManagementKeyAsync(
+    internal static async Task<KeyType> SetManagementKeyAsync(
         IBackend backend,
-        PivManagementKeyType keyType,
+        KeyType keyType,
         ReadOnlyMemory<byte> newKey,
         bool requireTouch = false,
         CancellationToken cancellationToken = default)
@@ -617,14 +584,8 @@ internal static class AuthenticationProtocol
         Logger.LogDebug("PIV: Setting management key, type {KeyType}", keyType);
 
         // Validate key length
-        int expectedLength = keyType switch
-        {
-            PivManagementKeyType.TripleDes => 24,
-            PivManagementKeyType.Aes128 => 16,
-            PivManagementKeyType.Aes192 => 24,
-            PivManagementKeyType.Aes256 => 32,
-            _ => throw new ArgumentException($"Unsupported key type: {keyType}", nameof(keyType))
-        };
+        byte algorithmId = KeyTypeEncoding.EncodeManagement(keyType);
+        int expectedLength = keyType.GetKeySizeBytes();
 
         if (newKey.Length != expectedLength)
         {
@@ -635,19 +596,18 @@ internal static class AuthenticationProtocol
 
         // Build data: [algorithm] [slot 0x9B] [length] [key data]
         // Format per Yubico PIV spec: algorithm byte, slot byte, length byte, key bytes
-        var dataLength = 3 + newKey.Length; // header (3 bytes) + key
+        var dataLength = ManagementKeyHeaderLength + newKey.Length; // header (3 bytes) + key
         var data = new byte[dataLength];
         try
         {
-            data[0] = (byte)keyType;      // Algorithm byte (0x03=3DES, 0x08=AES128, 0x0A=AES192, 0x0C=AES256)
-            data[1] = 0x9B;               // Slot 9B (management key slot)
-            data[2] = (byte)newKey.Length; // Key length
-            newKey.Span.CopyTo(data.AsSpan(3));
+            data[0] = algorithmId;
+            data[1] = KeyReference.Management;
+            data[2] = (byte)newKey.Length;
+            newKey.Span.CopyTo(data.AsSpan(ManagementKeyHeaderLength));
 
-            // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF
             // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
-            byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
-            var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, data);
+            byte p2 = requireTouch ? TouchRequiredParameter : NoTouchParameter;
+            var command = new ApduCommand(Cla, InsSetManagementKey, SetManagementKeyParameter, p2, data);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -678,10 +638,9 @@ internal static class AuthenticationProtocol
         byte[] pukPair = PinUtilities.EncodePinPairBytes(oldPuk.Span, newPuk.Span);
         try
         {
-            // INS 0x24 (CHANGE REFERENCE DATA), P2=0x81 (PUK reference)
-            var command = new ApduCommand(0x00, 0x24, 0x00, 0x81, pukPair);
+            var command = new ApduCommand(Cla, InsChangeReference, 0, KeyReference.Puk, pukPair);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-            if (response.SW == 0x6D00)
+            if (response.SW == SWConstants.InsNotSupported)
                 throw new NotSupportedException("Changing the PUK is not supported by this YubiKey.");
 
             if (!response.IsOK())
@@ -715,16 +674,15 @@ internal static class AuthenticationProtocol
         byte[] pukPinPair = PinUtilities.EncodePinPairBytes(puk.Span, newPin.Span);
         try
         {
-            // INS 0x2C (RESET RETRY COUNTER), P2=0x80 (PIN reference)
-            var command = new ApduCommand(0x00, 0x2C, 0x00, 0x80, pukPinPair);
+            var command = new ApduCommand(Cla, InsResetRetry, 0, KeyReference.Pin, pukPinPair);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-            if (response.SW == 0x6D00)
+            if (response.SW == SWConstants.InsNotSupported)
                 throw new NotSupportedException("Unblocking the PIN is not supported by this YubiKey.");
 
             if (!response.IsOK())
             {
                 // 0x6983 = PUK blocked
-                if (response.SW == 0x6983)
+                if (response.SW == SWConstants.AuthenticationMethodBlocked)
                 {
                     throw new InvalidPinException(0, "PUK is blocked");
                 }
@@ -765,7 +723,7 @@ internal static class AuthenticationProtocol
             int retriesRemaining = 1; // Start with 1 to enter loop
             while (retriesRemaining > 0)
             {
-                var pukCommand = new ApduCommand(0x00, 0x2C, 0x00, 0x80, emptyPukPin);
+                var pukCommand = new ApduCommand(Cla, InsResetRetry, 0, KeyReference.Pin, emptyPukPin);
                 var response = await backend.SendAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
                 retriesRemaining = PinUtilities.GetRetriesFromStatusWord(response.SW);
@@ -809,10 +767,9 @@ internal static class AuthenticationProtocol
             throw new ArgumentOutOfRangeException(nameof(pukAttempts), "PUK attempts must be 1-255");
         }
 
-        // INS 0xFA (SET PIN RETRIES), P1=PIN retries, P2=PUK retries, no data
-        var command = new ApduCommand(0x00, 0xFA, (byte)pinAttempts, (byte)pukAttempts);
+        var command = new ApduCommand(Cla, InsSetRetries, (byte)pinAttempts, (byte)pukAttempts);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-        if (response.SW == 0x6D00)
+        if (response.SW == SWConstants.InsNotSupported)
             throw new NotSupportedException("Setting PIN/PUK retries is not supported by this YubiKey.");
 
         if (!response.IsOK())
@@ -829,7 +786,7 @@ internal static class AuthenticationProtocol
         {
             while (retriesRemaining > 0)
             {
-                var pinCommand = new ApduCommand(0x00, 0x20, 0x00, 0x80, emptyPin);
+                var pinCommand = new ApduCommand(Cla, InsVerify, 0, KeyReference.Pin, emptyPin);
                 var response = await backend.SendAsync(pinCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
                 retriesRemaining = PinUtilities.GetRetriesFromStatusWord(response.SW);

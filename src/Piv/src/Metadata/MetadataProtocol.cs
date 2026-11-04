@@ -13,7 +13,9 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Buffers.Binary;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Piv.Backends;
@@ -24,6 +26,17 @@ namespace Yubico.YubiKit.Piv.Metadata;
 
 internal static class MetadataProtocol
 {
+    private const byte Cla = 0x00;
+    private const byte InsGetMetadata = 0xF7;
+    private const byte InsGetSerial = 0xF8;
+    private const byte TagAlgorithm = 0x01;
+    private const byte TagPolicy = 0x02;
+    private const byte TagOrigin = 0x03;
+    private const byte OriginGenerated = 0x01;
+    private const byte TagPublicKey = 0x04;
+    private const byte TagIsDefault = 0x05;
+    private const byte TagRetries = 0x06;
+
     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Metadata.MetadataProtocol");
 
     internal static async Task<PinMetadata> GetPinMetadataAsync(
@@ -32,11 +45,11 @@ internal static class MetadataProtocol
     {
         Logger.LogDebug("PIV: Getting PIN metadata");
 
-        var command = new ApduCommand(0x00, 0xF7, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Pin, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
-        if (response.SW == 0x6D00)
+        if (response.SW == SWConstants.InsNotSupported)
         {
             throw new NotSupportedException("PIN metadata requires firmware 5.3.0 or later");
         }
@@ -57,8 +70,8 @@ internal static class MetadataProtocol
     private static PinMetadata ParsePinMetadata(ReadOnlyMemory<byte> data)
     {
         var fields = DecodeMetadataFields(data);
-        var defaultValue = RequiredField(fields, 0x05, 1);
-        var retries = RequiredField(fields, 0x06, 2);
+        var defaultValue = RequiredField(fields, TagIsDefault, 1);
+        var retries = RequiredField(fields, TagRetries, 2);
         if (defaultValue.Span[0] > 1 || retries.Span[1] > retries.Span[0])
             throw new ApduException("Invalid PIN/PUK metadata values.");
         return new PinMetadata(defaultValue.Span[0] != 0, retries.Span[0], retries.Span[1]);
@@ -94,18 +107,17 @@ internal static class MetadataProtocol
     {
         Logger.LogDebug("PIV: Getting slot metadata for 0x{Slot:X2}", (byte)slot);
 
-        // INS 0xF7 (GET METADATA), P2 = slot
-        var command = new ApduCommand(0x00, 0xF7, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsGetMetadata, 0, (byte)slot, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
-        if (response.SW == 0x6D00)
+        if (response.SW == SWConstants.InsNotSupported)
         {
             throw new NotSupportedException("Slot metadata requires firmware 5.3.0 or later");
         }
 
         // Check for empty slot - 0x6A82 "File not found" or 0x6A88 "Referenced data not found"
-        if (response.SW is 0x6A82 or 0x6A88)
+        if (response.SW is SWConstants.FileOrApplicationNotFound or SWConstants.DataNotFound)
         {
             return null;
         }
@@ -119,14 +131,14 @@ internal static class MetadataProtocol
         // Parse metadata TLV using TlvHelper
         var tlvDict = DecodeMetadataFields(response.Data);
 
-        byte algorithmId = RequiredField(tlvDict, 0x01, 1).Span[0];
-        var policy = RequiredField(tlvDict, 0x02, 2);
+        byte algorithmId = RequiredField(tlvDict, TagAlgorithm, 1).Span[0];
+        var policy = RequiredField(tlvDict, TagPolicy, 2);
         var pinPolicy = (PinPolicy)policy.Span[0];
         var touchPolicy = (TouchPolicy)policy.Span[1];
-        var origin = RequiredField(tlvDict, 0x03, 1);
-        var isGenerated = origin.Span[0] == 0x01;
+        var origin = RequiredField(tlvDict, TagOrigin, 1);
+        var isGenerated = origin.Span[0] == OriginGenerated;
 
-        ReadOnlyMemory<byte>? publicKey = tlvDict.TryGetValue(0x04, out var pk) ? pk : null;
+        ReadOnlyMemory<byte>? publicKey = tlvDict.TryGetValue(TagPublicKey, out var pk) ? pk : null;
 
         return new SlotMetadata(
             KeyType: KeyTypeEncoding.Decode(algorithmId),
@@ -147,12 +159,11 @@ internal static class MetadataProtocol
     {
         Logger.LogDebug("PIV: Getting PUK metadata");
 
-        // INS 0xF7 (GET METADATA), P2 = 0x81 (PUK slot)
-        var command = new ApduCommand(0x00, 0xF7, 0x00, 0x81, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Puk, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
-        if (response.SW == 0x6D00)
+        if (response.SW == SWConstants.InsNotSupported)
         {
             throw new NotSupportedException("PUK metadata requires firmware 5.3.0 or later");
         }
@@ -172,15 +183,14 @@ internal static class MetadataProtocol
     {
         Logger.LogDebug("PIV: Getting management key metadata");
 
-        // INS 0xF7 (GET METADATA), P2 = 0x9B (SLOT_CARD_MANAGEMENT)
-        const byte InsGetMetadata = 0xF7;
-        const byte SlotCardManagement = 0x9B;
 
-        var command = new ApduCommand(0x00, InsGetMetadata, 0x00, SlotCardManagement, ReadOnlyMemory<byte>.Empty);
+
+
+        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Management, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
-        if (response.SW == 0x6D00)
+        if (response.SW == SWConstants.InsNotSupported)
         {
             throw new NotSupportedException("Management key metadata requires firmware 5.3.0 or later");
         }
@@ -191,19 +201,17 @@ internal static class MetadataProtocol
         }
 
         // Parse metadata TLV using TlvHelper
-        // TAG 0x01 = algorithm (ManagementKeyType)
-        // TAG 0x02 = policy (byte 0 = unused, byte 1 = touch policy)
-        // TAG 0x05 = isDefault (1 = default, 0 = not default)
         var tlvDict = DecodeMetadataFields(response.Data);
 
         // Early metadata-capable firmware may omit the algorithm, meaning Triple-DES.
         // Present known fields must still have their exact protocol lengths.
-        var keyType = tlvDict.ContainsKey(0x01)
-            ? (PivManagementKeyType)RequiredField(tlvDict, 0x01, 1).Span[0]
-            : PivManagementKeyType.TripleDes;
+        byte algorithmId = tlvDict.ContainsKey(TagAlgorithm)
+            ? RequiredField(tlvDict, TagAlgorithm, 1).Span[0]
+            : KeyTypeEncoding.EncodeManagement(KeyType.TripleDES);
+        var keyType = KeyTypeEncoding.Decode(algorithmId);
 
-        var touchPolicy = (TouchPolicy)RequiredField(tlvDict, 0x02, 2).Span[1];
-        var defaultValue = RequiredField(tlvDict, 0x05, 1).Span[0];
+        var touchPolicy = (TouchPolicy)RequiredField(tlvDict, TagPolicy, 2).Span[1];
+        var defaultValue = RequiredField(tlvDict, TagIsDefault, 1).Span[0];
         if (defaultValue > 1)
             throw new ApduException("Invalid management-key default-state metadata.");
         var isDefault = defaultValue != 0;
@@ -215,7 +223,8 @@ internal static class MetadataProtocol
             KeyType: keyType,
             IsDefault: isDefault,
             TouchPolicy: touchPolicy
-        );
+        )
+        { RawAlgorithmId = algorithmId, RawData = response.Data.ToArray() };
     }
 
     internal static async Task<int> GetSerialNumberAsync(IBackend backend, CancellationToken cancellationToken)
@@ -223,11 +232,11 @@ internal static class MetadataProtocol
 
         Logger.LogDebug("PIV: Getting YubiKey serial number");
 
-        var command = new ApduCommand(0x00, 0xF8, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsGetSerial, 0, Cla, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // 0x6D00 means INS not supported (firmware < 5.0.0)
-        if (response.SW == 0x6D00)
+        if (response.SW == SWConstants.InsNotSupported)
         {
             throw new NotSupportedException("Serial number retrieval requires firmware 5.0.0 or later");
         }
@@ -244,7 +253,7 @@ internal static class MetadataProtocol
 
         // Serial is returned as big-endian 4-byte integer
         var serialBytes = response.Data.Span;
-        var serial = (serialBytes[0] << 24) | (serialBytes[1] << 16) | (serialBytes[2] << 8) | serialBytes[3];
+        var serial = BinaryPrimitives.ReadInt32BigEndian(serialBytes);
 
         Logger.LogDebug("PIV: Retrieved serial number: {Serial}", serial);
         return serial;

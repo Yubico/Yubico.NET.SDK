@@ -4,6 +4,7 @@
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Buffers;
+using System.Collections.Frozen;
 using System.ComponentModel;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
@@ -167,25 +168,29 @@ public static class PivHelpers
 
     public static string FormatSlot(Slot slot) => $"0x{(byte)slot:X2}";
 
+    private static readonly FrozenDictionary<string, KeyType> KeyTypeNames =
+        new Dictionary<string, KeyType>
+        {
+            ["rsa2048"] = KeyType.RSA2048,
+            ["rsa3072"] = KeyType.RSA3072,
+            ["rsa4096"] = KeyType.RSA4096,
+            ["eccp256"] = KeyType.ECP256,
+            ["ecp256"] = KeyType.ECP256,
+            ["p256"] = KeyType.ECP256,
+            ["eccp384"] = KeyType.ECP384,
+            ["ecp384"] = KeyType.ECP384,
+            ["p384"] = KeyType.ECP384,
+            ["ed25519"] = KeyType.Ed25519,
+            ["x25519"] = KeyType.X25519
+        }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
     public static KeyType ParseKeyType(string? keyType)
     {
         if (string.IsNullOrEmpty(keyType))
-        {
             throw new ArgumentException("--key-type is required.");
-        }
-
-        return keyType.ToLowerInvariant() switch
-        {
-            "rsa2048" => KeyType.RSA2048,
-            "rsa3072" => KeyType.RSA3072,
-            "rsa4096" => KeyType.RSA4096,
-            "eccp256" or "ecp256" or "p256" => KeyType.ECP256,
-            "eccp384" or "ecp384" or "p384" => KeyType.ECP384,
-            "ed25519" => KeyType.Ed25519,
-            "x25519" => KeyType.X25519,
-            _ => throw new ArgumentException(
-                $"Unknown algorithm: {keyType}. Use rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519.")
-        };
+        return KeyTypeNames.TryGetValue(keyType, out var selected)
+            ? selected
+            : throw new ArgumentException($"Unknown key type: {keyType}. Use rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519.");
     }
 
     public static PinPolicy ParsePinPolicy(string? policy) =>
@@ -208,13 +213,13 @@ public static class PivHelpers
             _ => throw new ArgumentException($"Unknown touch policy: {policy}. Use default, never, always, cached.")
         };
 
-    public static PivManagementKeyType ParseManagementKeyType(string? keyType) =>
+    public static KeyType ParseManagementKeyType(string? keyType) =>
         keyType?.ToLowerInvariant() switch
         {
-            null or "3des" => PivManagementKeyType.TripleDes,
-            "aes128" => PivManagementKeyType.Aes128,
-            "aes192" => PivManagementKeyType.Aes192,
-            "aes256" => PivManagementKeyType.Aes256,
+            null or "3des" => KeyType.TripleDES,
+            "aes128" => KeyType.AES128,
+            "aes192" => KeyType.AES192,
+            "aes256" => KeyType.AES256,
             _ => throw new ArgumentException($"Unknown key type: {keyType}. Use 3des, aes128, aes192, aes256.")
         };
 

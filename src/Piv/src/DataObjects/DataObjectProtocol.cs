@@ -23,6 +23,14 @@ namespace Yubico.YubiKit.Piv.DataObjects;
 
 internal static class DataObjectProtocol
 {
+    private const byte Cla = 0x00;
+    private const byte InsGetData = 0xCB;
+    private const byte InsPutData = 0xDB;
+    private const byte ObjectDataP1 = 0x3F;
+    private const byte ObjectDataP2 = 0xFF;
+    private const byte TagData = 0x53;
+    private const byte TagObjectId = 0x5C;
+
     /// <summary>
     /// Reads a PIV data object.
     /// </summary>
@@ -35,7 +43,7 @@ internal static class DataObjectProtocol
         CancellationToken cancellationToken = default)
     {
         // INS 0xCB (GET DATA)
-        var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, EncodeObjectId(objectId));
+        var command = new ApduCommand(Cla, InsGetData, ObjectDataP1, ObjectDataP2, EncodeObjectId(objectId));
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         try
@@ -59,7 +67,7 @@ internal static class DataObjectProtocol
     {
         if (data.IsEmpty)
             return [];
-        if (data[0] != 0x53)
+        if (data[0] != TagData)
             return data.ToArray();
         using var wrapper = Tlv.Create(data);
         return wrapper.Value.ToArray();
@@ -86,11 +94,11 @@ internal static class DataObjectProtocol
         {
             objectIdBytes.CopyTo(encoded, 0);
             int offset = objectIdBytes.Length;
-            encoded[offset++] = 0x53;
+            encoded[offset++] = TagData;
             offset += BerLength.Write(encoded.AsSpan(offset), dataLen);
             if (data is { } value)
                 value.Span.CopyTo(encoded.AsSpan(offset));
-            var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, encoded);
+            var command = new ApduCommand(Cla, InsPutData, ObjectDataP1, ObjectDataP2, encoded);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -110,16 +118,16 @@ internal static class DataObjectProtocol
     /// </summary>
     private static byte[] EncodeObjectId(int objectId)
     {
-        if (objectId <= 0xFF)
+        if (objectId <= byte.MaxValue)
         {
-            return [0x5C, 0x01, (byte)objectId];
+            return [TagObjectId, 0x01, (byte)objectId];
         }
 
-        if (objectId <= 0xFFFF)
+        if (objectId <= ushort.MaxValue)
         {
-            return [0x5C, 0x02, (byte)(objectId >> 8), (byte)(objectId & 0xFF)];
+            return [TagObjectId, 0x02, (byte)(objectId >> 8), (byte)(objectId & byte.MaxValue)];
         }
 
-        return [0x5C, 0x03, (byte)(objectId >> 16), (byte)((objectId >> 8) & 0xFF), (byte)(objectId & 0xFF)];
+        return [TagObjectId, 0x03, (byte)(objectId >> 16), (byte)((objectId >> 8) & byte.MaxValue), (byte)(objectId & byte.MaxValue)];
     }
 }

@@ -96,7 +96,7 @@ v2 location: `src/Piv/src/**`
   **Severity**: Major | **Confidence**: High
 
 - **Feature/API**: Typed PIV data object model — `CardholderUniqueId` (CHUID), `CardCapabilityContainer` (CCC), `AdminData`, `KeyHistory`, `PinProtectedData`, base `PivDataObject` with `Encode()`/`Decode()`/`TryDecode()`
-  **v2 status**: Missing/Degraded — v2's `PivDataObject.cs` is only a `static class` of tag constants; `PivDataObjectProtocol.cs` exposes raw `GetObjectAsync`/`PutObjectAsync` with no parsed field access.
+  **v2 status**: Different shape — `DataObject.cs` holds tag constants and `DataObjectProtocol.cs` provides raw GET/PUT exchanges. Typed `DataObjects.CardholderUniqueId`, `CardCapabilityContainer`, `AdminData`, and `KeyHistory` models provide parsed field access without the V1 `PivDataObject` base-class hierarchy; PIN-protected management material is handled by session workflows rather than a public `PinProtectedData` model.
   **User impact**: Consumers must hand-parse/build TLV-encoded CHUID/CCC/admin-data themselves.
   **Severity**: Major | **Confidence**: High
 

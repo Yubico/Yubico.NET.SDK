@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Piv.Backends;
 using Yubico.YubiKit.Piv.DataObjects;
@@ -33,7 +34,8 @@ internal static class PinOnlyProtocol
     private const int PinProtectedTag = 0x88;
     private const int ManagementKeyTag = 0x89;
     private const int Pbkdf2Iterations = 10_000;
-    private static readonly int[] ValidManagementKeyLengths = [16, 24, 32];
+    private static readonly int[] ValidManagementKeyLengths =
+        [KeyType.AES128.GetKeySizeBytes(), KeyType.AES192.GetKeySizeBytes(), KeyType.AES256.GetKeySizeBytes()];
 
     internal static async Task<PinOnlyMode> GetPinOnlyModeAsync(
         IBackend backend,
@@ -158,19 +160,4 @@ internal static class PinOnlyProtocol
 #pragma warning restore CA5379, CA5387
     }
 
-    internal static int GetManagementKeyLength(PivManagementKeyType keyType) => keyType switch
-    {
-        PivManagementKeyType.Aes128 => 16,
-        PivManagementKeyType.Aes256 => 32,
-        _ => 24, // TripleDes and Aes192
-    };
-
-    internal static void FillRepeatingDefaultKeyPattern(Span<byte> destination)
-    {
-        ReadOnlySpan<byte> pattern = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
-        for (int i = 0; i < destination.Length; i++)
-        {
-            destination[i] = pattern[i % pattern.Length];
-        }
-    }
 }

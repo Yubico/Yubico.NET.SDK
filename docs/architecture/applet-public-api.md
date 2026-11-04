@@ -33,7 +33,7 @@ public concrete-session operations. They are implemented by the SDK and are not 
 - Preserve protocol vocabulary where semantics differ. Normalize only equivalent concepts.
 - Applet dependency-injection registrations and factory delegates are not part of the product surface.
 
-PIV biometric verification is a three-state mode, represented by `PivUserVerification`: `Verify`,
+PIV biometric verification is a three-state mode, represented by `UserVerification`: `Verify`,
 `VerifyAndRequestTemporaryPin`, and `CheckOnly`. This intentionally differs from the original plan's options-object
 proposal. The previous two booleans exposed four combinations even though `(true, true)` was not a fourth behavior;
 check-only silently won. An enum makes every valid mode explicit.

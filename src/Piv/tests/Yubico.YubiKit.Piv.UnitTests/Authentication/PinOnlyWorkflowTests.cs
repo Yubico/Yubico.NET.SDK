@@ -1,7 +1,9 @@
 using System.Reflection;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Authentication;
 using Yubico.YubiKit.Piv.Backends;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -54,27 +56,32 @@ public class PinOnlyWorkflowTests
     }
 
     [Theory]
-    [InlineData(PivManagementKeyType.Aes128, 16)]
-    [InlineData(PivManagementKeyType.Aes192, 24)]
-    [InlineData(PivManagementKeyType.Aes256, 32)]
-    [InlineData(PivManagementKeyType.TripleDes, 24)]
-    public async Task Disable_ReplacesTypeAppropriateDefaultBeforeDeletingRecoveryObjects(PivManagementKeyType type, int length)
+    [InlineData(KeyType.AES128, 16)]
+    [InlineData(KeyType.AES192, 24)]
+    [InlineData(KeyType.AES256, 32)]
+    [InlineData(KeyType.TripleDES, 24)]
+    public async Task Disable_ReplacesTypeAppropriateDefaultBeforeDeletingRecoveryObjects(KeyType type, int length)
     {
         using var backend = new WorkflowBackend { HasProtectedMode = true };
         await using var session = await CreateSessionAsync(backend, type);
+        ReadOnlyMemory<byte> defaultView = AuthenticationProtocol.GetDefaultManagementKey(type);
+        byte[] defaultSnapshot = defaultView.ToArray();
+        Assert.True(defaultView.Equals(AuthenticationProtocol.GetDefaultManagementKey(type)));
 
         await session.SetPinOnlyModeAsync(PinOnlyMode.None, ReadOnlyMemory<byte>.Empty,
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(new byte[] { 0xCB, 0xFF, 0xDB, 0xDB }, backend.Commands.Select(c => c.Ins));
         byte[] replacement = backend.CommandData[1];
-        Assert.Equal((byte)type, replacement[0]);
+        Assert.Equal(KeyTypeEncoding.Encode(type), replacement[0]);
         Assert.Equal(length, replacement[2]);
         for (int i = 0; i < length; i++)
             Assert.Equal((byte)(i % 8 + 1), replacement[i + 3]);
         Assert.Equal(new byte[] { 0x5C, 0x03, 0x5F, 0xC1, 0x09, 0x53, 0x00 }, backend.CommandData[2]);
         Assert.Equal(new byte[] { 0x5C, 0x03, 0x5F, 0xFF, 0x00, 0x53, 0x00 }, backend.CommandData[3]);
         Assert.True(session.IsManagementKeyAuthenticated);
+        Assert.Equal(defaultSnapshot, defaultView.ToArray());
+        Assert.True(defaultView.Equals(AuthenticationProtocol.GetDefaultManagementKey(type)));
         Assert.All(backend.SecretBuffers, buffer => Assert.All(buffer.ToArray(), b => Assert.Equal(0, b)));
     }
 
@@ -123,10 +130,10 @@ public class PinOnlyWorkflowTests
         Assert.All(backend.SecretBuffers, buffer => Assert.All(buffer.ToArray(), b => Assert.Equal(0, b)));
     }
 
-    private static async Task<PivSession> CreateSessionAsync(WorkflowBackend backend, PivManagementKeyType type = PivManagementKeyType.Aes192)
+    private static async Task<PivSession> CreateSessionAsync(WorkflowBackend backend, KeyType type = KeyType.AES192)
     {
         var connection = new RecordingSmartCardConnection([0x90, 0x00], [5, 7, 0, 0x90, 0x00],
-            [0x01, 0x01, (byte)type, 0x02, 0x02, 0x00, 0x00, 0x05, 0x01, 0x01, 0x90, 0x00]);
+            [0x01, 0x01, KeyTypeEncoding.Encode(type), 0x02, 0x02, 0x00, 0x00, 0x05, 0x01, 0x01, 0x90, 0x00]);
         var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         typeof(PivSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, backend);
         typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);

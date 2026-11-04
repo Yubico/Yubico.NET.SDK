@@ -84,7 +84,7 @@ public class PivSessionTests
         var session = new PivSession(mockConnection, null);
 
         // Default management key type should be 3DES
-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
     }
 
     [Fact]
@@ -164,7 +164,7 @@ public class PivSessionTests
 
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
         Assert.True(connection.TransmittedCommands.Count >= 3);
         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xA4); // SELECT
         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xFD); // GET VERSION
@@ -187,7 +187,7 @@ public class PivSessionTests
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
     }
 
     /// <summary>
@@ -217,7 +217,7 @@ public class PivSessionTests
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
     }
 
     /// <summary>
@@ -240,7 +240,7 @@ public class PivSessionTests
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
     }
 
     [Fact]
@@ -263,7 +263,7 @@ public class PivSessionTests
 
         var metadata = await session.GetManagementKeyMetadataAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivManagementKeyType.TripleDes, metadata.KeyType);
+        Assert.Equal(KeyType.TripleDES, metadata.KeyType);
         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xF7 && command[3] == 0x9B);
     }
 
@@ -415,7 +415,7 @@ public class PivSessionTests
         try
         {
             await session.SetManagementKeyAsync(
-                PivManagementKeyType.Aes128,
+                KeyType.AES128,
                 newKey,
                 cancellationToken: TestContext.Current.CancellationToken);
         }
@@ -424,7 +424,7 @@ public class PivSessionTests
             CryptographicOperations.ZeroMemory(newKey);
         }
 
-        Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
+        Assert.Equal(KeyType.AES128, session.ManagementKeyType);
         Assert.True(session.IsManagementKeyAuthenticated);
         Assert.Equal(0xFF, LastCommand(connection)[1]);
     }
@@ -440,7 +440,7 @@ public class PivSessionTests
         try
         {
             await Assert.ThrowsAsync<ApduException>(() => session.SetManagementKeyAsync(
-                PivManagementKeyType.Aes128,
+                KeyType.AES128,
                 newKey,
                 cancellationToken: TestContext.Current.CancellationToken));
         }
@@ -449,7 +449,7 @@ public class PivSessionTests
             CryptographicOperations.ZeroMemory(newKey);
         }
 
-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
         Assert.True(session.IsManagementKeyAuthenticated);
     }
 
@@ -464,7 +464,7 @@ public class PivSessionTests
         try
         {
             var exception = await Assert.ThrowsAsync<ApduException>(() => session.SetManagementKeyAsync(
-                PivManagementKeyType.Aes128,
+                KeyType.AES128,
                 newKey,
                 cancellationToken: TestContext.Current.CancellationToken));
             Assert.True(exception.SW == SWConstants.SecurityStatusNotSatisfied);
@@ -474,7 +474,7 @@ public class PivSessionTests
             CryptographicOperations.ZeroMemory(newKey);
         }
 
-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
         Assert.False(session.IsManagementKeyAuthenticated);
     }
 
@@ -499,7 +499,7 @@ public class PivSessionTests
         }
 
         Assert.False(session.IsManagementKeyAuthenticated);
-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
         Assert.Equal(0x87, LastCommand(connection)[1]);
     }
 
@@ -533,15 +533,15 @@ public class PivSessionTests
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET
-            ManagementKeyMetadataResponse(PivManagementKeyType.Aes128)); // authoritative post-reset metadata
+            ManagementKeyMetadataResponse(KeyType.AES128)); // authoritative post-reset metadata
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
+        await SetManagementKeyForTestAsync(session, KeyType.AES256);
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
         Assert.False(session.IsManagementKeyAuthenticated);
-        Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
+        Assert.Equal(KeyType.AES128, session.ManagementKeyType);
     }
 
     /// <summary>
@@ -563,12 +563,12 @@ public class PivSessionTests
             [0x6D, 0x00]); // GET METADATA unsupported
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes128);
+        await SetManagementKeyForTestAsync(session, KeyType.AES128);
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
         Assert.False(session.IsManagementKeyAuthenticated);
-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
     }
 
     /// <summary>
@@ -591,7 +591,7 @@ public class PivSessionTests
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
         Assert.False(session.IsManagementKeyAuthenticated);
-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
     }
 
     [Fact]
@@ -607,12 +607,12 @@ public class PivSessionTests
             [0x6D, 0x00]); // GET METADATA unsupported
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
+        await SetManagementKeyForTestAsync(session, KeyType.AES256);
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
         Assert.False(session.IsManagementKeyAuthenticated);
-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
     }
 
     [Theory]
@@ -630,14 +630,14 @@ public class PivSessionTests
             [(byte)(statusWord >> 8), (byte)statusWord]); // unexpected metadata refresh failure
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
+        await SetManagementKeyForTestAsync(session, KeyType.AES256);
 
         var exception = await Assert.ThrowsAsync<ApduException>(() =>
             session.ResetAsync(TestContext.Current.CancellationToken));
 
         Assert.True(exception.SW == statusWord);
         Assert.False(session.IsManagementKeyAuthenticated);
-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
     }
 
     [Fact]
@@ -652,12 +652,12 @@ public class PivSessionTests
             [0x6A, 0x80]); // unexpected metadata refresh failure
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
+        await SetManagementKeyForTestAsync(session, KeyType.AES256);
 
         await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
 
         Assert.False(session.IsManagementKeyAuthenticated);
-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
     }
 
     [Fact]
@@ -714,14 +714,9 @@ public class PivSessionTests
             .GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)!
             .SetValue(session, true);
 
-    private static async Task SetManagementKeyForTestAsync(PivSession session, PivManagementKeyType keyType)
+    private static async Task SetManagementKeyForTestAsync(PivSession session, KeyType keyType)
     {
-        int keyLength = keyType switch
-        {
-            PivManagementKeyType.Aes128 => 16,
-            PivManagementKeyType.Aes256 => 32,
-            _ => 24
-        };
+        int keyLength = keyType.GetKeySizeBytes();
         byte[] key = new byte[keyLength];
         try
         {
@@ -753,9 +748,9 @@ public class PivSessionTests
 
     // Metadata TLVs: key type(01), touch/default policy(02), generated/default flag(05), then SW 9000.
     private static byte[] ManagementKeyMetadataResponse(
-        PivManagementKeyType keyType = PivManagementKeyType.TripleDes) =>
+        KeyType keyType = KeyType.TripleDES) =>
     [
-        0x01, 0x01, (byte)keyType,
+        0x01, 0x01, KeyTypeEncoding.Encode(keyType),
         0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
         0x05, 0x01, 0x01,
         0x90, 0x00

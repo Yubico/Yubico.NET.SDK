@@ -101,7 +101,7 @@ finally
     CryptographicOperations.ZeroMemory(pin);
 }
 byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
-ReadOnlyMemory<byte> signature = await session.SignOrDecryptAsync(Slot.Authentication, digest);
+Memory<byte> signature = await session.SignOrDecryptAsync(Slot.Authentication, digest);
 ```
 
 ECDSA signs the digest you pass, so hash first. This overload reads slot metadata to pick the algorithm and
@@ -159,6 +159,9 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
 - PIV-local model/policy prefixes are removed: for example `PinPolicy`, `TouchPolicy`, `PinMetadata`,
   `SlotMetadata`, `KeyCreationOptions`, and `DataObjects.AdminData`. Session entrypoints remain `PivSession`
   and `IPivSession`. CLI key selectors use `--key-type` and key-type result fields are named `KeyType`.
+- Management-key operations also use Core `KeyType` (`TripleDES`, `AES128`, `AES192`, `AES256`) and canonical
+  key sizes. Symmetric management types cannot be generated/imported as asymmetric slot keys. The session's
+  nullable `ManagementKeyType` is null for an unmodeled algorithm; raw management metadata remains inspectable.
 - Slot metadata exposes nullable `KeyType`, `RawAlgorithmId`, and complete `RawData`. Unknown identifiers
   remain readable, while using an unrecognized key algorithm throws `NotSupportedException`.
 - `EnsureSupports` is protected session implementation machinery, no longer a public interface member.

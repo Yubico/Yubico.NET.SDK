@@ -11,6 +11,25 @@ namespace Yubico.YubiKit.Piv.UnitTests;
 public class SessionConsistencyTests
 {
     [Fact]
+    public async Task Generate_MatchPolicy_ProbesCapabilityWithoutRequiringEnrollment()
+    {
+        using var ec = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var parameters = ec.ExportParameters(false);
+        byte[] publicResponse = [0x7F, 0x49, 0x43, 0x86, 0x41, 0x04,
+            .. parameters.Q.X ?? throw new InvalidOperationException(), .. parameters.Q.Y ?? throw new InvalidOperationException(), 0x90, 0x00];
+        var connection = Connection([0x06, 0x01, 0x04, 0x07, 0x01, 0x00, 0x90, 0x00], publicResponse);
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
+
+        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256,
+            new KeyCreationOptions { PinPolicy = PinPolicy.MatchOnce }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(KeyType.ECP256, publicKey.KeyType);
+        Assert.Equal(0xF7, connection.TransmittedCommands[^2][1]);
+        Assert.Equal(0x96, connection.TransmittedCommands[^2][3]);
+        Assert.Equal(0x47, connection.TransmittedCommands[^1][1]);
+    }
+    [Fact]
     public async Task Authenticate_CancelledAttempt_ClearsPriorAuthenticationWithoutTraffic()
     {
         var connection = Connection();
@@ -126,7 +145,7 @@ public class SessionConsistencyTests
             "puk" => session.GetPukMetadataAsync(TestContext.Current.CancellationToken),
             "management" => session.GetManagementKeyMetadataAsync(TestContext.Current.CancellationToken),
             "slot" => session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken),
-            _ => session.SetManagementKeyAsync(PivManagementKeyType.Aes192, new byte[24], cancellationToken: TestContext.Current.CancellationToken)
+            _ => session.SetManagementKeyAsync(KeyType.AES192, new byte[24], cancellationToken: TestContext.Current.CancellationToken)
         });
 
         Assert.False(session.IsSupported(Features.Metadata));
@@ -315,7 +334,7 @@ public class SessionConsistencyTests
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
     }
 
     private static RecordingSmartCardConnection Connection(params byte[][] responses) => new(

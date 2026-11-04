@@ -49,11 +49,11 @@ public class PivResetTests
         // Verify default state - management key type resets to TripleDes (or AES for fw >= 5.7.0)
         if (state.FirmwareVersion >= new FirmwareVersion(5, 7, 0))
         {
-            Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+            Assert.Equal(KeyType.AES192, session.ManagementKeyType);
         }
         else
         {
-            Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+            Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
         }
 
         // Verify we can authenticate with default management key

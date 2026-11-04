@@ -173,6 +173,18 @@ What still needs a human is presence and timing, not destruction — touch-polic
 
 ## Firmware And Feature Gates
 
+Helpers obtain metadata-only category loggers from `YubiKitLogging`, not logger parameters. `KeyTypeEncoding`
+is the sole PIV wire-ID table; its frozen inverse is derived once. Request encoders enforce management vs
+asymmetric subsets, so shared Core `KeyType` does not permit AES slot generation or P-521 requests. Management
+key lengths and EC curve OIDs/sizes come from Core definitions. `KeyReference` holds only internal PIN/PUK,
+management, and Bio references, separate from public asymmetric `Slot` values.
+
+PIN/PUK parameters are named by role and carry caller-owned UTF-8 bytes, not ASCII-only credentials. Internal
+working copies are cleared; shared factory-default key slices are borrowed read-only and never cleared.
+Bio metadata uses tagged fields (retries 06, configured 07, temporary PIN 08); MATCH-policy probes check
+capability, not fingerprint enrollment. Bio verification modes use the Python-confirmed APDU payloads.
+No Bio-hardware coverage is implied by fake-protocol tests.
+
 Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of duplicating version checks. Be careful to distinguish device firmware from applet-reported firmware when beta hardware reports sentinel applet versions.
 
 `Features` is a public standalone PIV catalog; `IsSupported` stays public and `EnsureSupports` is protected.

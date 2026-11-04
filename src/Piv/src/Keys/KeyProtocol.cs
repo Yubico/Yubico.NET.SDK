@@ -27,6 +27,34 @@ namespace Yubico.YubiKit.Piv.Keys;
 
 internal static class KeyProtocol
 {
+    private const byte Cla = 0x00;
+    private const byte InsGenerate = 0x47;
+    private const byte InsImport = 0xFE;
+    private const byte InsMove = 0xF6;
+    private const byte InsAttest = 0xF9;
+    private const byte DeleteDestination = 0xFF;
+    private const byte TagGenerationTemplate = 0xAC;
+    private const byte TagAlgorithm = 0x80;
+    private const byte TagPinPolicy = 0xAA;
+    private const byte TagTouchPolicy = 0xAB;
+    private const int TagPublicKeyTemplate = 0x7F49;
+    private const byte TagPublicPoint = 0x86;
+    private const byte UncompressedPoint = 0x04;
+    private const int ShortTlvHeaderLength = 2;
+    private const int KeyPolicyLength = 3;
+    private const byte SingleByteValueLength = 1;
+    private const byte TagRsaP = 0x01;
+    private const byte TagRsaQ = 0x02;
+    private const byte TagRsaDp = 0x03;
+    private const byte TagRsaDq = 0x04;
+    private const byte TagRsaInverseQ = 0x05;
+    private const byte TagEcScalar = 0x06;
+    private const byte TagEd25519PrivateKey = 0x07;
+    private const byte TagX25519PrivateKey = 0x08;
+    private const byte TagRsaModulus = 0x81;
+    private const byte TagRsaExponent = 0x82;
+    private static ReadOnlySpan<byte> RsaPublicExponent => [0x01, 0x00, 0x01];
+
     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Keys.KeyProtocol");
 
     /// <summary>
@@ -52,45 +80,41 @@ internal static class KeyProtocol
 
         // Build the command data: TAG 0xAC [ TAG 0x80 (algorithm) + optional policies ]
         // Pre-compute size: 0xAC + len + (0x80,0x01,algo) + optional (0xAA,0x01,pin) + optional (0xAB,0x01,touch)
-        int innerLength = 3; // TAG 0x80 (algorithm) is always present
+        int innerLength = KeyPolicyLength; // TAG 0x80 (algorithm) is always present
         if (pinPolicy != PinPolicy.Default)
-            innerLength += 3;
+            innerLength += KeyPolicyLength;
         if (touchPolicy != TouchPolicy.Default)
-            innerLength += 3;
+            innerLength += KeyPolicyLength;
 
-        var data = new byte[2 + innerLength]; // 0xAC + length byte + inner content
+        var data = new byte[ShortTlvHeaderLength + innerLength]; // 0xAC + length byte + inner content
         try
         {
             int offset = 0;
 
-            // TAG 0xAC (Template)
-            data[offset++] = 0xAC;
+            data[offset++] = TagGenerationTemplate;
             data[offset++] = (byte)innerLength;
 
-            // TAG 0x80 (Algorithm)
-            data[offset++] = 0x80;
-            data[offset++] = 0x01;
-            data[offset++] = KeyTypeEncoding.Encode(keyType);
+            data[offset++] = TagAlgorithm;
+            data[offset++] = SingleByteValueLength;
+            data[offset++] = KeyTypeEncoding.EncodeAsymmetric(keyType);
 
-            // TAG 0xAA (PIN policy) - only if not default
             if (pinPolicy != PinPolicy.Default)
             {
-                data[offset++] = 0xAA;
-                data[offset++] = 0x01;
+                data[offset++] = TagPinPolicy;
+                data[offset++] = SingleByteValueLength;
                 data[offset++] = (byte)pinPolicy;
             }
 
-            // TAG 0xAB (Touch policy) - only if not default
             if (touchPolicy != TouchPolicy.Default)
             {
-                data[offset++] = 0xAB;
-                data[offset++] = 0x01;
+                data[offset++] = TagTouchPolicy;
+                data[offset++] = SingleByteValueLength;
                 data[offset++] = (byte)touchPolicy;
             }
 
-            var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
+            var command = new ApduCommand(Cla, InsGenerate, 0, (byte)slot, data);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-            if (response.SW == 0x6D00)
+            if (response.SW == SWConstants.InsNotSupported)
                 throw new NotSupportedException("PIV key generation is not supported by this YubiKey.");
 
             if (!response.IsOK())
@@ -131,7 +155,7 @@ internal static class KeyProtocol
         Logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, privateKey.KeyType);
 
         var keyType = privateKey.KeyType;
-        byte algorithmId = KeyTypeEncoding.Encode(keyType);
+        byte algorithmId = KeyTypeEncoding.EncodeAsymmetric(keyType);
 
         // Build TLV-encoded key data based on algorithm
         byte[]? keyData = null;
@@ -148,21 +172,21 @@ internal static class KeyProtocol
             // Add PIN policy TLV if not default
             if (pinPolicy != PinPolicy.Default)
             {
-                using var pinPolicyTlv = new Tlv(0xAA, [(byte)pinPolicy]);
+                using var pinPolicyTlv = new Tlv(TagPinPolicy, [(byte)pinPolicy]);
                 keyData = AppendTlvZeroingPrevious(keyData!, pinPolicyTlv);
             }
 
             // Add touch policy TLV if not default
             if (touchPolicy != TouchPolicy.Default)
             {
-                using var touchPolicyTlv = new Tlv(0xAB, [(byte)touchPolicy]);
+                using var touchPolicyTlv = new Tlv(TagTouchPolicy, [(byte)touchPolicy]);
                 keyData = AppendTlvZeroingPrevious(keyData!, touchPolicyTlv);
             }
 
             // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
-            var command = new ApduCommand(0x00, 0xFE, algorithmId, (byte)slot, keyData);
+            var command = new ApduCommand(Cla, InsImport, algorithmId, (byte)slot, keyData);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-            if (response.SW == 0x6D00)
+            if (response.SW == SWConstants.InsNotSupported)
                 throw new NotSupportedException("PIV key import is not supported by this YubiKey.");
 
             if (!response.IsOK())
@@ -214,11 +238,7 @@ internal static class KeyProtocol
         var parameters = rsaKey.Parameters;
 
         // Validate RSA exponent is 65537 (standard requirement)
-        if (parameters.Exponent is null ||
-            !(parameters.Exponent.Length == 3 &&
-              parameters.Exponent[0] == 0x01 &&
-              parameters.Exponent[1] == 0x00 &&
-              parameters.Exponent[2] == 0x01))
+        if (parameters.Exponent is null || !parameters.Exponent.AsSpan().SequenceEqual(RsaPublicExponent))
         {
             throw new NotSupportedException("RSA exponent must be 65537 (0x010001)");
         }
@@ -230,14 +250,14 @@ internal static class KeyProtocol
         }
 
         // All components should be half the modulus length
-        var componentLength = parameters.P.Length;
+        var componentLength = rsaKey.KeyType.GetKeySizeBytes() / 2;
 
         // Create TLVs for each component, padding to correct length
-        using var pTlv = new Tlv(0x01, PadToLength(parameters.P, componentLength));
-        using var qTlv = new Tlv(0x02, PadToLength(parameters.Q, componentLength));
-        using var dpTlv = new Tlv(0x03, PadToLength(parameters.DP, componentLength));
-        using var dqTlv = new Tlv(0x04, PadToLength(parameters.DQ, componentLength));
-        using var iqTlv = new Tlv(0x05, PadToLength(parameters.InverseQ, componentLength));
+        using var pTlv = CreatePaddedComponent(TagRsaP, parameters.P, componentLength);
+        using var qTlv = CreatePaddedComponent(TagRsaQ, parameters.Q, componentLength);
+        using var dpTlv = CreatePaddedComponent(TagRsaDp, parameters.DP, componentLength);
+        using var dqTlv = CreatePaddedComponent(TagRsaDq, parameters.DQ, componentLength);
+        using var iqTlv = CreatePaddedComponent(TagRsaInverseQ, parameters.InverseQ, componentLength);
 
         // Concatenate all TLVs
         return [.. pTlv.AsSpan(),
@@ -262,7 +282,7 @@ internal static class KeyProtocol
 
         // D should be padded to the curve size
         var curveSize = keyType.GetKeySizeBytes();
-        using var dTlv = new Tlv(0x06, PadToLength(parameters.D, curveSize));
+        using var dTlv = CreatePaddedComponent(TagEcScalar, parameters.D, curveSize);
 
         return dTlv.AsSpan().ToArray();
     }
@@ -274,7 +294,7 @@ internal static class KeyProtocol
     /// </summary>
     private static byte[] EncodeCurve25519PrivateKey(Curve25519PrivateKey curveKey)
     {
-        var tag = curveKey.KeyType == KeyType.Ed25519 ? 0x07 : 0x08;
+        var tag = curveKey.KeyType == KeyType.Ed25519 ? TagEd25519PrivateKey : TagX25519PrivateKey;
         using var tlv = new Tlv(tag, curveKey.PrivateKey.Span);
 
         return tlv.AsSpan().ToArray();
@@ -283,17 +303,23 @@ internal static class KeyProtocol
     /// <summary>
     /// Pads byte array to target length with leading zeros if needed.
     /// </summary>
-    private static byte[] PadToLength(byte[] data, int targetLength)
+    private static Tlv CreatePaddedComponent(byte tag, ReadOnlySpan<byte> data, int targetLength)
     {
-        if (data.Length >= targetLength)
+        if (data.Length > targetLength)
+            throw new ArgumentException("Private component exceeds the canonical key size.", nameof(data));
+        // Supported PIV components are at most 256 bytes. Tlv takes its own copy; no padded
+        // private-material array is abandoned, and caller-owned key parameters are never cleared.
+        Span<byte> padded = stackalloc byte[targetLength];
+        try
         {
-            return data;
+            padded.Clear();
+            data.CopyTo(padded[(targetLength - data.Length)..]);
+            return new Tlv(tag, padded);
         }
-
-        var result = new byte[targetLength];
-        var padding = targetLength - data.Length;
-        Buffer.BlockCopy(data, 0, result, padding, data.Length);
-        return result;
+        finally
+        {
+            CryptographicOperations.ZeroMemory(padded);
+        }
     }
 
     /// <summary>
@@ -317,10 +343,9 @@ internal static class KeyProtocol
             throw new InvalidOperationException("Cannot move attestation key");
         }
 
-        // INS 0xF6, P1 = destination slot, P2 = source slot, NO DATA
-        var command = new ApduCommand(0x00, 0xF6, (byte)destinationSlot, (byte)sourceSlot);
+        var command = new ApduCommand(Cla, InsMove, (byte)destinationSlot, (byte)sourceSlot);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-        if (response.SW == 0x6D00)
+        if (response.SW == SWConstants.InsNotSupported)
             throw new NotSupportedException("PIV key move is not supported by this YubiKey.");
 
         if (!response.IsOK())
@@ -340,10 +365,9 @@ internal static class KeyProtocol
     {
         Logger.LogDebug("PIV: Deleting key from slot 0x{Slot:X2}", (byte)slot);
 
-        // INS 0xF6, P1 = 0xFF (delete), P2 = slot to delete, NO DATA
-        var command = new ApduCommand(0x00, 0xF6, 0xFF, (byte)slot);
+        var command = new ApduCommand(Cla, InsMove, DeleteDestination, (byte)slot);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-        if (response.SW == 0x6D00)
+        if (response.SW == SWConstants.InsNotSupported)
             throw new NotSupportedException("PIV key deletion is not supported by this YubiKey.");
 
         if (!response.IsOK())
@@ -363,11 +387,10 @@ internal static class KeyProtocol
     {
         Logger.LogDebug("PIV: Attesting key in slot 0x{Slot:X2}", (byte)slot);
 
-        // INS 0xF9 (ATTEST), P1 = slot, P2 = 0, NO DATA, no explicit Le
         // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
-        var command = new ApduCommand(0x00, 0xF9, (byte)slot, 0x00);
+        var command = new ApduCommand(Cla, InsAttest, (byte)slot, 0);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-        if (response.SW == 0x6D00)
+        if (response.SW == SWConstants.InsNotSupported)
             throw new NotSupportedException("PIV key attestation is not supported by this YubiKey.");
 
         if (!response.IsOK())
@@ -386,7 +409,7 @@ internal static class KeyProtocol
     {
         // Parse 0x7F49 (Public key template) - Tlv handles 2-byte tags
         using var template = Tlv.Create(data.Span);
-        if (template.Tag != 0x7F49)
+        if (template.Tag != TagPublicKeyTemplate)
         {
             throw new ApduException("Invalid public key response format");
         }
@@ -407,29 +430,29 @@ internal static class KeyProtocol
     private static IPublicKey ParseEccPublicKey(ReadOnlySpan<byte> data, KeyType keyType)
     {
         // ECC public key format: TAG 0x86 (EC point)
-        if (data.Length < 2 || data[0] != 0x86)
+        if (data.Length < ShortTlvHeaderLength || data[0] != TagPublicPoint)
         {
             throw new ApduException("Invalid ECC public key format");
         }
 
-        int offset = 1;
-        int length = data[offset];
-        offset++;
-
-        var point = data.Slice(offset, length);
+        using var pointTlv = Tlv.Create(data);
+        var point = pointTlv.Value.Span;
 
         // Convert to ECPublicKey using the Core cryptography types
-        var curve = keyType == KeyType.ECP256
-            ? ECCurve.NamedCurves.nistP256
-            : ECCurve.NamedCurves.nistP384;
+        var definition = keyType.GetKeyDefinition();
+        var curve = ECCurve.CreateFromOid(new Oid(definition.CurveOid
+            ?? throw new NotSupportedException($"Key type {keyType} has no EC curve OID.")));
+        int coordinateSize = definition.LengthInBytes;
+        if (point.Length != 1 + 2 * coordinateSize || point[0] != UncompressedPoint)
+            throw new ApduException("Invalid uncompressed EC public point length or format.");
 
         var parameters = new ECParameters
         {
             Curve = curve,
             Q = new ECPoint
             {
-                X = point.Slice(1, (point.Length - 1) / 2).ToArray(),
-                Y = point.Slice(1 + (point.Length - 1) / 2).ToArray()
+                X = point.Slice(1, coordinateSize).ToArray(),
+                Y = point.Slice(1 + coordinateSize, coordinateSize).ToArray()
             }
         };
 
@@ -439,17 +462,16 @@ internal static class KeyProtocol
     private static IPublicKey ParseCurve25519PublicKey(ReadOnlySpan<byte> data, KeyType keyType)
     {
         // Curve25519 public key format: TAG 0x86 (point)
-        if (data.Length < 2 || data[0] != 0x86)
+        if (data.Length < ShortTlvHeaderLength || data[0] != TagPublicPoint)
         {
             throw new ApduException("Invalid Curve25519 public key format");
         }
 
-        int offset = 1;
-        int length = data[offset];
-        offset++;
+        using var pointTlv = Tlv.Create(data);
+        var point = pointTlv.Value.Span;
 
-        var point = data.Slice(offset, length);
-
+        if (point.Length != keyType.GetKeySizeBytes())
+            throw new ApduException("Public point length does not match the key definition.");
         return Curve25519PublicKey.CreateFromValue(point.ToArray(), keyType);
     }
 
@@ -458,12 +480,12 @@ internal static class KeyProtocol
         // RSA public key format: TAG 0x81 (modulus) + TAG 0x82 (public exponent)
         var tlvDict = TlvHelper.DecodeDictionary(data);
 
-        if (!tlvDict.TryGetValue(0x81, out var modulusMemory))
+        if (!tlvDict.TryGetValue(TagRsaModulus, out var modulusMemory))
         {
             throw new ApduException("Invalid RSA public key format: missing modulus");
         }
 
-        if (!tlvDict.TryGetValue(0x82, out var exponentMemory))
+        if (!tlvDict.TryGetValue(TagRsaExponent, out var exponentMemory))
         {
             throw new ApduException("Invalid RSA public key format: missing exponent");
         }

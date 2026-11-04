@@ -79,7 +79,7 @@ internal static class PrivateKeyOperations
         UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken)
     {
-        Logger.LogDebug("PIV: Signing/decrypting with slot 0x{Slot:X2}, algorithm {KeyType}", (byte)slot, keyType);
+        Logger.LogDebug("PIV: Signing/decrypting with slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, keyType);
 
         // Size the TAG 81 payload for the algorithm; the bytes are written straight into the APDU buffer below.
         int preparedLength = PreparedDataLength(keyType, data.Length);

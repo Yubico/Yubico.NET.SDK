@@ -27,6 +27,7 @@ namespace Yubico.YubiKit.Piv.Metadata;
 internal static class MetadataProtocol
 {
     private const byte Cla = 0x00;
+    private const byte UnusedParameter = 0x00;
     private const byte InsGetMetadata = 0xF7;
     private const byte InsGetSerial = 0xF8;
     private const byte TagAlgorithm = 0x01;
@@ -45,7 +46,7 @@ internal static class MetadataProtocol
     {
         Logger.LogDebug("PIV: Getting PIN metadata");
 
-        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Pin, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsGetMetadata, UnusedParameter, KeyReference.Pin, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
@@ -107,7 +108,7 @@ internal static class MetadataProtocol
     {
         Logger.LogDebug("PIV: Getting slot metadata for 0x{Slot:X2}", (byte)slot);
 
-        var command = new ApduCommand(Cla, InsGetMetadata, 0, (byte)slot, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsGetMetadata, UnusedParameter, (byte)slot, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
@@ -159,7 +160,7 @@ internal static class MetadataProtocol
     {
         Logger.LogDebug("PIV: Getting PUK metadata");
 
-        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Puk, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsGetMetadata, UnusedParameter, KeyReference.Puk, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
@@ -186,7 +187,7 @@ internal static class MetadataProtocol
 
 
 
-        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Management, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsGetMetadata, UnusedParameter, KeyReference.Management, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // Check for "instruction not supported" which indicates firmware < 5.3
@@ -232,7 +233,7 @@ internal static class MetadataProtocol
 
         Logger.LogDebug("PIV: Getting YubiKey serial number");
 
-        var command = new ApduCommand(Cla, InsGetSerial, 0, Cla, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(Cla, InsGetSerial, UnusedParameter, UnusedParameter, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         // 0x6D00 means INS not supported (firmware < 5.0.0)

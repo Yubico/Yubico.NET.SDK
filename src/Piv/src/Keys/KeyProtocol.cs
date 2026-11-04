@@ -76,7 +76,7 @@ internal static class KeyProtocol
         TouchPolicy touchPolicy = TouchPolicy.Default,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("PIV: Generating key in slot 0x{Slot:X2}, algorithm {KeyType}", (byte)slot, keyType);
+        Logger.LogDebug("PIV: Generating key in slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, keyType);
 
         // Build the command data: TAG 0xAC [ TAG 0x80 (algorithm) + optional policies ]
         // Pre-compute size: 0xAC + len + (0x80,0x01,algo) + optional (0xAA,0x01,pin) + optional (0xAB,0x01,touch)
@@ -194,7 +194,7 @@ internal static class KeyProtocol
                 throw ApduException.FromStatusWord(response.SW, $"Key import failed for slot 0x{(byte)slot:X2}");
             }
 
-            Logger.LogDebug("PIV: Key imported successfully into slot 0x{Slot:X2}, algorithm {KeyType}", (byte)slot, keyType);
+            Logger.LogDebug("PIV: Key imported successfully into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, keyType);
         }
         finally
         {

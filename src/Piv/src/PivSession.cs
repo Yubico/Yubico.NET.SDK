@@ -42,6 +42,7 @@ namespace Yubico.YubiKit.Piv;
 public sealed class PivSession : ApplicationSession, IPivSession
 {
     private const byte Cla = 0x00;
+    private const byte UnusedParameter = 0x00;
 
     // PIV instruction bytes
     private const byte InsReset = 0xFB;
@@ -189,7 +190,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         await BlockPukAsync(cancellationToken).ConfigureAwait(false);
 
         // Step 3: Send RESET command
-        var resetCommand = new ApduCommand(Cla, InsReset, 0, Cla, ReadOnlyMemory<byte>.Empty);
+        var resetCommand = new ApduCommand(Cla, InsReset, UnusedParameter, UnusedParameter, ReadOnlyMemory<byte>.Empty);
         var response = await _backend.SendAsync(resetCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())

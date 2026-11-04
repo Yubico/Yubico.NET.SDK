@@ -152,7 +152,7 @@ internal static class DeviceHelper
     }
 
     /// <summary>
-    /// Parses a key algorithm string into a <see cref="KeyType"/>.
+    /// Parses a key type string into a <see cref="KeyType"/>.
     /// </summary>
     internal static KeyType? ParseKeyType(string? value)
     {
@@ -163,7 +163,7 @@ internal static class DeviceHelper
             return null;
         }
 
-        var alg = value.ToLowerInvariant() switch
+        var keyType = value.ToLowerInvariant() switch
         {
             "rsa2048" => (KeyType?)KeyType.RSA2048,
             "rsa3072" => KeyType.RSA3072,
@@ -175,13 +175,13 @@ internal static class DeviceHelper
             _ => null
         };
 
-        if (alg is null)
+        if (keyType is null)
         {
             Console.Error.WriteLine(
                 $"Error: Invalid --key-type '{value}'. Valid: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519");
         }
 
-        return alg;
+        return keyType;
     }
 
     /// <summary>

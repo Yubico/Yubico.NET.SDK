@@ -17,6 +17,14 @@ known firmware support, not runtime authentication, device configuration, or gua
 derived applet sessions use it internally. Consumers should invoke operations directly and handle their
 reported errors rather than calling an enforcement method first.
 
+## APDU response ownership
+
+`ApduResponse` is a sealed reference-type owner, not a value-type record. Its constructors copy their
+input; `RawData` and `Data` are read-only views of the owned copy. Call `Clear()` after consuming sensitive
+response material. It zeroes the complete owned response (including status bytes) and all previously
+obtained views, without changing constructor input. Read/check status before clearing. Aliasing a response
+shares its owner; there is no default empty response or synthesized value equality.
+
 ## Requirements
 
 - .NET 10 on Windows, macOS, or Linux; Linux also needs PC/SC and udev rules ([Linux setup](../../docs/linux-setup.md)).

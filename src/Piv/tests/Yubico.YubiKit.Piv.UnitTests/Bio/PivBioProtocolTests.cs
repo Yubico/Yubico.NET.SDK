@@ -42,7 +42,7 @@ public class PivBioProtocolTests
 
         // Sanity: the returned (distinct) copy still has the real temporary PIN.
         Assert.NotNull(result);
-        Assert.Equal(temporaryPin, result!.Value.ToArray());
+        Assert.Equal(temporaryPin, result);
 
         Assert.NotNull(backend.CapturedRawDataArray);
         int dataLength = backend.CapturedCount - 2; // exclude trailing SW bytes

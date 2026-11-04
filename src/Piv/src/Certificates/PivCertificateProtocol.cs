@@ -46,14 +46,14 @@ internal static class PivCertificateProtocol
         // Read the data object
         var certData = await PivDataObjectProtocol.GetObjectAsync(backend, objectId, cancellationToken).ConfigureAwait(false);
 
-        if (certData.IsEmpty)
+        if (certData.Length == 0)
         {
             return null;
         }
 
         // Parse TLV: TAG 0x70 (cert) + TAG 0x71 (info) + TAG 0xFE (LRC)
         // Note: GetObjectAsync already unwraps the outer 0x53 tag
-        var tlvDict = TlvHelper.DecodeDictionary(certData.Span);
+        var tlvDict = TlvHelper.DecodeDictionary(certData.AsSpan());
 
         byte[]? certBytes = tlvDict.TryGetValue(0x70, out var cert)
             ? cert.ToArray()

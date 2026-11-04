@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
@@ -105,7 +104,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
 
         var keyCreated = false;
         byte[] digest = SHA256.HashData("PIV user-presence probe"u8);
-        ReadOnlyMemory<byte> signature = default;
+        Memory<byte> signature = default;
         try
         {
             IPublicKey generatedPublicKey = await session.GenerateKeyAsync(
@@ -164,7 +163,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             CryptographicOperations.ZeroMemory(digest);
             if (!signature.IsEmpty)
             {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(signature).Span);
+                CryptographicOperations.ZeroMemory(signature.Span);
             }
 
             if (keyCreated)

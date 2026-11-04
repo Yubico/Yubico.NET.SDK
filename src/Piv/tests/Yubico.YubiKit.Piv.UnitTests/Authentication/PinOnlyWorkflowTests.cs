@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
@@ -203,8 +202,6 @@ public class PinOnlyWorkflowTests
             CryptographicOperations.ZeroMemory(Key);
             foreach (byte[] bytes in CommandData)
                 CryptographicOperations.ZeroMemory(bytes);
-            foreach (var buffer in SecretBuffers)
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(buffer).Span);
         }
     }
 }

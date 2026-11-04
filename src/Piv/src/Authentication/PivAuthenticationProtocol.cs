@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
@@ -211,7 +210,7 @@ internal static class PivAuthenticationProtocol
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+            response.Clear();
         }
     }
 

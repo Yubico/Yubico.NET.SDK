@@ -182,6 +182,12 @@ var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oce
 
 ### TLV Processing
 
+`ApduResponse` owns a private copied byte array in a sealed reference type. Consumers clear sensitive
+response bytes through `response.Clear()` after parsing, never by casting a read-only view writable.
+Clear invalidates `Data`/`RawData` aliases and status bytes, so inspect status first. Caller constructor
+buffers are not owned by the response and remain unchanged. Do not reintroduce a struct owning cloned
+sensitive arrays: copied structs cannot provide a single clear/lifetime owner.
+
 The canonical usage examples for `DecodeList`, `TryFindValue`, `Tlv`, `EncodeList`, nested encoding, and
 `EncodeAndDisposeList` are in [docs/usage/tlv-processing.md](../../docs/usage/tlv-processing.md). Keep the full examples there rather
 than duplicating them in this contributor guide.

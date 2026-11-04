@@ -170,6 +170,11 @@ development firmware retains Core's permissive compatibility handling.
 
 ## Security notes
 
+- Crypto, raw data-object, and temporary-PIN results transfer writable `Memory<byte>` to the caller.
+  Clear owned plaintext, shared secrets, and temporary PINs with `CryptographicOperations.ZeroMemory(result.Span)`
+  after use. This replaces read-only result memory from earlier previews. Internal parsers retain mutable
+  owned buffers until transfer; raw APDU responses are cleared through their owner's `Clear()` method.
+
 - PINs, PUKs, management keys, and temporary PINs cross the API as `ReadOnlyMemory<byte>`. The session never
   zeroes a buffer you passed in; zero it yourself with `CryptographicOperations.ZeroMemory` in a `finally`.
 - Never log PINs, PUKs, management keys, plaintexts, or signatures. Log metadata only.

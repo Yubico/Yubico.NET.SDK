@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
@@ -31,7 +29,7 @@ internal static class PivDataObjectProtocol
     /// <param name="objectId">The object ID (e.g., from <see cref="PivDataObject"/>).</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The object data, or empty if the object doesn't exist.</returns>
-    internal static async Task<ReadOnlyMemory<byte>> GetObjectAsync(
+    internal static async Task<byte[]> GetObjectAsync(
         IPivBackend backend,
         int objectId,
         CancellationToken cancellationToken = default)
@@ -40,57 +38,31 @@ internal static class PivDataObjectProtocol
         var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, EncodeObjectId(objectId));
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
-        if (response.SW == 0x6A82) // File not found
+        try
         {
-            return ReadOnlyMemory<byte>.Empty;
+            if (response.SW == SWConstants.FileOrApplicationNotFound)
+                return [];
+            if (!response.IsOK())
+                throw ApduException.FromStatusWord(response.SW, $"Failed to read data object 0x{objectId:X6}");
+            return UnwrapDataObjectResponse(response.Data.Span);
         }
-
-        if (!response.IsOK())
+        finally
         {
-            throw ApduException.FromStatusWord(response.SW,
-                $"Failed to read data object 0x{objectId:X6}");
+            response.Clear();
         }
-
-        // Response is wrapped in TAG 0x53 (Discretionary data)
-        // Format: 53 LL [data] - unwrap and return inner data
-        return UnwrapDataObjectResponse(response.Data);
     }
 
     /// <summary>
     /// Unwraps a GET DATA response that is wrapped in TAG 0x53.
     /// </summary>
-    private static ReadOnlyMemory<byte> UnwrapDataObjectResponse(ReadOnlyMemory<byte> data)
+    private static byte[] UnwrapDataObjectResponse(ReadOnlySpan<byte> data)
     {
         if (data.IsEmpty)
-            return data;
-
-        var span = data.Span;
-
-        // Check for TAG 0x53 (Discretionary data)
-        if (span[0] != 0x53)
-        {
-            // Not wrapped: `data` IS the returned value (no copy is made), so it cannot be zeroed
-            // here - the caller owns it as their deliverable, same reasoning as PutObjectAsync
-            // cannot zero the value it's asked to transmit before the caller is done with it.
-            return data;
-        }
-
-        // Use Tlv to parse the wrapper, copy value before disposing.
-        try
-        {
-            using var wrapper = Tlv.Create(span);
-            return wrapper.Value.ToArray();
-        }
-        finally
-        {
-            // `data` is the raw GET DATA response payload (may carry a clear-text PIN-protected
-            // management key, e.g. when reading the PRINTED object for PIN-only mode). Once Tlv.Create
-            // has copied everything it needs out of it (above), the original buffer is no longer
-            // needed. Zeroing is harmless for the many non-secret objects (certs, CHUID, CCC, ADMIN
-            // DATA) read through this same path - unconditional, matching the approach already
-            // applied to PutObjectAsync's write-side buffer.
-            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(data).Span);
-        }
+            return [];
+        if (data[0] != 0x53)
+            return data.ToArray();
+        using var wrapper = Tlv.Create(data);
+        return wrapper.Value.ToArray();
     }
 
     /// <summary>
@@ -108,33 +80,17 @@ internal static class PivDataObjectProtocol
         // Build command data: TAG 0x5C [ object ID ] + TAG 0x53 [ data ]
         var objectIdBytes = EncodeObjectId(objectId);
         int dataLen = data.HasValue && !data.Value.IsEmpty ? data.Value.Length : 0;
-        int dataLenSize = dataLen > 0 ? BerLength.EncodingSize(dataLen) : 1; // 1 byte for 0x00 (empty)
-        int estimatedSize = objectIdBytes.Length + 1 + dataLenSize + dataLen;
-        var writer = new ArrayBufferWriter<byte>(estimatedSize);
-
-        writer.Write(objectIdBytes);
-
-        // TAG 0x53 (Data) - always required, even if empty for delete
-        ReadOnlySpan<byte> dataTag = [0x53];
-        writer.Write(dataTag);
-        if (data.HasValue && !data.Value.IsEmpty)
-        {
-            var lenSpan = writer.GetSpan(dataLenSize);
-            BerLength.Write(lenSpan, dataLen);
-            writer.Advance(dataLenSize);
-            writer.Write(data.Value.Span);
-        }
-        else
-        {
-            // Empty data for delete operations
-            ReadOnlySpan<byte> emptyLen = [0x00];
-            writer.Write(emptyLen);
-        }
-
-        // INS 0xDB (PUT DATA)
+        int dataLenSize = BerLength.EncodingSize(dataLen);
+        byte[] encoded = new byte[objectIdBytes.Length + 1 + dataLenSize + dataLen];
         try
         {
-            var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, writer.WrittenMemory);
+            objectIdBytes.CopyTo(encoded, 0);
+            int offset = objectIdBytes.Length;
+            encoded[offset++] = 0x53;
+            offset += BerLength.Write(encoded.AsSpan(offset), dataLen);
+            if (data is { } value)
+                value.Span.CopyTo(encoded.AsSpan(offset));
+            var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, encoded);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsOK())
@@ -145,11 +101,7 @@ internal static class PivDataObjectProtocol
         }
         finally
         {
-            // The written buffer may carry sensitive material (e.g. a PIN-protected management key
-            // stored via PIN-only mode). Zeroing is harmless for the many non-secret callers
-            // (certificates, CHUID, CCC, ADMIN DATA) so this always runs, matching ApduCommand's
-            // documented "caller zeroes the underlying buffer after transmission" contract.
-            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(writer.WrittenMemory).Span);
+            CryptographicOperations.ZeroMemory(encoded);
         }
     }
 

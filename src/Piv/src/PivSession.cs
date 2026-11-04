@@ -15,7 +15,6 @@
 using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Abstractions;
@@ -428,7 +427,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     // Both overloads are established alpha entry points: one explicit algorithm and one metadata-driven.
 #pragma warning disable RS0026
-    public async Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+    public async Task<Memory<byte>> SignOrDecryptAsync(
         Slot slot,
         KeyType algorithm,
         ReadOnlyMemory<byte> data,
@@ -452,7 +451,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     // Metadata-based algorithm discovery is intentionally a second established alpha overload.
 #pragma warning disable RS0026
-    public async Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+    public async Task<Memory<byte>> SignOrDecryptAsync(
         Slot slot,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
@@ -493,7 +492,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
     }
 #pragma warning restore RS0026
 
-    public async Task<ReadOnlyMemory<byte>> DecryptAsync(
+    public async Task<Memory<byte>> DecryptAsync(
         Slot slot,
         ReadOnlyMemory<byte> cipherText,
         RSAEncryptionPadding padding,
@@ -524,7 +523,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
             .ConfigureAwait(false);
     }
 
-    public async Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
+    public async Task<Memory<byte>> CalculateSecretAsync(
         Slot slot,
         IPublicKey peerPublicKey,
         CancellationToken cancellationToken = default)
@@ -612,7 +611,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return await PivBioProtocol.GetBioMetadataAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<ReadOnlyMemory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default)
+    public async Task<Memory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
 
@@ -773,13 +772,14 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
     }
 
-    public async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
+    public async Task<Memory<byte>?> VerifyUvAsync(
         PivUserVerification userVerification = PivUserVerification.Verify,
         CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
 
-        return await PivBioProtocol.VerifyUvAsync(_backend, Logger, userVerification, cancellationToken).ConfigureAwait(false);
+        var temporaryPin = await PivBioProtocol.VerifyUvAsync(_backend, Logger, userVerification, cancellationToken).ConfigureAwait(false);
+        return temporaryPin is null ? null : temporaryPin.AsMemory();
     }
 
     public async Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default)
@@ -789,7 +789,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         await PivBioProtocol.VerifyTemporaryPinAsync(_backend, Logger, temporaryPin, cancellationToken).ConfigureAwait(false);
     }
 
-    private Task<ReadOnlyMemory<byte>> SignOrDecryptWithUserPresenceAsync(
+    private Task<byte[]> SignOrDecryptWithUserPresenceAsync(
         Slot slot,
         KeyType algorithm,
         ReadOnlyMemory<byte> data,
@@ -944,7 +944,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         bool pinProtectedAuthenticated = false;
         try
         {
-            if (PivPinOnlyProtocol.TryDecodePinProtectedManagementKey(MemoryMarshal.AsMemory(printedRaw).Span, out storedKey))
+            if (PivPinOnlyProtocol.TryDecodePinProtectedManagementKey(printedRaw, out storedKey))
             {
                 pinProtectedAuthenticated = await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false);
                 if (pinProtectedAuthenticated)
@@ -975,7 +975,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
     }
 
-    private async Task<(ReadOnlyMemory<byte> Data, bool PinVerified)> ReadPrintedForRecoveryAsync(
+    private async Task<(byte[] Data, bool PinVerified)> ReadPrintedForRecoveryAsync(
         ReadOnlyMemory<byte> pin, CancellationToken cancellationToken)
     {
         EnsureBackend(cancellationToken);

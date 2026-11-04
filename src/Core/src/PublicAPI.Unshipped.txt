@@ -1,5 +1,7 @@
 #nullable enable
 
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Clear() -> void
+
 Yubico.YubiKit.Core.Abstractions.IApplicationSession
 Yubico.YubiKit.Core.Abstractions.IApplicationSession.ConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType
 Yubico.YubiKit.Core.Abstractions.IApplicationSession.FirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
@@ -507,11 +509,9 @@ Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.P2.set -> void
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.SW.get -> short?
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.SW.set -> void
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse
-Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.ApduResponse() -> void
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.ApduResponse(System.ReadOnlyMemory<byte> data) -> void
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.ApduResponse(byte[]! dataWithoutSW, short sw) -> void
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Data.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse other) -> bool
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.IsOK() -> bool
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.RawData.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.SW.get -> short
@@ -522,7 +522,7 @@ Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduFormatter.Format(Yubico.YubiKi
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduFormatter.Format(byte cla, byte ins, byte p1, byte p2, System.ReadOnlyMemory<byte> data, int le) -> System.Memory<byte>
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduProcessor
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduProcessor.Formatter.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduFormatter!
-Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduProcessor.TransmitAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand command, bool useScp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse>!
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduProcessor.TransmitAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand command, bool useScp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse!>!
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration other) -> bool
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.ForceShortApdus.get -> bool
@@ -596,7 +596,7 @@ Yubico.YubiKit.Core.Sessions.RawOtpHidSession.SendAndReceiveAsync(byte command, 
 Yubico.YubiKit.Core.Sessions.RawSmartCardSession
 Yubico.YubiKit.Core.Sessions.RawSmartCardSession.Configure(Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration? configuration = null) -> void
 Yubico.YubiKit.Core.Sessions.RawSmartCardSession.SelectAsync(System.ReadOnlyMemory<byte> applicationId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
-Yubico.YubiKit.Core.Sessions.RawSmartCardSession.TransmitAndReceiveAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand command, bool throwOnError = true, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse>!
+Yubico.YubiKit.Core.Sessions.RawSmartCardSession.TransmitAndReceiveAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand command, bool throwOnError = true, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse!>!
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion?
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride.init -> void
@@ -920,8 +920,6 @@ override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset.ToString() -
 ~override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Equals(object obj) -> bool
 override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.GetHashCode() -> int
 override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.ToString() -> string!
-~override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Equals(object obj) -> bool
-override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.GetHashCode() -> int
 override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.ToString() -> string!
 ~override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.Equals(object obj) -> bool
 override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.GetHashCode() -> int
@@ -1071,10 +1069,8 @@ static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset.operator !=(Yu
 static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset! l, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset! r) -> bool
 static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand right) -> bool
 static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand right) -> bool
-static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.FromResponse(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse response, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand? command = null, string? additionalContext = null) -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException!
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.FromResponse(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse! response, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand? command = null, string? additionalContext = null) -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException!
 static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.FromStatusWord(short sw, string? additionalContext = null) -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException!
-static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse right) -> bool
-static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse right) -> bool
 static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration right) -> bool
 static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration right) -> bool
 static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.ExtractRetryCount(short sw) -> int?

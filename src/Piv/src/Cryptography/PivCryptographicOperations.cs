@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
@@ -46,7 +45,7 @@ internal static class PivCryptographicOperations
     /// PIN verification may be required before this operation depending on the key's PIN policy.
     /// </para>
     /// </remarks>
-    internal static Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+    internal static Task<byte[]> SignOrDecryptAsync(
         IPivBackend backend,
         ILogger logger,
         Slot slot,
@@ -63,7 +62,7 @@ internal static class PivCryptographicOperations
             userPresenceNotification,
             cancellationToken);
 
-    private static async Task<ReadOnlyMemory<byte>> SignOrDecryptCoreAsync(
+    private static async Task<byte[]> SignOrDecryptCoreAsync(
         IPivBackend backend,
         ILogger logger,
         Slot slot,
@@ -132,7 +131,7 @@ internal static class PivCryptographicOperations
 
                 // Parse response: TAG 0x7C [ TAG 0x82 (response data) ]
                 result = ParseCryptoResponse(response.Data);
-                ReadOnlyMemory<byte> transferredResult = await ResolveAndTransferCryptoResultAsync(
+                byte[] transferredResult = await ResolveAndTransferCryptoResultAsync(
                         result,
                         userPresenceNotification)
                     .ConfigureAwait(false);
@@ -146,7 +145,7 @@ internal static class PivCryptographicOperations
                     CryptographicOperations.ZeroMemory(result);
                 }
 
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+                response.Clear();
             }
         }
         finally
@@ -156,7 +155,7 @@ internal static class PivCryptographicOperations
     }
 
     /// <inheritdoc/>
-    internal static async Task<ReadOnlyMemory<byte>> DecryptAsync(
+    internal static async Task<byte[]> DecryptAsync(
         IPivBackend backend,
         ILogger logger,
         PivSlotMetadata? metadata,
@@ -200,7 +199,6 @@ internal static class PivCryptographicOperations
         // We generate a temporary RSA key of the same size, use textbook RSA (encrypt with public key)
         // to re-wrap the raw bytes, then decrypt with the dummy private key and real padding params.
         // This lets .NET's crypto library handle PKCS#1 v1.5 and OAEP unpadding correctly.
-        byte[]? rawBytes = null;
         byte[]? reEncrypted = null;
         try
         {
@@ -209,8 +207,7 @@ internal static class PivCryptographicOperations
             var publicParams = dummy.ExportParameters(false);
             var n = publicParams.Modulus ?? throw new CryptographicException("RSA key export returned null modulus.");
             var e = publicParams.Exponent ?? throw new CryptographicException("RSA key export returned null exponent.");
-            rawBytes = CopyAndZeroSource(rawDecrypted);
-            reEncrypted = ModPow(rawBytes, e, n, keyBits / 8);
+            reEncrypted = ModPow(rawDecrypted, e, n, keyBits / 8);
             return dummy.Decrypt(reEncrypted, padding);
         }
         catch (CryptographicException ex)
@@ -220,9 +217,7 @@ internal static class PivCryptographicOperations
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(rawDecrypted).Span);
-            if (rawBytes is not null)
-                CryptographicOperations.ZeroMemory(rawBytes);
+            CryptographicOperations.ZeroMemory(rawDecrypted);
             if (reEncrypted is not null)
             {
                 CryptographicOperations.ZeroMemory(reEncrypted);
@@ -283,7 +278,7 @@ internal static class PivCryptographicOperations
     /// <param name="peerPublicKey">The peer's public key.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The shared secret (x-coordinate for NIST curves, point for Curve25519).</returns>
-    internal static async Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
+    internal static async Task<byte[]> CalculateSecretAsync(
         IPivBackend backend,
         ILogger logger,
         Slot slot,
@@ -359,7 +354,7 @@ internal static class PivCryptographicOperations
 
                 // Parse response: TAG 0x7C [ TAG 0x82 (shared secret) ]
                 result = ParseCryptoResponse(response.Data);
-                ReadOnlyMemory<byte> transferredResult = await ResolveAndTransferCryptoResultAsync(
+                byte[] transferredResult = await ResolveAndTransferCryptoResultAsync(
                         result,
                         userPresenceNotification)
                     .ConfigureAwait(false);
@@ -373,7 +368,7 @@ internal static class PivCryptographicOperations
                     CryptographicOperations.ZeroMemory(result);
                 }
 
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+                response.Clear();
             }
         }
         finally
@@ -452,7 +447,7 @@ internal static class PivCryptographicOperations
     }
 
     /// <summary>Resolves successful user presence before transferring an owned cryptographic result.</summary>
-    internal static async Task<ReadOnlyMemory<byte>> ResolveAndTransferCryptoResultAsync(
+    internal static async Task<byte[]> ResolveAndTransferCryptoResultAsync(
         byte[] result,
         UserPresenceNotification userPresenceNotification)
     {
@@ -466,19 +461,6 @@ internal static class PivCryptographicOperations
             CryptographicOperations.ZeroMemory(result);
             throw;
         }
-    }
-
-    /// <summary>
-    /// Copies <paramref name="source"/> into a fresh array and zeroes <paramref name="source"/>'s
-    /// backing buffer, since <paramref name="source"/> (the raw RSA decryption output returned by
-    /// <see cref="SignOrDecryptCoreAsync"/>) would otherwise be left as an unzeroed second copy of
-    /// the clear-text plaintext once the caller starts working from its own copy.
-    /// </summary>
-    internal static byte[] CopyAndZeroSource(ReadOnlyMemory<byte> source)
-    {
-        var copy = source.ToArray();
-        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(source).Span);
-        return copy;
     }
 
     private static byte[] EncodePeerPublicKey(IPublicKey publicKey)

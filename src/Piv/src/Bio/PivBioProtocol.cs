@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Piv.Backend;
@@ -82,7 +81,7 @@ internal static class PivBioProtocol
     /// <returns>A temporary PIN only for <see cref="PivUserVerification.VerifyAndRequestTemporaryPin" />; otherwise null. Caller must zero returned bytes immediately after use.</returns>
     /// <exception cref="NotSupportedException">Thrown if biometrics are not supported or configured.</exception>
     /// <exception cref="InvalidPinException">Thrown if biometric verification fails, with the remaining retry count.</exception>
-    internal static async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
+    internal static async Task<byte[]?> VerifyUvAsync(
         IPivBackend backend,
         ILogger logger,
         PivUserVerification userVerification = PivUserVerification.Verify,
@@ -151,7 +150,7 @@ internal static class PivBioProtocol
 
         // The original GET DATA response buffer also carries the temporary PIN in the clear; the
         // caller only owns/zeroes `tempPin` (the copy above), so this method must zero the source.
-        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.Data).Span);
+        response.Clear();
 
         logger.LogDebug("PIV: Biometric verification succeeded, temporary PIN retrieved (length={Length})", tempPin.Length);
         logger.LogWarning("PIV: Caller MUST zero temporary PIN immediately after use!");

@@ -67,6 +67,11 @@ success responses therefore resolve as `Failed`, and raw or untransferred parsed
 
 ## Critical Security Requirements
 
+Raw APDU responses have a Core-owned `Clear()` operation. Internal crypto/data-object results stay in owned
+`byte[]` buffers until the public session transfers `Memory<byte>` to the caller. Never cast read-only memory
+writable to perform cleanup. Clear only buffers owned by this scope; caller inputs and static defaults remain
+borrowed and unmodified.
+
 PIV handles PINs, PUKs, management keys, private keys, and cryptographic operation payloads.
 
 - Zero PINs, PUKs, management keys, and encoded sensitive APDU payloads with `CryptographicOperations.ZeroMemory()`.

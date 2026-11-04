@@ -112,7 +112,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>16-byte temporary PIN if requested; null otherwise. Caller must zero returned bytes.</returns>
     /// <exception cref="NotSupportedException">Biometric authentication not available.</exception>
-    Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
+    Task<Memory<byte>?> VerifyUvAsync(
         PivUserVerification userVerification = PivUserVerification.Verify,
         CancellationToken cancellationToken = default);
 
@@ -281,7 +281,7 @@ public interface IPivSession : IApplicationSession
     /// <returns>Signature or decrypted data.</returns>
     // Both declarations are established alpha entry points: explicit and metadata-driven algorithms.
 #pragma warning disable RS0026
-    Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+    Task<Memory<byte>> SignOrDecryptAsync(
         Slot slot,
         KeyType algorithm,
         ReadOnlyMemory<byte> data,
@@ -309,7 +309,7 @@ public interface IPivSession : IApplicationSession
     /// <returns>Signature or decrypted data.</returns>
     /// <exception cref="NotSupportedException">YubiKey firmware is older than 5.3 and does not support metadata retrieval.</exception>
     /// <exception cref="InvalidOperationException">Slot is empty (no key present).</exception>
-    Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
+    Task<Memory<byte>> SignOrDecryptAsync(
         Slot slot,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default);
@@ -340,7 +340,7 @@ public interface IPivSession : IApplicationSession
     /// <returns>Decrypted plaintext with padding removed.</returns>
     /// <exception cref="ArgumentException">Cipher text length does not match RSA key size, or slot has no RSA key.</exception>
     /// <exception cref="CryptographicException">Padding is malformed or decryption failed.</exception>
-    Task<ReadOnlyMemory<byte>> DecryptAsync(
+    Task<Memory<byte>> DecryptAsync(
         Slot slot,
         ReadOnlyMemory<byte> cipherText,
         RSAEncryptionPadding padding,
@@ -356,7 +356,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="peerPublicKey">Peer's public key for ECDH.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Raw shared secret (x-coordinate for ECDH, 32 bytes for X25519).</returns>
-    Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
+    Task<Memory<byte>> CalculateSecretAsync(
         Slot slot,
         IPublicKey peerPublicKey,
         CancellationToken cancellationToken = default);
@@ -447,7 +447,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="objectId">PIV data object identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Object data or empty if object does not exist.</returns>
-    Task<ReadOnlyMemory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default);
+    Task<Memory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Write PIV data object.

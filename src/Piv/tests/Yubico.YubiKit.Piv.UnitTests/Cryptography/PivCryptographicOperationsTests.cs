@@ -33,14 +33,16 @@ namespace Yubico.YubiKit.Piv.UnitTests.Cryptography;
 public class PivCryptographicOperationsTests
 {
     [Fact]
-    public void CopyAndZeroSource_CopiesValueAndZeroesSourceBuffer()
+    public async Task ResolveAndTransferCryptoResultAsync_SuccessTransfersOwnedBufferWithoutCopyingOrClearing()
     {
         byte[] source = Enumerable.Range(1, 32).Select(i => (byte)i).ToArray();
         byte[] sourceSnapshot = (byte[])source.Clone();
 
-        var result = PivCryptographicOperations.CopyAndZeroSource(source);
-
+        var result = await PivCryptographicOperations.ResolveAndTransferCryptoResultAsync(source, UserPresenceNotification.None);
+        Assert.Same(source, result);
         Assert.Equal(sourceSnapshot, result);
+        // Ownership has transferred; only the receiver clears this mutable result now.
+        CryptographicOperations.ZeroMemory(result);
         Assert.All(source, b => Assert.Equal(0, b));
     }
 

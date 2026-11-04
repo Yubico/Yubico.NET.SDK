@@ -34,12 +34,24 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 ///     not by Core, solely for independent live-read comparisons.
 /// </remarks>
 [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
-public class ScopedDiscoveryReadOnlyTests(ITestOutputHelper output) : IAsyncLifetime
+public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
 {
     private const int MaxAttempts = 3;
     private static readonly ConnectionType[] ConcreteTypes =
         [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
-    private readonly AllowList _allowList = new(new AppSettingsAllowListProvider());
+    private readonly ITestOutputHelper _output;
+    private readonly AllowList _allowList;
+
+    public ScopedDiscoveryReadOnlyTests(ITestOutputHelper output)
+        : this(output, new AllowList(new AppSettingsAllowListProvider()))
+    {
+    }
+
+    internal ScopedDiscoveryReadOnlyTests(ITestOutputHelper output, AllowList allowList)
+    {
+        _output = output;
+        _allowList = allowList;
+    }
 
     public Task InitializeAsync() => YubiKeyManager.ShutdownAsync();
     public Task DisposeAsync() => YubiKeyManager.ShutdownAsync();
@@ -87,7 +99,7 @@ public class ScopedDiscoveryReadOnlyTests(ITestOutputHelper output) : IAsyncLife
         }
 
         Assert.False(YubiKeyManager.IsMonitoring);
-        output.WriteLine($"Validated {scope}: {expected.Count} authorized physical key(s), {scoped.Count} view(s).");
+        _output.WriteLine($"Validated {scope}: {expected.Count} authorized physical key(s), {scoped.Count} view(s).");
     }
 
     [SkippableFact]
@@ -114,12 +126,13 @@ public class ScopedDiscoveryReadOnlyTests(ITestOutputHelper output) : IAsyncLife
 
         Assert.Equal(snapshots, first.Select(view => view.CachedDeviceInfo));
         Assert.False(YubiKeyManager.IsMonitoring);
-        output.WriteLine($"Default and explicit All agree for {ConnectionsBySerial(first).Count} authorized physical key(s).");
+        _output.WriteLine($"Default and explicit All agree for {ConnectionsBySerial(first).Count} authorized physical key(s).");
     }
 
-    private async Task<IReadOnlyList<IYubiKey>> ReferenceScanAsync(CancellationToken token)
+    internal async Task<IReadOnlyList<IYubiKey>> ReferenceScanAsync(
+        CancellationToken token, Func<Task<IReadOnlyList<IYubiKey>>>? scanAsync = null)
     {
-        var reference = Authorized(await ScanUntilReadyAsync(null, _ => true, token));
+        var reference = Authorized(await ScanUntilReadyAsync(null, _ => true, token, scanAsync));
         Assert.NotEmpty(reference);
         return reference;
     }
@@ -132,14 +145,15 @@ public class ScopedDiscoveryReadOnlyTests(ITestOutputHelper output) : IAsyncLife
             .ToDictionary(group => group.Key, group => group.Aggregate(ConnectionType.Unknown, (all, view) => all | view.AvailableConnections));
 
     private async Task<IReadOnlyList<IYubiKey>> ScanUntilReadyAsync(
-        ConnectionType? scope, Func<IReadOnlyList<IYubiKey>, bool> ready, CancellationToken token)
+        ConnectionType? scope, Func<IReadOnlyList<IYubiKey>, bool> ready, CancellationToken token,
+        Func<Task<IReadOnlyList<IYubiKey>>>? scanAsync = null)
     {
         IReadOnlyList<IYubiKey> scan = [];
         for (var attempt = 1; attempt <= MaxAttempts; attempt++)
         {
-            scan = await TransientScanRetry.ScanAsync(() => scope is { } requested
+            scan = await TransientScanRetry.ScanAsync(scanAsync ?? (() => scope is { } requested
                 ? YubiKeyManager.ScanAsync(requested, token)
-                : YubiKeyManager.ScanAsync(cancellationToken: token));
+                : YubiKeyManager.ScanAsync(cancellationToken: token)));
             Assert.Equal(scan.Count, scan.Select(view => view.DeviceId).Distinct(StringComparer.Ordinal).Count());
             var concrete = scope == ConnectionType.Hid
                 ? ConnectionType.HidFido | ConnectionType.HidOtp
@@ -149,17 +163,19 @@ public class ScopedDiscoveryReadOnlyTests(ITestOutputHelper output) : IAsyncLife
                 Assert.NotEqual(ConnectionType.Unknown, view.AvailableConnections);
                 Assert.Equal(ConnectionType.Unknown, view.AvailableConnections & ~concrete);
             });
-            if (scan.Count > 0 && scan.All(view => view.SerialNumber is not null && view.CachedDeviceInfo is not null) && ready(scan))
+            // A complete Security Key snapshot may have no serial. Missing metadata must still block:
+            // an unidentified view could be a contended authorized fixture, not an unrelated device.
+            if (scan.Count > 0 && scan.All(view => view.CachedDeviceInfo is not null) && ready(scan))
                 return scan;
 
-            output.WriteLine($"{scope ?? ConnectionType.All} attempt {attempt}: {scan.Count} view(s), " +
+            _output.WriteLine($"{scope ?? ConnectionType.All} attempt {attempt}: {scan.Count} view(s), " +
                 $"{scan.Count(view => view.CachedDeviceInfo is null)} without metadata; fixture not ready (contention is possible).");
             if (attempt < MaxAttempts)
                 await Task.Delay(TimeSpan.FromMilliseconds(250), token);
         }
 
         Skip.If(scope is null && scan.Count == 0, "No USB fixture found after bounded scan attempts.");
-        Assert.Fail("Incomplete serial/metadata or missing expected interfaces after three scans. " +
+        Assert.Fail("Incomplete metadata or missing expected interfaces after three scans. " +
             "Requires idle, serial-bearing USB fixtures; check external contention before diagnosing a discovery regression.");
         return scan;
     }
@@ -176,7 +192,7 @@ public class ScopedDiscoveryReadOnlyTests(ITestOutputHelper output) : IAsyncLife
         Assert.Equal(view.SerialNumber, live.SerialNumber);
         AssertMetadataMatches(cached, live);
         AssertMetadataMatches(cached, Assert.IsType<DeviceInfo>(view.CachedDeviceInfo));
-        output.WriteLine($"{type}: cached/live firmware {live.FirmwareVersion}, {live.FormFactor}, USB {live.UsbEnabled}; serial correlation passed.");
+        _output.WriteLine($"{type}: cached/live firmware {live.FirmwareVersion}, {live.FormFactor}, USB {live.UsbEnabled}; serial correlation passed.");
     }
 
     private async Task<IConnection> ConnectWithRetryAsync(IYubiKey view, ConnectionType type, CancellationToken token)
@@ -195,7 +211,7 @@ public class ScopedDiscoveryReadOnlyTests(ITestOutputHelper output) : IAsyncLife
             }
             catch (ConnectionInUseException) when (attempt < MaxAttempts)
             {
-                output.WriteLine($"{type} connect attempt {attempt}: ConnectionInUseException; bounded retry.");
+                _output.WriteLine($"{type} connect attempt {attempt}: ConnectionInUseException; bounded retry.");
                 await Task.Delay(TimeSpan.FromMilliseconds(250), token);
             }
         }

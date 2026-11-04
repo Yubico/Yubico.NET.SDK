@@ -13,6 +13,9 @@ For Management-specific test patterns, device filtering, and test state utilitie
 - `Yubico.YubiKit.Management.UnitTests` - Unit tests for Management module (xUnit v3)
 - `Yubico.YubiKit.Management.IntegrationTests` - Integration tests requiring YubiKey hardware (xUnit v2)
 
+`ScopedDiscoveryReadinessTests` is hardware-free despite living beside the read-only hardware suite. It injects
+scan results and an allow list into that suite's actual reference-scan path, including metadata readiness retries.
+
 ## Advanced Device Filtering
 
 Management tests use the most powerful device filtering system in the SDK via `[WithYubiKey]` attribute:

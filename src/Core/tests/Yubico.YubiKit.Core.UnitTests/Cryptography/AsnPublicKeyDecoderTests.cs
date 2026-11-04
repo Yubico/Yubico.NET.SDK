@@ -187,6 +187,19 @@ public class AsnPublicKeyDecoderTests
         Assert.Throws<NotSupportedException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
     }
 
+    [Theory]
+    [InlineData("3011300906072A8648CE380401030400020108")] // Parameters absent.
+    [InlineData("301C301406072A8648CE380401300902011702010B020102030400020108")]
+    public void CreatePublicKey_UnsupportedDsaWithOrWithoutParameters_ThrowsNotSupportedException(string spkiHex)
+    {
+        // id-dsa (1.2.840.10040.4.1), with optional Dss-Parms SEQUENCE (p=23, q=11, g=2),
+        // and a BIT STRING containing the DER INTEGER public value y=8. These small values
+        // exercise algorithm dispatch, not provider support or cryptographic strength.
+        var spki = Convert.FromHexString(spkiHex);
+
+        Assert.Throws<NotSupportedException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
+    }
+
     [Fact]
     public void CreatePublicKey_UnsupportedCurveOid_ThrowsNotSupportedException()
     {

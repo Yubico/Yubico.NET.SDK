@@ -56,9 +56,8 @@ internal class AsnPublicKeyDecoder
 
         // RFC 5480: one named-curve OID. RFC 8410: Ed/X parameters MUST be absent.
         var curveOid = keyAlgorithmOid == Oids.EcPublicKey ? seqAlgorithmIdentifier.ReadObjectIdentifier() : string.Empty;
-        seqAlgorithmIdentifier.ThrowIfNotEmpty();
 
-        return keyAlgorithmOid switch
+        IPublicKey publicKey = keyAlgorithmOid switch
         {
             Oids.Rsa => CreateRSAPublicKey(subjectPublicKey),
             Oids.EcPublicKey => CreateECPublicKey(curveOid, subjectPublicKey),
@@ -66,6 +65,10 @@ internal class AsnPublicKeyDecoder
             Oids.Ed25519 => Curve25519PublicKey.CreateFromValue(subjectPublicKey, KeyType.Ed25519),
             _ => throw new NotSupportedException($"Unsupported public key algorithm OID '{keyAlgorithmOid}'.")
         };
+
+        // Enforce parameter rules only for supported algorithms, preserving the unsupported-OID exception.
+        seqAlgorithmIdentifier.ThrowIfNotEmpty();
+        return publicKey;
     }
 
     private static RSAPublicKey CreateRSAPublicKey(byte[] subjectPublicKey)

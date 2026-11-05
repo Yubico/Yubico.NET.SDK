@@ -398,6 +398,31 @@ one-to-one mapping between operating-system interfaces and physical USB interfac
 
 ### Device Event Delivery
 
+**Owned-monitor migration, Stage 1:** `YubiKeyMonitor` is now the sole composition/teardown owner of the
+repository and monitor service. `YubiKeyDeviceManager` is a temporary adapter for the unchanged static
+API; do not grow a second lifecycle implementation there. The initialized factory is internal until the
+compile-consistent static API/consumer migration. It starts listeners first and awaits the loop's own
+initial scan-and-publication signal, not a separate manual rescan. Empty success is ready; initial scan or
+publication failure is propagated and disposes partial ownership. Creation cancellation cancels the wait
+and triggers bounded teardown; the loop's token belongs to its generation and is not linked to the
+creation token. The production interval remains five seconds; test timing stays internal.
+
+Repository diffs serialize on `_cacheLock`; cached reads use an atomically replaced, read-only membership
+list published only at the end of a complete diff. The short `_stateLock` coordinates snapshot admission,
+disposal, and failure, without making teardown wait for a parked diff (including device getters/logging).
+Reads do not enumerate a dictionary being modified or touch hardware. Lists are historical membership
+snapshots, not deeply immutable devices.
+The existing service publication/generation gates remain responsible for rejecting stale scans. Monitor
+disposal shares completion, retires queued built-in finder reads without releasing native leases, and
+disposes the repository first rather than separately emptying a still-live cache. Unexpected terminal loop
+failure faults active/future subscriptions and rejects snapshot access; ordinary later scan failures still
+retain the last snapshot and retry. A failed abandoned generation cannot fault a successor's repository.
+
+**Staged limitation:** owned `WatchAsync` still delegates the same change-only stream described below.
+Atomic snapshot capture plus subscription/initial Added replay belongs to Stage 2; never prepend an
+uncoordinated `CurrentDevices` read. Public creation and removal of the legacy static lifecycle belong to
+Stage 3. `YubiKeyMonitorTests` and the gated repository partial-diff test pin Stage 1 without hardware.
+
 One public surface over one internal pipeline, both BCL-typed:
 
 - `YubiKeyManager.WatchAsync(ct)` — `IAsyncEnumerable<DeviceEvent>`. There is no observable surface;
@@ -423,7 +448,8 @@ Contracts worth knowing before editing:
 - **Overflow faults rather than drops**, because `DeviceEvent` is a delta and a dropped event
   permanently desynchronises the consumer's device list. Recover by re-enumerating and calling
   `FindAllAsync`.
-- **Repository disposal ends active watchers normally** — not faulted, not cancelled.
+- **Repository disposal ends healthy active watchers normally** — not faulted, not cancelled. A terminal
+  monitoring failure instead faults subscriptions; later disposal does not erase an already-published fault.
 - **Enumerating after completion** ends immediately rather than throwing or hanging.
 - **Ordering across concurrent `Publish` calls belongs to the producer.** The monitor's publication
   gate provides it. `Publish` after `Complete` is a silent no-op.

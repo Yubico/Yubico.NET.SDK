@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Core.Devices;
@@ -34,6 +35,11 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
 
     private readonly ConcurrentDictionary<string, IYubiKey> _deviceCache = new();
     private readonly DeviceEventHub _events = new();
+    // Serialize diffs, but never make disposal/failure wait on device properties or logging in a diff.
+    private readonly Lock _cacheLock = new();
+    private readonly Lock _stateLock = new();
+    private IReadOnlyList<IYubiKey> _snapshot = Array.AsReadOnly<IYubiKey>([]);
+    private Exception? _failure;
 
     private volatile bool _hasData;
     private int _disposed;
@@ -44,12 +50,22 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
     /// <param name="cancellationToken">Cancels this enumeration only.</param>
     /// <remarks>
     /// Subscription is lazy, and each enumeration owns an independent bounded buffer. Cancellation and
-    /// overflow terminate only the affected enumeration; repository disposal ends every active
-    /// enumeration normally. Delivery is asynchronous, so no consumer can block or interrupt
+    /// overflow terminate only the affected enumeration; disposal ends healthy active enumerations
+    /// normally, while terminal monitoring failure faults them. Delivery is asynchronous, so no consumer can block or interrupt
     /// <see cref="UpdateCache"/>.
     /// </remarks>
     public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
-        _events.WatchAsync(cancellationToken);
+        WatchCoreAsync(cancellationToken);
+
+    private async IAsyncEnumerable<DeviceEvent> WatchCoreAsync(
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (Volatile.Read(ref _disposed) == 1)
+            yield break;
+
+        await foreach (var change in _events.WatchAsync(cancellationToken).ConfigureAwait(false))
+            yield return change;
+    }
 
     /// <summary>
     /// Number of live <see cref="WatchAsync"/> subscriptions. Diagnostic observability for the
@@ -82,8 +98,11 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
     public IReadOnlyList<IYubiKey> GetAll(ConnectionType type = ConnectionType.All)
     {
         ThrowIfDisposed();
-
-        return [.. _deviceCache.Values.Where(d => type.Matches(d.AvailableConnections))];
+        ThrowIfFailed();
+        var snapshot = Volatile.Read(ref _snapshot);
+        return type == ConnectionType.All
+            ? snapshot
+            : Array.AsReadOnly<IYubiKey>([.. snapshot.Where(d => type.Matches(d.AvailableConnections))]);
     }
 
     /// <summary>
@@ -98,8 +117,16 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
     /// </remarks>
     public void UpdateCache(IEnumerable<IYubiKey> devices)
     {
-        ThrowIfDisposed();
+        lock (_cacheLock)
+        {
+            ThrowIfDisposed();
+            ThrowIfFailed();
+            UpdateCacheCore(devices);
+        }
+    }
 
+    private void UpdateCacheCore(IEnumerable<IYubiKey> devices)
+    {
         // Diffing is keyed by physical identity — the set of interface paths a key occupies — and never by
         // IYubiKey.DeviceId. DeviceId names the evidence tier that resolved the merge and may change while
         // the interface set remains unchanged; the repository retains the existing object across those
@@ -143,41 +170,26 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
         var changedCount = 0;
         foreach (var identityKey in newKeys.Intersect(currentKeys))
         {
-            var updated = newDeviceMap[identityKey];
-            if (!_deviceCache.TryGetValue(identityKey, out var existing))
-                continue;
-
-            var serialContradiction = existing.SerialNumber is { } existingSerial &&
-                updated.SerialNumber is { } updatedSerial &&
-                existingSerial != updatedSerial;
-            if (existing.AvailableConnections != updated.AvailableConnections || serialContradiction)
-            {
-                _deviceCache[identityKey] = updated;
-                _events.Publish(new DeviceEvent(DeviceAction.Removed, existing));
-                _events.Publish(new DeviceEvent(DeviceAction.Added, updated));
+            if (UpdateRetainedDevice(identityKey, newDeviceMap[identityKey]))
                 changedCount++;
-                Logger.LogDebug(
-                    "Device republished: {OldDeviceId} -> {NewDeviceId}, connections {OldConnections} -> " +
-                    "{NewConnections}, serial {OldSerial} -> {NewSerial}",
-                    existing.DeviceId,
-                    updated.DeviceId,
-                    existing.AvailableConnections,
-                    updated.AvailableConnections,
-                    existing.SerialNumber,
-                    updated.SerialNumber);
-            }
-            else if (existing is YubiKeyDevice retained &&
-                updated is YubiKeyDevice latest &&
-                latest.DeviceInfo is { } metadata)
-            {
-                retained.DeviceInfo = metadata;
-            }
-
-            // Otherwise retain the object whose DeviceId was published in Added, so a later Removed event
-            // remains correlated for this uninterrupted physical-presence lifetime.
         }
 
-        _hasData = true;
+        // Readers see only complete publications, never the intermediate removals/additions above.
+        // The private backing array escapes solely through its read-only wrapper.
+        var snapshot = Array.AsReadOnly<IYubiKey>([.. _deviceCache.Values]);
+        lock (_stateLock)
+        {
+            if (_disposed == 1)
+            {
+                // Disposal may have abandoned this diff. Release any references installed after its
+                // first clear, but never restore validity or emit events through the completed hub.
+                _deviceCache.Clear();
+                ThrowIfDisposed();
+            }
+            ThrowIfFailed();
+            Volatile.Write(ref _snapshot, snapshot);
+            _hasData = true;
+        }
 
         Logger.LogDebug(
             "Cache updated: {Total} devices, {Added} added, {Removed} removed, {Changed} republished",
@@ -187,12 +199,56 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
             changedCount);
     }
 
+    private bool UpdateRetainedDevice(string identityKey, IYubiKey updated)
+    {
+        if (!_deviceCache.TryGetValue(identityKey, out var existing))
+            return false;
+
+        var serialContradiction = existing.SerialNumber is { } existingSerial &&
+            updated.SerialNumber is { } updatedSerial && existingSerial != updatedSerial;
+        if (existing.AvailableConnections != updated.AvailableConnections || serialContradiction)
+        {
+            _deviceCache[identityKey] = updated;
+            _events.Publish(new DeviceEvent(DeviceAction.Removed, existing));
+            _events.Publish(new DeviceEvent(DeviceAction.Added, updated));
+            Logger.LogDebug(
+                "Device republished: {OldDeviceId} -> {NewDeviceId}, connections {OldConnections} -> " +
+                "{NewConnections}, serial {OldSerial} -> {NewSerial}",
+                existing.DeviceId, updated.DeviceId, existing.AvailableConnections, updated.AvailableConnections,
+                existing.SerialNumber, updated.SerialNumber);
+            return true;
+        }
+
+        if (existing is YubiKeyDevice retained && updated is YubiKeyDevice latest && latest.DeviceInfo is { } metadata)
+            retained.DeviceInfo = metadata;
+
+        // Retain the originally published object so a later Removed event remains correlated.
+        return false;
+    }
+
     private void ThrowIfDisposed()
     {
-        if (_disposed == 1)
+        if (Volatile.Read(ref _disposed) == 1)
         {
             throw new ObjectDisposedException(nameof(YubiKeyDeviceRepository));
         }
+    }
+
+    internal void Fail(Exception error)
+    {
+        lock (_stateLock)
+        {
+            if (_disposed == 1 || _failure is not null)
+                return;
+            Volatile.Write(ref _failure, error);
+            _events.Complete(new InvalidOperationException("Device monitoring terminated unexpectedly.", error));
+        }
+    }
+
+    private void ThrowIfFailed()
+    {
+        if (Volatile.Read(ref _failure) is { } failure)
+            throw new InvalidOperationException("Device monitoring terminated unexpectedly.", failure);
     }
 
     /// <summary>
@@ -200,22 +256,23 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
     /// <see cref="HasData"/> so the discarded cache is no longer reported as valid. Idempotent.
     /// </summary>
     /// <remarks>
-    /// The disposed flag is set before the cache is emptied, so a concurrent <see cref="UpdateCache"/>
-    /// either completes in full beforehand or is rejected outright. There is no instant at which the
-    /// repository is live and emptied, which is what stops a late publication from diffing an attached
-    /// device against an empty cache and reporting it as newly added.
+    /// Disposal never waits on the diff lock. It marks the repository disposed, completes event delivery,
+    /// and discards membership under the short state lock. An abandoned diff can finish its internal work,
+    /// but cannot restore a snapshot or cache validity, or publish through the completed hub.
     /// </remarks>
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref _disposed, 1) == 1)
+        lock (_stateLock)
         {
-            return;
+            if (Interlocked.Exchange(ref _disposed, 1) == 1)
+                return;
+
+            _events.Complete();
+
+            _deviceCache.Clear();
+            Volatile.Write(ref _snapshot, Array.AsReadOnly<IYubiKey>([]));
+            _hasData = false;
         }
-
-        _events.Complete();
-
-        _deviceCache.Clear();
-        _hasData = false;
 
         Logger.LogDebug("YubiKeyDeviceRepository disposed");
 

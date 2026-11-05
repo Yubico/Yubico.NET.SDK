@@ -18,16 +18,11 @@ using Yubico.YubiKit.Core.Abstractions;
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-/// Composition root that owns and coordinates the device repository and monitor service.
+/// Temporary adapter retaining the legacy static manager's cached discovery and lifecycle APIs.
 /// </summary>
 /// <remarks>
-/// This class provides the main entry point for device management. It:
-/// <list type="bullet">
-///   <item>Owns a <see cref="YubiKeyDeviceRepository"/> for caching device state</item>
-///   <item>Owns a <see cref="YubiKeyDeviceMonitorService"/> for device discovery</item>
-///   <item>Implements smart caching: first call scans, subsequent calls return cache</item>
-///   <item>Supports forced rescans via <c>forceRescan</c> parameter</item>
-/// </list>
+/// Composition and teardown belong solely to <see cref="YubiKeyMonitor"/>. This adapter is removed
+/// with the compile-consistent migration of the static API and its consumers.
 /// </remarks>
 internal sealed class YubiKeyDeviceManager : IAsyncDisposable
 {
@@ -36,10 +31,11 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     /// <summary>
     /// Default monitoring interval (5 seconds).
     /// </summary>
-    internal static readonly TimeSpan DefaultMonitoringInterval = TimeSpan.FromSeconds(5);
+    internal static readonly TimeSpan DefaultMonitoringInterval = YubiKeyMonitor.DefaultMonitoringInterval;
 
-    private readonly YubiKeyDeviceRepository _repository;
-    private readonly YubiKeyDeviceMonitorService _monitorService;
+    private readonly YubiKeyMonitor _monitor;
+    private YubiKeyDeviceRepository Repository => _monitor.Repository;
+    private YubiKeyDeviceMonitorService MonitorService => _monitor.Service;
     private readonly SemaphoreSlim _initializationLock = new(1, 1);
 
     private int _disposed;
@@ -56,7 +52,11 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     /// event. Pinning it needs a hook because the window lives entirely inside <see cref="DisposeAsync"/>
     /// and closes before it returns.
     /// </remarks>
-    internal Func<Task>? RepositoryTeardownReachedForTest;
+    internal Func<Task>? RepositoryTeardownReachedForTest
+    {
+        get => _monitor.RepositoryTeardownReachedForTest;
+        set => _monitor.RepositoryTeardownReachedForTest = value;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="YubiKeyDeviceManager"/> class.
@@ -70,21 +70,22 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(monitorService);
 
-        _repository = repository;
-        _monitorService = monitorService;
+        _monitor = new YubiKeyMonitor(repository, monitorService);
     }
+
+    private YubiKeyDeviceManager(YubiKeyMonitor monitor) => _monitor = monitor;
 
     /// <summary>
     /// Gets an async sequence of device events (arrivals and removals).
     /// </summary>
     /// <param name="cancellationToken">Stops this enumeration.</param>
     public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
-        _repository.WatchAsync(cancellationToken);
+        _monitor.WatchAsync(cancellationToken);
 
     /// <summary>
     /// Gets a value indicating whether device monitoring is currently active.
     /// </summary>
-    public bool IsMonitoring => _monitorService.IsMonitoring;
+    public bool IsMonitoring => MonitorService.IsMonitoring;
 
     /// <summary>
     /// Finds all connected YubiKey devices.
@@ -106,22 +107,22 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
         if (forceRescan)
         {
             Logger.LogDebug("FindAllAsync: forceRescan=true, performing scan");
-            await _monitorService.RescanAsync(cancellationToken).ConfigureAwait(false);
-            return _repository.GetAll(type);
+            await MonitorService.RescanAsync(cancellationToken).ConfigureAwait(false);
+            return Repository.GetAll(type);
         }
 
         // If monitoring is active and we have data, return cache
-        if (IsMonitoring && _repository.HasData)
+        if (IsMonitoring && Repository.HasData)
         {
             Logger.LogDebug("FindAllAsync: monitoring active with data, returning cache");
-            return _repository.GetAll(type);
+            return Repository.GetAll(type);
         }
 
         // If we have data, return cache
-        if (_repository.HasData)
+        if (Repository.HasData)
         {
             Logger.LogDebug("FindAllAsync: returning cached data");
-            return _repository.GetAll(type);
+            return Repository.GetAll(type);
         }
 
         // First-time initialization: need to scan
@@ -129,14 +130,14 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
         try
         {
             // Double-check after acquiring lock
-            if (_repository.HasData)
+            if (Repository.HasData)
             {
-                return _repository.GetAll(type);
+                return Repository.GetAll(type);
             }
 
             Logger.LogDebug("FindAllAsync: first call, performing initial scan");
-            await _monitorService.RescanAsync(cancellationToken).ConfigureAwait(false);
-            return _repository.GetAll(type);
+            await MonitorService.RescanAsync(cancellationToken).ConfigureAwait(false);
+            return Repository.GetAll(type);
         }
         finally
         {
@@ -174,7 +175,7 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     public void StartMonitoring(TimeSpan interval)
     {
         ThrowIfDisposed();
-        _monitorService.StartMonitoring(interval);
+        MonitorService.StartMonitoring(interval);
     }
 
     /// <summary>
@@ -183,7 +184,7 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     public void StopMonitoring()
     {
         ThrowIfDisposed();
-        _monitorService.StopMonitoring();
+        MonitorService.StopMonitoring();
     }
 
     private void ThrowIfDisposed()
@@ -197,50 +198,16 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     /// <summary>
     /// Disposes all resources with correct ordering.
     /// </summary>
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        if (Interlocked.Exchange(ref _disposed, 1) == 1)
-        {
-            return;
-        }
-
-        // 1. Stop monitoring (if active)
-        _monitorService.StopMonitoring();
-
-        // 2. Dispose monitor service
-        await _monitorService.DisposeAsync().ConfigureAwait(false);
-
-        // 3. Dispose the repository. Disposal already clears the cache, and it must be the first
-        //    thing done to the repository: a publication that outlived the monitor's bounded drain
-        //    and resumes here would find a live-but-emptied repository if the cache were cleared
-        //    separately first, diff against an empty cache, and emit Added for every attached
-        //    device after DisposeAsync had already returned. Disposing first makes that publication
-        //    throw ObjectDisposedException instead, which is what upholds the documented guarantee
-        //    that no device event escapes a disposed manager.
-        var teardownHook = RepositoryTeardownReachedForTest;
-        if (teardownHook is not null)
-        {
-            await teardownHook().ConfigureAwait(false);
-        }
-
-        _repository.Dispose();
-
-        // 4. Dispose synchronization primitives
-        _initializationLock.Dispose();
-
-        Logger.LogDebug("YubiKeyDeviceManager disposed");
+        Interlocked.Exchange(ref _disposed, 1);
+        // Do not dispose the initialization gate: an abandoned caller can still release it.
+        return _monitor.DisposeAsync();
     }
 
     /// <summary>
     /// Creates a new <see cref="YubiKeyDeviceManager"/> instance without requiring dependency injection.
     /// </summary>
     /// <returns>A new instance of <see cref="YubiKeyDeviceManager"/>.</returns>
-    public static YubiKeyDeviceManager Create()
-    {
-        var repository = new YubiKeyDeviceRepository();
-        var findYubiKeys = FindYubiKeys.Create();
-        var monitorService = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
-
-        return new YubiKeyDeviceManager(repository, monitorService);
-    }
+    public static YubiKeyDeviceManager Create() => new(YubiKeyMonitor.CreateUninitialized());
 }

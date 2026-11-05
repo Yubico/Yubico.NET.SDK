@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -124,6 +125,21 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
     /// need a seam instead.
     /// </remarks>
     internal Func<Task>? PublishAdmittedForTest;
+
+    /// <summary>Test-only observation/fault injection at the loop's wait boundary.</summary>
+    internal Action? MonitoringWaitReachedForTest;
+
+    internal async Task StartInitializedAsync(TimeSpan interval, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var generation = StartMonitoringCore(interval, requireInitialScan: true);
+        // Cancel only initialization's wait. The factory disposes on failure/cancellation, and the
+        // generation owns its own lifetime token, never linked to the caller's creation token.
+        var failure = await generation.InitialScan.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+        if (failure is not null)
+            ExceptionDispatchInfo.Throw(failure);
+        cancellationToken.ThrowIfCancellationRequested();
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="YubiKeyDeviceMonitorService"/> class.
@@ -302,7 +318,9 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
     /// make an idempotent start unsafe to call defensively.
     /// </para>
     /// </remarks>
-    public void StartMonitoring(TimeSpan interval)
+    public void StartMonitoring(TimeSpan interval) => StartMonitoringCore(interval, requireInitialScan: false);
+
+    private MonitorGeneration StartMonitoringCore(TimeSpan interval, bool requireInitialScan)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(interval, TimeSpan.Zero, nameof(interval));
         ThrowIfDisposed();
@@ -315,7 +333,7 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
             {
                 if (!_monitoringTask.IsCompleted)
                 {
-                    return; // Already monitoring, idempotent
+                    return _current ?? throw new ObjectDisposedException(nameof(YubiKeyDeviceMonitorService));
                 }
 
                 // The monitoring loop only completes through StopMonitoring or
@@ -333,7 +351,7 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
                 _monitoringTask = null;
             }
 
-            var generation = new MonitorGeneration();
+            var generation = new MonitorGeneration(requireInitialScan);
 
             // Listeners are best-effort accelerators. A transport whose listener
             // cannot start (for example, no PC/SC service on the host) simply
@@ -387,6 +405,7 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
                 "Device monitoring started with interval {Interval} (generation {GenerationId})",
                 interval,
                 generation.Id);
+            return generation;
         }
     }
 
@@ -589,10 +608,17 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         var signal = generation.Signal;
         try
         {
-            await RescanSafelyAsync("initial monitor startup", generation, cancellationToken).ConfigureAwait(false);
+            if (generation.RequireInitialScan)
+                await RescanCoreAsync(generation, cancellationToken).ConfigureAwait(false);
+            else
+                await RescanSafelyAsync("initial monitor startup", generation, cancellationToken).ConfigureAwait(false);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            generation.InitialScan.TrySetResult(null);
 
             while (!cancellationToken.IsCancellationRequested)
             {
+                MonitoringWaitReachedForTest?.Invoke();
                 var trigger = await WaitForTriggerAsync(signal, interval, cancellationToken).ConfigureAwait(false);
                 if (trigger == DeviceMonitorWaitResult.Timeout)
                 {
@@ -614,14 +640,32 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
 
                 await RescanSafelyAsync("listener event", generation, cancellationToken).ConfigureAwait(false);
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            throw new InvalidOperationException("The device monitoring signal completed unexpectedly.");
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // Expected during shutdown
+            generation.InitialScan.TrySetCanceled(cancellationToken);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "monitoring loop terminated unexpectedly");
+            FailGeneration(generation, ex);
+        }
+    }
+
+    private void FailGeneration(MonitorGeneration generation, Exception error)
+    {
+        // A result rather than a faulted TCS avoids an unobserved exception if initialization's
+        // wait was canceled while a native scan continued. The factory rethrows the original error.
+        generation.InitialScan.TrySetResult(error);
+        Logger.LogError(error, "monitoring loop terminated unexpectedly");
+        lock (_publishLock)
+        {
+            // A failed abandoned predecessor must not poison a newer monitoring lifetime.
+            // Repository failure takes only its short state lock, never waits for a diff to drain.
+            if (_disposed == 0 && ReferenceEquals(generation, _current))
+                _repository.Fail(error);
         }
     }
 
@@ -749,15 +793,24 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         // Hardware activity on any transport globally invalidates identity and metadata evidence: a
         // composite swap may signal one transport first, and retaining sibling evidence could mix two keys.
         // Invalidate BEFORE queueing so the triggered rescan re-reads. See IFindYubiKeys.NotifyTransportActivity.
-        _findYubiKeys.NotifyTransportActivity(ConnectionType.Hid);
-        QueueRescan(signal, "HID");
+        SignalTransportEvent(signal, ConnectionType.Hid);
     }
 
     private void SignalSmartCardEvent(DeviceMonitorSignal signal)
     {
         // See SignalHidEvent: globally invalidate cached identity and metadata before the rescan runs.
-        _findYubiKeys.NotifyTransportActivity(ConnectionType.SmartCard);
-        QueueRescan(signal, "SmartCard");
+        SignalTransportEvent(signal, ConnectionType.SmartCard);
+    }
+
+    private void SignalTransportEvent(DeviceMonitorSignal signal, ConnectionType transport)
+    {
+        lock (_publishLock)
+        {
+            if (_disposed == 1)
+                return;
+            _findYubiKeys.NotifyTransportActivity(transport);
+            QueueRescan(signal, transport.ToString());
+        }
     }
 
     private enum DeviceMonitorWaitResult
@@ -836,6 +889,15 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
 
         var taskToAwait = StopMonitoringCore(disposing: true);
 
+        lock (_publishLock)
+        {
+            // Retire queued discovery, not native owners. Already-open work keeps the prerequisite's
+            // admission/registry lease through actual native teardown. No callback may renew evidence
+            // after this retirement because ingress checks _disposed under this same lock.
+            if (_findYubiKeys is FindYubiKeys finder)
+                finder.RetireReadScope();
+        }
+
         if (taskToAwait is not null)
         {
             try
@@ -881,9 +943,14 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
     /// never disposed - an abandoned generation is unreachable garbage that can
     /// wedge nothing outside itself.
     /// </summary>
-    private sealed class MonitorGeneration
+    private sealed class MonitorGeneration(bool requireInitialScan = false)
     {
         private static long _nextId;
+
+        public bool RequireInitialScan { get; } = requireInitialScan;
+
+        public TaskCompletionSource<Exception?> InitialScan { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         /// <summary>Monotonic identifier, used for logging only.</summary>
         public long Id { get; } = Interlocked.Increment(ref _nextId);

@@ -41,8 +41,9 @@ namespace Yubico.YubiKit.Core.Devices;
 /// is lock-free: it reads an immutable snapshot of the watcher list, so subscribing or unsubscribing
 /// cannot disturb an in-flight publication. Mutations take a short lock and swap in a new array
 /// (copy-on-write).</para>
-/// <para><see cref="Complete"/> is idempotent, ends every current watcher normally, and makes any later
-/// enumeration end immediately. Ordering across concurrent <see cref="Publish"/> calls is the caller's
+/// <para><see cref="Complete"/> is idempotent, ends every current watcher (normally or with a supplied
+/// terminal monitoring error), and makes later enumerations observe the same outcome. Ordering across
+/// concurrent <see cref="Publish"/> calls is the caller's
 /// responsibility; the monitor's publication gate provides it.</para>
 /// </remarks>
 internal sealed class DeviceEventHub
@@ -59,6 +60,8 @@ internal sealed class DeviceEventHub
 
     /// <summary>Guarded by <see cref="_gate"/>.</summary>
     private bool _completed;
+
+    private Exception? _completionError;
 
     /// <summary>
     /// Number of registered watchers. Diagnostic observability for the lazy-subscription and
@@ -92,13 +95,13 @@ internal sealed class DeviceEventHub
     }
 
     /// <summary>
-    /// Ends the sequence for every current watcher normally — not faulted, not cancelled. Idempotent.
+    /// Ends the sequence for every current watcher, optionally with a terminal monitoring error. Idempotent.
     /// </summary>
     /// <remarks>
     /// After this returns, watchers are released and any later <see cref="WatchAsync"/> enumeration ends
-    /// immediately without yielding anything.
+    /// immediately without yielding anything, or faults with the supplied error.
     /// </remarks>
-    public void Complete()
+    public void Complete(Exception? error = null)
     {
         Watcher[] snapshot;
 
@@ -110,13 +113,14 @@ internal sealed class DeviceEventHub
             }
 
             _completed = true;
+            _completionError = error;
             snapshot = _watchers;
             _watchers = [];
         }
 
         foreach (var watcher in snapshot)
         {
-            watcher.Complete();
+            watcher.Complete(error);
         }
     }
 
@@ -170,11 +174,13 @@ internal sealed class DeviceEventHub
                 _watchers = [.. _watchers, watcher];
                 return watcher;
             }
+
+            // Preserve terminal monitoring failure for enumerations that start after loop death.
+            watcher.Complete(_completionError);
         }
 
         // Subscribing after completion yields an already-finished buffer, so the enumeration ends
         // immediately instead of waiting for events that can never arrive.
-        watcher.Complete();
         return watcher;
     }
 
@@ -254,10 +260,10 @@ internal sealed class DeviceEventHub
             }
         }
 
-        public void Complete()
+        public void Complete(Exception? error = null)
         {
             _terminated = true;
-            _ = _channel.Writer.TryComplete();
+            _ = _channel.Writer.TryComplete(error);
         }
     }
 }

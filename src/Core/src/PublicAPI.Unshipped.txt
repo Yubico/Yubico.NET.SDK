@@ -1,4 +1,8 @@
 #nullable enable
+Yubico.YubiKit.Core.Devices.YubiKeyMonitor
+Yubico.YubiKit.Core.Devices.YubiKeyMonitor.CurrentDevices.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!
+Yubico.YubiKit.Core.Devices.YubiKeyMonitor.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Yubico.YubiKit.Core.Devices.YubiKeyMonitor.WatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.Core.DeviceEvent!>!
 
 Yubico.YubiKit.Core.Abstractions.IApplicationSession
 Yubico.YubiKit.Core.Abstractions.IApplicationSession.ConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType

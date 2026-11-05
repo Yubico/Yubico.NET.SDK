@@ -54,6 +54,27 @@ Discovery needs no PIN, touch, or open session. Later snippets assume these dire
 
 ## Common operations
 
+### Owned monitoring migration (in progress)
+
+`YubiKeyMonitor` introduces an explicitly owned monitoring lifetime with `CurrentDevices`, `WatchAsync`,
+and `IAsyncDisposable`. `CurrentDevices` reads the last completed, read-only membership snapshot without
+hardware I/O. Previously obtained lists keep their membership; the contained device objects can still
+receive last-known metadata updates. Disposal does not dispose application-owned sessions/connections.
+Accessing `CurrentDevices` after disposal throws; enumerating `WatchAsync` after disposal completes empty.
+Unexpected terminal monitoring failure faults subscriptions and rejects cached access rather than leaving
+an apparently live, frozen cache.
+
+This is the first stage of the migration, **not yet an alternative public entry point**. Initialization is
+currently internal: it registers listeners before the loop's single initial scan and waits for publication,
+including successful empty discovery. Startup failure/cancellation cleans up the partial lifetime; the
+creation token does not control the monitor after successful creation. The initial interval is five seconds.
+The legacy static `YubiKeyManager` API remains supported at this stage.
+
+`YubiKeyMonitor.WatchAsync` currently delegates the existing **change-only** stream. Atomic initial-device
+replay is a subsequent stage; do not combine `CurrentDevices` with a separate subscription and assume that
+there is no gap. A later compile-consistent migration will expose `YubiKeyManager.CreateMonitorAsync` and
+update the static discovery API and its consumers. Until then, the examples below use the existing API.
+
 ### Scan selected interfaces without the manager cache
 
 ```csharp

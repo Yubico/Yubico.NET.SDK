@@ -24,28 +24,18 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
 
 | Method | Description |
 |--------|-------------|
-| `FindAllAsync()` | Find all connected YubiKeys |
-| `FindAllAsync(ConnectionType)` | Filter full-device cached results by connection type |
-| `ScanAsync(scope, cancellationToken)` | Independent fresh scan limited to the requested interfaces; no repository updates |
-| `FindFirstAsync(predicate, cancellationToken)` | Find the first match, or throw `InvalidOperationException` |
-| `FindFirstOrDefaultAsync(predicate, cancellationToken)` | Find the first match, or return `null` |
+| `FindAllAsync(interfaces: All, cancellationToken)` | Fresh independent discovery, limited to selected interfaces |
+| `FindFirstAsync(predicate, interfaces: All, cancellationToken)` | Discover once and select the first match, or throw `InvalidOperationException` |
+| `FindFirstOrDefaultAsync(predicate, interfaces: All, cancellationToken)` | Discover once and select the first match, or return `null` |
 
 ### Monitoring Methods
 
 | Method | Description |
 |--------|-------------|
-| `StartMonitoring()` | Start monitoring with default 5-second interval |
-| `StartMonitoring(TimeSpan)` | Start monitoring with custom interval |
-| `StopMonitoring()` | Stop monitoring |
-| `IsMonitoring` | Check if monitoring is active |
-| `WatchAsync(CancellationToken)` | Async sequence of repository-diffed device events (`await foreach`) |
-
-### Lifecycle Methods
-
-| Method | Description |
-|--------|-------------|
-| `ShutdownAsync()` | Clean up all resources (async) |
-| `Shutdown()` | Clean up all resources (sync) |
+| `CreateMonitorAsync(cancellationToken)` | Create an independent active monitor; await initial publication, including empty success |
+| `monitor.CurrentDevices` | Read the latest completed, read-only membership snapshot without I/O |
+| `monitor.WatchAsync(cancellationToken)` | Replay initial Added events, then stream ordered changes |
+| `monitor.DisposeAsync()` | Stop and dispose this owned lifetime; normally use `await using` |
 
 ## Simple Discovery
 
@@ -53,7 +43,7 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
 // Find all devices
 var allDevices = await YubiKeyManager.FindAllAsync();
 
-// Find only SmartCard-connected devices
+// Enumerate/probe only SmartCard interfaces (no HID slots are returned).
 var smartCardDevices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
 
 // Find only HID-connected devices (FIDO2, OTP)
@@ -65,35 +55,36 @@ var firstSmartCardDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
     device => device.SupportsConnection(ConnectionType.SmartCard));
 ```
 
-The first-device methods are one-shot queries over the same cached discovery as `FindAllAsync`.
+The first-device methods perform one fresh discovery operation, like `FindAllAsync`.
 They do not wait for a YubiKey to be inserted, and discovery ordering is not stable. Use
-`WatchAsync` when the application needs to wait for device changes. They inherit `FindAllAsync`
-cancellation behavior: the token is passed to discovery, but a cached result may complete without
-observing cancellation.
+an owned monitor's `WatchAsync` when the application needs to wait for device changes.
 
 ## Independent Scoped Scans
 
-Use `ScanAsync` when you need a one-shot view without the manager's cache or monitoring lifecycle:
+All Find methods use independent evidence, without a shared cache or monitoring lifecycle:
 
 ```csharp
 // Enumerate and probe only SmartCard interfaces; never enumerate HID.
-var smartCardViews = await YubiKeyManager.ScanAsync(ConnectionType.SmartCard, cancellationToken);
+var smartCardViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
 
 // Enumerate HID descriptors, but create slots and probe metadata only for FIDO interfaces.
-var fidoViews = await YubiKeyManager.ScanAsync(ConnectionType.HidFido, cancellationToken);
+var fidoViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
 
-// Fresh evidence across all interfaces, still without publishing into the manager repository.
-var allViews = await YubiKeyManager.ScanAsync(cancellationToken: cancellationToken);
+// Fresh evidence across all interfaces, still without publishing into a monitor repository.
+var allViews = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
 ```
 
 Each call creates a new finder with independent identity/metadata evidence. It does **not** initialize
-the manager, return its cached objects, update its repository, emit `WatchAsync` events, or start
-monitoring. A monitor already running is neither stopped nor restricted by the scope. `FindAllAsync`,
-including `forceRescan: true`, retains its existing full-scan/result-filter behavior and repository updates.
+tracking, return cached objects, update a repository, emit events, or start monitoring.
+A monitor already running is neither stopped nor restricted by the interfaces scope.
 
-`scope` supports concrete combinations of `SmartCard`, `HidFido`, and `HidOtp`. `Hid` expands to
+`interfaces` supports concrete combinations of `SmartCard`, `HidFido`, and `HidOtp`. `Hid` expands to
 `HidFido | HidOtp`; `All` includes all three; `Unknown` scans nothing. Undefined bits are ignored, as
 with discovery result filtering; a value containing only undefined bits scans nothing.
+
+Flags select places to look, not a requirement that every key expose all selected interfaces. When later
+operations need a full composite key, discover All and filter locally using `SupportsConnection`, rather
+than narrowing discovery and accidentally discarding sibling connection slots.
 
 - SmartCard-only never enumerates HID, and HID-only never enumerates PC/SC. Excluded backends are not
   constructed.
@@ -157,18 +148,14 @@ Do not substitute `device.CachedDeviceInfo?.SerialNumber` for it.
 
 ## Device Monitoring
 
-For applications that need to react to device connections and disconnections. The SDK has **no
-reactive dependency** — both surfaces below use BCL types only.
+For continuous tracking, explicitly own and share a monitor. The factory registers listeners before the
+loop's single initial scan and returns only after successful publication. An empty snapshot is ready;
+initial failure/cancellation cleans up partial ownership. Creation cancellation applies only until return.
+The SDK has **no reactive dependency** — the stream uses BCL types only.
 
-> **Owned-monitor migration:** the examples here still use the legacy static, change-only API.
-> `YubiKeyMonitor` now provides initial `Added` replay plus ordered deltas, but its initialized factory
-> remains internal until the public API/consumer migration. Each enumeration's first `MoveNextAsync`
-> captures membership and registers for changes at one complete-publication boundary. Initial membership
-> does not occupy its independent 256-event delta buffer; incoming changes during replay can overflow it.
-> To recover, **clear the consumer's projection and re-enumerate `WatchAsync` on the same monitor**.
-> Do not use a separate snapshot/discovery call followed by subscription as a race-free substitute.
-> Cancellation/overflow are subscriber-local; disposal drains captured replay and published deltas, while
-> new enumerations after disposal complete empty. The static examples below do not acquire replay semantics.
+`CurrentDevices` is a coherent, read-only membership snapshot without hardware I/O. Older lists keep their
+membership; contained devices can receive last-known metadata updates. A later failed scan retains the
+previous snapshot and retries; unexpected terminal failure faults watchers and rejects cached access.
 
 ### `await foreach` (recommended)
 
@@ -176,10 +163,9 @@ reactive dependency** — both surfaces below use BCL types only.
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 
-// Start monitoring (events won't flow until this is called)
-YubiKeyManager.StartMonitoring();
+await using var monitor = await YubiKeyManager.CreateMonitorAsync();
 
-await foreach (var e in YubiKeyManager.WatchAsync())
+await foreach (var e in monitor.WatchAsync())
 {
     var message = e.Action switch
     {
@@ -195,20 +181,21 @@ await foreach (var e in YubiKeyManager.WatchAsync())
 Pass a cancellation token and cancel it to stop watching. Enumeration throws
 `OperationCanceledException`, and the subscription is released automatically.
 
-> **Start enumerating before the action you expect to trigger an event.** `WatchAsync` subscribes on
-> the first iteration, not when it is called, so events raised in between are not observed.
+On the first `MoveNextAsync`, `WatchAsync` captures membership and registers for subsequent deltas at one
+publication boundary. It yields initial Added events outside the boundary, followed by ordered changes.
+Do not prepend a separate snapshot or one-shot Find call: that would reintroduce a subscription gap.
 
 #### Waiting for a specific device event
 
-To wait for an insertion with a timeout, handle cancellation explicitly:
+To accept an already-attached key or wait for an insertion with a timeout, handle cancellation explicitly:
 
 ```csharp
 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-YubiKeyManager.StartMonitoring();
+await using var monitor = await YubiKeyManager.CreateMonitorAsync(cts.Token);
 
 try
 {
-    await foreach (var e in YubiKeyManager.WatchAsync(cts.Token))
+    await foreach (var e in monitor.WatchAsync(cts.Token))
     {
         if (e.Action == DeviceAction.Added)
         {
@@ -223,29 +210,29 @@ catch (OperationCanceledException) when (cts.IsCancellationRequested)
 }
 ```
 
-Each enumeration of the legacy static `WatchAsync` gets its own independent buffer, so several watchers can run
+Each enumeration of `monitor.WatchAsync` gets its own independent buffer, so several watchers can run
 concurrently without interfering. If a new event arrives while a consumer's 256-event buffer is
 full, its stream ends with an `InvalidOperationException` rather than silently dropping events —
-resynchronise with `FindAllAsync` and re-enumerate. Because `DeviceEvent` is a delta rather than a
+**clear the consumer's projection and re-enumerate the same monitor**. Initial replay does not occupy the
+delta buffer, but changes during replay can overflow it. Because `DeviceEvent` is a delta rather than a
 snapshot, dropping one would permanently desynchronise your device list, so the SDK reports it instead.
 Concurrent watchers are state-safe: cancelling or losing one watcher neither completes nor faults
-another, and shutting the SDK down ends every active watcher normally rather than by throwing.
+another. Disposal ends healthy watchers normally; buffered history can drain, and new enumerations after
+disposal end empty. `CurrentDevices` after disposal throws. Disposing one monitor does not affect another
+or dispose application-owned sessions/connections. Already-admitted native work can outlive bounded
+teardown and keeps its lease until actual release; late results cannot repopulate the disposed repository.
 
 `WatchAsync` is the only device-change stream. Device events are never delivered inline on the
 monitor's publishing thread, so a slow or abandoned watcher cannot delay device monitoring for
 anyone else.
 
-`StartMonitoring()` performs an initial repository rescan. Native SmartCard and HID listener notifications are
+Native SmartCard and HID listener notifications are
 treated as rescan triggers only. Public device events are emitted from repository diffs after discovery,
 so a raw HID listener notification is not itself authoritative evidence that a YubiKey physical device was added
 or removed.
 
-### Custom Monitoring Interval
-
-```csharp
-// Monitor with 10-second interval
-YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(10));
-```
+The monitor scans all interfaces, uses listeners as latency hints, and falls back to a five-second interval.
+There is no public interval or force-refresh option in this version. Filter `CurrentDevices` locally.
 
 ### UI Thread Marshaling
 
@@ -256,7 +243,8 @@ With `await foreach`, capture the UI `SynchronizationContext` and post to it —
 ```csharp
 var ui = SynchronizationContext.Current!;
 
-await foreach (var e in YubiKeyManager.WatchAsync(CancellationToken.None))
+await using var monitor = await YubiKeyManager.CreateMonitorAsync();
+await foreach (var e in monitor.WatchAsync(CancellationToken.None))
 {
     ui.Post(_ => DevicesList.Add(e.Device), null);
 }
@@ -325,26 +313,18 @@ Connections through disjoint scoped views are **never** opened simultaneously in
 and disjoint ownership bounds, cancellation, and queued-read retirement are tested with fakes in
 `FindYubiKeysScopeTests`; successful read-only hardware checks do not imply universal physical-key locking.
 
-### Static manager cleanup
+### Owned lifetime cleanup
 
-In xUnit tests, clean up static state between tests:
+One-shot tests need no manager initialization or shutdown. Tests that actually track changes own a monitor:
 
 ```csharp
-public class YubiKeyTests : IAsyncLifetime
+public class YubiKeyTests
 {
-    public Task InitializeAsync() => Task.CompletedTask;
-
-    public async Task DisposeAsync()
-    {
-        // Reset static state for test isolation
-        await YubiKeyManager.ShutdownAsync();
-    }
-
     [Fact]
-    public async Task CanDiscoverDevices()
+    public async Task CanReadAnInitializedSnapshot()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
-        Assert.NotNull(devices);
+        await using var monitor = await YubiKeyManager.CreateMonitorAsync();
+        Assert.NotNull(monitor.CurrentDevices);
     }
 }
 ```
@@ -356,7 +336,8 @@ Device discovery is inherently subject to race conditions. If a device connects 
 - The returned list may not include a device that just connected
 - The returned list may include a device that just disconnected
 
-For real-time accuracy, use `WatchAsync` with `StartMonitoring()` to track changes as they occur.
+For ongoing tracking, own a monitor and consume its `WatchAsync`. Neither discovery nor tracking promises
+an instantaneous global hardware snapshot.
 
 ## Migration from DI-based API
 
@@ -393,12 +374,21 @@ Key changes:
 - Remove `IYubiKeyManager` constructor parameter
 - Remove `AddYubiKeyManagerCore()` service registration
 - Call static `YubiKeyManager` methods directly
-- Use `ShutdownAsync()` for cleanup instead of `IDisposable`
+- One-shot discovery needs no cleanup; tracking components receive a host-owned monitor or own one with `await using`
+
+### Earlier v2 prerelease migration
+
+- `ScanAsync(scope, ct)` becomes `FindAllAsync(interfaces: scope, cancellationToken: ct)`.
+- Remove `forceRescan`; every Find uses fresh per-call evidence, including after an earlier empty result.
+- Replace static Start/Stop/Watch/Shutdown/IsMonitoring with `CreateMonitorAsync`, owned `WatchAsync`,
+  `CurrentDevices`, and disposal. There are no aliases preserving the old global cache semantics.
+- Old `type` filtered a full scan; new `interfaces` narrows discovery. Preserve full connection slots with
+  All plus local filtering when that is the caller's intent.
 
 ## Thread Safety
 
 All `YubiKeyManager` methods are thread-safe:
 - `FindAllAsync()` can be called from multiple threads concurrently
-- `StartMonitoring()` and `StopMonitoring()` are idempotent
+- Monitors are independent owners; repeated disposal shares completion
 - Listener notifications are serialized through a single-reader debounce queue before rescans
 - `WatchAsync` events may be delivered on any thread

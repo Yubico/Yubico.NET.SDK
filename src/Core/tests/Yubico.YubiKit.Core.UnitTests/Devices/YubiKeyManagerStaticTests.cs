@@ -18,246 +18,189 @@ using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
-/// <summary>
-/// The two things about <see cref="YubiKeyManager"/> that are only true of the facade: what its
-/// public surface does <em>not</em> expose, and the lazy create/recreate policy around its static
-/// manager.
-/// </summary>
-/// <remarks>
-/// <para>
-/// Everything the facade merely forwards is asserted where fakes can stand in for hardware, and is
-/// deliberately not repeated here: discovery and monitoring lifecycle on
-/// <c>YubiKeyDeviceManagerTests</c> and <c>YubiKeyDeviceMonitorServiceTests</c>, watcher delivery
-/// and cancellation on <c>DeviceEventHubTests</c> and <c>YubiKeyDeviceRepositoryTests</c>, and the
-/// real zero-configuration scan on the integration suite's <c>YubiKeyManagerTests</c>. Duplicating
-/// those here bought no coverage and cost a real device scan per test.
-/// </para>
-/// <para>
-/// Everything remains hermetic. One-shot scans use per-call fake finders, and the repository-isolation
-/// test installs a manager with fake discovery and unavailable listeners. These tests join
-/// <see cref="DiscoveryWorkerAdmissionCollection"/> because scoped metadata reads use its worker pool.
-/// </para>
-/// <para>
-/// The negative assertions below are the ones compilation cannot make for us: a member that should
-/// be absent stays absent only if something checks.
-/// </para>
-/// </remarks>
+/// <summary>Hermetic facade tests using per-call finders, never global test configuration.</summary>
 [Collection(DiscoveryWorkerAdmissionCollection.Name)]
-public class YubiKeyManagerStaticTests : IAsyncLifetime
+public class YubiKeyManagerStaticTests
 {
-    private static readonly FieldInfo ManagerField = typeof(YubiKeyManager).GetField("_manager", BindingFlags.NonPublic | BindingFlags.Static)
-        ?? throw new InvalidOperationException("Manager field not found.");
-
-    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
-
-    public async ValueTask DisposeAsync()
-    {
-        // Enumerating a watcher creates the static manager, so every test here leaves one behind.
-        await YubiKeyManager.ShutdownAsync();
-    }
-
     [Fact]
-    public void YubiKeyManager_WatchAsync_IsTheOnlyDeviceChangeStream()
+    public void DiscoveryFacade_HasNoGlobalLifetimeOrCache()
     {
-        var method = typeof(YubiKeyManager).GetMethod(
-            nameof(YubiKeyManager.WatchAsync),
-            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
-            [typeof(CancellationToken)]);
-
-        Assert.NotNull(method);
-        Assert.Equal(typeof(IAsyncEnumerable<DeviceEvent>), method.ReturnType);
-
-        // The observable surface was removed outright; no obsolete shim, alias, or overload survives.
-        Assert.DoesNotContain(
-            typeof(YubiKeyManager).GetMembers(
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static),
-            m => m.Name.Contains("DeviceChanges", StringComparison.Ordinal));
-        Assert.DoesNotContain(
-            typeof(YubiKeyManager).GetMembers(
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static),
-            m => m is System.Reflection.PropertyInfo p &&
-                 typeof(IObservable<DeviceEvent>).IsAssignableFrom(p.PropertyType));
-    }
-
-    [Fact]
-    public void DeviceAction_DoesNotContainUpdated()
-    {
-        // DeviceAction.Updated was removed per PRD
+        Assert.Empty(typeof(YubiKeyManager).GetFields(BindingFlags.Static | BindingFlags.NonPublic));
+        var oldNames = new[] { "ScanAsync", "StartMonitoring", "StopMonitoring", "WatchAsync", "IsMonitoring", "Shutdown", "ShutdownAsync", "DeviceChanges" };
+        Assert.DoesNotContain(typeof(YubiKeyManager).GetMembers(BindingFlags.Public | BindingFlags.Static),
+            member => oldNames.Contains(member.Name));
+        Assert.DoesNotContain(typeof(YubiKeyManager).GetMethods(BindingFlags.Public | BindingFlags.Static),
+            method => method.GetParameters().Any(parameter => parameter.Name is "forceRescan" or "type" or "scope"));
         Assert.False(Enum.IsDefined(typeof(DeviceAction), "Updated"));
     }
 
     [Fact]
-    public async Task YubiKeyManager_WatchAsync_CanBeEnumeratedWithoutStartingMonitoring()
-    {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
-        // Enumerating (which is what actually subscribes) must not auto-start monitoring.
-        await using var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
-        var pending = enumerator.MoveNextAsync();
-
-        Assert.False(YubiKeyManager.IsMonitoring);
-
-        await cts.CancelAsync();
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await pending);
-    }
-
-    /// <summary>
-    /// Shutting down when nothing was ever created must be a no-op rather than a null dereference.
-    /// </summary>
-    [Fact]
-    public async Task YubiKeyManager_ShutdownAsync_IsIdempotent()
-    {
-        await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
-        await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
-
-        Assert.False(YubiKeyManager.IsMonitoring);
-    }
-
-    [Fact]
-    public async Task ScanAsync_EmptyScopeDoesNotInitializeManager()
-    {
-        Assert.Null(ManagerField.GetValue(null));
-
-        Assert.Empty(await YubiKeyManager.ScanAsync(ConnectionType.Unknown, TestContext.Current.CancellationToken));
-        Assert.Empty(await YubiKeyManager.ScanAsync((ConnectionType)0x80, TestContext.Current.CancellationToken));
-
-        Assert.Null(ManagerField.GetValue(null));
-    }
-
-    [Fact]
-    public async Task ScanAsync_PreCanceledDoesNotConstructFinderOrInitializeManager()
-    {
-        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        await cancellation.CancelAsync();
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.ScanAsync(ConnectionType.All, cancellation.Token));
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.ScanAsync(
-            ConnectionType.All, cancellation.Token, _ => throw new InvalidOperationException("Finder must not be constructed")));
-        Assert.Null(ManagerField.GetValue(null));
-    }
-
-    [Fact]
-    public async Task ScanAsync_IndependentEvidenceDoesNotInitializeManager()
+    public async Task FindAllAsync_SubsequentCall_ObservesChangedDevices()
     {
         var rig = new FindYubiKeysScopeTests.ScopeRig();
-
-        Assert.Single(await YubiKeyManager.ScanAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder));
-
-        Assert.Null(ManagerField.GetValue(null));
-        Assert.False(YubiKeyManager.IsMonitoring);
+        var first = Assert.Single(await YubiKeyManager.FindAllAsync(
+            ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder));
+        rig.Serial = 333;
+        var second = Assert.Single(await YubiKeyManager.FindAllAsync(
+            ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder));
+        Assert.NotSame(first, second);
+        Assert.Equal(111, first.SerialNumber);
+        Assert.Equal(333, second.SerialNumber);
+        Assert.Equal(2, rig.Pcsc.Calls);
+        Assert.Equal(2, rig.OpenCalls.Values.Sum());
     }
 
     [Fact]
-    public async Task ScanAsync_DoesNotPublishPartialViewsOrChangeAnActiveManagersRepository()
+    public async Task FindAllAsync_EmptyThenPresent_UsesANewFinderAndEnumeratesAgain()
     {
         var rig = new FindYubiKeysScopeTests.ScopeRig();
-        var retained = Assert.Single(await rig.CreateFinder(ConnectionType.All)
-            .FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken));
+        var empty = true;
+        var factories = 0;
+        FindYubiKeys CreateFinder(ConnectionType interfaces)
+        {
+            factories++;
+            var finder = rig.CreateFinder(interfaces);
+            if (empty) rig.Pcsc.Devices = [];
+            return finder;
+        }
+
+        Assert.Empty(await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken, CreateFinder));
+        empty = false;
+        Assert.Single(await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken, CreateFinder));
+        Assert.Equal(2, factories);
+        Assert.Equal(2, rig.Pcsc.Calls);
+    }
+
+    [Fact]
+    public async Task FindAllAsync_EmptyInterfaces_PerformsNoBackendInitialization()
+    {
+        Assert.Empty(await YubiKeyManager.FindAllAsync(ConnectionType.Unknown, TestContext.Current.CancellationToken));
+        Assert.Empty(await YubiKeyManager.FindAllAsync((ConnectionType)0x80, TestContext.Current.CancellationToken));
+    }
+
+    [Theory]
+    [InlineData(ConnectionType.SmartCard)]
+    [InlineData(ConnectionType.Hid)]
+    [InlineData(ConnectionType.SmartCard | ConnectionType.HidFido)]
+    public async Task FindFirstMethods_UseOneScopedDiscoveryAndStopAtFirstPredicateMatch(ConnectionType interfaces)
+    {
+        var rig = new FindYubiKeysScopeTests.ScopeRig { IncludeSecondKey = true };
+        var calls = 0;
+        var predicateCalls = 0;
+        FindYubiKeys CreateFinder(ConnectionType scope)
+        {
+            Assert.Equal(interfaces, scope);
+            calls++;
+            return rig.CreateFinder(scope);
+        }
+
+        var optional = await YubiKeyManager.FindFirstOrDefaultAsync(key =>
+        {
+            predicateCalls++;
+            return true;
+        }, interfaces, TestContext.Current.CancellationToken, CreateFinder);
+        Assert.NotNull(optional);
+        Assert.Equal(1, predicateCalls);
+        Assert.Equal(1, calls);
+        var required = await YubiKeyManager.FindFirstAsync(key => key.SerialNumber == 222,
+            interfaces, TestContext.Current.CancellationToken, CreateFinder);
+        Assert.Equal(222, required.SerialNumber);
+        Assert.Equal(2, calls);
+        Assert.Equal(ConnectionType.Unknown, required.AvailableConnections & ~interfaces.ToConcreteScope());
+    }
+
+    [Fact]
+    public async Task FindFirstMethods_NullPredicateAndNoMatch_PreserveSelectionSemantics()
+    {
+        var rig = new FindYubiKeysScopeTests.ScopeRig();
+        Assert.NotNull(await YubiKeyManager.FindFirstOrDefaultAsync(null, ConnectionType.SmartCard,
+            TestContext.Current.CancellationToken, rig.CreateFinder));
+        Assert.Equal(111, (await YubiKeyManager.FindFirstAsync(null, ConnectionType.SmartCard,
+            TestContext.Current.CancellationToken, rig.CreateFinder)).SerialNumber);
+        Assert.Null(await YubiKeyManager.FindFirstOrDefaultAsync(_ => false, ConnectionType.SmartCard,
+            TestContext.Current.CancellationToken, rig.CreateFinder));
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => YubiKeyManager.FindFirstAsync(
+            _ => false, ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder));
+        Assert.Equal("No matching YubiKey was found.", error.Message);
+        Assert.Null(await YubiKeyManager.FindFirstOrDefaultAsync(null, ConnectionType.Unknown, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => YubiKeyManager.FindFirstAsync(
+            interfaces: ConnectionType.Unknown, cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task FindFirstMethods_PropagatePredicateAndDiscoveryExceptions()
+    {
+        var rig = new FindYubiKeysScopeTests.ScopeRig();
+        var expected = new InvalidDataException("Scripted failure");
+        Assert.Same(expected, await Assert.ThrowsAsync<InvalidDataException>(() => YubiKeyManager.FindFirstOrDefaultAsync(
+            _ => throw expected, ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder)));
+        Assert.Same(expected, await Assert.ThrowsAsync<InvalidDataException>(() => YubiKeyManager.FindFirstAsync(
+            null, ConnectionType.All, TestContext.Current.CancellationToken, _ => throw expected)));
+    }
+
+    [Fact]
+    public async Task FindAllAsync_DoesNotPublishPartialViewsOrChangeAnOwnedMonitor()
+    {
+        var rig = new FindYubiKeysScopeTests.ScopeRig();
+        var retained = Assert.Single(await YubiKeyManager.FindAllAsync(ConnectionType.All,
+            TestContext.Current.CancellationToken, rig.CreateFinder));
         var repository = new YubiKeyDeviceRepository();
-        repository.UpdateCache([retained]);
-        var monitor = new YubiKeyDeviceMonitorService(repository, new FixedFinder(retained),
-            () => throw new InvalidOperationException("No native HID listener in unit tests"),
-            () => throw new InvalidOperationException("No native PC/SC listener in unit tests"));
-        var manager = new YubiKeyDeviceManager(repository, monitor);
-        ManagerField.SetValue(null, manager);
-        await using var watcher = YubiKeyManager.WatchAsync(TestContext.Current.CancellationToken)
+        var service = new YubiKeyDeviceMonitorService(repository, new FixedFinder(retained),
+            () => throw new InvalidOperationException("No native HID listener"),
+            () => throw new InvalidOperationException("No native PC/SC listener"));
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+            TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
+        await using var watcher = monitor.WatchAsync(TestContext.Current.CancellationToken)
             .GetAsyncEnumerator(TestContext.Current.CancellationToken);
-        var pendingEvent = watcher.MoveNextAsync();
+        Assert.True(await watcher.MoveNextAsync());
+        Assert.Same(retained, watcher.Current.Device);
+        var pending = watcher.MoveNextAsync().AsTask();
         try
         {
-            YubiKeyManager.StartMonitoring(TimeSpan.FromHours(1));
             rig.Serial = 333;
-
-            var scoped = Assert.Single(await YubiKeyManager.ScanAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder));
+            var scoped = Assert.Single(await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard,
+                TestContext.Current.CancellationToken, rig.CreateFinder));
             Assert.Equal(333, scoped.SerialNumber);
             Assert.Equal(ConnectionType.SmartCard, scoped.AvailableConnections);
-            var cached = Assert.Single(await YubiKeyManager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken));
-            Assert.Same(retained, cached);
-            Assert.Equal(111, cached.SerialNumber);
-            Assert.Equal(ConnectionTypeExtensions.ConcreteConnections, cached.AvailableConnections);
-            Assert.Same(manager, ManagerField.GetValue(null));
-            Assert.True(YubiKeyManager.IsMonitoring);
+            Assert.Same(retained, Assert.Single(monitor.CurrentDevices));
+            Assert.Equal(111, retained.SerialNumber);
+            Assert.Equal(ConnectionTypeExtensions.ConcreteConnections, retained.AvailableConnections);
+            Assert.False(pending.IsCompleted);
+            Assert.True(service.IsMonitoring);
         }
         finally
         {
-            // End the outstanding MoveNext before disposing its enumerator, even on assertion/runner failure.
-            await YubiKeyManager.ShutdownAsync(CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            await monitor.DisposeAsync();
+            // End the outstanding MoveNext before enumerator disposal, even on runner cancellation.
+            Assert.False(await pending.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None));
         }
-        Assert.False(await pendingEvent);
+    }
+
+    [Fact]
+    public async Task PublicOverloads_AreUnambiguousAndObserveCancellationBeforeInitialization()
+    {
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        await cancellation.CancelAsync();
+        var ct = cancellation.Token;
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(cancellationToken: ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(interfaces: ConnectionType.All, cancellationToken: ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(null, ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(cancellationToken: ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(predicate: null, cancellationToken: ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(null, ConnectionType.All, ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(null, ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(cancellationToken: ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(predicate: null, cancellationToken: ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(null, ConnectionType.All, ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.CreateMonitorAsync(ct));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(ConnectionType.All, ct,
+            _ => throw new InvalidOperationException("Finder must not be constructed")));
     }
 
     private sealed class FixedFinder(IYubiKey device) : IFindYubiKeys
     {
         public Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<IYubiKey>>([device]);
-    }
-
-    /// <summary>
-    /// The facade tolerates being asked to stop, and being asked whether it is monitoring, before
-    /// anything has ever been created.
-    /// </summary>
-    /// <remarks>
-    /// This is the one piece of monitoring behaviour that is the facade's own rather than the
-    /// manager's: <c>StopMonitoring</c> and <c>IsMonitoring</c> both read the static field and
-    /// null-guard it, so with no manager they must be a no-op and <see langword="false"/> instead
-    /// of a null dereference. Everything past that guard forwards to
-    /// <c>YubiKeyDeviceManager</c>/<c>YubiKeyDeviceMonitorService</c> and is asserted there,
-    /// against fakes, without starting real listeners.
-    /// </remarks>
-    [Fact]
-    public void YubiKeyManager_StopMonitoring_WithNoManager_IsNoOp()
-    {
-        Assert.False(YubiKeyManager.IsMonitoring);
-
-        YubiKeyManager.StopMonitoring();
-
-        Assert.False(YubiKeyManager.IsMonitoring);
-    }
-
-    /// <summary>
-    /// After shutdown the static facade must build a new manager rather than hand back the disposed
-    /// one, whose repository would end every enumeration immediately.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The test creates a manager <em>before</em> shutting down, which is what makes it about
-    /// recreation at all. Shutting down first would only prove ordinary first-time lazy creation,
-    /// since cleanup already leaves the static field null - the assertion would hold just as well
-    /// with the recreation logic removed.
-    /// </para>
-    /// <para>
-    /// Two things are asserted, and both are needed. The pre-shutdown enumeration must end
-    /// normally, proving the old manager really was disposed rather than left running. The
-    /// post-shutdown enumeration must then be cancellable, which is the liveness claim: a dead
-    /// sequence ends with no elements and so never reaches the cancellation, whereas a live one
-    /// waits. Nothing here starts monitoring, so the fresh repository has no publisher and cannot
-    /// deliver an element that would end the wait for real reasons.
-    /// </para>
-    /// </remarks>
-    [Fact]
-    public async Task YubiKeyManager_WatchAsync_AfterShutdown_RecreatesTheContext()
-    {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
-        // Enumerating is what subscribes, so this is what actually creates the manager.
-        var firstEnumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
-        await using (firstEnumerator.ConfigureAwait(false))
-        {
-            var pendingOnFirst = firstEnumerator.MoveNextAsync();
-
-            await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
-
-            // The disposed manager completes its stream rather than leaving the watcher hanging.
-            Assert.False(await pendingOnFirst);
-        }
-
-        // A second watcher must be served by a newly built manager, not the disposed one.
-        var secondEnumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
-        await using (secondEnumerator.ConfigureAwait(false))
-        {
-            var pendingOnSecond = secondEnumerator.MoveNextAsync();
-
-            await cts.CancelAsync();
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await pendingOnSecond);
-        }
     }
 }

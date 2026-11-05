@@ -130,12 +130,6 @@
       "entries": ["StartMonitoringCore#53CF906250ED#worker#Task.Run starts the monitoring loop independently of the caller; owned initialization awaits its first publication, while legacy StartMonitoring returns without waiting. The loop can still wait on discovery and is retired on shutdown.", "StopMonitoring#13EAD41AA391#sync-boundary#The synchronous StopMonitoring path blocks at most its shutdown timeout and abandons an unresponsive monitoring generation."]
     },
     {
-      "path": "Devices/YubiKeyManager.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/YubiKeyManager.cs:263 calls ShutdownAsync().GetAwaiter().GetResult() in the synchronous Shutdown entry point."],
-      "status": ["documented", "outstanding"],
-      "entries": ["Shutdown#9872F46D8981#sync-boundary#Shutdown is the synchronous compatibility boundary and blocks the initiating thread until ShutdownAsync completes."]
-    },
-    {
       "path": "Protocols/Fido/Hid/FidoHidConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
       "evidence": ["Protocols/Fido/Hid/FidoHidConnection.cs:32-49 invokes IHidConnection.SetReport synchronously before returning Task.CompletedTask."],
       "status": ["documented", "outstanding"],

@@ -20,7 +20,7 @@ public class YubiKeyManagerTests : IAsyncLifetime
 {
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task FindAllAsync_HasAtLeastOneDevice()

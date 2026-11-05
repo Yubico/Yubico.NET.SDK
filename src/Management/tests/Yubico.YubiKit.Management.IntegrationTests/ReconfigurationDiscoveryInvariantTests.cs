@@ -89,7 +89,7 @@ public class ReconfigurationDiscoveryInvariantTests
             var scans = 0;
             while (DateTime.UtcNow < deadline)
             {
-                var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+                var devices = await YubiKeyManager.FindAllAsync();
                 scans++;
                 AssertIdentityInvariants(devices, serial);
             }
@@ -105,7 +105,7 @@ public class ReconfigurationDiscoveryInvariantTests
         }
 
         // Post-restore steady state: the key is whole again and the invariants still hold.
-        var settled = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+        var settled = await YubiKeyManager.FindAllAsync();
         AssertIdentityInvariants(settled, serial);
     }
 
@@ -210,7 +210,7 @@ public class ReconfigurationDiscoveryInvariantTests
         IReadOnlyList<IYubiKey> devices;
         try
         {
-            devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+            devices = await YubiKeyManager.FindAllAsync();
         }
         catch
         {

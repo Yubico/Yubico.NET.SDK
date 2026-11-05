@@ -374,7 +374,7 @@ public class YubiKeyDeviceRepositoryTests
 
         stall.Release();
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => overflowing);
-        Assert.Contains("FindAllAsync", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("same monitor", ex.Message, StringComparison.Ordinal);
 
         // The watcher that kept up lost nothing to its neighbour's fault and is still enumerating.
         const int published = 1 + (2 * (cycles - 1));
@@ -714,7 +714,7 @@ public class YubiKeyDeviceRepositoryTests
     /// <summary>
     /// Disposal discards the cache, so the "a scan has populated this cache" flag has to go with it.
     /// Leaving it set makes a disposed repository report a valid cache it no longer holds, which is the
-    /// signal <see cref="YubiKeyDeviceManager.FindAllAsync"/> reads to decide whether a scan is needed.
+    /// signal that distinguishes a successful empty publication from an uninitialized repository.
     /// </summary>
     [Fact]
     public void HasData_FalseAfterDispose()

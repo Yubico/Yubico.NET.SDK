@@ -91,13 +91,11 @@ internal static class MonitorVerification
         Console.WriteLine("Follow each prompt, then press Enter. Ctrl+C aborts.");
         Console.WriteLine();
 
-        // Three concurrent watchers over the one public stream. Each subscribes before monitoring
-        // starts, because WatchAsync subscribes on first enumeration rather than at call time.
-        await using var sinkA = Sink.Start("watcher-A");
-        await using var sinkB = Sink.Start("watcher-B");
-        await using var sinkTransient = Sink.Start("watcher-transient");
-
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+        // All consumers share one explicitly owned monitor; each gets initial replay plus changes.
+        await using var monitor = await YubiKeyManager.CreateMonitorAsync();
+        await using var sinkA = Sink.Start("watcher-A", monitor);
+        await using var sinkB = Sink.Start("watcher-B", monitor);
+        await using var sinkTransient = Sink.Start("watcher-transient", monitor);
 
         var failures = new List<string>();
 
@@ -184,7 +182,7 @@ internal static class MonitorVerification
         // --- Step 8: shutdown with a key attached ---
         Console.WriteLine();
         Prompt(8, "Leave a key attached. Press Enter to shut down.");
-        await YubiKeyManager.ShutdownAsync();
+        await monitor.DisposeAsync();
 
         // Shutdown must end every active watcher normally - not cancelled, not faulted.
         foreach (var sink in new[] { sinkA, sinkB })
@@ -207,16 +205,9 @@ internal static class MonitorVerification
 
         // --- Step 9: restart after shutdown ---
         Console.WriteLine();
-        Prompt(9, "Press Enter to restart monitoring (verifies static state recreates).");
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
-        var restarted = YubiKeyManager.IsMonitoring;
-        Console.WriteLine(restarted ? "  ok    monitoring restarted" : "  FAIL  monitoring did not restart");
-        if (!restarted)
-        {
-            failures.Add("monitoring did not restart after shutdown");
-        }
-
-        await YubiKeyManager.ShutdownAsync();
+        Prompt(9, "Press Enter to create a new initialized monitor after disposal.");
+        await using var replacement = await YubiKeyManager.CreateMonitorAsync();
+        Console.WriteLine($"  ok    new monitor initialized with {replacement.CurrentDevices.Count} device(s)");
 
         Console.WriteLine();
         Console.WriteLine("=== Result ===");
@@ -253,7 +244,7 @@ internal static class MonitorVerification
         Prompt(number, instruction);
 
         // Allow one additional polling interval before inspecting the event snapshot.
-        Thread.Sleep(TimeSpan.FromSeconds(2));
+        Thread.Sleep(TimeSpan.FromSeconds(6));
 
         var after = reference.Snapshot();
         var delta = after.Count - before;
@@ -342,14 +333,12 @@ internal static class MonitorVerification
 
         private volatile bool _endedNormally;
 
-        private Sink(string name)
+        private Sink(string name, YubiKeyMonitor monitor)
         {
             Name = name;
 
-            // Subscribe synchronously here: WatchAsync subscribes on the first MoveNextAsync, and
-            // that first call runs the iterator up to its first suspension point before returning.
-            // Deferring it to the pump task would race the initial scan.
-            var enumerator = YubiKeyManager.WatchAsync(_cts.Token).GetAsyncEnumerator(_cts.Token);
+            // Replay captures current membership atomically with registration on the first move.
+            var enumerator = monitor.WatchAsync(_cts.Token).GetAsyncEnumerator(_cts.Token);
             var first = enumerator.MoveNextAsync();
 
             _pump = Task.Run(async () =>
@@ -381,7 +370,7 @@ internal static class MonitorVerification
         /// <summary>True once the enumeration ended because the SDK completed the sequence.</summary>
         public bool EndedNormally => _endedNormally;
 
-        public static Sink Start(string name) => new(name);
+        public static Sink Start(string name, YubiKeyMonitor monitor) => new(name, monitor);
 
         /// <summary>Cancels this watcher only and waits for its pump to unwind.</summary>
         public async Task StopAsync()

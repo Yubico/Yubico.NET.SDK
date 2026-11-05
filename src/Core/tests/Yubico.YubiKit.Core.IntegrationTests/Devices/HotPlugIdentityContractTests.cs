@@ -16,7 +16,6 @@ using System.Diagnostics;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
@@ -39,7 +38,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
 {
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
@@ -73,11 +72,9 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
 
         using var watching = new CancellationTokenSource();
 
-        // WatchAsync subscribes on the first MoveNextAsync, and that call runs the iterator up to its
-        // first suspension point before returning. Taking the enumerator and starting that first move
-        // here on the test thread — before StartMonitoring — is what stops the initial scan racing
-        // ahead of the watcher.
-        var enumerator = YubiKeyManager.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
+        await using var monitor = await YubiKeyManager.CreateMonitorAsync(watching.Token);
+        // Initial replay and subsequent changes share the monitor's publication boundary.
+        var enumerator = monitor.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
         var firstMove = enumerator.MoveNextAsync();
         var pump = Task.Run(
             async () =>
@@ -103,14 +100,13 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
             },
             CancellationToken.None);
 
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
-        Note("monitoring started (1 s interval)");
+        Note("owned monitor initialized (5 s fallback interval)");
 
         // Establish one published key with a known serial before the operator removes it.
         IYubiKey? original = null;
         while (clock.Elapsed < TimeSpan.FromSeconds(20))
         {
-            var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
+            var devices = monitor.CurrentDevices;
             if (devices is [{ SerialNumber: not null } sole])
             {
                 original = sole;
@@ -135,7 +131,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         var phase2Deadline = clock.Elapsed + TimeSpan.FromSeconds(120);
         while (clock.Elapsed < phase2Deadline && !removedTcs.Task.IsCompleted)
         {
-            var snapshot = await YubiKeyManager.FindAllAsync(ConnectionType.All);
+            var snapshot = monitor.CurrentDevices;
             if (snapshot.Count == 0 && !snapshotEmptied)
             {
                 snapshotEmptied = true;
@@ -163,7 +159,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         var phase3Deadline = clock.Elapsed + TimeSpan.FromSeconds(120);
         while (clock.Elapsed < phase3Deadline)
         {
-            var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
+            var devices = monitor.CurrentDevices;
             if (devices is [{ SerialNumber: not null } sole])
             {
                 reinserted = sole;

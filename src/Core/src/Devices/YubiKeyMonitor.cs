@@ -32,7 +32,6 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     private readonly DisposalGate _disposal = new();
     private int _disposed;
 
-    // The legacy manager borrows these during the staged migration; ownership stays here.
     internal YubiKeyDeviceRepository Repository { get; }
     internal YubiKeyDeviceMonitorService Service { get; }
     internal Func<Task>? RepositoryTeardownReachedForTest;
@@ -95,7 +94,6 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
         return new YubiKeyMonitor(repository, service);
     }
 
-    // Stage 3 will expose this through YubiKeyManager.CreateMonitorAsync, not another public lifecycle API.
     internal static Task<YubiKeyMonitor> CreateAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

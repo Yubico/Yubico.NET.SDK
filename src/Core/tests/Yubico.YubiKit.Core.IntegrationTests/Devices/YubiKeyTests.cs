@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
@@ -25,7 +24,7 @@ public class YubiKeyTests : IAsyncLifetime
 {
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
@@ -66,13 +65,12 @@ public class YubiKeyTests : IAsyncLifetime
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-        // Enumerate first: WatchAsync subscribes on the first MoveNextAsync, so starting the
-        // monitor beforehand could let the initial rescan's events land before anyone is listening.
-        var events = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+        // The owned stream atomically replays current membership, then follows changes.
+        await using var monitor = await YubiKeyManager.CreateMonitorAsync(cts.Token);
+        var events = monitor.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
         await using (events.ConfigureAwait(false))
         {
             var pending = events.MoveNextAsync();
-            YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
 
             while (await pending)
             {

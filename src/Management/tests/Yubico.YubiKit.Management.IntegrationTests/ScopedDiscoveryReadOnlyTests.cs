@@ -23,12 +23,12 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
 /// <summary>
-///     Read-only public ScanAsync/CachedDeviceInfo coverage on idle, serial-bearing USB fixtures.
+///     Read-only public FindAllAsync/CachedDeviceInfo coverage on idle, serial-bearing USB fixtures.
 ///     Tests every attached allow-listed key, not just WithYubiKey's first matching device.
 /// </summary>
 /// <remarks>
-///     Does not inherit IntegrationTestBase: that base starts monitoring, which can probe disjoint
-///     siblings while a scoped connection is live. All scans finish before any live session opens;
+///     Owns no monitor, avoiding discovery probes of disjoint siblings while a scoped connection is live.
+///     All scans finish before any live session opens;
 ///     sessions and connections are sequential, including across disjoint views of the same key.
 ///     No reset, configuration, credentials, touch, or reinsertion. Management is referenced here,
 ///     not by Core, solely for independent live-read comparisons.
@@ -53,8 +53,8 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
         _allowList = allowList;
     }
 
-    public Task InitializeAsync() => YubiKeyManager.ShutdownAsync();
-    public Task DisposeAsync() => YubiKeyManager.ShutdownAsync();
+    public Task InitializeAsync() => Task.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [SkippableTheory]
     [InlineData(ConnectionType.SmartCard)]
@@ -63,7 +63,7 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
     [InlineData(ConnectionType.Hid)]
     [InlineData(ConnectionType.SmartCard | ConnectionType.HidOtp)]
     [InlineData(ConnectionType.All)]
-    public async Task ScanAsync_ScopedViewsCorrelateWithFullScanAndSequentialLiveReads(ConnectionType scope)
+    public async Task FindAllAsync_ScopedViewsCorrelateWithFullScanAndSequentialLiveReads(ConnectionType scope)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         var token = timeout.Token;
@@ -98,12 +98,11 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
             }
         }
 
-        Assert.False(YubiKeyManager.IsMonitoring);
         _output.WriteLine($"Validated {scope}: {expected.Count} authorized physical key(s), {scoped.Count} view(s).");
     }
 
     [SkippableFact]
-    public async Task ScanAsync_DefaultAndExplicitAllKeepIndependentViewsAndCachedSnapshots()
+    public async Task FindAllAsync_DefaultAndExplicitAllKeepIndependentViewsAndCachedSnapshots()
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         var first = await ReferenceScanAsync(timeout.Token); // Omitted scope exercises the public default.
@@ -125,7 +124,6 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
         }
 
         Assert.Equal(snapshots, first.Select(view => view.CachedDeviceInfo));
-        Assert.False(YubiKeyManager.IsMonitoring);
         _output.WriteLine($"Default and explicit All agree for {ConnectionsBySerial(first).Count} authorized physical key(s).");
     }
 
@@ -152,8 +150,8 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
         for (var attempt = 1; attempt <= MaxAttempts; attempt++)
         {
             scan = await TransientScanRetry.ScanAsync(scanAsync ?? (() => scope is { } requested
-                ? YubiKeyManager.ScanAsync(requested, token)
-                : YubiKeyManager.ScanAsync(cancellationToken: token)));
+                ? YubiKeyManager.FindAllAsync(requested, token)
+                : YubiKeyManager.FindAllAsync(cancellationToken: token)));
             Assert.Equal(scan.Count, scan.Select(view => view.DeviceId).Distinct(StringComparer.Ordinal).Count());
             var concrete = scope == ConnectionType.Hid
                 ? ConnectionType.HidFido | ConnectionType.HidOtp

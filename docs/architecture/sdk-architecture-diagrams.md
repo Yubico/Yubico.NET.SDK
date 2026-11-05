@@ -286,25 +286,27 @@ usable YubiKey object." Entry point is the **static** `YubiKeyManager` — no DI
 
 ```mermaid
 flowchart TD
-    Start(["YubiKeyManager.FindAllAsync(type=All)"])
-    Mgr["YubiKeyDeviceManager<br/><i>composition root (lazy)</i>"]
-    Repo["YubiKeyDeviceRepository<br/><i>cache</i>"]
-    Mon["YubiKeyDeviceMonitorService<br/><i>hot-plug events</i>"]
-    Find["FindYubiKeys.FindAllAsync"]
+    Start(["YubiKeyManager.Find…Async(interfaces=All)"])
+    Create(["await YubiKeyManager.CreateMonitorAsync()"])
+    Owner["YubiKeyMonitor<br/><i>explicitly owned lifetime</i>"]
+    Repo["YubiKeyDeviceRepository<br/>CurrentDevices / atomic WatchAsync replay + changes"]
+    Mon["YubiKeyDeviceMonitorService<br/><i>listeners + discovery loop</i>"]
+    Find["FindYubiKeys<br/><i>independent per-call or per-monitor evidence</i>"]
 
     FPcsc["IFindPcscDevices<br/>(PC/SC readers)"]
     FHid["IFindHidInterfaces<br/>(FIDO + OTP HID)"]
-    Merge{"Merge interfaces of<br/>same physical key<br/>(by USB Product ID)"}
+    Merge{"Conservatively merge interfaces<br/>using topology, serial and PID evidence"}
 
     Slot["PcscConnectionSlot / HidConnectionSlot<br/><i>raw live interface candidate</i>"]
     Flat["YubiKeyDevice<br/>optional SmartCard · FIDO · OTP slots"]
 
     Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous"])
 
-    Start --> Mgr
-    Mgr --> Repo
-    Mgr --> Mon
-    Mgr -->|cache miss / forceRescan| Find
+    Start -->|fresh scoped finder; retire on exit| Find
+    Create -->|await initial publication| Owner
+    Owner --> Repo
+    Owner --> Mon
+    Mon -->|All interfaces| Find
     Find --> FPcsc
     Find --> FHid
     FPcsc --> Slot
@@ -312,6 +314,7 @@ flowchart TD
     Slot --> Merge
     Merge --> Flat
     Flat --> Result
+    Mon -->|publish completed snapshots| Repo
 ```
 
 ### Then: connecting (transport selection)
@@ -374,8 +377,9 @@ flowchart TD
   the caller's connection; only convenience entry points own the hidden connection they create.
 - **Transport selection is single-shot:** each applet selects one supported transport from its default order
   or explicit override. Held and platform errors propagate without trying another interface.
-- **Monitoring:** `StartMonitoring()` exposes hot-plug events through one stream — `await foreach`
-  over `YubiKeyManager.WatchAsync(ct)`. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type.
+- **Monitoring:** `await CreateMonitorAsync(ct)` returns an initialized owned monitor. Consume
+  `monitor.WatchAsync(ct)` for initial Added replay plus changes, or read `CurrentDevices` without I/O.
+  Dispose the monitor explicitly. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type.
   Good "advanced" slide if time allows.
 
 ---

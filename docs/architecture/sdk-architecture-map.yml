@@ -155,7 +155,7 @@ diagrams:
       - src/Core/src/Devices
     symbols:
       YubiKeyManager: src/Core/src/Devices/YubiKeyManager.cs
-      YubiKeyDeviceManager: src/Core/src/Devices/YubiKeyDeviceManager.cs
+      YubiKeyMonitor: src/Core/src/Devices/YubiKeyMonitor.cs
       YubiKeyDeviceRepository: src/Core/src/Devices/YubiKeyDeviceRepository.cs
       YubiKeyDeviceMonitorService: src/Core/src/Devices/YubiKeyDeviceMonitorService.cs
       FindYubiKeys: src/Core/src/Devices/FindYubiKeys.cs

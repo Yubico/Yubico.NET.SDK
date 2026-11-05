@@ -83,7 +83,7 @@ await using (var session = await device.CreateManagementSessionAsync())
 
 // The key disconnects and re-enumerates. The session above is disposed; rescan before using the device again.
 await Task.Delay(TimeSpan.FromSeconds(3));
-var rebooted = await YubiKeyManager.FindAllAsync(forceRescan: true);
+var rebooted = await YubiKeyManager.FindAllAsync(); // Every Find performs fresh discovery.
 ```
 
 `DeviceConfig` is a record whose properties mirror `DeviceInfo`: `UsbEnabled`, `NfcEnabled`, `AutoEjectTimeout`,

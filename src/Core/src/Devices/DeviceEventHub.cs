@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
 /// Asynchronous fan-out of <see cref="DeviceEvent"/>s to <c>await foreach</c> consumers: the single
-/// delivery path behind <see cref="YubiKeyManager.WatchAsync"/> and <see cref="YubiKeyMonitor.WatchAsync"/>.
+/// delivery path behind <see cref="YubiKeyMonitor.WatchAsync"/>.
 /// </summary>
 /// <remarks>
 /// <para><strong>The publisher is never handed to a consumer.</strong> <see cref="Publish"/> only writes
@@ -153,9 +153,9 @@ internal sealed class DeviceEventHub
 
     // Called directly under the repository's state lock for atomic snapshot capture + registration.
     // Merely obtaining an independent WatchAsync iterator here would defer registration until too late.
-    internal Subscription Subscribe(bool includesSnapshot = false)
+    internal Subscription Subscribe()
     {
-        var watcher = new Subscription(this, includesSnapshot);
+        var watcher = new Subscription(this);
 
         lock (_gate)
         {
@@ -190,7 +190,7 @@ internal sealed class DeviceEventHub
     }
 
     /// <summary>One enumeration's private bounded buffer.</summary>
-    internal sealed class Subscription(DeviceEventHub owner, bool includesSnapshot) : IDisposable
+    internal sealed class Subscription(DeviceEventHub owner) : IDisposable
     {
         private readonly Channel<DeviceEvent> _channel = Channel.CreateBounded<DeviceEvent>(
             new BoundedChannelOptions(WatcherBufferCapacity)
@@ -237,9 +237,7 @@ internal sealed class DeviceEventHub
             _ = _channel.Writer.TryComplete(new InvalidOperationException(
                 $"The device event watcher's {WatcherBufferCapacity}-event buffer was full and the " +
                 "sequence was terminated to avoid silently dropping events. " +
-                (includesSnapshot
-                    ? "Clear the consumer's device projection and re-enumerate WatchAsync on the same monitor."
-                    : "Re-enumerate and resynchronize the device list via YubiKeyManager.FindAllAsync.")));
+                "Clear the consumer's device projection and re-enumerate WatchAsync on the same monitor."));
 
             // Do not invoke logging providers here: repository publication holds the short state lock.
             // The enumeration's terminal exception carries the fault and recovery instructions.

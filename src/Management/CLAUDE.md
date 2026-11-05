@@ -401,10 +401,10 @@ public async Task MyTest(YubiKeyTestState state) =>
 
 ### 1. Read-Only Device Information Tests
 
-`ScopedDiscoveryReadOnlyTests` exercises Core's public `ScanAsync` and `CachedDeviceInfo` contracts with
+`ScopedDiscoveryReadOnlyTests` exercises Core's public `FindAllAsync` and `CachedDeviceInfo` contracts with
 independent live Management reads. Unlike `[WithYubiKey]`'s first-match binding, it loops over all attached
-allow-listed serial-bearing USB fixtures. Do not derive it from `IntegrationTestBase`: that base starts
-monitoring, which can probe disjoint sibling interfaces while a scoped connection is held. Finish scans
+allow-listed serial-bearing USB fixtures. It owns no background monitor: monitoring can probe disjoint
+sibling interfaces while a scoped connection is held. The applet test base likewise no longer starts tracking. Finish scans
 before opening any live connection, then asynchronously dispose each borrowed session and connection
 before the next one. Its bounded retries report missing metadata and connection contention without
 swallowing unrelated errors. Excluded native call counts and disjoint ownership limits belong in Core's
@@ -869,7 +869,7 @@ using var mgmt = await ManagementSession.CreateAsync(
 
 ```csharp
 // Find all connected YubiKeys
-var devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken);
+var devices = await YubiKeyManager.FindAllAsync(cancellationToken);
 foreach (var device in devices)
 {
     var info = await device.GetDeviceInfoAsync(cancellationToken: cancellationToken);

@@ -27,10 +27,6 @@ internal static class SmartCardScenario
             Console.Error.WriteLine($"FAIL mode=smartcard serial={serial}: {ex}");
             return 1;
         }
-        finally
-        {
-            await YubiKeyManager.ShutdownAsync();
-        }
     }
 
     private static async Task<IYubiKey?> FindSelectedAsync(int serial)

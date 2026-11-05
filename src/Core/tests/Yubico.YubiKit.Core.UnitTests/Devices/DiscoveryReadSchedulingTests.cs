@@ -68,7 +68,7 @@ public class DiscoveryReadSchedulingTests
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var (held, _) = HoldFirstDisposal(rig, release.Task);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        var scan = YubiKeyManager.ScanAsync(ConnectionType.All, cancellation.Token, rig.CreateFinder);
+        var scan = YubiKeyManager.FindAllAsync(ConnectionType.All, cancellation.Token, rig.CreateFinder);
         try
         {
             await held.DisposalEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
@@ -92,7 +92,7 @@ public class DiscoveryReadSchedulingTests
             // A fresh independent finder must also respect the abandoned native owner. Its queued reads
             // retire at exit; neither scope may open a sibling when the original owner finally drains.
             var fresh = new ScopeRig { IncludeSecondKey = true, PrimaryReader = "Yubico YubiKey future USB reader" };
-            _ = await YubiKeyManager.ScanAsync(ConnectionType.All, TestContext.Current.CancellationToken, fresh.CreateFinder)
+            _ = await YubiKeyManager.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken, fresh.CreateFinder)
                 .WaitAsync(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
             Assert.Empty(fresh.OpenCalls);
 

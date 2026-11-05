@@ -82,7 +82,7 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfFailed();
             snapshot = _snapshot;
-            subscription = _events.Subscribe(includesSnapshot: true);
+            subscription = _events.Subscribe();
         }
 
         using (subscription)
@@ -111,9 +111,8 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
     /// <remarks>
     /// This is a cache-validity flag, not a count. A scan that legitimately found no devices sets it,
     /// so <see langword="true"/> with an empty <see cref="GetAll"/> means "scanned, nothing attached"
-    /// rather than "never scanned" - which is exactly the distinction
-    /// <see cref="YubiKeyDeviceManager.FindAllAsync"/> needs to avoid rescanning on every call when no
-    /// key is plugged in. It returns to <see langword="false"/> on <see cref="Dispose"/>, which
+    /// rather than "never scanned". Monitor initialization accepts a successful empty publication.
+    /// It returns to <see langword="false"/> on <see cref="Dispose"/>, which
     /// discards the cache it describes.
     /// </remarks>
     public bool HasData => _hasData;

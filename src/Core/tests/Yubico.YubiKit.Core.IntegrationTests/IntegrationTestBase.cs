@@ -12,31 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Devices;
-
 namespace Yubico.YubiKit.Core.IntegrationTests;
 
 /// <summary>
-/// Base class for integration tests using the static YubiKeyManager API.
+/// Base for one-shot applet integration tests. Tracking tests explicitly own their own monitor.
 /// </summary>
 public abstract class IntegrationTestBase : IAsyncDisposable
 {
-    private bool _disposed;
-
-    protected IntegrationTestBase()
-    {
-        // Start monitoring to enable device events
-        YubiKeyManager.StartMonitoring();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_disposed)
-            return;
-
-        await YubiKeyManager.ShutdownAsync();
-        GC.SuppressFinalize(this);
-
-        _disposed = true;
-    }
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

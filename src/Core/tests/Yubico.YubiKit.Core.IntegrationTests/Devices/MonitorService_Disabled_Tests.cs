@@ -28,7 +28,7 @@ public class MonitorService_Disabled_Tests : IAsyncLifetime
         return Task.CompletedTask;
     }
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task WhenMonitoringDisabled_StillFindsDevicesOnDemand()
@@ -39,9 +39,4 @@ public class MonitorService_Disabled_Tests : IAsyncLifetime
         Assert.NotEmpty(devices);
     }
 
-    [Fact]
-    public void WhenMonitoringDisabled_IsMonitoringReturnsFalse()
-    {
-        Assert.False(YubiKeyManager.IsMonitoring);
-    }
 }

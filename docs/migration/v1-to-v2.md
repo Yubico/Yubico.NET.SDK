@@ -235,7 +235,6 @@ using Yubico.YubiKit.Core.Devices;
 
 var devices = await YubiKeyManager.FindAllAsync(
     ConnectionType.All,
-    forceRescan: true,
     cancellationToken: cancellationToken);
 var device = devices.First();
 ```
@@ -243,6 +242,11 @@ var device = devices.First();
 Migration notes:
 
 - Replace synchronous enumeration assumptions with async flow and cancellation support.
+- Every Find uses fresh per-call evidence, without global cache or monitoring. `interfaces` restricts
+  enumeration/probes, not just results; discover All and filter locally to preserve composite slots.
+- Earlier v2 prerelease users: replace `ScanAsync` with `FindAllAsync(interfaces: ...)`, remove `forceRescan`,
+  and replace static monitoring/shutdown with `await using var monitor = await YubiKeyManager.CreateMonitorAsync(ct)`.
+  Use `monitor.CurrentDevices` for cached membership and `monitor.WatchAsync(ct)` for initial replay plus changes.
 - V2 models one physical YubiKey with one or more available connections. Avoid assuming that the discovered object is a single transport handle.
 - If v1 code filtered by `Transport.HidFido`, `Transport.UsbSmartCard`, or NFC-specific behavior, review the v2 `ConnectionType` choice rather than applying a mechanical enum rename.
 - For the common "just get one matching device" case, prefer `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` (throws `InvalidOperationException` when none match) or `FindFirstOrDefaultAsync(...)` (returns `null`) over `FindAllAsync(...).First()`. See `core-find-first-discovery-helpers` in `v1-to-v2-map.yml` and `docs/usage/device-discovery.md`.

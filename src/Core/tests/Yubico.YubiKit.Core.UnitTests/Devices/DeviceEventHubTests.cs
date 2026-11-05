@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
 /// White-box tests for <see cref="DeviceEventHub"/> — the single delivery path behind
-/// <c>YubiKeyManager.WatchAsync</c>.
+/// <c>YubiKeyMonitor.WatchAsync</c>.
 /// </summary>
 /// <remarks>
 /// These pin the primitive: independent per-watcher buffers, lazy subscription, overflow and
@@ -239,7 +239,7 @@ public class DeviceEventHubTests
         stall.Release();
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => consumer);
-        Assert.Contains("FindAllAsync", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("same monitor", ex.Message, StringComparison.Ordinal);
     }
 
     [Fact]

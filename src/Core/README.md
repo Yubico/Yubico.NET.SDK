@@ -54,7 +54,7 @@ Discovery needs no PIN, touch, or open session. Later snippets assume these dire
 
 ## Common operations
 
-### Owned monitoring migration (in progress)
+### Own continuous tracking
 
 `YubiKeyMonitor` introduces an explicitly owned monitoring lifetime with `CurrentDevices`, `WatchAsync`,
 and `IAsyncDisposable`. `CurrentDevices` reads the last completed, read-only membership snapshot without
@@ -64,11 +64,11 @@ Accessing `CurrentDevices` after disposal throws; enumerating `WatchAsync` after
 Unexpected terminal monitoring failure faults subscriptions and rejects cached access rather than leaving
 an apparently live, frozen cache.
 
-This is a staged migration, **not yet an alternative public entry point**. Initialization is
-currently internal: it registers listeners before the loop's single initial scan and waits for publication,
+Create it with `await YubiKeyManager.CreateMonitorAsync(cancellationToken)` and dispose with `await using`.
+Initialization registers listeners before the loop's single initial scan and waits for publication,
 including successful empty discovery. Startup failure/cancellation cleans up the partial lifetime; the
 creation token does not control the monitor after successful creation. The initial interval is five seconds.
-The legacy static `YubiKeyManager` API remains supported at this stage.
+There is no process-global monitoring lifetime or device cache.
 
 `YubiKeyMonitor.WatchAsync` now supplies initial `Added` events followed by ordered changes. On each
 enumeration's first `MoveNextAsync`, it captures membership and subscribes at the same boundary as a
@@ -78,21 +78,19 @@ Overflow faults only that watcher: **clear its device projection and re-enumerat
 `WatchAsync`** to rebuild it safely. Canceling a watcher does not stop monitoring. Disposal allows already
 captured replay and published deltas to drain, but new enumerations complete empty.
 
-The legacy static `YubiKeyManager.WatchAsync` remains **change-only** until the facade migration. Do not
-combine a separate `CurrentDevices` read with a subscription and assume that it is race-free. A later
-compile-consistent migration will expose `YubiKeyManager.CreateMonitorAsync` and update static discovery
-and its consumers. Until then, the examples below use the existing API.
+Do not combine a separate `CurrentDevices` read with a subscription and assume that it is race-free.
+Use the replaying stream to initialize a UI projection; use `CurrentDevices` for point-in-time lookups.
 
-### Scan selected interfaces without the manager cache
+### Discover selected interfaces once
 
 ```csharp
-var smartCardViews = await YubiKeyManager.ScanAsync(ConnectionType.SmartCard, cancellationToken);
-var fidoViews = await YubiKeyManager.ScanAsync(ConnectionType.HidFido, cancellationToken);
+var smartCardViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
+var fidoViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
 ```
 
-Each call uses fresh discovery evidence without initializing the manager, changing its repository, or
-starting monitoring. Scope limits enumeration/probes and returned connection slots, unlike `FindAllAsync`'s
-full-device result filter. HID-only skips PC/SC; SmartCard-only skips HID. OTP/FIDO share HID descriptor
+Every Find call uses fresh discovery evidence without a shared repository or background tracking.
+`interfaces` limits enumeration/probes and returned connection slots; it is not a full-device result filter.
+To retain composite slots, discover All and filter locally. HID-only skips PC/SC; SmartCard-only skips HID. OTP/FIDO share HID descriptor
 enumeration, but excluded interfaces are not probed. Existing monitors run unchanged.
 
 Partial views can split one physical key. Connection exclusion covers overlapping known interface IDs,
@@ -128,26 +126,23 @@ the competing client before retrying, or explicitly accept a coexistence policy.
 `ExclusiveWithSharedFallback` default and can affect applications running alongside gpg-agent, browsers,
 or OS smart-card services.
 
-If discovery ran during contention, a PC/SC-only key may be cached with a `null` `SerialNumber` because
-its metadata could not be read. Closing the competing client does not itself refresh that cache:
-`FindFirstAsync` and `FindFirstOrDefaultAsync` still query cached results. Force a scan before retrying
-a serial predicate:
+If discovery ran during contention, a PC/SC-only key may have a `null` `SerialNumber` because its metadata
+could not be read. After closing the competing client, repeat the Find operation with fresh evidence:
 
 ```csharp
 // After closing the competing client; expectedSerialNumber is the serial you want to find.
-await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken: cancellationToken);
 IYubiKey? matchingDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
     key => key.SerialNumber == expectedSerialNumber, cancellationToken);
 ```
 
-A forced scan retries failed metadata reads; it does not guarantee a serial if the key remains busy,
+A fresh lookup retries metadata reads; it does not guarantee a serial if the key remains busy,
 unavailable, or does not report one. With monitoring active, a later successful scan can also refresh
 the metadata.
 
 Without topology evidence, contention on multiple same-model keys can leave PC/SC interfaces separate
 from serial-bearing HID interfaces. A serial match may then lack SmartCard support; a PIV-opening
 `NotSupportedException` can mean incomplete discovery, not that the hardware lacks PIV. After closing
-the competing clients, force a scan as above and reacquire the device by serial before retrying; check
+the competing clients, repeat discovery as above and reacquire the device by serial before retrying; check
 `SupportsConnection(ConnectionType.SmartCard)`. Previously returned `IYubiKey` objects have immutable
 `AvailableConnections` and do not gain the remerged interfaces.
 
@@ -214,22 +209,27 @@ IYubiKey? smartCard = await YubiKeyManager.FindFirstOrDefaultAsync(
 ```
 
 `FindFirstAsync` throws `InvalidOperationException` when nothing matches; `FindFirstOrDefaultAsync` returns
-`null`. Both are one-shot queries over the same cached discovery as `FindAllAsync`: they do not wait for a
+`null`. Both perform one fresh discovery operation, like `FindAllAsync`: they do not wait for a
 key to be inserted, and "first" is not a stable ordering.
 
 ### Watch for devices being added and removed
 
 ```csharp
-YubiKeyManager.StartMonitoring();
+await using var monitor = await YubiKeyManager.CreateMonitorAsync();
 
-await foreach (DeviceEvent change in YubiKeyManager.WatchAsync())
+await foreach (DeviceEvent change in monitor.WatchAsync())
 {
     Console.WriteLine($"{change.Action}: serial {change.Device.SerialNumber}");
 }
 ```
 
 `WatchAsync` yields `Added` and `Removed` events computed from a repository diff, not raw OS notifications.
-Subscription starts on first enumeration; events raised before that are not replayed.
+Subscription starts on first enumeration, atomically replaying current membership before ordered changes.
+
+**v2 prerelease migration:** replace `ScanAsync` with `FindAllAsync(interfaces: ...)`; remove `forceRescan`.
+Replace static Start/Stop/Watch/Shutdown calls with an owned monitor and `DisposeAsync`. Old `type` filters
+selected full-device results; the new `interfaces` restricts discovery, so retain All plus local filtering
+where later operations need composite connection slots. No compatibility aliases retain the old cache behavior.
 
 ### Send raw APDUs
 
@@ -404,7 +404,7 @@ device with `Yubico.YubiKit.SecurityDomain`.
 
 ## Related
 
-For repeatable `ScanAsync`/`CachedDeviceInfo` hardware validation, use the
+For repeatable `FindAllAsync`/`CachedDeviceInfo` hardware validation, use the
 [targeted read-only discovery checks](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 They cover every attached authorized serial-bearing USB key, use sequential connections only, and keep the
 live-read Management dependency in its integration project. Scope exclusion and disjoint ownership limits

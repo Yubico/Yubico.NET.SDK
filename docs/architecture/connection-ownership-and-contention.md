@@ -113,6 +113,16 @@ Discovery leases remain per-interface and nonblocking:
 Idle ownership records remain for the process lifetime to avoid unsafe remove/recreate races. Their
 count is bounded by unique interface IDs observed.
 
+Separately, discovery's native-read admission serializes potentially sibling USB probes by PID before
+they request a worker or interface lease. It covers both identity and metadata reads, including connection
+disposal, across finders and evidence epochs. An unknown USB PID conservatively acquires all known PID
+gates. These fixed gates are scheduling only: they contain no metadata and add no public connection claims.
+Once an interface lease is acquired, it owns this admission until native release; an abandoned waiter or
+retired scope cannot release it. Built-in native owners that cannot prove teardown retain it with their
+quarantined interface claim. See [native discovery scheduling](device-discovery-guarantees.md#native-discovery-scheduling)
+for the throughput tradeoff and pinning tests. Direct raw reads outside the finder and caller-owned public
+connections do not acquire these discovery PID gates; the grouping bound above remains unchanged.
+
 ## Session transport selection
 
 Multi-transport applet entry points select exactly one transport. An explicit valid

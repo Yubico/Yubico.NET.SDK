@@ -80,6 +80,32 @@ serial evidence is pinned by
 
 ## Independent scoped observations
 
+### Native discovery scheduling
+
+Potential sibling interfaces must not make concurrent progress during discovery. Overlapping CCID/OTP
+Management reads reproduced an OTP response timeout on hardware; awaiting only the bounded identity
+waiter would still let its abandoned native operation overlap a later sibling read.
+
+Before native-worker admission, USB reads therefore acquire process-wide PID admission. All interfaces
+with the same known PID serialize, even when they belong to distinct keys or different finders. An unknown
+USB PID (including an unparsed CCID reader name) acquires all known PID gates in order, because it may be
+a sibling of any enumerated HID PID. Known different PIDs and non-USB readers remain independent. This
+intentionally conservative scheduling does not strengthen merge evidence or change registry member claims.
+It stores neither device metadata nor serial/topology aliases globally.
+
+The admission transfers to the native discovery lease, surviving bounded waiter timeout, cancellation,
+scope retirement, and failed built-in teardown that retains the quarantined lease. Scope retirement cancels
+queued admissions; they occupy no native worker while waiting. The existing identity/metadata budgets and
+four-worker bound are unchanged. A blocked same-PID owner can therefore leave other interfaces unread in
+that scan rather than admitting unsafe overlapping work.
+
+Pinned by `DiscoveryReadSchedulingTests.FindAllAsync_PotentialSiblingReads_WaitForNativeDisposal`,
+`ScanAsync_ExitKeepsNativeAdmissionAndRetiresQueuedSiblings`, and
+`FindAllAsync_DifferentPidMetadata_ProgressesWhileNativeDisposalIsHeld`; retained native-failure admission
+is exercised by the isolated `PcscDiscoveryLifetimeTests` cleanup probes.
+
+### Scoped lifecycle
+
 `YubiKeyManager.ScanAsync(scope, cancellationToken)` creates a fresh finder per call. Its immutable scope
 limits enumeration and probes, not just returned devices. Excluded transport backends are not constructed;
 SmartCard-only skips HID enumeration and HID-only skips PC/SC enumeration. OTP and FIDO still share OS HID

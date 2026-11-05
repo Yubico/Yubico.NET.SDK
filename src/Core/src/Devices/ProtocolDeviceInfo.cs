@@ -42,6 +42,7 @@ internal static class ProtocolDeviceInfo
     {
         private readonly Lock _gate = new();
         private readonly ConcurrentDictionary<ReadKey, SharedRead> _inFlightReads = new();
+        private readonly ConcurrentDictionary<string, IReadOnlyList<SemaphoreSlim>> _usbReadGates = new();
         private TransportEpoch _currentEpoch = new(generation: 0);
         private bool _retired;
 
@@ -56,6 +57,12 @@ internal static class ProtocolDeviceInfo
 
         internal SharedRead GetOrAdd(ReadKey key, Func<ReadKey, SharedRead> create) =>
             _inFlightReads.GetOrAdd(key, create);
+
+        internal void CoordinateUsbRead(string interfaceId, ushort? pid) =>
+            _usbReadGates[interfaceId] = DiscoveryReadAdmission.GatesFor(pid);
+
+        internal IReadOnlyList<SemaphoreSlim>? ReadGatesFor(string interfaceId) =>
+            _usbReadGates.GetValueOrDefault(interfaceId);
 
         internal void Remove(ReadKey key, SharedRead read) =>
             _ = _inFlightReads.TryRemove(KeyValuePair.Create(key, read));
@@ -319,13 +326,50 @@ internal static class ProtocolDeviceInfo
         }
     }
 
-    private static Task<DeviceInfo> StartSharedRead(
+    private static async Task<DeviceInfo> StartSharedRead(
         ReadScope scope,
         ReadKey key,
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
         bool waitForWorkerSlot,
         DiscoveryReadLeaseTracker leaseTracker)
+    {
+        DiscoveryReadAdmission? nativeAdmission = null;
+        try
+        {
+            if (scope.ReadGatesFor(key.InterfaceId) is { } gates)
+            {
+                // Preserve nonblocking refusal for an already-held interface instead of waiting behind
+                // its owner's PID gate. This is only a precheck; the worker still acquires atomically.
+                if (!DeviceConnectionRegistry.IsDiscoveryAvailable(key.InterfaceId))
+                    throw new DiscoveryReadSkippedException(key.InterfaceId, DiscoveryReadSkipCause.InterfaceLeaseHeld);
+                nativeAdmission = await DiscoveryReadAdmission.AcquireAsync(gates, epoch.Superseded)
+                    .ConfigureAwait(false);
+            }
+
+            return await StartAdmittedRead(scope, key, epoch, provider, waitForWorkerSlot, leaseTracker, nativeAdmission)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (epoch.Superseded.IsCancellationRequested)
+        {
+            throw Superseded(key);
+        }
+        finally
+        {
+            // After registration, only native teardown releases this admission. In particular a built-in
+            // owner that cannot prove native release keeps the PID gate along with its quarantined lease.
+            nativeAdmission?.DisposeUnlessTransferred();
+        }
+    }
+
+    private static Task<DeviceInfo> StartAdmittedRead(
+        ReadScope scope,
+        ReadKey key,
+        TransportEpoch epoch,
+        IDiscoveryConnectionProvider? provider,
+        bool waitForWorkerSlot,
+        DiscoveryReadLeaseTracker leaseTracker,
+        DiscoveryReadAdmission? nativeAdmission)
     {
         if (waitForWorkerSlot)
         {
@@ -336,7 +380,7 @@ internal static class ProtocolDeviceInfo
             // bounds the wait, and the admission bound itself is preserved: at most
             // MaximumConcurrentWorkers native reads run concurrently, so a hung native call still cannot
             // multiply workers.
-            return StartQueuedSharedRead(scope, key, epoch, provider, leaseTracker);
+            return StartQueuedSharedRead(scope, key, epoch, provider, leaseTracker, nativeAdmission);
         }
 
         if (!DiscoveryWorkerAdmission.TryAcquire(out var admission))
@@ -351,7 +395,7 @@ internal static class ProtocolDeviceInfo
             // WaitAsync. Saturation skips instead of queuing or allocating another worker (best-effort
             // metadata path). Supersession is validated inside the worker, immediately before the
             // hardware open (see ConnectAndReadAsync).
-            return StartWorker(scope, key, epoch, provider, admission, leaseTracker);
+            return StartWorker(scope, key, epoch, provider, admission, leaseTracker, nativeAdmission);
         }
         catch
         {
@@ -365,7 +409,8 @@ internal static class ProtocolDeviceInfo
         ReadKey key,
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
-        DiscoveryReadLeaseTracker leaseTracker)
+        DiscoveryReadLeaseTracker leaseTracker,
+        DiscoveryReadAdmission? nativeAdmission)
     {
         // The queued wait is cancelled by transport activity so superseded reads cannot accumulate behind
         // hung workers: each hotplug event would otherwise enqueue another uncancellable waiter (its
@@ -385,7 +430,7 @@ internal static class ProtocolDeviceInfo
 
         try
         {
-            return await StartWorker(scope, key, epoch, provider, admission, leaseTracker).ConfigureAwait(false);
+            return await StartWorker(scope, key, epoch, provider, admission, leaseTracker, nativeAdmission).ConfigureAwait(false);
         }
         catch
         {
@@ -411,7 +456,8 @@ internal static class ProtocolDeviceInfo
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
         IDisposable admission,
-        DiscoveryReadLeaseTracker leaseTracker) =>
+        DiscoveryReadLeaseTracker leaseTracker,
+        DiscoveryReadAdmission? nativeAdmission) =>
         Task.Factory.StartNew(
                 async () =>
                 {
@@ -423,6 +469,7 @@ internal static class ProtocolDeviceInfo
                                 epoch,
                                 provider,
                                 leaseTracker,
+                                nativeAdmission,
                                 CancellationToken.None)
                             .ConfigureAwait(false);
                     }
@@ -438,15 +485,17 @@ internal static class ProtocolDeviceInfo
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
         DiscoveryReadLeaseTracker leaseTracker,
+        DiscoveryReadAdmission? nativeAdmission,
         CancellationToken cancellationToken)
     {
         var interfaceId = key.InterfaceId;
         if (provider is null)
             throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.NoDiscoveryProvider);
 
-        var discoveryLease = DeviceConnectionRegistry.TryAcquireDiscovery(interfaceId);
+        var discoveryLease = DeviceConnectionRegistry.TryAcquireDiscovery(interfaceId, nativeAdmission);
         if (discoveryLease is null)
             throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.InterfaceLeaseHeld);
+        nativeAdmission?.TransferToLease();
         leaseTracker.Register(discoveryLease);
         var registrationTransferred = false;
         try

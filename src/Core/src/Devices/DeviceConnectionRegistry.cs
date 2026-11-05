@@ -129,8 +129,11 @@ internal static class DeviceConnectionRegistry
     ///     connection owns or is already waiting for the interface. Throws a fresh
     ///     <see cref="UnrecoveredConnectionException" /> when an earlier native owner has not proven release.
     /// </summary>
-    public static IDisposable? TryAcquireDiscovery(string deviceId) =>
-        GetOwnership(deviceId).TryAcquireDiscovery();
+    public static IDisposable? TryAcquireDiscovery(string deviceId, IDisposable? nativeAdmission = null) =>
+        GetOwnership(deviceId).TryAcquireDiscovery(nativeAdmission);
+
+    internal static bool IsDiscoveryAvailable(string deviceId) =>
+        !Interfaces.TryGetValue(deviceId, out var ownership) || ownership.IsDiscoveryAvailable;
 
     internal static Task WaitForRecoveryForTest(string deviceId) =>
         GetOwnership(deviceId).WaitForRecovery();
@@ -160,6 +163,18 @@ internal static class DeviceConnectionRegistry
             {
                 lock (_sync)
                     return _connectionCount > 0;
+            }
+        }
+
+        public bool IsDiscoveryAvailable
+        {
+            get
+            {
+                lock (_sync)
+                {
+                    ThrowIfUnrecovered();
+                    return !_discoveryActive && _connectionCount == 0 && _waitingConnections == 0;
+                }
             }
         }
 
@@ -242,7 +257,7 @@ internal static class DeviceConnectionRegistry
                 return _recoveryCompletion?.Task ?? Task.CompletedTask;
         }
 
-        public IDisposable? TryAcquireDiscovery()
+        public IDisposable? TryAcquireDiscovery(IDisposable? nativeAdmission)
         {
             lock (_sync)
             {
@@ -252,7 +267,7 @@ internal static class DeviceConnectionRegistry
 
                 _discoveryActive = true;
                 _discoveryReleased = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-                return new Registration(this, LeaseKind.Discovery);
+                return new Registration(this, LeaseKind.Discovery, nativeAdmission);
             }
         }
 
@@ -303,7 +318,10 @@ internal static class DeviceConnectionRegistry
         void MarkUnrecovered(Exception failure);
     }
 
-    private sealed class Registration(InterfaceOwnership ownership, LeaseKind kind) : IUnrecoveredRegistration
+    private sealed class Registration(
+        InterfaceOwnership ownership,
+        LeaseKind kind,
+        IDisposable? nativeAdmission = null) : IUnrecoveredRegistration
     {
         private readonly Lock _sync = new();
         private int _disposed;
@@ -317,6 +335,7 @@ internal static class DeviceConnectionRegistry
 
                 _disposed = 1;
                 ownership.Release(kind);
+                nativeAdmission?.Dispose();
             }
         }
 

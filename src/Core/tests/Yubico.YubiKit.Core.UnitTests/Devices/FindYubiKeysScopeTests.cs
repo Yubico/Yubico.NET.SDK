@@ -379,8 +379,11 @@ public class FindYubiKeysScopeTests
         internal const string Reader = "Yubico YubiKey OTP+FIDO+CCID";
         private readonly string _prefix = $"scope:{Guid.NewGuid():N}:";
         internal int Serial { get; set; } = 111;
+        internal string PrimaryReader { get; init; } = Reader;
+        internal short ProductId { get; init; } = 0x0407;
         internal bool IncludeSecondKey { get; init; }
         internal bool FailReads { get; init; }
+        internal Func<string, Task<IConnection>>? OpenConnection { get; set; }
         internal TaskCompletionSource<IConnection>? PendingOpen { get; init; }
         internal TaskCompletionSource OpenEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         internal PcscFinder Pcsc { get; } = new();
@@ -392,11 +395,11 @@ public class FindYubiKeysScopeTests
 
         internal FindYubiKeys CreateFinder(ConnectionType scope)
         {
-            Pcsc.Devices = IncludeSecondKey ? [new PcscInterface(Reader), new PcscInterface(Reader + " 01")] : [new PcscInterface(Reader)];
+            Pcsc.Devices = IncludeSecondKey ? [new PcscInterface(PrimaryReader), new PcscInterface(PrimaryReader + " 01")] : [new PcscInterface(PrimaryReader)];
             Hid.Devices = IncludeSecondKey
-                ? [new HidInterface("fido", HidInterfaceType.Fido), new HidInterface("otp", HidInterfaceType.Otp),
-                    new HidInterface("fido2", HidInterfaceType.Fido), new HidInterface("otp2", HidInterfaceType.Otp)]
-                : [new HidInterface("fido", HidInterfaceType.Fido), new HidInterface("otp", HidInterfaceType.Otp), new HidInterface("unsupported", HidInterfaceType.Unknown)];
+                ? [new HidInterface("fido", HidInterfaceType.Fido, ProductId), new HidInterface("otp", HidInterfaceType.Otp, ProductId),
+                    new HidInterface("fido2", HidInterfaceType.Fido, ProductId), new HidInterface("otp2", HidInterfaceType.Otp, ProductId)]
+                : [new HidInterface("fido", HidInterfaceType.Fido, ProductId), new HidInterface("otp", HidInterfaceType.Otp, ProductId), new HidInterface("unsupported", HidInterfaceType.Unknown, ProductId)];
             return new FindYubiKeys(Pcsc, Hid, CreateSlot, scope, this);
         }
 
@@ -427,6 +430,7 @@ public class FindYubiKeysScopeTests
         {
             OpenCalls.AddOrUpdate(name, 1, (_, calls) => calls + 1);
             OpenEntered.TrySetResult();
+            if (OpenConnection is { } open) return open(name);
             if (PendingOpen is { } pending) return pending.Task;
             if (FailReads) return Task.FromException<IConnection>(new InvalidOperationException("Scripted unreadable identity"));
             return Task.FromResult<IConnection>(CreateIdentityConnection(name.EndsWith('2') || name.EndsWith(" 01", StringComparison.Ordinal) ? 222 : Serial));
@@ -473,10 +477,10 @@ public class FindYubiKeysScopeTests
             public PscsConnectionKind Kind => PscsConnectionKind.Usb;
         }
 
-        private sealed class HidInterface(string name, HidInterfaceType type) : IHidInterface
+        private sealed class HidInterface(string name, HidInterfaceType type, short productId) : IHidInterface
         {
             public string ReaderName => name;
-            public HidDescriptorInfo DescriptorInfo { get; } = new() { VendorId = 0x1050, ProductId = 0x0407 };
+            public HidDescriptorInfo DescriptorInfo { get; } = new() { VendorId = 0x1050, ProductId = productId };
             public HidInterfaceType InterfaceType => type;
             public IHidConnection ConnectToFeatureReports() => throw new InvalidOperationException("No native access in unit tests");
             public IHidConnection ConnectToIOReports() => throw new InvalidOperationException("No native access in unit tests");
@@ -509,12 +513,19 @@ public class FindYubiKeysScopeTests
     internal sealed class IdentityConnection(FakeSmartCardConnection inner) : ISmartCardConnection
     {
         internal int DisposeCount { get; private set; }
+        internal TaskCompletionSource DisposalEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        internal Task? PendingDisposal { get; set; }
         public ConnectionType Type => ConnectionType.SmartCard;
         public Transport Transport => Transport.Usb;
         public bool SupportsExtendedApdu() => true;
         public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken = default) => inner.TransmitAndReceiveAsync(command, cancellationToken);
         public void Dispose() { DisposeCount++; inner.Dispose(); }
-        public ValueTask DisposeAsync() { Dispose(); return ValueTask.CompletedTask; }
+        public async ValueTask DisposeAsync()
+        {
+            DisposalEntered.TrySetResult();
+            if (PendingDisposal is { } pending) await pending;
+            Dispose();
+        }
     }
 }

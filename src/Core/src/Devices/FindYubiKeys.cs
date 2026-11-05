@@ -139,6 +139,8 @@ public class FindYubiKeys : IFindYubiKeys
 
             var interfaces = await EnumerateInterfacesAsync(cancellationToken).ConfigureAwait(false);
             EvictAbsentIdentities(evidence, interfaces);
+            foreach (var iface in interfaces.Where(iface => iface.IsUsb))
+                evidence.ReadScope.CoordinateUsbRead(iface.Device.InterfaceId, iface.Pid);
 
             // Reader-name drift: if any USB CCID reader name failed to parse to a known PID, PID correlation
             // is untrustworthy this scan; degrade to serial-based merge for all USB interfaces (ISC-11).

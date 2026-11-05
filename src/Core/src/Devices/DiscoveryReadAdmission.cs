@@ -61,7 +61,18 @@ internal sealed class DiscoveryReadAdmission : IDisposable
             }
 
             // Event-driven retry only: no reservations, native workers, timers, or polling while queued.
-            await changed.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await changed.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // WaitAsync cancellation can inline this continuation. Retirement cancels under
+                // finder/ingress locks: leave its stack before read completion can log or finish a scan.
+                // ForceYielding on the incomplete wait itself would not prevent later inlining.
+                await Task.CompletedTask.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
+                throw;
+            }
         }
     }
 

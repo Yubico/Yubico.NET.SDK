@@ -125,9 +125,9 @@
     },
     {
       "path": "Devices/YubiKeyDeviceMonitorService.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/YubiKeyDeviceMonitorService.cs: StartMonitoringCore schedules the monitoring loop for both legacy start and owned initialization; StopMonitoring bounds the synchronous shutdown wait and abandons a stuck generation."],
+      "evidence": ["Devices/YubiKeyDeviceMonitorService.cs: InitializeAsync schedules the sole monitoring loop and awaits its initial publication; DisposeAsync bounded-drains that loop asynchronously."],
       "status": ["documented", "outstanding"],
-      "entries": ["StartMonitoringCore#53CF906250ED#worker#Task.Run starts the monitoring loop independently of the caller; owned initialization awaits its first publication, while legacy StartMonitoring returns without waiting. The loop can still wait on discovery and is retired on shutdown.", "StopMonitoring#13EAD41AA391#sync-boundary#The synchronous StopMonitoring path blocks at most its shutdown timeout and abandons an unresponsive monitoring generation."]
+      "entries": ["InitializeAsync#B4D626DECC1F#worker#Task.Run starts one monitoring loop independently of the creation token; initialization awaits its first publication. Discovery may still block, and bounded disposal may abandon the retired loop without releasing its native leases."]
     },
     {
       "path": "Protocols/Fido/Hid/FidoHidConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",

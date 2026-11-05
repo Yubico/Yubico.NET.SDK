@@ -112,7 +112,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await monitor.Service.StartInitializedAsync(interval, cancellationToken).ConfigureAwait(false);
+            await monitor.Service.InitializeAsync(interval, cancellationToken).ConfigureAwait(false);
             return monitor;
         }
         catch

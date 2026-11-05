@@ -31,7 +31,7 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
     public FakeHidListener Hid { get; } = new();
     public FakeSmartCardListener SmartCard { get; } = new();
     public YubiKeyDeviceMonitorService Service { get; }
-    public Task Loop { get; private set; } = Task.CompletedTask;
+    public Task Loop => Service.MonitoringCompletionForTest;
     public Action? WaitReached { get; set; }
 
     public OwnedMonitorFixture()
@@ -44,13 +44,8 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
         };
     }
 
-    public Task<YubiKeyMonitor> CreateAsync(CancellationToken cancellationToken)
-    {
+    public Task<YubiKeyMonitor> CreateAsync(CancellationToken cancellationToken) =>
         _creation = YubiKeyMonitor.CreateAsync(Repository, Service, cancellationToken, TimeSpan.FromHours(1));
-        // Capture before teardown clears the service's running-task slot.
-        Loop = Service.MonitoringCompletionForTest;
-        return _creation;
-    }
 
     public Task WaitForScanAsync(int count, CancellationToken cancellationToken) => AsyncWait.WaitUntilAsync(
         () => Volatile.Read(ref _completedScans) >= count,

@@ -22,6 +22,50 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 [Trait("Category", "RuntimeResilience")]
 public class DiscoveryReadSchedulingTests
 {
+    [Fact]
+    public async Task ReadScopeRetirement_QueuedPidAdmission_DoesNotInlineReadCompletion()
+    {
+        var gates = DiscoveryReadAdmission.GatesFor(0x0407);
+        using var owner = await DiscoveryReadAdmission.AcquireAsync(gates, TestContext.Current.CancellationToken);
+        var scope = ProtocolDeviceInfo.CreateScope();
+        Assert.True(scope.TryCaptureEpoch(out var epoch));
+        var ingress = new Lock();
+        var queued = DiscoveryReadAdmission.AcquireAsync(gates, epoch.Superseded);
+        Assert.False(queued.IsCompleted);
+
+        // A queued read's continuation can perform completion logging or finish a scan. Neither
+        // may run inline under the worker's ingress/finder retirement locks during internal Cancel.
+        async Task<bool> ObserveCompletionAsync()
+        {
+            try
+            {
+                using var admission = await queued;
+                return ingress.IsHeldByCurrentThread;
+            }
+            catch (OperationCanceledException)
+            {
+                return ingress.IsHeldByCurrentThread;
+            }
+        }
+
+        var completion = ObserveCompletionAsync();
+        try
+        {
+            lock (ingress)
+                ProtocolDeviceInfo.Retire(scope);
+
+            Assert.False(await completion.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+            Assert.True(queued.IsCanceled);
+        }
+        finally
+        {
+            ProtocolDeviceInfo.Retire(scope);
+            // Retirement must finish the queued read before releasing its admission owner, even
+            // after runner cancellation; this never releases an already-open native read early.
+            await completion.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+        }
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

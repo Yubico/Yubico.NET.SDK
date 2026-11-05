@@ -16,114 +16,44 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-/// Service responsible for device discovery and monitoring lifecycle.
+/// Owns listeners and one sequential discovery/publication loop, borrowing the owner's repository.
 /// </summary>
-/// <remarks>
-/// <para>
-/// This service owns the device listeners (HID and SmartCard) and coordinates
-/// with <see cref="YubiKeyDeviceRepository"/> to update the device cache.
-/// It has no cache of its own - all state is maintained in the repository.
-/// Uses a single-reader channel to serialize listener ingress and debounce redundant scans.
-/// </para>
-/// <para>
-/// Lifecycle races are handled with epoch-gated publication: each monitoring
-/// epoch is a <see cref="MonitorGeneration"/> captured once by the loop, manual
-/// rescans, and listener callbacks. Every publication acquires the shared,
-/// never-disposed <see cref="_publishGate"/> and is admitted only if its
-/// generation is still current and the service is not disposed; superseded
-/// snapshots are discarded. Lifecycle operations swap <see cref="_current"/>
-/// under <see cref="_publishLock"/>; <see cref="StartMonitoring"/> and
-/// <see cref="StopMonitoring"/> never touch the publication gate at all, and
-/// <see cref="DisposeAsync"/> only attempts a bounded drain of it. A stalled
-/// publication therefore cannot block start or stop, and can delay dispose by
-/// no more than the shutdown timeout. An abandoned generation is unreachable
-/// garbage that can no longer publish stale truth.
-/// A publication already admitted when disposal times out its bounded drain may
-/// complete after <see cref="DisposeAsync"/> returns. If the manager has
-/// disposed the repository by then, the publication is discarded rather than
-/// emitted, so no device event escapes a disposed manager. This is a documented
-/// contract, not an accident.
-/// </para>
-/// </remarks>
 internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyDeviceMonitorService>();
 
-    /// <summary>
-    /// Quiet period after the last listener hint before a coalesced repository rescan runs.
-    /// </summary>
+    /// <summary>Quiet period after the last listener hint before a coalesced rescan runs.</summary>
     internal static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(200);
 
-    /// <summary>
-    /// Maximum time listener hints may be coalesced before forcing a repository rescan.
-    /// </summary>
+    /// <summary>Maximum time listener hints may be coalesced before forcing a rescan.</summary>
     internal static readonly TimeSpan MaxCoalesceInterval = 5 * ThrottleInterval;
 
-    /// <summary>
-    /// Default maximum time <see cref="StopMonitoring"/> and <see cref="DisposeAsync"/>
-    /// wait for the monitoring loop and in-flight publications before abandoning them.
-    /// </summary>
+    /// <summary>Bounds the managed loop drain, not native listener teardown or total disposal time.</summary>
     internal static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
 
     private readonly YubiKeyDeviceRepository _repository;
     private readonly IFindYubiKeys _findYubiKeys;
-    private readonly Lock _monitorLock = new();
-
-    // Shared, never-disposed publication gate held across admission + UpdateCache.
-    // All publications, across all generations, are mutually exclusive and never
-    // interleave; a successor's snapshot is serialized strictly after any
-    // in-flight predecessor's. This relies on UpdateCache publishing synchronously
-    // and completing before UpdateCache returns.
-    private readonly SemaphoreSlim _publishGate = new(1, 1);
-
-    // Tiny state lock guarding only the publication admission check and _current
-    // swaps at start/stop/dispose. Lifecycle operations take ONLY this lock,
-    // never _publishGate (except the bounded dispose drain), so a stalled
-    // device-event subscriber can never block start/stop/dispose.
-    private readonly Lock _publishLock = new();
-
+    private readonly Lock _ingressLock = new();
     private readonly TimeSpan _shutdownTimeout;
+    private readonly DeviceMonitorSignal _signal = new();
+    private readonly TaskCompletionSource<Exception?> _initialScan = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    // Device listeners for event-driven discovery
+    // Not disposed: an abandoned loop may still register with its token. This timer-less source and
+    // its registrations remain owned by that work; linked wait sources are disposed by the loop itself.
+    private readonly CancellationTokenSource _lifetime = new();
+
     private HidDeviceListener? _hidListener;
     private ISmartCardDeviceListener? _smartCardListener;
-
-    // The current monitor generation. The loop, manual rescans, and listener
-    // callbacks capture this reference ONCE; a generation's identity is that
-    // reference, so a torn gate/generation pairing is impossible by
-    // construction. Null only after disposal.
-    private volatile MonitorGeneration? _current;
-
-    // Monitoring lifecycle fields
     private Task? _monitoringTask;
-
     private volatile int _disposed;
 
-    /// <summary>
-    /// Test seam: invoked after <see cref="_publishGate"/> is acquired and before
-    /// the admission check, so tests can pin admission atomicity deterministically.
-    /// Never set in production.
-    /// </summary>
-    internal Func<Task>? PublishGateAcquiredForTest;
-
-    /// <summary>
-    /// Test seam: invoked after a snapshot passes admission and before
-    /// <see cref="YubiKeyDeviceRepository.UpdateCache"/> runs, while <see cref="_publishGate"/> is
-    /// still held. Never set in production.
-    /// </summary>
-    /// <remarks>
-    /// This is the window a blocking device-event subscriber used to occupy. Delivery is now
-    /// asynchronous fan-out into per-watcher buffers, so no consumer can hold a publication in flight
-    /// any more - which is the point of the design, and also why the lifecycle tests that must hold one
-    /// need a seam instead.
-    /// </remarks>
+    /// <summary>Test-only pause after the lifetime precheck and before repository publication.</summary>
     internal Func<Task>? PublishAdmittedForTest;
 
     /// <summary>Test-only observation/fault injection at the loop's wait boundary.</summary>
@@ -132,33 +62,38 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
     /// <summary>Test-only replacement of terminal logging, without changing the process-wide logger.</summary>
     internal Action<Exception>? TerminalFailureLogForTest;
 
-    /// <summary>Read-only observation of the actual loop; capture before disposal clears its slot.</summary>
-    internal Task MonitoringCompletionForTest
-    {
-        get
-        {
-            lock (_monitorLock)
-                return _monitoringTask ?? Task.CompletedTask;
-        }
-    }
+    /// <summary>Read-only observation of the one loop task, retained through disposal.</summary>
+    internal Task MonitoringCompletionForTest => _monitoringTask ?? Task.CompletedTask;
 
-    internal async Task StartInitializedAsync(TimeSpan interval, CancellationToken cancellationToken)
+    internal async Task InitializeAsync(TimeSpan interval, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var generation = StartMonitoringCore(interval, requireInitialScan: true);
-        // Cancel only initialization's wait. The factory disposes on failure/cancellation, and the
-        // generation owns its own lifetime token, never linked to the caller's creation token.
-        var failure = await generation.InitialScan.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(interval, TimeSpan.Zero, nameof(interval));
+        Debug.Assert(_monitoringTask is null, "Owned construction initializes once, before public exposure.");
+
+        // Listeners are optional latency accelerators; discovery/repository diffs supply device truth.
+        // Store each started listener immediately so the owner can clean partial initialization.
+        _hidListener = TryStartHidListener();
+        _smartCardListener = TryStartSmartCardListener();
+        _monitoringTask = Task.Run(() => MonitoringLoopAsync(interval, _lifetime.Token));
+
+        if (_hidListener is null && _smartCardListener is null)
+        {
+            Logger.LogWarning(
+                "No device-change listener could start; monitoring will rely on the {Interval} interval rescan only.",
+                interval);
+        }
+
+        Logger.LogInformation("Device monitoring started with interval {Interval}", interval);
+
+        // Creation cancellation only cancels this wait. The owner disposes partial initialization;
+        // the loop's lifetime is independent of the caller's creation token after successful return.
+        var failure = await _initialScan.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
         if (failure is not null)
             ExceptionDispatchInfo.Throw(failure);
         cancellationToken.ThrowIfCancellationRequested();
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="YubiKeyDeviceMonitorService"/> class.
-    /// </summary>
-    /// <param name="repository">The device repository to update on scans.</param>
-    /// <param name="findYubiKeys">The device discovery service.</param>
     public YubiKeyDeviceMonitorService(
         YubiKeyDeviceRepository repository,
         IFindYubiKeys findYubiKeys)
@@ -183,263 +118,49 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         _shutdownTimeout = shutdownTimeout ?? DefaultShutdownTimeout;
         HidListenerFactory = hidListenerFactory;
         SmartCardListenerFactory = smartCardListenerFactory;
-        _current = new MonitorGeneration();
     }
 
     private Func<HidDeviceListener> HidListenerFactory { get; }
-
     private Func<ISmartCardDeviceListener> SmartCardListenerFactory { get; }
 
-    /// <summary>
-    /// Gets a value indicating whether device monitoring is currently active.
-    /// </summary>
-    public bool IsMonitoring
+    private async Task ScanAndPublishAsync(CancellationToken cancellationToken)
     {
-        get
-        {
-            lock (_monitorLock)
-            {
-                return _monitoringTask is not null && !_monitoringTask.IsCompleted;
-            }
-        }
-    }
+        cancellationToken.ThrowIfCancellationRequested();
+        Logger.LogDebug("Rescanning devices...");
+        var devices = await _findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken).ConfigureAwait(false);
 
-    /// <summary>
-    /// Performs a single device scan and updates the repository.
-    /// </summary>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>A task representing the async operation.</returns>
-    public async Task RescanAsync(CancellationToken cancellationToken = default)
-    {
-        ThrowIfDisposed();
+        // A finder may ignore cancellation. Reject its late result before entering repository diffing.
+        if (_disposed == 1)
+            return;
+        cancellationToken.ThrowIfCancellationRequested();
 
-        // Capture the generation ONCE at entry. If a lifecycle swap happens while
-        // this rescan is in flight, its snapshot fails admission and is discarded.
-        var generation = _current;
-        if (generation is null)
-        {
-            throw new ObjectDisposedException(nameof(YubiKeyDeviceMonitorService));
-        }
+        var admittedHook = PublishAdmittedForTest;
+        if (admittedHook is not null)
+            await admittedHook().ConfigureAwait(false);
 
-        await RescanCoreAsync(generation, cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task RescanCoreAsync(MonitorGeneration generation, CancellationToken cancellationToken)
-    {
-        // The per-generation scan gate serializes whole scan+publish sequences
-        // within one generation, so same-generation snapshot ordering cannot
-        // invert. It is never disposed; a hung scan holding it wedges nothing
-        // outside its own dead generation.
-        await generation.ScanGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            Logger.LogDebug("Rescanning devices...");
-            var devices = await _findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken)
-                .ConfigureAwait(false);
-            await PublishSnapshotAsync(generation, devices, cancellationToken).ConfigureAwait(false);
+            // Only the loop calls this helper and awaits the complete publication before scanning again.
+            // Do not lock across the diff: getters/loggers can block. If this outlives the bounded drain,
+            // the owner's repository disposal and its final state-lock check reject the late commit.
+            _repository.UpdateCache(devices);
         }
-        finally
+        catch (ObjectDisposedException) when (_disposed == 1)
         {
-            generation.ScanGate.Release();
+            // Expected only during retirement. A disposed repository in a live worker must surface.
         }
     }
 
-    /// <summary>
-    /// Publishes a device snapshot under the shared publication gate. Admission is
-    /// the linearization point: a snapshot publishes iff its generation is current
-    /// and the service undisposed at admission; superseded snapshots are discarded.
-    /// A publication admitted while current may complete after a concurrent swap,
-    /// but the successor's first publication is serialized strictly after it, so
-    /// newer truth always lands last.
-    /// </summary>
-    private async Task PublishSnapshotAsync(
-        MonitorGeneration generation,
-        IReadOnlyList<IYubiKey> devices,
-        CancellationToken cancellationToken)
-    {
-        await _publishGate.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            var hook = PublishGateAcquiredForTest;
-            if (hook is not null)
-            {
-                await hook().ConfigureAwait(false);
-            }
-
-            lock (_publishLock)
-            {
-                if (_disposed == 1 || !ReferenceEquals(generation, _current))
-                {
-                    Logger.LogDebug(
-                        "Discarding device snapshot from superseded monitor generation {GenerationId}",
-                        generation.Id);
-                    return;
-                }
-            }
-
-            var admittedHook = PublishAdmittedForTest;
-            if (admittedHook is not null)
-            {
-                await admittedHook().ConfigureAwait(false);
-            }
-
-            try
-            {
-                _repository.UpdateCache(devices);
-            }
-            catch (ObjectDisposedException) when (_disposed == 1)
-            {
-                // The shutdown race the type-level contract describes: this publication
-                // was admitted before disposal, outlived DisposeAsync's bounded drain,
-                // and resumed after the manager disposed the repository. Discarding it
-                // here is what makes "the repository silences any later emission" true -
-                // UpdateCache throws once disposed. (The event hub underneath does not:
-                // publishing after completion is a silent no-op, so UpdateCache's own
-                // ThrowIfDisposed is the single source of that behaviour.)
-                // Nothing is lost: the repository is being torn down.
-                //
-                // The _disposed guard matters: a repository disposed while THIS monitor is
-                // still alive is a composition bug, not shutdown, and it must keep surfacing
-                // through the normal scan failure path rather than being misattributed.
-                Logger.LogDebug(
-                    "Repository disposed while publishing from monitor generation {GenerationId}; discarding late snapshot",
-                    generation.Id);
-            }
-        }
-        finally
-        {
-            _publishGate.Release();
-        }
-    }
-
-    /// <summary>
-    /// Starts continuous monitoring for device changes.
-    /// </summary>
-    /// <param name="interval">The polling interval between scans when no events occur.</param>
-    /// <remarks>
-    /// <para>
-    /// Monitoring is event-driven with interval-based fallback. When device events
-    /// occur (via HID or SmartCard listeners), a rescan is triggered immediately
-    /// with coalescing to avoid redundant scans.
-    /// </para>
-    /// <para>
-    /// Calling this while monitoring is already running is a no-op, <b>including when
-    /// <paramref name="interval"/> differs from the running one</b>. The new interval is
-    /// ignored rather than applied, and no error is raised. Stop monitoring and start it
-    /// again to change the interval. This is a deliberate contract, not an oversight: a
-    /// silent partial application would be worse than either extreme, and throwing would
-    /// make an idempotent start unsafe to call defensively.
-    /// </para>
-    /// </remarks>
-    public void StartMonitoring(TimeSpan interval) => StartMonitoringCore(interval, requireInitialScan: false);
-
-    private MonitorGeneration StartMonitoringCore(TimeSpan interval, bool requireInitialScan)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(interval, TimeSpan.Zero, nameof(interval));
-        ThrowIfDisposed();
-
-        lock (_monitorLock)
-        {
-            ThrowIfDisposed();
-
-            if (_monitoringTask is not null)
-            {
-                if (!_monitoringTask.IsCompleted)
-                {
-                    return _current ?? throw new ObjectDisposedException(nameof(YubiKeyDeviceMonitorService));
-                }
-
-                // The monitoring loop only completes through StopMonitoring or
-                // DisposeAsync, which also clear this field. A completed task here
-                // means the loop terminated unexpectedly; tear down the stale
-                // session state so monitoring can restart cleanly.
-                Logger.LogWarning("Previous monitoring loop terminated unexpectedly; restarting device monitoring");
-
-                // Retire BEFORE tearing listeners down. Teardown can block on listener Stop/Dispose, and
-                // until retirement completes the dead generation is still current, so a manual rescan
-                // holding it would pass admission for the whole of that teardown.
-                RetireCurrentGeneration(disposing: false);
-                TeardownListeners();
-
-                _monitoringTask = null;
-            }
-
-            var generation = new MonitorGeneration(requireInitialScan);
-
-            // Listeners are best-effort accelerators. A transport whose listener
-            // cannot start (for example, no PC/SC service on the host) simply
-            // contributes no event hints; it is never fatal to monitoring. Device
-            // truth always comes from the interval fallback rescan and the
-            // repository diff, so a transport whose listener is unavailable is
-            // still detected at interval granularity. This mirrors canonical
-            // yubikit (Rust/Python), where a transport that fails to enumerate is
-            // skipped and discovery continues with the others.
-            var hidListener = TryStartHidListener(generation.Signal);
-            var smartCardListener = TryStartSmartCardListener(generation.Signal);
-
-            // Swap the current generation BEFORE starting the loop so the loop's
-            // initial rescan passes admission. The predecessor (if any) was already retired AND
-            // swapped out of _current by RetireCurrentGeneration, so anything it still does has been
-            // failing admission since retirement rather than only from this point.
-            lock (_publishLock)
-            {
-                _current = generation;
-            }
-
-            try
-            {
-                var monitoringTask = Task.Run(
-                    () => MonitoringLoopAsync(interval, generation, generation.Cts.Token));
-
-                _hidListener = hidListener;
-                _smartCardListener = smartCardListener;
-                _monitoringTask = monitoringTask;
-            }
-            catch
-            {
-                // Scheduling the loop is not expected to fail, but keep the path
-                // leak-free: tear down every listener that did start. The failed
-                // generation stays current (its gates are never disposed), so
-                // manual rescans keep working and a later start swaps it out.
-                generation.Cts.Cancel();
-                generation.Signal.Complete();
-                CleanupListeners(hidListener, smartCardListener);
-                throw;
-            }
-
-            if (hidListener is null && smartCardListener is null)
-            {
-                Logger.LogWarning(
-                    "No device-change listener could start; monitoring will rely on the {Interval} interval rescan only.",
-                    interval);
-            }
-
-            Logger.LogInformation(
-                "Device monitoring started with interval {Interval} (generation {GenerationId})",
-                interval,
-                generation.Id);
-            return generation;
-        }
-    }
-
-    /// <summary>
-    /// Starts the HID device-change listener on a best-effort basis. Returns the
-    /// started listener, or <see langword="null"/> if it could not start; in that
-    /// case HID changes are still detected by the interval fallback rescan.
-    /// </summary>
-    private HidDeviceListener? TryStartHidListener(DeviceMonitorSignal rescanSignal)
+    private HidDeviceListener? TryStartHidListener()
     {
         HidDeviceListener? listener = null;
         try
         {
             listener = HidListenerFactory();
-            // Capture this attempt's signal so a stale callback can never signal a later attempt.
-            listener.DeviceEvent = hint => SignalHidEvent(rescanSignal, hint);
+            listener.DeviceEvent = SignalHidEvent;
             listener.Start();
             if (listener.Status == DeviceListenerStatus.Started)
-            {
                 return listener;
-            }
 
             Logger.LogWarning(
                 "HID device-change listener did not start (status: {Status}); HID changes will be detected on the interval rescan",
@@ -456,24 +177,16 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         return null;
     }
 
-    /// <summary>
-    /// Starts the SmartCard device-change listener on a best-effort basis. Returns
-    /// the started listener, or <see langword="null"/> if it could not start; in
-    /// that case SmartCard changes are still detected by the interval fallback
-    /// rescan. A missing or stopped PC/SC service is the common non-fatal cause.
-    /// </summary>
-    private ISmartCardDeviceListener? TryStartSmartCardListener(DeviceMonitorSignal rescanSignal)
+    private ISmartCardDeviceListener? TryStartSmartCardListener()
     {
         ISmartCardDeviceListener? listener = null;
         try
         {
             listener = SmartCardListenerFactory();
-            listener.DeviceEvent = () => SignalSmartCardEvent(rescanSignal);
+            listener.DeviceEvent = () => SignalTransportEvent(ConnectionType.SmartCard);
             listener.Start();
             if (listener.Status == DeviceListenerStatus.Started)
-            {
                 return listener;
-            }
 
             Logger.LogWarning(
                 "SmartCard device-change listener did not start (status: {Status}); SmartCard changes will be detected on the interval rescan",
@@ -490,168 +203,32 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         return null;
     }
 
-    /// <summary>
-    /// Stops monitoring for device changes.
-    /// </summary>
-    public void StopMonitoring()
+    private async Task MonitoringLoopAsync(TimeSpan interval, CancellationToken cancellationToken)
     {
-        var taskToAwait = StopMonitoringCore(disposing: false);
-        if (taskToAwait is null)
-        {
-            return;
-        }
-
-        // Wait for monitoring loop to complete (outside lock to avoid deadlock)
-        var loopStopped = false;
         try
         {
-            loopStopped = taskToAwait.Wait(_shutdownTimeout);
-        }
-        catch (AggregateException)
-        {
-            // The monitoring task faulted, which means it has completed.
-            loopStopped = true;
-        }
-
-        if (!loopStopped)
-        {
-            // Abandon the stuck loop (e.g. a rescan blocked in native I/O). Its
-            // generation is already retired, so it can no longer publish.
-            Logger.LogWarning(
-                "Device monitoring loop did not stop within {Timeout}; abandoning it",
-                _shutdownTimeout);
-            return;
-        }
-
-        Logger.LogInformation("Device monitoring stopped");
-    }
-
-    /// <summary>
-    /// Retires the current generation: cancels it, completes its signal, and swaps it out of
-    /// <see cref="_current"/> so nothing it still does can pass admission.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The swap is the load-bearing half, not the cancellation. A retired generation that is still
-    /// reachable through <see cref="_current"/> passes the admission check in
-    /// <see cref="PublishSnapshotAsync"/>, so a manual rescan that captured it can publish stale truth
-    /// after it was retired. Cancelling its token does not prevent that: <see cref="RescanAsync"/>
-    /// waits on the caller's token, not the generation's.
-    /// </para>
-    /// <para>
-    /// There is exactly one retirement path on purpose. The restart-after-loop-death branch in
-    /// <see cref="StartMonitoring"/> previously carried its own copy that cancelled and completed but
-    /// never swapped, leaving the dead generation current across listener teardown and startup - a far
-    /// wider window than the one here. A second "retire a generation" mechanism is precisely the
-    /// re-merge that <c>src/Core/CLAUDE.md</c> warns against; keep it single.
-    /// </para>
-    /// <para>
-    /// <paramref name="disposing"/> clears the slot outright. Every other caller installs a fresh
-    /// generation so manual rescans keep working after a plain stop or a restart.
-    /// </para>
-    /// <para>
-    /// <b>Precondition: the caller must hold <see cref="_monitorLock"/>.</b> This reads
-    /// <see cref="_current"/> before taking <see cref="_publishLock"/> to write it, which is only safe
-    /// because every write to <see cref="_current"/> after construction happens under
-    /// <see cref="_monitorLock"/>. Without that, the read and the write could straddle a concurrent swap
-    /// and this would retire one generation while replacing a different one.
-    /// </para>
-    /// </remarks>
-    private void RetireCurrentGeneration(bool disposing)
-    {
-        Debug.Assert(_monitorLock.IsHeldByCurrentThread, "RetireCurrentGeneration requires _monitorLock");
-
-        var generation = _current;
-
-        generation?.Cts.Cancel();
-        generation?.Signal.Complete();
-
-        lock (_publishLock)
-        {
-            _current = disposing ? null : new MonitorGeneration();
-        }
-    }
-
-    private Task? StopMonitoringCore(bool disposing)
-    {
-        lock (_monitorLock)
-        {
-            if (_monitoringTask is null)
-            {
-                if (disposing)
-                {
-                    // Retire the idle generation: any in-flight manual rescan on it
-                    // fails admission from here on.
-                    lock (_publishLock)
-                    {
-                        _current = null;
-                    }
-
-                    TeardownListeners();
-                }
-
-                return null; // Not monitoring, idempotent
-            }
-
-            var taskToAwait = _monitoringTask;
-
-            RetireCurrentGeneration(disposing);
-
-            _monitoringTask = null;
-
-            // Teardown listeners under lock
-            TeardownListeners();
-
-            return taskToAwait;
-        }
-    }
-
-    /// <summary>
-    /// Internal monitoring loop that processes listener events using a
-    /// <see cref="ThrottleInterval"/> quiet period capped by
-    /// <see cref="MaxCoalesceInterval"/>, plus interval fallback scans.
-    /// The loop captures its generation once and never re-reads
-    /// <see cref="_current"/>; once superseded, its publications fail admission.
-    /// </summary>
-    private async Task MonitoringLoopAsync(
-        TimeSpan interval,
-        MonitorGeneration generation,
-        CancellationToken cancellationToken)
-    {
-        var signal = generation.Signal;
-        try
-        {
-            if (generation.RequireInitialScan)
-                await RescanCoreAsync(generation, cancellationToken).ConfigureAwait(false);
-            else
-                await RescanSafelyAsync("initial monitor startup", generation, cancellationToken).ConfigureAwait(false);
-
+            await ScanAndPublishAsync(cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            generation.InitialScan.TrySetResult(null);
+            _initialScan.TrySetResult(null);
 
             while (!cancellationToken.IsCancellationRequested)
             {
                 MonitoringWaitReachedForTest?.Invoke();
-                var trigger = await WaitForTriggerAsync(signal, interval, cancellationToken).ConfigureAwait(false);
+                var trigger = await WaitForTriggerAsync(_signal, interval, cancellationToken).ConfigureAwait(false);
                 if (trigger == DeviceMonitorWaitResult.Timeout)
                 {
-                    await RescanSafelyAsync("interval fallback", generation, cancellationToken).ConfigureAwait(false);
+                    await RescanSafelyAsync("interval fallback", cancellationToken).ConfigureAwait(false);
                     continue;
                 }
 
                 if (trigger == DeviceMonitorWaitResult.Completed)
-                {
                     break;
-                }
 
-                _ = signal.TryConsume();
-
-                if (!await WaitForDebounceQuietPeriodAsync(signal, cancellationToken).ConfigureAwait(false))
-                {
+                _ = _signal.TryConsume();
+                if (!await WaitForDebounceQuietPeriodAsync(_signal, cancellationToken).ConfigureAwait(false))
                     break;
-                }
 
-                await RescanSafelyAsync("listener event", generation, cancellationToken).ConfigureAwait(false);
+                await RescanSafelyAsync("listener event", cancellationToken).ConfigureAwait(false);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -659,29 +236,26 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            generation.InitialScan.TrySetCanceled(cancellationToken);
+            _initialScan.TrySetCanceled(cancellationToken);
         }
         catch (Exception ex)
         {
-            FailGeneration(generation, ex);
+            FailLoop(ex);
         }
     }
 
-    private void FailGeneration(MonitorGeneration generation, Exception error)
+    private void FailLoop(Exception error)
     {
         // A result rather than a faulted TCS avoids an unobserved exception if initialization's
         // wait was canceled while a native scan continued. The factory rethrows the original error.
-        generation.InitialScan.TrySetResult(error);
-        lock (_publishLock)
-        {
-            // A failed abandoned predecessor must not poison a newer monitoring lifetime.
-            // Repository failure takes only its short state lock, never waits for a diff to drain.
-            if (_disposed == 0 && ReferenceEquals(generation, _current))
-                _repository.Fail(error);
-        }
+        _initialScan.TrySetResult(error);
+        if (_disposed == 1)
+            return;
 
-        // Publish the causal failure first. Providers are external code: they may block or throw,
-        // and must neither hold a lifecycle lock nor leave consumers watching a frozen live-looking cache.
+        // Failure uses the repository's short state boundary, never the diff or ingress lock.
+        _repository.Fail(error);
+
+        // Publish the causal failure first: diagnostic providers may block or throw.
         try
         {
             if (TerminalFailureLogForTest is { } log)
@@ -695,16 +269,16 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         }
     }
 
-    private async Task RescanSafelyAsync(string reason, MonitorGeneration generation, CancellationToken cancellationToken)
+    private async Task RescanSafelyAsync(string reason, CancellationToken cancellationToken)
     {
         try
         {
             Logger.LogDebug("Starting device rescan after {Reason}", reason);
-            await RescanCoreAsync(generation, cancellationToken).ConfigureAwait(false);
+            await ScanAndPublishAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // Expected during shutdown
+            // Expected during shutdown.
         }
         catch (Exception ex)
         {
@@ -712,40 +286,26 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         }
     }
 
-    /// <summary>
-    /// Waits for listener hints to stay quiet for <see cref="ThrottleInterval"/>,
-    /// forcing a rescan once the coalescing round reaches
-    /// <see cref="MaxCoalesceInterval"/>.
-    /// </summary>
     private async Task<bool> WaitForDebounceQuietPeriodAsync(
         DeviceMonitorSignal signal,
         CancellationToken cancellationToken)
     {
         var coalesceStarted = Stopwatch.GetTimestamp();
-
         while (true)
         {
             var elapsed = Stopwatch.GetElapsedTime(coalesceStarted);
             if (elapsed >= MaxCoalesceInterval)
-            {
                 return true;
-            }
 
             var remainingCoalesce = MaxCoalesceInterval - elapsed;
             var waitInterval = remainingCoalesce < ThrottleInterval
                 ? remainingCoalesce
                 : ThrottleInterval;
-
             var trigger = await WaitForTriggerAsync(signal, waitInterval, cancellationToken).ConfigureAwait(false);
             if (trigger == DeviceMonitorWaitResult.Timeout)
-            {
                 return true;
-            }
-
             if (trigger == DeviceMonitorWaitResult.Completed)
-            {
                 return false;
-            }
 
             _ = signal.TryConsume();
         }
@@ -790,52 +350,27 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         }
     }
 
-    private static void QueueRescan(DeviceMonitorSignal signal, string source)
-    {
-        try
-        {
-            if (!signal.TrySignal())
-            {
-                Logger.LogTrace("Ignored device rescan request from {Source}; monitoring is stopping", source);
-                return;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogTrace(ex, "Ignored device rescan request from {Source}", source);
-        }
-    }
-
-    private void SignalHidEvent(
-        DeviceMonitorSignal signal,
-        HidDeviceRescanHint hint)
+    private void SignalHidEvent(HidDeviceRescanHint hint)
     {
         Logger.LogTrace(
             "Received HID rescan hint: {Kind}, {PlatformDeviceId}, {DevicePath}",
             hint.ChangeKind,
             hint.PlatformDeviceId,
             hint.DevicePath);
-
-        // Hardware activity on any transport globally invalidates identity and metadata evidence: a
-        // composite swap may signal one transport first, and retaining sibling evidence could mix two keys.
-        // Invalidate BEFORE queueing so the triggered rescan re-reads. See IFindYubiKeys.NotifyTransportActivity.
-        SignalTransportEvent(signal, ConnectionType.Hid);
+        SignalTransportEvent(ConnectionType.Hid);
     }
 
-    private void SignalSmartCardEvent(DeviceMonitorSignal signal)
+    private void SignalTransportEvent(ConnectionType transport)
     {
-        // See SignalHidEvent: globally invalidate cached identity and metadata before the rescan runs.
-        SignalTransportEvent(signal, ConnectionType.SmartCard);
-    }
-
-    private void SignalTransportEvent(DeviceMonitorSignal signal, ConnectionType transport)
-    {
-        lock (_publishLock)
+        lock (_ingressLock)
         {
             if (_disposed == 1)
                 return;
+
+            // Activity globally invalidates identity/metadata evidence before signaling discovery.
+            // Ordered with final retirement so even a captured late callback cannot renew read scopes.
             _findYubiKeys.NotifyTransportActivity(transport);
-            QueueRescan(signal, transport.ToString());
+            _ = _signal.TrySignal();
         }
     }
 
@@ -846,19 +381,13 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         Completed
     }
 
-    /// <summary>
-    /// Tears down device listeners. Signal completion is handled where the
-    /// owning generation is retired, not here.
-    /// </summary>
     private void TeardownListeners()
     {
         var hidListener = _hidListener;
         var smartCardListener = _smartCardListener;
         _hidListener = null;
         _smartCardListener = null;
-
         CleanupListeners(hidListener, smartCardListener);
-
         Logger.LogDebug("Device listeners torn down");
     }
 
@@ -894,41 +423,31 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         }
     }
 
-    private void ThrowIfDisposed()
-    {
-        if (_disposed == 1)
-        {
-            throw new ObjectDisposedException(nameof(YubiKeyDeviceMonitorService));
-        }
-    }
-
-    /// <summary>
-    /// Stops monitoring, tears down listeners, and bounded-drains any in-flight publication.
-    /// Idempotent.
-    /// </summary>
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) == 1)
-        {
             return;
-        }
 
-        var taskToAwait = StopMonitoringCore(disposing: true);
-
-        lock (_publishLock)
+        lock (_ingressLock)
         {
-            // Retire queued discovery, not native owners. Already-open work keeps the prerequisite's
-            // admission/registry lease through actual native teardown. No callback may renew evidence
-            // after this retirement because ingress checks _disposed under this same lock.
+            // Lock order: ingress -> finder evidence -> read-scope gate. Retire releases the scope
+            // gate before cancelling its internal admission waits; those callbacks do not wait for
+            // this loop or re-enter ingress. Already-open reads retain their native admission/lease.
             if (_findYubiKeys is FindYubiKeys finder)
                 finder.RetireReadScope();
         }
 
-        if (taskToAwait is not null)
+        // Worker cancellation callbacks and native listener cleanup run outside the ingress lock.
+        _lifetime.Cancel();
+        _signal.Complete();
+        TeardownListeners();
+
+        if (_monitoringTask is { } loop)
         {
             try
             {
-                await taskToAwait.WaitAsync(_shutdownTimeout).ConfigureAwait(false);
+                // Every publication is inside this one task: no separate publication drain exists.
+                await loop.WaitAsync(_shutdownTimeout).ConfigureAwait(false);
             }
             catch (TimeoutException)
             {
@@ -936,65 +455,9 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
                     "Device monitoring loop did not stop within {Timeout} during dispose; abandoning it",
                     _shutdownTimeout);
             }
-            catch
-            {
-                // Faulted or canceled means the loop has completed.
-            }
-        }
-
-        // Bounded drain of any in-flight publication - the gate itself is the
-        // in-flight indicator. The gate is never disposed: on timeout the
-        // publication is abandoned and, having been admitted while current, may
-        // complete and emit device events after disposal (documented contract).
-        // The manager disposes the repository afterwards, which silences any
-        // later emission.
-        if (await _publishGate.WaitAsync(_shutdownTimeout).ConfigureAwait(false))
-        {
-            _publishGate.Release();
-        }
-        else
-        {
-            Logger.LogWarning(
-                "In-flight device publication did not finish within {Timeout} during dispose; abandoning it",
-                _shutdownTimeout);
         }
 
         Logger.LogDebug("YubiKeyDeviceMonitorService disposed");
-    }
-
-    /// <summary>
-    /// One monitoring epoch. The loop, manual rescans, and listener callbacks all
-    /// capture this reference once; a generation's identity is that reference, so
-    /// a torn gate/generation pairing is impossible by construction. Gates are
-    /// never disposed - an abandoned generation is unreachable garbage that can
-    /// wedge nothing outside itself.
-    /// </summary>
-    private sealed class MonitorGeneration(bool requireInitialScan = false)
-    {
-        private static long _nextId;
-
-        public bool RequireInitialScan { get; } = requireInitialScan;
-
-        public TaskCompletionSource<Exception?> InitialScan { get; } =
-            new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        /// <summary>Monotonic identifier, used for logging only.</summary>
-        public long Id { get; } = Interlocked.Increment(ref _nextId);
-
-        /// <summary>Serializes scan+publish sequences within this generation. Never disposed.</summary>
-        public SemaphoreSlim ScanGate { get; } = new(1, 1);
-
-        /// <summary>Capacity-one wake-up signal for this generation's loop.</summary>
-        public DeviceMonitorSignal Signal { get; } = new();
-
-        /// <summary>
-        ///     Cancellation source for this generation's loop. Never disposed, like the gates:
-        ///     an abandoned generation is unreachable garbage. It holds no timer (nothing calls
-        ///     <c>CancelAfter</c>) and every linked source derived from it is disposed by its own
-        ///     <c>using</c>, so disposal would reclaim nothing while reintroducing the question
-        ///     "is it safe to dispose this yet?" that the epoch model exists to eliminate.
-        /// </summary>
-        public CancellationTokenSource Cts { get; } = new();
     }
 }
 

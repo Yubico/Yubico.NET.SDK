@@ -75,14 +75,6 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
                 $"Conservation violated for {type}: {enumerated} interface(s) enumerated at the USB layer " +
                 $"but {exposed} returned device(s) expose the type. Devices: {Describe(devices)}");
         }
-        // Result filtering is local, preserving the full composite slots from this observation.
-        foreach (var type in ConcreteTypes)
-        {
-            var filtered = devices.Where(device => Supports(device, type)).ToList();
-            Assert.Equal(
-                devices.Where(d => Supports(d, type)).Select(d => d.DeviceId).Order(StringComparer.Ordinal),
-                filtered.Select(d => d.DeviceId).Order(StringComparer.Ordinal));
-        }
     }
 
     [Fact]

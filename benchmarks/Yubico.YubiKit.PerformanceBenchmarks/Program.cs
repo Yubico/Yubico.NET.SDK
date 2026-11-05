@@ -100,10 +100,10 @@ public class YubiKeyDiscoveryBenchmarks
 {
     private YubiKeyMonitor? _monitor;
 
-    [GlobalSetup]
+    [GlobalSetup(Target = nameof(CurrentDevices))]
     public async Task Setup() => _monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
 
-    [GlobalCleanup]
+    [GlobalCleanup(Target = nameof(CurrentDevices))]
     public async Task Cleanup()
     {
         if (_monitor is not null) await _monitor.DisposeAsync().ConfigureAwait(false);
@@ -123,7 +123,8 @@ public class YubiKeyDiscoveryBenchmarks
     [Benchmark]
     public static async Task<int> CreateInitializedMonitor()
     {
-        await using var monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+        var monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+        await using var monitorLifetime = monitor.ConfigureAwait(false);
         return monitor.CurrentDevices.Count;
     }
 }

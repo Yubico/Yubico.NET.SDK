@@ -129,6 +129,9 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
     /// <summary>Test-only observation/fault injection at the loop's wait boundary.</summary>
     internal Action? MonitoringWaitReachedForTest;
 
+    /// <summary>Test-only replacement of terminal logging, without changing the process-wide logger.</summary>
+    internal Action<Exception>? TerminalFailureLogForTest;
+
     internal async Task StartInitializedAsync(TimeSpan interval, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -659,13 +662,26 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         // A result rather than a faulted TCS avoids an unobserved exception if initialization's
         // wait was canceled while a native scan continued. The factory rethrows the original error.
         generation.InitialScan.TrySetResult(error);
-        Logger.LogError(error, "monitoring loop terminated unexpectedly");
         lock (_publishLock)
         {
             // A failed abandoned predecessor must not poison a newer monitoring lifetime.
             // Repository failure takes only its short state lock, never waits for a diff to drain.
             if (_disposed == 0 && ReferenceEquals(generation, _current))
                 _repository.Fail(error);
+        }
+
+        // Publish the causal failure first. Providers are external code: they may block or throw,
+        // and must neither hold a lifecycle lock nor leave consumers watching a frozen live-looking cache.
+        try
+        {
+            if (TerminalFailureLogForTest is { } log)
+                log(error);
+            else
+                Logger.LogError(error, "monitoring loop terminated unexpectedly");
+        }
+        catch (Exception)
+        {
+            // Reporting is best-effort; the original failure is already observable in the repository.
         }
     }
 

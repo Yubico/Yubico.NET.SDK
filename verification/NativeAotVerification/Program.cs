@@ -92,7 +92,8 @@ internal static class MonitorVerification
         Console.WriteLine();
 
         // All consumers share one explicitly owned monitor; each gets initial replay plus changes.
-        await using var monitor = await YubiKeyManager.CreateMonitorAsync();
+        var monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+        await using var monitorLifetime = monitor.ConfigureAwait(false);
         await using var sinkA = Sink.Start("watcher-A", monitor);
         await using var sinkB = Sink.Start("watcher-B", monitor);
         await using var sinkTransient = Sink.Start("watcher-transient", monitor);
@@ -182,7 +183,7 @@ internal static class MonitorVerification
         // --- Step 8: shutdown with a key attached ---
         Console.WriteLine();
         Prompt(8, "Leave a key attached. Press Enter to shut down.");
-        await monitor.DisposeAsync();
+        await monitor.DisposeAsync().ConfigureAwait(false);
 
         // Shutdown must end every active watcher normally - not cancelled, not faulted.
         foreach (var sink in new[] { sinkA, sinkB })
@@ -206,7 +207,8 @@ internal static class MonitorVerification
         // --- Step 9: restart after shutdown ---
         Console.WriteLine();
         Prompt(9, "Press Enter to create a new initialized monitor after disposal.");
-        await using var replacement = await YubiKeyManager.CreateMonitorAsync();
+        var replacement = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+        await using var replacementLifetime = replacement.ConfigureAwait(false);
         Console.WriteLine($"  ok    new monitor initialized with {replacement.CurrentDevices.Count} device(s)");
 
         Console.WriteLine();

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -851,6 +852,70 @@ public class YubiKeyMonitorTests
         await using var future = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
         var futureFailure = await Assert.ThrowsAsync<InvalidOperationException>(() => future.MoveNextAsync().AsTask());
         Assert.Same(failure, futureFailure.InnerException);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task TerminalLoopFailure_ThrowingLogger_CannotPreventFailurePublicationOrDisposal()
+    {
+        await using var fixture = new MonitorFixture();
+        var reachedWait = Signal();
+        var loggingEntered = Signal();
+        var loggingReleased = Signal();
+        using var releaseLogging = new ManualResetEventSlim();
+        var failure = new IOException("terminal loop failure");
+        var logger = new ThrowingTerminalLogger(error =>
+        {
+            Assert.Same(failure, error);
+            loggingEntered.TrySetResult();
+            try { Assert.True(releaseLogging.Wait(Bound, TestToken)); }
+            finally { loggingReleased.TrySetResult(); }
+        });
+        fixture.Service.TerminalFailureLogForTest = error => logger.LogError(error, "terminal report");
+        fixture.Service.MonitoringWaitReachedForTest = () => reachedWait.TrySetResult();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        await reachedWait.Task.WaitAsync(Bound, TestToken);
+        await using var active = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        var pending = active.MoveNextAsync().AsTask();
+        fixture.Service.MonitoringWaitReachedForTest = () => throw failure;
+        fixture.SmartCard.Raise();
+        try
+        {
+            await loggingEntered.Task.WaitAsync(Bound, TestToken);
+            // Failure must already be visible while the provider is blocked, before it throws.
+            Assert.Same(failure, Assert.Throws<InvalidOperationException>(() => monitor.CurrentDevices).InnerException);
+            var activeError = await Assert.ThrowsAsync<InvalidOperationException>(() => pending.WaitAsync(Bound, TestToken));
+            Assert.Same(failure, activeError.InnerException);
+            await using var future = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+            var futureError = await Assert.ThrowsAsync<InvalidOperationException>(() => future.MoveNextAsync().AsTask());
+            Assert.Same(failure, futureError.InnerException);
+            // A blocked provider must not hold a lifecycle lock or prevent bounded disposal.
+            await Task.Run(async () => await monitor.DisposeAsync(), TestToken).WaitAsync(Bound, TestToken);
+            Assert.True(fixture.Hid.Disposed && fixture.SmartCard.Disposed);
+            Assert.Throws<ObjectDisposedException>(() => monitor.CurrentDevices);
+        }
+        finally
+        {
+            releaseLogging.Set();
+            await loggingReleased.Task.WaitAsync(Bound, CancellationToken.None);
+            // The provider has left its gate; drain the outstanding move before enumerator disposal,
+            // including on an assertion failure or runner cancellation.
+            await monitor.DisposeAsync().AsTask().WaitAsync(Bound, CancellationToken.None);
+            try { await pending.WaitAsync(Bound, CancellationToken.None); }
+            catch (InvalidOperationException) { }
+        }
+    }
+
+    private sealed class ThrowingTerminalLogger(Action<Exception?> beforeThrow) : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            beforeThrow(exception);
+            throw new IOException("logging provider failed");
+        }
     }
 
     private static TaskCompletionSource Signal() => new(TaskCreationOptions.RunContinuationsAsynchronously);

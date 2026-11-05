@@ -21,9 +21,9 @@ using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-/// Tests for <see cref="YubiKeyDeviceMonitorService"/>.
+/// Tests for <see cref="YubiKeyMonitorWorker"/>.
 /// </summary>
-public class YubiKeyDeviceMonitorServiceTests
+public class YubiKeyMonitorWorkerTests
 {
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(30);
 
@@ -36,11 +36,11 @@ public class YubiKeyDeviceMonitorServiceTests
             new FakeYubiKey("device-1", ConnectionType.SmartCard),
             new FakeYubiKey("device-2", ConnectionType.HidFido)
         ]);
-        var service = new YubiKeyDeviceMonitorService(repository, findYubiKeys,
+        var worker = new YubiKeyMonitorWorker(repository, findYubiKeys,
             () => new FakeHidDeviceListener(), () => new FakeSmartCardDeviceListener());
 
         // Act
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
 
         // Assert
@@ -53,9 +53,9 @@ public class YubiKeyDeviceMonitorServiceTests
     [Fact]
     public async Task ListenerScan_ChangedDiscovery_UpdatesRepositoryMembership()
     {
-        var (service, repository, findYubiKeys, _, smartCard) = CreateService();
+        var (worker, repository, findYubiKeys, _, smartCard) = CreateWorker();
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.Single(repository.GetAll());
 
@@ -80,8 +80,8 @@ public class YubiKeyDeviceMonitorServiceTests
     [Fact]
     public async Task ListenerScan_EmitsRepositoryDiffEvents()
     {
-        var (service, repository, findYubiKeys, _, smartCard) = CreateService();
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        var (worker, repository, findYubiKeys, _, smartCard) = CreateWorker();
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
@@ -103,11 +103,11 @@ public class YubiKeyDeviceMonitorServiceTests
     public async Task CreateAsync_PerformsOneInitialLoopScan()
     {
         // Arrange
-        var (service, repository, findYubiKeys, _, _) = CreateService();
+        var (worker, repository, findYubiKeys, _, _) = CreateWorker();
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.HidFido)]);
 
         // Act
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
 
         // Assert
@@ -122,8 +122,8 @@ public class YubiKeyDeviceMonitorServiceTests
     public async Task HidListenerHint_DoesNotEmitPublicDeviceChangeWithoutRepositoryDiff()
     {
         // Arrange
-        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        var (worker, repository, findYubiKeys, hidListener, _) = CreateWorker();
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
 
@@ -147,8 +147,8 @@ public class YubiKeyDeviceMonitorServiceTests
     public async Task HidUnknownRemoval_TriggersRepositoryRescan()
     {
         // Arrange
-        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        var (worker, repository, findYubiKeys, hidListener, _) = CreateWorker();
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
 
         findYubiKeys.SetDevices([new FakeYubiKey("device-2", ConnectionType.HidOtp)]);
@@ -166,10 +166,10 @@ public class YubiKeyDeviceMonitorServiceTests
     public async Task ConcurrentListenerEvents_DoNotRunConcurrentRescans()
     {
         // Arrange
-        var (service, repository, findYubiKeys, hidListener, smartCardListener) = CreateService();
+        var (worker, repository, findYubiKeys, hidListener, smartCardListener) = CreateWorker();
         findYubiKeys.ScanDelay = TimeSpan.FromMilliseconds(80);
 
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         await findYubiKeys.WaitForCompletedScanAsync(1, TestContext.Current.CancellationToken);
 
@@ -205,8 +205,8 @@ public class YubiKeyDeviceMonitorServiceTests
     public async Task HintBurst_CoalescesIntoBoundedRescans()
     {
         // Arrange
-        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        var (worker, repository, findYubiKeys, hidListener, _) = CreateWorker();
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         await findYubiKeys.WaitForCompletedScanAsync(1, TestContext.Current.CancellationToken);
 
@@ -219,7 +219,7 @@ public class YubiKeyDeviceMonitorServiceTests
         await findYubiKeys.WaitForCompletedScanAsync(2, TestContext.Current.CancellationToken);
 
         // Allow any (incorrect) trailing per-hint rescans to surface before asserting the bound.
-        await Task.Delay(YubiKeyDeviceMonitorService.MaxCoalesceInterval + YubiKeyDeviceMonitorService.ThrottleInterval,
+        await Task.Delay(YubiKeyMonitorWorker.MaxCoalesceInterval + YubiKeyMonitorWorker.ThrottleInterval,
             TestContext.Current.CancellationToken);
 
         // Assert - the whole burst lands within the debounce window: at most the coalesced
@@ -232,11 +232,11 @@ public class YubiKeyDeviceMonitorServiceTests
     [Trait("Category", "RuntimeResilience")]
     public async Task EventStorm_DuringBlockedScan_ProducesExactlyOneFollowUpScan()
     {
-        var (service, repository, findYubiKeys, hidListener, smartCardListener) = CreateService();
+        var (worker, repository, findYubiKeys, hidListener, smartCardListener) = CreateWorker();
         findYubiKeys.HangIgnoringCancellation = true;
-        var creation = YubiKeyMonitor.CreateAsync(repository, service,
+        var creation = YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
-        var loop = service.MonitoringCompletionForTest;
+        var loop = worker.MonitoringCompletionForTest;
         try
         {
             await AsyncWait.WaitUntilAsync(() => findYubiKeys.ActiveScans == 1, "Initial blocked scan did not start",
@@ -252,7 +252,7 @@ public class YubiKeyDeviceMonitorServiceTests
             findYubiKeys.ReleaseHungScans();
             var monitor = await creation.WaitAsync(Bound, TestContext.Current.CancellationToken);
             await findYubiKeys.WaitForCompletedScanAsync(2, TestContext.Current.CancellationToken);
-            await Task.Delay(YubiKeyDeviceMonitorService.ThrottleInterval + TimeSpan.FromMilliseconds(100),
+            await Task.Delay(YubiKeyMonitorWorker.ThrottleInterval + TimeSpan.FromMilliseconds(100),
                 TestContext.Current.CancellationToken);
             await monitor.DisposeAsync();
             Assert.Equal(2, findYubiKeys.ScanCount);
@@ -273,8 +273,8 @@ public class YubiKeyDeviceMonitorServiceTests
     public async Task SustainedHintStorm_RescanRunsWithinMaxCoalesceInterval()
     {
         // Arrange
-        var (service, repository, findYubiKeys, hidListener, _) = CreateService();
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        var (worker, repository, findYubiKeys, hidListener, _) = CreateWorker();
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         await findYubiKeys.WaitForCompletedScanAsync(1, TestContext.Current.CancellationToken);
 
@@ -299,7 +299,7 @@ public class YubiKeyDeviceMonitorServiceTests
         {
             // Assert - without the cap this deadline is unreachable: the quiet period re-arms
             // on every 20 ms hint until the storm ends.
-            var deadline = DateTimeOffset.UtcNow + YubiKeyDeviceMonitorService.MaxCoalesceInterval + TimeSpan.FromSeconds(2);
+            var deadline = DateTimeOffset.UtcNow + YubiKeyMonitorWorker.MaxCoalesceInterval + TimeSpan.FromSeconds(2);
             while (findYubiKeys.CompletedScans < 2)
             {
                 Assert.True(
@@ -322,7 +322,7 @@ public class YubiKeyDeviceMonitorServiceTests
         var repository = new YubiKeyDeviceRepository();
         var findYubiKeys = new FakeFindYubiKeys([]);
         var hid = new FakeHidDeviceListener();
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
             () => hid,
@@ -330,7 +330,7 @@ public class YubiKeyDeviceMonitorServiceTests
 
         // The SmartCard listener is unavailable, but HID starts, so monitoring
         // runs (degraded). Startup must not throw for an unavailable transport.
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
         Assert.Equal(1, hid.StartCount);
@@ -349,14 +349,14 @@ public class YubiKeyDeviceMonitorServiceTests
         var hid = new FakeHidDeviceListener { ThrowOnStart = true };
         var smartCard = new FakeSmartCardDeviceListener();
         var findYubiKeys = new FakeFindYubiKeys([]);
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
             () => hid,
             () => smartCard);
 
         // HID cannot start, but SmartCard starts, so monitoring runs (degraded).
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
         // The failed HID listener is cleaned up individually.
@@ -379,7 +379,7 @@ public class YubiKeyDeviceMonitorServiceTests
         var hid = new FakeHidDeviceListener { StartStatus = DeviceListenerStatus.Error };
         var smartCard = new FakeSmartCardDeviceListener();
         var findYubiKeys = new FakeFindYubiKeys([]);
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
             () => hid,
@@ -387,7 +387,7 @@ public class YubiKeyDeviceMonitorServiceTests
 
         // HID reports Error (does not throw); it is cleaned up while SmartCard
         // keeps monitoring alive.
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
         Assert.Null(hid.DeviceEvent);
@@ -409,7 +409,7 @@ public class YubiKeyDeviceMonitorServiceTests
         var hid = new FakeHidDeviceListener();
         var smartCard = new FakeSmartCardDeviceListener { StartStatus = DeviceListenerStatus.Error };
         var findYubiKeys = new FakeFindYubiKeys([]);
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
             () => hid,
@@ -417,7 +417,7 @@ public class YubiKeyDeviceMonitorServiceTests
 
         // SmartCard reports Error (the common no-PC/SC case); it is cleaned up
         // while HID keeps monitoring alive.
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
         Assert.NotNull(hid.DeviceEvent);
@@ -440,14 +440,14 @@ public class YubiKeyDeviceMonitorServiceTests
         var findYubiKeys = new FakeFindYubiKeys([]);
         var hid = new FakeHidDeviceListener();
         var failedSmartCard = new FakeSmartCardDeviceListener { ThrowOnStart = true };
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
             () => hid,
             () => failedSmartCard);
 
         // SmartCard Start throws; HID starts, so monitoring runs (degraded).
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
         Assert.NotNull(hid.DeviceEvent);
@@ -462,7 +462,7 @@ public class YubiKeyDeviceMonitorServiceTests
         // A callback from the detached, failed listener can no longer trigger a rescan.
         failedSmartCard.Raise();
         await Task.Delay(
-            YubiKeyDeviceMonitorService.ThrottleInterval + TimeSpan.FromMilliseconds(100),
+            YubiKeyMonitorWorker.ThrottleInterval + TimeSpan.FromMilliseconds(100),
             TestContext.Current.CancellationToken);
         Assert.Equal(scanCountBeforeStaleCallback, findYubiKeys.ScanCount);
 
@@ -477,7 +477,7 @@ public class YubiKeyDeviceMonitorServiceTests
         var findYubiKeys = new FakeFindYubiKeys([]);
         var hid = new FakeHidDeviceListener { StartStatus = DeviceListenerStatus.Error };
         var smartCard = new FakeSmartCardDeviceListener { StartStatus = DeviceListenerStatus.Error };
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
             () => hid,
@@ -485,7 +485,7 @@ public class YubiKeyDeviceMonitorServiceTests
 
         // Neither listener can start, but monitoring still runs on the interval
         // rescan alone. Startup must not throw.
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromMilliseconds(200));
         Assert.True(repository.HasData);
         Assert.Null(hid.DeviceEvent);
@@ -513,10 +513,10 @@ public class YubiKeyDeviceMonitorServiceTests
     public async Task DisposeAsync_StopsMonitoring()
     {
         // Arrange
-        var (service, repository, _, _, _) = CreateService();
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        var (worker, repository, _, _, _) = CreateWorker();
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
-        var loop = service.MonitoringCompletionForTest;
+        var loop = worker.MonitoringCompletionForTest;
 
         // Act
         await monitor.DisposeAsync();
@@ -530,10 +530,10 @@ public class YubiKeyDeviceMonitorServiceTests
     [Trait("Category", "RuntimeResilience")]
     public async Task DisposeAsync_RescanHungIgnoringCancellation_CompletesWithinBoundedTime()
     {
-        var (service, repository, findYubiKeys, _, smartCard) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        var (worker, repository, findYubiKeys, _, smartCard) = CreateWorker(shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
-        var loop = service.MonitoringCompletionForTest;
+        var loop = worker.MonitoringCompletionForTest;
         findYubiKeys.HangIgnoringCancellation = true;
         smartCard.Raise();
         try
@@ -562,13 +562,13 @@ public class YubiKeyDeviceMonitorServiceTests
         // monitor itself is disposing. A repository disposed out from under a live monitor throws
         // the same exception type and is a composition bug, so it must keep surfacing through the
         // normal scan failure path rather than being misattributed to shutdown.
-        var (service, repository, findYubiKeys, _, _) = CreateService();
+        var (worker, repository, findYubiKeys, _, _) = CreateWorker();
         findYubiKeys.SetDevices([new FakeYubiKey("device-a", ConnectionType.SmartCard)]);
 
         repository.Dispose();
 
         // Act + Assert - the monitor is not disposed, so the exception propagates.
-        _ = await Assert.ThrowsAsync<ObjectDisposedException>(() => YubiKeyMonitor.CreateAsync(repository, service,
+        _ = await Assert.ThrowsAsync<ObjectDisposedException>(() => YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1)));
     }
 
@@ -580,9 +580,9 @@ public class YubiKeyDeviceMonitorServiceTests
     [Fact]
     public async Task ListenerEvents_NotifyTheFinderOfTransportActivity_EvictingEvidenceGlobally()
     {
-        var (service, repository, findYubiKeys, hidListener, smartCardListener) = CreateService();
+        var (worker, repository, findYubiKeys, hidListener, smartCardListener) = CreateWorker();
 
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
 
         hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
@@ -599,25 +599,25 @@ public class YubiKeyDeviceMonitorServiceTests
     /// Fake IFindYubiKeys for testing.
     /// </summary>
     private static (
-        YubiKeyDeviceMonitorService Service,
+        YubiKeyMonitorWorker Worker,
         YubiKeyDeviceRepository Repository,
         FakeFindYubiKeys FindYubiKeys,
         FakeHidDeviceListener HidListener,
-        FakeSmartCardDeviceListener SmartCardListener) CreateService(TimeSpan? shutdownTimeout = null)
+        FakeSmartCardDeviceListener SmartCardListener) CreateWorker(TimeSpan? shutdownTimeout = null)
     {
         var repository = new YubiKeyDeviceRepository();
         var findYubiKeys = new FakeFindYubiKeys([]);
         var hidListener = new FakeHidDeviceListener();
         var smartCardListener = new FakeSmartCardDeviceListener();
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
             () => hidListener,
             () => smartCardListener,
             shutdownTimeout);
-        findYubiKeys.ObserveLoop(service);
+        findYubiKeys.ObserveLoop(worker);
 
-        return (service, repository, findYubiKeys, hidListener, smartCardListener);
+        return (worker, repository, findYubiKeys, hidListener, smartCardListener);
     }
 
     private sealed class FakeHidDeviceListener : HidDeviceListener
@@ -715,8 +715,8 @@ public class YubiKeyDeviceMonitorServiceTests
         private int _completedScans;
 
         public int CompletedScans => Volatile.Read(ref _completedScans);
-        public void ObserveLoop(YubiKeyDeviceMonitorService service) =>
-            service.MonitoringWaitReachedForTest = () => Volatile.Write(ref _completedScans, ScanCount);
+        public void ObserveLoop(YubiKeyMonitorWorker worker) =>
+            worker.MonitoringWaitReachedForTest = () => Volatile.Write(ref _completedScans, ScanCount);
         public Task WaitForCompletedScanAsync(int count, CancellationToken cancellationToken) => AsyncWait.WaitUntilAsync(
             () => CompletedScans >= count, $"Loop did not complete scan/publication {count}", Bound, cancellationToken);
 

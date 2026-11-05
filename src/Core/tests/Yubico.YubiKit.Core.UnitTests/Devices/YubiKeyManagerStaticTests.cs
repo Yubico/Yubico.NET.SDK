@@ -146,10 +146,10 @@ public class YubiKeyManagerStaticTests
         var retained = Assert.Single(await YubiKeyManager.FindAllAsync(ConnectionType.All,
             TestContext.Current.CancellationToken, rig.CreateFinder));
         var repository = new YubiKeyDeviceRepository();
-        var service = new YubiKeyDeviceMonitorService(repository, new FixedFinder(retained),
+        var worker = new YubiKeyMonitorWorker(repository, new FixedFinder(retained),
             () => new OwnedMonitorFixture.FakeHidListener(),
             () => new OwnedMonitorFixture.FakeSmartCardListener());
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         await using var watcher = monitor.WatchAsync(TestContext.Current.CancellationToken)
             .GetAsyncEnumerator(TestContext.Current.CancellationToken);

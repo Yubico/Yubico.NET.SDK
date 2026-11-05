@@ -124,10 +124,10 @@
       "entries": ["SendAsync#7E193F00C2D2#async-blocked#FIDO registered wrapper invokes an interface before returning its task; built-in and external implementations may differ, so call-entry blocking is not excluded.", "SendAsync#02DE25ABA089#async-blocked#OTP registered wrapper invokes an interface before returning its task; interface dispatch hides whether send blocks the initiating caller.", "ReceiveAsync#F40A6967CA7E#async-blocked#FIDO registered receive forwards to an interface before returning the task; legacy implementations read a report synchronously.", "ReceiveAsync#4A72BB47AAC9#async-blocked#OTP registered receive forwards to an interface before returning the task; legacy implementations read a feature report synchronously.", "BeginTransactionAsync#EC6EEE925842#async-blocked#Registered smart-card wrapper dispatches BeginTransactionAsync synchronously; external implementations may use the blocking interface default.", "TransmitAndReceiveAsync#018B849AB854#async-blocked#Registered smart-card transmit dispatches through an external interface before task return; native call-entry blocking is unresolved."]
     },
     {
-      "path": "Devices/YubiKeyDeviceMonitorService.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/YubiKeyDeviceMonitorService.cs: InitializeAsync schedules the sole monitoring loop and awaits its initial publication; DisposeAsync bounded-drains that loop asynchronously."],
+      "path": "Devices/YubiKeyMonitorWorker.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Devices/YubiKeyMonitorWorker.cs: InitializeAsync schedules the sole monitoring loop and awaits its initial publication; DisposeAsync bounded-drains that loop asynchronously."],
       "status": ["documented", "outstanding"],
-      "entries": ["InitializeAsync#B4D626DECC1F#worker#Task.Run starts one monitoring loop independently of the creation token; initialization awaits its first publication. Discovery may still block, and bounded disposal may abandon the retired loop without releasing its native leases."]
+      "entries": ["InitializeAsync#DA1121C60CD0#worker#Task.Run starts one monitoring loop independently of the creation token; initialization awaits its first publication. Discovery may still block, and bounded disposal may abandon the retired loop without releasing its native leases."]
     },
     {
       "path": "Protocols/Fido/Hid/FidoHidConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",

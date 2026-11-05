@@ -59,10 +59,10 @@ public class FindPcscDevicesTests
             device => new MetadataSlot(rig, device.ReaderName), topologyResolver: rig);
         var hid = new OwnedMonitorFixture.FakeHidListener();
         var smartCard = new OwnedMonitorFixture.FakeSmartCardListener();
-        var service = new YubiKeyDeviceMonitorService(repository, finder, () => hid, () => smartCard);
+        var worker = new YubiKeyMonitorWorker(repository, finder, () => hid, () => smartCard);
         var completedScans = 0;
-        service.MonitoringWaitReachedForTest = () => Interlocked.Increment(ref completedScans);
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
+        worker.MonitoringWaitReachedForTest = () => Interlocked.Increment(ref completedScans);
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         var existingDevice = Assert.Single(monitor.CurrentDevices);
         Assert.Equal(111, existingDevice.SerialNumber);

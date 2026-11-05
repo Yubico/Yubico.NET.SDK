@@ -24,9 +24,9 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <summary>
 /// Owns listeners and one sequential discovery/publication loop, borrowing the owner's repository.
 /// </summary>
-internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
+internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
 {
-    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyDeviceMonitorService>();
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyMonitorWorker>();
 
     /// <summary>Quiet period after the last listener hint before a coalesced rescan runs.</summary>
     internal static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(200);
@@ -35,7 +35,7 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
     internal static readonly TimeSpan MaxCoalesceInterval = 5 * ThrottleInterval;
 
     /// <summary>Bounds the managed loop drain, not native listener teardown or total disposal time.</summary>
-    internal static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
 
     private readonly YubiKeyDeviceRepository _repository;
     private readonly IFindYubiKeys _findYubiKeys;
@@ -94,14 +94,7 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         cancellationToken.ThrowIfCancellationRequested();
     }
 
-    public YubiKeyDeviceMonitorService(
-        YubiKeyDeviceRepository repository,
-        IFindYubiKeys findYubiKeys)
-        : this(repository, findYubiKeys, HidDeviceListener.Create, () => new DesktopSmartCardDeviceListener())
-    {
-    }
-
-    internal YubiKeyDeviceMonitorService(
+    internal YubiKeyMonitorWorker(
         YubiKeyDeviceRepository repository,
         IFindYubiKeys findYubiKeys,
         Func<HidDeviceListener> hidListenerFactory,
@@ -214,7 +207,7 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
             while (!cancellationToken.IsCancellationRequested)
             {
                 MonitoringWaitReachedForTest?.Invoke();
-                var trigger = await WaitForTriggerAsync(_signal, interval, cancellationToken).ConfigureAwait(false);
+                var trigger = await WaitForTriggerAsync(interval, cancellationToken).ConfigureAwait(false);
                 if (trigger == DeviceMonitorWaitResult.Timeout)
                 {
                     await RescanSafelyAsync("interval fallback", cancellationToken).ConfigureAwait(false);
@@ -225,7 +218,7 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
                     break;
 
                 _ = _signal.TryConsume();
-                if (!await WaitForDebounceQuietPeriodAsync(_signal, cancellationToken).ConfigureAwait(false))
+                if (!await WaitForDebounceQuietPeriodAsync(cancellationToken).ConfigureAwait(false))
                     break;
 
                 await RescanSafelyAsync("listener event", cancellationToken).ConfigureAwait(false);
@@ -286,9 +279,7 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         }
     }
 
-    private async Task<bool> WaitForDebounceQuietPeriodAsync(
-        DeviceMonitorSignal signal,
-        CancellationToken cancellationToken)
+    private async Task<bool> WaitForDebounceQuietPeriodAsync(CancellationToken cancellationToken)
     {
         var coalesceStarted = Stopwatch.GetTimestamp();
         while (true)
@@ -301,18 +292,17 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
             var waitInterval = remainingCoalesce < ThrottleInterval
                 ? remainingCoalesce
                 : ThrottleInterval;
-            var trigger = await WaitForTriggerAsync(signal, waitInterval, cancellationToken).ConfigureAwait(false);
+            var trigger = await WaitForTriggerAsync(waitInterval, cancellationToken).ConfigureAwait(false);
             if (trigger == DeviceMonitorWaitResult.Timeout)
                 return true;
             if (trigger == DeviceMonitorWaitResult.Completed)
                 return false;
 
-            _ = signal.TryConsume();
+            _ = _signal.TryConsume();
         }
     }
 
-    private static async Task<DeviceMonitorWaitResult> WaitForTriggerAsync(
-        DeviceMonitorSignal signal,
+    private async Task<DeviceMonitorWaitResult> WaitForTriggerAsync(
         TimeSpan timeout,
         CancellationToken cancellationToken)
     {
@@ -320,7 +310,7 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
         using var readCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         var timeoutTask = Task.Delay(timeout, timeoutCts.Token);
-        var readTask = signal.WaitToReadAsync(readCts.Token).AsTask();
+        var readTask = _signal.WaitToReadAsync(readCts.Token).AsTask();
         var completedTask = await Task.WhenAny(timeoutTask, readTask).ConfigureAwait(false);
 
         if (completedTask == timeoutTask)
@@ -457,30 +447,30 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
             }
         }
 
-        Logger.LogDebug("YubiKeyDeviceMonitorService disposed");
+        Logger.LogDebug("YubiKeyMonitorWorker disposed");
     }
-}
 
-/// <summary>
-///     Capacity-one occurrence signal for monitor wake-ups. Listener payloads are logged at ingress and are
-///     intentionally not queued because the consumer only needs to know that at least one rescan is pending.
-/// </summary>
-internal sealed class DeviceMonitorSignal
-{
-    private readonly Channel<bool> _channel = Channel.CreateBounded<bool>(
-        new BoundedChannelOptions(1)
-        {
-            SingleReader = true,
-            SingleWriter = false,
-            AllowSynchronousContinuations = false,
-            FullMode = BoundedChannelFullMode.DropWrite
-        });
-    public bool TrySignal() => _channel.Writer.TryWrite(true);
+    /// <summary>
+    ///     Capacity-one occurrence signal for monitor wake-ups. Listener payloads are logged at ingress and are
+    ///     intentionally not queued because the consumer only needs to know that at least one rescan is pending.
+    /// </summary>
+    private sealed class DeviceMonitorSignal
+    {
+        private readonly Channel<bool> _channel = Channel.CreateBounded<bool>(
+            new BoundedChannelOptions(1)
+            {
+                SingleReader = true,
+                SingleWriter = false,
+                AllowSynchronousContinuations = false,
+                FullMode = BoundedChannelFullMode.DropWrite
+            });
+        public bool TrySignal() => _channel.Writer.TryWrite(true);
 
-    public ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken) =>
-        _channel.Reader.WaitToReadAsync(cancellationToken);
+        public ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken) =>
+            _channel.Reader.WaitToReadAsync(cancellationToken);
 
-    public bool TryConsume() => _channel.Reader.TryRead(out _);
+        public bool TryConsume() => _channel.Reader.TryRead(out _);
 
-    public void Complete() => _channel.Writer.TryComplete();
+        public void Complete() => _channel.Writer.TryComplete();
+    }
 }

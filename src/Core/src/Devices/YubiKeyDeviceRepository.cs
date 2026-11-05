@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// This class maintains a thread-safe cache of discovered devices and emits
 /// <see cref="DeviceEvent"/>s when the cache is updated via <see cref="UpdateCache"/>.
 /// It has no discovery capability - that responsibility belongs to
-/// <see cref="YubiKeyDeviceMonitorService"/>.
+/// <see cref="YubiKeyMonitorWorker"/>.
 /// The repository owns the <see cref="DeviceEventHub"/> that backs <see cref="WatchAsync"/>.
 /// </remarks>
 internal sealed class YubiKeyDeviceRepository : IDisposable

@@ -14,6 +14,8 @@
 
 using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
@@ -27,19 +29,19 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </remarks>
 public sealed class YubiKeyMonitor : IAsyncDisposable
 {
-    internal static readonly TimeSpan DefaultMonitoringInterval = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan DefaultMonitoringInterval = TimeSpan.FromSeconds(5);
 
     private readonly DisposalGate _disposal = new();
+    private readonly YubiKeyDeviceRepository _repository;
+    private readonly YubiKeyMonitorWorker _worker;
     private int _disposed;
 
-    internal YubiKeyDeviceRepository Repository { get; }
-    internal YubiKeyDeviceMonitorService Service { get; }
     internal Func<Task>? RepositoryTeardownReachedForTest;
 
-    internal YubiKeyMonitor(YubiKeyDeviceRepository repository, YubiKeyDeviceMonitorService service)
+    private YubiKeyMonitor(YubiKeyDeviceRepository repository, YubiKeyMonitorWorker worker)
     {
-        Repository = repository;
-        Service = service;
+        _repository = repository;
+        _worker = worker;
     }
 
     /// <summary>
@@ -56,7 +58,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
         get
         {
             ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
-            return Repository.GetAll();
+            return _repository.GetAll();
         }
     }
 
@@ -83,36 +85,30 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
         if (Volatile.Read(ref _disposed) != 0)
             yield break;
 
-        await foreach (var change in Repository.WatchWithSnapshotAsync(cancellationToken).ConfigureAwait(false))
+        await foreach (var change in _repository.WatchWithSnapshotAsync(cancellationToken).ConfigureAwait(false))
             yield return change;
-    }
-
-    internal static YubiKeyMonitor CreateUninitialized()
-    {
-        var repository = new YubiKeyDeviceRepository();
-        var service = new YubiKeyDeviceMonitorService(repository, FindYubiKeys.Create());
-        return new YubiKeyMonitor(repository, service);
     }
 
     internal static Task<YubiKeyMonitor> CreateAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return InitializeAsync(CreateUninitialized(), cancellationToken, DefaultMonitoringInterval);
+        var repository = new YubiKeyDeviceRepository();
+        var worker = new YubiKeyMonitorWorker(repository, FindYubiKeys.Create(),
+            HidDeviceListener.Create, () => new DesktopSmartCardDeviceListener());
+        return CreateAsync(repository, worker, cancellationToken, DefaultMonitoringInterval);
     }
 
-    internal static Task<YubiKeyMonitor> CreateAsync(
+    internal static async Task<YubiKeyMonitor> CreateAsync(
         YubiKeyDeviceRepository repository,
-        YubiKeyDeviceMonitorService service,
+        YubiKeyMonitorWorker worker,
         CancellationToken cancellationToken,
-        TimeSpan interval) => InitializeAsync(new YubiKeyMonitor(repository, service), cancellationToken, interval);
-
-    private static async Task<YubiKeyMonitor> InitializeAsync(
-        YubiKeyMonitor monitor, CancellationToken cancellationToken, TimeSpan interval)
+        TimeSpan interval)
     {
+        var monitor = new YubiKeyMonitor(repository, worker);
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await monitor.Service.InitializeAsync(interval, cancellationToken).ConfigureAwait(false);
+            await worker.InitializeAsync(interval, cancellationToken).ConfigureAwait(false);
             return monitor;
         }
         catch
@@ -137,7 +133,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
         Volatile.Write(ref _disposed, 1);
         try
         {
-            await Service.DisposeAsync().ConfigureAwait(false);
+            await _worker.DisposeAsync().ConfigureAwait(false);
             var hook = RepositoryTeardownReachedForTest;
             if (hook is not null)
                 await hook().ConfigureAwait(false);
@@ -145,7 +141,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
         finally
         {
             // Dispose first: never expose a live-but-emptied cache to an abandoned publication.
-            Repository.Dispose();
+            _repository.Dispose();
         }
     }
 }

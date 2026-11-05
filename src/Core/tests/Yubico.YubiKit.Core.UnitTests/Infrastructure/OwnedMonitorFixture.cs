@@ -30,14 +30,14 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
     public ScriptedFinder Finder { get; } = new();
     public FakeHidListener Hid { get; } = new();
     public FakeSmartCardListener SmartCard { get; } = new();
-    public YubiKeyDeviceMonitorService Service { get; }
-    public Task Loop => Service.MonitoringCompletionForTest;
+    public YubiKeyMonitorWorker Worker { get; }
+    public Task Loop => Worker.MonitoringCompletionForTest;
     public Action? WaitReached { get; set; }
 
     public OwnedMonitorFixture()
     {
-        Service = new(Repository, Finder, () => Hid, () => SmartCard, TimeSpan.FromMilliseconds(50));
-        Service.MonitoringWaitReachedForTest = () =>
+        Worker = new(Repository, Finder, () => Hid, () => SmartCard, TimeSpan.FromMilliseconds(50));
+        Worker.MonitoringWaitReachedForTest = () =>
         {
             Volatile.Write(ref _completedScans, Finder.ScanCount);
             WaitReached?.Invoke();
@@ -45,7 +45,7 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
     }
 
     public Task<YubiKeyMonitor> CreateAsync(CancellationToken cancellationToken) =>
-        _creation = YubiKeyMonitor.CreateAsync(Repository, Service, cancellationToken, TimeSpan.FromHours(1));
+        _creation = YubiKeyMonitor.CreateAsync(Repository, Worker, cancellationToken, TimeSpan.FromHours(1));
 
     public Task WaitForScanAsync(int count, CancellationToken cancellationToken) => AsyncWait.WaitUntilAsync(
         () => Volatile.Read(ref _completedScans) >= count,
@@ -55,7 +55,7 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
     {
         if (_creation is null)
         {
-            await Service.DisposeAsync();
+            await Worker.DisposeAsync();
             Repository.Dispose();
         }
         else

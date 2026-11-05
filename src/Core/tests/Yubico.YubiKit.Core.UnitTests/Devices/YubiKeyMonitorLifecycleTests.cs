@@ -35,7 +35,7 @@ public class YubiKeyMonitorLifecycleTests
         await using var watcher = await DeviceEventWatcher.StartAsync(fixture.Repository, TestToken);
         var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        fixture.Service.PublishAdmittedForTest = () =>
+        fixture.Worker.PublishAdmittedForTest = () =>
         {
             admitted.TrySetResult();
             return release.Task;
@@ -75,7 +75,7 @@ public class YubiKeyMonitorLifecycleTests
         await using var watcher = await DeviceEventWatcher.StartAsync(fixture.Repository, TestToken);
         var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        fixture.Service.PublishAdmittedForTest = () =>
+        fixture.Worker.PublishAdmittedForTest = () =>
         {
             admitted.TrySetResult();
             return release.Task;

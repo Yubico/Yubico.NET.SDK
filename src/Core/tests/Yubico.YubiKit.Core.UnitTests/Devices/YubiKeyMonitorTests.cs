@@ -383,7 +383,7 @@ public class YubiKeyMonitorTests
             await releaseScan.Task.WaitAsync(ct);
             return [device];
         };
-        fixture.Service.PublishAdmittedForTest = async () =>
+        fixture.Worker.PublishAdmittedForTest = async () =>
         {
             publicationEntered.TrySetResult();
             await releasePublication.Task.WaitAsync(TestToken);
@@ -430,10 +430,10 @@ public class YubiKeyMonitorTests
     {
         var rig = new FindYubiKeysScopeTests.ScopeRig { IncludeSecondKey = true };
         var repository = new YubiKeyDeviceRepository();
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository, rig.CreateFinder(ConnectionType.All),
             () => new OwnedMonitorFixture.FakeHidListener(), () => new OwnedMonitorFixture.FakeSmartCardListener(), TimeSpan.FromMilliseconds(50));
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service, TestToken, TimeSpan.FromHours(1));
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker, TestToken, TimeSpan.FromHours(1));
         var snapshot = monitor.CurrentDevices;
         Assert.Equal(2, snapshot.Count);
         Assert.All(snapshot, key => Assert.NotNull(key.CachedDeviceInfo));
@@ -491,7 +491,7 @@ public class YubiKeyMonitorTests
     {
         await using var fixture = new OwnedMonitorFixture();
         var failure = new IOException("publication failed");
-        fixture.Service.PublishAdmittedForTest = () => throw failure;
+        fixture.Worker.PublishAdmittedForTest = () => throw failure;
 
         Assert.Same(failure, await Assert.ThrowsAsync<IOException>(() => fixture.CreateAsync(TestToken)));
         Assert.True(fixture.Hid.Disposed && fixture.SmartCard.Disposed);
@@ -645,7 +645,7 @@ public class YubiKeyMonitorTests
         if (publicationFailure)
         {
             fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([]);
-            fixture.Service.PublishAdmittedForTest = () => throw new IOException("transient publication failure");
+            fixture.Worker.PublishAdmittedForTest = () => throw new IOException("transient publication failure");
         }
         else
             fixture.Finder.Scan = _ => throw new IOException("transient scan failure");
@@ -655,7 +655,7 @@ public class YubiKeyMonitorTests
         Assert.Same(first, Assert.Single(monitor.CurrentDevices));
         AssertChange(Assert.Single(watcher.Events), DeviceAction.Added, first);
         var second = new FakeYubiKey("second");
-        fixture.Service.PublishAdmittedForTest = null;
+        fixture.Worker.PublishAdmittedForTest = null;
         fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([second]);
         fixture.SmartCard.Raise();
         await watcher.WaitForCountAsync(3, "monitor did not recover from a failed scan", TestToken);
@@ -710,7 +710,7 @@ public class YubiKeyMonitorTests
         var admitted = Signal();
         var release = Signal();
         fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([new FakeYubiKey("late")]);
-        fixture.Service.PublishAdmittedForTest = async () =>
+        fixture.Worker.PublishAdmittedForTest = async () =>
         {
             admitted.TrySetResult();
             await release.Task.WaitAsync(TestToken);
@@ -775,12 +775,12 @@ public class YubiKeyMonitorTests
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestToken);
         var rig = new FindYubiKeysScopeTests.ScopeRig { PendingOpen = new(TaskCreationOptions.RunContinuationsAsynchronously) };
         var repository = new YubiKeyDeviceRepository();
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository, rig.CreateFinder(ConnectionType.SmartCard),
             () => new OwnedMonitorFixture.FakeHidListener(), () => new OwnedMonitorFixture.FakeSmartCardListener(), TimeSpan.FromMilliseconds(50));
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestToken);
-        var creation = YubiKeyMonitor.CreateAsync(repository, service, cancellation.Token, TimeSpan.FromHours(1));
-        var loop = service.MonitoringCompletionForTest;
+        var creation = YubiKeyMonitor.CreateAsync(repository, worker, cancellation.Token, TimeSpan.FromHours(1));
+        var loop = worker.MonitoringCompletionForTest;
         try
         {
             await rig.OpenEntered.Task.WaitAsync(Bound, TestToken);
@@ -828,7 +828,7 @@ public class YubiKeyMonitorTests
         var repository = new YubiKeyDeviceRepository();
         var hid = new OwnedMonitorFixture.FakeHidListener();
         var smartCard = new OwnedMonitorFixture.FakeSmartCardListener();
-        var service = new YubiKeyDeviceMonitorService(
+        var worker = new YubiKeyMonitorWorker(
             repository, finder, () => hid, () => smartCard, TimeSpan.FromMilliseconds(50));
         try
         {
@@ -838,7 +838,7 @@ public class YubiKeyMonitorTests
                 admissions.Add(admission);
             }
 
-            await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service, TestToken, TimeSpan.FromHours(1));
+            await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker, TestToken, TimeSpan.FromHours(1));
             Assert.Equal(2, monitor.CurrentDevices.Count);
             var hidCallback = hid.DeviceEvent;
             var pcscCallback = smartCard.DeviceEvent;
@@ -903,7 +903,7 @@ public class YubiKeyMonitorTests
             loggingEntered.TrySetResult();
             Assert.True(releaseLogging.Wait(Bound, TestToken));
         });
-        fixture.Service.TerminalFailureLogForTest = error => logger.LogError(error, "terminal report");
+        fixture.Worker.TerminalFailureLogForTest = error => logger.LogError(error, "terminal report");
         fixture.WaitReached = () => reachedWait.TrySetResult();
         var monitor = await fixture.CreateAsync(TestToken);
         await reachedWait.Task.WaitAsync(Bound, TestToken);
@@ -951,7 +951,7 @@ public class YubiKeyMonitorTests
         await using var watcher = await DeviceEventWatcher.StartAsync(fixture.Repository, TestToken);
         var admitted = Signal();
         var release = Signal();
-        fixture.Service.PublishAdmittedForTest = () =>
+        fixture.Worker.PublishAdmittedForTest = () =>
         {
             admitted.TrySetResult();
             return release.Task;
@@ -963,7 +963,7 @@ public class YubiKeyMonitorTests
             await admitted.Task.WaitAsync(Bound, TestToken);
             fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([third]);
             fixture.SmartCard.Raise();
-            await Task.Delay(YubiKeyDeviceMonitorService.ThrottleInterval * 2, TestToken);
+            await Task.Delay(YubiKeyMonitorWorker.ThrottleInterval * 2, TestToken);
             Assert.Equal(2, fixture.Finder.ScanCount);
             Assert.Same(first, Assert.Single(monitor.CurrentDevices));
             release.TrySetResult();

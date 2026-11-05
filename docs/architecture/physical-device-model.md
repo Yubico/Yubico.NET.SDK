@@ -21,7 +21,7 @@ See also: [device identity and physical-device correlation](./device-identity.md
 `IYubiKey` (defined in `src/Core/src/Abstractions/IYubiKey.cs`) is intentionally small:
 
 - `string DeviceId` — a human-readable correlation identifier. Once a device object is published through
-  the `YubiKeyManager` repository, its `DeviceId` remains stable for that uninterrupted physical presence while its
+  an owned `YubiKeyMonitor` repository, its `DeviceId` remains stable for that uninterrupted physical presence while its
   physical interface identity and `AvailableConnections` remain unchanged. The repository retains the
   originally published object across evidence-tier flips so its eventual `Removed` event correlates with
   the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
@@ -58,7 +58,7 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 
 // One IYubiKey per physical device, even when CCID + HID FIDO + HID OTP are all present.
-var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+var devices = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.All);
 
 foreach (var device in devices)
 {
@@ -70,8 +70,11 @@ foreach (var device in devices)
     }
 }
 
-// Filters return physical devices capable of the requested connection, not per-interface rows.
-var fidoCapable = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
+// Keep full composite slots, then select physical keys capable of FIDO.
+var fidoCapable = devices.Where(key => key.SupportsConnection(ConnectionType.HidFido));
+
+// Or intentionally discover only FIDO interfaces; these views have no CCID/OTP slots.
+var fidoViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido);
 ```
 
 In the common case, discovery merges the interfaces of a single physical key by USB Product ID parsed from
@@ -85,29 +88,40 @@ name cannot be parsed for its Product ID, or when a serial number needed to disa
 keys cannot be read. In those cases interfaces are left unmerged rather than risk wrongly collapsing two
 distinct keys, so one physical key can surface as more than one row.
 
-`FindAllAsync(forceRescan: false)` returns the repository cache after its first populated scan;
-`forceRescan: true` performs discovery and reconciles the result into that cache. Successful identity and
-metadata reads are cached while their interface set remains present, but activity observed on any transport
-globally invalidates both caches; the observed transport is diagnostic context, not an eviction scope.
-Discovery populates best-effort metadata for every published device shape, including one-interface USB and
-NFC records. Grouping does not depend on those metadata results, but the bounded reads are awaited and may
-delay scan completion by up to their budget. When a later scan obtains metadata for an otherwise unchanged
-physical device, the repository copies it onto the object it originally published without emitting `Added`
-or `Removed`; callers see it through `CachedDeviceInfo`. Request fresh Management data explicitly when
-current device configuration matters.
-`WatchAsync` events are emitted from repository diffs after a full rescan, not directly from native listener
-hints. These APIs inherit the conservative grouping bounds in
-[Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
+Every `FindAllAsync`, `FindFirstAsync`, and `FindFirstOrDefaultAsync` call performs independent one-shot
+discovery with fresh per-call evidence, including after an earlier empty result. First-result methods
+select after discovery; they do not wait for insertion. There is no global repository or tracking lifetime.
+Discovery populates best-effort metadata for every device shape, including one-interface USB and NFC
+records. Grouping does not depend on those results, but bounded reads are awaited and may delay completion.
 
-For an independent one-shot view, use `YubiKeyManager.ScanAsync(scope, cancellationToken)`. It uses fresh
-evidence without initializing the manager, changing the repository, emitting events, or starting monitoring.
-Unlike `FindAllAsync`'s result filter, scope limits enumeration/probes and returned connection slots.
+For tracking, explicitly own a ready monitor:
+
+```csharp
+await using var monitor = await YubiKeyManager.CreateMonitorAsync(cancellationToken);
+var current = monitor.CurrentDevices; // Initial publication is complete; no I/O on this read.
+await foreach (var change in monitor.WatchAsync(cancellationToken))
+{
+    // Initial Added replay, then ordered changes. Do not separately prepend 'current'.
+    Apply(change);
+}
+```
+
+The monitor's finder retains successful identity/metadata evidence until observed interface absence,
+PID change, or listener activity invalidates it. When a later scan obtains metadata for an unchanged
+physical device, the repository updates its retained object without emitting `Added` or `Removed`.
+This is last-known data, not continuously refreshed configuration. Request live Management data when
+current configuration matters. `WatchAsync` changes come from full repository diffs, not native hints.
+These APIs inherit [Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
+
+One-shot `interfaces` limits enumeration/probes and returned connection slots, not just result selection.
 SmartCard-only skips HID, HID-only skips PC/SC, and OTP/FIDO share descriptor enumeration but not excluded
 interface probes. A view contains only observed in-scope interfaces; partial scope does not relax the
 PID-completeness rule. Existing monitors run unchanged. See
 [independent scoped scans](../usage/device-discovery.md#independent-scoped-scans) for examples and lifetime
 bounds. Connections exclude other views only through overlapping known member interface IDs: disjoint
 scoped views cannot promise physical-key exclusion even with matching serials. Coordinate them explicitly.
+Monitor disposal releases its tracking resources, not caller-owned sessions/connections or returned
+descriptors. Earlier membership lists remain historical; reading `CurrentDevices` after disposal throws.
 
 ### Platform Support For HID Discovery
 

@@ -1,6 +1,7 @@
 # Device Discovery with YubiKeyManager
 
-This guide covers how to discover and monitor YubiKey devices using the static `YubiKeyManager` API.
+Choose fresh one-shot discovery through `YubiKeyManager.Find…Async`, or explicitly own a ready
+`YubiKeyMonitor` for cached membership and changes. No DI registration or global tracking state is needed.
 
 ## Quick Start
 
@@ -37,6 +38,19 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
 | `monitor.WatchAsync(cancellationToken)` | Replay initial Added events, then stream ordered changes |
 | `monitor.DisposeAsync()` | Stop and dispose this owned lifetime; normally use `await using` |
 
+### Choose the lifetime for your application
+
+| Application | Recommended path |
+|---|---|
+| Short CLI command or script | `FindFirstAsync` / `FindAllAsync`; no background cleanup |
+| Optional hardware feature | `FindFirstOrDefaultAsync`; null means no matching key now |
+| CCID-only utility | `Find…Async(interfaces: ConnectionType.SmartCard)` to avoid HID probing |
+| Desktop device picker | Owned monitor + replaying `WatchAsync` to build the UI without a subscription gap |
+| Long-running service | Share one host-owned monitor; filter `CurrentDevices` in memory |
+| Embedded component | Receive an `IYubiKey` or host-owned monitor; do not take over process-wide lifetime |
+| Independent diagnostic | One-shot Find with its own scope/evidence, even if a monitor exists |
+| Configuration editor | Monitor for selection and presence; Management for live configuration |
+
 ## Simple Discovery
 
 ```csharp
@@ -72,6 +86,12 @@ var fidoViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.Hid
 
 // Fresh evidence across all interfaces, still without publishing into a monitor repository.
 var allViews = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+
+// Either family can discover the selected physical key. No OTP slots/protocol probes are admitted.
+var selected = await YubiKeyManager.FindFirstAsync(
+    predicate: key => key.SerialNumber == serial,
+    interfaces: ConnectionType.SmartCard | ConnectionType.HidFido,
+    cancellationToken: cancellationToken);
 ```
 
 Each call creates a new finder with independent identity/metadata evidence. It does **not** initialize
@@ -91,7 +111,7 @@ than narrowing discovery and accidentally discarding sibling connection slots.
 - OTP and FIDO share OS HID descriptor enumeration. The OS may therefore expose excluded descriptors,
   but they receive no connection slots, topology queries, or identity/metadata protocol probes.
 - Returned `AvailableConnections` contains only observed in-scope interfaces. A scoped view does not gain
-  sibling slots from an earlier scan or the repository. PID completeness still means the PID's **full**
+  sibling slots from an earlier scan or a monitor. PID completeness still means the PID's **full**
   expected interface set, not the requested subset. Ambiguous partial observations can split one key
   into several results.
 - Metadata is best-effort, and each returned object can retain historical `CachedDeviceInfo`. Separate
@@ -191,10 +211,9 @@ To accept an already-attached key or wait for an insertion with a timeout, handl
 
 ```csharp
 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-await using var monitor = await YubiKeyManager.CreateMonitorAsync(cts.Token);
-
 try
 {
+    await using var monitor = await YubiKeyManager.CreateMonitorAsync(cts.Token);
     await foreach (var e in monitor.WatchAsync(cts.Token))
     {
         if (e.Action == DeviceAction.Added)
@@ -241,12 +260,19 @@ Events are raised on background threads, so UI applications must marshal before 
 With `await foreach`, capture the UI `SynchronizationContext` and post to it — no extra dependency:
 
 ```csharp
-var ui = SynchronizationContext.Current!;
+var ui = SynchronizationContext.Current
+    ?? throw new InvalidOperationException("Start watching from the UI thread.");
 
 await using var monitor = await YubiKeyManager.CreateMonitorAsync();
 await foreach (var e in monitor.WatchAsync(CancellationToken.None))
 {
-    ui.Post(_ => DevicesList.Add(e.Device), null);
+    ui.Post(_ =>
+    {
+        if (e.Action == DeviceAction.Added)
+            DevicesList.Add(e.Device);
+        else if (e.Action == DeviceAction.Removed)
+            DevicesList.Remove(e.Device);
+    }, null);
 }
 ```
 
@@ -278,7 +304,7 @@ catch (PlatformInteropException ex)
 From the repository root, explicitly select the read-only cases:
 
 ```bash
-dotnet toolchain.cs -- test --integration --project Management --filter "FullyQualifiedName~ScopedDiscoveryReadOnlyTests"
+dotnet toolchain.cs -- test --integration --project Management.IntegrationTests --filter "(FullyQualifiedName~OwnedMonitorReadOnlyTests|FullyQualifiedName~ScopedDiscoveryReadOnlyTests)&Category!=RequiresUserPresence"
 ```
 
 These tests live in the Management integration project only because they compare discovery metadata with
@@ -287,15 +313,15 @@ Configure the existing `YubiKeyTests:AllowedSerialNumbers` allow list before run
 **every attached authorized serial-bearing USB key**, not just the first `[WithYubiKey]` match, and do not
 hard-code a key count or serial in the source.
 
-The seven cases cover SmartCard, FIDO, OTP, HID, SmartCard+OTP, explicit All, and the default scope. They check
+The eight scoped cases cover SmartCard, FIDO, OTP, HID, SmartCard+OTP, SmartCard+FIDO, explicit All, and the default scope. They check
 in-scope connection sets, serial-based `SameDeviceAs` correlation across independent views, retained snapshots,
 and cached/live serial, firmware, form factor, and USB/NFC capability agreement. Each exposed concrete
 connection is opened, read, and asynchronously disposed before the next connection. The tests never reset,
 write configuration or credentials, request touch, or require unplugging. Do **not** substitute a broad
 Management integration run: other cases in that project change configuration or reset the key.
 
-Run on an idle serial-bearing USB fixture, without another monitor/client probing the same keys. The tests
-do not start monitoring or use its cache; a full reference scan precedes each scoped test. Consequently this
+Run on idle serial-bearing USB fixtures, without another monitor/client probing the same keys. The scoped
+tests do not start monitoring or use its cache; a full reference scan precedes each scoped test. Consequently this
 hardware run does not prove that excluded backends were never called: the deterministic `FindYubiKeysScopeTests`
 pin those boundaries, including the distinction between shared HID descriptor enumeration and excluded
 interface protocol probes.
@@ -313,21 +339,36 @@ Connections through disjoint scoped views are **never** opened simultaneously in
 and disjoint ownership bounds, cancellation, and queued-read retirement are tested with fakes in
 `FindYubiKeysScopeTests`; successful read-only hardware checks do not imply universal physical-key locking.
 
+`OwnedMonitorReadOnlyTests` adds four public-API cases requiring **at least two attached authorized keys**;
+fewer usable fixtures fails that hardware prerequisite rather than counting a one-key run as two-key coverage.
+They verify both fixtures in `CurrentDevices` immediately after awaited creation (no polling into readiness),
+initial Added replay, retained membership/object identity, subscriber-local cancellation, factory-token
+independence, disposal/stream completion, recreate, independent convenience selection, and predicate-based
+null/throw no-match behavior without unplugging anything. They log fixture ordinals/interface support,
+not machine serials. Snapshot metadata is compared with sequential live reads only **after disposing the
+monitor**. Incomplete initial metadata/interfaces remain failures, not successful two-key observations.
+
+Repeated hardware cache reads do not prove absence of I/O by speed alone:
+`YubiKeyMonitorTests.CurrentDevices_PopulatedSnapshot_PerformsNoBackendEnumerationProbesOrOpens` uses
+instrumented PC/SC and HID backends, slot/topology/open counters, and real finder-produced descriptors.
+`ScopedDiscoveryReadinessTests` also pins that a complete serial-less bystander does not prevent readiness,
+whereas any view lacking metadata exhausts the bounded retries. Run that hardware-free regression explicitly
+with `--integration --project Management.IntegrationTests --filter "FullyQualifiedName~ScopedDiscoveryReadinessTests"`.
+
+**Attended acceptance remains a separate required pass gate for this lifecycle migration.** With a human
+present, run the narrowly selected `DeviceEventHotPlugTests` and `HotPlugIdentityContractTests` protocols
+for real removal/reinsertion and event/identity lifetime validation. Do not execute those cases unattended
+or count unexecuted/skipped cases as acceptance. No UV/UP, touch, PIN/biometric prompt, reset, write, or manual
+insertion/removal is part of the read-only filter above.
+
 ### Owned lifetime cleanup
 
 One-shot tests need no manager initialization or shutdown. Tests that actually track changes own a monitor:
 
-```csharp
-public class YubiKeyTests
-{
-    [Fact]
-    public async Task CanReadAnInitializedSnapshot()
-    {
-        await using var monitor = await YubiKeyManager.CreateMonitorAsync();
-        Assert.NotNull(monitor.CurrentDevices);
-    }
-}
-```
+Keep the monitor in an `await using` scope and dispose each watcher/connection/session that the test
+creates. The two-fixture suite above asserts actual initial membership and replay rather than merely
+checking a non-null list. Use deterministic fixtures for valid empty initialization and blocked-native
+teardown; do not manufacture absence through unattended physical removal.
 
 ## Race Conditions
 

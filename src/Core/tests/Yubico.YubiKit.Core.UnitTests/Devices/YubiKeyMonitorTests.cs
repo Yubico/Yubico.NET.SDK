@@ -424,6 +424,37 @@ public class YubiKeyMonitorTests
     }
 
     [Fact]
+    public async Task CurrentDevices_PopulatedSnapshot_PerformsNoBackendEnumerationProbesOrOpens()
+    {
+        var rig = new FindYubiKeysScopeTests.ScopeRig { IncludeSecondKey = true };
+        using var repository = new YubiKeyDeviceRepository();
+        await using var service = new YubiKeyDeviceMonitorService(
+            repository, rig.CreateFinder(ConnectionType.All),
+            () => new FakeHidListener(), () => new FakeSmartCardListener(), TimeSpan.FromMilliseconds(50));
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service, TestToken, TimeSpan.FromHours(1));
+        var snapshot = monitor.CurrentDevices;
+        Assert.Equal(2, snapshot.Count);
+        Assert.All(snapshot, key => Assert.NotNull(key.CachedDeviceInfo));
+        var before = (rig.Pcsc.Calls, rig.Hid.Calls, rig.CreatedSlots.Count, rig.TopologyCalls.Count,
+            rig.OpenCalls.Values.Sum(), rig.Connections.Count);
+        Assert.True(before.Item1 > 0 && before.Item2 > 0 && before.Item5 > 0);
+
+        // Poison the actual finder backends after initialization. This is a call-count proof, not
+        // a timing assertion about reads finishing before a background scan happens to run.
+        rig.Pcsc.PendingEnumeration = Task.FromResult<IReadOnlyList<IPcscDevice>>([]);
+        rig.Hid.Devices = [];
+        rig.OpenConnection = _ => throw new InvalidOperationException("Cached access must not open hardware.");
+        for (var i = 0; i < 100; i++)
+        {
+            Assert.Same(snapshot, monitor.CurrentDevices);
+            Assert.All(monitor.CurrentDevices, key => Assert.NotNull(key.CachedDeviceInfo));
+        }
+
+        Assert.Equal(before, (rig.Pcsc.Calls, rig.Hid.Calls, rig.CreatedSlots.Count, rig.TopologyCalls.Count,
+            rig.OpenCalls.Values.Sum(), rig.Connections.Count));
+    }
+
+    [Fact]
     public async Task CreateAsync_PreCanceled_CleansOwnershipWithoutStartingListenersOrScanning()
     {
         await using var fixture = new MonitorFixture();

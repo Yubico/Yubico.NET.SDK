@@ -62,6 +62,7 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
     [InlineData(ConnectionType.HidOtp)]
     [InlineData(ConnectionType.Hid)]
     [InlineData(ConnectionType.SmartCard | ConnectionType.HidOtp)]
+    [InlineData(ConnectionType.SmartCard | ConnectionType.HidFido)]
     [InlineData(ConnectionType.All)]
     public async Task FindAllAsync_ScopedViewsCorrelateWithFullScanAndSequentialLiveReads(ConnectionType scope)
     {
@@ -135,10 +136,10 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
         return reference;
     }
 
-    private IReadOnlyList<IYubiKey> Authorized(IReadOnlyList<IYubiKey> scan) =>
+    internal IReadOnlyList<IYubiKey> Authorized(IReadOnlyList<IYubiKey> scan) =>
         scan.Where(view => _allowList.IsDeviceAllowed(view.SerialNumber)).ToList();
 
-    private static Dictionary<int, ConnectionType> ConnectionsBySerial(IReadOnlyList<IYubiKey> views) =>
+    internal static Dictionary<int, ConnectionType> ConnectionsBySerial(IReadOnlyList<IYubiKey> views) =>
         views.GroupBy(view => Assert.IsType<int>(view.SerialNumber))
             .ToDictionary(group => group.Key, group => group.Aggregate(ConnectionType.Unknown, (all, view) => all | view.AvailableConnections));
 
@@ -178,7 +179,7 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
         return scan;
     }
 
-    private async Task AssertLiveReadAsync(IYubiKey view, ConnectionType type, DeviceInfo cached, CancellationToken token)
+    internal async Task AssertLiveReadAsync(IYubiKey view, ConnectionType type, DeviceInfo cached, CancellationToken token)
     {
         // The helper returns only after disposing both the borrowed session and its connection.
         // Never scan or connect through a different scoped view while either is held.
@@ -215,7 +216,7 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
         }
     }
 
-    private static void AssertMetadataMatches(DeviceInfo expected, DeviceInfo actual)
+    internal static void AssertMetadataMatches(DeviceInfo expected, DeviceInfo actual)
     {
         // Compare semantic fields, not record equality over independently-owned ReadOnlyMemory values.
         Assert.Equal(expected.SerialNumber, actual.SerialNumber);

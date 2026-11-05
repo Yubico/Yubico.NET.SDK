@@ -64,11 +64,10 @@ observed at read time, and a hit under a different PID is a miss. Pinned by
 `FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit`; the monitor wiring by
 `ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport`.
 
-Documented bound: if no listener event reports the change, staleness detection degrades to scan-observed
-absence. A forced scan only after replugging does not invalidate same-interface cache entries. Consumers
-driving `FindAllAsync` directly across a physical swap they orchestrated themselves should force a scan
-while the slot is empty before replugging, or restart `YubiKeyManager` to discard the caches.
-Alternatively, `YubiKeyManager.ScanAsync` uses new evidence per call without changing the manager's cache.
+Documented monitor bound: if no listener event reports the change, staleness detection degrades to
+scan-observed absence. An interval scan after replugging need not invalidate same-interface evidence.
+Each public `YubiKeyManager.Find…Async` instead creates fresh evidence per invocation, without updating
+any monitor's repository. Neither path promises that unavailable/busy interfaces yield complete metadata.
 
 Hardware evidence and its limit: an operator-coordinated port swap of two same-model keys (the
 reader-name-reuse shape behind the substitution hazard) re-published both under their correct serial
@@ -113,7 +112,7 @@ that the retired unknown request never opens when the held native owner finally 
 
 ### Scoped lifecycle
 
-`YubiKeyManager.ScanAsync(scope, cancellationToken)` creates a fresh finder per call. Its immutable scope
+`YubiKeyManager.FindAllAsync(interfaces, cancellationToken)` creates a fresh finder per call. Its immutable scope
 limits enumeration and probes, not just returned devices. Excluded transport backends are not constructed;
 SmartCard-only skips HID enumeration and HID-only skips PC/SC enumeration. OTP and FIDO still share OS HID
 descriptor enumeration, but excluded interfaces are filtered before slots, topology, or protocol reads.
@@ -123,29 +122,49 @@ A partial scope is not a complete physical-interface census: PID-only merging st
 full expected interface set. No sibling slots or evidence are imported from earlier scans. Partial views
 can therefore fragment more than full scans, and do not accumulate identity evidence between calls.
 Pinned by `ScopedFinder_PartialTriplePidWithoutIdentity_DoesNotTreatScopeAsPidCompleteness`, the two
-`ScopedFinder_TwoSamePidKeys*` vectors, `ScanAsync_ChangingScopeNeverImportsSiblingSlotsFromPriorScan`, and
-`ScanAsync_RepeatScansRereadMetadataAndIdentityRatherThanSharingEvidence` in `FindYubiKeysScopeTests`.
+`ScopedFinder_TwoSamePidKeys*` vectors, `FindAllAsync_ChangingScopeNeverImportsSiblingSlotsFromPriorScan`, and
+`FindAllAsync_RepeatScansRereadMetadataAndIdentityRatherThanSharingEvidence` in `FindYubiKeysScopeTests`.
 The existing complementary-partial G2 bound still applies; scope does not strengthen identity evidence.
 
-The one-shot result never enters the manager repository and does not initialize or constrain monitoring
-(`YubiKeyManagerStaticTests.ScanAsync_DoesNotPublishPartialViewsOrChangeAnActiveManagersRepository`).
+The one-shot result never enters a monitor repository and does not initialize or constrain monitoring
+(`YubiKeyManagerStaticTests.FindAllAsync_DoesNotPublishPartialViewsOrChangeAnOwnedMonitor`).
 On exit the read scope is retired, preventing queued identity reads from opening later. Already-open reads
 retain their native-worker admission and registry lease until teardown; caller cancellation does not prove
-native drain (`ScanAsync_ExitRetiresQueuedIdentityReadsBeforeLaterWorkerAdmission` and
-`ScanAsync_CancellationRetainsOpenedReadOwnershipUntilBackgroundTeardown`). Concurrent scans do not join
+native drain (`FindAllAsync_ExitRetiresQueuedIdentityReadsBeforeLaterWorkerAdmission` and
+`FindAllAsync_CancellationRetainsOpenedReadOwnershipUntilBackgroundTeardown`). Concurrent scans do not join
 each other's reads, but still coordinate overlapping interface claims
-(`ScanAsync_ConcurrentCallsHaveIndependentReadScopesButShareInterfaceOwnership`). Disjoint member sets do
+(`FindAllAsync_ConcurrentCallsHaveIndependentReadScopesButShareInterfaceOwnership`). Disjoint member sets do
 not provide physical-key exclusion, even with matching serials; see the
 [ownership grouping bound](connection-ownership-and-contention.md#grouping-bound).
 
 The public one-shot result remains connectable after its discovery scope retires
-(`ScanAsync_ReturnedViewCanConnectSequentiallyAfterDiscoveryScopeRetires`). Hardware coverage lives in
+(`FindAllAsync_ReturnedViewCanConnectSequentiallyAfterDiscoveryScopeRetires`). Hardware coverage lives in
 Management's `ScopedDiscoveryReadOnlyTests`: scoped/full views are correlated by serial, cached metadata is
 compared with sequential live reads on every exposed concrete connection, and default/explicit All use
 independent objects. It accepts conservative fragmentation rather than equating view count with key count.
 These idle-fixture checks do not prove exclusion of native calls or safety of disjoint simultaneous access;
 those scope and ownership boundaries remain pinned by deterministic tests above. See the
 [targeted read-only command and fixture requirements](../usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+
+### Owned monitoring and cached membership
+
+`CreateMonitorAsync` returns a new owned `YubiKeyMonitor` only after the loop's first successful publication,
+including empty success. It starts listeners before discovery, cleans partial initialization on failure,
+and does not link the initialized monitor lifetime to its factory token. Pinned by `YubiKeyMonitorTests`
+(`CreateAsync_WaitsForFirstLoopPublication_WithoutDuplicateInitialScan`,
+`CreateAsync_EmptyScan_IsReadyAndCachedReadsPerformNoDiscovery`, initial scan/publication failure tests,
+`CreateAsync_CreationTokenCanceledAfterReturn_DoesNotStopMonitoring`, and
+`CreateAsync_HintDuringInitialScan_IsInvalidatedAndReconciled`).
+
+`CurrentDevices` is coherent, read-only membership without enumeration, probes, or native opens
+(`CurrentDevices_PopulatedSnapshot_PerformsNoBackendEnumerationProbesOrOpens`). Lists retain historical
+membership; contained objects can receive later last-known metadata (`CurrentDevices_IsReadOnlyHistoricalMembership_NotTheFindersList`).
+Each `WatchAsync` enumeration atomically captures the snapshot and registers for ordered deltas at first
+`MoveNextAsync`; replay runs outside publication locks and outside delta capacity. Gated parked-diff,
+large-replay, overflow/resubscription, cancellation, disposal, and terminal-failure tests in
+`YubiKeyMonitorTests` pin those boundaries. Dispose/recreate starts a new identity-retention lifetime.
+`OwnedMonitorReadOnlyTests` adds two-fixture public-factory/replay/lifetime checks and sequential live
+metadata comparisons after disposal. These unattended checks do not replace attended hotplug acceptance.
 
 ## Device identity: what `DeviceId` does and does not promise
 
@@ -338,7 +357,7 @@ than closing it, and doubles metadata reads.
 
 Successful serial reads are cached per interface and evicted when an interface disappears or any
 transport activity globally invalidates cached identity and metadata. Between invalidations, knowledge
-accumulates across scans. In practice a long-lived `YubiKeyManager` reaches complete grouping on the first
+accumulates across scans within an owned monitor. In practice a long-lived `YubiKeyMonitor` reaches complete grouping on the first
 scan and stays there until any HID or PC/SC hotplug activity invalidates it. Listener activity is
 transport-wide and can include devices other than YubiKeys.
 

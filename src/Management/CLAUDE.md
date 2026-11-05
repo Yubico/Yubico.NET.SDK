@@ -411,6 +411,14 @@ swallowing unrelated errors. Excluded native call counts and disjoint ownership 
 deterministic scope tests, not concurrent hardware experiments. The canonical read-only filter and fixture
 requirements are in [device discovery testing](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 
+`OwnedMonitorReadOnlyTests` additionally requires at least two attached allowed keys and exercises the public
+initialized factory, immediate snapshot, initial replay, subscriber-local cancellation, factory-token
+independence, disposal/recreate, and combined-interface conveniences/no-match predicates. It reuses the
+scoped suite's readiness/authorization and semantic metadata/live-read helpers, not its background lifetime
+(there is none). Incomplete initial snapshots fail immediately. It disposes every monitor before explicit
+live comparisons; do not introduce monitor/live-read overlap to shorten the tests. Read-only operations
+need neither UP nor UV, and these cases never mutate key state or satisfy attended hotplug acceptance.
+
 ```csharp
 [SkippableTheory]
 [WithYubiKey]

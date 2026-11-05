@@ -1,5 +1,19 @@
 # Event-Driven Device Discovery Architecture
 
+## Public ownership boundary
+
+Applications choose one-shot `YubiKeyManager.Find…Async(interfaces: ..., cancellationToken: ...)` or an
+explicitly owned `await YubiKeyManager.CreateMonitorAsync(ct)`. Find uses a fresh scoped finder per call,
+without a repository, listener startup, or events. The initialized `YubiKeyMonitor` owns the service below,
+its finder/evidence, repository, and subscriptions. It scans All even without watchers. There is no global
+manager/cache or static start/stop/shutdown lifecycle.
+
+The factory registers listeners before the loop's single initial scan and awaits successful publication.
+Empty discovery is a valid initialized snapshot; initial failure/cancellation tears down partial ownership.
+The creation token applies only until return. `CurrentDevices` then reads the latest completed, read-only
+membership snapshot without I/O. It tracks presence/interfaces with optional last-known metadata, not
+continuously refreshed configuration. Use live Management reads for authoritative configuration.
+
 ## Before vs After
 
 ### BEFORE: Timer-Based Polling (500ms)
@@ -154,9 +168,20 @@ YubiKeyDeviceRepository ──diff──► DeviceEventHub (asynchronous fan-out
                           one bounded buffer (256) per watcher
                                         │
                                         ▼
-                             YubiKeyManager.WatchAsync(ct)
-                             (IAsyncEnumerable<DeviceEvent>)
+                              monitor.WatchAsync(ct)
+                              (IAsyncEnumerable<DeviceEvent>)
 ```
+
+On first `MoveNextAsync`, the repository captures membership and eagerly registers the hub subscription
+under the same short `_stateLock` used to publish membership and enqueue a complete diff. It then yields
+initial Added replay and ordered deltas outside that lock. Replay does not consume delta-buffer capacity;
+changes during replay still can overflow it. No consumer code runs on the publication path. Never prepend
+an independent snapshot to a lazy subscription: that loses changes between capture and registration.
+
+Cancellation or overflow terminates only one watcher. Overflow recovery clears the consumer projection
+and re-enumerates the same monitor to capture a new snapshot/tail boundary. An independent one-shot Find
+cannot safely resynchronize an unrelated event stream. See `YubiKeyMonitorTests` for gated race, large
+replay, cancellation, overflow, and disposal tests.
 
 ---
 
@@ -180,12 +205,12 @@ Listener hints are **not** queued and there is no `DeviceMonitorRescanRequest` p
 
 ## Generation (Epoch) Model
 
-Monitor lifecycle is an **epoch model**, not a state machine. Each `StartMonitoring` builds an
+The internal service lifecycle is an **epoch model**, not a public restartable state machine. Internal `StartMonitoring` builds an
 immutable `MonitorGeneration` bundling `{ Id, ScanGate, Signal, Cts }`, held in a single field
 `_current`. The loop and every `RescanAsync` capture that reference once; a generation's identity
 *is* that reference, so a torn gate/generation pair is not representable.
 
-- **Publication is gated, not coordinated.** All publications, from any generation, are mutually
+- **Scan publication is serialized.** All publications, from any generation, are mutually
   exclusive under the monitor service's single never-disposed `_publishGate`, held across the
   admission check and `UpdateCache`. This currently relies on `UpdateCache` publishing
   synchronously and finishing before it returns.
@@ -193,20 +218,28 @@ immutable `MonitorGeneration` bundling `{ Id, ScanGate, Signal, Cts }`, held in 
   only if its generation is still `_current` and the service is not disposed. A superseded
   generation can never publish — including a scan hung in native I/O that returns long after its
   generation was retired.
-- **Lifecycle never blocks on subscribers.** `StartMonitoring` / `StopMonitoring` / `DisposeAsync`
-  take only `_publishLock`, never `_publishGate`, so a device-event handler blocking inside
-  `UpdateCache` cannot wedge start, stop, or dispose.
+- **Consumers cannot block publication.** The hub only enqueues into independently buffered watchers,
+  without synchronous continuations. Internal start/stop transitions take `_publishLock`, not
+  `_publishGate`; bounded disposal can abandon a stalled publication without invoking any consumer.
 - **Nothing is disposed that anyone can still acquire.** Scan gates live inside their generation and
   are never disposed; abandoned generations are simply unreachable garbage. `DisposeAsync` drains
   `_publishGate` with the shutdown bound and, on timeout, warns and abandons — a publication already
-  in flight may therefore complete after `DisposeAsync` returns. The manager disposes the repository
-  afterwards, which silences any later emission. This is a documented contract, not an accident.
+  in flight may therefore finish after service teardown returns. The owned monitor closes public access
+  first, then disposes its repository in `finally` after bounded service teardown, rather than clearing
+  a live cache. A late diff cannot commit membership or events after owned disposal returns.
+
+Healthy watcher buffers can drain events published before disposal and then complete normally; new
+enumerations after disposal complete empty. `CurrentDevices` after disposal throws, while previously
+obtained lists retain historical membership. Disposal is idempotent and does not dispose caller-owned
+connections/sessions. Already-admitted native reads retain ownership until actual teardown. A later
+ordinary scan failure retains the previous publication and retries; unexpected terminal loop failure
+faults watchers and rejects cached access rather than leaving a frozen active-looking monitor.
 
 ## Key Improvements
 
 | Aspect | Before (Polling) | After (Event-Driven) |
 |--------|------------------|----------------------|
-| **Detection Latency** | Up to 500ms | ~5ms (HID) / 1000ms max (SmartCard) |
+| **Detection Latency** | Polling cadence plus discovery | Native hint plus coalescing/discovery; five-second fallback, not an end-to-end bound |
 | **CPU Usage (Idle)** | Constant polling | Near-zero (waiting on OS) |
 | **SmartCard Thread** | Task.Run (pool thread) | Dedicated background thread |
 | **HID Windows** | ❌ Not implemented | ✅ CM_Register_Notification |
@@ -241,7 +274,7 @@ INFINITE timeout (0xFFFFFFFF):
 │     // Returns after 1000ms even if no change                │
 │     // Loop checks _isListening flag                         │
 │     // Dispose() sets _isListening = false                   │
-│     // Thread exits within 1000ms guaranteed                 │
+│     // Bounded wait permits another stop check              │
 │ }                                                            │
 └──────────────────────────────────────────────────────────────┘
 
@@ -258,7 +291,8 @@ src/Core/src/
 │   ├── YubiKeyDeviceMonitorService.cs        ◄── Event-driven monitor loop
 │   ├── YubiKeyDeviceRepository.cs            ◄── Repository-diffed device events
 │   ├── DeviceEventHub.cs                     ◄── Asynchronous fan-out behind WatchAsync
-│   └── YubiKeyManager.cs                     ◄── Static public entry point
+│   ├── YubiKeyMonitor.cs                     ◄── Initialized public ownership and snapshots
+│   └── YubiKeyManager.cs                     ◄── One-shot Find and owned-monitor factory
 └── Transports/
     ├── SmartCard/
     │   ├── ISmartCardDeviceListener.cs       ◄── Listener interface

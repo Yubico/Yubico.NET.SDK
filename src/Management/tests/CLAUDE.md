@@ -15,6 +15,11 @@ For Management-specific test patterns, device filtering, and test state utilitie
 
 `ScopedDiscoveryReadinessTests` is hardware-free despite living beside the read-only hardware suite. It injects
 scan results and an allow list into that suite's actual reference-scan path, including metadata readiness retries.
+Complete serial-less bystanders are allowed; missing metadata on any view remains incomplete readiness.
+`OwnedMonitorReadOnlyTests` requires two attached allowed serial-bearing USB fixtures, asserts immediate
+initialized snapshots/replay and owned lifetimes, and performs sequential live reads only after monitor
+disposal. Use the explicit [read-only filter](../../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks),
+not a broad Management project run, for unattended discovery work. Attended hotplug acceptance is separate.
 
 ## Advanced Device Filtering
 

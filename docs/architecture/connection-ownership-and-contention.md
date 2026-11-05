@@ -56,7 +56,7 @@ that standalone records belong to one key, it does not guess. Each record then h
 scope, so protection degrades conservatively to per-interface exclusion. See
 [Device Discovery Guarantees](device-discovery-guarantees.md).
 
-The same bound applies to `YubiKeyManager.ScanAsync`: a scoped view deliberately knows only in-scope
+The same bound applies to `YubiKeyManager.Find…Async(interfaces: ...)`: a scoped view deliberately knows only in-scope
 members. Repeated scans and all/scoped views with any shared member ID exclude each other's connections
 in either acquisition order. Two disjoint views, such as SmartCard-only and FIDO-only, have **no shared
 claim**, even if they report the same serial or topology key. The registry does not register global
@@ -67,6 +67,13 @@ also per-interface: a scan can still probe an unclaimed sibling while a scoped c
 interface of that key. Pinned by
 `ScopedViews_OverlappingAllAndScopedConnectionsExcludeEachOtherInBothDirections` and
 `ScopedViews_DisjointMembersEvenWithSameSerial_HaveOnlyPerInterfaceExclusion` in `FindYubiKeysScopeTests`.
+
+An owned monitor has independent discovery evidence and scans All; a one-shot `interfaces` request neither
+pauses nor restricts it. Do not assume a monitor is a hardware broker for independent scoped/raw views.
+For explicit metadata comparisons over different interfaces, finish scans and dispose tracking before
+opening sequential live connections when sibling overlap cannot be ruled out. Disposing a monitor does
+not dispose application-owned sessions or connections; native work already admitted may retain its lease
+past bounded teardown until actual release. No late result can repopulate its disposed repository.
 
 ## One connection, one session
 

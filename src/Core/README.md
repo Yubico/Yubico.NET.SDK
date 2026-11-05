@@ -70,6 +70,10 @@ including successful empty discovery. Startup failure/cancellation cleans up the
 creation token does not control the monitor after successful creation. The initial interval is five seconds.
 There is no process-global monitoring lifetime or device cache.
 
+Share one host-owned monitor between long-lived components rather than letting each component take over
+tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a
+monitor for selection, but must explicitly read Management for current configuration.
+
 `YubiKeyMonitor.WatchAsync` now supplies initial `Added` events followed by ordered changes. On each
 enumeration's first `MoveNextAsync`, it captures membership and subscribes at the same boundary as a
 completed publication, so there is no snapshot/subscription gap. Initial replay does not occupy the
@@ -230,6 +234,10 @@ Subscription starts on first enumeration, atomically replaying current membershi
 Replace static Start/Stop/Watch/Shutdown calls with an owned monitor and `DisposeAsync`. Old `type` filters
 selected full-device results; the new `interfaces` restricts discovery, so retain All plus local filtering
 where later operations need composite connection slots. No compatibility aliases retain the old cache behavior.
+
+For two-key read-only validation of the public factory, replay, snapshots, lifetime, and metadata, see the
+[targeted discovery hardware checks](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+Those unattended tests do not satisfy the separate attended removal/reinsertion acceptance gate.
 
 ### Send raw APDUs
 

@@ -79,8 +79,8 @@ mappings:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDevice.Static.cs
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/IYubiKeyDevice.cs
       - yubikit:src/Core/
-    notes: Discovery, transport selection, and connection ownership must be reviewed at call sites.
-    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+    notes: "Review discovery, transport selection, and ownership at call sites. Every YubiKeyManager.Find…Async now performs fresh independent one-shot discovery; interfaces restricts enumeration/probes, not just results. Preserve All plus local filtering where later operations need composite slots. For tracking, await CreateMonitorAsync and own/dispose the returned YubiKeyMonitor: CurrentDevices is no-I/O membership and WatchAsync supplies atomic initial Added replay plus ordered changes. No process-global cache or static monitoring lifecycle remains. CachedDeviceInfo is optional last-known metadata; Management remains the live-read API."
+    last_reviewed_commit: 7c534e8b7b8ad8cf53b964f972cd9a45e9ebd857
   - id: hid-listener-rescan-hints
     status: manual
     confidence: high
@@ -98,8 +98,9 @@ mappings:
       - yubikit:src/Core/src/Devices/YubiKeyDeviceRepository.cs
       - yubikit:src/Core/src/Devices/YubiKeyManager.cs
       - yubikit:src/Core/src/Devices/DeviceEventHub.cs
-    notes: V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> events with per-HID-device payloads, while v1 device-level consumers used YubiKeyDeviceListener.Arrived/Removed and YubiKeyDevice.FindAll() over the listener cache. V2 low-level HID DeviceEvent is only a diagnostic rescan hint (HidDeviceChangeKind plus optional platform id/path), not public physical-device truth. Use YubiKeyManager.WatchAsync(cancellationToken) (IAsyncEnumerable<DeviceEvent>) for repository-diffed Added/Removed events after YubiKeyDeviceRepository.UpdateCache. WatchAsync is the only device-change stream: the earlier IObservable<DeviceEvent> DeviceChanges property was removed outright with no shim, and the System.Reactive dependency is gone. Each enumeration is an independent watcher with its own bounded buffer, so filtering that used Rx operators such as Where becomes an if inside the await foreach.
-    last_reviewed_commit: c3b7e206fd900413cf0a64b0efa75badbe71fd49
+      - yubikit:src/Core/src/Devices/YubiKeyMonitor.cs
+    notes: V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> events with per-HID-device payloads, while v1 device-level consumers used YubiKeyDeviceListener.Arrived/Removed and YubiKeyDevice.FindAll() over the listener cache. V2 low-level HID DeviceEvent is only a diagnostic rescan hint (HidDeviceChangeKind plus optional platform id/path), not public physical-device truth. Await YubiKeyManager.CreateMonitorAsync, then consume the owned YubiKeyMonitor.WatchAsync(cancellationToken) (IAsyncEnumerable<DeviceEvent>) for initial Added replay plus repository-diffed changes. Snapshot capture and subscription are atomic on first enumeration. WatchAsync is the only device-change stream; the earlier IObservable DeviceChanges and System.Reactive dependency were removed without a shim. Each watcher has an independent bounded delta buffer; overflow faults only that watcher. Clear its projection and re-enumerate the same monitor to recover. Dispose the monitor with await using; cancellation affects only a subscription. Rx Where becomes an if inside await foreach.
+    last_reviewed_commit: 7c534e8b7b8ad8cf53b964f972cd9a45e9ebd857
   - id: hid-usage-page-to-interface-type
     status: assisted
     confidence: high
@@ -304,14 +305,15 @@ mappings:
     confidence: high
     migration_kind: member
     v1: IYubiKeyDevice.SerialNumber / IYubiKeyDevice.FirmwareVersion and related device metadata
-    v2: IYubiKey.CreateManagementSessionAsync(...).GetDeviceInfoAsync(...)
+    v2: IYubiKey.CachedDeviceInfo for last-known metadata; ManagementSession.GetDeviceInfoAsync(...) for live reads
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/IYubiKeyDevice.cs
       - yubikit:src/Management/src/IYubiKeyExtensions.cs
       - yubikit:src/Management/src/IManagementSession.cs
       - yubikit:src/Management/examples/ManagementTool/Commands/InfoCommand.cs
-    notes: Use Management for rich metadata and capability state; v1 FirmwareVersion usually maps to DeviceInfo.FirmwareVersion for comparisons and DeviceInfo.VersionName for display. Configuration-changing Management calls remain manual-review because they can persistently modify or reboot the device.
-    last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
+      - yubikit:src/Core/src/Abstractions/IYubiKey.cs
+    notes: Use Core IYubiKey.CachedDeviceInfo for optional last-known metadata without I/O, or Management for live metadata and capability state; a live read does not promise to update discovery metadata. V1 FirmwareVersion usually maps to DeviceInfo.FirmwareVersion for comparisons and DeviceInfo.VersionName for display. Configuration-changing Management calls remain manual-review because they can persistently modify or reboot the device.
+    last_reviewed_commit: 7c534e8b7b8ad8cf53b964f972cd9a45e9ebd857
   - id: recipe-piv-generate-key
     status: manual
     confidence: medium
@@ -551,7 +553,7 @@ mappings:
       - yubikit:src/Core/src/Abstractions/IYubiKey.cs
       - yubikit:src/Core/src/Abstractions/DeviceCorrelation.cs
       - yubikit:docs/architecture/device-identity.md
-    notes: Additive default-interface members on the public IYubiKey; existing implementers still compile unchanged. SerialNumber is null until a discovery metadata read succeeds (and possibly forever - reads can fail persistently, and whole device classes such as the Security Key series report no serial at all); once non-null it never reverts to null. SameDeviceAs evaluates reference identity first, then compares known serials, returning Unknown (not a guess) when either side's serial is unknown - this is a three-valued correlation, not a total equality predicate, and must not be coerced to true/false for deduplication. This complements, not replaces, `recipe-management-device-info`: the Management session path remains the source for FirmwareVersion and the rest of DeviceInfo.
+    notes: Additive default-interface members on the public IYubiKey; existing implementers still compile unchanged. SerialNumber is null until a discovery metadata read succeeds (and possibly forever - reads can fail persistently, and whole device classes such as the Security Key series report no serial at all); once non-null it never reverts to null. SameDeviceAs evaluates reference identity first, then compares known serials, returning Unknown (not a guess) when either side's serial is unknown - this is a three-valued correlation, not a total equality predicate, and must not be coerced to true/false for deduplication. This complements, not replaces, recipe-management-device-info. Core CachedDeviceInfo now exposes optional last-known metadata; Management remains the live source for firmware/configuration. The serial latch remains independent of metadata replacement.
     last_reviewed_commit: 277920d9de48d4aedad7ecc5d00201a015b5a297
   - id: webauthn-client-construction-and-streams
     status: assisted
@@ -596,14 +598,14 @@ mappings:
     confidence: high
     migration_kind: member
     v1: YubiKeyDevice.FindAll().First() / YubiKeyDevice.FindByTransport(...).First()
-    v2: YubiKeyManager.FindFirstAsync(predicate, cancellationToken) / YubiKeyManager.FindFirstOrDefaultAsync(predicate, cancellationToken)
+    v2: YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken) / YubiKeyManager.FindFirstOrDefaultAsync(predicate, interfaces, cancellationToken)
     evidence:
       - yubikit:src/Core/src/Devices/YubiKeyManager.cs
-      - yubikit:src/Core/src/Devices/YubiKeyDeviceManager.cs
-      - yubikit:src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceManagerTests.cs
+      - yubikit:src/Core/src/Devices/FindYubiKeys.cs
+      - yubikit:src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs
       - yubikit:docs/usage/device-discovery.md
-    notes: "`feat(core): add first-key discovery helpers` (`6cb3875f`) adds a one-shot convenience over `FindAllAsync` for the common single-device case. `FindFirstAsync(predicate, cancellationToken)` returns the first matching `IYubiKey` or throws `InvalidOperationException` when none match; `FindFirstOrDefaultAsync(predicate, cancellationToken)` returns `null` instead of throwing. Both are one-shot queries over `FindAllAsync`: they do not wait for insertion, discovery ordering is not stable, and they inherit `FindAllAsync`'s caching (a cached result can complete without observing cancellation) and exception-propagation behavior. This supersedes the `devices.First()` / `FindAllAsync(...).First()` idiom shown in `recipe-device-discovery-find-by-transport` and the Common Migration Recipes' Device Discovery and Device Info examples for the common single-device case; `FindAllAsync` remains the entry point for enumerating every connected key or applying explicit `ConnectionType`/`forceRescan` control."
-    last_reviewed_commit: 0501f516e7877188e6d8977cc799f04a837cffed
+    notes: "FindFirstAsync returns the first matching IYubiKey or throws InvalidOperationException; FindFirstOrDefaultAsync returns null for no match. Both perform exactly one independent fresh FindAllAsync operation with the same interfaces scope, cancellation, and exception propagation; they never wait for insertion or use stable ordering. Predicates are optional and execute outside publication locks. Required-token forwarding overloads retain established call forms, not another discovery mode. This supersedes the devices.First() idiom for single-device callers. Remove forceRescan and ScanAsync from earlier v2 prerelease code; use FindAllAsync for fresh enumeration and an owned monitor's CurrentDevices for cached membership."
+    last_reviewed_commit: 7c534e8b7b8ad8cf53b964f972cd9a45e9ebd857
   - id: security-domain-openpgp-key-info-rename
     status: automatic
     confidence: high

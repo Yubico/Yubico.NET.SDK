@@ -40,11 +40,14 @@ That's the cost, and we think the smaller surface is worth it.
 
 ### Device discovery, events, and ownership
 
-- `YubiKeyManager.WatchAsync` is now the only public device-change stream,
+- An owned `YubiKeyMonitor.WatchAsync` is the only public device-change stream,
   replacing the earlier v2 `DeviceChanges`/`System.Reactive` surface with
   `IAsyncEnumerable<DeviceEvent>`. Each watcher has an independent bounded
-  buffer. Overflow faults that watcher rather than silently dropping a delta;
-  resynchronise with `FindAllAsync` and start watching again.
+  buffer and atomic initial Added replay. Overflow faults that watcher rather than
+  silently dropping a delta; clear its projection and re-enumerate the same monitor.
+  Await `YubiKeyManager.CreateMonitorAsync` for initialized tracking and dispose that
+  lifetime with `await using`. `CurrentDevices` is no-I/O membership; all Find
+  conveniences instead perform fresh independent discovery, scoped by `interfaces`.
 - Discovery models a physical key as one `IYubiKey` when evidence supports
   grouping its interfaces. `SerialNumber` and tri-state `SameDeviceAs`
   (`Same`, `Different`, or `Unknown`) support correlation. Ambiguous evidence

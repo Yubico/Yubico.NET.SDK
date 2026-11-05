@@ -107,6 +107,7 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         var first = await ReferenceScanAsync(timeout.Token); // Omitted scope exercises the public default.
+        Skip.If(first.Count == 0, "No authorized serial-bearing USB fixture found.");
         var snapshots = first.Select(view => view.CachedDeviceInfo).ToList();
         var second = Authorized(await ScanUntilReadyAsync(ConnectionType.All, scan =>
             ConnectionsBySerial(Authorized(scan)).OrderBy(pair => pair.Key)
@@ -131,9 +132,9 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
     internal async Task<IReadOnlyList<IYubiKey>> ReferenceScanAsync(
         CancellationToken token, Func<Task<IReadOnlyList<IYubiKey>>>? scanAsync = null)
     {
-        var reference = Authorized(await ScanUntilReadyAsync(null, _ => true, token, scanAsync));
-        Assert.NotEmpty(reference);
-        return reference;
+        // Validate every view before filtering; callers decide whether absent authorized fixtures
+        // mean a skip (scoped tests) or a failed two-key prerequisite (owned-monitor tests).
+        return Authorized(await ScanUntilReadyAsync(null, _ => true, token, scanAsync));
     }
 
     internal IReadOnlyList<IYubiKey> Authorized(IReadOnlyList<IYubiKey> scan) =>

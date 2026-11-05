@@ -24,6 +24,26 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 public class ScopedDiscoveryReadinessTests(ITestOutputHelper output)
 {
     private const int AuthorizedSerial = 12345678;
+    private const int NonallowlistedSerial = 87654321;
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(NonallowlistedSerial)]
+    public async Task ReferenceScanAsync_OnlyCompleteNonallowlistedDevice_ReturnsEmptyForCallerPrerequisite(int? serial)
+    {
+        var bystander = new ScanView("bystander", serial, Metadata(serial));
+        var suite = new ScopedDiscoveryReadOnlyTests(output, new AllowList(new FixtureAllowListProvider()));
+        var attempts = 0;
+
+        var reference = await suite.ReferenceScanAsync(CancellationToken.None, () =>
+        {
+            attempts++;
+            return Task.FromResult<IReadOnlyList<IYubiKey>>([bystander]);
+        });
+
+        Assert.Empty(reference);
+        Assert.Equal(1, attempts);
+    }
 
     [Fact]
     public async Task ReferenceScanAsync_MetadataCompleteSeriallessDevice_ReturnsOnlyAuthorizedFixture()
@@ -46,6 +66,7 @@ public class ScopedDiscoveryReadinessTests(ITestOutputHelper output)
     [Theory]
     [InlineData(null)]
     [InlineData(AuthorizedSerial)]
+    [InlineData(NonallowlistedSerial)]
     public async Task ReferenceScanAsync_ViewWithoutMetadata_ExhaustsReadinessRetries(int? incompleteSerial)
     {
         var fixture = new ScanView("authorized", AuthorizedSerial, Metadata(AuthorizedSerial));
@@ -61,6 +82,25 @@ public class ScopedDiscoveryReadinessTests(ITestOutputHelper output)
 
         Assert.Equal(3, attempts);
         Assert.Contains("missing expected interfaces after three scans", failure.Message);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(NonallowlistedSerial)]
+    public async Task ReferenceScanAsync_OnlyNonallowlistedDeviceWithoutMetadata_FailsBeforeCallerPrerequisite(int? serial)
+    {
+        var incomplete = new ScanView("incomplete", serial, null);
+        var suite = new ScopedDiscoveryReadOnlyTests(output, new AllowList(new FixtureAllowListProvider()));
+        var attempts = 0;
+
+        var failure = await Assert.ThrowsAsync<FailException>(() => suite.ReferenceScanAsync(CancellationToken.None, () =>
+        {
+            attempts++;
+            return Task.FromResult<IReadOnlyList<IYubiKey>>([incomplete]);
+        }));
+
+        Assert.Equal(3, attempts);
+        Assert.Contains("Incomplete metadata", failure.Message);
     }
 
     private static DeviceInfo Metadata(int? serial) =>

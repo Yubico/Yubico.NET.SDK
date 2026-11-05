@@ -160,6 +160,16 @@ Do not substitute `device.CachedDeviceInfo?.SerialNumber` for it.
 For applications that need to react to device connections and disconnections. The SDK has **no
 reactive dependency** — both surfaces below use BCL types only.
 
+> **Owned-monitor migration:** the examples here still use the legacy static, change-only API.
+> `YubiKeyMonitor` now provides initial `Added` replay plus ordered deltas, but its initialized factory
+> remains internal until the public API/consumer migration. Each enumeration's first `MoveNextAsync`
+> captures membership and registers for changes at one complete-publication boundary. Initial membership
+> does not occupy its independent 256-event delta buffer; incoming changes during replay can overflow it.
+> To recover, **clear the consumer's projection and re-enumerate `WatchAsync` on the same monitor**.
+> Do not use a separate snapshot/discovery call followed by subscription as a race-free substitute.
+> Cancellation/overflow are subscriber-local; disposal drains captured replay and published deltas, while
+> new enumerations after disposal complete empty. The static examples below do not acquire replay semantics.
+
 ### `await foreach` (recommended)
 
 ```csharp
@@ -213,7 +223,7 @@ catch (OperationCanceledException) when (cts.IsCancellationRequested)
 }
 ```
 
-Each enumeration of `WatchAsync` gets its own independent buffer, so several watchers can run
+Each enumeration of the legacy static `WatchAsync` gets its own independent buffer, so several watchers can run
 concurrently without interfering. If a new event arrives while a consumer's 256-event buffer is
 full, its stream ends with an `InvalidOperationException` rather than silently dropping events —
 resynchronise with `FindAllAsync` and re-enumerate. Because `DeviceEvent` is a delta rather than a

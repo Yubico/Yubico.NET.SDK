@@ -27,6 +27,343 @@ public class YubiKeyMonitorTests
     private static CancellationToken TestToken => TestContext.Current.CancellationToken;
 
     [Fact]
+    public async Task WatchAsync_IsLazy_AndEachEnumerationReplaysItsOwnSnapshotThenOrderedDeltas()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        var first = new FakeYubiKey("first");
+        var second = new FakeYubiKey("second");
+        var third = new FakeYubiKey("third");
+        fixture.Repository.UpdateCache([first]);
+        var stream = monitor.WatchAsync(TestToken);
+        await using var early = stream.GetAsyncEnumerator(TestToken);
+        Assert.Equal(0, fixture.Repository.WatcherCount);
+
+        fixture.Repository.UpdateCache([second]);
+        var initial = early.MoveNextAsync().AsTask();
+        fixture.Repository.UpdateCache([third]);
+        await using var late = stream.GetAsyncEnumerator(TestToken);
+        var lateInitial = late.MoveNextAsync().AsTask();
+        await monitor.DisposeAsync();
+
+        Assert.True(await initial.WaitAsync(Bound, TestToken));
+        AssertChange(early.Current, DeviceAction.Added, second);
+        Assert.True(await early.MoveNextAsync());
+        AssertChange(early.Current, DeviceAction.Removed, second);
+        Assert.True(await early.MoveNextAsync());
+        AssertChange(early.Current, DeviceAction.Added, third);
+        Assert.False(await early.MoveNextAsync());
+        Assert.True(await lateInitial.WaitAsync(Bound, TestToken));
+        AssertChange(late.Current, DeviceAction.Added, third);
+        Assert.False(await late.MoveNextAsync());
+        Assert.Equal(1, fixture.Finder.ScanCount);
+    }
+
+    [Fact]
+    public async Task WatchAsync_DuringParkedDiff_CapturesPreviousPublicationAndItsCompleteTail()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        using var release = new ManualResetEventSlim();
+        var removed = new BlockingIdentityKey();
+        var added = new FakeYubiKey("added");
+        fixture.Repository.UpdateCache([removed]);
+        var diffReached = Signal();
+        removed.OnIdRead = () =>
+        {
+            diffReached.TrySetResult();
+            Assert.True(release.Wait(Bound, TestToken));
+        };
+        var publication = Task.Run(() => fixture.Repository.UpdateCache([added]), TestToken);
+        try
+        {
+            await diffReached.Task.WaitAsync(Bound, TestToken);
+            await using var watcher = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+            var initial = watcher.MoveNextAsync();
+            // Snapshot capture must not wait for a diff parked in a device getter/logger.
+            Assert.True(initial.IsCompletedSuccessfully);
+            Assert.True(await initial);
+            AssertChange(watcher.Current, DeviceAction.Added, removed);
+            Assert.Equal(1, fixture.Repository.WatcherCount);
+            Assert.Same(removed, Assert.Single(monitor.CurrentDevices));
+            release.Set();
+            await publication.WaitAsync(Bound, TestToken);
+            await monitor.DisposeAsync();
+
+            Assert.True(await watcher.MoveNextAsync());
+            AssertChange(watcher.Current, DeviceAction.Removed, removed);
+            Assert.True(await watcher.MoveNextAsync());
+            AssertChange(watcher.Current, DeviceAction.Added, added);
+            Assert.False(await watcher.MoveNextAsync());
+        }
+        finally
+        {
+            release.Set();
+            // The diff still owns the fake's gate even if an assertion or runner cancellation fires.
+            await publication.WaitAsync(Bound, CancellationToken.None);
+        }
+    }
+
+    [Fact]
+    public async Task WatchAsync_LargeInitialSnapshot_DoesNotUseTheBoundedDeltaBuffer()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        IYubiKey[] devices = [.. Enumerable.Range(0, DeviceEventHub.WatcherBufferCapacity + 50)
+            .Select(i => new FakeYubiKey($"initial-{i}"))];
+        fixture.Repository.UpdateCache(devices);
+        await using var watcher = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        Assert.True(await watcher.MoveNextAsync());
+        var initial = new HashSet<IYubiKey> { watcher.Current.Device };
+        Assert.Equal(DeviceAction.Added, watcher.Current.Action);
+        // A later publication queues a delta while the consumer is still replaying initial membership.
+        var added = new FakeYubiKey("delta");
+        fixture.Repository.UpdateCache([.. devices, added]);
+        await monitor.DisposeAsync();
+
+        for (var i = 1; i < devices.Length; i++)
+        {
+            Assert.True(await watcher.MoveNextAsync());
+            Assert.Equal(DeviceAction.Added, watcher.Current.Action);
+            Assert.True(initial.Add(watcher.Current.Device), "duplicate initial device");
+        }
+        Assert.True(initial.SetEquals(devices));
+        Assert.True(await watcher.MoveNextAsync());
+        AssertChange(watcher.Current, DeviceAction.Added, added);
+        Assert.False(await watcher.MoveNextAsync());
+    }
+
+    [Fact]
+    public async Task WatchAsync_ChangedConnections_RemovesTheReplayedObjectBeforeAddingItsReplacement()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        var first = new FakeYubiKey("same-interface", ConnectionType.SmartCard);
+        var replacement = new FakeYubiKey("same-interface", ConnectionType.SmartCard | ConnectionType.HidFido);
+        fixture.Repository.UpdateCache([first]);
+        await using var watcher = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        Assert.True(await watcher.MoveNextAsync());
+        AssertChange(watcher.Current, DeviceAction.Added, first);
+        fixture.Repository.UpdateCache([replacement]);
+        Assert.Same(replacement, Assert.Single(monitor.CurrentDevices));
+        await monitor.DisposeAsync();
+
+        Assert.True(await watcher.MoveNextAsync());
+        AssertChange(watcher.Current, DeviceAction.Removed, first);
+        Assert.True(await watcher.MoveNextAsync());
+        AssertChange(watcher.Current, DeviceAction.Added, replacement);
+        Assert.False(await watcher.MoveNextAsync());
+    }
+
+    [Fact]
+    public async Task WatchAsync_CancelingDuringInitialReplay_UnsubscribesOnlyThatEnumeration()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        fixture.Repository.UpdateCache([new FakeYubiKey("first"), new FakeYubiKey("second")]);
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestToken);
+        await using var canceled = monitor.WatchAsync(cancellation.Token).GetAsyncEnumerator(cancellation.Token);
+        await using var healthy = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        Assert.True(await canceled.MoveNextAsync());
+        Assert.True(await healthy.MoveNextAsync());
+        Assert.Equal(2, fixture.Repository.WatcherCount);
+        await cancellation.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => canceled.MoveNextAsync().AsTask());
+        Assert.Equal(1, fixture.Repository.WatcherCount);
+        var added = new FakeYubiKey("after-cancellation");
+        fixture.Repository.UpdateCache([.. monitor.CurrentDevices, added]);
+        Assert.True(await healthy.MoveNextAsync());
+        Assert.True(await healthy.MoveNextAsync());
+        AssertChange(healthy.Current, DeviceAction.Added, added);
+        Assert.True(fixture.Service.IsMonitoring);
+    }
+
+    [Fact]
+    public async Task WatchAsync_OverflowDuringReplay_IsIsolated_AndSameMonitorCanRebuildProjection()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        var first = new FakeYubiKey("first");
+        fixture.Repository.UpdateCache([first, new FakeYubiKey("second")]);
+        var stream = monitor.WatchAsync(TestToken);
+        await using var stalled = stream.GetAsyncEnumerator(TestToken);
+        Assert.True(await stalled.MoveNextAsync());
+        await using var healthy = await DeviceEventWatcher.StartAsync(
+            monitor.WatchAsync, () => fixture.Repository.WatcherCount, TestToken);
+        await healthy.WaitForCountAsync(2, "healthy initial replay missing", TestToken);
+
+        var projection = new HashSet<IYubiKey> { stalled.Current.Device };
+        for (var i = 0; i <= DeviceEventHub.WatcherBufferCapacity / 2; i++)
+        {
+            fixture.Repository.UpdateCache([first, new FakeYubiKey($"replacement-{i}")]);
+            await healthy.WaitForCountAsync(2 + (2 * (i + 1)), "healthy subscriber lost a delta", TestToken);
+        }
+
+        var overflow = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            while (await stalled.MoveNextAsync())
+                Apply(projection, stalled.Current);
+        });
+        Assert.Contains("clear", overflow.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("same monitor", overflow.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("FindAllAsync", overflow.Message, StringComparison.Ordinal);
+        Assert.Equal(1, fixture.Repository.WatcherCount);
+        Assert.False(healthy.Completion.IsCompleted);
+
+        // Recovery deliberately discards stale state and reuses the same monitor, not one-shot discovery.
+        projection.Clear();
+        await using var recovered = stream.GetAsyncEnumerator(TestToken);
+        Assert.True(await recovered.MoveNextAsync());
+        Apply(projection, recovered.Current);
+        var expected = monitor.CurrentDevices;
+        var afterRecovery = new FakeYubiKey("after-recovery");
+        fixture.Repository.UpdateCache([.. expected, afterRecovery]);
+        await monitor.DisposeAsync();
+        while (await recovered.MoveNextAsync())
+            Apply(projection, recovered.Current);
+        Assert.True(projection.SetEquals([.. expected, afterRecovery]));
+        await healthy.Completion.WaitAsync(Bound, TestToken);
+        Assert.Equal(1, fixture.Finder.ScanCount);
+    }
+
+    [Fact]
+    public async Task WatchAsync_DisposalDrainsCapturedReplayAndPublishedTail_ButUnstartedEnumerationIsEmpty()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        var first = new FakeYubiKey("first");
+        var second = new FakeYubiKey("second");
+        var added = new FakeYubiKey("added");
+        fixture.Repository.UpdateCache([first, second]);
+        var stream = monitor.WatchAsync(TestToken);
+        await using var started = stream.GetAsyncEnumerator(TestToken);
+        await using var unstarted = stream.GetAsyncEnumerator(TestToken);
+        Assert.True(await started.MoveNextAsync());
+        var projection = new HashSet<IYubiKey> { started.Current.Device };
+        fixture.Repository.UpdateCache([second, added]);
+        await monitor.DisposeAsync();
+
+        while (await started.MoveNextAsync())
+            Apply(projection, started.Current);
+        Assert.True(projection.SetEquals([second, added]));
+        Assert.False(await unstarted.MoveNextAsync());
+        await using var afterDisposal = stream.GetAsyncEnumerator(TestToken);
+        Assert.False(await afterDisposal.MoveNextAsync());
+        Assert.Equal(0, fixture.Repository.WatcherCount);
+    }
+
+    [Fact]
+    public async Task WatchAsync_PausedReplay_DoesNotHoldThePublicationOrDisposalBoundary()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        var first = new FakeYubiKey("first");
+        var second = new FakeYubiKey("second");
+        var added = new FakeYubiKey("added");
+        fixture.Repository.UpdateCache([first, second]);
+        await using var watcher = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        Assert.True(await watcher.MoveNextAsync());
+
+        // A different thread must be able to publish/dispose while the consumer holds its first item.
+        await Task.Run(() => fixture.Repository.UpdateCache([second, added]), TestToken).WaitAsync(Bound, TestToken);
+        await Task.Run(async () => await monitor.DisposeAsync(), TestToken).WaitAsync(Bound, TestToken);
+        var projection = new HashSet<IYubiKey> { watcher.Current.Device };
+        while (await watcher.MoveNextAsync())
+            Apply(projection, watcher.Current);
+        Assert.True(projection.SetEquals([second, added]));
+    }
+
+    [Fact]
+    public async Task WatchAsync_StartedDuringMonitorTeardown_DoesNotReplayTheStillRetainedRepository()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        fixture.Repository.UpdateCache([new FakeYubiKey("historical")]);
+        var entered = Signal();
+        var release = Signal();
+        monitor.RepositoryTeardownReachedForTest = async () =>
+        {
+            entered.TrySetResult();
+            await release.Task.WaitAsync(TestToken);
+        };
+        var disposal = monitor.DisposeAsync().AsTask();
+        try
+        {
+            await entered.Task.WaitAsync(Bound, TestToken);
+            Assert.Single(fixture.Repository.GetAll());
+            await using var watcher = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+            Assert.False(await watcher.MoveNextAsync());
+            Assert.Equal(0, fixture.Repository.WatcherCount);
+        }
+        finally
+        {
+            release.TrySetResult();
+            await disposal.WaitAsync(Bound, TestToken);
+        }
+    }
+
+    [Fact]
+    public async Task WatchAsync_TerminalFailure_DrainsCapturedHistoryButFutureEnumerationDoesNotReplay()
+    {
+        await using var fixture = new MonitorFixture();
+        await using var monitor = await fixture.CreateAsync(TestToken);
+        var first = new FakeYubiKey("first");
+        var second = new FakeYubiKey("second");
+        var added = new FakeYubiKey("added");
+        fixture.Repository.UpdateCache([first, second]);
+        await using var active = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        Assert.True(await active.MoveNextAsync());
+        var projection = new HashSet<IYubiKey> { active.Current.Device };
+        fixture.Repository.UpdateCache([second, added]);
+        var failure = new IOException("terminal failure");
+        fixture.Repository.Fail(failure);
+
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            while (await active.MoveNextAsync())
+                Apply(projection, active.Current);
+        });
+        Assert.Same(failure, actual.InnerException);
+        Assert.True(projection.SetEquals([second, added]));
+        Assert.Same(failure, Assert.Throws<InvalidOperationException>(() => monitor.CurrentDevices).InnerException);
+        await using var future = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        var futureError = await Assert.ThrowsAsync<InvalidOperationException>(() => future.MoveNextAsync().AsTask());
+        Assert.Same(failure, futureError.InnerException);
+        await monitor.DisposeAsync();
+        await using var afterDisposal = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        Assert.False(await afterDisposal.MoveNextAsync());
+    }
+
+    private static void AssertChange(DeviceEvent change, DeviceAction action, IYubiKey device)
+    {
+        Assert.Equal(action, change.Action);
+        Assert.Same(device, change.Device);
+    }
+
+    private static void Apply(HashSet<IYubiKey> projection, DeviceEvent change)
+    {
+        Assert.True(change.Action == DeviceAction.Added
+            ? projection.Add(change.Device)
+            : projection.Remove(change.Device), "duplicate arrival or unpaired removal");
+    }
+
+    private sealed class BlockingIdentityKey : IYubiKey
+    {
+        public Action? OnIdRead { get; set; }
+        public string DeviceId
+        {
+            get
+            {
+                OnIdRead?.Invoke();
+                return "removed";
+            }
+        }
+        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection => throw new NotSupportedException();
+    }
+
+    [Fact]
     public async Task CreateAsync_WaitsForFirstLoopPublication_WithoutDuplicateInitialScan()
     {
         var fixture = new MonitorFixture();
@@ -269,20 +606,22 @@ public class YubiKeyMonitorTests
         await using var monitor = await fixture.CreateAsync(TestToken);
         await using var watcher = await DeviceEventWatcher.StartAsync(
             monitor.WatchAsync, () => fixture.Repository.WatcherCount, TestToken);
+        await watcher.WaitForCountAsync(1, "initial membership was not replayed", TestToken);
         fixture.Finder.Scan = _ => throw new IOException("transient scan failure");
         fixture.SmartCard.Raise();
         await afterFailure.Task.WaitAsync(Bound, TestToken);
 
         Assert.Same(first, Assert.Single(monitor.CurrentDevices));
-        Assert.Empty(watcher.Events);
+        AssertChange(Assert.Single(watcher.Events), DeviceAction.Added, first);
         var second = new FakeYubiKey("second");
         fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([second]);
         fixture.SmartCard.Raise();
-        await watcher.WaitForCountAsync(2, "monitor did not recover from a failed scan", TestToken);
+        await watcher.WaitForCountAsync(3, "monitor did not recover from a failed scan", TestToken);
         await afterRetry.Task.WaitAsync(Bound, TestToken);
         Assert.Same(second, Assert.Single(monitor.CurrentDevices));
         Assert.Equal(3, fixture.Finder.ScanCount);
         Assert.Collection(watcher.Events,
+            change => AssertChange(change, DeviceAction.Added, first),
             change =>
             {
                 Assert.Equal(DeviceAction.Removed, change.Action);

@@ -80,7 +80,8 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     /// </summary>
     /// <param name="cancellationToken">Stops this enumeration.</param>
     public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
-        _monitor.WatchAsync(cancellationToken);
+        // Keep the legacy global change-only contract until the Stage 3 facade migration.
+        Repository.WatchAsync(cancellationToken);
 
     /// <summary>
     /// Gets a value indicating whether device monitoring is currently active.

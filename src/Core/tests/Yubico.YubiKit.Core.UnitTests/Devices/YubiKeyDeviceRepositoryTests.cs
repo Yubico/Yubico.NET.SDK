@@ -27,6 +27,29 @@ public class YubiKeyDeviceRepositoryTests
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(30);
 
     [Fact]
+    public async Task UpdateCache_FailedDiff_DoesNotPublishPartialDeltasOrChangeTheNextDiffBase()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var removed = new BlockingIdentityKey();
+        var added = new FakeYubiKey("added");
+        repository.UpdateCache([removed]);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
+        var failure = new IOException("device getter failed during diff");
+        removed.OnIdRead = () => throw failure;
+
+        Assert.Same(failure, Assert.Throws<IOException>(() => repository.UpdateCache([added])));
+        Assert.Same(removed, Assert.Single(repository.GetAll()));
+        removed.OnIdRead = null;
+        Assert.Empty(await watcher.DrainAsync(repository, TestContext.Current.CancellationToken));
+
+        repository.UpdateCache([added]);
+        repository.Dispose();
+        await watcher.Completion.WaitAsync(Bound, TestContext.Current.CancellationToken);
+        Assert.Single(watcher.Events, change => change.Action == DeviceAction.Removed && ReferenceEquals(change.Device, removed));
+        Assert.Single(watcher.Events, change => change.Action == DeviceAction.Added && ReferenceEquals(change.Device, added));
+    }
+
+    [Fact]
     public async Task GetAll_DuringPartialDiff_ReturnsOnlyTheLastCompletedMembership()
     {
         using var repository = new YubiKeyDeviceRepository();
@@ -42,8 +65,8 @@ public class YubiKeyDeviceRepositoryTests
             Assert.True(release.Wait(Bound, TestContext.Current.CancellationToken));
         };
 
-        // Park after the dictionary removal, before additions. Cached reads must neither wait on this
-        // diff nor expose its transient membership. No monitor/subscription boundary is involved here.
+        // Park while staging a removal, before additions. Cached reads must neither wait on this
+        // diff nor expose uncommitted membership. No monitor/subscription boundary is involved here.
         var publication = Task.Run(() => repository.UpdateCache([retained, added]), TestContext.Current.CancellationToken);
         try
         {
@@ -73,6 +96,7 @@ public class YubiKeyDeviceRepositoryTests
         using var release = new ManualResetEventSlim();
         var removed = new BlockingIdentityKey();
         repository.UpdateCache([removed]);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
         var removalReached = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         removed.OnIdRead = () =>
         {
@@ -86,6 +110,8 @@ public class YubiKeyDeviceRepositoryTests
             await removalReached.Task.WaitAsync(Bound, TestContext.Current.CancellationToken);
             disposal = Task.Run(repository.Dispose, TestContext.Current.CancellationToken);
             await disposal.WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+            await watcher.Completion.WaitAsync(Bound, TestContext.Current.CancellationToken);
+            Assert.Empty(watcher.Events); // A partially staged diff is not published history to drain.
             release.Set();
             await Assert.ThrowsAsync<ObjectDisposedException>(() => publication.WaitAsync(Bound, TestContext.Current.CancellationToken));
             Assert.False(repository.HasData);

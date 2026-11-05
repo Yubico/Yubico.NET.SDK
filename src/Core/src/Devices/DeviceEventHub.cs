@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
@@ -20,7 +19,7 @@ namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
 /// Asynchronous fan-out of <see cref="DeviceEvent"/>s to <c>await foreach</c> consumers: the single
-/// delivery path behind <see cref="YubiKeyManager.WatchAsync"/>.
+/// delivery path behind <see cref="YubiKeyManager.WatchAsync"/> and <see cref="YubiKeyMonitor.WatchAsync"/>.
 /// </summary>
 /// <remarks>
 /// <para><strong>The publisher is never handed to a consumer.</strong> <see cref="Publish"/> only writes
@@ -35,8 +34,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// is subscribed until the first <c>MoveNextAsync</c>. Events raised between calling it and entering the
 /// loop are not observed.</para>
 /// <para><strong>Overflow faults instead of dropping.</strong> Device events are deltas, so a consumer
-/// that falls behind must resynchronize via <c>YubiKeyManager.FindAllAsync</c> rather than silently
-/// carry on with a hole in its view.</para>
+/// that falls behind must rebuild its view rather than silently carry on with a hole in it. Owned
+/// monitor watchers clear their projection and re-enumerate the same monitor's replay stream.</para>
 /// <para><strong>Thread safety:</strong> all members are safe for concurrent use. <see cref="Publish"/>
 /// is lock-free: it reads an immutable snapshot of the watcher list, so subscribing or unsubscribing
 /// cannot disturb an in-flight publication. Mutations take a short lock and swap in a new array
@@ -51,12 +50,10 @@ internal sealed class DeviceEventHub
     /// <summary>Per-watcher buffer depth.</summary>
     internal const int WatcherBufferCapacity = 256;
 
-    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DeviceEventHub>();
-
     private readonly Lock _gate = new();
 
     /// <summary>Immutable snapshot; only ever replaced, never mutated in place.</summary>
-    private Watcher[] _watchers = [];
+    private Subscription[] _watchers = [];
 
     /// <summary>Guarded by <see cref="_gate"/>.</summary>
     private bool _completed;
@@ -103,7 +100,7 @@ internal sealed class DeviceEventHub
     /// </remarks>
     public void Complete(Exception? error = null)
     {
-        Watcher[] snapshot;
+        Subscription[] snapshot;
 
         lock (_gate)
         {
@@ -147,25 +144,18 @@ internal sealed class DeviceEventHub
     private async IAsyncEnumerable<DeviceEvent> Iterate(
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var watcher = Subscribe();
-        try
+        using var watcher = Subscribe();
+        await foreach (var deviceEvent in watcher.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
-            await foreach (var deviceEvent in watcher.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
-            {
-                yield return deviceEvent;
-            }
-        }
-        finally
-        {
-            // Runs on enumerator disposal, however the loop ended: normal completion, break,
-            // cancellation, overflow, or an exception thrown by the consumer's own loop body.
-            Unsubscribe(watcher);
+            yield return deviceEvent;
         }
     }
 
-    private Watcher Subscribe()
+    // Called directly under the repository's state lock for atomic snapshot capture + registration.
+    // Merely obtaining an independent WatchAsync iterator here would defer registration until too late.
+    internal Subscription Subscribe(bool includesSnapshot = false)
     {
-        var watcher = new Watcher();
+        var watcher = new Subscription(this, includesSnapshot);
 
         lock (_gate)
         {
@@ -184,7 +174,7 @@ internal sealed class DeviceEventHub
         return watcher;
     }
 
-    private void Unsubscribe(Watcher watcher)
+    private void Unsubscribe(Subscription watcher)
     {
         lock (_gate)
         {
@@ -200,7 +190,7 @@ internal sealed class DeviceEventHub
     }
 
     /// <summary>One enumeration's private bounded buffer.</summary>
-    private sealed class Watcher
+    internal sealed class Subscription(DeviceEventHub owner, bool includesSnapshot) : IDisposable
     {
         private readonly Channel<DeviceEvent> _channel = Channel.CreateBounded<DeviceEvent>(
             new BoundedChannelOptions(WatcherBufferCapacity)
@@ -244,20 +234,15 @@ internal sealed class DeviceEventHub
             _terminated = true;
 
             // Completing distinguishes a full live buffer from one that is already finished.
-            var faulted = _channel.Writer.TryComplete(new InvalidOperationException(
+            _ = _channel.Writer.TryComplete(new InvalidOperationException(
                 $"The device event watcher's {WatcherBufferCapacity}-event buffer was full and the " +
-                "sequence was terminated to avoid silently dropping events. Re-enumerate and " +
-                "resynchronize the device list via YubiKeyManager.FindAllAsync."));
+                "sequence was terminated to avoid silently dropping events. " +
+                (includesSnapshot
+                    ? "Clear the consumer's device projection and re-enumerate WatchAsync on the same monitor."
+                    : "Re-enumerate and resynchronize the device list via YubiKeyManager.FindAllAsync.")));
 
-            // TryWrite also returns false after normal completion. Log only when this call actually
-            // terminates a live watcher as an overflow.
-            if (faulted)
-            {
-                Logger.LogWarning(
-                    "A device event watcher overflowed its {Capacity}-event buffer and was terminated. " +
-                    "That consumer is not draining events fast enough; other watchers are unaffected.",
-                    WatcherBufferCapacity);
-            }
+            // Do not invoke logging providers here: repository publication holds the short state lock.
+            // The enumeration's terminal exception carries the fault and recovery instructions.
         }
 
         public void Complete(Exception? error = null)
@@ -265,5 +250,7 @@ internal sealed class DeviceEventHub
             _terminated = true;
             _ = _channel.Writer.TryComplete(error);
         }
+
+        public void Dispose() => owner.Unsubscribe(this);
     }
 }

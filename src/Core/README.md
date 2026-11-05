@@ -64,16 +64,24 @@ Accessing `CurrentDevices` after disposal throws; enumerating `WatchAsync` after
 Unexpected terminal monitoring failure faults subscriptions and rejects cached access rather than leaving
 an apparently live, frozen cache.
 
-This is the first stage of the migration, **not yet an alternative public entry point**. Initialization is
+This is a staged migration, **not yet an alternative public entry point**. Initialization is
 currently internal: it registers listeners before the loop's single initial scan and waits for publication,
 including successful empty discovery. Startup failure/cancellation cleans up the partial lifetime; the
 creation token does not control the monitor after successful creation. The initial interval is five seconds.
 The legacy static `YubiKeyManager` API remains supported at this stage.
 
-`YubiKeyMonitor.WatchAsync` currently delegates the existing **change-only** stream. Atomic initial-device
-replay is a subsequent stage; do not combine `CurrentDevices` with a separate subscription and assume that
-there is no gap. A later compile-consistent migration will expose `YubiKeyManager.CreateMonitorAsync` and
-update the static discovery API and its consumers. Until then, the examples below use the existing API.
+`YubiKeyMonitor.WatchAsync` now supplies initial `Added` events followed by ordered changes. On each
+enumeration's first `MoveNextAsync`, it captures membership and subscribes at the same boundary as a
+completed publication, so there is no snapshot/subscription gap. Initial replay does not occupy the
+independent 256-event delta buffer; changes arriving while replay is consumed can still overflow it.
+Overflow faults only that watcher: **clear its device projection and re-enumerate the same monitor's
+`WatchAsync`** to rebuild it safely. Canceling a watcher does not stop monitoring. Disposal allows already
+captured replay and published deltas to drain, but new enumerations complete empty.
+
+The legacy static `YubiKeyManager.WatchAsync` remains **change-only** until the facade migration. Do not
+combine a separate `CurrentDevices` read with a subscription and assume that it is race-free. A later
+compile-consistent migration will expose `YubiKeyManager.CreateMonitorAsync` and update static discovery
+and its consumers. Until then, the examples below use the existing API.
 
 ### Scan selected interfaces without the manager cache
 

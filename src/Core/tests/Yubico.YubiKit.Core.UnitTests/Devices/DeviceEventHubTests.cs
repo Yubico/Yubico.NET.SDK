@@ -33,6 +33,53 @@ public class DeviceEventHubTests
 
     private static DeviceEvent Added(string deviceId) => new(DeviceAction.Added, new FakeYubiKey(deviceId));
 
+    [Fact]
+    public async Task Publish_DoesNotRunAPendingMoveNextContinuationInline()
+    {
+        var hub = new DeviceEventHub();
+        await using var watcher = hub.WatchAsync(TestContext.Current.CancellationToken)
+            .GetAsyncEnumerator(TestContext.Current.CancellationToken);
+        var pending = watcher.MoveNextAsync().AsTask();
+        Assert.Equal(1, hub.WatcherCount);
+        var publishingThread = Environment.CurrentManagedThreadId;
+        var inPublish = false;
+        var resumedInline = pending.ContinueWith(
+            _ => Environment.CurrentManagedThreadId == publishingThread && inPublish,
+            TestContext.Current.CancellationToken, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+
+        inPublish = true;
+        hub.Publish(Added("published"));
+        inPublish = false;
+
+        Assert.False(await resumedInline.WaitAsync(Bound, TestContext.Current.CancellationToken));
+        Assert.True(await pending);
+    }
+
+    [Fact]
+    public async Task Complete_WithTerminalError_DrainsPublishedEventsAndPreservesTheFirstOutcome()
+    {
+        var hub = new DeviceEventHub();
+        await using var watcher = hub.WatchAsync(TestContext.Current.CancellationToken)
+            .GetAsyncEnumerator(TestContext.Current.CancellationToken);
+        var pending = watcher.MoveNextAsync().AsTask();
+        var failure = new InvalidOperationException("terminal failure");
+        hub.Publish(Added("first"));
+        hub.Publish(Added("second"));
+        hub.Complete(failure);
+        hub.Complete();
+        hub.Publish(Added("too-late"));
+
+        Assert.True(await pending.WaitAsync(Bound, TestContext.Current.CancellationToken));
+        Assert.Equal("first", watcher.Current.Device.DeviceId);
+        Assert.True(await watcher.MoveNextAsync());
+        Assert.Equal("second", watcher.Current.Device.DeviceId);
+        Assert.Same(failure, await Assert.ThrowsAsync<InvalidOperationException>(() => watcher.MoveNextAsync().AsTask()));
+        await using var future = hub.WatchAsync(TestContext.Current.CancellationToken)
+            .GetAsyncEnumerator(TestContext.Current.CancellationToken);
+        Assert.Same(failure, await Assert.ThrowsAsync<InvalidOperationException>(() => future.MoveNextAsync().AsTask()));
+        Assert.Equal(0, hub.WatcherCount);
+    }
+
     // ---------- Fan-out ----------
 
     [Fact]

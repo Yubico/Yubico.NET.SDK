@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Core.Devices;
@@ -61,19 +62,31 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     }
 
     /// <summary>
-    /// Streams device changes with an independent bounded buffer for each enumeration.
+    /// Replays current devices as Added events, then streams ordered changes with an independent bounded delta buffer.
     /// </summary>
     /// <param name="cancellationToken">Cancels only this subscription, not the monitor.</param>
     /// <returns>A lazy stream that completes on disposal and faults on terminal monitoring failure.</returns>
     /// <remarks>
-    /// This staged implementation delegates the change-only stream: it does not yet replay current
-    /// devices or coordinate initial membership with subscription. Subscription starts on first enumeration.
-    /// Events already buffered before disposal may still be delivered. Enumerating after disposal ends empty.
+    /// On the first MoveNextAsync, membership capture and delta registration share one short publication
+    /// boundary. Replay runs outside that boundary and does not occupy the bounded delta buffer. Changes
+    /// arriving during replay can overflow that buffer; clear the consumer's projection and re-enumerate
+    /// this same monitor to recover. Cancellation and overflow affect only their own subscription.
+    /// Replay and events already captured before disposal may still drain. Enumerating after disposal ends empty.
     /// </remarks>
     /// <exception cref="OperationCanceledException">The subscription is canceled.</exception>
     /// <exception cref="InvalidOperationException">The subscriber overflowed or monitoring failed terminally.</exception>
     public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
-        Repository.WatchAsync(cancellationToken);
+        WatchCoreAsync(cancellationToken);
+
+    private async IAsyncEnumerable<DeviceEvent> WatchCoreAsync(
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (Volatile.Read(ref _disposed) != 0)
+            yield break;
+
+        await foreach (var change in Repository.WatchWithSnapshotAsync(cancellationToken).ConfigureAwait(false))
+            yield return change;
+    }
 
     internal static YubiKeyMonitor CreateUninitialized()
     {

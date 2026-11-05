@@ -132,6 +132,16 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
     /// <summary>Test-only replacement of terminal logging, without changing the process-wide logger.</summary>
     internal Action<Exception>? TerminalFailureLogForTest;
 
+    /// <summary>Read-only observation of the actual loop; capture before disposal clears its slot.</summary>
+    internal Task MonitoringCompletionForTest
+    {
+        get
+        {
+            lock (_monitorLock)
+                return _monitoringTask ?? Task.CompletedTask;
+        }
+    }
+
     internal async Task StartInitializedAsync(TimeSpan interval, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

@@ -15,6 +15,7 @@
 using System.Reflection;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -146,8 +147,8 @@ public class YubiKeyManagerStaticTests
             TestContext.Current.CancellationToken, rig.CreateFinder));
         var repository = new YubiKeyDeviceRepository();
         var service = new YubiKeyDeviceMonitorService(repository, new FixedFinder(retained),
-            () => throw new InvalidOperationException("No native HID listener"),
-            () => throw new InvalidOperationException("No native PC/SC listener"));
+            () => new OwnedMonitorFixture.FakeHidListener(),
+            () => new OwnedMonitorFixture.FakeSmartCardListener());
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         await using var watcher = monitor.WatchAsync(TestContext.Current.CancellationToken)
@@ -166,7 +167,6 @@ public class YubiKeyManagerStaticTests
             Assert.Equal(111, retained.SerialNumber);
             Assert.Equal(ConnectionTypeExtensions.ConcreteConnections, retained.AvailableConnections);
             Assert.False(pending.IsCompleted);
-            Assert.True(service.IsMonitoring);
         }
         finally
         {

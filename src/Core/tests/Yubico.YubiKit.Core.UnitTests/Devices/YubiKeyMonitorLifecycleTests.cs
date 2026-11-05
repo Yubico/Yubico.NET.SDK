@@ -21,98 +21,85 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// <summary>Disposal-window regressions migrated from the removed global manager adapter.</summary>
 public class YubiKeyMonitorLifecycleTests
 {
+    private static readonly TimeSpan Bound = TimeSpan.FromSeconds(5);
+    private static CancellationToken TestToken => TestContext.Current.CancellationToken;
+
     [Fact]
     public async Task DisposeAsync_ResumingAParkedPublicationAtRepositoryTeardown_EmitsNothing()
     {
-        var repository = new YubiKeyDeviceRepository();
+        await using var fixture = new OwnedMonitorFixture();
         var device = new FakeYubiKey("device-1", ConnectionType.SmartCard);
-        var service = CreateService(repository, new FixedFinder(device));
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
-            TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
-        // Change-only repository observation isolates deltas from the monitor's initial replay.
-        await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
+        fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([device]);
+        var monitor = await fixture.CreateAsync(TestToken);
+        // Change-only observation isolates deltas from the monitor's initial replay.
+        await using var watcher = await DeviceEventWatcher.StartAsync(fixture.Repository, TestToken);
         var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        service.PublishAdmittedForTest = async () =>
+        fixture.Service.PublishAdmittedForTest = () =>
         {
-            admitted.SetResult();
-            await release.Task;
+            admitted.TrySetResult();
+            return release.Task;
         };
-        var parked = service.RescanAsync(TestContext.Current.CancellationToken);
+        fixture.SmartCard.Raise();
         try
         {
-            await admitted.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            await admitted.Task.WaitAsync(Bound, TestToken);
             monitor.RepositoryTeardownReachedForTest = async () =>
             {
                 release.TrySetResult();
-                await parked.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+                await fixture.Loop.WaitAsync(Bound, TestToken);
             };
-            // The bounded service drain expires. The resumed diff must still see the intact cache,
+            // After the bounded drain expires, the resumed diff still sees intact membership,
             // not a live-but-emptied repository that would synthesize another Added event.
             await monitor.DisposeAsync();
-            await watcher.Completion.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            await watcher.Completion.WaitAsync(Bound, TestToken);
             Assert.True(watcher.EndedNormally);
             Assert.Empty(watcher.Events);
         }
         finally
         {
             release.TrySetResult();
-            // Drain the publication before disposing its fake repository, even on runner cancellation.
-            await parked.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            // The actual loop owns the publication until it finishes, even on runner cancellation.
+            await monitor.DisposeAsync();
+            await fixture.Loop.WaitAsync(Bound, CancellationToken.None);
         }
     }
 
     [Fact]
     public async Task DisposeAsync_WithAPublicationResumingAfterDisposeReturned_EmitsNothing()
     {
-        var repository = new YubiKeyDeviceRepository();
+        await using var fixture = new OwnedMonitorFixture();
+        var monitor = await fixture.CreateAsync(TestToken);
         var device = new FakeYubiKey("device-1", ConnectionType.SmartCard);
-        var finder = new FixedFinder(device) { Devices = [] };
-        var service = CreateService(repository, finder);
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, service,
-            TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
-        // The abandoned publication would add a new device if it could reach a live repository.
-        finder.Devices = [device];
-        await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
+        fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([device]);
+        await using var watcher = await DeviceEventWatcher.StartAsync(fixture.Repository, TestToken);
         var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        service.PublishAdmittedForTest = async () =>
+        fixture.Service.PublishAdmittedForTest = () =>
         {
-            admitted.SetResult();
-            await release.Task;
+            admitted.TrySetResult();
+            return release.Task;
         };
-        var parked = service.RescanAsync(TestContext.Current.CancellationToken);
+        fixture.SmartCard.Raise();
         try
         {
-            await admitted.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            await admitted.Task.WaitAsync(Bound, TestToken);
             await monitor.DisposeAsync();
             release.TrySetResult();
-            await parked.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-            await watcher.Completion.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            await fixture.Loop.WaitAsync(Bound, TestToken);
+            await watcher.Completion.WaitAsync(Bound, TestToken);
             Assert.True(watcher.EndedNormally);
             Assert.Empty(watcher.Events);
-            Assert.False(repository.HasData);
-            Assert.Throws<ObjectDisposedException>(() => repository.GetAll());
+            Assert.False(fixture.Repository.HasData);
+            Assert.Throws<ObjectDisposedException>(() => fixture.Repository.GetAll());
             Assert.Throws<ObjectDisposedException>(() => monitor.CurrentDevices);
         }
         finally
         {
             release.TrySetResult();
-            // Drain the admitted publication even when the runner has canceled.
-            await parked.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            // Drain the real loop before the fake lifetime ends, even when the runner has canceled.
+            await monitor.DisposeAsync();
+            await fixture.Loop.WaitAsync(Bound, CancellationToken.None);
         }
-    }
-
-    private static YubiKeyDeviceMonitorService CreateService(YubiKeyDeviceRepository repository, IFindYubiKeys finder) =>
-        new(repository, finder,
-            () => throw new InvalidOperationException("No native HID listener"),
-            () => throw new InvalidOperationException("No native PC/SC listener"),
-            shutdownTimeout: TimeSpan.FromMilliseconds(250));
-
-    private sealed class FixedFinder(IYubiKey device) : IFindYubiKeys
-    {
-        internal IReadOnlyList<IYubiKey> Devices { get; set; } = [device];
-        public Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default) =>
-            Task.FromResult(Devices);
     }
 }

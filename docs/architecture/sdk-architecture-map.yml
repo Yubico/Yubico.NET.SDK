@@ -165,6 +165,6 @@ diagrams:
       IFindPcscDevices: src/Core/src/Transports/SmartCard/FindPcscDevices.cs
       IFindHidInterfaces: src/Core/src/Transports/Hid/FindHidInterfaces.cs
       IYubiKey: src/Core/src/Abstractions/IYubiKey.cs
-      LocalYubiKey: src/Core/src/Devices/LocalYubiKey.cs
+      YubiKeyDevice: src/Core/src/Devices/YubiKeyDevice.cs
       IConnection: src/Core/src/Abstractions/IConnection.cs
       ISmartCardConnection: src/Core/src/Transports/SmartCard/ISmartCardConnection.cs

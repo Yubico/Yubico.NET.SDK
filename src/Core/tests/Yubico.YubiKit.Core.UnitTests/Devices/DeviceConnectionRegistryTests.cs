@@ -171,7 +171,7 @@ public class DeviceConnectionRegistryTests
     {
         var smartCardMember = new RecordingYubiKey(NewId(), ConnectionType.SmartCard);
         var otpMember = new RecordingYubiKey(NewId(), ConnectionType.HidOtp);
-        var composite = new LocalYubiKey(
+        var composite = new YubiKeyDevice(
             NewId(), smartCardMember, hidFido: null, otpMember, deviceInfo: null);
         using var registration = await DeviceConnectionRegistry.AcquireConnectionAsync(
             composite.InterfaceIds, TestContext.Current.CancellationToken);

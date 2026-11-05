@@ -57,7 +57,7 @@ public class CompositeDeviceMergerTests
         Assert.NotSame(sky, published);
         Assert.Equal(sky.InterfaceId, published.DeviceId);
         Assert.Equal(ConnectionType.HidFido, published.AvailableConnections);
-        Assert.Equal("8:hid:fido", LocalYubiKey.PhysicalIdentityKeyFor(published));
+        Assert.Equal("8:hid:fido", YubiKeyDevice.PhysicalIdentityKeyFor(published));
     }
 
     [Fact]
@@ -180,7 +180,7 @@ public class CompositeDeviceMergerTests
         ]);
 
         var composite = Assert.Single(merged, c => c.DeviceId == "ykphysical:103");
-        var published = Assert.IsType<LocalYubiKey>(composite);
+        var published = Assert.IsType<YubiKeyDevice>(composite);
         Assert.NotNull(published.DeviceInfo);
         Assert.Equal(103, published.DeviceInfo!.Value.SerialNumber);
     }
@@ -191,5 +191,5 @@ public class CompositeDeviceMergerTests
     }
 
     private static IReadOnlyList<string> InterfaceIdsOf(IYubiKey device) =>
-        Assert.IsType<LocalYubiKey>(device).InterfaceIds;
+        Assert.IsType<YubiKeyDevice>(device).InterfaceIds;
 }

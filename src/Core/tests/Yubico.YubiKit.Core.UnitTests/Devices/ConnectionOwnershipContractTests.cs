@@ -168,7 +168,7 @@ public class ConnectionOwnershipContractTests
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
         var hid = CreateHidSlot(hidDevice);
-        var composite = new LocalYubiKey(
+        var composite = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}", smartCard, hid, hidOtp: null, deviceInfo: null);
 
         await using var ccid = await composite.ConnectAsync<ISmartCardConnection>(Ct);
@@ -200,7 +200,7 @@ public class ConnectionOwnershipContractTests
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
         var firstHid = CreateHidSlot(firstHidDevice);
-        var olderComposite = new LocalYubiKey(
+        var olderComposite = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}",
             firstSmartCard,
             firstHid,
@@ -210,7 +210,7 @@ public class ConnectionOwnershipContractTests
         var laterHid = CreateHidSlot(new FakeHidInterface(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido));
-        _ = new LocalYubiKey(
+        _ = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}",
             firstSmartCard,
             laterHid,
@@ -218,7 +218,7 @@ public class ConnectionOwnershipContractTests
             deviceInfo: null);
 
         var laterSmartCard = CreateSmartCardSlot(new CountingFactory());
-        _ = new LocalYubiKey(
+        _ = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}",
             laterSmartCard,
             firstHid,
@@ -337,10 +337,10 @@ public class ConnectionOwnershipContractTests
         Assert.DoesNotContain("CCID", refusal.Message, StringComparison.Ordinal);
     }
 
-    private static LocalYubiKey CreateSmartCardDevice(ISmartCardConnectionFactory factory)
+    private static YubiKeyDevice CreateSmartCardDevice(ISmartCardConnectionFactory factory)
     {
         var slot = CreateSmartCardSlot(factory);
-        return new LocalYubiKey(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+        return new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
     }
 
     private static PcscConnectionSlot CreateSmartCardSlot(ISmartCardConnectionFactory factory) =>
@@ -348,14 +348,14 @@ public class ConnectionOwnershipContractTests
             new PcscDevice { ReaderName = $"ownership-reader-{Guid.NewGuid():N}", Atr = null },
             factory);
 
-    private static LocalYubiKey CreateHidDevice(IHidInterface hidDevice)
+    private static YubiKeyDevice CreateHidDevice(IHidInterface hidDevice)
     {
         var slot = CreateHidSlot(hidDevice);
         return slot.ConnectionType switch
         {
-            ConnectionType.HidFido => new LocalYubiKey(
+            ConnectionType.HidFido => new YubiKeyDevice(
                 slot.InterfaceId, smartCard: null, slot, hidOtp: null, deviceInfo: null),
-            ConnectionType.HidOtp => new LocalYubiKey(
+            ConnectionType.HidOtp => new YubiKeyDevice(
                 slot.InterfaceId, smartCard: null, hidFido: null, slot, deviceInfo: null),
             _ => throw new InvalidOperationException("Expected one concrete HID connection.")
         };

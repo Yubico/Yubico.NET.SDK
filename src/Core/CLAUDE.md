@@ -340,14 +340,14 @@ serials never trigger identity-based republication. If no listener event invalid
 observes absence, same-interface substitution remains unknowable from cached evidence.
 
 `IYubiKey.CachedDeviceInfo` exposes the existing nullable Core `DeviceInfo` snapshot without I/O; its default
-interface implementation returns `null` for custom implementations. `LocalYubiKey` delegates directly to
+interface implementation returns `null` for custom implementations. `YubiKeyDevice` delegates directly to
 `DeviceInfo`, whose getter reads the atomically published `DeviceInfoSnapshot` reference. Do not introduce a
 second cache or infer freshness from this property. Existing discovery/repository updates replace the
 snapshot without a device event, and null updates preserve the last successful value. Retained objects can
 expose stale metadata after configuration changes or disconnect. `ManagementSession.GetDeviceInfoAsync` is
 the live-read API and does not promise to update discovery metadata. The independent `SerialNumber` latch
 and identity contract remain unchanged, even if a newer metadata snapshot omits its serial. No-hardware
-coverage is in `LocalYubiKeyTests` (no connection on access, snapshot replacement, default implementations,
+coverage is in `YubiKeyDeviceTests` (no connection on access, snapshot replacement, default implementations,
 serial independence) and `YubiKeyDeviceRepositoryCompositeTests` (retention and replacement isolation).
 
 Use `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` when absence is exceptional and
@@ -385,8 +385,7 @@ Fixture requirements and the explicit read-only filter are in
 [device discovery testing](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
-handles; they are not `IYubiKey` objects. Only the internal `LocalYubiKey` implementation is published by
-production discovery; manager, repository, and monitor types keep their separate roles.
+handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by production discovery.
 
 `IYubiKey` models the physical key; `IHidInterface` models one operating-system-exposed HID report
 interface discovered by `FindHidInterfaces`. `IHidConnection` is an opened report connection, while

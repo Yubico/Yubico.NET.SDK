@@ -53,7 +53,7 @@ public class FindYubiKeysScopeTests
         Assert.Equal(expectedNames, rig.CreatedSlots.Order());
         Assert.Equal(expectedNames, rig.TopologyCalls.Order());
         Assert.All(rig.OpenCalls.Keys, name => Assert.Contains(name, expectedNames));
-        Assert.Equal(expectedNames.Count, devices.Sum(device => Assert.IsType<LocalYubiKey>(device).InterfaceIds.Count));
+        Assert.Equal(expectedNames.Count, devices.Sum(device => Assert.IsType<YubiKeyDevice>(device).InterfaceIds.Count));
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class FindYubiKeysScopeTests
         Assert.Equal(ConnectionTypeExtensions.ConcreteConnections, device.AvailableConnections);
         Assert.Equal(1, rig.Pcsc.Calls);
         Assert.Equal(1, rig.Hid.Calls);
-        Assert.Equal(3, Assert.IsType<LocalYubiKey>(device).InterfaceIds.Count);
+        Assert.Equal(3, Assert.IsType<YubiKeyDevice>(device).InterfaceIds.Count);
 
         var again = Assert.Single(await finder.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken));
         Assert.Equal(ConnectionTypeExtensions.ConcreteConnections, again.AvailableConnections);
@@ -85,7 +85,7 @@ public class FindYubiKeysScopeTests
         var devices = await finder.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, devices.Count);
-        Assert.All(devices, device => Assert.Single(Assert.IsType<LocalYubiKey>(device).InterfaceIds));
+        Assert.All(devices, device => Assert.Single(Assert.IsType<YubiKeyDevice>(device).InterfaceIds));
         Assert.DoesNotContain(devices, device => device.DeviceId.StartsWith("ykphysical:pid:", StringComparison.Ordinal));
     }
 
@@ -113,7 +113,7 @@ public class FindYubiKeysScopeTests
             .FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
         Assert.Equal(4, devices.Count);
-        Assert.All(devices, device => Assert.Single(Assert.IsType<LocalYubiKey>(device).InterfaceIds));
+        Assert.All(devices, device => Assert.Single(Assert.IsType<YubiKeyDevice>(device).InterfaceIds));
     }
 
     [Theory]
@@ -148,7 +148,7 @@ public class FindYubiKeysScopeTests
 
         Assert.Equal(ConnectionTypeExtensions.ConcreteConnections, Assert.Single(all).AvailableConnections);
         Assert.All(hid, key => Assert.Equal(ConnectionType.Unknown, key.AvailableConnections & ConnectionType.SmartCard));
-        Assert.Equal(2, hid.Sum(key => Assert.IsType<LocalYubiKey>(key).InterfaceIds.Count));
+        Assert.Equal(2, hid.Sum(key => Assert.IsType<YubiKeyDevice>(key).InterfaceIds.Count));
         Assert.Equal(ConnectionType.SmartCard, Assert.Single(ccid).AvailableConnections);
     }
 
@@ -240,9 +240,9 @@ public class FindYubiKeysScopeTests
         // Merely observing a complete group does not register persistent physical-identity aliases.
         Assert.Single(await rig.CreateFinder(ConnectionType.All)
             .FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken));
-        var ccid = Assert.IsType<LocalYubiKey>(Assert.Single(await rig.CreateFinder(ConnectionType.SmartCard)
+        var ccid = Assert.IsType<YubiKeyDevice>(Assert.Single(await rig.CreateFinder(ConnectionType.SmartCard)
             .FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken)));
-        var fido = Assert.IsType<LocalYubiKey>(Assert.Single(await rig.CreateFinder(ConnectionType.HidFido)
+        var fido = Assert.IsType<YubiKeyDevice>(Assert.Single(await rig.CreateFinder(ConnectionType.HidFido)
             .FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken)));
         Assert.Equal(ccid.SerialNumber, fido.SerialNumber);
         Assert.Empty(ccid.InterfaceIds.Intersect(fido.InterfaceIds));

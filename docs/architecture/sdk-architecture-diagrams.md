@@ -297,7 +297,7 @@ flowchart TD
     Merge{"Merge interfaces of<br/>same physical key<br/>(by USB Product ID)"}
 
     Slot["PcscConnectionSlot / HidConnectionSlot<br/><i>raw live interface candidate</i>"]
-    Flat["LocalYubiKey<br/>optional SmartCard · FIDO · OTP slots"]
+    Flat["YubiKeyDevice<br/>optional SmartCard · FIDO · OTP slots"]
 
     Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous"])
 
@@ -365,7 +365,7 @@ flowchart TD
 **Teaching notes:**
 - **One `IYubiKey` = one physical key.** It exposes `AvailableConnections`
   (`SmartCard | HidFido | HidOtp` flags). Discovery publishes one internal production implementation,
-   `LocalYubiKey`. Before merging, each live PC/SC or HID handle is a raw `PcscConnectionSlot` or `HidConnectionSlot`,
+  `YubiKeyDevice`. Before merging, each live PC/SC or HID handle is a raw `PcscConnectionSlot` or `HidConnectionSlot`,
   not an `IYubiKey`.
 - **Merge logic** is conservative: interfaces merge by USB Product ID; NFC is never merged
   with USB; ambiguity → surface as separate rows rather than mis-merge.

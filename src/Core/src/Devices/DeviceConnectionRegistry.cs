@@ -65,7 +65,7 @@ internal static class DeviceConnectionRegistry
     /// <summary>
     ///     Whether the interface of <paramref name="device" /> that would serve <paramref name="connection" />
     ///     is in use. Published-device slots are resolved through
-    ///     <see cref="LocalYubiKey.TryResolveSlot" />, the same routing a connect uses, so the check
+    ///     <see cref="YubiKeyDevice.TryResolveSlot" />, the same routing a connect uses, so the check
     ///     matches the interface a read would actually open.
     /// </summary>
     public static bool IsInterfaceInUse(IYubiKey device, ConnectionType connection) =>
@@ -77,7 +77,7 @@ internal static class DeviceConnectionRegistry
     /// </summary>
     public static string ResolveInterfaceId(IYubiKey device, ConnectionType connection)
     {
-        if (device is not LocalYubiKey published)
+        if (device is not YubiKeyDevice published)
             return device.DeviceId;
 
         return published.TryResolveSlot(connection, out var slot)

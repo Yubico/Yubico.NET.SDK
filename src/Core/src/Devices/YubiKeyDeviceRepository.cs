@@ -103,13 +103,13 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
         // Diffing is keyed by physical identity — the set of interface paths a key occupies — and never by
         // IYubiKey.DeviceId. DeviceId names the evidence tier that resolved the merge and may change while
         // the interface set remains unchanged; the repository retains the existing object across those
-        // evidence changes so later removal remains correlated (see LocalYubiKey.PhysicalIdentityKeyFor).
+        // evidence changes so later removal remains correlated (see YubiKeyDevice.PhysicalIdentityKeyFor).
         var currentKeys = _deviceCache.Keys.ToHashSet();
         var newDeviceMap = new Dictionary<string, IYubiKey>();
 
         foreach (var device in devices)
         {
-            newDeviceMap[LocalYubiKey.PhysicalIdentityKeyFor(device)] = device;
+            newDeviceMap[YubiKeyDevice.PhysicalIdentityKeyFor(device)] = device;
         }
 
         var newKeys = newDeviceMap.Keys.ToHashSet();
@@ -166,8 +166,8 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
                     existing.SerialNumber,
                     updated.SerialNumber);
             }
-            else if (existing is LocalYubiKey retained &&
-                updated is LocalYubiKey latest &&
+            else if (existing is YubiKeyDevice retained &&
+                updated is YubiKeyDevice latest &&
                 latest.DeviceInfo is { } metadata)
             {
                 retained.DeviceInfo = metadata;

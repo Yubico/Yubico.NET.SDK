@@ -479,7 +479,7 @@ internal static class ProtocolDeviceInfo
     private static HidConnectionSlot? ResolveMacHidSlot(IDiscoveryConnectionProvider provider, ConnectionType connection)
     {
         if (connection is not (ConnectionType.HidFido or ConnectionType.HidOtp)) return null;
-        if (provider is LocalYubiKey published)
+        if (provider is YubiKeyDevice published)
             return published.TryResolveSlot(connection, out var selected) ? AsBuiltInMacHidSlot(selected) : null;
         return AsBuiltInMacHidSlot(provider);
     }
@@ -495,7 +495,7 @@ internal static class ProtocolDeviceInfo
             return null;
         if (provider is PcscConnectionSlot pcscSlot)
             return pcscSlot;
-        return provider is LocalYubiKey published &&
+        return provider is YubiKeyDevice published &&
                published.TryResolveSlot(connection, out var slot) &&
                slot is PcscConnectionSlot selectedPcscSlot
             ? selectedPcscSlot

@@ -29,12 +29,12 @@ public class HeldExceptionPropagationTests
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     [Fact]
-    public async Task LocalYubiKey_SmartCardSlotThrowsHeldScard_PropagatesUnwrapped()
+    public async Task YubiKeyDevice_SmartCardSlotThrowsHeldScard_PropagatesUnwrapped()
     {
         var held = new SCardException("held", (long)ErrorCode.SCARD_E_SHARING_VIOLATION);
         var smartCardMember = new ThrowingMember(ConnectionType.SmartCard, held);
         var hidMember = new ThrowingMember(ConnectionType.HidFido, new InvalidOperationException("unused"));
-        var device = new LocalYubiKey(
+        var device = new YubiKeyDevice(
             "composite:test",
             smartCardMember,
             hidMember,
@@ -47,14 +47,14 @@ public class HeldExceptionPropagationTests
         Assert.Equal(unchecked((int)ErrorCode.SCARD_E_SHARING_VIOLATION), ex.HResult);
     }
     [Fact]
-    public async Task LocalYubiKey_ConcretePcscSlotThrowsHeldScard_PropagatesUnwrapped()
+    public async Task YubiKeyDevice_ConcretePcscSlotThrowsHeldScard_PropagatesUnwrapped()
     {
         var held = new SCardException("held", (long)ErrorCode.SCARD_E_SERVER_TOO_BUSY);
         var device = new PcscDevice { ReaderName = "fake-reader", Atr = null };
         var slot = new PcscConnectionSlot(
             device,
             new ThrowingFactory(held));
-        var yubiKey = new LocalYubiKey(
+        var yubiKey = new YubiKeyDevice(
             slot.InterfaceId,
             slot,
             hidFido: null,

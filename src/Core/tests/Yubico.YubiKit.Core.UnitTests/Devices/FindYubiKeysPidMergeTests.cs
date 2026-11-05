@@ -86,7 +86,7 @@ public class FindYubiKeysPidMergeTests
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, result.Count);
-        Assert.All(result, d => Assert.Single(Assert.IsType<LocalYubiKey>(d).InterfaceIds));
+        Assert.All(result, d => Assert.Single(Assert.IsType<YubiKeyDevice>(d).InterfaceIds));
     }
 
     private sealed class FakeFindPcscDevices(IReadOnlyList<IPcscDevice> devices) : IFindPcscDevices

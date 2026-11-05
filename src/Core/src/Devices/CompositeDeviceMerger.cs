@@ -66,13 +66,13 @@ internal readonly record struct DeviceInterfaceDescriptor(
 /// </remarks>
 internal static class CompositeDeviceMerger
 {
-    public static IReadOnlyList<LocalYubiKey> Merge(
+    public static IReadOnlyList<YubiKeyDevice> Merge(
         IReadOnlyList<DeviceInterfaceDescriptor> descriptors,
         bool pidCorrelationUntrusted = false)
     {
         ArgumentNullException.ThrowIfNull(descriptors);
 
-        var result = new List<LocalYubiKey>();
+        var result = new List<YubiKeyDevice>();
 
         // Tier 1 — topology evidence (strongest, when available). Interfaces carrying a topology key are
         // grouped by the physical USB device that owns them and are removed from all later tiers; every
@@ -159,7 +159,7 @@ internal static class CompositeDeviceMerger
     /// </remarks>
     private static List<DeviceInterfaceDescriptor> MergeUsbByTopology(
         IEnumerable<DeviceInterfaceDescriptor> usbDescriptors,
-        List<LocalYubiKey> result)
+        List<YubiKeyDevice> result)
     {
         var descriptors = usbDescriptors.ToList();
         var withTopology = descriptors.Where(d => !string.IsNullOrEmpty(d.TopologyKey)).ToList();
@@ -289,7 +289,7 @@ internal static class CompositeDeviceMerger
     private static void MergeSamePidBySerialWithDeduction(
         ushort pid,
         IReadOnlyList<DeviceInterfaceDescriptor> descriptors,
-        List<LocalYubiKey> result,
+        List<YubiKeyDevice> result,
         ContestedSerials contested)
     {
         var anchored = descriptors
@@ -378,7 +378,7 @@ internal static class CompositeDeviceMerger
             ConnectionType.Unknown,
             static (current, descriptor) => current | descriptor.Connection);
 
-    private static void MergeUsbBySerial(IEnumerable<DeviceInterfaceDescriptor> usbDescriptors, List<LocalYubiKey> result)
+    private static void MergeUsbBySerial(IEnumerable<DeviceInterfaceDescriptor> usbDescriptors, List<YubiKeyDevice> result)
     {
         var descriptors = usbDescriptors.ToList();
 
@@ -392,7 +392,7 @@ internal static class CompositeDeviceMerger
         AddStandaloneDevices(descriptors.Where(d => d.Serial is null), result);
     }
 
-    private static void AddGroupedDevice(IEnumerable<DeviceInterfaceDescriptor> group, string deviceId, List<LocalYubiKey> result)
+    private static void AddGroupedDevice(IEnumerable<DeviceInterfaceDescriptor> group, string deviceId, List<YubiKeyDevice> result)
     {
         var ordered = group.OrderBy(m => ConnectionOrder(m.Connection)).ToList();
 
@@ -412,7 +412,7 @@ internal static class CompositeDeviceMerger
         }
 
         var deviceInfo = ordered.Select(m => m.DeviceInfo).FirstOrDefault(di => di.HasValue);
-        result.Add(new LocalYubiKey(
+        result.Add(new YubiKeyDevice(
             deviceId,
             Slot(ordered, ConnectionType.SmartCard),
             Slot(ordered, ConnectionType.HidFido),
@@ -423,7 +423,7 @@ internal static class CompositeDeviceMerger
 
     private static void AddStandaloneDevices(
         IEnumerable<DeviceInterfaceDescriptor> descriptors,
-        List<LocalYubiKey> result)
+        List<YubiKeyDevice> result)
     {
         foreach (var descriptor in descriptors)
             AddStandaloneDevice(descriptor, result);
@@ -431,8 +431,8 @@ internal static class CompositeDeviceMerger
 
     private static void AddStandaloneDevice(
         DeviceInterfaceDescriptor descriptor,
-        List<LocalYubiKey> result) =>
-        result.Add(new LocalYubiKey(
+        List<YubiKeyDevice> result) =>
+        result.Add(new YubiKeyDevice(
             descriptor.Device.InterfaceId,
             descriptor.Connection == ConnectionType.SmartCard ? descriptor.Device : null,
             descriptor.Connection == ConnectionType.HidFido ? descriptor.Device : null,

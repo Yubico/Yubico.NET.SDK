@@ -395,7 +395,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
         await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // The same physical key now also enumerates its OTP interface: the interface set changed.
-        var threeInterfaces = new LocalYubiKey(
+        var threeInterfaces = new YubiKeyDevice(
             "ykphysical:pid:0407",
             new FakeSlot("pcsc:a", ConnectionType.SmartCard),
             new FakeSlot("hid-fido:a", ConnectionType.HidFido),
@@ -425,7 +425,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
     {
         using var repository = new YubiKeyDeviceRepository();
         using var cts = new CancellationTokenSource(Bound);
-        var fidoShape = new LocalYubiKey(
+        var fidoShape = new YubiKeyDevice(
             "ykphysical:pid:0402",
             smartCard: null,
             new FakeSlot("hid:a", ConnectionType.HidFido),
@@ -436,15 +436,15 @@ public class YubiKeyDeviceRepositoryCompositeTests
         await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Same sole interface id, but it now reports the OTP connection type instead of FIDO.
-        var otpShape = new LocalYubiKey(
+        var otpShape = new YubiKeyDevice(
             "ykphysical:pid:0401",
             smartCard: null,
             hidFido: null,
             new FakeSlot("hid:a", ConnectionType.HidOtp),
             default(DeviceInfo) with { SerialNumber = updatedSerial });
         Assert.Equal(
-            LocalYubiKey.PhysicalIdentityKeyFor(fidoShape),
-            LocalYubiKey.PhysicalIdentityKeyFor(otpShape));
+            YubiKeyDevice.PhysicalIdentityKeyFor(fidoShape),
+            YubiKeyDevice.PhysicalIdentityKeyFor(otpShape));
         repository.UpdateCache([otpShape]);
 
         var events = await watcher.DrainAsync(repository, cts.Token);
@@ -496,7 +496,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
     private static DeviceInterfaceDescriptor Usb(string id, ConnectionType connection, int? serial) =>
         new(new FakeSlot(id, connection), connection, IsUsb: true, FullKeyPid, serial, null);
 
-    private static LocalYubiKey Published(
+    private static YubiKeyDevice Published(
         string deviceId,
         string smartCardId,
         string hidFidoId,
@@ -509,7 +509,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
             deviceInfo);
 
     private static IReadOnlyList<string> InterfaceIdsOf(IYubiKey device) =>
-        Assert.IsType<LocalYubiKey>(device).InterfaceIds;
+        Assert.IsType<YubiKeyDevice>(device).InterfaceIds;
 
     private sealed class FakeSlot(string deviceId, ConnectionType connectionType) : IYubiKeyConnectionSlot
     {

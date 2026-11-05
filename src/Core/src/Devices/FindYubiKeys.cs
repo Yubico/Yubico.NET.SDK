@@ -111,7 +111,7 @@ public class FindYubiKeys : IFindYubiKeys
     private readonly record struct CachedIdentity(DeviceInfo Info, ushort? Pid);
 
     // Best-effort metadata cache, keyed by the published device's stable interface-set key
-    // (LocalYubiKey.PhysicalIdentityKey, NOT DeviceId, which can flip between pid- and
+    // (YubiKeyDevice.PhysicalIdentityKey, NOT DeviceId, which can flip between pid- and
     // serial-forms). Evicted when any member interface disappears.
     private sealed class EvidenceEpoch
     {
@@ -337,7 +337,7 @@ public class FindYubiKeys : IFindYubiKeys
 
     private async Task PopulateMetadataAsync(
         EvidenceEpoch evidence,
-        IReadOnlyList<LocalYubiKey> merged,
+        IReadOnlyList<YubiKeyDevice> merged,
         IReadOnlyList<InterfaceCandidate> interfaces,
         CancellationToken cancellationToken)
     {

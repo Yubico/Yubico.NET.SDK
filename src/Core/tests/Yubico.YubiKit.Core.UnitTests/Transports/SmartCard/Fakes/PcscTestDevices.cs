@@ -19,10 +19,10 @@ namespace Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
 
 internal static class PcscTestDevices
 {
-    public static LocalYubiKey Create(ISCardConnectionApi api) =>
+    public static YubiKeyDevice Create(ISCardConnectionApi api) =>
         Create(new SmartCardConnectionFactory(api), out _);
 
-    public static LocalYubiKey Create(
+    public static YubiKeyDevice Create(
         ISmartCardConnectionFactory factory,
         out PcscConnectionSlot slot)
     {
@@ -32,6 +32,6 @@ internal static class PcscTestDevices
             Atr = null
         };
         slot = new PcscConnectionSlot(pcscDevice, factory);
-        return new LocalYubiKey(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+        return new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
     }
 }

@@ -155,7 +155,7 @@ public class DeviceConnectionOwnershipTests
         Assert.Equal(1, secondFactory.CreateCalls);
     }
 
-    private static LocalYubiKey CreateDevice(ISmartCardConnectionFactory factory) =>
+    private static YubiKeyDevice CreateDevice(ISmartCardConnectionFactory factory) =>
         CreateDevice(CreateSlot(factory));
 
     private static PcscConnectionSlot CreateSlot(ISmartCardConnectionFactory factory) =>
@@ -163,9 +163,9 @@ public class DeviceConnectionOwnershipTests
             new PcscDevice { ReaderName = $"test-reader-{Guid.NewGuid():N}", Atr = null },
             factory);
 
-    private static LocalYubiKey CreateDevice(PcscConnectionSlot slot)
+    private static YubiKeyDevice CreateDevice(PcscConnectionSlot slot)
     {
-        return new LocalYubiKey(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+        return new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
     }
 
     private sealed class BlockingCreationFactory : ISmartCardConnectionFactory

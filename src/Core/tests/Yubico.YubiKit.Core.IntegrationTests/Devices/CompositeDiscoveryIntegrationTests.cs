@@ -165,12 +165,12 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         for (var attempt = 0; attempt < 3; attempt++)
         {
             devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
-            if (devices.All(device => Assert.IsType<LocalYubiKey>(device).DeviceInfo is not null))
+            if (devices.All(device => Assert.IsType<YubiKeyDevice>(device).DeviceInfo is not null))
                 break;
         }
 
         Assert.NotEmpty(devices);
-        Assert.All(devices, device => Assert.NotNull(Assert.IsType<LocalYubiKey>(device).DeviceInfo));
+        Assert.All(devices, device => Assert.NotNull(Assert.IsType<YubiKeyDevice>(device).DeviceInfo));
     }
 
     [Fact]

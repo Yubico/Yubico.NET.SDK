@@ -288,9 +288,11 @@ usable YubiKey object." Entry point is the **static** `YubiKeyManager` — no DI
 flowchart TD
     Start(["YubiKeyManager.Find…Async(interfaces=All)"])
     Create(["await YubiKeyManager.CreateMonitorAsync()"])
-    Owner["YubiKeyMonitor<br/><i>explicitly owned lifetime</i>"]
-    Repo["YubiKeyDeviceRepository<br/>CurrentDevices / atomic WatchAsync replay + changes"]
-    Mon["YubiKeyDeviceMonitorService<br/><i>listeners + discovery loop</i>"]
+    Owner["YubiKeyMonitor<br/><i>composition + initialize-run-dispose owner</i>"]
+    Repo["YubiKeyDeviceRepository<br/>membership + identity retention<br/>atomic commit / replay / failure / disposal"]
+    Mon["YubiKeyMonitorWorker<br/><i>listeners + one sequential<br/>scan / publication loop</i>"]
+    Hub["DeviceEventHub<br/><i>isolated bounded watcher buffers</i>"]
+    Views(["monitor.CurrentDevices: no-I/O snapshot<br/>monitor.WatchAsync: initial replay + ordered deltas"])
     Find["FindYubiKeys<br/><i>independent per-call or per-monitor evidence</i>"]
 
     FPcsc["IFindPcscDevices<br/>(PC/SC readers)"]
@@ -302,11 +304,11 @@ flowchart TD
 
     Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous"])
 
-    Start -->|fresh scoped finder; retire on exit| Find
+    Start -->|fresh scoped call| Find
     Create -->|await initial publication| Owner
-    Owner --> Repo
-    Owner --> Mon
-    Mon -->|All interfaces| Find
+    Owner -->|owns teardown| Repo
+    Owner -->|initialize once / drain loop| Mon
+    Mon -->|All| Find
     Find --> FPcsc
     Find --> FHid
     FPcsc --> Slot
@@ -314,8 +316,19 @@ flowchart TD
     Slot --> Merge
     Merge --> Flat
     Flat --> Result
-    Mon -->|publish completed snapshots| Repo
+    Mon -->|await full publication| Repo
+    Repo -->|ordered delta enqueue| Hub
+    Repo -->|atomic snapshot + tail| Views
+    Hub -->|asynchronous deltas| Views
 ```
+
+One-shot Find retires its read scope on exit. The worker borrows the repository; only the public owner
+tears it down. There is no manual rescan, restart mode, or monitor generation. The ingress lock orders
+listener invalidation against final finder
+retirement; the repository's short state boundary rejects late membership/event commits after disposal.
+The one ten-second loop-drain budget is not a native listener or total disposal timeout. Finder evidence
+epochs/read scopes and actual native admission/lease retention remain separate from the removed monitor
+generations. See [worker concurrency and shutdown](event-driven-device-discovery.md#single-lifetime-worker-and-shutdown).
 
 ### Then: connecting (transport selection)
 
@@ -416,14 +429,13 @@ Pre-rendered for slides and offline viewing (regenerate with the command below):
 Regenerate after editing the diagrams:
 
 ```bash
-# SVG (vector — best for slides)
-mmdc -i docs/architecture/sdk-architecture-diagrams.md -o docs/architecture/images/sdk.svg -t neutral -b transparent
-# PNG (3× raster)
-mmdc -i docs/architecture/sdk-architecture-diagrams.md -o docs/architecture/images/png/sdk.png -t neutral -b white -s 3
-# then rename sdk-1..7 → L0..L4 per the table above
+npm ci  # installs the pinned Mermaid CLI from package-lock.json
+scripts/architecture/render-architecture.sh
 ```
 
-Requires `@mermaid-js/mermaid-cli` (`npm i -g @mermaid-js/mermaid-cli`).
+The script checks the pinned CLI version, renders SVG and 3× PNG files with deterministic names, and
+records source/image hashes in `images/image-manifest.txt`. Retain each changed diagram and its matching
+manifest row together; avoid unrelated rendered churn.
 
 ---
 

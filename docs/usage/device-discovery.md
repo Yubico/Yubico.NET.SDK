@@ -173,6 +173,11 @@ loop's single initial scan and returns only after successful publication. An emp
 initial failure/cancellation cleans up partial ownership. Creation cancellation applies only until return.
 The SDK has **no reactive dependency** — the stream uses BCL types only.
 
+Each monitor has one initialize-run-dispose lifetime. A single internal worker awaits every initial,
+listener-triggered, and fallback scan and its publication before starting another. There is no manual
+rescan or stop/restart mode. After terminal failure, dispose it and create a new monitor; a new watcher
+on the failed monitor does not restart discovery.
+
 `CurrentDevices` is a coherent, read-only membership snapshot without hardware I/O. Older lists keep their
 membership; contained devices can receive last-known metadata updates. A later failed scan retains the
 previous snapshot and retries; unexpected terminal failure faults watchers and rejects cached access.
@@ -238,8 +243,12 @@ snapshot, dropping one would permanently desynchronise your device list, so the 
 Concurrent watchers are state-safe: cancelling or losing one watcher neither completes nor faults
 another. Disposal ends healthy watchers normally; buffered history can drain, and new enumerations after
 disposal end empty. `CurrentDevices` after disposal throws. Disposing one monitor does not affect another
-or dispose application-owned sessions/connections. Already-admitted native work can outlive bounded
-teardown and keeps its lease until actual release; late results cannot repopulate the disposed repository.
+or dispose application-owned sessions/connections. Concurrent disposal callers share completion through
+repository teardown. Disposal closes public access, retires discovery ingress, and waits once for the
+sole worker loop with a **ten-second managed-drain budget**, then disposes the repository even if the loop
+was abandoned. This budget does **not** bound native listener cleanup or total wall-clock disposal.
+Already-open native discovery reads keep their admission/lease until actual teardown. Late uncommitted
+results cannot repopulate disposed membership or emit new deltas; already-committed history may still drain.
 
 `WatchAsync` is the only device-change stream. Device events are never delivered inline on the
 monitor's publishing thread, so a slow or abandoned watcher cannot delay device monitoring for
@@ -252,6 +261,21 @@ or removed.
 
 The monitor scans all interfaces, uses listeners as latency hints, and falls back to a five-second interval.
 There is no public interval or force-refresh option in this version. Filter `CurrentDevices` locally.
+
+### Technical troubleshooting
+
+- Listeners are optional latency accelerators, not device truth. If one fails to start, its cleanup is
+  attempted and the other listener/five-second fallback still runs. Ordinary later scan failures retain
+  the last committed snapshot and retry on subsequent hints/fallback; initial failure instead fails creation.
+- When diagnosing listener/coalescing/scan/drain messages, the internal logger category is now
+  `Yubico.YubiKit.Core.Devices.YubiKeyMonitorWorker`, renamed from
+  `Yubico.YubiKit.Core.Devices.YubiKeyDeviceMonitorService`. Update category-specific filters; the public
+  `YubiKeyManager` / `YubiKeyMonitor` API names are unchanged. See [logging setup](../LOGGING.md).
+- Removed monitor generations do not mean discovery evidence is timeless. Listener activity globally
+  invalidates finder identity/metadata evidence and retires its read scope before signaling a scan.
+  Without hints, same-interface swaps may stay stale until a scan observes absence. Finder evidence epochs,
+  queued-read retirement, and actual native ownership remain; cancellation or a drain timeout does not
+  prove native release. See [monitor concurrency and shutdown](../architecture/event-driven-device-discovery.md#single-lifetime-worker-and-shutdown).
 
 ### UI Thread Marshaling
 
@@ -431,5 +455,6 @@ Key changes:
 All `YubiKeyManager` methods are thread-safe:
 - `FindAllAsync()` can be called from multiple threads concurrently
 - Monitors are independent owners; repeated disposal shares completion
-- Listener notifications are serialized through a single-reader debounce queue before rescans
+- Listener ingress orders evidence invalidation against retirement; a private capacity-one occurrence
+  signal coalesces hints for one sequential discovery/publication loop, not a notification payload queue
 - `WatchAsync` events may be delivered on any thread

@@ -72,8 +72,10 @@ An owned monitor has independent discovery evidence and scans All; a one-shot `i
 pauses nor restricts it. Do not assume a monitor is a hardware broker for independent scoped/raw views.
 For explicit metadata comparisons over different interfaces, finish scans and dispose tracking before
 opening sequential live connections when sibling overlap cannot be ruled out. Disposing a monitor does
-not dispose application-owned sessions or connections; native work already admitted may retain its lease
-past bounded teardown until actual release. No late result can repopulate its disposed repository.
+not dispose application-owned sessions or connections. Its one ten-second managed-loop drain is not a
+timeout for native listener cleanup or total disposal. Already-open discovery reads retain their actual
+admission/lease until native teardown, even past that drain budget. No late uncommitted result can
+repopulate disposed membership or emit new deltas; already-committed history may still drain.
 
 ## One connection, one session
 

@@ -26,6 +26,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// Each instance has independent discovery evidence, listeners, and subscriptions. Dispose the monitor
 /// when its owner no longer needs tracking; this does not dispose caller-owned sessions or connections.
 /// Membership snapshots are read-only, but their device objects can receive later last-known metadata.
+/// Creation awaits the worker's first successful publication. Each monitor has one initialize-run-dispose
+/// lifetime; recovery after terminal failure requires creating a new monitor, not restarting this one.
 /// </remarks>
 public sealed class YubiKeyMonitor : IAsyncDisposable
 {
@@ -122,8 +124,11 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     /// Stops tracking, closes subscriptions, and releases the repository. Idempotent with shared completion.
     /// </summary>
     /// <remarks>
-    /// Teardown uses the existing bounded monitor drain. Already-admitted native work may outlive this
-    /// call and retains its lease until actual teardown; its late result cannot repopulate the repository.
+    /// Public access closes first, then the worker retires listener ingress and drains its sole loop with
+    /// a ten-second budget. That budget does not bound native listener cleanup or total disposal time.
+    /// The repository is disposed in a finally block, rejecting late membership/event commits even if the
+    /// loop is abandoned. Already-open native reads may outlive this call and retain their admission and
+    /// lease until actual teardown. Events committed before repository disposal may still drain.
     /// Device descriptors and caller-owned connections remain usable independently of this monitor.
     /// </remarks>
     public ValueTask DisposeAsync() => _disposal.DisposeAsync(DisposeCoreAsync);

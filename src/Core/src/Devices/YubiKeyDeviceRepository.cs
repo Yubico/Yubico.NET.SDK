@@ -19,7 +19,7 @@ using Yubico.YubiKit.Core.Abstractions;
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-/// Pure cache repository for YubiKey devices with diff-based change detection.
+/// Owns device membership, identity retention, and atomic snapshot-plus-delta subscription.
 /// </summary>
 /// <remarks>
 /// This class maintains a thread-safe cache of discovered devices and emits
@@ -27,6 +27,9 @@ namespace Yubico.YubiKit.Core.Devices;
 /// It has no discovery capability - that responsibility belongs to
 /// <see cref="YubiKeyMonitorWorker"/>.
 /// The repository owns the <see cref="DeviceEventHub"/> that backs <see cref="WatchAsync"/>.
+/// Diffs serialize separately from the short state boundary for membership/event commits, replay
+/// registration, failure, and disposal. That final boundary rejects late commits from abandoned work;
+/// neither disposal nor failure waits for device getters or logging inside a diff.
 /// </remarks>
 internal sealed class YubiKeyDeviceRepository : IDisposable
 {
@@ -37,6 +40,7 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
     private readonly DeviceEventHub _events = new();
     // Serialize diffs, but never make disposal/failure wait on device properties or logging in a diff.
     private readonly Lock _cacheLock = new();
+    // Final commit and snapshot/tail registration are atomic with failure and disposal.
     private readonly Lock _stateLock = new();
     private IReadOnlyList<IYubiKey> _snapshot = Array.AsReadOnly<IYubiKey>([]);
     private Exception? _failure;
@@ -212,6 +216,8 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
         var snapshot = Array.AsReadOnly<IYubiKey>([.. newDeviceMap.Values]);
         lock (_stateLock)
         {
+            // A worker precheck cannot cover a diff parked in a getter/logger through owner disposal.
+            // Reject that late membership/event commit here, without making disposal take _cacheLock.
             ThrowIfDisposed();
             ThrowIfFailed();
             Volatile.Write(ref _deviceCache, newDeviceMap);
@@ -280,13 +286,14 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
     }
 
     /// <summary>
-    /// Ends every active <see cref="WatchAsync"/> enumeration normally, clears the cache, and resets
+    /// Ends healthy active <see cref="WatchAsync"/> enumerations normally, clears the cache, and resets
     /// <see cref="HasData"/> so the discarded cache is no longer reported as valid. Idempotent.
     /// </summary>
     /// <remarks>
     /// Disposal never waits on the diff lock. It marks the repository disposed, completes event delivery,
     /// and discards membership under the short state lock. An abandoned diff can finish its internal work,
     /// but cannot restore a snapshot or cache validity, or publish through the completed hub.
+    /// Already-buffered history can drain, and an earlier terminal monitoring fault is not overwritten.
     /// </remarks>
     public void Dispose()
     {

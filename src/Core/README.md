@@ -67,8 +67,10 @@ an apparently live, frozen cache.
 Create it with `await YubiKeyManager.CreateMonitorAsync(cancellationToken)` and dispose with `await using`.
 Initialization registers listeners before the loop's single initial scan and waits for publication,
 including successful empty discovery. Startup failure/cancellation cleans up the partial lifetime; the
-creation token does not control the monitor after successful creation. The initial interval is five seconds.
-There is no process-global monitoring lifetime or device cache.
+creation token does not control the monitor after successful creation. One internal worker performs all
+initial, listener-triggered, and five-second fallback scans sequentially. There is no manual refresh or
+stop/restart mode: dispose the monitor and create a new one to recover from terminal failure. There is no
+process-global monitoring lifetime or device cache.
 
 Share one host-owned monitor between long-lived components rather than letting each component take over
 tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a
@@ -84,6 +86,13 @@ captured replay and published deltas to drain, but new enumerations complete emp
 
 Do not combine a separate `CurrentDevices` read with a subscription and assume that it is race-free.
 Use the replaying stream to initialize a UI projection; use `CurrentDevices` for point-in-time lookups.
+
+Disposal closes public access, retires discovery ingress, and waits once for the worker loop with a
+ten-second drain budget before disposing the repository. This is **not** a total disposal timeout or a
+deadline for native listener cleanup. Already-open discovery reads retain their native admission and
+lease until actual teardown; a late result cannot restore disposed membership or emit new events.
+Already-committed replay/deltas may still drain. See the [monitor architecture](../../docs/architecture/event-driven-device-discovery.md#single-lifetime-worker-and-shutdown)
+for the ownership and concurrency boundaries.
 
 ### Discover selected interfaces once
 

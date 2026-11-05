@@ -24,9 +24,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <remarks>
 /// <para><strong>The publisher is never handed to a consumer.</strong> <see cref="Publish"/> only writes
 /// into per-watcher bounded buffers and returns; no consumer code runs on the publishing thread, and no
-/// consumer can block, slow, or fault a publication. That is what lets the device monitor hold its
-/// publication gate across <see cref="YubiKeyDeviceRepository.UpdateCache"/> without a slow watcher
-/// wedging device monitoring.</para>
+/// consumer can block, slow, or fault a publication. The repository can therefore enqueue a complete
+/// diff under its short state lock without a slow watcher wedging device monitoring.</para>
 /// <para><strong>Every watcher is independent.</strong> Each enumeration owns a
 /// <see cref="WatcherBufferCapacity"/>-event buffer. Overflow, cancellation, and abandonment terminate
 /// only the watcher they happen to; the publisher and every other watcher continue unaffected.</para>
@@ -43,7 +42,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <para><see cref="Complete"/> is idempotent, ends every current watcher (normally or with a supplied
 /// terminal monitoring error), and makes later enumerations observe the same outcome. Ordering across
 /// concurrent <see cref="Publish"/> calls is the caller's
-/// responsibility; the monitor's publication gate provides it.</para>
+/// responsibility; the repository enqueues each complete diff under its state lock, and the monitor's
+/// sole worker loop awaits each <see cref="YubiKeyDeviceRepository.UpdateCache"/> before scanning again.</para>
 /// </remarks>
 internal sealed class DeviceEventHub
 {
@@ -199,7 +199,7 @@ internal sealed class DeviceEventHub
                 SingleWriter = false,
 
                 // Keep reader continuations off the publishing thread so a consumer cannot stall the
-                // monitor while it holds the repository publication gate.
+                // repository while it holds its short state lock to enqueue a complete diff.
                 AllowSynchronousContinuations = false,
 
                 // TryWrite reports a full buffer without blocking the publisher.
@@ -220,7 +220,7 @@ internal sealed class DeviceEventHub
             // A terminated watcher stays in the publisher's snapshot until its enumerator is disposed,
             // and an abandoned enumerator never disposes. Without this check every later Publish would
             // allocate and format a fresh overflow exception for a buffer that can never accept it —
-            // once per event, forever, on the path the monitor holds its publication gate across.
+            // once per event, forever, inside the repository's short state-lock publication boundary.
             if (_terminated)
             {
                 return;

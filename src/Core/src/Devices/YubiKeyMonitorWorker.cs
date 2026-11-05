@@ -24,6 +24,13 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <summary>
 /// Owns listeners and one sequential discovery/publication loop, borrowing the owner's repository.
 /// </summary>
+/// <remarks>
+/// Initialized once before public exposure, then retired by <see cref="YubiKeyMonitor"/>. Initial,
+/// listener-triggered, and fallback scans all await full publication inside the same loop; there is no
+/// manual rescan, restart, or replacement monitor generation. The ingress lock orders evidence
+/// invalidation against final finder read-scope retirement, not scanning or repository commits.
+/// The owner disposes the repository after the worker's one bounded managed-loop drain.
+/// </remarks>
 internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyMonitorWorker>();
@@ -39,6 +46,8 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
 
     private readonly YubiKeyDeviceRepository _repository;
     private readonly IFindYubiKeys _findYubiKeys;
+    // Callback acceptance/invalidation and final finder retirement share this boundary. Discovery,
+    // repository diffing, logging, worker-token cancellation, and listener cleanup stay outside it.
     private readonly Lock _ingressLock = new();
     private readonly TimeSpan _shutdownTimeout;
     private readonly DeviceMonitorSignal _signal = new();
@@ -65,6 +74,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     /// <summary>Read-only observation of the one loop task, retained through disposal.</summary>
     internal Task MonitoringCompletionForTest => _monitoringTask ?? Task.CompletedTask;
 
+    /// <summary>Starts the sole lifetime and awaits its first successful repository publication.</summary>
     internal async Task InitializeAsync(TimeSpan interval, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

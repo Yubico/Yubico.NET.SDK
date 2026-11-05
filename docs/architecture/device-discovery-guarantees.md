@@ -62,7 +62,7 @@ observed at read time, and a hit under a different PID is a miss. Pinned by
 `FindAllAsync_SameSlotSwapWithTransportActivity_DoesNotServeStaleMetadata`,
 `NotifyTransportActivity_HidOnly_EvictsPcscIdentityEvidenceToo`, and
 `FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit`; the monitor wiring by
-`ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport`.
+`YubiKeyMonitorWorkerTests.ListenerEvents_NotifyTheFinderOfTransportActivity_EvictingEvidenceGlobally`.
 
 Documented monitor bound: if no listener event reports the change, staleness detection degrades to
 scan-observed absence. An interval scan after replugging need not invalidate same-interface evidence.
@@ -165,6 +165,30 @@ large-replay, overflow/resubscription, cancellation, disposal, and terminal-fail
 `YubiKeyMonitorTests` pin those boundaries. Dispose/recreate starts a new identity-retention lifetime.
 `OwnedMonitorReadOnlyTests` adds two-fixture public-factory/replay/lifetime checks and sequential live
 metadata comparisons after disposal. These unattended checks do not replace attended hotplug acceptance.
+
+The public owner composes one internal `YubiKeyMonitorWorker` and repository. Initial, listener-driven,
+and fallback discovery/publication are awaited by the same sequential loop, without a manual-rescan API,
+restart mode, or monitor generations. `ConcurrentListenerEvents_DoNotRunConcurrentRescans` and
+`EventStorm_DuringBlockedScan_ProducesExactlyOneFollowUpScan` in `YubiKeyMonitorWorkerTests`, plus
+`YubiKeyMonitorTests.ListenerScans_WaitForPublication_AndPublishOrderedDeltas`, pin the single producer.
+
+The worker's sole ingress lock orders evidence invalidation/signaling against final finder read-scope
+retirement (`DisposeAsync_OrdersAdmittedListenerActivity_AndIgnoresCapturedLateCallback`). Finder evidence
+epochs/read scopes are retained native-read safety, **not** replacement monitor generations. Queued reads
+retire; already-open reads keep actual admission/leases until native teardown, including after the one
+ten-second managed-loop drain expires. That budget is not a native listener or total disposal timeout.
+`CreateAsync_CancellationRetainsAdmittedReadLeaseUntilNativeTeardown` and
+`DisposeAsync_RetiresQueuedBuiltInFinderReadsBeforeWorkerCapacityReturns` pin those ownership boundaries.
+
+The owner closes public access first and disposes the repository in `finally` after worker teardown.
+Repository diff serialization is separate from its short state boundary for final membership/event
+commits, atomic snapshot/replay registration, failure, and disposal. A diff already in progress may overlap
+teardown, but its final disposed/failed check rejects a late commit; previously committed history may
+drain. `DisposeAsync_LoopParkedInsideRepositoryDiff_RejectsLateCommit`, both `YubiKeyMonitorLifecycleTests`
+cases, and `YubiKeyDeviceRepositoryTests` pin that distinction. Concurrent disposal completion and causal
+failure publication before a blocked/throwing logger are pinned by
+`DisposeAsync_ConcurrentCallsShareCompletion_UntilRepositoryTeardownFinishes` and
+`TerminalLoopFailure_ThrowingLogger_CannotPreventFailurePublicationOrDisposal` in `YubiKeyMonitorTests`.
 
 ## Device identity: what `DeviceId` does and does not promise
 

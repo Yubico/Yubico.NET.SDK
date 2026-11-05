@@ -47,7 +47,6 @@ public class YubiKeyMonitorWorkerTests
         var devices = repository.GetAll();
         Assert.Equal(2, devices.Count);
         Assert.True(repository.HasData);
-
     }
 
     [Fact]
@@ -74,7 +73,6 @@ public class YubiKeyMonitorWorkerTests
         Assert.Contains(devices, d => d.DeviceId == "device-2");
         Assert.Contains(devices, d => d.DeviceId == "device-3");
         Assert.DoesNotContain(devices, d => d.DeviceId == "device-1");
-
     }
 
     [Fact]
@@ -93,10 +91,7 @@ public class YubiKeyMonitorWorkerTests
         Assert.Single(events);
         Assert.Equal(DeviceAction.Added, events[0].Action);
         Assert.Equal("device-1", events[0].Device.DeviceId);
-
     }
-
-
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
@@ -114,7 +109,6 @@ public class YubiKeyMonitorWorkerTests
         Assert.True(repository.HasData);
         Assert.Single(repository.GetAll());
         Assert.Equal(1, findYubiKeys.ScanCount);
-
     }
 
     [Fact]
@@ -197,7 +191,6 @@ public class YubiKeyMonitorWorkerTests
         await findYubiKeys.WaitForCompletedScanAsync(2, TestContext.Current.CancellationToken);
         await monitor.DisposeAsync();
         Assert.Equal(1, findYubiKeys.MaxConcurrentScans);
-
     }
 
     [Fact]
@@ -630,16 +623,11 @@ public class YubiKeyMonitorWorkerTests
 
         public bool ThrowOnStart { get; init; }
 
-        public bool ThrowOnStop { get; init; }
-
         public DeviceListenerStatus StartStatus { get; init; } = DeviceListenerStatus.Started;
-
-        public Action<HidDeviceRescanHint>? CapturedDeviceEvent { get; private set; }
 
         public override void Start()
         {
             StartCount++;
-            CapturedDeviceEvent = DeviceEvent;
             if (ThrowOnStart)
                 throw new InvalidOperationException("Expected HID start failure.");
 
@@ -649,9 +637,6 @@ public class YubiKeyMonitorWorkerTests
         public override void Stop()
         {
             StopCount++;
-            if (ThrowOnStop)
-                throw new InvalidOperationException("Expected HID stop failure.");
-
             Status = DeviceListenerStatus.Stopped;
         }
 
@@ -811,5 +796,4 @@ public class YubiKeyMonitorWorkerTests
             }
         }
     }
-
 }

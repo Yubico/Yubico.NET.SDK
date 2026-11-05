@@ -7,15 +7,15 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 namespace Yubico.YubiKit.Piv;
 
 /// <summary>
-/// Utilities for encoding PIN and PUK values according to PIV specification.
+/// Encodes credential bytes for the YubiKey PIV command helpers.
 /// </summary>
 /// <remarks>
 /// <para>
-/// PIV PIN/PUK encoding requires:
-/// - UTF-8 encoding of the PIN characters
-/// - Maximum 8 bytes
-/// - Padding with 0xFF to reach 8-byte length
-/// - Empty PIN is encoded as 8 bytes of 0xFF
+/// Character overloads encode UTF-8; byte overloads preserve supplied bytes. Each field is padded
+/// on the right with FF to eight bytes; empty inputs become eight FF bytes. These helpers enforce
+/// a maximum width, while public operations and the card enforce their additional policy.
+/// SP 800-73-4 Part 2 §2.4.3 specifies an ASCII decimal PIN and a binary eight-byte PUK;
+/// unrestricted UTF-8 acceptance is an SDK mechanism rather than that federal profile's rule.
 /// </para>
 /// </remarks>
 internal static class PinUtilities

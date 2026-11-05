@@ -1,0 +1,15 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/verify-v4.py v4 prepared
+PASS: 730 explicit unit dispositions, 45 complete groups, 36 shipping source paths; current bodies, typed wrappers and source/configuration identities reconcile.
+PENDING: builds, C# binding/analyzers and actual compiler captures. Example/sample/test/hardware execution remains separately scoped.
+
+EXIT=0
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/verify-source-context-v4.py
+PASS: 61 baseline originals, 60 current bodies, 47 selected bodies in 45 typed groups; 730 explicit dispositions; 111 module sources / four module and six shared documents; all 36 original actual-PivTool sources/project retained; complete wrapper transforms and corrected F9 shape reconcile.
+PENDING: coordinator consumer/annotation/actual-shipping builds, actual Csc/source/reference/analyzer/config/assets captures and live dependency verification. Preparation establishes no new compilation or device result.
+
+EXIT=0
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/verify-preparation.py
+PASS: 551 historical artifacts preserved; nine exact tool adaptations; accepted 59/50 path scope, 111 module sources/ten documents, 45 unchanged groups/47 selected bodies, 730 actual unit dispositions, fresh v4 hosts and unchanged proven graph/order-neutral algorithms (5/12, 2/4, 5/10).
+PENDING: fresh v4 consumer/annotation/actual-shipping builds, immediate captures and final live verification. Earlier successful v3 compiler/binary evidence remains historical; this check runs no build, test, capture or device operation.
+
+EXIT=0

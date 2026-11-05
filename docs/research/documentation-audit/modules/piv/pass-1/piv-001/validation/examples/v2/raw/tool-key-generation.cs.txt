@@ -1,0 +1,17 @@
+
+// Requires an authorized target slot and a borrowed active managementKey buffer.
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.AuthenticateAsync(managementKey, ct);
+
+var result = await KeyGeneration.GenerateKeyAsync(
+    session,
+    Slot.Authentication,
+    KeyType.P256,
+    PinPolicy.Once,
+    TouchPolicy.Cached,
+    ct);
+
+if (result.Success)
+{
+    var publicKeyBytes = result.PublicKey;
+}

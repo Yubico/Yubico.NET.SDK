@@ -1,0 +1,7 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare.py prepare --acceptance-sha256 f42cd302c8210179a32d7e13419f7a2dfaaf41aa66b1ab9aa70b9c0bb229ae11
+Retained 730 complete current fence/inline/XML/mapping/task bodies in docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/inventory.json; assign every identity an explicit disposition before extraction.
+Prepared 45 complete task groups/730 explicit body dispositions and actual 36-source PivTool context; coordinator compilation/capture follows.
+Bound 61 original body hashes, 60 current bodies (42 module + 18 shared), all 111 module C# identities, ten document identities and complete original 36-source actual PivTool/project text; corrected F9 result/JSON qualification retained.
+Prepared fresh v3: one accepted annotation body change plus separate README inline-selector dispositions, unchanged 111 C# sources and 44 consumer groups; unique v3 hosts, full actual shipping project and versioned graph/canonical-analyzer tools. Builds/captures remain coordinator-owned.
+
+EXIT=0

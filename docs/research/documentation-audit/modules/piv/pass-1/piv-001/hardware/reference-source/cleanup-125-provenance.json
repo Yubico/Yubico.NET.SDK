@@ -1,0 +1,160 @@
+{
+  "status": "prepared-not-executed",
+  "canonical": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-cleanup-v2.py",
+    "sha256": "6042cef33b929136b3035c904255e3b18691f7cda96c789f2532fe2e7f3ad1a5",
+    "bytes": 17838
+  },
+  "target": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-cleanup-125.py",
+    "sha256": "9c079d681750ec8a3aef903d9b6f5e70ae11fb0050d9914130786709ca3714d3",
+    "bytes": 17838
+  },
+  "baseline": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/baseline-125.json",
+    "sha256": "1bac12341dfa823dfc5106a7b4ce78dee4497c2d14edcfd0cf3f112d9fd92705",
+    "serial": 125,
+    "selected_reader": "Yubico YubiKey OTP+FIDO+CCID 01 00",
+    "device": {
+      "serial": 125,
+      "firmware": "5.8.0",
+      "version_name": "5.8.0.alpha.2",
+      "management_applet_version": "5.8.0",
+      "version_qualifier": {
+        "version": "5.8.0",
+        "type": "ALPHA",
+        "iteration": 2
+      },
+      "provenance": "fresh ManagementSession.read_device_info on selected CCID connection",
+      "transport": "USB",
+      "form_factor": "USB_A_KEYCHAIN",
+      "fips": false,
+      "reset_blocked": 0
+    },
+    "piv": {
+      "public_api_version": "0.0.1",
+      "raw_applet_version_hex": "000001",
+      "version_source": "PIV GET VERSION (FD), independent of Management DeviceInfo",
+      "serial": {
+        "state": "present",
+        "value": 125
+      }
+    },
+    "ordinary_slots_empty": 24,
+    "pin": {
+      "state": "present",
+      "value": {
+        "default_value": true,
+        "total_attempts": 3,
+        "attempts_remaining": 3
+      }
+    },
+    "puk": {
+      "state": "present",
+      "value": {
+        "default_value": true,
+        "total_attempts": 3,
+        "attempts_remaining": 3
+      }
+    },
+    "management_key": {
+      "state": "present",
+      "value": {
+        "key_type": 10,
+        "default_value": true,
+        "touch_policy": 1
+      }
+    },
+    "attestation": {
+      "name": "ATTESTATION",
+      "metadata": {
+        "state": "present",
+        "value": {
+          "algorithm_id": 7,
+          "algorithm": "RSA2048",
+          "pin_policy_id": 2,
+          "pin_policy": "ONCE",
+          "touch_policy_id": 1,
+          "touch_policy": "NEVER",
+          "origin": "imported-or-other",
+          "public_key_encoded_sha256": "f0eb02559c7875ee51e0dee8f22ecf9f68fef5e0f137e973e2042d40d352cd74",
+          "spki_sha256": "5fbb057994305ab5e98f70b6c17a582fee5ccff580aeb8c9d821cf52ff3d4c27",
+          "spki_length": 294
+        }
+      },
+      "certificate": {
+        "state": "present",
+        "value": {
+          "der_sha256": "84d4b3407b5ca5743ae7f0ea46a58ccb493db357f877483e5c288790fe34fd1a",
+          "der_length": 793,
+          "spki_sha256": "5fbb057994305ab5e98f70b6c17a582fee5ccff580aeb8c9d821cf52ff3d4c27",
+          "spki_length": 294
+        }
+      }
+    }
+  },
+  "allowlisted_substitutions": [
+    {
+      "before": "3f160854e948cb01f3e535efe0e59cdf5df5eb67b94cdeb7658b0de9d1223718",
+      "after": "1bac12341dfa823dfc5106a7b4ce78dee4497c2d14edcfd0cf3f112d9fd92705",
+      "expected_count": 1,
+      "actual_count": 1
+    },
+    {
+      "before": "Yubico YubiKey OTP+FIDO+CCID 00 00",
+      "after": "Yubico YubiKey OTP+FIDO+CCID 01 00",
+      "expected_count": 1,
+      "actual_count": 1
+    },
+    {
+      "before": "serial-103",
+      "after": "serial-125",
+      "expected_count": 1,
+      "actual_count": 1
+    },
+    {
+      "before": "baseline-103.json",
+      "after": "baseline-125.json",
+      "expected_count": 1,
+      "actual_count": 1
+    },
+    {
+      "before": " == 103",
+      "after": " == 125",
+      "expected_count": 3,
+      "actual_count": 3
+    },
+    {
+      "before": "serial 103",
+      "after": "serial 125",
+      "expected_count": 1,
+      "actual_count": 1
+    },
+    {
+      "before": "serial=103",
+      "after": "serial=125",
+      "expected_count": 3,
+      "actual_count": 3
+    }
+  ],
+  "unified_diff": "--- vendor-cleanup-v2.py (serial 103 canonical)\n+++ vendor-cleanup-125.py (serial 125 derivative)\n@@ -1,5 +1,5 @@\n #!/usr/bin/env python3\n-\"\"\"Restore the captured serial-103 PIV baseline through a bounded vendor path.\"\"\"\n+\"\"\"Restore the captured serial-125 PIV baseline through a bounded vendor path.\"\"\"\n \n import argparse\n from contextlib import contextmanager\n@@ -21,10 +21,10 @@\n from yubikit.piv import DEFAULT_MANAGEMENT_KEY, MANAGEMENT_KEY_TYPE, PivSession\n \n \n-BASELINE_HASH = \"3f160854e948cb01f3e535efe0e59cdf5df5eb67b94cdeb7658b0de9d1223718\"\n+BASELINE_HASH = \"1bac12341dfa823dfc5106a7b4ce78dee4497c2d14edcfd0cf3f112d9fd92705\"\n STATE_HELPER_HASH = \"41aa7200cd912a5f7a1438ad693fff83ad36b32873540b8a70d1b578f976600a\"\n MANIFEST_HASH = \"ebd4aa11daec37265b8c2b027d31bdfdd871d850b7b7b637a4a5ffb07fa96f5d\"\n-READER = \"Yubico YubiKey OTP+FIDO+CCID 00 00\"\n+READER = \"Yubico YubiKey OTP+FIDO+CCID 01 00\"\n HERE = Path(__file__).resolve().parent\n \n \n@@ -73,11 +73,11 @@\n \n \n def validate_baseline(path, args):\n-    require(digest(path) == BASELINE_HASH, \"Require the exact successful baseline-103.json\")\n+    require(digest(path) == BASELINE_HASH, \"Require the exact successful baseline-125.json\")\n     state = json.loads(path.read_text())\n     require(state[\"status\"] == \"captured\" and state[\"failures\"] == [], \"Baseline contains failures\")\n-    require(args.serial == args.authorize_reset_serial == state[\"requested_serial\"] == 103,\n-            \"Both explicit serial arguments must authorize captured serial 103\")\n+    require(args.serial == args.authorize_reset_serial == state[\"requested_serial\"] == 125,\n+            \"Both explicit serial arguments must authorize captured serial 125\")\n     require(args.reader == state[\"selected_reader\"] == READER, \"Exact captured reader guard failed\")\n     require(state[\"pin\"][\"value\"] == state[\"puk\"][\"value\"] == {\n         \"default_value\": True, \"total_attempts\": 3, \"attempts_remaining\": 3}, \"Baseline retry/default guard\")\n@@ -160,7 +160,7 @@\n         management = ManagementSession(trace)\n         info = management.read_device_info()\n         expected = baseline[\"device\"]\n-        require(info.serial == args.serial == 103, \"Live Management serial mismatch\")\n+        require(info.serial == args.serial == 125, \"Live Management serial mismatch\")\n         require(str(info.version) == expected[\"firmware\"] and info.version_name == expected[\"version_name\"]\n                 and str(management.version) == expected[\"management_applet_version\"], \"Live firmware mismatch\")\n         require(info.form_factor.name == expected[\"form_factor\"] and not info.is_fips\n@@ -268,7 +268,7 @@\n     require(result.returncode == 0, \"Public capture failed: \" + suffix)\n     state = json.loads(output.read_text())\n     require(state[\"status\"] == \"captured\" and state[\"failures\"] == [], \"Public capture contains failures\")\n-    require(state[\"requested_serial\"] == 103 and state[\"selected_reader\"] == args.reader,\n+    require(state[\"requested_serial\"] == 125 and state[\"selected_reader\"] == args.reader,\n             \"Public capture identity mismatch\")\n     require(state[\"provenance\"] == baseline[\"provenance\"], \"Public capture source/runtime identity changed\")\n     delta = differences(stable(baseline), stable(state))\n@@ -280,7 +280,7 @@\n         require(actual == expected, \"Public identity/F9 mismatch: \" + suffix + \"/\" + key)\n     if suffix != \"before\":\n         require(delta == [], \"Public state differs from baseline: \" + suffix)\n-    receipt.event(\"public-capture-verified\", label=suffix, serial=103, differences=len(delta))\n+    receipt.event(\"public-capture-verified\", label=suffix, serial=125, differences=len(delta))\n     return state\n \n \n@@ -295,10 +295,10 @@\n                 \"Actual algorithm and vendor public factory key width mismatch\")\n         trace.phase = \"factory-pin\"\n         session.verify_pin(\"123456\")\n-        receipt.event(\"factory-pin-verified\", serial=103)\n+        receipt.event(\"factory-pin-verified\", serial=125)\n         trace.phase = \"factory-management\"\n         session.authenticate(DEFAULT_MANAGEMENT_KEY)\n-        receipt.event(\"factory-management-authenticated\", serial=103, algorithm=algorithm.name,\n+        receipt.event(\"factory-management-authenticated\", serial=125, algorithm=algorithm.name,\n                       algorithm_id=int(algorithm), credential_source=\"installed public DEFAULT_MANAGEMENT_KEY\")\n \n \n",
+  "checks": {
+    "exact_forward_transform": true,
+    "exact_inverse_transform": true,
+    "python_ast": "accepted without executing helper",
+    "canonical_103_source_unchanged": true,
+    "installed_vendor_sources_and_snapshots": "nine pairs match frozen manifest",
+    "physical_operations": "not requested; unattended multikey remains in scope"
+  },
+  "inherited_behavior": [
+    "exact target baseline hash and reader/serial guards",
+    "fresh identity and F9 captured-field/certificate guards before retry mutation",
+    "actual baseline firmware qualifier; no global/private version override",
+    "bounded PIN/PUK blocking and reset",
+    "actual AES192 factory default authentication only after successful reset",
+    "three fresh independent public captures",
+    "all stable fields compared; only utc/mode excluded",
+    "payload-free header/status journal; no protected secret reads",
+    "exclusive evidence retention; 180-second process deadline and per-capture 45-second bound"
+  ]
+}

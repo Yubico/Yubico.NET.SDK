@@ -1,0 +1,24 @@
+# dotnet toolchain.cs -- docs-qa
+# started:   2026-11-05 08:40:08 +01:00
+# directory: /home/rupicola/Code/y/Yubico.Yubikit.NET
+# git:       yubikit-docs-audit @ 727fe43a (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: docs-qa  (log: artifacts/toolchain/runs/20261105-084008-389-docs-qa/run.log)
+
+▶ target: docs-qa
+
+=== Validating active documentation ===
+
+▶ RUN dotnet msbuild /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj -getProperty:YubiKitDocsBranch -getProperty:PackageProjectUrl -nologo (output captured)
+✓ Validated 73 active documentation file(s)
+✓ Validated 10 package readme(s)
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- docs-qa)
+Targets:
+  ✓ docs-qa     0.3s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261105-084008-389-docs-qa/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

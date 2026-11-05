@@ -1,0 +1,212 @@
+{
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "source_archive": {
+    "manifest": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/record-manifest.json",
+    "manifest_sha256": "71698c428044b99165fb68759a2e47b6af701187f0ddb7b5838e5bc3278bf7ee",
+    "files": 607
+  },
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/run-command.py",
+      "source_sha256": "94bfa5f5992649231c9b817e94502af0ff4bb6ed99b67efd4aaf2e3047233db8",
+      "target": "run-command.py",
+      "target_sha256": "08a1b497038dda95b390ebd0e1c660455c48c967cb2004ce6f345a483d046451",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "Reused from final frozen YubiHSM validation/run-command.py.",
+          "after": "Reused from final frozen OpenPGP validation/run-command.py.",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "name, *command = sys.argv[1:]",
+          "after": "if (HERE.parent / 'record-manifest.json').exists():\n    raise SystemExit('Run is frozen')\nname, *command = sys.argv[1:]",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/check-records.py",
+      "source_sha256": "68132bb297be13519f196739dfc754953025755511f2baa262c6ae1ff49bc137",
+      "target": "check-records.py",
+      "target_sha256": "cfd53cbd28d7dee934c0477e3e36dcdfea9d36d1f2197bda84b8868af4d1a8a2",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "print('NOT RUN: final reviewed-files hash check (use --reviewed after review). No module content or external target contents opened.')",
+          "after": "print('PENDING: final reviewed-files hash check; use --reviewed after review. Scope: record text and local-target existence.')",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/manifest.py",
+      "source_sha256": "ee22c3e37d1f366f1483bd6313ad9c00ad7409c45d50bb9dc957ed1c90973413",
+      "target": "manifest.py",
+      "target_sha256": "8e96422791f1f0ac11c1ba416055547caf0a854371e18498d21e3ede2c2904cc",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+          "after": "727fe43afc430c5d8364d868a6436de50626e476",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "'openpgp-001'",
+          "after": "'piv-001'",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/check-preserved.py",
+      "source_sha256": "b39f93bc94e25b63353065a9862288b84db2b182430c72b89090737610622fe3",
+      "target": "check-preserved.py",
+      "target_sha256": "a6728406bec18c2aa3d5e7a59a0058b54ff8f8af1ce5c6cadbf0a9d53a607f3d",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "require([r['checked'] for r in archives] == [784, 402, 534, 164, 433, 477], 'Unexpected prior archive baseline counts')",
+          "after": "require(len(archives) == 7 and sum(r['files'] for r in archives) == 3401, 'Unexpected prior archive baseline counts')",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "require(archive['result'] == 'pass' and len(rows) == archive['checked'],",
+          "after": "require(len(rows) == archive['files'],",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "print('PASS: all four original user files unchanged; prior archives were read only.')",
+          "after": "integration = json.loads((RUN / 'integration-baseline.json').read_text())\nrequire(integration['commit'] == '727fe43afc430c5d8364d868a6436de50626e476', 'Integration baseline changed')\nrequire(len(integration['files']) == len({row['path'] for row in integration['files']}) == 114, 'Integration path set changed')\nfor row in integration['files']:\n    data = read_safe(ROOT, row['path'])\n    require(hashlib.sha256(data).hexdigest() == row['sha256'], f\"Changed integration evidence: {row['path']}\")\nprint('PASS: 3,401 prior artifacts, four original user files and 114 PR745 integration files preserved.')",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/checker/src/Program.cs",
+      "source_sha256": "e160a62ca74ab5de682dcc3915317253deff653b655571018a14b1ca541c7dc8",
+      "target": "checker/src/Program.cs",
+      "target_sha256": "400b8242e144b4e152409f7b95d382cdbc9ab747ea90324639b7990f069ffd6c",
+      "operations": [
+        {
+          "operation": "remove-between-markers",
+          "start": "static async Task<int> CheckImportRemovalsAsync(",
+          "end": "static (string[] Tokens, string[] Trivia) Shape(",
+          "removed_sha256": "54006711382403959d57ef23b897afb85750bf3d34ce1e351cb3aefb40af35d2",
+          "removed_bytes": 14889
+        },
+        {
+          "operation": "remove-between-markers",
+          "start": "static int Compile(",
+          "end": "static string Hash(",
+          "removed_sha256": "ded29b6624740f325bcfed5d42b6fb641f9d15b09052e48cfa6a441716fb6ddb",
+          "removed_bytes": 5186
+        },
+        {
+          "operation": "literal-replace",
+          "before": "fe180282a2d77b15eaaa5868d6c8b00e251d1f05",
+          "after": "727fe43afc430c5d8364d868a6436de50626e476",
+          "count": 2
+        },
+        {
+          "operation": "literal-replace",
+          "before": "            [\"tokens-import-removals\", var root, var manifest] => await CheckImportRemovalsAsync(Path.GetFullPath(root), manifest),\n",
+          "after": "",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "            [\"compile\", var source, var root, .. var modules] => Compile(source, Path.GetFullPath(root), modules),\n",
+          "after": "",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "Usage: DocCheck tokens <repo> | tokens-import-removals <repo> <run-local import-removals.json> | api <repo> | compile <source.cs> <repo> [SDK module ...] [--reference <assembly.dll> ...] [--identity-comparer default|desktop]",
+          "after": "Usage: AuditPiv001.Checker tokens <repo> | api <repo>",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "if (oldPaths.Length == 0 || !oldPaths.SequenceEqual(currentPaths))",
+          "after": "if (oldPaths.Length != 20 || !oldPaths.SequenceEqual(currentPaths))",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/checker/Directory.Build.props",
+      "source_sha256": "db83f187988d3dcaeb481e39f995e6728e51af0e35fa026bd1e7e26aea930412",
+      "target": "checker/Directory.Build.props",
+      "target_sha256": "3f6a132bfdbdeb5fb9339e1462b55b55c4b86b54f2ce5ceea5afa8bee034b11f",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "/tmp/opencode/openpgp-001-doccheck",
+          "after": "/tmp/opencode/piv-001-doccheck",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/checker/Directory.Build.targets",
+      "source_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a",
+      "target": "checker/Directory.Build.targets",
+      "target_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a",
+      "operations": []
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/checker/src/Yubico.YubiKit.AuditPgp001.Checker.csproj",
+      "source_sha256": "c07aa0fe34dc7cbff1476b513b4943ecd3314c697a68a434b6ac5f18f4d7349f",
+      "target": "checker/src/Yubico.YubiKit.AuditPiv001.Checker.csproj",
+      "target_sha256": "36ee2952ee6d893195927c7587105cfa0d3e9a33f1149eebdcfdfacfcb2c0035",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "Yubico.YubiKit.AuditPgp001.Checker",
+          "after": "Yubico.YubiKit.AuditPiv001.Checker",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/analyzer_policy.py",
+      "source_sha256": "cef301784921c7d856e67d95df07681c8ee9fa40aafe2505b7a6503a46f8f2fd",
+      "target": "examples/analyzer_policy.py",
+      "target_sha256": "da0e26e4daad4a704b00ac3d96450df0986183bb8317c25e03f9c15db46ba855",
+      "operations": [
+        {
+          "operation": "truncate-before-marker",
+          "marker": "def receipt():"
+        }
+      ]
+    }
+  ],
+  "baselines": [
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/inventory.json",
+      "sha256": "efd1e3285f0dbdd1a30ad06483a409be1b6d062f45d44a35f5a370e6a21b6384"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/prior-archive-baseline.json",
+      "sha256": "34caf0aa694a1b0d16b2d524b4acf3664c00f61df6cb1541ba8c71c33f9d74e9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/user-work-baseline.json",
+      "sha256": "8515cd743225e2c74b1249d0b7dc41226575f8a4d006835bafab3c25b0c95dc8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/integration-baseline.json",
+      "sha256": "c4b2215bd281e4492cb3be81f20592411f6b7970417dfbbe7b6c991d0809c458"
+    }
+  ],
+  "generator": {
+    "path": "prepare-tools.py",
+    "sha256": "214eaab9280e8761e2a5277203ffc816d13278eb70eae055b08a7fd22f338af4"
+  },
+  "policy": "Fresh prepared sources only; strict Roslyn tokens/directives and all 20 API snapshots. Import-removal and ad-hoc compilation routes removed. Historical result rows remain in frozen archives."
+}

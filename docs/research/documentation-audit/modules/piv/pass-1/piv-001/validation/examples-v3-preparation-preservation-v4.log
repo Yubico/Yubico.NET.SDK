@@ -1,0 +1,5 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-preparation.py
+PASS: 247 historical artifacts preserved; nine versioned tool transformations replayed; 57 current accepted products, sole annotation fence change plus README inline-selector dispositions, 730 current units, unchanged 44 consumer groups, fresh v3 namespaces and exact 5/12, 2/4, 5/10 graph contexts reconciled.
+PENDING: fresh v3 consumer/annotation/actual-shipping builds, immediate captures and final --live verification. Prior v2 compilation/capture/failure evidence stays attached to v2.
+
+EXIT=0

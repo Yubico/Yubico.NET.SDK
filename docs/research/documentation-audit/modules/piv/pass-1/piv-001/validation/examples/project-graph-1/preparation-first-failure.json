@@ -1,0 +1,11 @@
+{
+  "command": "python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/project-graph-1/prepare.py",
+  "exit": 1,
+  "tool_sha256": "aa1300989d59eef07016b79517ce3af11b9a81268d45eafc4a3d05aacbc1d646",
+  "phase": "static context-metadata preparation",
+  "error": "ValueError: Context-specific graph metadata changed; adjudicate before capture",
+  "original_expected_counts": { "consumer": [5, 12], "annotations": [2, 4], "pivtool": [5, 11] },
+  "observed_recursive_xml_counts": { "consumer": [5, 12], "annotations": [2, 4], "pivtool": [5, 10] },
+  "correction": "The graph excludes its root host. The actual PivTool root has ten reachable project dependencies; consumer includes PivTool plus WebAuthn and has twelve. Derive and pin exact closure node sets from recursive XML rather than asserting a copied or guessed closure count.",
+  "scope": "Preparation stopped before receipt creation. Additive tools were source-only and no capture/build/test/device operation ran. Original v2 tools, extraction, failed consumer capture and intact consumer workspace stayed unchanged."
+}

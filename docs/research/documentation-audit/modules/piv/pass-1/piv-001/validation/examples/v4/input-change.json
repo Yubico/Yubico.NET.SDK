@@ -1,0 +1,22 @@
+{
+  "parent_inventory": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/inventory.json",
+    "bytes": 329183,
+    "sha256": "32bcffff1170d13e1bffcefa6517ed266ef646ab479f704bfedea68738ff4933"
+  },
+  "current_inventory": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4/inventory.json",
+    "bytes": 329447,
+    "sha256": "3d4feafcc4922eb11336d4c1ff5a2c941ec2a496ca9938ef1278f360832a0e6f"
+  },
+  "changed_source_paths": [
+    "src/Piv/examples/PivTool/PivExamples/Results/KeyGenerationResult.cs",
+    "src/Piv/src/Cryptography/PrivateKeyOperations.cs"
+  ],
+  "unchanged_complete_bodies": true,
+  "prose_changes": [],
+  "removed_prose_units": [],
+  "current_unit_count": 730,
+  "previous_unit_count": 730,
+  "compilation_scope": "All v4 contexts await fresh builds/captures; valid v3 records retain their historical source/binary context."
+}

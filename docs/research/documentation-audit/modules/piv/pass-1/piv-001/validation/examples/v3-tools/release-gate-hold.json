@@ -1,0 +1,10 @@
+{
+  "command": "python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare.py",
+  "exit": 1,
+  "initial_tool_sha256": "e5d67d60414159b975c18a62f4e556f514b2d62e712d920b65407639f4291ef7",
+  "output": "preparation.log",
+  "phase": "release identity gate before any v3 manifest or body extraction",
+  "error": "ValueError: Current post-format accepted file changed: src/Piv/README.md",
+  "explanation": "The coordinator was applying the separately announced README canonical-selector correction while the initial gate still targeted the annotation-only acceptance. The gate correctly stopped before writing a v3 manifest. Independent versioned tool preparation now has a source-only stage; final extraction requires the later review-accepted-v3.json and matching reconciled final hashes.",
+  "scope": "Release hold only; original v2 sources/tools/manifests/failed and successful captures remain preserved. No new build, test, capture, formatter or device operation ran."
+}

@@ -1,0 +1,23 @@
+commit fe91d0ecc8d568a3ccbce3d276f1871af25d0aa0
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Wed Apr 30 14:56:01 2025 +0200
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Wed Apr 30 14:56:01 2025 +0200
+
+    Improve error handling for printed slot
+
+diff --git a/ykman/piv.py b/ykman/piv.py
+index 0a5e6c5d..cc78ec2c 100644
+--- a/ykman/piv.py
++++ b/ykman/piv.py
+@@ -282,6 +282,10 @@ def get_pivman_protected_data(session: PivSession) -> PivmanProtectedData:
+             logger.debug("No data, initializing blank")
+             return PivmanProtectedData()
+         raise
++    except Exception:
++        raise ValueError(
++            f"Invalid data in protected slot ({hex(OBJECT_ID_PIVMAN_PROTECTED_DATA)})"
++        )
+ 
+ 
+ def pivman_set_mgm_key(

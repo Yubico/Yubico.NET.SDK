@@ -1,0 +1,79 @@
+commit 70e11d77942acd5c5f7c627e398cf5119c64fc55
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Wed Dec 20 10:07:53 2023 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Tue Jan 23 12:00:37 2024 +0100
+
+    Add PIV RSA 3072 and 4096.
+
+diff --git a/tests/device/test_piv.py b/tests/device/test_piv.py
+index 9f6137bd..40d2b5a9 100644
+--- a/tests/device/test_piv.py
++++ b/tests/device/test_piv.py
+@@ -141,6 +141,12 @@ class TestCertificateSignatures:
+             pytest.skip("ECCP384 requires YubiKey 4 or later")
+         if key_type == KEY_TYPE.RSA1024 and info.is_fips and info.version[0] == 4:
+             pytest.skip("RSA1024 not available on YubiKey FIPS")
++        if key_type in (KEY_TYPE.RSA3072, KEY_TYPE.RSA4096) and info.version < (
++            5,
++            7,
++            0,
++        ):
++            pytest.skip(f"{key_type} requires YubiKey 5.7 or later")
+ 
+         slot = SLOT.SIGNATURE
+         public_key = import_key(session, slot, key_type)
+diff --git a/ykman/piv.py b/ykman/piv.py
+index 27afed16..a1fc3153 100644
+--- a/ykman/piv.py
++++ b/ykman/piv.py
+@@ -144,14 +144,12 @@ def parse_rfc4514_string(value: str) -> x509.Name:
+     return x509.Name(attributes)
+ 
+ 
+-def _dummy_key(algorithm):
+-    if algorithm == KEY_TYPE.RSA1024:
+-        return rsa.generate_private_key(65537, 1024, default_backend())  # nosec
+-    if algorithm == KEY_TYPE.RSA2048:
+-        return rsa.generate_private_key(65537, 2048, default_backend())
+-    if algorithm == KEY_TYPE.ECCP256:
++def _dummy_key(key_type):
++    if key_type.algorithm == ALGORITHM.RSA:
++        return rsa.generate_private_key(65537, key_type.bit_len, default_backend())
++    if key_type == KEY_TYPE.ECCP256:
+         return ec.generate_private_key(ec.SECP256R1(), default_backend())
+-    if algorithm == KEY_TYPE.ECCP384:
++    if key_type == KEY_TYPE.ECCP384:
+         return ec.generate_private_key(ec.SECP384R1(), default_backend())
+     raise ValueError("Invalid algorithm")
+ 
+diff --git a/yubikit/piv.py b/yubikit/piv.py
+index d5a30184..3ceb5436 100755
+--- a/yubikit/piv.py
++++ b/yubikit/piv.py
+@@ -84,9 +84,14 @@ def require_version(my_version: Version, *args, **kwargs):
+ class KEY_TYPE(IntEnum):
+     RSA1024 = 0x06
+     RSA2048 = 0x07
++    RSA3072 = 0x05
++    RSA4096 = 0x16
+     ECCP256 = 0x11
+     ECCP384 = 0x14
+ 
++    def __str__(self):
++        return self.name
++
+     @property
+     def algorithm(self):
+         return ALGORITHM.EC if self.name.startswith("ECC") else ALGORITHM.RSA
+@@ -428,6 +433,10 @@ def check_key_support(
+         if pin_policy == PIN_POLICY.NEVER:
+             raise NotSupportedError("PIN_POLICY.NEVER not allowed on YubiKey FIPS")
+ 
++    # New key types
++    if version < (5, 7, 0) and key_type in (KEY_TYPE.RSA3072, KEY_TYPE.RSA4096):
++        raise NotSupportedError(f"{key_type} requires YubiKey 5.7 or later")
++
+     # TODO: Detect Bio capabilities
+     if version < () and pin_policy in (PIN_POLICY.MATCH_ONCE, PIN_POLICY.MATCH_ALWAYS):
+         raise NotSupportedError(

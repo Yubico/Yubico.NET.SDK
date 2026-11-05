@@ -1,0 +1,2 @@
+/tmp/opencode/piv-001-examples-v4-consumer/obj/Yubico.YubiKit.AuditPiv001.Examples.v4.consumer.csproj.nuget.g.targets
+/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.targets/ImportAfter/Microsoft.TestPlatform.ImportAfter.targets

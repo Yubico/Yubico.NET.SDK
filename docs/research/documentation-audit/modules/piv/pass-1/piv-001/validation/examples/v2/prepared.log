@@ -1,0 +1,5 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/verify.py v2 prepared
+PASS: 730 explicit unit dispositions, 45 complete groups, 36 shipping source paths; current bodies, typed wrappers and source/configuration identities reconcile.
+PENDING: builds, C# binding/analyzers and actual compiler captures. Example/sample/test/hardware execution remains separately scoped.
+
+EXIT=0

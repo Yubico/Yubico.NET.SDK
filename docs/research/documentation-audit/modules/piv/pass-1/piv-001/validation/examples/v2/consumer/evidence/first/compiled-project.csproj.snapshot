@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(RepositoryRoot)/src/Piv/src/Yubico.YubiKit.Piv.csproj" />
+    <Compile Include="Examples.cs" />
+  </ItemGroup>
+<ItemGroup><ProjectReference Include="$(RepositoryRoot)/src/Piv/examples/PivTool/PivTool.csproj" /><ProjectReference Include="$(RepositoryRoot)/src/Management/src/Yubico.YubiKit.Management.csproj" /><ProjectReference Include="$(RepositoryRoot)/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" /><ProjectReference Include="$(RepositoryRoot)/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" /></ItemGroup></Project>

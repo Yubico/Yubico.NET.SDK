@@ -1,0 +1,11 @@
+
+// Evaluation only: the session must use the 24-byte factory key with Triple-DES or AES-192.
+var mgmtKey = PivSession.DefaultManagementKey.ToArray();
+try
+{
+    var result = await PinManagement.AuthenticateAsync(session, mgmtKey, ct);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(mgmtKey);
+}

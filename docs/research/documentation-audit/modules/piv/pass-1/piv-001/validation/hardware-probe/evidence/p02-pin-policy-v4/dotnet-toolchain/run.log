@@ -1,0 +1,37 @@
+# dotnet toolchain.cs -- test --integration --project AuditPiv001.Hardware.IntegrationTests --filter FullyQualifiedName~P02_PinAlwaysConsumesVerification_PinOnceReusesIt
+# started:   2026-11-05 08:14:45 +01:00
+# directory: /home/rupicola/Code/y/Yubico.Yubikit.NET
+# git:       yubikit-docs-audit @ 727fe43a (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261105-081445-786-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit + integration tests ===
+
+
+=== Testing: AuditPiv001.Hardware.IntegrationTests ===
+▶ RUN dotnet test docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests.csproj -c Release --list-tests --filter FullyQualifiedName~P02_PinAlwaysConsumesVerification_PinOnceReusesIt (output captured)
+▶ RUN dotnet test docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~P02_PinAlwaysConsumesVerification_PinOnceReusesIt"
+  output: artifacts/toolchain/runs/20261105-081445-786-test/01-test-AuditPiv001.Hardware.IntegrationTests.log
+✓ PASS (1 executed, 0 skipped)
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- test --integration --project AuditPiv001.Hardware.IntegrationTests --filter FullyQualifiedName~P02_PinAlwaysConsumesVerification_PinOnceReusesIt)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ test                       9.5s
+Projects (test):
+  ✓ PASS      AuditPiv001.Hardware.IntegrationTests  1 executed, 0 skipped
+Totals: projects: 1 passed, 0 failed, 0 with no tests executed; tests: 1 executed, 0 failed, 0 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261105-081445-786-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

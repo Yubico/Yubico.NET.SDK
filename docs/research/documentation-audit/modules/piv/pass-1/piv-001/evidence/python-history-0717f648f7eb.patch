@@ -1,0 +1,34 @@
+commit 0717f648f7ebe8184af73db3dfa704e5a7b3a04d
+Author:     Emil Lundberg <emil@yubico.com>
+AuthorDate: Mon Oct 16 17:10:28 2017 +0200
+Commit:     Emil Lundberg <emil@yubico.com>
+CommitDate: Tue Oct 17 14:15:14 2017 +0200
+
+    piv: Refuse to generate RSA keys on CVE-2017-15361 affected YubiKeys
+
+diff --git a/ykman/piv.py b/ykman/piv.py
+index 8343128a..1263e69f 100644
+--- a/ykman/piv.py
++++ b/ykman/piv.py
+@@ -29,7 +29,9 @@
+ from __future__ import absolute_import
+ from enum import IntEnum, unique
+ from .driver_ccid import APDUError, SW_OK, SW_APPLICATION_NOT_FOUND
+-from .util import AID, Tlv, parse_tlvs
++from .util import (
++    AID, Tlv, parse_tlvs,
++    ensure_not_cve201715361_vulnerable_firmware_version)
+ from cryptography import x509
+ from cryptography.utils import int_to_bytes, int_from_bytes
+ from cryptography.hazmat.primitives import hashes
+@@ -650,6 +652,10 @@ class PivController(object):
+ 
+     def generate_key(self, slot, algorithm, pin_policy=PIN_POLICY.DEFAULT,
+                      touch_policy=TOUCH_POLICY.DEFAULT):
++
++        if ALGO.is_rsa(algorithm):
++            ensure_not_cve201715361_vulnerable_firmware_version(self.version)
++
+         data = Tlv(TAG.ALGO, six.int2byte(algorithm))
+         if pin_policy:
+             data += Tlv(TAG.PIN_POLICY, six.int2byte(pin_policy))

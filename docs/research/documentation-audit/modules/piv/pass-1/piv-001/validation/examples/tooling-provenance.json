@@ -1,0 +1,948 @@
+{
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "status": "skeleton-awaiting-reviewed-formatted-release",
+  "source_archive": {
+    "manifest": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/record-manifest.json",
+    "manifest_sha256": "71698c428044b99165fb68759a2e47b6af701187f0ddb7b5838e5bc3278bf7ee",
+    "files": 607
+  },
+  "copies": [
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/inventory.py",
+      "source_sha256": "e1330fb9927dc85f7d5b5a7d819ea80b98b24528d395aa289c48ae670ee92dce",
+      "target": "inventory.py",
+      "target_sha256": "bb92a1221b4797071b0c74bab73e3a50e94180617edd72760272cbd8a4fd503f",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 3
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 5
+        },
+        {
+          "operation": "literal-replace",
+          "before": "scope['editor_complete'] is True and bool(scope['notification'])",
+          "after": "scope['baseline'] == '727fe43afc430c5d8364d868a6436de50626e476' and scope['editor_complete'] is True and scope['reviewer_complete'] is True and scope['formatter_complete'] is True and bool(scope['notification'])",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "    return scope\n",
+          "after": "    for key in ('final_review', 'formatter_record'):\n        row = scope[key]\n        target = canonical(row['path'])\n        require(target.is_relative_to(RUN) and sha(target.read_bytes()) == row['sha256'], 'Released record identity changed: ' + key)\n    reviewed = json.loads(canonical(scope['final_review']['path']).read_text())\n    require(reviewed['baseline'] == scope['baseline'], 'Final review baseline mismatch')\n    final = {row['path']: row for row in reviewed['files']}\n    require(len(final) == len(reviewed['files']) and bool(final), 'Require nonempty distinct final reviewed paths')\n    for path in scope['edited_paths']:\n        require(path in final and sha(canonical(path).read_bytes()) == final[path]['final_sha256'], 'Released final input changed: ' + path)\n    return scope\n",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "    xml, xml_documents = xml_inventory(source_paths(module))",
+          "after": "    xml, xml_documents = xml_inventory(source_paths(module))\n    tasks = []\n    for item in accepted['task_units']:\n        path = item['path']\n        require(path.startswith('src/Piv/') or path in accepted['shared_paths'], 'Task unit escaped released scope')\n        lines = canonical(path).read_text().splitlines(keepends=True)\n        lo, hi = item['start_line'], item['end_line']\n        require(1 <= lo <= hi <= len(lines) and bool(item['reason']), 'Require a bounded task unit and rationale')\n        body = ''.join(lines[lo - 1:hi])\n        tasks.append(dict(path=path, id=item['id'], body=body, body_sha256=sha(body.encode()), reason=item['reason']))\n    require(len(tasks) == len({row['id'] for row in tasks}), 'Duplicate task unit identities')",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "inline=inline, xml=xml, xml_documents=xml_documents, mappings=mappings,",
+          "after": "inline=inline, xml=xml, xml_documents=xml_documents, mappings=mappings, tasks=tasks,",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "suffix = f\"{item['chunk']}:{item['tag']}:{item['index']}\" if kind == 'xml' else str(item.get('id', item.get('index')))",
+          "after": "suffix = f\"{item['chunk']}:{item['tag']}:{item['index']}\" if kind == 'xml' else str(item.get('id', item.get('index')))",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "def identities(inventory):",
+          "after": "def legacy_identities(inventory):",
+          "count": 1
+        },
+        {
+          "operation": "append-file",
+          "path": "inventory-extension.py.snapshot",
+          "sha256": "c6bf81a03850b54e6aee550810c0d1ef0aa3a79a95a8d58919f5c2bd3003c5f8"
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/sdk-policy.py",
+      "source_sha256": "6ae48d93202d4827a5c03b2cc4d743d85d149fc60027a7a04c39e63ea60779c1",
+      "target": "sdk-policy.py",
+      "target_sha256": "6ae48d93202d4827a5c03b2cc4d743d85d149fc60027a7a04c39e63ea60779c1",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/analyzer_policy.py",
+      "source_sha256": "cef301784921c7d856e67d95df07681c8ee9fa40aafe2505b7a6503a46f8f2fd",
+      "target": "compiler_policy.py",
+      "target_sha256": "691e233a30c6c8dc4dabd5a53e1b57a16a0cbfcf27887c5d0d87640ba54c8de1",
+      "operations": [
+        {
+          "operation": "remove-between-markers",
+          "start": "def receipt():",
+          "end": "def verify_capture(",
+          "removed_sha256": "0eafec28ec631bea460fed09ac5b6a255d734726c15096f5ee541e9d3bffcbe7"
+        },
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "    record = receipt()\n",
+          "after": "",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "data['analyzer_package_correction_sha256'] == identity(HERE / 'manifest.json')['sha256']",
+          "after": "data['tooling_provenance_sha256'] == identity(HERE / 'tooling-provenance.json')['sha256']",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "    validate_proof(proof)",
+          "after": "    require(proof['package'] == 'Microsoft.CodeAnalysis.NetAnalyzers' and proof['version'] == VERSION, 'Canonical analyzer package identity changed')",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/capture.py",
+      "source_sha256": "7010402d6ea2079dbe181aaeecadaf65f2105952bd76dbc8a8f7caa628830b24",
+      "target": "capture.py",
+      "target_sha256": "68560398ebab8feee7100010211a6b8863f8a4af421211477324018ca06031f4",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 3
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 8
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 5
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "sys.path.insert(0, str(Path(__file__).resolve().parents[1]))\nimport analyzer_policy as _analyzer_policy",
+          "after": "import compiler_policy as _analyzer_policy\nfrom provenance import project_reference_proof",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "_analyzer_policy.receipt()\n",
+          "after": "",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "('compile-inputs.txt', 'resolved-references.txt', 'analyzers.txt', 'analyzer-configs.txt', 'policy-final.txt', 'csc-command-line.txt', 'imported-projects.txt')",
+          "after": "('compile-inputs.txt', 'resolved-references.txt', 'analyzers.txt', 'analyzer-configs.txt', 'policy-final.txt', 'csc-command-line.txt', 'imported-projects.txt', 'project-references.txt', 'resolved-project-references.txt')",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "    _analyzer_policy.validate_proof(analyzer_package)\n",
+          "after": "",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "len(sample_paths) == len(set(sample_paths)) == 19",
+          "after": "len(sample_paths) == len(set(sample_paths)) == 36",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "all 19 original PivTool sources",
+          "after": "all 36 original PivTool sources",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "    result = dict(revision=revision,",
+          "after": "    project_proof = project_reference_proof(actual_project, policy, references, dest)\n    result = dict(project_reference_proof=project_proof, revision=revision,",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "analyzer_package_correction_sha256=_analyzer_policy.identity(_analyzer_policy.HERE / 'manifest.json')['sha256']",
+          "after": "tooling_provenance_sha256=_analyzer_policy.identity(HERE / 'tooling-provenance.json')['sha256']",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "dest.mkdir(parents=True, exist_ok=False)",
+          "after": "require(not (HERE.parent.parent / 'record-manifest.json').exists(), 'Run is frozen')\ndest.mkdir(parents=True, exist_ok=False)",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/analyzer-package-1/verify.py",
+      "source_sha256": "9e213c1df78619868e370edfa03a8233ed27457b6e61d85ed47ecae7fec460f9",
+      "target": "verify.py",
+      "target_sha256": "7e14ba20705695bf540308a2b04ae09212050cc5eaba3e9a3eb8e4c03c0a2b61",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 4
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 4
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 7
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "sys.path.insert(0, str(Path(__file__).resolve().parents[1]))\nimport analyzer_policy as _analyzer_policy",
+          "after": "import compiler_policy as _analyzer_policy\nfrom provenance import verify_project_proof",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "_analyzer_policy.receipt()\n",
+          "after": "",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "('mapping', 'mappings')",
+          "after": "('mapping', 'mappings'), ('task', 'tasks')",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "len(sample['source_paths']) == 19",
+          "after": "len(sample['source_paths']) == 36",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "all 19 current PivTool source paths",
+          "after": "all 36 current PivTool source paths",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "19 shipping source paths",
+          "after": "36 shipping source paths",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "        _analyzer_policy.verify_capture(data, evidence, args.live)",
+          "after": "        _analyzer_policy.verify_capture(data, evidence, args.live)\n        verify_project_proof(data['project_reference_proof'], evidence, args.live)",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/Directory.Build.props",
+      "source_sha256": "e9685de4c47c377bf07e991e9d602edebeb9e4a8901e0ca59c9bb03017df37c4",
+      "target": "v1/consumer/Directory.Build.props",
+      "target_sha256": "39b058cb3d8e5476674a8b8920aab9ebf5d8d2dfea82ac00e406633e0fe5fd29",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/Directory.Build.targets",
+      "source_sha256": "6965eb75d83a83b7ecabe3b43f3a7447ad45b263d73f3c063162add5a1b2f4f9",
+      "target": "v1/consumer/Directory.Build.targets",
+      "target_sha256": "69303cc4ed45fba7b84d7c09f58c7fa1495e2433ac3922948e8fcb325665d5ae",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 2
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "    <MakeDir Directories=\"$(DocumentationWorkspace)\" />",
+          "after": "    <MakeDir Directories=\"$(DocumentationWorkspace)\" />\n    <WriteLinesToFile File=\"$(DocumentationWorkspace)/project-references.txt\" Lines=\"@(ProjectReference-&gt;'%(FullPath)')\" Overwrite=\"true\" />\n    <WriteLinesToFile File=\"$(DocumentationWorkspace)/resolved-project-references.txt\" Lines=\"@(_ResolvedProjectReferencePaths-&gt;'%(FullPath)|%(MSBuildSourceProjectFile)|%(OriginalProjectReferenceItemSpec)')\" Overwrite=\"true\" />",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "      <DocumentationPolicy Include=\"Configuration=$(Configuration)\" />",
+          "after": "      <DocumentationPolicy Include=\"Configuration=$(Configuration)\" />\n      <DocumentationPolicy Include=\"Version=$(Version)\" />\n      <DocumentationPolicy Include=\"YubiKitVersion=$(YubiKitVersion)\" />\n      <DocumentationPolicy Include=\"AssemblyVersion=$(AssemblyVersion)\" />\n      <DocumentationPolicy Include=\"TargetPath=$(TargetPath)\" />",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditPgp001.Examples.v1.consumer.csproj",
+      "source_sha256": "522d58ac4429c763f6db17267ecbec7099980bc5861b3262813371b429dc8f4f",
+      "target": "v1/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v1.consumer.csproj",
+      "target_sha256": "190e12b90de530bac9a132116b8505356db8b2cfa8a94a9e0e8ffd273addb3ed",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 2
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/annotations/Directory.Build.props",
+      "source_sha256": "5d39a87a675bf96ec3604cb70a92fd4d62fdf1158de0f3c48a85821c82cf2737",
+      "target": "v1/annotations/Directory.Build.props",
+      "target_sha256": "8f487a68098df29488d32f918283048439bca957b97ba9de3c3afe7a92eaabde",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/annotations/Directory.Build.targets",
+      "source_sha256": "6965eb75d83a83b7ecabe3b43f3a7447ad45b263d73f3c063162add5a1b2f4f9",
+      "target": "v1/annotations/Directory.Build.targets",
+      "target_sha256": "69303cc4ed45fba7b84d7c09f58c7fa1495e2433ac3922948e8fcb325665d5ae",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 2
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "    <MakeDir Directories=\"$(DocumentationWorkspace)\" />",
+          "after": "    <MakeDir Directories=\"$(DocumentationWorkspace)\" />\n    <WriteLinesToFile File=\"$(DocumentationWorkspace)/project-references.txt\" Lines=\"@(ProjectReference-&gt;'%(FullPath)')\" Overwrite=\"true\" />\n    <WriteLinesToFile File=\"$(DocumentationWorkspace)/resolved-project-references.txt\" Lines=\"@(_ResolvedProjectReferencePaths-&gt;'%(FullPath)|%(MSBuildSourceProjectFile)|%(OriginalProjectReferenceItemSpec)')\" Overwrite=\"true\" />",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "      <DocumentationPolicy Include=\"Configuration=$(Configuration)\" />",
+          "after": "      <DocumentationPolicy Include=\"Configuration=$(Configuration)\" />\n      <DocumentationPolicy Include=\"Version=$(Version)\" />\n      <DocumentationPolicy Include=\"YubiKitVersion=$(YubiKitVersion)\" />\n      <DocumentationPolicy Include=\"AssemblyVersion=$(AssemblyVersion)\" />\n      <DocumentationPolicy Include=\"TargetPath=$(TargetPath)\" />",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/annotations/src/Yubico.YubiKit.AuditPgp001.Examples.v1.annotations.csproj",
+      "source_sha256": "044025bfd9bae6c48a7cdd7d79ae048ab8708bca3433ee97fbf1a5ba07ee5282",
+      "target": "v1/annotations/src/Yubico.YubiKit.AuditPiv001.Examples.v1.annotations.csproj",
+      "target_sha256": "df0b34ca31dc6c4fd16874033e3d5b6c0462afdb75f94050f22f1c4d3916ff49",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 2
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/v1/openpgptool/OpenPgpTool.Capture.targets",
+      "source_sha256": "5b4f47ba75ff03270aeaf783a819debb9b536e807e2e13defe6a5dcfa31695f1",
+      "target": "v1/pivtool/PivTool.Capture.targets",
+      "target_sha256": "8112f23dfdf9dec2bfab77e078c57ffa7f1eb3afb7d8b96ca63e5291e3ba9eea",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 2
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 3
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "    <MakeDir Directories=\"$(DocumentationWorkspace)\" />",
+          "after": "    <MakeDir Directories=\"$(DocumentationWorkspace)\" />\n    <WriteLinesToFile File=\"$(DocumentationWorkspace)/project-references.txt\" Lines=\"@(ProjectReference-&gt;'%(FullPath)')\" Overwrite=\"true\" />\n    <WriteLinesToFile File=\"$(DocumentationWorkspace)/resolved-project-references.txt\" Lines=\"@(_ResolvedProjectReferencePaths-&gt;'%(FullPath)|%(MSBuildSourceProjectFile)|%(OriginalProjectReferenceItemSpec)')\" Overwrite=\"true\" />",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "      <DocumentationPolicy Include=\"Configuration=$(Configuration)\" />",
+          "after": "      <DocumentationPolicy Include=\"Configuration=$(Configuration)\" />\n      <DocumentationPolicy Include=\"Version=$(Version)\" />\n      <DocumentationPolicy Include=\"YubiKitVersion=$(YubiKitVersion)\" />\n      <DocumentationPolicy Include=\"AssemblyVersion=$(AssemblyVersion)\" />\n      <DocumentationPolicy Include=\"TargetPath=$(TargetPath)\" />",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/validation/examples/dispatch/src/Yubico.YubiKit.AuditPgp001.Examples.Shipping.OpenPgpTool.csproj",
+      "source_sha256": "04f714a1f558bcf915e9c932187ef7a3f414051a6ae984da4f15d7a61b0fabee",
+      "target": "dispatch/src/Yubico.YubiKit.AuditPiv001.Examples.Shipping.PivTool.csproj",
+      "target_sha256": "484fbc23baffaa88dbdb72828db989fc5e524a57f981eea5e8e56766c5ba4e01",
+      "operations": [
+        {
+          "operation": "literal-replace",
+          "before": "AuditPgp001",
+          "after": "AuditPiv001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp-001",
+          "after": "piv-001",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgpTool",
+          "after": "PivTool",
+          "count": 9
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgptool",
+          "after": "pivtool",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPgp",
+          "after": "Piv",
+          "count": 1
+        },
+        {
+          "operation": "literal-replace",
+          "before": "OpenPGP",
+          "after": "PIV",
+          "count": 0
+        },
+        {
+          "operation": "literal-replace",
+          "before": "openpgp",
+          "after": "piv",
+          "count": 0
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "path": "capture.py",
+      "bytes": 11511,
+      "sha256": "68560398ebab8feee7100010211a6b8863f8a4af421211477324018ca06031f4"
+    },
+    {
+      "path": "compiler_policy.py",
+      "bytes": 8083,
+      "sha256": "691e233a30c6c8dc4dabd5a53e1b57a16a0cbfcf27887c5d0d87640ba54c8de1"
+    },
+    {
+      "path": "inventory.py",
+      "bytes": 10073,
+      "sha256": "bb92a1221b4797071b0c74bab73e3a50e94180617edd72760272cbd8a4fd503f"
+    },
+    {
+      "path": "prepare-final.py",
+      "bytes": 9063,
+      "sha256": "d00bc66e758329431d6bc10ca9094650501936a4ca3ace131cdd3e5f1ce2e71c"
+    },
+    {
+      "path": "prepare-tools.py",
+      "bytes": 12448,
+      "sha256": "5466342884627920036034d1acb1e1e6c40a02461941dbb9577686a531ce5051"
+    },
+    {
+      "path": "provenance.py",
+      "bytes": 4183,
+      "sha256": "5c62f97c4ed5c518f451be55b366e8b2c208284ffd3de9b3e35024796c84f29e"
+    },
+    {
+      "path": "sdk-policy.py",
+      "bytes": 2944,
+      "sha256": "6ae48d93202d4827a5c03b2cc4d743d85d149fc60027a7a04c39e63ea60779c1"
+    },
+    {
+      "path": "verify-skeleton.py",
+      "bytes": 5248,
+      "sha256": "435ed53c3bfb63d92750e1cf539c2e8bf2d4a54d444927afe4a99b7a3fe5c44b"
+    },
+    {
+      "path": "verify.py",
+      "bytes": 9710,
+      "sha256": "7e14ba20705695bf540308a2b04ae09212050cc5eaba3e9a3eb8e4c03c0a2b61"
+    }
+  ],
+  "context_metadata": [
+    {
+      "path": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "bytes": 1135,
+      "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj",
+      "bytes": 1836,
+      "sha256": "e0f6adebe2ca56036347347c97a3cb1b92ff13ade217ade82c103080020ed3e7"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivTool.csproj",
+      "bytes": 950,
+      "sha256": "9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349"
+    },
+    {
+      "path": "Directory.Build.props",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "Directory.Packages.props",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "global.json",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": ".editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    }
+  ],
+  "policy": "Fresh tools and empty hosts only; corrected final OpenPGP analyzer-package-1 capture/verify algorithms integrated directly. Final extraction and current body reading require explicit reviewed/formatted release. Ordinary actual PivTool outputs retained; historical results/bodies excluded."
+}

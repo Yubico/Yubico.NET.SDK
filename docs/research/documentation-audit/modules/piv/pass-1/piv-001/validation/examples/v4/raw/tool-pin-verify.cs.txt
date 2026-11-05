@@ -1,0 +1,16 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var pin = Encoding.UTF8.GetBytes("123456");
+try
+{
+    var result = await PinManagement.VerifyPinAsync(session, pin, ct);
+    if (result.Success)
+    {
+        Console.WriteLine("PIN verified");
+    }
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+}

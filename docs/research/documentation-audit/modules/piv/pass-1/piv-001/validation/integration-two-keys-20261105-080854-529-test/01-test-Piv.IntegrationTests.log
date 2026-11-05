@@ -1,0 +1,32 @@
+$ dotnet test src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~PivMultiKeyContentionTests"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Piv -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Piv.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll
+Test run for /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Piv.IntegrationTests
+[xUnit.net 00:00:00.12]   Discovered:  Yubico.YubiKit.Piv.IntegrationTests
+[xUnit.net 00:00:00.14]   Starting:    Yubico.YubiKit.Piv.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 2 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 2 device(s)
+[YubiKey Infrastructure] Device SN:125 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 2 authorized, 0 filtered
+[xUnit.net 00:00:27.35]     Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey [OUTPUT] Busy serial 125: RSA-4096 23.907s; responsive serial 103: PIV sign 0.079s.
+[xUnit.net 00:01:45.23]     Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey [OUTPUT] Busy serial 103: RSA-4096 77.872s; responsive serial 125: PIV sign 0.076s.
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey [1 m 46 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.FindAllAsync_WithOpenSessionOnOneKey_IdentifiesOtherKeysAndPreservesSession [1 s]
+[xUnit.net 00:01:52.53]   Finished:    Yubico.YubiKit.Piv.IntegrationTests
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.ConcurrentPivSessions_OnTwoKeys_OperateIndependently [3 s]
+
+Test Run Successful.
+Total tests: 3
+     Passed: 3
+ Total time: 1.8804 Minutes

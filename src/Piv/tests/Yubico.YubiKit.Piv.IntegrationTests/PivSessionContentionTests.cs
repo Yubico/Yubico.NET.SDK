@@ -28,15 +28,23 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This is the motivating defect of the session-contention effort
-///         (<c>docs/architecture/connection-ownership-and-contention.md</c>). Four lines of ordinary public API,
-///         default settings, one process:
+///         The current ownership guard rejects a second conflicting connection before applet selection.
+///         This fragment assumes a provisioned P-256 slot, verified caller-owned PIN and open session;
+///         it catches the expected acquisition failure and checks that the original session still signs.
 ///     </para>
 ///     <code>
-///     await using var piv = await key.CreatePivSessionAsync();  // CCID handle #1, SELECT PIV
-///     await piv.VerifyPinAsync(pin);                            // security state established
-///     var info = await key.GetDeviceInfoAsync();                // CCID handle #2, SELECT Management
-///     await piv.SignAsync(...);                                 // pre-fix: SW=0x6D00
+///     await using var piv = await key.CreatePivSessionAsync(cancellationToken: ct);
+///     await piv.VerifyPinAsync(pin, ct);
+///     try
+///     {
+///         await key.GetDeviceInfoAsync(cancellationToken: ct);
+///         throw new InvalidOperationException("Expected the ownership guard to reject the second connection.");
+///     }
+///     catch (ConnectionInUseException)
+///     {
+///         Memory&lt;byte&gt; signature = await piv.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest, ct);
+///         CryptographicOperations.ZeroMemory(signature.Span);
+///     }
 ///     </code>
 ///     <para>
 ///         <see cref="PivDiscoveryContentionTests" /> covers the same hazard reached through
@@ -165,7 +173,7 @@ public class PivSessionContentionTests
     ///     The documented migration path for the ownership change. One live connection per physical key and
     ///     one live session per connection remain practical because a caller-owned connection supports
     ///     successive applet sessions — dispose session A, construct session B on the same handle, no reconnect
-    ///     and no re-enumeration. Disposing a session must therefore NOT dispose a caller-created connection.
+    ///     and no re-enumeration. The connection creator retains disposal responsibility between sessions.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]

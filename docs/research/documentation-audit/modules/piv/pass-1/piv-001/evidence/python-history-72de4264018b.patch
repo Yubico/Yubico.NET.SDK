@@ -1,0 +1,27 @@
+commit 72de4264018bfd5a1251e1571f01f5383062e2ef
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Fri Jan 26 10:02:10 2024 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Fri Jan 26 10:02:10 2024 +0100
+
+    Check for bio before reset
+
+diff --git a/yubikit/piv.py b/yubikit/piv.py
+index e870326c..c7cd03e7 100755
+--- a/yubikit/piv.py
++++ b/yubikit/piv.py
+@@ -505,6 +505,14 @@ class PivSession:
+     def reset(self) -> None:
+         logger.debug("Preparing PIV reset")
+ 
++        try:
++            if self.get_bio_metadata().configured:
++                raise ValueError(
++                    "Cannot perform PIV reset when biometrics are configured"
++                )
++        except NotSupportedError:
++            pass
++
+         # Block PIN
+         logger.debug("Verify PIN with invalid attempts until blocked")
+         counter = self.get_pin_attempts()

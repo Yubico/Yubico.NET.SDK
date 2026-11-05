@@ -1,0 +1,410 @@
+commit 8a7d152dd4a576e89c71b5fa1113197c04a11df7
+Author:     Dennis Dyall Wallin <dennis@dyallo.se>
+AuthorDate: Wed Nov 4 17:00:47 2026 +0100
+Commit:     Dennis Dyall Wallin <dennis@dyallo.se>
+CommitDate: Wed Nov 4 17:00:47 2026 +0100
+
+    fix(piv): align extraction errors and validate recovery witnesses
+    
+    Restore source-correct V1 symbols in migration examples and import Core cryptography in the V2 key-generation example. Report unknown parsed metadata algorithms as NotSupportedException from both extractors while retaining recognized-family errors.
+    
+    Reject stale derived authentication at witness submission, independently validate the derived witness, and simulate protected restoration success or changed-key rejection. Retain first-stage cancellation/status coverage and assert original authentication payload/response buffers are cleared before disposal without production hooks.
+    
+    Verify known RSA/EC metadata extraction against generated public keys on hardware. Focused regressions: 19 passed; PIV units: 264 passed; final hardware subset: 18 passed; final reset: 1 passed. Full clean solution build has zero warnings/errors; scoped formatting and complexity pass.
+
+diff --git a/src/Piv/src/PivSlotMetadataExtensions.cs b/src/Piv/src/PivSlotMetadataExtensions.cs
+index f2a158d7..94ce1746 100644
+--- a/src/Piv/src/PivSlotMetadataExtensions.cs
++++ b/src/Piv/src/PivSlotMetadataExtensions.cs
+@@ -29,6 +29,7 @@ public static class PivSlotMetadataExtensions
+     /// <param name="metadata">The slot metadata containing the public key.</param>
+     /// <returns>An <see cref="RSA"/> instance with the public key imported.</returns>
+     /// <exception cref="InvalidOperationException">The slot does not contain an RSA key.</exception>
++    /// <exception cref="NotSupportedException">The metadata reports an algorithm not recognized by this SDK.</exception>
+     /// <remarks>
+     /// <para>
+     /// The returned RSA instance can be used with <c>CertificateRequest</c> to generate
+@@ -44,7 +45,8 @@ public static class PivSlotMetadataExtensions
+     /// </example>
+     public static RSA GetRsaPublicKey(this PivSlotMetadata metadata)
+     {
+-        if (metadata.KeyType is not { } keyType || !keyType.IsRSA())
++        var keyType = metadata.RequireKeyType();
++        if (!keyType.IsRSA())
+         {
+             throw new InvalidOperationException(
+                 $"Slot contains PIV algorithm 0x{metadata.RawAlgorithmId:X2}, not a known RSA key.");
+@@ -83,6 +85,7 @@ public static RSA GetRsaPublicKey(this PivSlotMetadata metadata)
+     /// <param name="metadata">The slot metadata containing the public key.</param>
+     /// <returns>An <see cref="ECDsa"/> instance with the public key imported.</returns>
+     /// <exception cref="InvalidOperationException">The slot does not contain an ECC key supported by ECDsa.</exception>
++    /// <exception cref="NotSupportedException">The metadata reports an algorithm not recognized by this SDK.</exception>
+     /// <remarks>
+     /// <para>
+     /// This method supports P-256 and P-384 curves. Ed25519 and X25519 keys are not supported
+@@ -102,7 +105,8 @@ public static RSA GetRsaPublicKey(this PivSlotMetadata metadata)
+     /// </example>
+     public static ECDsa GetECDsaPublicKey(this PivSlotMetadata metadata)
+     {
+-        if (metadata.KeyType is not { } keyType || !keyType.IsEllipticCurve())
++        var keyType = metadata.RequireKeyType();
++        if (!keyType.IsEllipticCurve())
+         {
+             throw new InvalidOperationException(
+                 $"Slot contains PIV algorithm 0x{metadata.RawAlgorithmId:X2}, not a known ECC key.");
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs
+index 21ccd50a..a6e22bf9 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs
+@@ -12,6 +12,7 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
++using System.Security.Cryptography;
+ using Yubico.YubiKit.Core.Cryptography;
+ using Yubico.YubiKit.Core.Devices;
+ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+@@ -72,13 +73,20 @@ public async Task GetSlotMetadataAsync_WithKey_ReturnsMetadata(YubiKeyTestState
+         await using var session = await state.Device.CreatePivSessionAsync();
+         await session.ResetAsync();
+         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+-        await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256);
++        KeyType[] keyTypes = [KeyType.ECP256, KeyType.RSA2048];
++        foreach (var keyType in keyTypes)
++        {
++            var generated = await session.GenerateKeyAsync(Slot.Authentication, keyType);
++            var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
+ 
+-        var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
+-
+-        Assert.NotNull(metadata);
+-        Assert.Equal(KeyType.ECP256, metadata.Value.KeyType);
+-        Assert.True(metadata.Value.IsGenerated);
++            Assert.NotNull(metadata);
++            Assert.Equal(keyType, metadata.Value.KeyType);
++            Assert.True(metadata.Value.IsGenerated);
++            using AsymmetricAlgorithm extracted = keyType.IsRSA()
++                ? metadata.Value.GetRsaPublicKey()
++                : metadata.Value.GetECDsaPublicKey();
++            Assert.Equal(generated.ExportSubjectPublicKeyInfo(), extracted.ExportSubjectPublicKeyInfo());
++        }
+     }
+ 
+     [SkippableTheory]
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs
+index 3619cb21..69acea6a 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs
+@@ -18,6 +18,8 @@
+ using Yubico.YubiKit.Core.Devices;
+ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ using Yubico.YubiKit.Core.Transports.SmartCard;
++using Yubico.YubiKit.Core.Utilities;
++using Yubico.YubiKit.Piv.Backend;
+ using Yubico.YubiKit.Tests.Shared;
+ 
+ namespace Yubico.YubiKit.Piv.UnitTests.Authentication;
+@@ -46,12 +48,15 @@ public async Task RecoverPinOnlyModeAsync_CancelledDerivedAuthentication_DoesNot
+     {
+         await using var connection = new MixedPinOnlyRecoveryConnection(true, cancelDerived: true);
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var captured = CaptureAuthenticationBuffers(session);
+ 
+         await Assert.ThrowsAsync<OperationCanceledException>(() => session.RecoverPinOnlyModeAsync(
+             "123456"u8.ToArray(), TestContext.Current.CancellationToken));
+ 
+         Assert.Equal(2, connection.AuthenticationAttempts);
+         Assert.False(session.IsManagementKeyAuthenticated);
++        Assert.Equal([1], connection.WitnessSubmissionAttempts);
++        captured.AssertCleared();
+     }
+     [Theory]
+     [InlineData(0x6A80)]
+@@ -60,6 +65,7 @@ public async Task RecoverPinOnlyModeAsync_UnexpectedDerivedAuthenticationFailure
+     {
+         await using var connection = new MixedPinOnlyRecoveryConnection(true, (ushort)status);
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var captured = CaptureAuthenticationBuffers(session);
+ 
+         var exception = await Assert.ThrowsAsync<ApduException>(() => session.RecoverPinOnlyModeAsync(
+             "123456"u8.ToArray(), TestContext.Current.CancellationToken));
+@@ -67,6 +73,8 @@ public async Task RecoverPinOnlyModeAsync_UnexpectedDerivedAuthenticationFailure
+         Assert.True(status == exception.SW);
+         Assert.Equal(2, connection.AuthenticationAttempts);
+         Assert.False(session.IsManagementKeyAuthenticated);
++        Assert.Equal([1], connection.WitnessSubmissionAttempts);
++        captured.AssertCleared();
+     }
+     [Fact]
+     public async Task GetPinOnlyModeAsync_NoAdminData_ReturnsNone()
+@@ -155,12 +163,16 @@ public async Task RecoverPinOnlyModeAsync_WhenDerivedCandidateFails_RestoresProt
+     {
+         await using var connection = new MixedPinOnlyRecoveryConnection(restoreProtectedAuthentication: true);
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var captured = CaptureAuthenticationBuffers(session);
+ 
+         var mode = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
+ 
+         Assert.Equal(PivPinOnlyMode.PinProtected, mode);
+         Assert.True(session.IsManagementKeyAuthenticated);
+         Assert.Equal(3, connection.AuthenticationAttempts);
++        Assert.Equal([1, 2, 3], connection.WitnessSubmissionAttempts);
++        Assert.True(connection.DerivedWitnessValidated);
++        captured.AssertCleared();
+     }
+ 
+     [Fact]
+@@ -168,12 +180,74 @@ public async Task RecoverPinOnlyModeAsync_WhenDerivedAndProtectedRestorationFail
+     {
+         await using var connection = new MixedPinOnlyRecoveryConnection(restoreProtectedAuthentication: false);
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var captured = CaptureAuthenticationBuffers(session);
+ 
+         var mode = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
+ 
+         Assert.Equal(PivPinOnlyMode.None, mode);
+         Assert.False(session.IsManagementKeyAuthenticated);
+         Assert.Equal(3, connection.AuthenticationAttempts);
++        Assert.Equal([1, 2, 3], connection.WitnessSubmissionAttempts);
++        Assert.True(connection.DerivedWitnessValidated);
++        captured.AssertCleared();
++    }
++
++    [Fact]
++    public async Task AuthenticateAsync_IncorrectSubmittedWitness_IsRejectedByDeviceAtSecondStage()
++    {
++        await using var connection = new MixedPinOnlyRecoveryConnection(true);
++        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var captured = CaptureAuthenticationBuffers(session);
++        byte[] wrongKey = Enumerable.Range(1, 24).Select(value => (byte)value).ToArray();
++        try
++        {
++            var exception = await Assert.ThrowsAsync<ApduException>(() => session.AuthenticateAsync(wrongKey, TestContext.Current.CancellationToken));
++
++            Assert.True(exception.SW == 0x6982);
++            Assert.False(session.IsManagementKeyAuthenticated);
++            Assert.Equal([1], connection.WitnessSubmissionAttempts);
++            captured.AssertCleared();
++        }
++        finally
++        {
++            CryptographicOperations.ZeroMemory(wrongKey);
++        }
++    }
++
++    private static AuthenticationBufferCapture CaptureAuthenticationBuffers(PivSession session)
++    {
++        var field = typeof(PivSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
++            ?? throw new InvalidOperationException("PIV backend field not found.");
++        var captured = new AuthenticationBufferCapture(Assert.IsAssignableFrom<IPivBackend>(field.GetValue(session)));
++        field.SetValue(session, captured);
++        return captured;
++    }
++
++    private sealed class AuthenticationBufferCapture(IPivBackend backend) : IPivBackend
++    {
++        private readonly List<ReadOnlyMemory<byte>> _payloads = [];
++        private readonly List<ReadOnlyMemory<byte>> _responses = [];
++
++        public Task<PivInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
++            backend.ReadInitialStateAsync(cancellationToken);
++
++        public async Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError = true, CancellationToken cancellationToken = default)
++        {
++            // Retain original owned-memory views, not snapshots. Assertions run before connection disposal.
++            if (command.Ins == 0x87 && command.Data.Length > 4)
++                _payloads.Add(command.Data);
++            var response = await backend.SendAsync(command, throwOnError, cancellationToken);
++            if (command.Ins == 0x87)
++                _responses.Add(response.RawData);
++            return response;
++        }
++
++        public void AssertCleared()
++        {
++            Assert.NotEmpty(_payloads);
++            Assert.NotEmpty(_responses);
++            Assert.All(_payloads.Concat(_responses), bytes => Assert.All(bytes.ToArray(), value => Assert.Equal(0, value)));
++        }
+     }
+ 
+     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
+@@ -213,8 +287,13 @@ private sealed class MixedPinOnlyRecoveryConnection(bool restoreProtectedAuthent
+ 
+         private readonly bool _restoreProtectedAuthentication = restoreProtectedAuthentication;
+         private bool _printedReadRejected;
++        private readonly byte[] _witness = new byte[8];
++        private byte[] _encryptedWitness = [];
++        private readonly byte[] _replacementKey = Enumerable.Range(1, 24).Select(value => (byte)value).ToArray();
+ 
+         public int AuthenticationAttempts { get; private set; }
++        public List<int> WitnessSubmissionAttempts { get; } = [];
++        public bool DerivedWitnessValidated { get; private set; }
+ 
+         public Transport Transport => Transport.Usb;
+ 
+@@ -289,47 +368,112 @@ private byte[] AuthenticateResponse(byte[] command)
+                 AuthenticationAttempts++;
+                 if (cancelDerived && AuthenticationAttempts == 2)
+                     throw new OperationCanceledException();
+-                bool succeeds = AuthenticationAttempts == 1 ||
+-                    (AuthenticationAttempts == 3 && _restoreProtectedAuthentication);
+-                if (!succeeds)
++                // Cancellation and unrelated status failures deliberately retain first-stage coverage.
++                if (AuthenticationAttempts == 2 && rejectionStatus != 0x6982)
+                 {
+                     return [(byte)(rejectionStatus >> 8), (byte)rejectionStatus];
+                 }
+ 
+-                ReadOnlySpan<byte> witness = [0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58];
+-                byte[] encryptedWitness = EncryptBlock(witness);
+-                return [0x7C, 0x0A, 0x80, 0x08, .. encryptedWitness, 0x90, 0x00];
++                RandomNumberGenerator.Fill(_witness);
++                CryptographicOperations.ZeroMemory(_encryptedWitness);
++                _encryptedWitness = TransformBlock(ActiveManagementKey, _witness, encrypt: true);
++                return [0x7C, 0x0A, 0x80, 0x08, .. _encryptedWitness, 0x90, 0x00];
+             }
+ 
+-            ReadOnlySpan<byte> challenge = commandData.Slice(14, 8);
+-            byte[] encryptedChallenge = EncryptBlock(challenge);
+-            return [0x7C, 0x0A, 0x82, 0x08, .. encryptedChallenge, 0x90, 0x00];
++            return CompleteAuthentication(commandData);
+         }
+ 
+-        private byte[] EncryptBlock(ReadOnlySpan<byte> input)
+-        {
+-            using var tripleDes = TripleDES.Create();
+-            tripleDes.Key = _managementKey;
+-            tripleDes.Mode = CipherMode.ECB;
+-            tripleDes.Padding = PaddingMode.None;
+-            using var encryptor = tripleDes.CreateEncryptor();
++        private ReadOnlySpan<byte> ActiveManagementKey =>
++            AuthenticationAttempts == 3 && !_restoreProtectedAuthentication ? _replacementKey : _managementKey;
+ 
+-            byte[] inputBytes = input.ToArray();
+-            byte[] output = new byte[8];
++        private byte[] CompleteAuthentication(ReadOnlySpan<byte> commandData)
++        {
++            WitnessSubmissionAttempts.Add(AuthenticationAttempts);
+             try
+             {
+-                _ = encryptor.TransformBlock(inputBytes, 0, inputBytes.Length, output, 0);
+-                return output;
++                using var outer = Tlv.Create(commandData);
++                Assert.Equal(0x7C, outer.Tag);
++                using var fields = TlvHelper.DecodeList(outer.Value.Span);
++                var submittedWitness = Assert.Single(fields, field => field.Tag == 0x80).Value;
++                var challenge = Assert.Single(fields, field => field.Tag == 0x81).Value;
++                Assert.Equal(8, submittedWitness.Length);
++                Assert.Equal(8, challenge.Length);
++
++                if (AuthenticationAttempts == 2)
++                    AssertDerivedWitness(submittedWitness.Span);
++
++                // A stale candidate is rejected only after proving it cannot decrypt the device witness.
++                // Failed restoration uses a changed physical key, not an unconditional canned rejection.
++                if (!CryptographicOperations.FixedTimeEquals(submittedWitness.Span, _witness))
++                    return [0x69, 0x82];
++
++                byte[] encryptedChallenge = TransformBlock(ActiveManagementKey, challenge.Span, encrypt: true);
++                try
++                {
++                    return [0x7C, 0x0A, 0x82, 0x08, .. encryptedChallenge, 0x90, 0x00];
++                }
++                finally
++                {
++                    CryptographicOperations.ZeroMemory(encryptedChallenge);
++                }
+             }
+             finally
+             {
+-                CryptographicOperations.ZeroMemory(inputBytes);
++                CryptographicOperations.ZeroMemory(_witness);
++                CryptographicOperations.ZeroMemory(_encryptedWitness);
++            }
++        }
++
++        private void AssertDerivedWitness(ReadOnlySpan<byte> submittedWitness)
++        {
++            Span<byte> derived = stackalloc byte[24];
++            try
++            {
++                // Independently check the stale derived candidate reached the wire, without a production hook.
++                // SHA1/10,000 is the legacy PIN-derived compatibility format.
++#pragma warning disable CA5379, CA5387
++                Rfc2898DeriveBytes.Pbkdf2("123456"u8, Salt, derived, 10_000, HashAlgorithmName.SHA1);
++#pragma warning restore CA5379, CA5387
++                byte[] expected = TransformBlock(derived, _encryptedWitness, encrypt: false);
++                try
++                {
++                    Assert.True(CryptographicOperations.FixedTimeEquals(submittedWitness, expected));
++                    DerivedWitnessValidated = true;
++                }
++                finally
++                {
++                    CryptographicOperations.ZeroMemory(expected);
++                }
++            }
++            finally
++            {
++                CryptographicOperations.ZeroMemory(derived);
++            }
++        }
++
++        private static byte[] TransformBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, bool encrypt)
++        {
++            byte[] keyBytes = key.ToArray();
++            try
++            {
++                using var tripleDes = TripleDES.Create();
++                tripleDes.Key = keyBytes;
++                return encrypt
++                    ? tripleDes.EncryptEcb(input, PaddingMode.None)
++                    : tripleDes.DecryptEcb(input, PaddingMode.None);
++            }
++            finally
++            {
++                CryptographicOperations.ZeroMemory(keyBytes);
+             }
+         }
+ 
+         private void ClearSensitiveState()
+         {
+             CryptographicOperations.ZeroMemory(_managementKey);
++            CryptographicOperations.ZeroMemory(_replacementKey);
++            CryptographicOperations.ZeroMemory(_witness);
++            CryptographicOperations.ZeroMemory(_encryptedWitness);
+             foreach (byte[] command in TransmittedCommands)
+             {
+                 CryptographicOperations.ZeroMemory(command);
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs
+index 6e8c7d7b..c8b5cee1 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs
+@@ -203,6 +203,26 @@ await Assert.ThrowsAsync<NotSupportedException>(() => session.SignOrDecryptAsync
+         Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0x87);
+     }
+ 
++    [Theory]
++    [InlineData(true)]
++    [InlineData(false)]
++    public async Task UnknownAlgorithm_ParsedMetadataExtraction_ReportsUnsupportedAlgorithm(bool extractRsa)
++    {
++        byte[] raw = [0x01, 0x01, 0xF1, 0x02, 0x02, 0x02, 0x01, 0x03, 0x01, 0x01, 0x04, 0x00];
++        var connection = Connection([.. raw, 0x90, 0x00]);
++        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var metadata = Assert.IsType<PivSlotMetadata>(await session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken));
++
++        var exception = Assert.Throws<NotSupportedException>(() =>
++        {
++            using AsymmetricAlgorithm key = extractRsa ? metadata.GetRsaPublicKey() : metadata.GetECDsaPublicKey();
++        });
++
++        Assert.Contains("0xF1", exception.Message);
++        Assert.Equal(raw, metadata.RawData.ToArray());
++        Assert.Equal(4, connection.TransmittedCommands.Count);
++    }
++
+     [Theory]
+     [InlineData(new byte[] { 0x02, 0x02, 0x02, 0x01 })]
+     [InlineData(new byte[] { 0x01, 0x02, 0x11, 0x00 })]

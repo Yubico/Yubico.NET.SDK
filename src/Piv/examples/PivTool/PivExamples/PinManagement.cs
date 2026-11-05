@@ -37,12 +37,12 @@ public static class PinManagement
     /// Verifies the PIN.
     /// </summary>
     /// <param name="session">A PIV session.</param>
-    /// <param name="pin">PIN as UTF-8 bytes (6-8 characters).</param>
+    /// <param name="pin">Caller-owned PIN as 6–8 encoded bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure with retries remaining.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var pin = Encoding.UTF8.GetBytes("123456");
     /// try
@@ -88,7 +88,7 @@ public static class PinManagement
     /// </summary>
     /// <param name="session">A PIV session.</param>
     /// <param name="oldPin">Current PIN as UTF-8 bytes.</param>
-    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 characters).</param>
+    /// <param name="newPin">New PIN as 6–8 encoded bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     /// <example>
@@ -136,7 +136,7 @@ public static class PinManagement
     /// </summary>
     /// <param name="session">A PIV session.</param>
     /// <param name="oldPuk">Current PUK as UTF-8 bytes.</param>
-    /// <param name="newPuk">New PUK as UTF-8 bytes (6-8 characters).</param>
+    /// <param name="newPuk">New PUK, up to eight encoded bytes; device/profile policy may be stricter.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     public static async Task<PinOperationResult> ChangePukAsync(
@@ -169,7 +169,7 @@ public static class PinManagement
     /// </summary>
     /// <param name="session">A PIV session.</param>
     /// <param name="puk">PUK as UTF-8 bytes.</param>
-    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 characters).</param>
+    /// <param name="newPin">New PIN, up to eight encoded bytes in this operation's encoder; device policy applies.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     /// <example>
@@ -244,7 +244,8 @@ public static class PinManagement
     /// <returns>Result indicating success or failure.</returns>
     /// <example>
     /// <code>
-    /// var mgmtKey = new byte[] { /* 24 bytes for 3DES, or 16/24/32 for AES */ };
+    /// // Evaluation only: the session must use the 24-byte factory key with Triple-DES or AES-192.
+    /// var mgmtKey = PivSession.DefaultManagementKey.ToArray();
     /// try
     /// {
     ///     var result = await PinManagement.AuthenticateAsync(session, mgmtKey, ct);
@@ -284,14 +285,12 @@ public static class PinManagement
     /// <returns>Result indicating success or failure.</returns>
     /// <example>
     /// <code>
-    /// // Authenticate with current key first
-    /// await session.AuthenticateAsync(currentKey);
-    /// 
-    /// // Then change to new key
-    /// var newKey = new byte[24]; // or 16/32 for AES
-    /// RandomNumberGenerator.Fill(newKey);
+    /// // currentKey and newKey are caller-owned buffers; securely back up newKey before this task.
+    /// // This example installs a 24-byte Triple-DES key on a compatible device.
+    /// await session.AuthenticateAsync(currentKey, ct);
     /// var result = await PinManagement.ChangeManagementKeyAsync(
-    ///     session, newKey, KeyType.TripleDes, ct);
+    ///     session, newKey, KeyType.TripleDes, requireTouch: false, cancellationToken: ct);
+    /// // Keep the backup through fresh-session authentication; the caller clears both buffers in finally.
     /// </code>
     /// </example>
     public static async Task<PinOperationResult> ChangeManagementKeyAsync(

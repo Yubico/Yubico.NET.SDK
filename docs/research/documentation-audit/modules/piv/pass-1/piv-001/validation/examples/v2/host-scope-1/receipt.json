@@ -1,0 +1,50 @@
+{
+  "reason": "Place application-owned host types in explicit namespaces, matching the canonical final OpenPGP host structure. Complete original bodies/wrappers, references, compiler policy and the actual shipping project stay unchanged.",
+  "generator": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/host-scope-v2.py",
+    "bytes": 4171,
+    "sha256": "559dae822e616cabf078dcefb5c923d26fabe06c3d95fcc4cff7ed3cb665c71d"
+  },
+  "changes": [
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Examples.cs",
+      "before_sha256": "cdd099d78b96c671ce05a58dd88c00adebb6a7db097813595dfb63350423b66e",
+      "after_sha256": "d18f339084948d1894c1c7cdb634572b605b090bf50cf2d4083e29b40d549d69",
+      "before_snapshot": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/host-scope-1/before/consumer-Examples.cs.snapshot",
+      "namespace_declaration": "namespace AuditPiv001.Examples.V2.Consumer;\n\n",
+      "insertion_index": 793,
+      "complete_body_bytes_unchanged": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/annotations/src/Examples.cs",
+      "before_sha256": "47cb6f7107843f177d568656fbc86fb25c1abedc614cde83e864ce3b76f8929a",
+      "after_sha256": "231b3fa9417de6fadaf2adbbb151e92f3adace092556bfcfe15180207e87ed7f",
+      "before_snapshot": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/host-scope-1/before/annotations-Examples.cs.snapshot",
+      "namespace_declaration": "namespace AuditPiv001.Examples.V2.Annotations;\n\n",
+      "insertion_index": 189,
+      "complete_body_bytes_unchanged": true
+    }
+  ],
+  "retained": [
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/host-scope-1/before/manifest.json.snapshot",
+      "bytes": 755949,
+      "sha256": "81820d4d59cdf4fe21881f0582421a4674b545bf064151b8d4d5ecb10273a7fc"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/host-scope-1/before/source-context.json.snapshot",
+      "bytes": 139111,
+      "sha256": "10a34a81446b2e22b4417254da834e555a14cb2225a82844d88c85210730fbd2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/host-scope-1/before/consumer-Examples.cs.snapshot",
+      "bytes": 30087,
+      "sha256": "cdd099d78b96c671ce05a58dd88c00adebb6a7db097813595dfb63350423b66e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/host-scope-1/before/annotations-Examples.cs.snapshot",
+      "bytes": 543,
+      "sha256": "47cb6f7107843f177d568656fbc86fb25c1abedc614cde83e864ce3b76f8929a"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await Certificates.ExportCertificatePemAsync(session, Slot.Authentication, ct);
+using var certificate = result.Certificate;
+if (result.Success && certificate is not null)
+{
+    var pem = certificate.ExportCertificatePem();
+    await File.WriteAllTextAsync("certificate.pem", pem, ct);
+}

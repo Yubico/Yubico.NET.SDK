@@ -1,0 +1,92 @@
+{
+  "checked_utc": "2026-11-05T00:14:22.874248+00:00",
+  "status": "pass",
+  "scope": "Record/index/hash/link existence checks only. Investigator ran zero builds/tests/formatters/device operations.",
+  "inventory_files": 123,
+  "module_regions": 927,
+  "shared_regions": 17,
+  "counts": {
+    "types": 23,
+    "api_entries": 370,
+    "operations": 42,
+    "methods": 89,
+    "hardware_files": 24,
+    "smoke": 80,
+    "unattended": 86
+  },
+  "sampling": {
+    "eligible_clean_regions": 396,
+    "required_minimum": 40,
+    "by_category": {
+      "narrative": 10,
+      "example": 93,
+      "internal-test": 210,
+      "api": 83
+    },
+    "selected": [],
+    "rule": "Coordinator selects >=10%, minimum3; include api, narrative/example, internal-test; deduplicate exact ranges and remove edited overlaps. This is a nominee denominator, not completed independent sampling."
+  },
+  "module_local_link_existence": [
+    {
+      "source": "src/Piv/CLAUDE.md",
+      "target": "README.md",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/CLAUDE.md",
+      "target": "../../CLAUDE.md",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/CLAUDE.md",
+      "target": "../Core/README.md#cryptographic-metadata",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/CLAUDE.md",
+      "target": "../../docs/TESTING.md#hardware-authorization",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../README.md",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../docs/linux-setup.md",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../Core/README.md#cryptographic-metadata",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../Core/README.md",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../SecurityDomain/README.md",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../docs/usage/user-interaction.md",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../docs/usage/device-discovery.md",
+      "exists": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../docs/DEV-GUIDE.md",
+      "exists": true
+    }
+  ],
+  "errors": []
+}

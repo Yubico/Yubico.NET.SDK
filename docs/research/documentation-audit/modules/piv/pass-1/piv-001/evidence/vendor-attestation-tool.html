@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PIV Tool Attestation &mdash; YubiKey PIV Tool User Guide  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/dist.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/gtm.js"></script>
+        <script src="https://kit.fontawesome.com/ea7c27f2b7.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="PIV Tool Command, Options and Actions" href="piv-tool-command.html" />
+    <link rel="prev" title="PIV YKCS11 Module" href="piv-tool-ykcs11.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            YubiKey PIV Tool User Guide
+              <img src="https://resources.yubico.com/XEG5TAAH/at/8kq7984j7ffgq82qvfgqvbnh/logo.svg?auto=webp&format=svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="piv-tool-setup.html">Set up PIV Tool</a></li>
+<li class="toctree-l1"><a class="reference internal" href="piv-tool-tasks.html">PIV Tool Common Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="piv-tool-ykcs11.html">PIV YKCS11 Module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PIV Tool Attestation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-attestation">What is Attestation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-and-verifying-attestation-certificates">Getting and Verifying Attestation Certificates</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="piv-tool-command.html">PIV Tool Command, Options and Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyright</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">YubiKey PIV Tool User Guide</a>
+      </nav>
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">PIV Tool Attestation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/piv-tool-attestation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="piv-tool-attestation">
+<span id="id1"></span><h1>PIV Tool Attestation<a class="headerlink" href="#piv-tool-attestation" title="Permalink to this heading"></a></h1>
+<p>This feature is only available in YubiKey 4.3 and above.</p>
+<div class="section" id="what-is-attestation">
+<h2>What is Attestation<a class="headerlink" href="#what-is-attestation" title="Permalink to this heading"></a></h2>
+<p>The YubiKey is able to create an attestation statement in the form of an X.509 certificate. This provides evidence that a certain key was generated on a YubiKey.
+The certificate can be validated up to Yubico Root CA to prove authenticity and validity. The returned attestation statement is in the form of a PEM encoded X.509 certificate, signed by a key stored in PIV slot f9 on the YubiKey.</p>
+<p>For more information on attestation, see Yubico content:</p>
+<ul class="simple">
+<li>Developer documentation, <a class="reference external" href="https://developers.yubico.com/PIV/Introduction/PIV_attestation.html" target="_blank">PIV attestation</a></li>
+<li>.NET YubiKey SDK: User’s Manual, <a class="reference external" href="https://docs.yubico.com/yesdk/users-manual/application-piv/attestation.html" target="_blank">PIV attestation statements</a></li>
+</ul>
+</div>
+<div class="section" id="getting-and-verifying-attestation-certificates">
+<h2>Getting and Verifying Attestation Certificates<a class="headerlink" href="#getting-and-verifying-attestation-certificates" title="Permalink to this heading"></a></h2>
+<p>Each YubiKey comes with a pre-loaded key and certificate. The certificate is signed by Yubico Root Certificate Authority (CA). The pre-loaded key and certificate can be replaced by overriding the content of the slot.</p>
+<blockquote>
+<div><div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">If the pre-loaded Yubico factory-issued key or certificate is overwritten, it cannot be restored - even a factory reset does not recover the data.</p>
+</div>
+</div></blockquote>
+<p>The OpenSSL method listed below is an example for verifying the certificate and validating with the Yubico Root CA. This method is for testing the concept of attestation verification only.</p>
+<blockquote>
+<div><div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">Yubico recommends using production level evaluation for production verification.</p>
+</div>
+</div></blockquote>
+<p>The following steps assume that the pre-loaded certificate and key in PIV slot f9 have not been overwritten. If they have been overwritten, you need to replace the certificate chain with your own - the one you used for the new key and certificate.</p>
+<p>To get and verify an attestation statement:</p>
+<ol class="arabic">
+<li><p class="first">Get and install <a class="reference external" href="https://developers.yubico.com/yubico-piv-tool" target="_blank">Yubico PIV Tool</a> for your platform.</p>
+<p>Make note of the folder/directory where you install the PIV tool. For example, on Windows that folder might be: <code class="docutils literal notranslate"><span class="pre">C:\Program</span> <span class="pre">Files\Yubico\Yubico</span> <span class="pre">PIV</span> <span class="pre">Tool\bin</span></code>.</p>
+<p>The Yubico PIV tool launches automatically launches when your run a <code class="docutils literal notranslate"><span class="pre">yubico-piv-tool</span></code> command. For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yubico-piv-tool<span class="w"> </span>--version
+</pre></div>
+</div>
+<p>When you run the <code class="docutils literal notranslate"><span class="pre">yubico-piv-tool</span></code>, make sure the your platform can access and understand the command:</p>
+<ul class="simple">
+<li>Add the install directory to PATH or navigate to the installation folder/directory.</li>
+<li>You might need to add the <code class="docutils literal notranslate"><span class="pre">./</span></code> prefix to the command. This tells the system to run the command from the current folder/directory.</li>
+<li>If you are using PowerShell, add the file extension, <code class="docutils literal notranslate"><span class="pre">.exe</span></code>, to the PIV tool executable, <code class="docutils literal notranslate"><span class="pre">yubico-piv-tool.exe</span></code>.</li>
+</ul>
+</li>
+<li><p class="first">Get an attestation statement (X.509 certificate) for a slot.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yubico</span><span class="o">-</span><span class="n">piv</span><span class="o">-</span><span class="n">tool</span> <span class="o">--</span><span class="n">action</span><span class="o">=</span><span class="n">attest</span> <span class="o">--</span><span class="n">slot</span><span class="o">=</span><span class="mi">9</span><span class="n">a</span> <span class="o">--</span><span class="n">out</span> <span class="o">&lt;</span><span class="n">PATH</span><span class="o">-</span><span class="n">attestation</span><span class="o">&gt;</span>\<span class="n">Slot9aAttestation</span><span class="o">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+<p>Where –</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;PATH-attestation&gt;</span></code> is where the command stores the attestation statement.</p>
+<p><code class="docutils literal notranslate"><span class="pre">9a</span></code> is an example for the slot on the YubiKey that contains the key you generated and want to attest. See <code class="docutils literal notranslate"><span class="pre">--slot</span></code> command in <a class="reference internal" href="piv-tool-command.html#piv-tool-command-options"><span class="std std-ref">PIV Tool Options</span></a> for possible slots.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The attestation fails when there is no key in the designated slot (slot 9a) or if the key in the slot was imported. Error message: <code class="docutils literal notranslate"><span class="pre">Failed</span> <span class="pre">to</span> <span class="pre">attest</span> <span class="pre">data</span></code>.</p>
+</div>
+</li>
+<li><p class="first">Get the intermediate CA from slot <code class="docutils literal notranslate"><span class="pre">f9</span></code> of the YubiKey.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yubico</span><span class="o">-</span><span class="n">piv</span><span class="o">-</span><span class="n">tool</span> <span class="o">--</span><span class="n">action</span><span class="o">=</span><span class="n">read</span><span class="o">-</span><span class="n">certificate</span> <span class="o">--</span><span class="n">slot</span><span class="o">=</span><span class="n">f9</span> <span class="o">--</span><span class="n">out</span>  <span class="o">&lt;</span><span class="n">PATH</span><span class="o">-</span><span class="n">intermediate</span><span class="o">&gt;</span>\<span class="n">SlotF9Intermediate</span><span class="o">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+<p>Where –</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;PATH-intermediate&gt;</span></code> is where the command stores the intermediate CA.</p>
+<p><code class="docutils literal notranslate"><span class="pre">f9</span></code> is the slot on the YubiKey with the pre-loaded intermediate certificate. See <code class="docutils literal notranslate"><span class="pre">--slot</span></code> command in <a class="reference internal" href="piv-tool-command.html#piv-tool-command-options"><span class="std std-ref">PIV Tool Options</span></a> for possible slots.</p>
+</li>
+<li><p class="first">Determine the firmware version of your YubiKey.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yubico-piv-tool<span class="w"> </span>--action<span class="o">=</span>version
+</pre></div>
+</div>
+</li>
+<li><p class="first">Download the certificate(s) appropriate for your YubiKey firmware version.</p>
+<ul>
+<li><p class="first">For pre-5.7.4 firmware, download the root certificate:</p>
+<p><a class="reference external" href="https://developers.yubico.com/PKI/yubico-piv-ca-1.pem" target="_blank">Yubico PIV Root CA Serial 263751</a></p>
+</li>
+<li><p class="first">For 5.7.4 or newer firmware, download the certificate chain:</p>
+<p><a class="reference external" href="https://developers.yubico.com/PKI/yubico-ca-1.pem" target="_blank">Yubico Attestation Root 1</a> and <a class="reference external" href="https://developers.yubico.com/PKI/yubico-intermediate.pem" target="_blank">Intermediate Certificates</a></p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>Record where the files are stored.</li>
+<li>Make sure the files are saved with the correct file extension <code class="docutils literal notranslate"><span class="pre">.pem</span></code> (and not .pem.txt or .txt)!</li>
+</ul>
+</div>
+</li>
+<li><p class="first">Download and install <a class="reference external" href="https://github.com/openssl/openssl?tab=readme-ov-file#download" target="_blank">openssl</a> for your platform.</p>
+<p>See the <a class="reference external" href="https://docs.openssl.org/3.4/man7/ossl-guide-introduction/" target="_blank">openssl documentation</a> for details.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">These commands don’t work with OpenSSL 1.1.0 on YubiKey 4 series products. To verify certificate chains for such devices, see <a class="reference external" href="https://support.yubico.com/support/solutions/articles/15000013406-piv-attestation-verification-fails-with-openssl-1-1-0" target="_blank">PIV Attestation Verification Fails with OpenSSL 1.1.0</a>.</p>
+</div>
+</li>
+<li><p class="first">Verify the attestation certificate using the command appropriate for your YubiKey firmware version.</p>
+<ul>
+<li><p class="first">For pre-5.7.4 firmware</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">verify</span> <span class="o">-</span><span class="n">CAfile</span> <span class="o">&lt;</span><span class="n">PATH</span><span class="o">-</span><span class="n">certs</span><span class="o">&gt;</span>\<span class="n">yubico</span><span class="o">-</span><span class="n">piv</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="mf">1.</span><span class="n">pem</span> <span class="o">-</span><span class="n">untrusted</span> <span class="o">&lt;</span><span class="n">PATH</span><span class="o">-</span><span class="n">intermediate</span><span class="o">&gt;</span>\<span class="n">SlotF9Intermediate</span><span class="o">.</span><span class="n">pem</span> <span class="o">&lt;</span><span class="n">PATH</span><span class="o">-</span><span class="n">attestation</span><span class="o">&gt;</span>\<span class="n">Slot9aAttestation</span><span class="o">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">For 5.7.4 and newer firmware</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">verify</span> <span class="o">-</span><span class="n">CAfile</span> <span class="o">&lt;</span><span class="n">PATH</span><span class="o">-</span><span class="n">certs</span><span class="o">&gt;</span>\<span class="n">yubico</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="mf">1.</span><span class="n">pem</span> <span class="o">-</span><span class="n">untrusted</span> <span class="o">&lt;</span><span class="n">PATH</span><span class="o">-</span><span class="n">intermediate</span><span class="o">&gt;</span>\<span class="n">yubico</span><span class="o">-</span><span class="n">intermediate</span><span class="o">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">untrusted</span> <span class="o">&lt;</span><span class="n">PATH</span><span class="o">-</span><span class="n">intermediate</span><span class="o">&gt;</span>\<span class="n">SlotF9Intermediate</span><span class="o">.</span><span class="n">pem</span> <span class="o">&lt;</span><span class="n">PATH</span><span class="o">-</span><span class="n">attestation</span><span class="o">&gt;</span>\<span class="n">Slot9aAttestation</span><span class="o">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Where – <code class="docutils literal notranslate"><span class="pre">&lt;PATH-certs&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;PATH-intermediate&gt;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&lt;PATH-attestation&gt;</span></code> are the locations of the stored Yubico CA, intermediate, and attestation <code class="docutils literal notranslate"><span class="pre">.pem</span></code> files identified in Step 1 to Step 5.</p>
+<p>Expected result:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Slot9Aattestation.pem:<span class="w"> </span>OK
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="piv-tool-ykcs11.html" class="btn btn-neutral float-left" title="PIV YKCS11 Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="piv-tool-command.html" class="btn btn-neutral float-right" title="PIV Tool Command, Options and Actions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="copyright.html">Copyright</a> 2025, Yubico AB.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+<noscript>
+  <iframe
+    title="Blank"
+    aria-hidden="true"
+    src="https://sgtm.yubico.com/ns.html?id=GTM-TCVFSSSJ"
+    height="0"
+    width="0"
+    style="display: none; visibility: hidden"
+  ></iframe>
+</noscript>
+<div>
+  <a
+    href="https://www.yubico.com/support/terms-conditions/cookie-notice/"
+    target="_blank"
+    >Cookies</a
+  >
+  |
+  <a
+    href="https://www.yubico.com/support/terms-conditions/privacy-notice/"
+    target="_blank"
+    >Privacy Policy</a
+  >
+</div>
+
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

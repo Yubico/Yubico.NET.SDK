@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/bind-source-context-v2.py
+Bound 61 original body hashes, 60 current bodies (42 module + 18 shared), all 111 module C# identities, ten document identities and complete original 36-source actual PivTool/project text; corrected F9 result/JSON qualification retained.
+
+EXIT=0

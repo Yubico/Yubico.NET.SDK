@@ -1,0 +1,5 @@
+$ /usr/bin/python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-cleanup-125.py --serial 125 --authorize-reset-serial 125 --reader 'Yubico YubiKey OTP+FIDO+CCID 01 00' --baseline docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/baseline-125.json --receipt docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/multikey-after-125.json
+UTC 2026-11-05T07:11:04.276309+00:00
+{"status": "restored-and-factory-authenticated", "receipt": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/multikey-after-125.json", "reset_completed": true}
+
+EXIT=0

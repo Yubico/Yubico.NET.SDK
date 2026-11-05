@@ -1,0 +1,29 @@
+{"operation": "public-capture-start", "label": "before", "command": ["/usr/bin/python3", "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py", "final", "--serial", "103", "--reader", "Yubico YubiKey OTP+FIDO+CCID 00 00", "--output", "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/cleanup-control-103.before.json"]}
+{"operation": "public-capture-exit", "label": "before", "returncode": 0}
+{"operation": "public-capture-verified", "label": "before", "serial": 103, "differences": 0}
+{"operation": "apdu-start", "phase": "identity", "header": "00a40400"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00a40400", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0100"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0100", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0100"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0100", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00a40400"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00a40400", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00fd0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00fd0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00fd0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00fd0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f80000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f80000", "sw": "0x9000"}
+{"operation": "live-identity-verified", "serial": 103, "firmware": "5.8.0.beta.0", "applet_version": "0.0.1"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f70096"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f70096", "sw": "0x6A88"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f700f9"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f700f9", "sw": "0x6117"}
+{"operation": "apdu-start", "phase": "identity", "header": "00c00000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00c00000", "sw": "0x9000"}
+{"operation": "cleanup-stopped", "reset_completed": false}

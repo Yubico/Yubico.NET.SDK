@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project Yubico.YubiKit.Piv.IntegrationTests --filter FullyQualifiedName~PivMultiKeyContentionTests",
+  "started": "2026-11-05T08:08:54.5294447+01:00",
+  "durationSeconds": 117.7,
+  "runDirectory": "artifacts/toolchain/runs/20261105-080854-529-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 117.6,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Piv.IntegrationTests",
+      "outcome": "passed",
+      "reason": "3 executed, 0 skipped",
+      "executed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261105-080854-529-test/01-test-Piv.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

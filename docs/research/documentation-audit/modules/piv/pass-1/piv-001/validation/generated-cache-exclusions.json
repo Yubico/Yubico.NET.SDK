@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "original_path": "hardware/__pycache__/vendor-state.cpython-314.pyc",
+      "external_path": "/tmp/opencode/piv-001-generated-cache/hardware/__pycache__/vendor-state.cpython-314.pyc",
+      "bytes": 21190,
+      "sha256": "5f22fc65ebe0e4cbf8e6ccb572645ff7875bb2949b8775c37563d7de28c639b2",
+      "classification": "generated Python cache, not required source evidence"
+    }
+  ],
+  "scope": "Only generated caches in this new run moved; source, raw logs, primary PDFs and all prior frozen archives unchanged"
+}

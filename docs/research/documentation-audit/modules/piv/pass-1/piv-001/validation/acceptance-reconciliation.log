@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/reconcile-acceptance.py
+PASS:57 accepted paths,48 whitespace-only C# transforms/imports unchanged,123 module identities,61/385 clean samples (minimum39).
+
+EXIT=0

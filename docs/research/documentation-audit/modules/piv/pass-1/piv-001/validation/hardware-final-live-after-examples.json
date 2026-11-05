@@ -1,0 +1,36 @@
+{
+  "captures": [
+    {
+      "capture": "validation/hardware-probe/evidence/p01-x25519-v4/compiler/capture.json",
+      "checked": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p02-pin-policy-v4/compiler/capture.json",
+      "checked": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p03-key-cert-v4/compiler/capture.json",
+      "checked": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p04-attestation-v4/compiler/capture.json",
+      "checked": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p05-tool-rsa-v4/compiler/capture.json",
+      "checked": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p06-tool-ed25519-v4/compiler/capture.json",
+      "checked": 361,
+      "mismatches": []
+    }
+  ],
+  "total_context_entries": 2166,
+  "scope": "After all three final example builds; captured Csc inputs and runtime binaries, excluding intentionally restored local fixture config retained in snapshots"
+}

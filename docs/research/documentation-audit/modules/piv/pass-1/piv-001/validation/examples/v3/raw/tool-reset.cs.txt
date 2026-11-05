@@ -1,0 +1,13 @@
+
+// Requires an authorized reset decision; normal reset retains F9 material.
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+// Ensure user confirms this destructive action
+if (userConfirmedReset)
+{
+    var result = await Reset.ResetPivApplicationAsync(session, ct);
+    if (result.Success)
+    {
+        Console.WriteLine("PIV application reset to factory defaults.");
+    }
+}

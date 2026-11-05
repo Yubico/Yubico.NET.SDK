@@ -97,7 +97,7 @@ v2 location: `src/Piv/src/**`
 
 - **Feature/API**: Typed PIV data object model — `CardholderUniqueId` (CHUID), `CardCapabilityContainer` (CCC), `AdminData`, `KeyHistory`, `PinProtectedData`, base `PivDataObject` with `Encode()`/`Decode()`/`TryDecode()`
   **v2 status**: Different shape — `DataObject.cs` holds tag constants and `DataObjectProtocol.cs` provides raw GET/PUT exchanges. Typed `DataObjects.CardholderUniqueId`, `CardCapabilityContainer`, `AdminData`, and `KeyHistory` models provide parsed field access without the V1 `PivDataObject` base-class hierarchy; PIN-protected management material is handled by session workflows rather than a public `PinProtectedData` model.
-  **User impact**: Use the typed models and session accessors for CHUID, CCC, admin data, and key history. Adapt code relying on the V1 base-class hierarchy; use PIN-only session workflows for protected management keys.
+  **User impact**: Use the typed models/session accessors for their fixed provisioning shapes and raw objects for other encodings. Adapt the V1 base-class hierarchy; use session workflows for protected keys. ADMIN timestamp byte order differs from Python; coordinate cross-tool writes.
   **Severity**: Minor (API shape change) | **Confidence**: High
 
 - **Feature/API**: MSROOTS support (`WriteMsroots`, `WriteMsrootsStream`, `ReadMsroots`, `ReadMsrootsStream`, `DeleteMsroots`) for Windows minidriver root-cert bundle storage
@@ -114,14 +114,18 @@ v2 location: `src/Piv/src/**`
   **Severity**: Cosmetic | **Confidence**: Medium
 
 - **Feature/API**: Certificate compression default behavior
-  **v2 status**: Behavior-changed — v1 only compresses when `compress: true` is explicitly passed; v2's `StoreCertificateAsync` auto-compresses any cert > 1856 bytes even when `compress: false` is passed. Format-compatible (both use GZip), arguably an improvement, but differs from the literal v1 contract.
+  **v2 status**: Behavior-changed — select `CertificateCompression.Always` for GZip, or the default `Automatic` to use GZip above 1856 DER bytes. The current enum has no force-uncompressed mode. This is SDK policy based on a recommended PIV length, not a hard device maximum; the enum replaces the earlier preview boolean.
   **Severity**: Minor | **Confidence**: High
 
 - **Feature/API**: Non-throwing `Try*` family — `TryVerifyPin`, `TryChangePin`, `TryChangePuk`, `TryResetPin`, `TryAuthenticateManagementKey`, `TryChangeManagementKey`, `TryReadObject<T>` with `out int? retriesRemaining`
   **v2 status**: Behavior-changed — only throwing variants exist; retry info surfaced via `InvalidPinException.RetriesRemaining` or `GetPinMetadataAsync`/`GetPukMetadataAsync`. Deliberate async/exception-first style shift, not a capability loss.
   **Severity**: Minor | **Confidence**: Medium
 
-**Verified improvement, no gap**: key generation/import (all algorithms incl. Ed25519/X25519), all 20 retired slots, Move/Delete key, AttestKey, GetMetadata, management-key ops (incl. touch policy, AES/3DES), PIN/PUK verify/change/unblock/retry-count, biometric UV + temporary PIN — v2 additionally adds shared `IUserPresencePrompt` touch notification and algorithm-auto-detecting `SignOrDecryptAsync`.
+**Source-present surface**: key generation/import (including firmware-gated Ed25519/X25519), 20 retired slots,
+Move/Delete, attestation, metadata, AES/Triple-DES management, PIN/PUK operations and biometric UV/temporary PIN.
+Shared `IUserPresencePrompt` and metadata-driven private-key operations are also present. These are source/API
+observations; product-profile, Bio, transport and platform qualification remain separate. See the PIV guide
+for reset/F9 scope, partial PIN-only transitions, crypto formats and result ownership.
 
 ---
 

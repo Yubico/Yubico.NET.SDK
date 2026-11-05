@@ -1,0 +1,35 @@
+{
+  "captures": [
+    {
+      "capture": "validation/hardware-probe/evidence/p01-x25519-v4/compiler/capture.json",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p02-pin-policy-v4/compiler/capture.json",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p03-key-cert-v4/compiler/capture.json",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p04-attestation-v4/compiler/capture.json",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p05-tool-rsa-v4/compiler/capture.json",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p06-tool-ed25519-v4/compiler/capture.json",
+      "checked_entries": 361,
+      "mismatches": []
+    }
+  ],
+  "scope": "Live Csc inputs and retained runtime binaries after two additional comment-only product corrections"
+}

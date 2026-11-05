@@ -1,0 +1,9 @@
+{
+  "path": "src/Tests.Shared/appsettings.json",
+  "tracked": true,
+  "bytes": 1016,
+  "sha256": "6500728c3ad148f7231b52db4a33c22a3c274b5e7ff8612aa5c1e61ecd04c414",
+  "purpose": "Preserve harness configuration before any temporary serial narrowing",
+  "restoration_required_if_modified": true,
+  "preparation_correction": "Initial ignored-file assumption failed before any write; actual shared allowlist is tracked."
+}

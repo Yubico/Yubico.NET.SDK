@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/reconcile-unit-dispositions.py
+PASS: all944 original semantic units dispositioned;64 samples bound; three unchanged finding-associated paths explicitly adjudicated.
+
+EXIT=0

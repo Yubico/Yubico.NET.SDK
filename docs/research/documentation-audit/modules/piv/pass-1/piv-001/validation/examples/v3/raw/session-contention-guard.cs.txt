@@ -1,0 +1,14 @@
+
+    await using var piv = await key.CreatePivSessionAsync(cancellationToken: ct);
+    await piv.VerifyPinAsync(pin, ct);
+    try
+    {
+        await key.GetDeviceInfoAsync(cancellationToken: ct);
+        throw new InvalidOperationException("Expected the ownership guard to reject the second connection.");
+    }
+    catch (ConnectionInUseException)
+    {
+        Memory<byte> signature = await piv.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest, ct);
+        CryptographicOperations.ZeroMemory(signature.Span);
+    }
+    

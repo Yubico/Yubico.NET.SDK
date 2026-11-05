@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFramework inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.WebAuthn</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.WebAuthn</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>Client-side WebAuthn registration and authentication for YubiKey authenticators over CTAP2, with typed extension processing and the experimental Yubico previewSign draft v4.</Description>
+    <PackageTags>yubikey;yubico;webauthn;fido2;ctap2;passkeys;authentication</PackageTags>
+
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- For NSubstitute to mock the internal IWebAuthnBackend test seam -->
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ctap2\src\Yubico.YubiKit.Ctap2.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,812 @@
+{
+  "schema": 1,
+  "status": "restored-and-factory-authenticated",
+  "reset_completed": true,
+  "utc": "2026-11-05T07:08:02.580160+00:00",
+  "cleanup_helper_sha256": "9c079d681750ec8a3aef903d9b6f5e70ae11fb0050d9914130786709ca3714d3",
+  "events": [
+    {
+      "operation": "public-capture-start",
+      "label": "before",
+      "command": [
+        "/usr/bin/python3",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py",
+        "final",
+        "--serial",
+        "125",
+        "--reader",
+        "Yubico YubiKey OTP+FIDO+CCID 01 00",
+        "--output",
+        "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/cleanup-control-125.before.json"
+      ]
+    },
+    {
+      "operation": "public-capture-exit",
+      "label": "before",
+      "returncode": 0
+    },
+    {
+      "operation": "public-capture-verified",
+      "label": "before",
+      "serial": 125,
+      "differences": 0
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00a40400"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00a40400",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0100"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0100",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0100"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0100",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00a40400"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00a40400",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00fd0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00fd0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00fd0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00fd0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f80000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f80000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "live-identity-verified",
+      "serial": 125,
+      "firmware": "5.8.0.alpha.2",
+      "applet_version": "0.0.1"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f70096"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f70096",
+      "sw": "0x6A88"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f700f9"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f700f9",
+      "sw": "0x6117"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00c00000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00c00000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "attestation-public-certificate",
+      "header": "00cb3fff"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "attestation-public-certificate",
+      "header": "00cb3fff",
+      "sw": "0x6100"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000",
+      "sw": "0x6100"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000",
+      "sw": "0x6126"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "attestation-public-identity-preserved-before-reset"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x80",
+      "attempt": 1,
+      "remaining_before": 3,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00200080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00200080",
+      "sw": "0x63C2"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x80",
+      "attempt": 2,
+      "remaining_before": 2,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00200080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00200080",
+      "sw": "0x63C1"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x80",
+      "attempt": 3,
+      "remaining_before": 1,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00200080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00200080",
+      "sw": "0x6983"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "reference-blocked",
+      "reference": "0x80",
+      "attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x81",
+      "attempt": 1,
+      "remaining_before": 3,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "002c0080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "002c0080",
+      "sw": "0x63C2"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x81",
+      "attempt": 2,
+      "remaining_before": 2,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "002c0080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "002c0080",
+      "sw": "0x63C1"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x81",
+      "attempt": 3,
+      "remaining_before": 1,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "002c0080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "002c0080",
+      "sw": "0x6983"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "reference-blocked",
+      "reference": "0x81",
+      "attempts": 3
+    },
+    {
+      "operation": "reset-issued",
+      "serial": 125
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "reset",
+      "header": "00fb0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "reset",
+      "header": "00fb0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "reset-completed",
+      "serial": 125
+    },
+    {
+      "operation": "connection-closed"
+    },
+    {
+      "operation": "public-capture-start",
+      "label": "after-reset",
+      "command": [
+        "/usr/bin/python3",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py",
+        "final",
+        "--serial",
+        "125",
+        "--reader",
+        "Yubico YubiKey OTP+FIDO+CCID 01 00",
+        "--output",
+        "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/cleanup-control-125.after-reset.json"
+      ]
+    },
+    {
+      "operation": "public-capture-exit",
+      "label": "after-reset",
+      "returncode": 0
+    },
+    {
+      "operation": "public-capture-verified",
+      "label": "after-reset",
+      "serial": 125,
+      "differences": 0
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00a40400"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00a40400",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0100"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0100",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0100"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0100",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00a40400"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00a40400",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00fd0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00fd0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00fd0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00fd0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f80000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f80000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "live-identity-verified",
+      "serial": 125,
+      "firmware": "5.8.0.alpha.2",
+      "applet_version": "0.0.1"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f7009b"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f7009b",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "factory-pin",
+      "header": "00200080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "factory-pin",
+      "header": "00200080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "factory-pin-verified",
+      "serial": 125
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "factory-management",
+      "header": "00f7009b"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "factory-management",
+      "header": "00f7009b",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "factory-management",
+      "header": "00870a9b"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "factory-management",
+      "header": "00870a9b",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "factory-management",
+      "header": "00870a9b"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "factory-management",
+      "header": "00870a9b",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "factory-management-authenticated",
+      "serial": 125,
+      "algorithm": "AES192",
+      "algorithm_id": 10,
+      "credential_source": "installed public DEFAULT_MANAGEMENT_KEY"
+    },
+    {
+      "operation": "connection-closed"
+    },
+    {
+      "operation": "public-capture-start",
+      "label": "after-auth",
+      "command": [
+        "/usr/bin/python3",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py",
+        "final",
+        "--serial",
+        "125",
+        "--reader",
+        "Yubico YubiKey OTP+FIDO+CCID 01 00",
+        "--output",
+        "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/cleanup-control-125.after-auth.json"
+      ]
+    },
+    {
+      "operation": "public-capture-exit",
+      "label": "after-auth",
+      "returncode": 0
+    },
+    {
+      "operation": "public-capture-verified",
+      "label": "after-auth",
+      "serial": 125,
+      "differences": 0
+    }
+  ],
+  "authorization": {
+    "serial": 125,
+    "authorize_reset_serial": 125,
+    "reader": "Yubico YubiKey OTP+FIDO+CCID 01 00"
+  },
+  "command": [
+    "/usr/bin/python3",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-cleanup-125.py",
+    "--serial",
+    "125",
+    "--authorize-reset-serial",
+    "125",
+    "--reader",
+    "Yubico YubiKey OTP+FIDO+CCID 01 00",
+    "--baseline",
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/baseline-125.json",
+    "--receipt",
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/cleanup-control-125.json"
+  ],
+  "baseline": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/baseline-125.json",
+    "sha256": "1bac12341dfa823dfc5106a7b4ce78dee4497c2d14edcfd0cf3f112d9fd92705"
+  },
+  "vendor_provenance": {
+    "python": "3.14.8 (main, Oct  2 2026, 10:23:31) [GCC 16.2.1 20260810]",
+    "executable": "/usr/bin/python3",
+    "distribution_version": "5.9.2",
+    "manifest_sha256": "ebd4aa11daec37265b8c2b027d31bdfdd871d850b7b7b637a4a5ffb07fa96f5d",
+    "files": {
+      "ykman.device": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/device.py",
+        "sha256": "398338584cce6a3980387fe1b7b0e8b1ced7bc1330252b363ff40be0689d4c2e"
+      },
+      "ykman.piv": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/piv.py",
+        "sha256": "b24c77190286b801ac77b8142f43f78b9aeefdd4599c23b2a7aceb62b378d224"
+      },
+      "ykman._cli.piv": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/_cli/piv.py",
+        "sha256": "c3e74c46e0952c9471856d6d08f70a6f783f4ae533207447e7e544616cccea5e"
+      },
+      "yubikit.piv": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/piv.py",
+        "sha256": "f1055e88dca0c8b0ff107a3f1724cd9e03447a95565ecbfde7517f8114ba47fd"
+      },
+      "yubikit.management": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/management.py",
+        "sha256": "7cc29f5803f36c945ec613849c65ee9ea83f7d4e260880ebab7096a4dcbe3192"
+      },
+      "yubikit.support": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/support.py",
+        "sha256": "c1a1722619fc7f3e6649cad66c638d6eaec5887804e86c9efdee01e57c24d8f5"
+      },
+      "yubikit.core": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/core/__init__.py",
+        "sha256": "524305273499d3a0fc37ff58c207a180cf3d280490bb48c4596507ed8a56061c"
+      },
+      "yubikit.core.smartcard": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/core/smartcard/__init__.py",
+        "sha256": "595be784aa2ede30488263cbc63686e94365a68d598b96fb350c71c1b5d694bd"
+      },
+      "ykman.pcsc": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/pcsc/__init__.py",
+        "sha256": "7df388a53eb3a1784f498c3e854a3cc272bef59233b3e0feaaeb72de6ad1199c"
+      }
+    },
+    "reviewed_api_shape": {
+      "ykman.pcsc.list_devices": "(name_filter=None)",
+      "ScardSmartCardConnection": "(connection)",
+      "ScardSmartCardConnection.send_and_receive": "(self, apdu)",
+      "PivSession.__init__": "(self, connection: 'SmartCardConnection', scp_key_params: 'ScpKeyParams | None' = None)",
+      "PivSession.get_serial": "(self) -> 'int'",
+      "PivSession.get_pin_metadata": "(self) -> 'PinMetadata'",
+      "PivSession.get_puk_metadata": "(self) -> 'PinMetadata'",
+      "PivSession.get_management_key_metadata": "(self) -> 'ManagementKeyMetadata'",
+      "PivSession.get_slot_metadata": "(self, slot: 'SLOT') -> 'SlotMetadata'",
+      "PivSession.get_bio_metadata": "(self) -> 'BioMetadata'",
+      "PivSession.get_object": "(self, object_id: 'int') -> 'bytes'",
+      "PivSession.get_certificate": "(self, slot: 'SLOT') -> 'x509.Certificate'",
+      "PivSession.reset": "(self) -> 'None'",
+      "PivSession.verify_pin": "(self, pin: 'str') -> 'None'",
+      "PivSession.authenticate": "(self, *args, **kwargs) -> 'None'",
+      "PivSession.change_puk": "(self, old_puk: 'str', new_puk: 'str') -> 'None'",
+      "ManagementSession.__init__": "(self, connection: 'OtpConnection | SmartCardConnection | FidoConnection', scp_key_params: 'ScpKeyParams | None' = None)",
+      "ManagementSession.read_device_info": "(self) -> 'DeviceInfo'",
+      "PinMetadata": "(default_value: 'bool', total_attempts: 'int', attempts_remaining: 'int') -> None",
+      "SlotMetadata": "(key_type: 'KEY_TYPE', pin_policy: 'PIN_POLICY', touch_policy: 'TOUCH_POLICY', generated: 'bool', public_key_encoded: 'bytes') -> None",
+      "ManagementKeyMetadata": "(key_type: 'MANAGEMENT_KEY_TYPE', default_value: 'bool', touch_policy: 'TOUCH_POLICY') -> None",
+      "list_all_devices": "(connection_types: Iterable[type[yubikit.core.Connection] | type[fido2.ctap.CtapDevice]] = dict_keys([<class 'yubikit.core.smartcard.SmartCardConnection'>, <class 'yubikit.core.otp.OtpConnection'>, <class 'fido2.ctap.CtapDevice'>])) -> list[tuple[ykman.base.YkmanDevice, yubikit.management.DeviceInfo]]"
+    },
+    "helper_sha256": "41aa7200cd912a5f7a1438ad693fff83ad36b32873540b8a70d1b578f976600a"
+  },
+  "readbacks": [
+    {
+      "label": "before",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/cleanup-control-125.before.json",
+      "sha256": "08ce2ea027c78d639df18c7999a8a6d61a98f67429813ebd6d7603febbbaf92a",
+      "baseline_differences": []
+    },
+    {
+      "label": "after-reset",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/cleanup-control-125.after-reset.json",
+      "sha256": "6e55855da60607356847e8afec3184a3bce77e673b590a5b584923eba3b18b56",
+      "baseline_differences": []
+    },
+    {
+      "label": "after-auth",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/cleanup-control-125.after-auth.json",
+      "sha256": "448d440bc52ef842e02d615f9240676b49d9117f18daa9874fdf3c8fc82cdaf8",
+      "baseline_differences": []
+    }
+  ],
+  "comparison_exceptions": [
+    "utc",
+    "mode"
+  ]
+}

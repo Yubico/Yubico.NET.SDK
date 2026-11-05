@@ -237,10 +237,10 @@ internal static class PrivateKeyOperations
         var exp = new System.Numerics.BigInteger(expBytes, isUnsigned: true, isBigEndian: true);
         var mod = new System.Numerics.BigInteger(modBytes, isUnsigned: true, isBigEndian: true);
 
-        // The re-wrap technique requires b < mod. If the raw YubiKey output (interpreted as an integer)
-        // is >= the dummy modulus, ModPow silently reduces it and the result won't unpad correctly.
-        // This is astronomically unlikely with a fresh random modulus of equal bit length, but we
-        // guard explicitly so any failure produces a clear error rather than a corrupt padding message.
+        // Re-wrapping requires b < mod to preserve the original integer through exponentiation.
+        // Valid full-width PKCS#1 v1.5 and OAEP encryption blocks begin with 00 and fit below a
+        // same-width, full-bit-length dummy modulus. Reject raw output at or above the modulus
+        // before modular reduction could change its value; host unpadding validates the encoding afterward.
         if (b >= mod)
         {
             throw new CryptographicException(

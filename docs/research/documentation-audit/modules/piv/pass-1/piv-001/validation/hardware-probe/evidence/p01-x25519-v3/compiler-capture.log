@@ -1,0 +1,10 @@
+$ /usr/bin/python3 /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/capture-v2.py /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/evidence/p01-x25519-v3/compiler
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/capture-v2.py", line 123, in <module>
+    require(actual_projects == {str(p) for p in declared}, 'Actual ProjectReference item set mismatch')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/capture-v2.py", line 25, in require
+    raise ValueError(message)
+ValueError: Actual ProjectReference item set mismatch
+
+EXIT=1

@@ -27,7 +27,8 @@ public sealed record CertificateResult
     public bool Success { get; init; }
 
     /// <summary>
-    /// Gets the certificate when the operation returns one.
+    /// Gets the caller-owned certificate when returned. Dispose it after using the result;
+    /// this record itself provides no disposal mechanism.
     /// </summary>
     public X509Certificate2? Certificate { get; init; }
 

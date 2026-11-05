@@ -1,0 +1,3 @@
+await using PivSession piv = await yubiKey.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);
+PinMetadata metadata = await piv.GetPinMetadataAsync(cancellationToken);

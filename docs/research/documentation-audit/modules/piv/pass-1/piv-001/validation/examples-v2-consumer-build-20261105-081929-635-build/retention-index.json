@@ -1,0 +1,40 @@
+{
+  "source": "artifacts/toolchain/runs/20261105-081929-635-build",
+  "files": [
+    {
+      "path": "01-clean-AuditPiv001.Examples.v2.consumer.log",
+      "bytes": 49756,
+      "sha256": "b44cc665ed59b5b289a67f1eee163ea9576fd090dbdc34a1ec837be7ceb3520c",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "02-build-AuditPiv001.Examples.v2.consumer.log",
+      "bytes": 2304,
+      "sha256": "4c7fec2de55914d1de44ab695ae25f2681bcd4e9ffc1ea9d2679246049514418",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 724,
+      "sha256": "4563b14b87cf7df1ab8d16a3d0a0b3ba55afa17dec5e505d97c243d81e62b022",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 449,
+      "sha256": "e407988ba0ed765ba443fb0d29c49c05e3546ede92e16d717aaeeddb2e827365",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2189,
+      "sha256": "56b37a2b3358690574c547dcb6da49fb364ff4d5ad74226985d62dfad862150a",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

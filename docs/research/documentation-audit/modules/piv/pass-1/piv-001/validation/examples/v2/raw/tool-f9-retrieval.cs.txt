@@ -1,0 +1,9 @@
+
+var result = await Attestation.GetIntermediateCertificateAsync(session, ct);
+// This helper returns F9 in AttestationCertificate; IntermediateCertificate remains null.
+using var f9Cert = result.AttestationCertificate;
+using var additionalCert = result.IntermediateCertificate;
+if (result.Success && f9Cert is not null)
+{
+    Console.WriteLine(f9Cert.Subject);
+}

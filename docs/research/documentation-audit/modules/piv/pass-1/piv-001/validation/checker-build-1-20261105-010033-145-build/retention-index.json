@@ -1,0 +1,40 @@
+{
+  "source": "artifacts/toolchain/runs/20261105-010033-145-build",
+  "files": [
+    {
+      "path": "01-clean-AuditPiv001.Checker.log",
+      "bytes": 797,
+      "sha256": "983e2e4182fb2092ea9d09dd8cf207b7603a90174b1f817f243c3a74c3b730db",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "02-build-AuditPiv001.Checker.log",
+      "bytes": 602,
+      "sha256": "3749e39dc96a1526aa4505e5337b0ea937da5c57664c303d4390f17e437e0b53",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 711,
+      "sha256": "bf606cd587f02260f983256f3e2c41394a56eaa321ce8c16f89766b24ee90f3e",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 436,
+      "sha256": "014005e5d2865642a8137c5fd0b3190f07f87bdfb593c93e25a79c043b78f90c",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2059,
+      "sha256": "15cfc73dd149e5e3e6062aa2465cee603705cf923330c5f11b37d93f7acf076b",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

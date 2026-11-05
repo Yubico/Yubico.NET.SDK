@@ -1,0 +1,2455 @@
+{
+  "project_graph_correction_sha256": "0f88fd89bf23ed99348350f266f3add1a6df7c215f449b96be24af988e4d11a8",
+  "project_reference_proof": {
+    "context": "consumer",
+    "project": {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj",
+      "bytes": 888,
+      "sha256": "db3806c0a18719a3c303ff0cc57792f74841ef8be8d54f53cf8dfa59288ceca9"
+    },
+    "direct_projects": [
+      {
+        "project": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+          "bytes": 759,
+          "sha256": "90e8e6c821b11df04322a1fec5ff96487783701323a5c7248ff3cef8892f0580"
+        },
+        "assembly": "Yubico.YubiKit.Cli.Shared",
+        "csc_reference": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Shared.dll",
+          "bytes": 20480,
+          "sha256": "f8593f53722d178aab6d1738d780e7199edd9aad18d5c7060f4824ac61ff5628"
+        }
+      },
+      {
+        "project": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+          "bytes": 932,
+          "sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad"
+        },
+        "assembly": "Yubico.YubiKit.Management",
+        "csc_reference": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+          "bytes": 16384,
+          "sha256": "be6e8cb3326f63980541abb30e1ff859b4e7702eb698313061071e52cb0fe3ee"
+        }
+      },
+      {
+        "project": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj",
+          "bytes": 950,
+          "sha256": "9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349"
+        },
+        "assembly": "PivTool",
+        "csc_reference": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/ref/PivTool.dll",
+          "bytes": 53248,
+          "sha256": "b2dbaee97668288c3d6e3cc5149bd69daeef8362ef3cf4228cf3b54b7a9a5096"
+        }
+      },
+      {
+        "project": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+          "bytes": 1135,
+          "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978"
+        },
+        "assembly": "Yubico.YubiKit.Piv",
+        "csc_reference": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll",
+          "bytes": 51200,
+          "sha256": "bbe3ab68478c09d1a729ab6ca0acb4b59df8bbbb8af0b69eb8028b721eb2762d"
+        }
+      },
+      {
+        "project": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+          "bytes": 1050,
+          "sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60"
+        },
+        "assembly": "Yubico.YubiKit.WebAuthn",
+        "csc_reference": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/ref/Yubico.YubiKit.WebAuthn.dll",
+          "bytes": 65536,
+          "sha256": "476d4d086e4db6ca0be86cac219b0bf62f12d8cb88eebad26aecf94c878b3167"
+        }
+      }
+    ],
+    "project_graph": {
+      "direct": [
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj"
+      ],
+      "closure": [
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+      ],
+      "graph": [
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+            "bytes": 1135,
+            "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978"
+          },
+          "project_id": "Yubico.YubiKit.Piv/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+            "bytes": 3024,
+            "sha256": "60705e6469ab458aa47a288fe1b2749e20506dfc006335bdbdb27d82e8668203"
+          },
+          "project_id": "Yubico.YubiKit.Core/1.0.0",
+          "dependencies": [],
+          "xml_literal_edges": [],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+            "bytes": 759,
+            "sha256": "90e8e6c821b11df04322a1fec5ff96487783701323a5c7248ff3cef8892f0580"
+          },
+          "project_id": "Yubico.YubiKit.Cli.Shared/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+            "bytes": 932,
+            "sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad"
+          },
+          "project_id": "Yubico.YubiKit.Management/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj",
+            "bytes": 950,
+            "sha256": "9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349"
+          },
+          "project_id": "PivTool/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+            "bytes": 1288,
+            "sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb"
+          },
+          "project_id": "Yubico.YubiKit.Cli.Commands/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj",
+            "bytes": 936,
+            "sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc"
+          },
+          "project_id": "Yubico.YubiKit.YubiOtp/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+            "bytes": 888,
+            "sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed"
+          },
+          "project_id": "Yubico.YubiKit.YubiHsm/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+            "bytes": 864,
+            "sha256": "d150bc39c7c4545e4cf9b87ed2ad25e967c6116211d66f6026638306a0ac68af"
+          },
+          "project_id": "Yubico.YubiKit.OpenPgp/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj",
+            "bytes": 911,
+            "sha256": "c435652e278028500459d4dc6a0db1472c78b811269eac65725628ceaa4b3110"
+          },
+          "project_id": "Yubico.YubiKit.Oath/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+            "bytes": 1366,
+            "sha256": "9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747"
+          },
+          "project_id": "Yubico.YubiKit.Ctap2/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+            "bytes": 1050,
+            "sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60"
+          },
+          "project_id": "Yubico.YubiKit.WebAuthn/1.0.0",
+          "dependencies": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+          ],
+          "xml_literal_edges": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+          ],
+          "deferred_xml_items": [],
+          "edge_authority": "recursive XML and restored target graph agree"
+        }
+      ],
+      "bindings": [
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+            "bytes": 1288,
+            "sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb"
+          },
+          "project_id": "Yubico.YubiKit.Cli.Commands/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Commands.dll",
+            "bytes": 73728,
+            "sha256": "9b48da34a3068e22df13c93f5105f226588782d7830d58dbeffe00606c56ab9e"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll",
+            "bytes": 219136,
+            "sha256": "321a5d4401de253ec182faa1376364d21c7e99b0e07fe95a981bcc20d15f519b"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+            "bytes": 759,
+            "sha256": "90e8e6c821b11df04322a1fec5ff96487783701323a5c7248ff3cef8892f0580"
+          },
+          "project_id": "Yubico.YubiKit.Cli.Shared/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Shared.dll",
+            "bytes": 20480,
+            "sha256": "f8593f53722d178aab6d1738d780e7199edd9aad18d5c7060f4824ac61ff5628"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll",
+            "bytes": 47616,
+            "sha256": "9fdb7213cf27f5fdfc8f1247d021f8e77263e9e9e3b9142c5da619faa688761f"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+            "bytes": 3024,
+            "sha256": "60705e6469ab458aa47a288fe1b2749e20506dfc006335bdbdb27d82e8668203"
+          },
+          "project_id": "Yubico.YubiKit.Core/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+            "bytes": 268288,
+            "sha256": "00541a2cec6f04656da98ef744d2b55012a0ff071724bad4dd7d0084a13ecf76"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+            "bytes": 753152,
+            "sha256": "cffc1f873819d5bc621dd65e40bc06707f5797ec94b4922f527701f55d7b59b3"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+            "bytes": 1366,
+            "sha256": "9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747"
+          },
+          "project_id": "Yubico.YubiKit.Ctap2/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll",
+            "bytes": 78336,
+            "sha256": "57482fedda1d7a000ebefbcf557cf9d8dae5bdb17983c71bfad1ee7181f4a32c"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll",
+            "bytes": 206848,
+            "sha256": "be261bc61fd6651284ea369d3a8cc61d76086215ac51852745596e71d8de53b2"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj",
+            "bytes": 932,
+            "sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad"
+          },
+          "project_id": "Yubico.YubiKit.Management/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+            "bytes": 16384,
+            "sha256": "be6e8cb3326f63980541abb30e1ff859b4e7702eb698313061071e52cb0fe3ee"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll",
+            "bytes": 36352,
+            "sha256": "c464694df04db746456ef18a33a3d1366c1871005ed8de88cc7054b08eea87c0"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj",
+            "bytes": 911,
+            "sha256": "c435652e278028500459d4dc6a0db1472c78b811269eac65725628ceaa4b3110"
+          },
+          "project_id": "Yubico.YubiKit.Oath/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/ref/Yubico.YubiKit.Oath.dll",
+            "bytes": 27648,
+            "sha256": "9e14bc17bbc9f480e3040dbfee680f1c289119a4faea5aea3726327d7a49449d"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll",
+            "bytes": 72192,
+            "sha256": "02d08f2008c1160e1dc1f56151762687de21e9d155334cc4e4aa53ddc850ade4"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+            "bytes": 864,
+            "sha256": "d150bc39c7c4545e4cf9b87ed2ad25e967c6116211d66f6026638306a0ac68af"
+          },
+          "project_id": "Yubico.YubiKit.OpenPgp/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/ref/Yubico.YubiKit.OpenPgp.dll",
+            "bytes": 49664,
+            "sha256": "b9574ce15a3c70b4370cdf8865bc8192b1914212cb40ee825525e1e8801b0428"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll",
+            "bytes": 127488,
+            "sha256": "4ed5c646877763bc7297cbe0968a63a9b440dd78d9a17a672935ff9d9c9cd99e"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj",
+            "bytes": 950,
+            "sha256": "9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349"
+          },
+          "project_id": "PivTool/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/ref/PivTool.dll",
+            "bytes": 53248,
+            "sha256": "b2dbaee97668288c3d6e3cc5149bd69daeef8362ef3cf4228cf3b54b7a9a5096"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.dll",
+            "bytes": 204288,
+            "sha256": "d4e502f98f0d3174c32d7ce5dcc0c20a500bc3c8d135fc24c66d3aa0cc29dcfd"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+            "bytes": 1135,
+            "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978"
+          },
+          "project_id": "Yubico.YubiKit.Piv/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll",
+            "bytes": 51200,
+            "sha256": "bbe3ab68478c09d1a729ab6ca0acb4b59df8bbbb8af0b69eb8028b721eb2762d"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll",
+            "bytes": 160256,
+            "sha256": "abe6ca37897b85fa3ec279b6429746a7606b9e076416981c0b14e21fd525c255"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+            "bytes": 1050,
+            "sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60"
+          },
+          "project_id": "Yubico.YubiKit.WebAuthn/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/ref/Yubico.YubiKit.WebAuthn.dll",
+            "bytes": 65536,
+            "sha256": "476d4d086e4db6ca0be86cac219b0bf62f12d8cb88eebad26aecf94c878b3167"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll",
+            "bytes": 165888,
+            "sha256": "0a44ec346452a9e4e75d28a778adbf78a5006b17f413f6c1a8ae0844e9f2f2a0"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+            "bytes": 888,
+            "sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed"
+          },
+          "project_id": "Yubico.YubiKit.YubiHsm/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiHsm.dll",
+            "bytes": 23552,
+            "sha256": "362231fb905677ee00316712894c5f33e410f710c0b8ffd21f6825c6b02b7585"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll",
+            "bytes": 53248,
+            "sha256": "a263e6d8153cc0ce7368df53756eb3f1732696ddb6b800a537963a53fd87719c"
+          }
+        },
+        {
+          "project": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj",
+            "bytes": 936,
+            "sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc"
+          },
+          "project_id": "Yubico.YubiKit.YubiOtp/1.0.0",
+          "actual_csc_reference": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiOtp.dll",
+            "bytes": 24064,
+            "sha256": "1884674e15a92e32a918904f08201d227091e24aa21d524095235c179d216de7"
+          },
+          "resolved_output": {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll",
+            "bytes": 58880,
+            "sha256": "5d974eeee8128c71728e571cb880bfbaf3f11d7b13491c65dc83a742e3052ce4"
+          }
+        }
+      ],
+      "restored_assets": {
+        "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/project.assets.json",
+        "bytes": 132540,
+        "sha256": "9d1d34043153b332396b4dbb9c41e37d1d55841c2891d1c6864e207f555a6212"
+      },
+      "sdk_transitive_reference_source": {
+        "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/targets/Microsoft.PackageDependencyResolution.targets",
+        "bytes": 27745,
+        "sha256": "825da447fff4e47d196b41bea5c2453178d5db4ad06f526d9fd671feab4134d8"
+      }
+    },
+    "sdk_csc_references": [
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Commands.dll",
+        "bytes": 73728,
+        "sha256": "9b48da34a3068e22df13c93f5105f226588782d7830d58dbeffe00606c56ab9e"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Shared.dll",
+        "bytes": 20480,
+        "sha256": "f8593f53722d178aab6d1738d780e7199edd9aad18d5c7060f4824ac61ff5628"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 268288,
+        "sha256": "00541a2cec6f04656da98ef744d2b55012a0ff071724bad4dd7d0084a13ecf76"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "57482fedda1d7a000ebefbcf557cf9d8dae5bdb17983c71bfad1ee7181f4a32c"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "be6e8cb3326f63980541abb30e1ff859b4e7702eb698313061071e52cb0fe3ee"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/ref/Yubico.YubiKit.Oath.dll",
+        "bytes": 27648,
+        "sha256": "9e14bc17bbc9f480e3040dbfee680f1c289119a4faea5aea3726327d7a49449d"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/ref/Yubico.YubiKit.OpenPgp.dll",
+        "bytes": 49664,
+        "sha256": "b9574ce15a3c70b4370cdf8865bc8192b1914212cb40ee825525e1e8801b0428"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll",
+        "bytes": 51200,
+        "sha256": "bbe3ab68478c09d1a729ab6ca0acb4b59df8bbbb8af0b69eb8028b721eb2762d"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/ref/Yubico.YubiKit.WebAuthn.dll",
+        "bytes": 65536,
+        "sha256": "476d4d086e4db6ca0be86cac219b0bf62f12d8cb88eebad26aecf94c878b3167"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiHsm.dll",
+        "bytes": 23552,
+        "sha256": "362231fb905677ee00316712894c5f33e410f710c0b8ffd21f6825c6b02b7585"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiOtp.dll",
+        "bytes": 24064,
+        "sha256": "1884674e15a92e32a918904f08201d227091e24aa21d524095235c179d216de7"
+      }
+    ],
+    "retained": [
+      {
+        "path": "project-graph/4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978-Yubico.YubiKit.Piv.csproj.snapshot",
+        "bytes": 1135,
+        "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978"
+      },
+      {
+        "path": "project-graph/60705e6469ab458aa47a288fe1b2749e20506dfc006335bdbdb27d82e8668203-Yubico.YubiKit.Core.csproj.snapshot",
+        "bytes": 3024,
+        "sha256": "60705e6469ab458aa47a288fe1b2749e20506dfc006335bdbdb27d82e8668203"
+      },
+      {
+        "path": "project-graph/90e8e6c821b11df04322a1fec5ff96487783701323a5c7248ff3cef8892f0580-Yubico.YubiKit.Cli.Shared.csproj.snapshot",
+        "bytes": 759,
+        "sha256": "90e8e6c821b11df04322a1fec5ff96487783701323a5c7248ff3cef8892f0580"
+      },
+      {
+        "path": "project-graph/9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad-Yubico.YubiKit.Management.csproj.snapshot",
+        "bytes": 932,
+        "sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad"
+      },
+      {
+        "path": "project-graph/9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349-PivTool.csproj.snapshot",
+        "bytes": 950,
+        "sha256": "9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349"
+      },
+      {
+        "path": "project-graph/1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb-Yubico.YubiKit.Cli.Commands.csproj.snapshot",
+        "bytes": 1288,
+        "sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb"
+      },
+      {
+        "path": "project-graph/4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc-Yubico.YubiKit.YubiOtp.csproj.snapshot",
+        "bytes": 936,
+        "sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc"
+      },
+      {
+        "path": "project-graph/fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed-Yubico.YubiKit.YubiHsm.csproj.snapshot",
+        "bytes": 888,
+        "sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed"
+      },
+      {
+        "path": "project-graph/d150bc39c7c4545e4cf9b87ed2ad25e967c6116211d66f6026638306a0ac68af-Yubico.YubiKit.OpenPgp.csproj.snapshot",
+        "bytes": 864,
+        "sha256": "d150bc39c7c4545e4cf9b87ed2ad25e967c6116211d66f6026638306a0ac68af"
+      },
+      {
+        "path": "project-graph/c435652e278028500459d4dc6a0db1472c78b811269eac65725628ceaa4b3110-Yubico.YubiKit.Oath.csproj.snapshot",
+        "bytes": 911,
+        "sha256": "c435652e278028500459d4dc6a0db1472c78b811269eac65725628ceaa4b3110"
+      },
+      {
+        "path": "project-graph/9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747-Yubico.YubiKit.Ctap2.csproj.snapshot",
+        "bytes": 1366,
+        "sha256": "9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747"
+      },
+      {
+        "path": "project-graph/f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60-Yubico.YubiKit.WebAuthn.csproj.snapshot",
+        "bytes": 1050,
+        "sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60"
+      },
+      {
+        "path": "project-graph/825da447fff4e47d196b41bea5c2453178d5db4ad06f526d9fd671feab4134d8-Microsoft.PackageDependencyResolution.targets.snapshot",
+        "bytes": 27745,
+        "sha256": "825da447fff4e47d196b41bea5c2453178d5db4ad06f526d9fd671feab4134d8"
+      }
+    ],
+    "project_graph_receipt_sha256": "0f88fd89bf23ed99348350f266f3add1a6df7c215f449b96be24af988e4d11a8",
+    "resolved_project_items": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj|../../../../../../../../../../../../src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj|../../../../../../../../../../../../src/Core/src/Yubico.YubiKit.Core.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj|../../../../../../../../../../../../src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj|../../../../../../../../../../../../src/Oath/src/Yubico.YubiKit.Oath.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj|../../../../../../../../../../../../src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj|../../../../../../../../../../../../src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj\n/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll|/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj|../../../../../../../../../../../../src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj\n",
+    "host_version": "1.0.0",
+    "host_assembly_version": "1.0.0.0",
+    "sdk_package_version": "2.0.0-alpha.2",
+    "rationale": "Declared references match the exact accepted direct set; recursive XML and restored target nodes establish the late transitive item set and each actual obj/bin DLL binding. Host and SDK versions remain independent recorded properties."
+  },
+  "revision": "v2",
+  "context": "consumer",
+  "attempt": "second",
+  "policy": {
+    "NETCoreSdkVersion": "10.0.403",
+    "TargetFramework": "net10.0",
+    "LangVersion": "14",
+    "WarningLevel": "9999",
+    "TreatWarningsAsErrors": "true",
+    "AnalysisLevel": "preview",
+    "AnalysisMode": "AllEnabledByDefault",
+    "EnableNETAnalyzers": "false",
+    "RunAnalyzersDuringBuild": "true",
+    "RunAnalyzers": "",
+    "SkipAnalyzers": "",
+    "SkipCompilerExecution": "",
+    "GeneratedProgramFile": "",
+    "NoWarn": ",CS1591,CA1848,1701,1702,8002",
+    "MSBuildProjectFullPath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj",
+    "MSBuildProjectExtensionsPath": "/tmp/opencode/piv-001-examples-v2-consumer/obj/",
+    "ProjectAssetsFile": "/tmp/opencode/piv-001-examples-v2-consumer/obj/project.assets.json",
+    "IsTestProject": "false",
+    "OutputType": "Library",
+    "Configuration": "Release",
+    "Version": "1.0.0",
+    "YubiKitVersion": "2.0.0-alpha.2",
+    "AssemblyVersion": "1.0.0.0",
+    "TargetPath": "/tmp/opencode/piv-001-examples-v2-consumer/bin/Release/net10.0/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.dll"
+  },
+  "records": [
+    {
+      "kind": "source",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Examples.cs",
+      "bytes": 30132,
+      "sha256": "d18f339084948d1894c1c7cdb634572b605b090bf50cf2d4083e29b40d549d69",
+      "retained": "source/d18f339084948d1894c1c7cdb634572b605b090bf50cf2d4083e29b40d549d69-Examples.cs.snapshot"
+    },
+    {
+      "kind": "source",
+      "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb",
+      "retained": "source/f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot"
+    },
+    {
+      "kind": "source",
+      "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.AssemblyInfo.cs",
+      "bytes": 1700,
+      "sha256": "955dc5c0d187332e2b6ef5ae0f6954bfe44c4d0041f6922f3edd1f7b1b1b2511",
+      "retained": "source/955dc5c0d187332e2b6ef5ae0f6954bfe44c4d0041f6922f3edd1f7b1b1b2511-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.AssemblyInfo.cs.snapshot"
+    },
+    {
+      "kind": "source",
+      "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.GlobalUsings.g.cs",
+      "bytes": 231,
+      "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592",
+      "retained": "source/8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.GlobalUsings.g.cs.snapshot"
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/Microsoft.CSharp.dll",
+      "bytes": 18256,
+      "sha256": "88fdee24404ebf44db7f84e955f44b85e98ab6a8a8955e274d0a41e6981cf899",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/Microsoft.VisualBasic.Core.dll",
+      "bytes": 59176,
+      "sha256": "d10888887043f8fe9fe18d5979e33c6a03da19d4b9b454e43fe77be9cdc88fd3",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/Microsoft.VisualBasic.dll",
+      "bytes": 17192,
+      "sha256": "95aa41f885965447a62b59f1b3ce1677300c51c009048c8c677b961e98e99a72",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/Microsoft.Win32.Primitives.dll",
+      "bytes": 16208,
+      "sha256": "781792a6c9ff73d120655304f50f4cea8ccd4cce2a514f90ee4e734970a732d3",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/Microsoft.Win32.Registry.dll",
+      "bytes": 21328,
+      "sha256": "197d29e22f33b692ec8b3321fd849c2f2e0f6714686cb1988727bd7ff9e1c128",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.AppContext.dll",
+      "bytes": 15184,
+      "sha256": "b03e016fa01d7cc9723044c7020940779e4af59e29bdf47f72bc6ed9d9b1d257",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Buffers.dll",
+      "bytes": 15184,
+      "sha256": "9bd4590fa18b9a6509efb5147158a6abbe4799e82e0efa9fa240102b6084872a",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Collections.Concurrent.dll",
+      "bytes": 27472,
+      "sha256": "c2397bedf543acb1929152fb6cd3c32a6a125bcb4a083938220ee62642814c9e",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Collections.Immutable.dll",
+      "bytes": 75088,
+      "sha256": "1a37547bc962e0a63aec96eceab9b83daa634f347683355e374ad4336127e562",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Collections.NonGeneric.dll",
+      "bytes": 22824,
+      "sha256": "d4a897b4ec3fc6919c004eb5eebd835cf23a452fe12baa6ec7df97fd44fbdaf0",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Collections.Specialized.dll",
+      "bytes": 25896,
+      "sha256": "69a7c1f6250767b43ffeda7d0dd5d04de44f23f1c938984331baa896590116c1",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Collections.dll",
+      "bytes": 55120,
+      "sha256": "887169794f6380e1fc110b237f6fdba15a0e6c5a2f73e7539f3e5330f17502a4",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ComponentModel.Annotations.dll",
+      "bytes": 31568,
+      "sha256": "15b9b734e01968c98c8b3af3395d5110fbee534865dc678398d72ff4c776f413",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ComponentModel.DataAnnotations.dll",
+      "bytes": 16680,
+      "sha256": "f7675a194e2f444670b94d3d3866dd3dd16b48b332cc5811268ff903e6c17a65",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ComponentModel.EventBasedAsync.dll",
+      "bytes": 19280,
+      "sha256": "98a339cb008f59092db3f8933ff96a50b1409cb1061d9f48f77f54e76233040d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ComponentModel.Primitives.dll",
+      "bytes": 25896,
+      "sha256": "b286c86fba090da249b28f8f66145aeb0cecc5ec4bffe613f039103c0dd576fe",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ComponentModel.TypeConverter.dll",
+      "bytes": 104784,
+      "sha256": "540d43b3c614263fc3c7f9c21532a484b2da7ebee90da8676e18d8a6eee722a3",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ComponentModel.dll",
+      "bytes": 15696,
+      "sha256": "1a7dc21ad6aa770f596a65e9f9fdfcf9bb255df6f687f1b323ce4fa5deeeb741",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Configuration.dll",
+      "bytes": 19240,
+      "sha256": "c53f9278c6889d8562d616106413bf50198f452316b4c5002100c568d541428c",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Console.dll",
+      "bytes": 26408,
+      "sha256": "0cee0de93a568dfdb468febc313d3a027929e218e082c16dc8582299bb528174",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Core.dll",
+      "bytes": 23376,
+      "sha256": "f1dcf1577c6a675f1c85ee9f13d103495ce123ed232001646f4132d76c1480cb",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Data.Common.dll",
+      "bytes": 154448,
+      "sha256": "5cf24487da9a9e5833657429943237e49ffa4b13300576ab6a9134087fefa06c",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Data.DataSetExtensions.dll",
+      "bytes": 15696,
+      "sha256": "65bd4ccac3f6f062a68d2ff797bb3908b7f21f908c95a1e85729b8c5bbcb3b87",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Data.dll",
+      "bytes": 23848,
+      "sha256": "50faa33a4a4258201a57f5df04831989ab41d9eef8b285c5b98f63b5eb8e62ae",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.Contracts.dll",
+      "bytes": 19752,
+      "sha256": "1b3f2741daabd7765154da4eeb634b7bdc2220734090570cd2301028dd777167",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.Debug.dll",
+      "bytes": 15656,
+      "sha256": "ba04477089ee6fc9ae8c2a8e711905fe1d7a113c785cb168d28eccaed435400b",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.DiagnosticSource.dll",
+      "bytes": 43344,
+      "sha256": "d74901448d4cf9d0b98423c44b2dd5c1f48745721dc01f6ea334a05daa51e6a9",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.FileVersionInfo.dll",
+      "bytes": 16680,
+      "sha256": "62865111b3c1fa7dd82e36caf9c19ac8a4ff9ce17148e94361c7ad8ece89bfd6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.Process.dll",
+      "bytes": 31528,
+      "sha256": "e9a24a80b6bebc920ef157868c7537f42491a0564f9fb5cf2884eaafc8f5c430",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.StackTrace.dll",
+      "bytes": 22824,
+      "sha256": "e43aad1c651b1a296e5a2e908192c17b52f33a4c9f8ad31da935f84a6b9d20d4",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.TextWriterTraceListener.dll",
+      "bytes": 17704,
+      "sha256": "84d26696dc74b7ee0ef826369e0b3f3740b8bdb5c1fa15345308fe8f82fcc08b",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.Tools.dll",
+      "bytes": 15184,
+      "sha256": "dade40a11c2594fc03c84d119050f8b4281077bbc28298e3c2f6d96673cb0667",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.TraceSource.dll",
+      "bytes": 27944,
+      "sha256": "640fc476be8879e00f70d71ad5a5dc6f64ddeae00a6e53bb54c8c1798322d1c7",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Diagnostics.Tracing.dll",
+      "bytes": 29008,
+      "sha256": "217d30399278821e53c909fd30d4bca8c02a5be899813545af156e8be49d4168",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Drawing.Primitives.dll",
+      "bytes": 35664,
+      "sha256": "1b2391b97094fd37da3f44d1763bb04c29e8d1d662fcf83859559588e8cd9a85",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Drawing.dll",
+      "bytes": 20264,
+      "sha256": "86fe6479c86f0f99358adcb89ecba5d3fb91a30d333545a17c00ef67d86a29f1",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Dynamic.Runtime.dll",
+      "bytes": 16168,
+      "sha256": "3d645a280ed6d073664f229842847d8af2dc2a7126ccf27c5eeba2c55c08286d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Formats.Asn1.dll",
+      "bytes": 26448,
+      "sha256": "894741df24a48926d59e881e911fe39e74532c48ce2be4147a84bb9eea26e1a8",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Formats.Tar.dll",
+      "bytes": 20264,
+      "sha256": "9456ada2a73c850dd960f8a059dc1d9bc5be11be91816a4363e80b51b900cf91",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Globalization.Calendars.dll",
+      "bytes": 15656,
+      "sha256": "cb2a60039ed7a7a797d133ecee1755185305632b8c78d62dcaf0d2ccb4e15ed6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Globalization.Extensions.dll",
+      "bytes": 15144,
+      "sha256": "7d27ac98541e7e6e72dab31aed4055fc9435b777bfce0f50722440601efd77bc",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Globalization.dll",
+      "bytes": 15656,
+      "sha256": "e374eb513cb207833143ac4967155589087e4fb71a8ae9108ee1d64596b67484",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.Compression.Brotli.dll",
+      "bytes": 18216,
+      "sha256": "11174d8af6b4d1690c02e25e248245b9132127f049152a7111dc6ed4892b37c5",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.Compression.FileSystem.dll",
+      "bytes": 15144,
+      "sha256": "3fab44511b3e88c31430c987223f46c71dda6f890a2d6ecb7b29031ccc4b6b5e",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.Compression.ZipFile.dll",
+      "bytes": 18728,
+      "sha256": "24b0e73e247d3c435518e842939f98cda7b2d2f0548a4b67cdd28e623dc267f0",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.Compression.dll",
+      "bytes": 21840,
+      "sha256": "c397879cd7f1206f8191630c43705e9b5cf7296461182d9e2356c9e57675e47f",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.FileSystem.AccessControl.dll",
+      "bytes": 20264,
+      "sha256": "7aeef64e8d0802374f43aa4626cf8524e9a9deafcacd6ea75229ad098a1d09ef",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.FileSystem.DriveInfo.dll",
+      "bytes": 17192,
+      "sha256": "0f30f6d93201d6d0205f79fe0259bb6d3a471ee3aad5cb53d78a7da69e064dc9",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.FileSystem.Primitives.dll",
+      "bytes": 15144,
+      "sha256": "a72218414270188a3d11fd291ff63c407f65f0a4ff8ebaa8351990649fdaa9c5",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.FileSystem.Watcher.dll",
+      "bytes": 20776,
+      "sha256": "eccbdbf99d06acb6c4424073948a251681db2042202b0808c7139e0925c6550b",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.FileSystem.dll",
+      "bytes": 15656,
+      "sha256": "1fdccf62b58857da2d75f26f0fa31ce342e035e08b61f08a439088834c25a650",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.IsolatedStorage.dll",
+      "bytes": 22352,
+      "sha256": "f916dcc4c91f31363f71ba5eb0dff4e75ae8b6cfe74607bfc8daf30a13788e69",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.MemoryMappedFiles.dll",
+      "bytes": 18216,
+      "sha256": "cff36b54f3db104cbb9b8dcc12d1f7a16c028e949cd866a51306ca8a77b1bf35",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.Pipelines.dll",
+      "bytes": 20264,
+      "sha256": "f48c75a1a3909cf6d511c680200dc67f619c1437ba3a71809d48d5a13a86e27a",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.Pipes.AccessControl.dll",
+      "bytes": 18216,
+      "sha256": "e293a5b74471e33ea0e615e5c1adde1ba7eddbe5ae35ca02161a5d30b8bba9c4",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.Pipes.dll",
+      "bytes": 22312,
+      "sha256": "5ebb5519b0b507c529a77afdee08e90ccd745d1f760afc1059bf3d62e4efd9ee",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.UnmanagedMemoryStream.dll",
+      "bytes": 15696,
+      "sha256": "ee80874913ba2b3dc55f05ed18043ef40a42cec0c2095a68a2825ec66e069c25",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.IO.dll",
+      "bytes": 15656,
+      "sha256": "7696915987cd96348e15e6b230394a9042e278baf26d07d2414b99e8a66ce969",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Linq.AsyncEnumerable.dll",
+      "bytes": 36136,
+      "sha256": "dc39f6134c81dae82d59377657fdfbd5aa20f7cefa52118ca2dd2adff0b42790",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Linq.Expressions.dll",
+      "bytes": 63312,
+      "sha256": "9ac37b7dbf5a1ed613a94f14d257969181d180b5a21839ef79e744ddf2d23409",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Linq.Parallel.dll",
+      "bytes": 31016,
+      "sha256": "d1b9646fbf4e88e79fc38e2d486a617fbdd879ac23e763eca3fb72559e90aebb",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Linq.Queryable.dll",
+      "bytes": 32040,
+      "sha256": "22251a6e2397f85613952a7541dedc9b6ab47e96315deee6116869d845ab0cd2",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Linq.dll",
+      "bytes": 33576,
+      "sha256": "288a8944aead18fab66da426c510877917209c03581955b69c00e53e2db2c114",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Memory.dll",
+      "bytes": 57128,
+      "sha256": "ca633099219d52dea264b12d3a13adb82b8970adf9f1e521660c137ec84fa733",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.Http.Json.dll",
+      "bytes": 23336,
+      "sha256": "18172d687f2b4f338f5769c6eb9239ab1544c75f252314b65ba0012e8665a142",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.Http.dll",
+      "bytes": 60200,
+      "sha256": "7eba8019731267309741405febe3138713357ed543e0d4eff2560e32942ff3b6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.HttpListener.dll",
+      "bytes": 25384,
+      "sha256": "1183a24e5020522d04b7d9b3b0a4cdfaf2b9fc5ff4c26eed8e9b54779f544594",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.Mail.dll",
+      "bytes": 32040,
+      "sha256": "53140c0525418330db92e57c5f7ac3b095278fc12a9832aacb0efe3c0242426b",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.NameResolution.dll",
+      "bytes": 17704,
+      "sha256": "71433a9bb4c229d110579988425fe97213dd3cbe08185716c7e302779a05aff2",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.NetworkInformation.dll",
+      "bytes": 33616,
+      "sha256": "328cabcb53921b1ce369bef80b765d73e3b791a132cf26a8bbce615237ef8381",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.Ping.dll",
+      "bytes": 20264,
+      "sha256": "7b9217de757e7710e24a63d3fcea6ce8293fa98f478917a5a3d2a372178f532a",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.Primitives.dll",
+      "bytes": 37160,
+      "sha256": "646d8d8b008cb03dbeefedc16fbbc653c0df7bd0579fe627f549aa2afeba6d6f",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.Quic.dll",
+      "bytes": 23848,
+      "sha256": "c170d2e7591dc334aad11c399948531173330f3488228b691d5c144b864e22d5",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.Requests.dll",
+      "bytes": 41256,
+      "sha256": "f836265885650313effe83111c89331fa8890f71be6da5a2e24660d841b97e2f",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.Security.dll",
+      "bytes": 53544,
+      "sha256": "c31add084988e952f3bdf0698d19be60e850659a735f7b7a31e1d81c4eaf33f0",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.ServerSentEvents.dll",
+      "bytes": 17192,
+      "sha256": "0c85a68f6793ef6cfe8f700e0aef332b0b48853428fdedb69b24ef6a77ae678c",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.ServicePoint.dll",
+      "bytes": 15144,
+      "sha256": "dc7433871738ffb8ce7f7963cee7fadc2103ab4b61e461a70e60d848625ae297",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.Sockets.dll",
+      "bytes": 47400,
+      "sha256": "c82db54c45b39e95cf1e563a805730b80392f8d75959e2a257cfb5861b4d522e",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.WebClient.dll",
+      "bytes": 27984,
+      "sha256": "422ba635e8428f96dcc3e3a4d7c0b47de7a009c43e7c3b3457c82c6b1837f977",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.WebHeaderCollection.dll",
+      "bytes": 19240,
+      "sha256": "1cb52035bb6929cb7235aa977cad0586232ec0ed34015a82045297433c4762ad",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.WebProxy.dll",
+      "bytes": 18216,
+      "sha256": "69d516d504e51692243357df54cc491ff1d8f90ff602f0f75310121615e1e0ee",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.WebSockets.Client.dll",
+      "bytes": 19280,
+      "sha256": "4e4fec19656bfdcc828472fd0b01afc779a0ddd511cc72f57d6946c3648f1754",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.WebSockets.dll",
+      "bytes": 23888,
+      "sha256": "92b5a32900bb576a62adcc396b34410ef74747fe9585a6623d5f2915696c155d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Net.dll",
+      "bytes": 17232,
+      "sha256": "1bb00c4e169c0a20ad8763f4105204c221b97e037464b5bacb6ec4b9d40e0ad7",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Numerics.Vectors.dll",
+      "bytes": 58152,
+      "sha256": "7490abe2f786f985bc60e03d696c75bd553881cdd0285e60954c5c825f84df23",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Numerics.dll",
+      "bytes": 15144,
+      "sha256": "c39d8710b4aba77631159b90e04abd81b58ff3cc9fc8433621b76683cd6aec9a",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ObjectModel.dll",
+      "bytes": 23376,
+      "sha256": "93e83f98d6cebca4c97758a8628a5f1c9627a7cd92f4a09f8da1cc8e13a08b81",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Reflection.DispatchProxy.dll",
+      "bytes": 15696,
+      "sha256": "da2b56af11bd26a1d07d8df6b25a0e88d4bf8fd0a6fe61f57541fcfcca99f089",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Reflection.Emit.ILGeneration.dll",
+      "bytes": 20768,
+      "sha256": "6d3f22aaa3090285295582bf139cd8f3463ca046e94f7a7ee8bef4a5f037b860",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Reflection.Emit.Lightweight.dll",
+      "bytes": 19240,
+      "sha256": "1d0bd2ebe19e74c645e8b249442f45162093607d6749edc2b2a21868e476a981",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Reflection.Emit.dll",
+      "bytes": 44368,
+      "sha256": "7b79d4fcd50ac9a1677a07d24cd5e6bbfb53bcbbd844a23a0aeebfe64a82edf3",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Reflection.Extensions.dll",
+      "bytes": 15184,
+      "sha256": "8ccbd7bd124cbfaa1cfd9315d922dd693ad7ade5d0436d246b188e02b40919df",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Reflection.Metadata.dll",
+      "bytes": 122192,
+      "sha256": "76b1dd46c5b423f93dd3aa348df257e46e3202acf14a2f67fe4ee7b579cff4f8",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Reflection.Primitives.dll",
+      "bytes": 21800,
+      "sha256": "e9870a3e969f9580aa33049638b1631d41c528f9d361d6117e70d9563e3b6ed7",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Reflection.TypeExtensions.dll",
+      "bytes": 19752,
+      "sha256": "9e755833cac01171fd2374c280d591a6bc9ad27045926da865d3c1f2e4c93d9d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Reflection.dll",
+      "bytes": 16168,
+      "sha256": "d3d7fa31b89606d7a5c10a26ced05a29d32ab2fb87a54f10c82cd74e8e19725d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Resources.Reader.dll",
+      "bytes": 15144,
+      "sha256": "181cf4b3b528f7e2a3316fb792339320a1c40c96c7b45b726ff16257097276e3",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Resources.ResourceManager.dll",
+      "bytes": 15656,
+      "sha256": "06fbffe507abc62101f0466d1570cecb074ec6a432a1ba058d4b9360ea13764f",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Resources.Writer.dll",
+      "bytes": 16168,
+      "sha256": "edc5fe620e948c158faa8acba6bd7ecc76abd3bca26595d4340d00780fe5a3f8",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.CompilerServices.Unsafe.dll",
+      "bytes": 15144,
+      "sha256": "bb342e1fbacfe7589b71936fb000c36b54ddc96d578bc0888623e19549c1e6f3",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.CompilerServices.VisualC.dll",
+      "bytes": 17192,
+      "sha256": "29b23180d86007436761db8ec81fac5288c0a63e218467f094c76473ea9f0410",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Extensions.dll",
+      "bytes": 17704,
+      "sha256": "f7e44a3f016421af7130ccdd913c57419d3cd2a0f48e34bdd1295797f2535cf8",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Handles.dll",
+      "bytes": 15656,
+      "sha256": "b21415740db52c068dddeb4dc61e95a41ec23b1a4c1b1623ff6b65399c7c0fdd",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.InteropServices.JavaScript.dll",
+      "bytes": 25936,
+      "sha256": "8e8fa9d156dc39e689ff3471a4d12f3df84a8fba2928a0d87f5da54af213f75e",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.InteropServices.RuntimeInformation.dll",
+      "bytes": 15696,
+      "sha256": "f0b683af8a5db0f4cbaa2119f66ba93a01ee0db8ba1079acd01f01d247c111a6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.InteropServices.dll",
+      "bytes": 101160,
+      "sha256": "ada1b809e6918429ccc28c587f743235c4ebba7d24a733fa646a6976c7bb5973",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Intrinsics.dll",
+      "bytes": 466216,
+      "sha256": "e079c5fda0ca806ff68c44732b926cbefdce4a52555148331a4fc19fd80efcea",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Loader.dll",
+      "bytes": 19752,
+      "sha256": "c892eb97152c25813b839bce7fe518285fc18acc869d42e054842272f507d744",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Numerics.dll",
+      "bytes": 36136,
+      "sha256": "aff64aa1bb78d390f77024d8b04385114027e4d3b36f42b59c49172058c68bc4",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Serialization.Formatters.dll",
+      "bytes": 23888,
+      "sha256": "fe0e0f73fd8969a83f07c3dc2f62fa3148272158c4162b3660d9c4588b566e5d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Serialization.Json.dll",
+      "bytes": 20776,
+      "sha256": "28d148f440067454c06f597f5914bf064d3abf721db1861cfc1296adea77f1b9",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Serialization.Primitives.dll",
+      "bytes": 19752,
+      "sha256": "5540b54d764c9297565ba2f525d3cdef4b8ed84ad80f479a9833340b8fec1e6c",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Serialization.Xml.dll",
+      "bytes": 39720,
+      "sha256": "8e7eb76ed7cca0d653daa906731375fccbf65456b8645b22c4344876c5f9657c",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.Serialization.dll",
+      "bytes": 17192,
+      "sha256": "39da6e91e025583c2d51a5180614cf278bdf7f6d850c4c011422869efca625ce",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Runtime.dll",
+      "bytes": 862504,
+      "sha256": "83718200954acb9052d8ff716053bca0fb8f591cacd59d5fe821ae8a19565382",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.AccessControl.dll",
+      "bytes": 37160,
+      "sha256": "7569b0581a843f5efec476a78234e30e3cf8f2699992ab9ea8b8f97aab1e3b4d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Claims.dll",
+      "bytes": 32592,
+      "sha256": "26ac297d49498eb92cffc0c09a106e4b88535453f487ba12b0df3899467623d6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Cryptography.Algorithms.dll",
+      "bytes": 17232,
+      "sha256": "0e5de3978293221c0e36bf52786abea8f7b74ebf06de58c9717db4507e59ac10",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Cryptography.Cng.dll",
+      "bytes": 16208,
+      "sha256": "9198b7e57489278215a2489d66d9d52c7a9d65ae7abe399cc9d27d1b23debbf6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Cryptography.Csp.dll",
+      "bytes": 16168,
+      "sha256": "2774b21002a29479de3523f8781d1411e4990575b50f1316d6a9cd490980c2db",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Cryptography.Encoding.dll",
+      "bytes": 15656,
+      "sha256": "070abb893bb963b2a846ad8b8c1354563c7b362d1c492eec53538fc28a871001",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Cryptography.OpenSsl.dll",
+      "bytes": 15656,
+      "sha256": "e2a8cba098ec00d19d043750e8a19374cc65d1a498b9eb15dbffe0eecc579b32",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Cryptography.Primitives.dll",
+      "bytes": 15656,
+      "sha256": "89e9947ee1e7839eeac2c9c0b37a2b0c0433ff338dadec6380fac1eae375ffd3",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Cryptography.X509Certificates.dll",
+      "bytes": 16680,
+      "sha256": "398e55927b3cfd070bc8d204740e50d012cb78f7a2dcb968a33869b4aa54e067",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Cryptography.dll",
+      "bytes": 163112,
+      "sha256": "cab74a838c41469f15de7942c6b5c420fe3c70a69be6e3b6c7e98dd2ffb68260",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Principal.Windows.dll",
+      "bytes": 26960,
+      "sha256": "6babfb522e03fb6306564f909c4a430ce3293205534b91b09436fb6d145353af",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.Principal.dll",
+      "bytes": 15144,
+      "sha256": "d1cdbae10415e4f384ecdf34cd6e427f7c1d67bb6549b7e15193006428734bb4",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.SecureString.dll",
+      "bytes": 15656,
+      "sha256": "3347281129d6cfc4a5c912dbb9f803878c99cc60d125ca5f2adbc4718ccf348a",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Security.dll",
+      "bytes": 18216,
+      "sha256": "e81926edd150a900fa0d6832aa813b2c3dfb156e7116a7cca2d96640ff24e438",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ServiceModel.Web.dll",
+      "bytes": 16680,
+      "sha256": "9537a9d13c43511fb95b6d30dda7817851b23e864503fa336626522499b51d24",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ServiceProcess.dll",
+      "bytes": 15656,
+      "sha256": "13fb65e12deec9ac60a8342dec6caeff8d35b56dc142cdabfab2745620d46fd0",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Text.Encoding.CodePages.dll",
+      "bytes": 15656,
+      "sha256": "403075620a95ffab0354fbe65f6609ba968b3367378c42c8400ba650953eca87",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Text.Encoding.Extensions.dll",
+      "bytes": 20776,
+      "sha256": "6e0c85234cc942a8486ebe91c292caa90ba36fbd9d1f427842570743ef3a6198",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Text.Encoding.dll",
+      "bytes": 15656,
+      "sha256": "f1531dcab1fe59529829a1a241953a5e55ef8340c8cf1a21c053eeb7c48e2a84",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Text.Encodings.Web.dll",
+      "bytes": 26448,
+      "sha256": "7d3b7851eb7fd6eb6fd2b945aa761e85c3c9c24d0400faba7cb766f4cbca29a4",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Text.Json.dll",
+      "bytes": 82216,
+      "sha256": "105ac7c08a63c6c41dbbf41650ff1b54c96ee11afa6ffb510cb213b78d23d71a",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Text.RegularExpressions.dll",
+      "bytes": 36648,
+      "sha256": "b2e82bc317bfc47444554a90832644cdb1b1cbe83f53290ecb02ccdd8855a168",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.AccessControl.dll",
+      "bytes": 20816,
+      "sha256": "a076dd23a41eb1eb7be8cfd51e3b5ad8528a69904ea60a8b379c7f6ebfe50b8c",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.Channels.dll",
+      "bytes": 19240,
+      "sha256": "4ccfa4888ecc59b0c004c4a6eee84efd5f9dd3d5baa3d816448e71b2857088a2",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.Overlapped.dll",
+      "bytes": 18768,
+      "sha256": "00b21c92ab1018d860c0aa0b8b1d27309a8f3845131517acbde9032207745f85",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.Tasks.Dataflow.dll",
+      "bytes": 32080,
+      "sha256": "b93340f775cc9a111916fccae6005ac797319b95a20c105667e48b11e66d9bfa",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.Tasks.Extensions.dll",
+      "bytes": 15656,
+      "sha256": "b35a1faeecc0fb706b06f470a13fb3b1d2addfef1cd5a81fb1bdbd75ad6c8fdd",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.Tasks.Parallel.dll",
+      "bytes": 20264,
+      "sha256": "74519be417dca600063ca7314aa7283952692b3ef7ce73c5901dfc44e8d0c7d6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.Tasks.dll",
+      "bytes": 16680,
+      "sha256": "a908649b99249e9533d674ed8838f2cace1f6a4071d848bf9edf7b96dc4ebc5f",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.Thread.dll",
+      "bytes": 23848,
+      "sha256": "91e5f9ccf9b897052a4f80576ae5f603a33f75015a15d2bd6e300fa7134c0136",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.ThreadPool.dll",
+      "bytes": 18256,
+      "sha256": "68f2a3a92af010d330dbf60b68f6b31add69017ea08aeeb0729b1ebaf13efd86",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.Timer.dll",
+      "bytes": 15144,
+      "sha256": "a7763eba808803faab8e904fd5b467d9c7dd5c18ddd9a584d7c686f08d27e10e",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Threading.dll",
+      "bytes": 33616,
+      "sha256": "bdf1caf4bc601e81a7bba8dd9cdf51d98383ec9812d7cdbb258872036292f142",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Transactions.Local.dll",
+      "bytes": 25896,
+      "sha256": "115d0a61264399ffc357dd29b9035e2bb2cd9a340378241c64530c2abbcabc5f",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Transactions.dll",
+      "bytes": 16720,
+      "sha256": "bfffd1196acf43fc9c88ebb561bb3a964ede3d8269bba09cf3258ead1ab4fcc4",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.ValueTuple.dll",
+      "bytes": 15656,
+      "sha256": "03a5049c71a54d9e8c2f2b9180529804d3e956ad6432a0668946115b29d3a830",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Web.HttpUtility.dll",
+      "bytes": 17192,
+      "sha256": "4f3c4a195ba35f8b7c63972a6496912ac9e76e1c9fbcdb28a6a479a400afa07b",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Web.dll",
+      "bytes": 15144,
+      "sha256": "5fc03752ad1c79c05bdf71cfc841f7c16cfcc4366365d8f7f31e22cff3cadd7f",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Windows.dll",
+      "bytes": 15696,
+      "sha256": "b2a12218c022eba72d8acbc36c012211f965bb49c2fe92c0aaf0964ee785c800",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Xml.Linq.dll",
+      "bytes": 15656,
+      "sha256": "f66daa73628bd932749377aa5094ebad056a63748223ed0dedb4b7dcd49e22b9",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Xml.ReaderWriter.dll",
+      "bytes": 116008,
+      "sha256": "83b97de9ae16e51138ac4122ebcd4ac5d573e36ece6cc53670f5ae158dfef5c9",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Xml.Serialization.dll",
+      "bytes": 16168,
+      "sha256": "4a38c5a78410d11d32df42565312306eefc1bee5c73a6c5c8c661b0cf1ac0717",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Xml.XDocument.dll",
+      "bytes": 34088,
+      "sha256": "117b22c47c96c522e3869e64d1b611ba432d87c6bfcd680a98d89214d2af6d2f",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Xml.XPath.XDocument.dll",
+      "bytes": 16208,
+      "sha256": "477567062778b4aa20769570cdf43e6ba634cfa5496030088a512fa5be28b351",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Xml.XPath.dll",
+      "bytes": 16680,
+      "sha256": "d7a0ce15ae4b9eaa51e6c9bb6fc0e5ab3ff22e4a5f0ef53728363b6685dfe540",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Xml.XmlDocument.dll",
+      "bytes": 15656,
+      "sha256": "fc671e921ca4cae98c3b1cd0ad0fdf1e75f115917c9fa0826f194efbd149c1ba",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Xml.XmlSerializer.dll",
+      "bytes": 50984,
+      "sha256": "aa69bc4e804078583f3e3b63e08b895c68a2db2462dfa07a9d04a054f67e26b1",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.Xml.dll",
+      "bytes": 23336,
+      "sha256": "8b35480d266706f1c8db8e70216a72ba26d3fb25725f8a1131731e4d380410ef",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/System.dll",
+      "bytes": 49448,
+      "sha256": "f6eefe3c6ec36a0543014d6657255c56a9c149d8499b0cac90ad6d77acb3d139",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/WindowsBase.dll",
+      "bytes": 16208,
+      "sha256": "a88115b54a4782631612f995f857624994143e783aca58dfe2fe0800417a49e6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/mscorlib.dll",
+      "bytes": 55632,
+      "sha256": "f57f948610d240ae51028069944a65d05d73920fb3c75219cadad15e877036a3",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/ref/net10.0/netstandard.dll",
+      "bytes": 100648,
+      "sha256": "2844417955d5b11f8434fcc969f52bc09104f438ae2f4d5595c36c355d06e270",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.configuration.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll",
+      "bytes": 28944,
+      "sha256": "722430c2456c43709a390c3e411f39d1fd32ccb7c820b39d1997e2573cf0a581",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+      "bytes": 66312,
+      "sha256": "2ed3794ec58972f03ce9377a16fec1c73c7e1ffcc0392890579c05fb789c0f13",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.dependencyinjection/10.0.2/lib/net10.0/Microsoft.Extensions.DependencyInjection.dll",
+      "bytes": 96048,
+      "sha256": "d723a3d85ccff102a2aad1f3fd39bb89aa71bac8d15b1bc56bded67087efb266",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.diagnostics.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll",
+      "bytes": 31496,
+      "sha256": "f307f2b10163e42593822dd768b530516eb8f7ba24fda3576d18b49a8f0f05f5",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.fileproviders.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll",
+      "bytes": 23816,
+      "sha256": "345e29f6887414124b18f67de668c16ff77e20fb195bbba4234e09a2bb1f9f22",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.hosting.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll",
+      "bytes": 54584,
+      "sha256": "ddb12c9ee77c9ad262f2202808010b727016077d701ddeb4d93cceaea709646d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Logging.Abstractions.dll",
+      "bytes": 67336,
+      "sha256": "69642e69c3259e4defee5858bbb9a36260ca2171524f55510110f4c7f86770d4",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.logging/10.0.2/lib/net10.0/Microsoft.Extensions.Logging.dll",
+      "bytes": 51984,
+      "sha256": "d24a34bf563fb4589f15d66eb902c8ea6e6919338401d8c1949d523fb9ec087f",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.options/10.0.2/lib/net10.0/Microsoft.Extensions.Options.dll",
+      "bytes": 65800,
+      "sha256": "b0a7ca186efe6c6e52779d5f0b5698fd8cf3d81eaee9333a44312f59e6a432eb",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.primitives/10.0.2/lib/net10.0/Microsoft.Extensions.Primitives.dll",
+      "bytes": 45360,
+      "sha256": "36785e9195be2ddbd3eca11a94bbd6b3f4ac0efc27fb84dbf042fed8e16e5568",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/spectre.console.cli/0.49.1/lib/net8.0/Spectre.Console.Cli.dll",
+      "bytes": 186880,
+      "sha256": "50babeba6453aec32bd6fadb3cfe451bb131dc34d3cc74ef58cde317e36d492d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/spectre.console/0.49.1/lib/net8.0/Spectre.Console.dll",
+      "bytes": 719872,
+      "sha256": "200fb336c0516ae15912b2ad772931d5c4e8e48327b3e0c79bb4c15305ec4b94",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/.nuget/packages/system.formats.cbor/10.0.2/lib/net10.0/System.Formats.Cbor.dll",
+      "bytes": 93960,
+      "sha256": "18875c3b5b857ec0426464e25f544c9c15cbbbc85f0a3b6005e6041c1e2861c9",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Commands.dll",
+      "bytes": 73728,
+      "sha256": "9b48da34a3068e22df13c93f5105f226588782d7830d58dbeffe00606c56ab9e",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Shared.dll",
+      "bytes": 20480,
+      "sha256": "f8593f53722d178aab6d1738d780e7199edd9aad18d5c7060f4824ac61ff5628",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+      "bytes": 268288,
+      "sha256": "00541a2cec6f04656da98ef744d2b55012a0ff071724bad4dd7d0084a13ecf76",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll",
+      "bytes": 78336,
+      "sha256": "57482fedda1d7a000ebefbcf557cf9d8dae5bdb17983c71bfad1ee7181f4a32c",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+      "bytes": 16384,
+      "sha256": "be6e8cb3326f63980541abb30e1ff859b4e7702eb698313061071e52cb0fe3ee",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/ref/Yubico.YubiKit.Oath.dll",
+      "bytes": 27648,
+      "sha256": "9e14bc17bbc9f480e3040dbfee680f1c289119a4faea5aea3726327d7a49449d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/ref/Yubico.YubiKit.OpenPgp.dll",
+      "bytes": 49664,
+      "sha256": "b9574ce15a3c70b4370cdf8865bc8192b1914212cb40ee825525e1e8801b0428",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/ref/PivTool.dll",
+      "bytes": 53248,
+      "sha256": "b2dbaee97668288c3d6e3cc5149bd69daeef8362ef3cf4228cf3b54b7a9a5096",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll",
+      "bytes": 51200,
+      "sha256": "bbe3ab68478c09d1a729ab6ca0acb4b59df8bbbb8af0b69eb8028b721eb2762d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/ref/Yubico.YubiKit.WebAuthn.dll",
+      "bytes": 65536,
+      "sha256": "476d4d086e4db6ca0be86cac219b0bf62f12d8cb88eebad26aecf94c878b3167",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiHsm.dll",
+      "bytes": 23552,
+      "sha256": "362231fb905677ee00316712894c5f33e410f710c0b8ffd21f6825c6b02b7585",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "reference",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiOtp.dll",
+      "bytes": 24064,
+      "sha256": "1884674e15a92e32a918904f08201d227091e24aa21d524095235c179d216de7",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/analyzers/dotnet/cs/Microsoft.Interop.ComInterfaceGenerator.dll",
+      "bytes": 328488,
+      "sha256": "5a8c98951c574a291d54d6c0973f4950e7256d5ce9203be77cbf1da87a28853d",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/analyzers/dotnet/cs/Microsoft.Interop.JavaScript.JSImportGenerator.dll",
+      "bytes": 136528,
+      "sha256": "ad9446e5a2926fd81b326f746b193c68725e3ad419f184d551bf50864e174e42",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll",
+      "bytes": 261928,
+      "sha256": "4b9a80ee25e00b5a8b2ef17054db035558abd3e2c3ee3e89672603e07274f589",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll",
+      "bytes": 462672,
+      "sha256": "1584fd126577da58faf46232497d6cfe32e8db557252ba0eb7307530d8a59d80",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll",
+      "bytes": 203088,
+      "sha256": "b43a11e2c5c5a8f09d53430387089c84a37442431ebbec5a63e381ce05ee7c27",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.14/analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll",
+      "bytes": 371496,
+      "sha256": "fd3e72f57400296a842685b28f40b700a86b5fd98dde56b4a6cb2e351b3f3858",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+      "bytes": 129808,
+      "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+      "bytes": 2495248,
+      "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.2/analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Logging.Generators.dll",
+      "bytes": 80688,
+      "sha256": "88139b918cc7fab679feef0c4fd4a25ba3773082d2ae1c6cf485f9cc92cdc6f6",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer",
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.options/10.0.2/analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Options.SourceGeneration.dll",
+      "bytes": 134928,
+      "sha256": "c0f9fc70a18c42637f8801a6ee7af722943fb7093731c95e85269f29198c7608",
+      "retention": "Binary dependency identity only; full compiler assets retained as text."
+    },
+    {
+      "kind": "analyzer-config",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig",
+      "bytes": 19880,
+      "sha256": "eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d",
+      "retained": "analyzer-config/eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d-analysislevelstyle_all.globalconfig.snapshot"
+    },
+    {
+      "kind": "analyzer-config",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "retained": "analyzer-config/630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3-.editorconfig.snapshot"
+    },
+    {
+      "kind": "analyzer-config",
+      "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.GeneratedMSBuildEditorConfig.editorconfig",
+      "bytes": 803,
+      "sha256": "5fc44d61de97e3617381ea2e059f79b44f8051df2596608d11575c6dff7ec184",
+      "retained": "analyzer-config/5fc44d61de97e3617381ea2e059f79b44f8051df2596608d11575c6dff7ec184-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.GeneratedMSBuildEditorConfig.editorconfig.snapshot"
+    },
+    {
+      "kind": "imported-project",
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.targets/ImportAfter/Microsoft.TestPlatform.ImportAfter.targets",
+      "bytes": 1180,
+      "sha256": "756dc130cb63c753c0c3e165b6dab8f955cecb5b22e0d34d47c7ff5b726034fe",
+      "retained": "imported-project/756dc130cb63c753c0c3e165b6dab8f955cecb5b22e0d34d47c7ff5b726034fe-Microsoft.TestPlatform.ImportAfter.targets.snapshot"
+    },
+    {
+      "kind": "imported-project",
+      "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj.nuget.g.targets",
+      "bytes": 1367,
+      "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea",
+      "retained": "imported-project/935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj.nuget.g.targets.snapshot"
+    }
+  ],
+  "analyzer_package": {
+    "package": "Microsoft.CodeAnalysis.NetAnalyzers",
+    "version": "9.0.0",
+    "builtin_selection": "false: duplicate SDK analyzers replaced by the explicit canonical NuGet package",
+    "assemblies": [
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+        "bytes": 129808,
+        "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+      },
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+        "bytes": 2495248,
+        "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+      }
+    ],
+    "shared_sources": [
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.props",
+        "bytes": 8270,
+        "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.targets",
+        "bytes": 2665,
+        "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+      },
+      {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Packages.props",
+        "bytes": 3142,
+        "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+      },
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+        "bytes": 3677,
+        "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+      },
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/DisableNETAnalyzersForNuGetPackage.props",
+        "bytes": 468,
+        "sha256": "83fe2cae0a46132ad1f1bfa3b8048a8dab4830e87f71dfafb2bc5b5022468252"
+      },
+      {
+        "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+        "bytes": 90446,
+        "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+      },
+      {
+        "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Current/Microsoft.Common.props",
+        "bytes": 11765,
+        "sha256": "87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48"
+      }
+    ],
+    "project_sources": [
+      {
+        "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj.nuget.g.props",
+        "bytes": 1814,
+        "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+      },
+      {
+        "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj.nuget.g.targets",
+        "bytes": 1367,
+        "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+      }
+    ],
+    "assets": {
+      "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/project.assets.json",
+      "bytes": 132540,
+      "sha256": "9d1d34043153b332396b4dbb9c41e37d1d55841c2891d1c6864e207f555a6212"
+    },
+    "package_sha512": "JajbvkrBgtdRghavIjcJuNHMOja4lqBmEezbhZyqWPYh2cpLhT5mPpfC7NQVDO4IehWQum9t/nwF4v+qQGtYWg==",
+    "analyzer_count": 10,
+    "csc_analyzer_membership_exact": true,
+    "warning_arguments": [
+      "/nowarn:CS1591,CA1848,1701,1702,8002",
+      "/warn:9999",
+      "/warnaserror+",
+      "/warnaserror+:NU1605,SYSLIB0011"
+    ]
+  },
+  "tooling_provenance_sha256": "fbb0a1ba66db86fccb96e217f5f9a24665851d6050a4c6b73595ff03e8e4abae",
+  "retained": [
+    {
+      "path": "compile-inputs.txt",
+      "bytes": 517,
+      "sha256": "f54cbbebf2fd942913fa7675b31e62bcf3d4e68f9ba46d48cdeb2c81a5f51d06"
+    },
+    {
+      "path": "resolved-references.txt",
+      "bytes": 41942,
+      "sha256": "098035cd734fcc461d3ef87c52fc5244023f651ddd20af7e0b0df0d0e58f0fa4"
+    },
+    {
+      "path": "analyzers.txt",
+      "bytes": 1466,
+      "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+    },
+    {
+      "path": "analyzer-configs.txt",
+      "bytes": 351,
+      "sha256": "2637e6daf3c580f120f5fa243fa4cbf13a644c3add60a05bbce4db3655c15af5"
+    },
+    {
+      "path": "policy-final.txt",
+      "bytes": 963,
+      "sha256": "44c2acdcfac43728a83a428fc37844605fd4ea479ecde4d57fceaad60e04c838"
+    },
+    {
+      "path": "csc-command-line.txt",
+      "bytes": 30147,
+      "sha256": "3b4a414d720cd1d8f8b020216c6f9f30c6a6f9698a1ef13995646ce25c5b65fc"
+    },
+    {
+      "path": "imported-projects.txt",
+      "bytes": 264,
+      "sha256": "3a241f61f0abe470e51fe1586e51782073b7ea8a0aa69da2926339d6e7cb3624"
+    },
+    {
+      "path": "project-references.txt",
+      "bytes": 1038,
+      "sha256": "03418daba6434a9bd2870a3143c24db7439a42cb17f68231ffaee2f393650c90"
+    },
+    {
+      "path": "resolved-project-references.txt",
+      "bytes": 3283,
+      "sha256": "6683ee0afa93e334d696a2133f59938313fcda052db747a2141fa564127fb991"
+    },
+    {
+      "path": "analyzer-package/df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100-Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "analyzer-package/bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e-Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "analyzer-package/ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3-Directory.Packages.props.snapshot",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "analyzer-package/444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133-Microsoft.CodeAnalysis.NetAnalyzers.props.snapshot",
+      "bytes": 3677,
+      "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+    },
+    {
+      "path": "analyzer-package/83fe2cae0a46132ad1f1bfa3b8048a8dab4830e87f71dfafb2bc5b5022468252-DisableNETAnalyzersForNuGetPackage.props.snapshot",
+      "bytes": 468,
+      "sha256": "83fe2cae0a46132ad1f1bfa3b8048a8dab4830e87f71dfafb2bc5b5022468252"
+    },
+    {
+      "path": "analyzer-package/f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da-Microsoft.CodeAnalysis.NetAnalyzers.targets.snapshot",
+      "bytes": 90446,
+      "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+    },
+    {
+      "path": "analyzer-package/87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48-Microsoft.Common.props.snapshot",
+      "bytes": 11765,
+      "sha256": "87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48"
+    },
+    {
+      "path": "analyzer-package/859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj.nuget.g.props.snapshot",
+      "bytes": 1814,
+      "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+    },
+    {
+      "path": "analyzer-package/935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj.nuget.g.targets.snapshot",
+      "bytes": 1367,
+      "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+    },
+    {
+      "path": "source/d18f339084948d1894c1c7cdb634572b605b090bf50cf2d4083e29b40d549d69-Examples.cs.snapshot",
+      "bytes": 30132,
+      "sha256": "d18f339084948d1894c1c7cdb634572b605b090bf50cf2d4083e29b40d549d69"
+    },
+    {
+      "path": "source/f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "path": "source/955dc5c0d187332e2b6ef5ae0f6954bfe44c4d0041f6922f3edd1f7b1b1b2511-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.AssemblyInfo.cs.snapshot",
+      "bytes": 1700,
+      "sha256": "955dc5c0d187332e2b6ef5ae0f6954bfe44c4d0041f6922f3edd1f7b1b1b2511"
+    },
+    {
+      "path": "source/8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.GlobalUsings.g.cs.snapshot",
+      "bytes": 231,
+      "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+    },
+    {
+      "path": "analyzer-config/eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d-analysislevelstyle_all.globalconfig.snapshot",
+      "bytes": 19880,
+      "sha256": "eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d"
+    },
+    {
+      "path": "analyzer-config/630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3-.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "analyzer-config/5fc44d61de97e3617381ea2e059f79b44f8051df2596608d11575c6dff7ec184-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.GeneratedMSBuildEditorConfig.editorconfig.snapshot",
+      "bytes": 803,
+      "sha256": "5fc44d61de97e3617381ea2e059f79b44f8051df2596608d11575c6dff7ec184"
+    },
+    {
+      "path": "imported-project/756dc130cb63c753c0c3e165b6dab8f955cecb5b22e0d34d47c7ff5b726034fe-Microsoft.TestPlatform.ImportAfter.targets.snapshot",
+      "bytes": 1180,
+      "sha256": "756dc130cb63c753c0c3e165b6dab8f955cecb5b22e0d34d47c7ff5b726034fe"
+    },
+    {
+      "path": "imported-project/935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea-Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj.nuget.g.targets.snapshot",
+      "bytes": 1367,
+      "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+    },
+    {
+      "path": "project.assets.json.snapshot",
+      "bytes": 132540,
+      "sha256": "9d1d34043153b332396b4dbb9c41e37d1d55841c2891d1c6864e207f555a6212"
+    },
+    {
+      "path": "Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "Directory.Packages.props.snapshot",
+      "bytes": 3142,
+      "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+    },
+    {
+      "path": "global.json.snapshot",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": ".editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "compiled-project.csproj.snapshot",
+      "bytes": 888,
+      "sha256": "db3806c0a18719a3c303ff0cc57792f74841ef8be8d54f53cf8dfa59288ceca9"
+    },
+    {
+      "path": "source-context.csproj.snapshot",
+      "bytes": 1135,
+      "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978"
+    }
+  ],
+  "extraction_manifest_sha256": "a546699cafc42f34abd93089a90e2e4c5b500a24c31afc30dfcf2111b6d2e7f7",
+  "sdk_optional_hook": null,
+  "native_shipping_capture": false,
+  "assets_identity": {
+    "path": "/tmp/opencode/piv-001-examples-v2-consumer/obj/project.assets.json",
+    "sha256": "9d1d34043153b332396b4dbb9c41e37d1d55841c2891d1c6864e207f555a6212"
+  },
+  "counts": {
+    "sources": 4,
+    "references": 192,
+    "analyzers": 10,
+    "configs": 3
+  },
+  "limits": "Actual Csc membership/policy/assets and source text retained. Binary identities only. Matching build log supplies success/diagnostics; compilation establishes binding rather than snippet/sample/device execution."
+}

@@ -1,0 +1,17 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await SlotInfoQuery.GetAllSlotsInfoAsync(session, ct);
+try
+{
+    if (result.Success)
+    {
+        foreach (var slot in result.Slots)
+            Console.WriteLine($"{slot.Name}: Key={slot.HasKey}, Cert={slot.HasCertificate}");
+    }
+}
+finally
+{
+    foreach (var slot in result.Slots)
+        slot.Certificate?.Dispose();
+}

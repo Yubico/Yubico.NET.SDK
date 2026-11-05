@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/capture-v3.py v3 consumer first
+PASS: consumer/first: 4 actual Csc sources, 192 references, 10 analyzers; source/config/assets text retained.
+
+EXIT=0

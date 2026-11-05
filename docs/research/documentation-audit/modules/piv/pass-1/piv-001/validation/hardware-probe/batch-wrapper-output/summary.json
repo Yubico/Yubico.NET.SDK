@@ -1,0 +1,77 @@
+[
+  {
+    "case": "P02_PinAlwaysConsumesVerification_PinOnceReusesIt",
+    "build_exit": 0,
+    "capture_exit": 0,
+    "test_exit": 0,
+    "cleanup_exit": 0,
+    "test_counts": {
+      "executed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "compiled_binaries_preserved": true,
+    "host_environment_verified": true,
+    "wrapper_exit": 0
+  },
+  {
+    "case": "P03_MoveAndDeletePreserveIndependentCertificates",
+    "build_exit": 0,
+    "capture_exit": 0,
+    "test_exit": 0,
+    "cleanup_exit": 0,
+    "test_counts": {
+      "executed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "compiled_binaries_preserved": true,
+    "host_environment_verified": true,
+    "wrapper_exit": 0
+  },
+  {
+    "case": "P04_AttestationBindsGeneratedKeyToPreservedIssuer",
+    "build_exit": 0,
+    "capture_exit": 0,
+    "test_exit": 0,
+    "cleanup_exit": 0,
+    "test_counts": {
+      "executed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "compiled_binaries_preserved": true,
+    "host_environment_verified": true,
+    "wrapper_exit": 0
+  },
+  {
+    "case": "P05_ActualPivToolRsaSignsOriginalMessage",
+    "build_exit": 0,
+    "capture_exit": 0,
+    "test_exit": 1,
+    "cleanup_exit": 0,
+    "test_counts": {
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0
+    },
+    "compiled_binaries_preserved": true,
+    "host_environment_verified": true,
+    "wrapper_exit": 1
+  },
+  {
+    "case": "P06_ActualPivToolEd25519SignsOriginalMessage",
+    "build_exit": 0,
+    "capture_exit": 0,
+    "test_exit": 1,
+    "cleanup_exit": 0,
+    "test_counts": {
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0
+    },
+    "compiled_binaries_preserved": true,
+    "host_environment_verified": true,
+    "wrapper_exit": 1
+  }
+]

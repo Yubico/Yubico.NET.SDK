@@ -1,0 +1,8 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.AuthenticateAsync(managementKey, ct);
+await session.VerifyPinAsync(pin, ct);
+
+var result = await Certificates.GenerateSelfSignedAsync(
+    session, Slot.Authentication, "CN=Test User", 365, ct);
+using var certificate = result.Certificate;

@@ -1,0 +1,53 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'PivTool'">
+    <DocumentationWorkspace>/tmp/opencode/piv-001-examples-v4-pivtool</DocumentationWorkspace>
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+  </PropertyGroup>
+  <Target Name="CaptureAuditPiv001SampleDocumentationInputs" BeforeTargets="CoreCompile" Condition="'$(MSBuildProjectName)' == 'PivTool'">
+    <MakeDir Directories="$(DocumentationWorkspace)" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/project-references.txt" Lines="@(ProjectReference-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/resolved-project-references.txt" Lines="@(_ResolvedProjectReferencePaths-&gt;'%(FullPath)|%(MSBuildSourceProjectFile)|%(OriginalProjectReferenceItemSpec)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/imported-projects.txt" Lines="$(MSBuildAllProjects)" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/compile-inputs.txt" Lines="@(Compile-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/resolved-references.txt" Lines="@(ReferencePathWithRefAssemblies-&gt;'%(FullPath)|%(FusionName)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/analyzers.txt" Lines="@(Analyzer-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocumentationWorkspace)/analyzer-configs.txt" Lines="@(EditorConfigFiles-&gt;'%(FullPath)')" Overwrite="true" />
+  </Target>
+  <Target Name="CaptureAuditPiv001SampleDocumentationCompilerPolicy" AfterTargets="CoreCompile" Condition="'$(MSBuildProjectName)' == 'PivTool'">
+    <WriteLinesToFile File="$(DocumentationWorkspace)/csc-command-line.txt" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+    <ItemGroup>
+      <DocumentationPolicy Include="NETCoreSdkVersion=$(NETCoreSdkVersion)" />
+      <DocumentationPolicy Include="TargetFramework=$(TargetFramework)" />
+      <DocumentationPolicy Include="LangVersion=$(LangVersion)" />
+      <DocumentationPolicy Include="WarningLevel=$(WarningLevel)" />
+      <DocumentationPolicy Include="TreatWarningsAsErrors=$(TreatWarningsAsErrors)" />
+      <DocumentationPolicy Include="AnalysisLevel=$(AnalysisLevel)" />
+      <DocumentationPolicy Include="AnalysisMode=$(AnalysisMode)" />
+      <DocumentationPolicy Include="EnableNETAnalyzers=$(EnableNETAnalyzers)" />
+      <DocumentationPolicy Include="RunAnalyzersDuringBuild=$(RunAnalyzersDuringBuild)" />
+      <DocumentationPolicy Include="RunAnalyzers=$(RunAnalyzers)" />
+      <DocumentationPolicy Include="SkipAnalyzers=$(_SkipAnalyzers)" />
+      <DocumentationPolicy Include="SkipCompilerExecution=$(SkipCompilerExecution)" />
+      <DocumentationPolicy Include="GeneratedProgramFile=$(GeneratedProgramFile)" />
+      <DocumentationPolicy Include="NoWarn=$([System.String]::Copy('$(NoWarn)').Replace(';', ','))" />
+      <DocumentationPolicy Include="MSBuildProjectFullPath=$(MSBuildProjectFullPath)" />
+      <DocumentationPolicy Include="MSBuildProjectExtensionsPath=$(MSBuildProjectExtensionsPath)" />
+      <DocumentationPolicy Include="ProjectAssetsFile=$(ProjectAssetsFile)" />
+      <DocumentationPolicy Include="IsTestProject=$(IsTestProject)" />
+      <DocumentationPolicy Include="OutputType=$(OutputType)" />
+      <DocumentationPolicy Include="Configuration=$(Configuration)" />
+      <DocumentationPolicy Include="Version=$(Version)" />
+      <DocumentationPolicy Include="YubiKitVersion=$(YubiKitVersion)" />
+      <DocumentationPolicy Include="AssemblyVersion=$(AssemblyVersion)" />
+      <DocumentationPolicy Include="TargetPath=$(TargetPath)" />
+      <DocumentationPolicy Include="BaseIntermediateOutputPath=$(BaseIntermediateOutputPath)" />
+      <DocumentationPolicy Include="BaseOutputPath=$(BaseOutputPath)" />
+      <DocumentationPolicy Include="IntermediateOutputPath=$(IntermediateOutputPath)" />
+      <DocumentationPolicy Include="OutputPath=$(OutputPath)" />
+      <DocumentationPolicy Include="_InitialMSBuildProjectExtensionsPath=$(_InitialMSBuildProjectExtensionsPath)" />
+      <DocumentationPolicy Include="CustomBeforeMicrosoftCommonProps=$(CustomBeforeMicrosoftCommonProps)" />
+      <DocumentationPolicy Include="CustomAfterMicrosoftCommonTargets=$(CustomAfterMicrosoftCommonTargets)" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(DocumentationWorkspace)/policy-final.txt" Lines="@(DocumentationPolicy)" Overwrite="true" />
+  </Target>
+</Project>

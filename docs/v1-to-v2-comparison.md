@@ -76,7 +76,7 @@ applications inspect valid fields introduced before the SDK models them.
 ## Still being decided
 
 **How far to extend credential prompting.** Direct credential parameters on
-applet sessions are settled: calls such as `PivSession.VerifyPinAsync(pinUtf8)`
+applet sessions are settled: calls such as `piv.VerifyPinAsync(pin)`
 keep authentication flow under application control. One applet-local exception
 exists — OATH's `AuthenticateAndRetryAsync` takes a password-provider callback
 so it can re-authenticate a locked applet mid-operation. Core now provides
@@ -139,8 +139,8 @@ The gaps table above already accounts for these:
   v1, so callers can clear them after use. Its parameters are named plainly
   (`credentialPassword`, `derivationPassword`, `currentPassword`,
   and `newPassword`). FIDO2, OpenPGP, and OATH secret parameters
-  were renamed the same way, which breaks named-argument call sites; PIV still
-  uses the `...Utf8` suffix.
+  were renamed the same way, which breaks named-argument call sites. Current PIV
+  parameters also use plain role names such as `pin`, `currentPin` and `currentPuk`.
 - YubiOTP keyboard-layout-aware static passwords and Yubico-OTP-algorithm
   challenge-response.
 - Dedicated exception types for SecurityDomain (`SecureChannelException`) and

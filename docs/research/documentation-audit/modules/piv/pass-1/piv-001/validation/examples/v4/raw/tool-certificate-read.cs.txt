@@ -1,0 +1,9 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await Certificates.GetCertificateAsync(session, Slot.Authentication, ct);
+using var certificate = result.Certificate;
+if (result.Success && certificate is not null)
+{
+    Console.WriteLine($"Subject: {certificate.Subject}");
+}

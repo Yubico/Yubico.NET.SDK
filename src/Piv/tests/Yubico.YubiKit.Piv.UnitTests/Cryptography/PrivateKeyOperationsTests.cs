@@ -26,8 +26,8 @@ namespace Yubico.YubiKit.Piv.UnitTests.Cryptography;
 /// Security regression tests: <c>ParseCryptoResponse</c> (used by both <c>SignOrDecryptAsync</c>/
 /// <c>DecryptAsync</c> and <c>CalculateSecretAsync</c>) copies the needed TLV value out of the raw
 /// AUTHENTICATE response but must also zero the original response buffer, since it carries the raw
-/// decrypted plaintext / ECDH shared secret in the clear. Additionally, <c>DecryptAsync</c> must zero
-/// its intermediate <c>rawDecrypted</c> copy once it has been re-copied into <c>rawBytes</c>.
+/// decrypted plaintext / ECDH shared secret in the clear. DecryptAsync also clears its owned
+/// rawDecrypted intermediate after host unpadding. Transferred mutable output belongs to the caller.
 /// </summary>
 public class PrivateKeyOperationsTests
 {

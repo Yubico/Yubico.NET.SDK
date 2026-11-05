@@ -44,7 +44,8 @@ public static class KeyGeneration
     /// <returns>Result containing the public key or error information.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// // Requires an authorized target slot and a borrowed active managementKey buffer.
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// await session.AuthenticateAsync(managementKey, ct);
     /// 
     /// var result = await KeyGeneration.GenerateKeyAsync(

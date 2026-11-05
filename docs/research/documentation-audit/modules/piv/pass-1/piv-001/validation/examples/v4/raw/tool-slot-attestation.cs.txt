@@ -1,0 +1,12 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await Attestation.GetAttestationAsync(
+    session, Slot.Authentication, ct);
+
+using var attestCert = result.AttestationCertificate;
+using var signerCert = result.IntermediateCertificate;
+if (result.Success && attestCert is not null)
+{
+    Console.WriteLine($"Retrieved attestation: {attestCert.Subject}");
+}

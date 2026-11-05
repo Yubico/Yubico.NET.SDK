@@ -19,6 +19,9 @@ namespace Yubico.YubiKit.Piv;
 /// <summary>
 /// PIV PIN metadata information.
 /// </summary>
+/// <param name="IsDefault">Whether the device reports the factory PIN is installed.</param>
+/// <param name="TotalRetries">Configured retry limit, measured in attempts.</param>
+/// <param name="RetriesRemaining">Attempts remaining before PIN blocking.</param>
 public readonly record struct PinMetadata(
     bool IsDefault,
     int TotalRetries,
@@ -27,6 +30,9 @@ public readonly record struct PinMetadata(
 /// <summary>
 /// PIV PUK metadata information.
 /// </summary>
+/// <param name="IsDefault">Whether the device reports the factory PUK is installed.</param>
+/// <param name="TotalRetries">Configured retry limit, measured in attempts.</param>
+/// <param name="RetriesRemaining">Attempts remaining before PUK blocking.</param>
 public readonly record struct PukMetadata(
     bool IsDefault,
     int TotalRetries,
@@ -35,6 +41,9 @@ public readonly record struct PukMetadata(
 /// <summary>
 /// PIV management key metadata information.
 /// </summary>
+/// <param name="KeyType">Recognized symmetric type, or null for an unmodeled algorithm; inspect RawAlgorithmId.</param>
+/// <param name="IsDefault">Whether the device reports the public factory key is installed.</param>
+/// <param name="TouchPolicy">Device-reported management-key touch policy.</param>
 public readonly record struct ManagementKeyMetadata(
     KeyType? KeyType,
     bool IsDefault,
@@ -49,6 +58,12 @@ public readonly record struct ManagementKeyMetadata(
 /// <summary>
 /// PIV slot metadata information.
 /// </summary>
+/// <param name="KeyType">Recognized key type, or null for an unmodeled algorithm. Null here does not mean an empty slot.</param>
+/// <param name="PinPolicy">Device-reported private-key verification policy.</param>
+/// <param name="TouchPolicy">Device-reported private-key touch policy.</param>
+/// <param name="IsGenerated">Whether the device reports on-device generation rather than import.</param>
+/// <param name="PublicKey">Raw PIV public-key TLVs: RSA modulus/exponent tags 81/82 or EC point tag 86,
+/// rather than SubjectPublicKeyInfo. Use SlotMetadataExtensions for disposable RSA/ECDsa host objects.</param>
 public readonly record struct SlotMetadata(
     KeyType? KeyType,
     PinPolicy PinPolicy,
@@ -74,6 +89,9 @@ public readonly record struct SlotMetadata(
 /// <summary>
 /// PIV biometric metadata information.
 /// </summary>
+/// <param name="IsConfigured">Whether fingerprint verification is configured; capability and enrollment are separate.</param>
+/// <param name="RetriesRemaining">Device-reported biometric verification attempts remaining.</param>
+/// <param name="HasTemporaryPin">Whether the device reports a temporary PIN is available.</param>
 public readonly record struct BioMetadata(
     bool IsConfigured,
     int RetriesRemaining,

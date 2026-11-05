@@ -1,0 +1,48 @@
+[
+  {
+    "file": "vendor-technical-manual.html",
+    "url": "https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-piv.html",
+    "accessed_utc": "2026-11-05T00:00:31.176921+00:00",
+    "status": "captured",
+    "sha256": "4fc51ead2620fb5b6d221c7dfe1ddce1c4a9fe8496a0518b5f63cf6998374daf",
+    "bytes": 41261
+  },
+  {
+    "file": "vendor-reset-command.html",
+    "url": "https://docs.yubico.com/yesdk/yubikey-api/Yubico.YubiKey.Piv.Commands.ResetPivCommand.html",
+    "accessed_utc": "2026-11-05T00:00:31.293702+00:00",
+    "status": "captured",
+    "sha256": "aa047a86ec55ef4705d31f059b1b7b5efe6b34d256a8316780e807e43a4d9b10",
+    "bytes": 12928
+  },
+  {
+    "file": "vendor-attestation-tool.html",
+    "url": "https://docs.yubico.com/software/yubikey/tools/pivtool/piv-tool-attestation.html",
+    "accessed_utc": "2026-11-05T00:00:31.581445+00:00",
+    "status": "captured",
+    "sha256": "199cee6a8b7e603f54d4494d4ae3be614408756b07fe5858e3eed838f3b1af6b",
+    "bytes": 19213
+  },
+  {
+    "file": "nist-sp800-73-4-status.html",
+    "url": "https://csrc.nist.gov/pubs/sp/800/73/4/final",
+    "accessed_utc": "2026-11-05T00:00:31.823279+00:00",
+    "status": "gap",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "file": "nist-sp800-78-4-status.html",
+    "url": "https://csrc.nist.gov/pubs/sp/800/78/4/final",
+    "accessed_utc": "2026-11-05T00:00:32.188694+00:00",
+    "status": "gap",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "file": "dotnet-rsa-verifydata.html",
+    "url": "https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.rsa.verifydata?view=net-10.0",
+    "accessed_utc": "2026-11-05T00:00:32.529976+00:00",
+    "status": "captured",
+    "sha256": "32db2b92ae640b063ad98152cfc75de2bbf55ee4c409559de280fbc4d54a5deb",
+    "bytes": 96194
+  }
+]

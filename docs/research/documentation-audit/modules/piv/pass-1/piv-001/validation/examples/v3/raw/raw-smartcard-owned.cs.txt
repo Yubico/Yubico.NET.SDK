@@ -1,0 +1,11 @@
+await using RawSmartCardSession raw =
+    await yubiKey.CreateRawSmartCardSessionAsync(cancellationToken);
+
+// Optional when the firmware version is known. Configure before the first APDU.
+raw.Configure(firmwareVersion);
+
+await raw.SelectAsync(applicationId, cancellationToken);
+ApduResponse response = await raw.TransmitAndReceiveAsync(
+    new ApduCommand(cla, ins, p1, p2, commandData),
+    throwOnError: false,
+    cancellationToken);

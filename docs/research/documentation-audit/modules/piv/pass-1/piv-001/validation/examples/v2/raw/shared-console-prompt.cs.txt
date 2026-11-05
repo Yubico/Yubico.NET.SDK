@@ -1,0 +1,12 @@
+using Yubico.YubiKit.Cli.Shared.Output;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Piv;
+
+var options = new SessionCreationOptions
+{
+    UserPresencePrompt = ConsoleUserPresencePrompt.Instance
+};
+
+await using PivSession session = await yubiKey.CreatePivSessionAsync(
+    options,
+    cancellationToken);

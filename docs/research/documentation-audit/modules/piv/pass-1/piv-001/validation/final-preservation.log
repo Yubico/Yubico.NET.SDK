@@ -1,0 +1,11 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/check-preserved.py
+PASS: 784 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/record-manifest.json
+PASS: 534 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/record-manifest.json
+PASS: 402 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/management/pass-1/management-001/record-manifest.json
+PASS: 607 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/record-manifest.json
+PASS: 164 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/record-manifest.json
+PASS: 477 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/record-manifest.json
+PASS: 433 prior archive records; baseline manifest hash verified: docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/record-manifest.json
+PASS: 3,401 prior artifacts, four original user files and 114 PR745 integration files preserved.
+
+EXIT=0

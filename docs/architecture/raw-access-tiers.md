@@ -74,7 +74,7 @@ await using (RawSmartCardSession raw =
 }
 
 // RawSmartCardSession borrowed the connection, so it remains available for the next session.
-await using PivSession piv = await PivSession.CreateAsync(connection, cancellationToken);
+await using PivSession piv = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
 ```
 
 ### FIDO HID

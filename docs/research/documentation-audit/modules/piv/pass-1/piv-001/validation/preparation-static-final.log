@@ -1,0 +1,5 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/verify-preparation.py
+PASS: 9 pinned/replayed source transformations; Python/XML syntax, unique AuditPiv001.Checker selector, 123 inventory paths/111 C# paths with both hashes, evidence attributes.
+PENDING: coordinator .NET compilation, actual token/API gates, preservation, final reviewed inputs/examples and repository/device gates.
+
+EXIT=0

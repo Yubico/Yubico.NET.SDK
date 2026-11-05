@@ -1,0 +1,3462 @@
+commit 58d9f2b9342888d16d1baa1c8e269abea30f33b1
+Author:     Dennis Dyall Wallin <dennis@dyallo.se>
+AuthorDate: Wed Nov 4 22:03:13 2026 +0100
+Commit:     Dennis Dyall Wallin <dennis@dyallo.se>
+CommitDate: Wed Nov 4 22:03:13 2026 +0100
+
+    fix(piv)!: use canonical key definitions and explicit protocol subsets
+    
+    Use Core KeyType for management keys, canonical key lengths and curve OIDs, one frozen wire-ID table with a derived inverse, and explicit asymmetric/management encoders. Preserve unknown management identifiers in nullable mapped metadata instead of guessing a factory type.
+    
+    Borrow static read-only factory-default slices without renting, filling, or clearing shared material. Name protocol instructions/tags/key references locally, reuse Core status constants, and clarify fallback, MATCH-policy support, and allowed-mode semantics. Clear padded private-component temporaries and use span-based block crypto without extra plaintext copies.
+    
+    Replace the guessed Bio positional parser and UV payloads with source-pinned TLV and ceremony framing; exercise reordered/malformed metadata, supported-but-unenrolled probes, canonical wire sizes/inverse lookup, unknown identifiers, EC extraction, and default lifetime. Update preview documentation and keep V1 examples intact.
+    
+    Complexity-Justification: AdminData.TryDecode: Requested type rename only; normalized method body is unchanged from base. Retain explicit TLV schema, flags, and required-field checks rather than combine an unrelated parser redesign with API migration.
+    Complexity-Justification: CardholderUniqueId.TryDecode: Requested type rename only; normalized method body is unchanged from base. The flat field/length checks preserve strict CHUID decoding and are existing protocol-validation complexity.
+    Complexity-Justification: CardCapabilityContainer.TryDecode: Requested type rename only; normalized method body is unchanged from base. Retain existing mandatory CCC field validation without unrelated behavioral changes.
+    Complexity-Justification: KeyHistory.TryDecode: Requested type rename only; normalized method body is unchanged from base. Explicit on/off-card count, URL, and TLV validation remains existing parser complexity.
+
+diff --git a/src/Piv/CLAUDE.md b/src/Piv/CLAUDE.md
+index 487f75ee..1f3cb198 100644
+--- a/src/Piv/CLAUDE.md
++++ b/src/Piv/CLAUDE.md
+@@ -173,6 +173,18 @@ What still needs a human is presence and timing, not destruction — touch-polic
+ 
+ ## Firmware And Feature Gates
+ 
++Helpers obtain metadata-only category loggers from `YubiKitLogging`, not logger parameters. `KeyTypeEncoding`
++is the sole PIV wire-ID table; its frozen inverse is derived once. Request encoders enforce management vs
++asymmetric subsets, so shared Core `KeyType` does not permit AES slot generation or P-521 requests. Management
++key lengths and EC curve OIDs/sizes come from Core definitions. `KeyReference` holds only internal PIN/PUK,
++management, and Bio references, separate from public asymmetric `Slot` values.
++
++PIN/PUK parameters are named by role and carry caller-owned UTF-8 bytes, not ASCII-only credentials. Internal
++working copies are cleared; shared factory-default key slices are borrowed read-only and never cleared.
++Bio metadata uses tagged fields (retries 06, configured 07, temporary PIN 08); MATCH-policy probes check
++capability, not fingerprint enrollment. Bio verification modes use the Python-confirmed APDU payloads.
++No Bio-hardware coverage is implied by fake-protocol tests.
++
+ Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of duplicating version checks. Be careful to distinguish device firmware from applet-reported firmware when beta hardware reports sentinel applet versions.
+ 
+ `Features` is a public standalone PIV catalog; `IsSupported` stays public and `EnsureSupports` is protected.
+diff --git a/src/Piv/README.md b/src/Piv/README.md
+index 4d8c5bc7..c39f115c 100644
+--- a/src/Piv/README.md
++++ b/src/Piv/README.md
+@@ -101,7 +101,7 @@ finally
+     CryptographicOperations.ZeroMemory(pin);
+ }
+ byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
+-ReadOnlyMemory<byte> signature = await session.SignOrDecryptAsync(Slot.Authentication, digest);
++Memory<byte> signature = await session.SignOrDecryptAsync(Slot.Authentication, digest);
+ ```
+ 
+ ECDSA signs the digest you pass, so hash first. This overload reads slot metadata to pick the algorithm and
+@@ -159,6 +159,9 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
+ - PIV-local model/policy prefixes are removed: for example `PinPolicy`, `TouchPolicy`, `PinMetadata`,
+   `SlotMetadata`, `KeyCreationOptions`, and `DataObjects.AdminData`. Session entrypoints remain `PivSession`
+   and `IPivSession`. CLI key selectors use `--key-type` and key-type result fields are named `KeyType`.
++- Management-key operations also use Core `KeyType` (`TripleDES`, `AES128`, `AES192`, `AES256`) and canonical
++  key sizes. Symmetric management types cannot be generated/imported as asymmetric slot keys. The session's
++  nullable `ManagementKeyType` is null for an unmodeled algorithm; raw management metadata remains inspectable.
+ - Slot metadata exposes nullable `KeyType`, `RawAlgorithmId`, and complete `RawData`. Unknown identifiers
+   remain readable, while using an unrecognized key algorithm throws `NotSupportedException`.
+ - `EnsureSupports` is protected session implementation machinery, no longer a public interface member.
+diff --git a/src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs b/src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs
+index cb15f0f1..0b69b96c 100644
+--- a/src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs
++++ b/src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs
+@@ -283,7 +283,7 @@ private static async Task<int> HandleMgmtKeyChangeAsync(
+         var newKey = DeviceHelper.ParseHex(DeviceHelper.GetFlag(flags, "new-management-key"), "new-management-key");
+         if (key is null || newKey is null) { ZeroAndReturn(key, newKey); return 1; }
+ 
+-        var keyType = DeviceHelper.ParseMgmtKeyType(DeviceHelper.GetFlag(flags, "algorithm"));
++        var keyType = DeviceHelper.ParseMgmtKeyType(DeviceHelper.GetFlag(flags, "key-type"));
+         bool requireTouch = DeviceHelper.HasFlag(flags, "require-touch");
+ 
+         var device = await DeviceHelper.GetDeviceAsync(serial, ct);
+@@ -314,7 +314,7 @@ private static async Task<int> HandleKeyGenerateAsync(
+         Dictionary<string, string?> flags, int? serial, bool useJson, CancellationToken ct)
+     {
+         var slot = DeviceHelper.ParseSlot(DeviceHelper.GetFlag(flags, "slot"));
+-        var keyType = DeviceHelper.ParseKeyAlgorithm(DeviceHelper.GetFlag(flags, "algorithm"));
++        var keyType = DeviceHelper.ParseKeyType(DeviceHelper.GetFlag(flags, "key-type"));
+         var key = DeviceHelper.ParseHex(DeviceHelper.GetFlag(flags, "management-key"), "management-key");
+         if (slot is null || keyType is null || key is null) { ZeroAndReturn(key); return 1; }
+ 
+diff --git a/src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs b/src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs
+index 38502a13..eb2ad557 100644
+--- a/src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs
++++ b/src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs
+@@ -154,7 +154,7 @@ internal static class DeviceHelper
+     /// <summary>
+     /// Parses a key algorithm string into a <see cref="KeyType"/>.
+     /// </summary>
+-    internal static KeyType? ParseKeyAlgorithm(string? value)
++    internal static KeyType? ParseKeyType(string? value)
+     {
+         if (value is null)
+         {
+@@ -211,13 +211,13 @@ internal static TouchPolicy ParseTouchPolicy(string? value) =>
+     /// <summary>
+     /// Parses a management key algorithm type string.
+     /// </summary>
+-    internal static PivManagementKeyType ParseMgmtKeyType(string? value) =>
++    internal static KeyType ParseMgmtKeyType(string? value) =>
+         value?.ToLowerInvariant() switch
+         {
+-            "aes128" => PivManagementKeyType.Aes128,
+-            "aes192" => PivManagementKeyType.Aes192,
+-            "aes256" => PivManagementKeyType.Aes256,
+-            _ => PivManagementKeyType.TripleDes
++            "aes128" => KeyType.AES128,
++            "aes192" => KeyType.AES192,
++            "aes256" => KeyType.AES256,
++            _ => KeyType.TripleDES
+         };
+ 
+     /// <summary>
+diff --git a/src/Piv/examples/PivTool/Cli/Menus/KeyGenerationMenu.cs b/src/Piv/examples/PivTool/Cli/Menus/KeyGenerationMenu.cs
+index 681a0774..3bf70649 100644
+--- a/src/Piv/examples/PivTool/Cli/Menus/KeyGenerationMenu.cs
++++ b/src/Piv/examples/PivTool/Cli/Menus/KeyGenerationMenu.cs
+@@ -29,10 +29,10 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+         // Select slot
+         var slot = SlotSelector.SelectSlot("Select slot for key generation:");
+ 
+-        // Select algorithm
+-        var keyType = AnsiConsole.Prompt(
++        // Select key type
++        var keyTypeChoice = AnsiConsole.Prompt(
+             new SelectionPrompt<string>()
+-                .Title("Select algorithm:")
++                .Title("Select key type:")
+                 .AddChoices(
+                 [
+                     "RSA 2048",
+@@ -44,7 +44,7 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+                     "X25519 (YubiKey 5.7+)"
+                 ]));
+ 
+-        var pivAlgorithm = keyType switch
++        var keyType = keyTypeChoice switch
+         {
+             "RSA 2048" => KeyType.RSA2048,
+             "RSA 3072" => KeyType.RSA3072,
+@@ -103,7 +103,7 @@ await AnsiConsole.Status()
+             .StartAsync("Generating key...", async ctx =>
+             {
+                 var result = await KeyGeneration.GenerateKeyAsync(
+-                    session, slot, pivAlgorithm, pinPolicy, touchPolicy, cancellationToken);
++                    session, slot, keyType, pinPolicy, touchPolicy, cancellationToken);
+ 
+                 if (result.Success)
+                 {
+diff --git a/src/Piv/examples/PivTool/PivExamples/PinManagement.cs b/src/Piv/examples/PivTool/PivExamples/PinManagement.cs
+index 898500cc..642f5887 100644
+--- a/src/Piv/examples/PivTool/PivExamples/PinManagement.cs
++++ b/src/Piv/examples/PivTool/PivExamples/PinManagement.cs
+@@ -12,6 +12,7 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
++using Yubico.YubiKit.Core.Cryptography;
+ using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples.Results;
+ 
+ namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
+@@ -290,13 +291,13 @@ public static async Task<PinOperationResult> AuthenticateAsync(
+     /// var newKey = new byte[24]; // or 16/32 for AES
+     /// RandomNumberGenerator.Fill(newKey);
+     /// var result = await PinManagement.ChangeManagementKeyAsync(
+-    ///     session, newKey, PivManagementKeyType.TripleDes, ct);
++    ///     session, newKey, KeyType.TripleDES, ct);
+     /// </code>
+     /// </example>
+     public static async Task<PinOperationResult> ChangeManagementKeyAsync(
+         IPivSession session,
+         ReadOnlyMemory<byte> newKey,
+-        PivManagementKeyType keyType = PivManagementKeyType.TripleDes,
++        KeyType keyType = KeyType.TripleDES,
+         bool requireTouch = false,
+         CancellationToken cancellationToken = default)
+     {
+@@ -312,4 +313,4 @@ public static async Task<PinOperationResult> ChangeManagementKeyAsync(
+             return PinOperationResult.Failed($"Failed to change management key: {ex.Message}");
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/src/Authentication/AuthenticationProtocol.cs b/src/Piv/src/Authentication/AuthenticationProtocol.cs
+index 1ec8f193..5c0d9ca0 100644
+--- a/src/Piv/src/Authentication/AuthenticationProtocol.cs
++++ b/src/Piv/src/Authentication/AuthenticationProtocol.cs
+@@ -16,6 +16,7 @@
+ using System.Buffers;
+ using System.Security.Cryptography;
+ using Yubico.YubiKit.Core;
++using Yubico.YubiKit.Core.Cryptography;
+ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ using Yubico.YubiKit.Core.Utilities;
+ using Yubico.YubiKit.Piv.Backends;
+@@ -26,6 +27,28 @@ namespace Yubico.YubiKit.Piv.Authentication;
+ 
+ internal static class AuthenticationProtocol
+ {
++    private const byte Cla = 0x00;
++    private const byte InsAuthenticate = 0x87;
++    private const byte InsVerify = 0x20;
++    private const byte InsChangeReference = 0x24;
++    private const byte InsResetRetry = 0x2C;
++    private const byte InsSetRetries = 0xFA;
++    private const byte TagDynAuth = 0x7C;
++    private const byte TagAuthWitness = 0x80;
++    private const byte TagAuthChallenge = 0x81;
++    private const byte TagAuthResponse = 0x82;
++    private const byte InsSetManagementKey = 0xFF;
++    private const byte SetManagementKeyParameter = 0xFF;
++    private const byte TouchRequiredParameter = 0xFE;
++    private const byte NoTouchParameter = 0xFF;
++    private const byte ShortTlvHeaderLength = 2;
++    private const int AuthenticationHeaderLength = 6;
++    private const int ManagementKeyHeaderLength = 3;
++    private const int PinPairLength = PinUtilities.PinLength * 2;
++    private const int DesBlockSize = 8;
++    private const int AesBlockSize = 16;
++    private static readonly int DesKeyComponentLength = KeyType.TripleDES.GetKeySizeBytes() / 3;
++
+     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Authentication.AuthenticationProtocol");
+ 
+     /// <summary>
+@@ -42,23 +65,23 @@ internal static class AuthenticationProtocol
+     /// type determines the algorithm.
+     /// </para>
+     /// </remarks>
+-    /// <example>
+-    /// <code>
+-    /// // Authenticate with default key (for initial setup only)
+-    /// await session.AuthenticateAsync(PivSession.DefaultManagementKey);
+-    /// 
+-    /// // Generate a new secure key and change it immediately
+-    /// byte[] newKey = RandomNumberGenerator.GetBytes(24);
+-    /// await session.ChangeManagementKeyAsync(newKey);
+-    /// </code>
+-    /// </example>
+-    internal static ReadOnlySpan<byte> DefaultManagementKey =>
++    private static readonly byte[] DefaultManagementKeyBytes =
+     [
++        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+     ];
+ 
++    internal static ReadOnlySpan<byte> DefaultManagementKey =>
++        DefaultManagementKeyBytes.AsSpan(0, KeyType.TripleDES.GetKeySizeBytes());
++
++    internal static ReadOnlyMemory<byte> GetDefaultManagementKey(KeyType keyType)
++    {
++        _ = KeyTypeEncoding.EncodeManagement(keyType);
++        return DefaultManagementKeyBytes.AsMemory(0, keyType.GetKeySizeBytes());
++    }
++
+     /// <summary>
+     /// Authenticates the session using the PIV management key.
+     /// </summary>
+@@ -69,7 +92,7 @@ internal static class AuthenticationProtocol
+     /// <remarks>
+     /// <para>
+     /// Authentication uses mutual challenge-response to prove knowledge of the management key
+-    /// without transmitting it. The key is automatically zeroed after use for security.
++    /// without transmitting it. Only SDK-owned working copies are cleared; caller input remains unchanged.
+     /// </para>
+     /// <para>
+     /// Default management key bytes (Triple-DES or AES-192): 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08 01 02 03 04 05 06 07 08
+@@ -77,21 +100,15 @@ internal static class AuthenticationProtocol
+     /// </remarks>
+     internal static async Task AuthenticateAsync(
+         IBackend backend,
+-        PivManagementKeyType managementKeyType,
++        KeyType managementKeyType,
+         ReadOnlyMemory<byte> managementKey,
+         CancellationToken cancellationToken = default)
+     {
+         Logger.LogDebug("PIV: Starting management key authentication with {KeyType}", managementKeyType);
+ 
+         // Validate key length based on management key type
+-        int expectedKeyLength = managementKeyType switch
+-        {
+-            PivManagementKeyType.TripleDes => 24,
+-            PivManagementKeyType.Aes128 => 16,
+-            PivManagementKeyType.Aes192 => 24,
+-            PivManagementKeyType.Aes256 => 32,
+-            _ => throw new ArgumentException($"Unsupported management key type: {managementKeyType}")
+-        };
++        byte algorithmId = KeyTypeEncoding.EncodeManagement(managementKeyType);
++        int expectedKeyLength = managementKeyType.GetKeySizeBytes();
+ 
+         if (managementKey.Length != expectedKeyLength)
+         {
+@@ -101,15 +118,8 @@ internal static async Task AuthenticateAsync(
+         }
+ 
+         // Challenge length: 8 bytes for 3DES, 16 bytes for AES
+-        int challengeLength = managementKeyType == PivManagementKeyType.TripleDes ? 8 : 16;
++        int challengeLength = managementKeyType == KeyType.TripleDES ? DesBlockSize : AesBlockSize;
+ 
+-        // Algorithm code for P1
+-        byte algorithmCode = (byte)managementKeyType;
+-
+-        const byte InsAuthenticate = 0x87;
+-        const byte SlotCardManagement = 0x9B;
+-        const byte TagDynAuth = 0x7C;
+-        const byte TagAuthWitness = 0x80;
+ 
+         var keyBytes = ArrayPool<byte>.Shared.Rent(expectedKeyLength);
+         try
+@@ -118,8 +128,8 @@ internal static async Task AuthenticateAsync(
+ 
+             // Step 1: Request witness from device
+             // Send: 7C 02 80 00 (empty witness request)
+-            byte[] witnessRequest = [TagDynAuth, 0x02, TagAuthWitness, 0x00];
+-            var witnessCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, witnessRequest);
++            byte[] witnessRequest = [TagDynAuth, ShortTlvHeaderLength, TagAuthWitness, 0];
++            var witnessCommand = new ApduCommand(Cla, InsAuthenticate, algorithmId, KeyReference.Management, witnessRequest);
+             var witnessResponse = await backend.SendAsync(witnessCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+             // Parse witness response: 7C [len] 80 [len] [witness data]
+@@ -144,15 +154,15 @@ internal static async Task AuthenticateAsync(
+                 // Step 4: Build and send response with decrypted witness and our challenge
+                 // Send: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
+                 // Max size: 1 (tag) + 3 (BER len) + 1 (tag) + 3 (BER len) + challengeLength + 1 (tag) + 3 (BER len) + challengeLength
+-                int responseSize = 12 + (2 * challengeLength);
++                int responseSize = AuthenticationHeaderLength + (2 * challengeLength);
+                 responseBuffer = ArrayPool<byte>.Shared.Rent(responseSize);
+                 int bytesWritten = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength), responseBuffer.AsSpan(0, responseSize));
+-                var challengeCommand = new ApduCommand(0x00, InsAuthenticate, algorithmCode, SlotCardManagement, responseBuffer.AsMemory(0, bytesWritten));
++                var challengeCommand = new ApduCommand(Cla, InsAuthenticate, algorithmId, KeyReference.Management, responseBuffer.AsMemory(0, bytesWritten));
+                 var challengeResponse = await backend.SendAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+                 // Step 5: Verify device's response (encrypted challenge)
+                 // Response: 7C [len] 82 [len] [encrypted challenge]
+-                encryptedChallenge = ParseAndClearAuthResponse(challengeResponse, 0x82, challengeLength);
++                encryptedChallenge = ParseAndClearAuthResponse(challengeResponse, TagAuthResponse, challengeLength);
+ 
+                 // Encrypt our challenge and compare
+                 expectedResponse = ArrayPool<byte>.Shared.Rent(challengeLength);
+@@ -183,7 +193,7 @@ internal static async Task AuthenticateAsync(
+                 }
+                 if (responseBuffer is not null)
+                 {
+-                    int responseSize = 12 + (2 * challengeLength);
++                    int responseSize = AuthenticationHeaderLength + (2 * challengeLength);
+                     CryptographicOperations.ZeroMemory(responseBuffer.AsSpan(0, responseSize));
+                     ArrayPool<byte>.Shared.Return(responseBuffer);
+                 }
+@@ -223,7 +233,7 @@ private static byte[] ParseAndClearAuthResponse(ApduResponse response, byte expe
+     private static byte[] ParseAuthResponse(ReadOnlySpan<byte> response, byte expectedInnerTag, int expectedLength)
+     {
+         using var outer = Tlv.Create(response);
+-        if (outer.Tag != 0x7C)
++        if (outer.Tag != TagDynAuth)
+         {
+             throw new ApduException($"Invalid auth response - expected TAG 0x7C, got 0x{outer.Tag:X2}");
+         }
+@@ -264,13 +274,13 @@ private static int BuildAuthResponse(ReadOnlySpan<byte> decryptedWitness, ReadOn
+         // Outer: 7C [len] [inner]
+         int offset = 0;
+ 
+-        destination[offset++] = 0x7C;
++        destination[offset++] = TagDynAuth;
+         offset += BerLength.Write(destination[offset..], innerLen);
+-        destination[offset++] = 0x80;
++        destination[offset++] = TagAuthWitness;
+         offset += BerLength.Write(destination[offset..], witnessLen);
+         decryptedWitness.CopyTo(destination[offset..]);
+         offset += witnessLen;
+-        destination[offset++] = 0x81;
++        destination[offset++] = TagAuthChallenge;
+         offset += BerLength.Write(destination[offset..], challengeLen);
+         challenge.CopyTo(destination[offset..]);
+ 
+@@ -280,81 +290,43 @@ private static int BuildAuthResponse(ReadOnlySpan<byte> decryptedWitness, ReadOn
+     /// <summary>
+     /// Encrypts a single block using ECB mode with the specified key type.
+     /// </summary>
+-    private static void EncryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, PivManagementKeyType keyType) =>
++    private static void EncryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, KeyType keyType) =>
+         CryptoBlockCore(key, plaintext, ciphertext, keyType, encrypt: true);
+ 
+     /// <summary>
+     /// Decrypts a single block using ECB mode with the specified key type.
+     /// </summary>
+-    private static void DecryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext, Span<byte> plaintext, PivManagementKeyType keyType) =>
++    private static void DecryptBlock(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext, Span<byte> plaintext, KeyType keyType) =>
+         CryptoBlockCore(key, ciphertext, plaintext, keyType, encrypt: false);
+ 
+     /// <summary>
+     /// Shared implementation for single-block ECB encrypt/decrypt with buffer management.
+     /// </summary>
+-    private static void CryptoBlockCore(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, PivManagementKeyType keyType, bool encrypt)
++    private static void CryptoBlockCore(ReadOnlySpan<byte> key, ReadOnlySpan<byte> input, Span<byte> output, KeyType keyType, bool encrypt)
+     {
+-        byte[]? keyBuffer = null;
+-        byte[]? inputBuffer = null;
+-        byte[]? outputBuffer = null;
++        if (keyType == KeyType.TripleDES)
++        {
++            // Preserve explicit EDE for the public factory default, which .NET rejects as a
++            // weak TripleDES key even though PIV requires it. Each DES component is still valid.
++            if (encrypt)
++                TripleDesEncryptManual(key, input, output);
++            else
++                TripleDesDecryptManual(key, input, output);
++            return;
++        }
++        byte[] keyCopy = key.ToArray();
+         try
+         {
+-            keyBuffer = ArrayPool<byte>.Shared.Rent(key.Length);
+-            inputBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
+-            outputBuffer = ArrayPool<byte>.Shared.Rent(input.Length);
+-
+-            key.CopyTo(keyBuffer);
+-            input.CopyTo(inputBuffer);
+-
+-            if (keyType == PivManagementKeyType.TripleDes)
+-            {
+-                if (encrypt)
+-                {
+-                    TripleDesEncryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), outputBuffer.AsSpan(0, input.Length));
+-                }
+-                else
+-                {
+-                    TripleDesDecryptManual(keyBuffer.AsSpan(0, key.Length), inputBuffer.AsSpan(0, input.Length), outputBuffer.AsSpan(0, input.Length));
+-                }
+-            }
++            using var aes = Aes.Create();
++            aes.Key = keyCopy;
++            if (encrypt)
++                _ = aes.EncryptEcb(input, output, PaddingMode.None);
+             else
+-            {
+-                byte[]? aesKeyArray = null;
+-                try
+-                {
+-                    using var aes = Aes.Create();
+-                    aesKeyArray = keyBuffer.AsSpan(0, key.Length).ToArray();
+-                    aes.Key = aesKeyArray;
+-                    aes.Mode = CipherMode.ECB;
+-                    aes.Padding = PaddingMode.None;
+-                    using var transform = encrypt ? aes.CreateEncryptor() : aes.CreateDecryptor();
+-                    transform.TransformBlock(inputBuffer, 0, input.Length, outputBuffer, 0);
+-                }
+-                finally
+-                {
+-                    if (aesKeyArray is not null) CryptographicOperations.ZeroMemory(aesKeyArray);
+-                }
+-            }
+-
+-            outputBuffer.AsSpan(0, input.Length).CopyTo(output);
++                _ = aes.DecryptEcb(input, output, PaddingMode.None);
+         }
+         finally
+         {
+-            if (keyBuffer is not null)
+-            {
+-                CryptographicOperations.ZeroMemory(keyBuffer.AsSpan(0, key.Length));
+-                ArrayPool<byte>.Shared.Return(keyBuffer);
+-            }
+-            if (inputBuffer is not null)
+-            {
+-                CryptographicOperations.ZeroMemory(inputBuffer.AsSpan(0, input.Length));
+-                ArrayPool<byte>.Shared.Return(inputBuffer);
+-            }
+-            if (outputBuffer is not null)
+-            {
+-                CryptographicOperations.ZeroMemory(outputBuffer.AsSpan(0, input.Length));
+-                ArrayPool<byte>.Shared.Return(outputBuffer);
+-            }
++            CryptographicOperations.ZeroMemory(keyCopy);
+         }
+     }
+ 
+@@ -366,13 +338,13 @@ private static void CryptoBlockCore(ReadOnlySpan<byte> key, ReadOnlySpan<byte> i
+     /// </summary>
+     private static void TripleDesDecryptManual(ReadOnlySpan<byte> key24, ReadOnlySpan<byte> input, Span<byte> output)
+     {
+-        Span<byte> temp1 = stackalloc byte[8];
+-        Span<byte> temp2 = stackalloc byte[8];
++        Span<byte> temp1 = stackalloc byte[DesBlockSize];
++        Span<byte> temp2 = stackalloc byte[DesBlockSize];
+         try
+         {
+-            DesBlockOperation(key24[16..24], input, temp1, encrypt: false);
+-            DesBlockOperation(key24[8..16], temp1, temp2, encrypt: true);
+-            DesBlockOperation(key24[..8], temp2, output, encrypt: false);
++            DesBlockOperation(key24[(2 * DesKeyComponentLength)..], input, temp1, encrypt: false);
++            DesBlockOperation(key24[DesKeyComponentLength..(2 * DesKeyComponentLength)], temp1, temp2, encrypt: true);
++            DesBlockOperation(key24[..DesKeyComponentLength], temp2, output, encrypt: false);
+         }
+         finally
+         {
+@@ -387,13 +359,13 @@ private static void TripleDesDecryptManual(ReadOnlySpan<byte> key24, ReadOnlySpa
+     /// </summary>
+     private static void TripleDesEncryptManual(ReadOnlySpan<byte> key24, ReadOnlySpan<byte> input, Span<byte> output)
+     {
+-        Span<byte> temp1 = stackalloc byte[8];
+-        Span<byte> temp2 = stackalloc byte[8];
++        Span<byte> temp1 = stackalloc byte[DesBlockSize];
++        Span<byte> temp2 = stackalloc byte[DesBlockSize];
+         try
+         {
+-            DesBlockOperation(key24[..8], input, temp1, encrypt: true);
+-            DesBlockOperation(key24[8..16], temp1, temp2, encrypt: false);
+-            DesBlockOperation(key24[16..24], temp2, output, encrypt: true);
++            DesBlockOperation(key24[..DesKeyComponentLength], input, temp1, encrypt: true);
++            DesBlockOperation(key24[DesKeyComponentLength..(2 * DesKeyComponentLength)], temp1, temp2, encrypt: false);
++            DesBlockOperation(key24[(2 * DesKeyComponentLength)..], temp2, output, encrypt: true);
+         }
+         finally
+         {
+@@ -412,31 +384,26 @@ private static void TripleDesEncryptManual(ReadOnlySpan<byte> key24, ReadOnlySpa
+     /// </remarks>
+     private static void DesBlockOperation(ReadOnlySpan<byte> key8, ReadOnlySpan<byte> input, Span<byte> output, bool encrypt)
+     {
+-        byte[] keyArr = key8.ToArray();
+-        byte[] inputArr = input.ToArray();
+-        byte[] outputArr = new byte[8];
++        byte[] keyCopy = key8.ToArray();
+         try
+         {
+             using var des = DES.Create();
+-            des.Key = keyArr;
+-            des.Mode = CipherMode.ECB;
+-            des.Padding = PaddingMode.None;
+-            using var transform = encrypt ? des.CreateEncryptor() : des.CreateDecryptor();
+-            transform.TransformBlock(inputArr, 0, 8, outputArr, 0);
+-            outputArr.AsSpan().CopyTo(output);
++            des.Key = keyCopy;
++            if (encrypt)
++                _ = des.EncryptEcb(input, output, PaddingMode.None);
++            else
++                _ = des.DecryptEcb(input, output, PaddingMode.None);
+         }
+         finally
+         {
+-            CryptographicOperations.ZeroMemory(keyArr);
+-            CryptographicOperations.ZeroMemory(inputArr);
+-            CryptographicOperations.ZeroMemory(outputArr);
++            CryptographicOperations.ZeroMemory(keyCopy);
+         }
+     }
+ 
+     /// <summary>
+     /// Verifies the user PIN.
+     /// </summary>
+-    /// <param name="pin">The PIN to verify. Must be 6-8 digits/characters.</param>
++    /// <param name="pin">The caller-owned PIN as 6-8 UTF-8 encoded bytes.</param>
+     /// <param name="cancellationToken">Token to cancel the operation.</param>
+     /// <exception cref="InvalidPinException">Thrown if PIN verification fails.</exception>
+     /// <exception cref="ArgumentException">Thrown if PIN is invalid format.</exception>
+@@ -460,19 +427,19 @@ internal static async Task VerifyPinAsync(
+     {
+         Logger.LogDebug("PIV: Verifying PIN");
+ 
+-        if (pin.Length is < 6 or > 8)
++        if (pin.Length is < 6 or > PinUtilities.PinLength)
+         {
+             throw new ArgumentException("PIN must be 6-8 bytes", nameof(pin));
+         }
+ 
+-        var paddedPin = ArrayPool<byte>.Shared.Rent(8);
++        var paddedPin = ArrayPool<byte>.Shared.Rent(PinUtilities.PinLength);
+         try
+         {
+             // Pad PIN to 8 bytes with 0xFF
+             pin.Span.CopyTo(paddedPin);
+-            Array.Fill(paddedPin, (byte)0xFF, pin.Length, 8 - pin.Length);
++            Array.Fill(paddedPin, PinUtilities.PaddingByte, pin.Length, PinUtilities.PinLength - pin.Length);
+ 
+-            var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, paddedPin.AsMemory(0, 8));
++            var command = new ApduCommand(Cla, InsVerify, 0, KeyReference.Pin, paddedPin.AsMemory(0, PinUtilities.PinLength));
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+             if (response.IsOK())
+@@ -496,7 +463,7 @@ internal static async Task VerifyPinAsync(
+         }
+         finally
+         {
+-            CryptographicOperations.ZeroMemory(paddedPin.AsSpan(0, 8));
++            CryptographicOperations.ZeroMemory(paddedPin.AsSpan(0, PinUtilities.PinLength));
+             ArrayPool<byte>.Shared.Return(paddedPin);
+         }
+     }
+@@ -517,7 +484,7 @@ internal static async Task<int> GetPinAttemptsAsync(
+ 
+         cancellationToken.ThrowIfCancellationRequested();
+         // Fallback: empty PIN verify to get retry count
+-        var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
++        var command = new ApduCommand(Cla, InsVerify, 0, KeyReference.Pin, ReadOnlyMemory<byte>.Empty);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+         if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
+@@ -540,12 +507,12 @@ internal static async Task<int> GetPinAttemptsAsync(
+     /// Changes the PIN.
+     /// </summary>
+     /// <param name="currentPin">The current PIN.</param>
+-    /// <param name="newPin">The new PIN (6-8 digits/characters).</param>
++    /// <param name="newPin">The caller-owned new PIN as 6-8 UTF-8 encoded bytes.</param>
+     /// <param name="cancellationToken">Token to cancel the operation.</param>
+     /// <exception cref="InvalidPinException">Thrown if current PIN is incorrect.</exception>
+     /// <exception cref="ArgumentException">Thrown if PIN format is invalid.</exception>
+     /// <remarks>
+-    /// Both PINs are automatically zeroed after use for security.
++    /// SDK-owned encoded working copies are cleared after use; caller input buffers are never cleared.
+     /// </remarks>
+     internal static async Task ChangePinAsync(
+         IBackend backend,
+@@ -555,27 +522,27 @@ internal static async Task ChangePinAsync(
+     {
+         Logger.LogDebug("PIV: Changing PIN");
+ 
+-        if (currentPin.Length is < 6 or > 8)
++        if (currentPin.Length is < 6 or > PinUtilities.PinLength)
+         {
+             throw new ArgumentException("Current PIN must be 6-8 bytes", nameof(currentPin));
+         }
+ 
+-        if (newPin.Length is < 6 or > 8)
++        if (newPin.Length is < 6 or > PinUtilities.PinLength)
+         {
+             throw new ArgumentException("New PIN must be 6-8 bytes", nameof(newPin));
+         }
+ 
+-        var pinData = ArrayPool<byte>.Shared.Rent(16);
++        var pinData = ArrayPool<byte>.Shared.Rent(PinPairLength);
+         try
+         {
+             // Format: [current PIN padded to 8][new PIN padded to 8]
+             currentPin.Span.CopyTo(pinData);
+-            Array.Fill(pinData, (byte)0xFF, currentPin.Length, 8 - currentPin.Length);
++            Array.Fill(pinData, PinUtilities.PaddingByte, currentPin.Length, PinUtilities.PinLength - currentPin.Length);
+ 
+-            newPin.Span.CopyTo(pinData.AsSpan(8));
+-            Array.Fill(pinData, (byte)0xFF, 8 + newPin.Length, 8 - newPin.Length);
++            newPin.Span.CopyTo(pinData.AsSpan(PinUtilities.PinLength));
++            Array.Fill(pinData, PinUtilities.PaddingByte, PinUtilities.PinLength + newPin.Length, PinUtilities.PinLength - newPin.Length);
+ 
+-            var command = new ApduCommand(0x00, 0x24, 0x00, 0x80, pinData.AsMemory(0, 16));
++            var command = new ApduCommand(Cla, InsChangeReference, 0, KeyReference.Pin, pinData.AsMemory(0, PinPairLength));
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+             if (response.IsOK())
+@@ -599,7 +566,7 @@ internal static async Task ChangePinAsync(
+         }
+         finally
+         {
+-            CryptographicOperations.ZeroMemory(pinData.AsSpan(0, 16));
++            CryptographicOperations.ZeroMemory(pinData.AsSpan(0, PinPairLength));
+             ArrayPool<byte>.Shared.Return(pinData);
+         }
+     }
+@@ -607,9 +574,9 @@ internal static async Task ChangePinAsync(
+     /// <summary>
+     /// Sets the management key (requires authentication with old key).
+     /// </summary>
+-    internal static async Task<PivManagementKeyType> SetManagementKeyAsync(
++    internal static async Task<KeyType> SetManagementKeyAsync(
+         IBackend backend,
+-        PivManagementKeyType keyType,
++        KeyType keyType,
+         ReadOnlyMemory<byte> newKey,
+         bool requireTouch = false,
+         CancellationToken cancellationToken = default)
+@@ -617,14 +584,8 @@ internal static async Task<PivManagementKeyType> SetManagementKeyAsync(
+         Logger.LogDebug("PIV: Setting management key, type {KeyType}", keyType);
+ 
+         // Validate key length
+-        int expectedLength = keyType switch
+-        {
+-            PivManagementKeyType.TripleDes => 24,
+-            PivManagementKeyType.Aes128 => 16,
+-            PivManagementKeyType.Aes192 => 24,
+-            PivManagementKeyType.Aes256 => 32,
+-            _ => throw new ArgumentException($"Unsupported key type: {keyType}", nameof(keyType))
+-        };
++        byte algorithmId = KeyTypeEncoding.EncodeManagement(keyType);
++        int expectedLength = keyType.GetKeySizeBytes();
+ 
+         if (newKey.Length != expectedLength)
+         {
+@@ -635,19 +596,18 @@ internal static async Task<PivManagementKeyType> SetManagementKeyAsync(
+ 
+         // Build data: [algorithm] [slot 0x9B] [length] [key data]
+         // Format per Yubico PIV spec: algorithm byte, slot byte, length byte, key bytes
+-        var dataLength = 3 + newKey.Length; // header (3 bytes) + key
++        var dataLength = ManagementKeyHeaderLength + newKey.Length; // header (3 bytes) + key
+         var data = new byte[dataLength];
+         try
+         {
+-            data[0] = (byte)keyType;      // Algorithm byte (0x03=3DES, 0x08=AES128, 0x0A=AES192, 0x0C=AES256)
+-            data[1] = 0x9B;               // Slot 9B (management key slot)
+-            data[2] = (byte)newKey.Length; // Key length
+-            newKey.Span.CopyTo(data.AsSpan(3));
++            data[0] = algorithmId;
++            data[1] = KeyReference.Management;
++            data[2] = (byte)newKey.Length;
++            newKey.Span.CopyTo(data.AsSpan(ManagementKeyHeaderLength));
+ 
+-            // INS 0xFF (SET MANAGEMENT KEY), P1 = 0xFF
+             // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
+-            byte p2 = (byte)(requireTouch ? 0xFE : 0xFF);
+-            var command = new ApduCommand(0x00, 0xFF, 0xFF, p2, data);
++            byte p2 = requireTouch ? TouchRequiredParameter : NoTouchParameter;
++            var command = new ApduCommand(Cla, InsSetManagementKey, SetManagementKeyParameter, p2, data);
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+             if (!response.IsOK())
+@@ -678,10 +638,9 @@ internal static async Task ChangePukAsync(
+         byte[] pukPair = PinUtilities.EncodePinPairBytes(oldPuk.Span, newPuk.Span);
+         try
+         {
+-            // INS 0x24 (CHANGE REFERENCE DATA), P2=0x81 (PUK reference)
+-            var command = new ApduCommand(0x00, 0x24, 0x00, 0x81, pukPair);
++            var command = new ApduCommand(Cla, InsChangeReference, 0, KeyReference.Puk, pukPair);
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-            if (response.SW == 0x6D00)
++            if (response.SW == SWConstants.InsNotSupported)
+                 throw new NotSupportedException("Changing the PUK is not supported by this YubiKey.");
+ 
+             if (!response.IsOK())
+@@ -715,16 +674,15 @@ internal static async Task UnblockPinAsync(
+         byte[] pukPinPair = PinUtilities.EncodePinPairBytes(puk.Span, newPin.Span);
+         try
+         {
+-            // INS 0x2C (RESET RETRY COUNTER), P2=0x80 (PIN reference)
+-            var command = new ApduCommand(0x00, 0x2C, 0x00, 0x80, pukPinPair);
++            var command = new ApduCommand(Cla, InsResetRetry, 0, KeyReference.Pin, pukPinPair);
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-            if (response.SW == 0x6D00)
++            if (response.SW == SWConstants.InsNotSupported)
+                 throw new NotSupportedException("Unblocking the PIN is not supported by this YubiKey.");
+ 
+             if (!response.IsOK())
+             {
+                 // 0x6983 = PUK blocked
+-                if (response.SW == 0x6983)
++                if (response.SW == SWConstants.AuthenticationMethodBlocked)
+                 {
+                     throw new InvalidPinException(0, "PUK is blocked");
+                 }
+@@ -765,7 +723,7 @@ internal static async Task BlockPukAsync(
+             int retriesRemaining = 1; // Start with 1 to enter loop
+             while (retriesRemaining > 0)
+             {
+-                var pukCommand = new ApduCommand(0x00, 0x2C, 0x00, 0x80, emptyPukPin);
++                var pukCommand = new ApduCommand(Cla, InsResetRetry, 0, KeyReference.Pin, emptyPukPin);
+                 var response = await backend.SendAsync(pukCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+                 retriesRemaining = PinUtilities.GetRetriesFromStatusWord(response.SW);
+@@ -809,10 +767,9 @@ internal static async Task SetPinAttemptsAsync(
+             throw new ArgumentOutOfRangeException(nameof(pukAttempts), "PUK attempts must be 1-255");
+         }
+ 
+-        // INS 0xFA (SET PIN RETRIES), P1=PIN retries, P2=PUK retries, no data
+-        var command = new ApduCommand(0x00, 0xFA, (byte)pinAttempts, (byte)pukAttempts);
++        var command = new ApduCommand(Cla, InsSetRetries, (byte)pinAttempts, (byte)pukAttempts);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-        if (response.SW == 0x6D00)
++        if (response.SW == SWConstants.InsNotSupported)
+             throw new NotSupportedException("Setting PIN/PUK retries is not supported by this YubiKey.");
+ 
+         if (!response.IsOK())
+@@ -829,7 +786,7 @@ internal static async Task BlockPinAsync(IBackend backend, int retriesRemaining,
+         {
+             while (retriesRemaining > 0)
+             {
+-                var pinCommand = new ApduCommand(0x00, 0x20, 0x00, 0x80, emptyPin);
++                var pinCommand = new ApduCommand(Cla, InsVerify, 0, KeyReference.Pin, emptyPin);
+                 var response = await backend.SendAsync(pinCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+                 retriesRemaining = PinUtilities.GetRetriesFromStatusWord(response.SW);
+diff --git a/src/Piv/src/Authentication/PinOnlyProtocol.cs b/src/Piv/src/Authentication/PinOnlyProtocol.cs
+index f3e75a2b..4e4e7287 100644
+--- a/src/Piv/src/Authentication/PinOnlyProtocol.cs
++++ b/src/Piv/src/Authentication/PinOnlyProtocol.cs
+@@ -15,6 +15,7 @@
+ using Microsoft.Extensions.Logging;
+ using System.Security.Cryptography;
+ using Yubico.YubiKit.Core;
++using Yubico.YubiKit.Core.Cryptography;
+ using Yubico.YubiKit.Core.Utilities;
+ using Yubico.YubiKit.Piv.Backends;
+ using Yubico.YubiKit.Piv.DataObjects;
+@@ -33,7 +34,8 @@ internal static class PinOnlyProtocol
+     private const int PinProtectedTag = 0x88;
+     private const int ManagementKeyTag = 0x89;
+     private const int Pbkdf2Iterations = 10_000;
+-    private static readonly int[] ValidManagementKeyLengths = [16, 24, 32];
++    private static readonly int[] ValidManagementKeyLengths =
++        [KeyType.AES128.GetKeySizeBytes(), KeyType.AES192.GetKeySizeBytes(), KeyType.AES256.GetKeySizeBytes()];
+ 
+     internal static async Task<PinOnlyMode> GetPinOnlyModeAsync(
+         IBackend backend,
+@@ -158,19 +160,4 @@ internal static void DeriveManagementKey(ReadOnlySpan<byte> pin, ReadOnlySpan<by
+ #pragma warning restore CA5379, CA5387
+     }
+ 
+-    internal static int GetManagementKeyLength(PivManagementKeyType keyType) => keyType switch
+-    {
+-        PivManagementKeyType.Aes128 => 16,
+-        PivManagementKeyType.Aes256 => 32,
+-        _ => 24, // TripleDes and Aes192
+-    };
+-
+-    internal static void FillRepeatingDefaultKeyPattern(Span<byte> destination)
+-    {
+-        ReadOnlySpan<byte> pattern = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+-        for (int i = 0; i < destination.Length; i++)
+-        {
+-            destination[i] = pattern[i % pattern.Length];
+-        }
+-    }
+ }
+\ No newline at end of file
+diff --git a/src/Piv/src/Backends/SmartCardBackend.cs b/src/Piv/src/Backends/SmartCardBackend.cs
+index 6452e62a..67286003 100644
+--- a/src/Piv/src/Backends/SmartCardBackend.cs
++++ b/src/Piv/src/Backends/SmartCardBackend.cs
+@@ -23,6 +23,9 @@ namespace Yubico.YubiKit.Piv.Backends;
+ 
+ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IBackend
+ {
++    private const byte Cla = 0x00;
++    private const byte InsGetVersion = 0xFD;
++
+     private readonly ISmartCardProtocol _protocol =
+         protocol ?? throw new ArgumentNullException(nameof(protocol));
+ 
+@@ -30,7 +33,7 @@ public async Task<Initialization> ReadInitialStateAsync(CancellationToken cancel
+     {
+         await SelectAsync(cancellationToken).ConfigureAwait(false);
+ 
+-        var versionCommand = new ApduCommand(0x00, 0xFD, 0x00, 0x00);
++        var versionCommand = new ApduCommand(Cla, InsGetVersion, 0, 0);
+         var versionResponse = await SendAsync(versionCommand, cancellationToken: cancellationToken)
+             .ConfigureAwait(false);
+ 
+diff --git a/src/Piv/src/Bio/BioProtocol.cs b/src/Piv/src/Bio/BioProtocol.cs
+index d5a2365a..b38ea0b5 100644
+--- a/src/Piv/src/Bio/BioProtocol.cs
++++ b/src/Piv/src/Bio/BioProtocol.cs
+@@ -13,200 +13,138 @@
+ // limitations under the License.
+ 
+ using Microsoft.Extensions.Logging;
+-using System.Buffers;
+ using System.Security.Cryptography;
+ using Yubico.YubiKit.Core;
+ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
++using Yubico.YubiKit.Core.Utilities;
+ using Yubico.YubiKit.Piv.Backends;
+ 
+ namespace Yubico.YubiKit.Piv.Bio;
+ 
+-#pragma warning disable CS1573 // Public XML docs live on PivSession/IPivSession; these are internal protocol helpers.
+-
+ internal static class BioProtocol
+ {
++    private const byte Cla = 0x00;
++    private const byte InsGetMetadata = 0xF7;
++    private const byte InsVerify = 0x20;
++    private const byte TagRetries = 0x06;
++    private const byte TagConfigured = 0x07;
++    private const byte TagTemporaryPinActive = 0x08;
++    private const byte TagTemporaryPin = 0x01;
++    private const byte TagRequestTemporaryPin = 0x02;
++    private const byte TagVerifyUv = 0x03;
++    private const int TemporaryPinLength = 16;
++    private const int ShortTlvHeaderLength = 2;
+     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Bio.BioProtocol");
+ 
+-    /// <summary>
+-    /// Gets metadata about the PIV biometric configuration.
+-    /// </summary>
+-    /// <param name="cancellationToken">Token to cancel the operation.</param>
+-    /// <returns>Biometric metadata including number of configured fingerprints.</returns>
+-    /// <exception cref="NotSupportedException">Thrown if the YubiKey does not support biometrics or biometrics are not configured.</exception>
+-    internal static async Task<BioMetadata> GetBioMetadataAsync(
+-        IBackend backend,
+-        CancellationToken cancellationToken = default)
++    internal static async Task<BioMetadata> GetBioMetadataAsync(IBackend backend, CancellationToken cancellationToken = default)
+     {
+-        Logger.LogDebug("PIV: Getting biometric metadata");
+-
+-        var command = new ApduCommand(0x00, 0xF7, 0x00, 0x96, ReadOnlyMemory<byte>.Empty);
++        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Bio);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-
+-        // SW 0x6A82 means object/feature not found (not configured)
+-        // SW 0x6D00 means instruction not supported (non-Bio key)
+-        if (response.SW is 0x6A82 or 0x6A88 or 0x6D00)
++        try
+         {
+-            throw new NotSupportedException("Biometrics are not supported or not configured on this YubiKey");
++            EnsureAvailable(response);
++            // Python YubiKit 4ca60f7 piv.py:1111-1133: retries are required; the two flags are optional.
++            var fields = TlvHelper.DecodeDictionary(response.Data);
++            byte retries = ReadByte(fields, TagRetries, required: true);
++            byte configured = ReadByte(fields, TagConfigured);
++            byte temporaryPin = ReadByte(fields, TagTemporaryPinActive);
++            if (configured > 1 || temporaryPin > 1)
++                throw new ApduException("Invalid biometric metadata flag.");
++            Logger.LogDebug("PIV: Biometric metadata configured={Configured}, retries={Retries}, temporary PIN active={Active}", configured == 1, retries, temporaryPin == 1);
++            return new BioMetadata(configured == 1, retries, temporaryPin == 1);
+         }
+-
+-        if (!response.IsOK())
++        catch (Exception ex) when (ex is ArgumentException or IndexOutOfRangeException)
+         {
+-            throw ApduException.FromStatusWord(response.SW, "Failed to get biometric metadata");
++            throw new ApduException("Malformed biometric metadata response.", ex);
+         }
+-
+-        if (response.Data.IsEmpty)
++        finally
+         {
+-            throw new ApduException("Empty biometric metadata response");
++            response.Clear();
+         }
+-
+-        var data = response.Data.Span;
+-
+-        // TODO: This parses response bytes by raw position, which is fragile.
+-        // The YubiKey Bio metadata response likely uses a TLV structure (similar to
+-        // other metadata responses), but the exact tags are not documented in the
+-        // public PIV specification. Once the Bio metadata TLV tags are confirmed
+-        // (e.g., from the YubiKey Bio technical reference), this should be converted
+-        // to proper TLV parsing using TlvHelper.DecodeDictionary() for robustness
+-        // against field reordering or optional fields.
+-        var isConfigured = data.Length > 0 && data[0] != 0;
+-        var retriesRemaining = data.Length > 1 ? data[1] : 0;
+-        var temporaryPinEnabled = data.Length > 2 && data[2] == 1;
+-
+-        return new BioMetadata(isConfigured, retriesRemaining, temporaryPinEnabled);
+     }
+ 
+-    /// <summary>
+-    /// Verifies the user via biometric (fingerprint) and optionally retrieves a temporary PIN.
+-    /// </summary>
+-    /// <param name="userVerification">The user-verification mode.</param>
+-    /// <param name="cancellationToken">Token to cancel the operation.</param>
+-    /// <returns>A temporary PIN only for <see cref="UserVerification.VerifyAndRequestTemporaryPin" />; otherwise null. Caller must zero returned bytes immediately after use.</returns>
+-    /// <exception cref="NotSupportedException">Thrown if biometrics are not supported or configured.</exception>
+-    /// <exception cref="InvalidPinException">Thrown if biometric verification fails, with the remaining retry count.</exception>
++    private static byte ReadByte(IDictionary<int, ReadOnlyMemory<byte>> fields, byte tag, bool required = false)
++    {
++        if (!fields.TryGetValue(tag, out var value))
++        {
++            if (required)
++                throw new ApduException($"Missing biometric metadata field 0x{tag:X2}.");
++            return 0;
++        }
++        if (value.Length != 1)
++            throw new ApduException($"Invalid biometric metadata field 0x{tag:X2}.");
++        return value.Span[0];
++    }
++
+     internal static async Task<byte[]?> VerifyUvAsync(
+         IBackend backend,
+         UserVerification userVerification = UserVerification.Verify,
+         CancellationToken cancellationToken = default)
+     {
+-        if (userVerification is < UserVerification.Verify or > UserVerification.CheckOnly)
+-            throw new ArgumentOutOfRangeException(nameof(userVerification));
+-
+-        (bool requestTemporaryPin, bool checkOnly) = userVerification switch
++        byte[] data = userVerification switch
+         {
+-            UserVerification.Verify => (false, false),
+-            UserVerification.VerifyAndRequestTemporaryPin => (true, false),
+-            UserVerification.CheckOnly => (false, true),
++            UserVerification.CheckOnly => [],
++            UserVerification.Verify => [TagVerifyUv, 0],
++            UserVerification.VerifyAndRequestTemporaryPin => [TagRequestTemporaryPin, 0],
+             _ => throw new ArgumentOutOfRangeException(nameof(userVerification))
+         };
+-        Logger.LogDebug("PIV: Verifying user via biometric (checkOnly={CheckOnly})", checkOnly);
+-
+-        // Build command data
+-        byte[] commandData;
+-        if (checkOnly || !requestTemporaryPin)
+-        {
+-            // TAG 0x02: Check only, don't return temporary PIN
+-            commandData = [0x02, 0x00];
+-        }
+-        else
+-        {
+-            // TAG 0x00: Return temporary PIN
+-            commandData = [0x00, 0x00];
+-        }
+-
+-        var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData);
++        Logger.LogDebug("PIV: Biometric verification mode {Mode}", userVerification);
++        var command = new ApduCommand(Cla, InsVerify, 0, KeyReference.Bio, data);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-
+-        // SW 0x6A82 or 0x6D00 means biometrics not supported/configured
+-        if (response.SW == 0x6A82 || response.SW == 0x6D00)
+-        {
+-            throw new NotSupportedException("Biometrics are not supported or not configured on this YubiKey");
+-        }
+-
+-        if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
+-        {
+-            throw new InvalidPinException(
+-                retriesRemaining,
+-                $"Biometric verification failed. {retriesRemaining} retries remaining.");
+-        }
+-
+-        if (!response.IsOK())
+-        {
+-            throw ApduException.FromStatusWord(response.SW, "Failed to verify biometric");
+-        }
+-
+-        if (checkOnly || !requestTemporaryPin)
+-        {
+-            Logger.LogDebug("PIV: Biometric verification succeeded (check only)");
+-            return null;
+-        }
+-
+-        // Parse temporary PIN from response
+-        if (response.Data.IsEmpty)
+-        {
+-            throw new ApduException("Expected temporary PIN in response but got empty data");
+-        }
+-
+-        var tempPin = new byte[response.Data.Length];
+-        response.Data.CopyTo(tempPin);
+-
+-        // The original GET DATA response buffer also carries the temporary PIN in the clear; the
+-        // caller only owns/zeroes `tempPin` (the copy above), so this method must zero the source.
+-        response.Clear();
+-
+-        Logger.LogDebug("PIV: Biometric verification succeeded, temporary PIN retrieved (length={Length})", tempPin.Length);
+-        Logger.LogWarning("PIV: Caller MUST zero temporary PIN immediately after use!");
+-
+-        return tempPin;
+-    }
+-
+-    /// <summary>
+-    /// Verifies the temporary PIN obtained from biometric verification.
+-    /// </summary>
+-    /// <param name="temporaryPin">The temporary PIN returned from VerifyUvAsync. This method does NOT zero it — the caller owns and must zero this buffer after use.</param>
+-    /// <param name="cancellationToken">Token to cancel the operation.</param>
+-    /// <exception cref="InvalidPinException">Thrown if the temporary PIN is invalid.</exception>
+-    internal static async Task VerifyTemporaryPinAsync(
+-        IBackend backend,
+-        ReadOnlyMemory<byte> temporaryPin,
+-        CancellationToken cancellationToken = default)
+-    {
+-        if (temporaryPin.IsEmpty)
+-        {
+-            throw new ArgumentException("Temporary PIN cannot be empty", nameof(temporaryPin));
+-        }
+-
+-        Logger.LogDebug("PIV: Verifying temporary PIN");
+-
+-        // Build command with TAG 0x01 for temporary PIN
+-        var commandData = ArrayPool<byte>.Shared.Rent(2 + temporaryPin.Length);
+         try
+         {
+-            commandData[0] = 0x01; // TAG for temporary PIN
+-            commandData[1] = (byte)temporaryPin.Length;
+-            temporaryPin.Span.CopyTo(commandData.AsSpan(2));
+-
+-            var command = new ApduCommand(0x00, 0x20, 0x00, 0x96, commandData.AsMemory(0, 2 + temporaryPin.Length));
+-            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-
+-            if (SWConstants.ExtractRetryCount(response.SW) is { } retriesRemaining)
+-            {
+-                throw new InvalidPinException(
+-                    retriesRemaining,
+-                    $"Temporary PIN verification failed. {retriesRemaining} retries remaining.");
+-            }
+-
+-            if (!response.IsOK())
+-            {
+-                throw ApduException.FromStatusWord(response.SW, "Failed to verify temporary PIN");
+-            }
+-
+-            Logger.LogDebug("PIV: Temporary PIN verified successfully");
++            EnsureVerified(response);
++            if (userVerification != UserVerification.VerifyAndRequestTemporaryPin)
++                return null;
++            if (response.Data.Length != TemporaryPinLength)
++                throw new ApduException("Biometric verification did not return a 16-byte temporary PIN.");
++            return response.Data.ToArray();
+         }
+         finally
+         {
+-            // Zero the command data containing the temporary PIN
+-            CryptographicOperations.ZeroMemory(commandData.AsSpan(0, 2 + temporaryPin.Length));
+-            ArrayPool<byte>.Shared.Return(commandData);
++            response.Clear();
+         }
+     }
++
++    internal static async Task VerifyTemporaryPinAsync(IBackend backend, ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default)
++    {
++        if (temporaryPin.Length != TemporaryPinLength)
++            throw new ArgumentException("Temporary PIN must be exactly 16 bytes.", nameof(temporaryPin));
++        byte[] data = new byte[ShortTlvHeaderLength + TemporaryPinLength];
++        try
++        {
++            data[0] = TagTemporaryPin;
++            data[1] = TemporaryPinLength;
++            temporaryPin.Span.CopyTo(data.AsSpan(ShortTlvHeaderLength));
++            var command = new ApduCommand(Cla, InsVerify, 0, KeyReference.Bio, data);
++            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
++            try
++            {
++                EnsureVerified(response);
++            }
++            finally
++            {
++                response.Clear();
++            }
++        }
++        finally
++        {
++            CryptographicOperations.ZeroMemory(data);
++        }
++    }
++
++    private static void EnsureAvailable(ApduResponse response)
++    {
++        if (response.SW is SWConstants.FileOrApplicationNotFound or SWConstants.DataNotFound or SWConstants.InsNotSupported)
++            throw new NotSupportedException("Biometric verification is not supported by this YubiKey.");
++        if (!response.IsOK())
++            throw ApduException.FromStatusWord(response.SW, "Biometric operation failed");
++    }
++
++    private static void EnsureVerified(ApduResponse response)
++    {
++        if (SWConstants.ExtractRetryCount(response.SW) is { } retries)
++            throw new InvalidPinException(retries, "Biometric verification failed.");
++        EnsureAvailable(response);
++    }
+ }
+\ No newline at end of file
+diff --git a/src/Piv/src/Certificates/CertificateProtocol.cs b/src/Piv/src/Certificates/CertificateProtocol.cs
+index 579eb2cd..c16e7f6a 100644
+--- a/src/Piv/src/Certificates/CertificateProtocol.cs
++++ b/src/Piv/src/Certificates/CertificateProtocol.cs
+@@ -27,6 +27,15 @@ namespace Yubico.YubiKit.Piv.Certificates;
+ 
+ internal static class CertificateProtocol
+ {
++    private const byte TagCertificate = 0x70;
++    private const byte TagCertificateInfo = 0x71;
++    private const byte TagLrc = 0xFE;
++    private const byte CompressedCertificate = 0x01;
++    private const byte UncompressedCertificate = 0x00;
++    private const int MaximumUncompressedCertificateLength = 1856;
++    private const int CertificateInfoTlvLength = 3;
++    private const int LrcTlvLength = 2;
++
+     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Certificates.CertificateProtocol");
+ 
+     /// <summary>
+@@ -57,13 +66,13 @@ internal static class CertificateProtocol
+         // Note: GetObjectAsync already unwraps the outer 0x53 tag
+         var tlvDict = TlvHelper.DecodeDictionary(certData.AsSpan());
+ 
+-        byte[]? certBytes = tlvDict.TryGetValue(0x70, out var cert)
++        byte[]? certBytes = tlvDict.TryGetValue(TagCertificate, out var cert)
+             ? cert.ToArray()
+             : null;
+ 
+-        bool isCompressed = tlvDict.TryGetValue(0x71, out var info)
++        bool isCompressed = tlvDict.TryGetValue(TagCertificateInfo, out var info)
+             && info.Length > 0
+-            && info.Span[0] == 0x01;
++            && info.Span[0] == CompressedCertificate;
+ 
+         if (certBytes is null || certBytes.Length == 0)
+         {
+@@ -102,7 +111,7 @@ internal static async Task StoreCertificateAsync(
+         Logger.LogDebug("PIV: Storing certificate in slot 0x{Slot:X2}", (byte)slot);
+ 
+         var certBytes = certificate.RawData;
+-        bool shouldCompress = compression == CertificateCompression.Always || certBytes.Length > 1856;
++        bool shouldCompress = compression == CertificateCompression.Always || certBytes.Length > MaximumUncompressedCertificateLength;
+ 
+         if (shouldCompress)
+         {
+@@ -117,23 +126,20 @@ internal static async Task StoreCertificateAsync(
+         // Build TLV: TAG 0x70 (cert) + TAG 0x71 (info) + TAG 0xFE (LRC)
+         // Note: PutObjectAsync adds the outer 0x53 wrapper
+         int certLenSize = BerLength.EncodingSize(certBytes.Length);
+-        int totalSize = 1 + certLenSize + certBytes.Length + 3 + 2; // 0x70 + len + cert + 0x71 01 xx + 0xFE 00
++        int totalSize = 1 + certLenSize + certBytes.Length + CertificateInfoTlvLength + LrcTlvLength; // 0x70 + len + cert + 0x71 01 xx + 0xFE 00
+         var writer = new ArrayBufferWriter<byte>(totalSize);
+ 
+-        // TAG 0x70 (Certificate)
+-        ReadOnlySpan<byte> certTag = [0x70];
++        ReadOnlySpan<byte> certTag = [TagCertificate];
+         writer.Write(certTag);
+         var lenSpan = writer.GetSpan(certLenSize);
+         BerLength.Write(lenSpan, certBytes.Length);
+         writer.Advance(certLenSize);
+         writer.Write(certBytes);
+ 
+-        // TAG 0x71 (Certificate info)
+-        ReadOnlySpan<byte> infoTlv = [0x71, 0x01, (byte)(shouldCompress ? 0x01 : 0x00)];
++        ReadOnlySpan<byte> infoTlv = [TagCertificateInfo, 1, shouldCompress ? CompressedCertificate : UncompressedCertificate];
+         writer.Write(infoTlv);
+ 
+-        // TAG 0xFE (LRC - error detection)
+-        ReadOnlySpan<byte> lrcTlv = [0xFE, 0x00];
++        ReadOnlySpan<byte> lrcTlv = [TagLrc, 0];
+         writer.Write(lrcTlv);
+ 
+         // Write to object
+@@ -157,6 +163,9 @@ internal static async Task DeleteCertificateAsync(
+ 
+     internal static int GetCertificateObjectId(Slot slot)
+     {
++        // Retired key references and certificate object identifiers are parallel contiguous ranges.
++        if (slot is >= Slot.Retired1 and <= Slot.Retired20)
++            return DataObject.Retired1 + ((byte)slot - (byte)Slot.Retired1);
+         return slot switch
+         {
+             Slot.Authentication => DataObject.Authentication,
+@@ -164,26 +173,6 @@ internal static int GetCertificateObjectId(Slot slot)
+             Slot.KeyManagement => DataObject.KeyManagement,
+             Slot.CardAuthentication => DataObject.CardAuthentication,
+             Slot.Attestation => DataObject.Attestation,
+-            Slot.Retired1 => DataObject.Retired1,
+-            Slot.Retired2 => DataObject.Retired2,
+-            Slot.Retired3 => DataObject.Retired3,
+-            Slot.Retired4 => DataObject.Retired4,
+-            Slot.Retired5 => DataObject.Retired5,
+-            Slot.Retired6 => DataObject.Retired6,
+-            Slot.Retired7 => DataObject.Retired7,
+-            Slot.Retired8 => DataObject.Retired8,
+-            Slot.Retired9 => DataObject.Retired9,
+-            Slot.Retired10 => DataObject.Retired10,
+-            Slot.Retired11 => DataObject.Retired11,
+-            Slot.Retired12 => DataObject.Retired12,
+-            Slot.Retired13 => DataObject.Retired13,
+-            Slot.Retired14 => DataObject.Retired14,
+-            Slot.Retired15 => DataObject.Retired15,
+-            Slot.Retired16 => DataObject.Retired16,
+-            Slot.Retired17 => DataObject.Retired17,
+-            Slot.Retired18 => DataObject.Retired18,
+-            Slot.Retired19 => DataObject.Retired19,
+-            Slot.Retired20 => DataObject.Retired20,
+             _ => throw new ArgumentException($"Slot 0x{(byte)slot:X2} does not support certificates", nameof(slot))
+         };
+     }
+diff --git a/src/Piv/src/Cryptography/PrivateKeyOperations.cs b/src/Piv/src/Cryptography/PrivateKeyOperations.cs
+index 0676cb7c..d3ec3d8d 100644
+--- a/src/Piv/src/Cryptography/PrivateKeyOperations.cs
++++ b/src/Piv/src/Cryptography/PrivateKeyOperations.cs
+@@ -28,6 +28,13 @@ namespace Yubico.YubiKit.Piv.Cryptography;
+ 
+ internal static class PrivateKeyOperations
+ {
++    private const byte Cla = 0x00;
++    private const byte InsAuthenticate = 0x87;
++    private const byte TagDynamicAuth = 0x7C;
++    private const byte TagResponse = 0x82;
++    private const byte TagChallenge = 0x81;
++    private const byte TagExponentiation = 0x85;
++
+     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Cryptography.PrivateKeyOperations");
+ 
+     /// <summary>
+@@ -93,24 +100,20 @@ private static async Task<byte[]> SignOrDecryptCoreAsync(
+         {
+             int offset = 0;
+ 
+-            // TAG 0x7C
+-            commandData[offset++] = 0x7C;
++            commandData[offset++] = TagDynamicAuth;
+ 
+             // Template length encoding
+             offset += BerLength.Write(commandData.AsSpan(offset), innerLength);
+ 
+-            // TAG 0x82 (Expected response - empty)
+-            commandData[offset++] = 0x82;
+-            commandData[offset++] = 0x00;
++            commandData[offset++] = TagResponse;
++            commandData[offset++] = 0;
+ 
+-            // TAG 0x81 (Challenge/data to sign/decrypt)
+-            commandData[offset++] = 0x81;
++            commandData[offset++] = TagChallenge;
+             offset += BerLength.Write(commandData.AsSpan(offset), preparedLength);
+ 
+             WritePreparedData(keyType, data.Span, commandData.AsSpan(offset, preparedLength));
+ 
+-            // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
+-            var command = new ApduCommand(0x00, 0x87, KeyTypeEncoding.Encode(keyType), (byte)slot, commandData);
++            var command = new ApduCommand(Cla, InsAuthenticate, KeyTypeEncoding.EncodeAsymmetric(keyType), (byte)slot, commandData);
+             await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
+ 
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+@@ -120,7 +123,7 @@ private static async Task<byte[]> SignOrDecryptCoreAsync(
+                 if (!response.IsOK())
+                 {
+                     // Check if PIN verification is required
+-                    if (response.SW == 0x6982)
++                    if (response.SW == SWConstants.SecurityStatusNotSatisfied)
+                     {
+                         throw new InvalidOperationException(
+                             "Security status not satisfied. PIN verification may be required before this operation.");
+@@ -315,24 +318,20 @@ internal static async Task<byte[]> CalculateSecretAsync(
+         {
+             int offset = 0;
+ 
+-            // TAG 0x7C
+-            data[offset++] = 0x7C;
++            data[offset++] = TagDynamicAuth;
+ 
+             // Template length encoding
+             offset += BerLength.Write(data.AsSpan(offset), innerLength);
+ 
+-            // TAG 0x82 (Expected response - empty)
+-            data[offset++] = 0x82;
+-            data[offset++] = 0x00;
++            data[offset++] = TagResponse;
++            data[offset++] = 0;
+ 
+-            // TAG 0x85 (Exponentiation data - peer public key)
+-            data[offset++] = 0x85;
++            data[offset++] = TagExponentiation;
+             offset += BerLength.Write(data.AsSpan(offset), peerKeyData.Length);
+ 
+             peerKeyData.CopyTo(data.AsSpan(offset));
+ 
+-            // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
+-            var command = new ApduCommand(0x00, 0x87, KeyTypeEncoding.Encode(keyType), (byte)slot, data);
++            var command = new ApduCommand(Cla, InsAuthenticate, KeyTypeEncoding.EncodeAsymmetric(keyType), (byte)slot, data);
+             await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
+ 
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+@@ -341,7 +340,7 @@ internal static async Task<byte[]> CalculateSecretAsync(
+             {
+                 if (!response.IsOK())
+                 {
+-                    if (response.SW == 0x6982)
++                    if (response.SW == SWConstants.SecurityStatusNotSatisfied)
+                     {
+                         throw new InvalidOperationException(
+                             "Security status not satisfied. PIN verification may be required before this operation.");
+@@ -392,31 +391,25 @@ private static int PreparedDataLength(KeyType keyType, int dataLength) =>
+     /// <exception cref="ArgumentException">An RSA block longer than the modulus.</exception>
+     private static void WritePreparedData(KeyType keyType, ReadOnlySpan<byte> data, Span<byte> destination)
+     {
+-        switch (keyType)
++        if (keyType.IsRSA())
+         {
+-            case KeyType.RSA1024 or KeyType.RSA2048 or KeyType.RSA3072 or KeyType.RSA4096:
+-                // The caller supplies the complete encoded block (PKCS#1 v1.5, OAEP or PSS). A shorter block
+-                // is the same integer left-padded; a longer one cannot be, so it is an error, not a truncation.
+-                if (data.Length > destination.Length)
+-                    throw new ArgumentException(
+-                        $"Data is {data.Length} bytes; an {keyType} block must be at most {destination.Length} bytes. " +
+-                        "Supply the complete encoded block, not the message.", nameof(data));
+-                LeftPad(data, destination);
+-                return;
+-
+-            case KeyType.ECP256 or KeyType.ECP384:
+-                // FIPS 186-5 §6.4.1: the signature uses the leftmost min(N, outlen) bits of the digest, so a
+-                // longer digest is truncated from the right and a shorter one is the integer e, left-padded.
+-                if (data.Length >= destination.Length)
+-                    data[..destination.Length].CopyTo(destination);
+-                else
+-                    LeftPad(data, destination);
+-                return;
+-
+-            default:
+-                data.CopyTo(destination);
+-                return;
++            // A short encoded RSA block is the same integer left-padded. A longer one cannot be
++            // represented faithfully: reject it rather than silently truncating caller input.
++            if (data.Length > destination.Length)
++                throw new ArgumentException($"Data exceeds the {keyType} encoded block size ({destination.Length} bytes).", nameof(data));
++            LeftPad(data, destination);
++            return;
+         }
++        if (keyType.IsECDsa())
++        {
++            // FIPS 186-5 §6.4.1 uses the leftmost min(N, outlen) bits of the digest.
++            if (data.Length >= destination.Length)
++                data[..destination.Length].CopyTo(destination);
++            else
++                LeftPad(data, destination);
++            return;
++        }
++        data.CopyTo(destination);
+     }
+ 
+     private static void LeftPad(ReadOnlySpan<byte> data, Span<byte> destination)
+@@ -429,14 +422,14 @@ private static byte[] ParseCryptoResponse(ReadOnlyMemory<byte> data)
+     {
+         // Parse outer TLV (0x7C - Dynamic Auth Template)
+         using var outer = Tlv.Create(data.Span);
+-        if (outer.Tag != 0x7C)
++        if (outer.Tag != TagDynamicAuth)
+         {
+             throw new ApduException("Invalid crypto response format");
+         }
+ 
+         // Parse inner TLV (0x82 - Response data)
+         using var inner = Tlv.Create(outer.Value.Span);
+-        if (inner.Tag != 0x82)
++        if (inner.Tag != TagResponse)
+         {
+             throw new ApduException("Invalid crypto response - expected TAG 0x82");
+         }
+diff --git a/src/Piv/src/DataObjects/DataObjectProtocol.cs b/src/Piv/src/DataObjects/DataObjectProtocol.cs
+index 177beadd..b7dbe766 100644
+--- a/src/Piv/src/DataObjects/DataObjectProtocol.cs
++++ b/src/Piv/src/DataObjects/DataObjectProtocol.cs
+@@ -23,6 +23,14 @@ namespace Yubico.YubiKit.Piv.DataObjects;
+ 
+ internal static class DataObjectProtocol
+ {
++    private const byte Cla = 0x00;
++    private const byte InsGetData = 0xCB;
++    private const byte InsPutData = 0xDB;
++    private const byte ObjectDataP1 = 0x3F;
++    private const byte ObjectDataP2 = 0xFF;
++    private const byte TagData = 0x53;
++    private const byte TagObjectId = 0x5C;
++
+     /// <summary>
+     /// Reads a PIV data object.
+     /// </summary>
+@@ -35,7 +43,7 @@ internal static async Task<byte[]> GetObjectAsync(
+         CancellationToken cancellationToken = default)
+     {
+         // INS 0xCB (GET DATA)
+-        var command = new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, EncodeObjectId(objectId));
++        var command = new ApduCommand(Cla, InsGetData, ObjectDataP1, ObjectDataP2, EncodeObjectId(objectId));
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+         try
+@@ -59,7 +67,7 @@ private static byte[] UnwrapDataObjectResponse(ReadOnlySpan<byte> data)
+     {
+         if (data.IsEmpty)
+             return [];
+-        if (data[0] != 0x53)
++        if (data[0] != TagData)
+             return data.ToArray();
+         using var wrapper = Tlv.Create(data);
+         return wrapper.Value.ToArray();
+@@ -86,11 +94,11 @@ internal static async Task PutObjectAsync(
+         {
+             objectIdBytes.CopyTo(encoded, 0);
+             int offset = objectIdBytes.Length;
+-            encoded[offset++] = 0x53;
++            encoded[offset++] = TagData;
+             offset += BerLength.Write(encoded.AsSpan(offset), dataLen);
+             if (data is { } value)
+                 value.Span.CopyTo(encoded.AsSpan(offset));
+-            var command = new ApduCommand(0x00, 0xDB, 0x3F, 0xFF, encoded);
++            var command = new ApduCommand(Cla, InsPutData, ObjectDataP1, ObjectDataP2, encoded);
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+             if (!response.IsOK())
+@@ -110,16 +118,16 @@ internal static async Task PutObjectAsync(
+     /// </summary>
+     private static byte[] EncodeObjectId(int objectId)
+     {
+-        if (objectId <= 0xFF)
++        if (objectId <= byte.MaxValue)
+         {
+-            return [0x5C, 0x01, (byte)objectId];
++            return [TagObjectId, 0x01, (byte)objectId];
+         }
+ 
+-        if (objectId <= 0xFFFF)
++        if (objectId <= ushort.MaxValue)
+         {
+-            return [0x5C, 0x02, (byte)(objectId >> 8), (byte)(objectId & 0xFF)];
++            return [TagObjectId, 0x02, (byte)(objectId >> 8), (byte)(objectId & byte.MaxValue)];
+         }
+ 
+-        return [0x5C, 0x03, (byte)(objectId >> 16), (byte)((objectId >> 8) & 0xFF), (byte)(objectId & 0xFF)];
++        return [TagObjectId, 0x03, (byte)(objectId >> 16), (byte)((objectId >> 8) & byte.MaxValue), (byte)(objectId & byte.MaxValue)];
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Piv/src/IPivSession.cs b/src/Piv/src/IPivSession.cs
+index d024d6d1..157d9faf 100644
+--- a/src/Piv/src/IPivSession.cs
++++ b/src/Piv/src/IPivSession.cs
+@@ -29,11 +29,14 @@ namespace Yubico.YubiKit.Piv;
+ /// Implements NIST SP 800-73 PIV application functionality for smart card operations
+ /// including key generation, certificate management, and cryptographic operations.
+ /// </para>
++/// <para>Credential inputs are caller-owned buffers. PIN/PUK inputs are UTF-8 bytes; byte-length
++/// checks do not imply ASCII-only, digit-only, or UTF-8-validity checks. Returned mutable memory is
++/// transferred to the caller, who must clear plaintext, shared secrets, and temporary PINs after use.</para>
+ /// </remarks>
+ public interface IPivSession : IApplicationSession
+ {
+-    /// <summary>PIV management key type currently in use.</summary>
+-    PivManagementKeyType ManagementKeyType { get; }
++    /// <summary>Recognized management key type, or null for an unmodeled algorithm; inspect raw management-key metadata.</summary>
++    KeyType? ManagementKeyType { get; }
+ 
+     /// <summary>
+     ///     Gets a value indicating whether the session has authenticated the PIV management key.
+@@ -61,17 +64,17 @@ public interface IPivSession : IApplicationSession
+     /// <remarks>
+     /// <para>
+     /// WARNING: This permanently destroys all PIV data, keys, and certificates.
+-    /// The operation requires that biometrics are not configured.
++    /// Device-specific biometric/reset restrictions may apply and are reported by the device.
+     /// </para>
+     /// <para>
+     /// A successful reset clears management-key authentication and refreshes
+     /// <see cref="ManagementKeyType"/> from post-reset metadata. If metadata is unavailable, the
+-    /// session uses AES-192 only for a reliable firmware version 5.7 or later and conservatively
+-    /// falls back to Triple-DES for sentinel or older versions. Unexpected metadata errors propagate.
++    /// session uses detected firmware (not a compatibility override): AES-192 for 5.7+ and development
++    /// versions, or Triple-DES for older released versions. Unexpected metadata errors propagate.
+     /// </para>
+     /// </remarks>
+     /// <param name="cancellationToken">Cancellation token.</param>
+-    /// <exception cref="InvalidOperationException">Biometrics are configured - cannot reset.</exception>
++    /// <exception cref="ApduException">The device rejects reset.</exception>
+     Task ResetAsync(CancellationToken cancellationToken = default);
+ 
+     // Authentication
+@@ -96,11 +99,11 @@ public interface IPivSession : IApplicationSession
+     /// </summary>
+     /// <remarks>
+     /// <para>
+-    /// PIN must be 6-8 ASCII characters. PIN is NOT zeroed by this method - caller is responsible
+-    /// for secure disposal of PIN data.
++    /// PIN must be 6-8 encoded bytes. The SDK does not enforce ASCII-only or digit-only content.
++    /// PIN input is never zeroed by this method; the caller is responsible for secure disposal.
+     /// </para>
+     /// </remarks>
+-    /// <param name="pin">PIN as UTF-8 bytes.</param>
++    /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <exception cref="InvalidPinException">PIN incorrect. Check RetriesRemaining property.</exception>
+     Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default);
+@@ -131,8 +134,8 @@ public interface IPivSession : IApplicationSession
+     /// <summary>
+     /// Change PIN from old PIN to new PIN.
+     /// </summary>
+-    /// <param name="currentPin">Current PIN as UTF-8 bytes.</param>
+-    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
++    /// <param name="currentPin">Current PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
++    /// <param name="newPin">New PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <exception cref="InvalidPinException">Old PIN incorrect.</exception>
+     Task ChangePinAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
+@@ -140,8 +143,8 @@ public interface IPivSession : IApplicationSession
+     /// <summary>
+     /// Change PUK from old PUK to new PUK.
+     /// </summary>
+-    /// <param name="currentPuk">Current PUK as UTF-8 bytes.</param>
+-    /// <param name="newPuk">New PUK as UTF-8 bytes (6-8 ASCII characters).</param>
++    /// <param name="currentPuk">Current PUK as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
++    /// <param name="newPuk">New PUK as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <exception cref="InvalidPinException">Old PUK incorrect.</exception>
+     Task ChangePukAsync(ReadOnlyMemory<byte> currentPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default);
+@@ -149,8 +152,8 @@ public interface IPivSession : IApplicationSession
+     /// <summary>
+     /// Unblock PIN using PUK and set new PIN.
+     /// </summary>
+-    /// <param name="puk">PUK as UTF-8 bytes.</param>
+-    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
++    /// <param name="puk">PUK as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
++    /// <param name="newPin">New PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <exception cref="InvalidPinException">PUK incorrect.</exception>
+     Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
+@@ -192,11 +195,11 @@ public interface IPivSession : IApplicationSession
+     /// </para>
+     /// </remarks>
+     /// <param name="slot">PIV slot for key storage.</param>
+-    /// <param name="keyType">Key algorithm and size.</param>
++    /// <param name="keyType">Shared key type, including key size.</param>
+     /// <param name="options">Optional key-use policies.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>Generated public key.</returns>
+-    /// <exception cref="NotSupportedException">Algorithm not supported on this YubiKey version.</exception>
++    /// <exception cref="NotSupportedException">Key type not supported on this YubiKey version.</exception>
+     Task<IPublicKey> GenerateKeyAsync(
+         Slot slot,
+         KeyType keyType,
+@@ -275,7 +278,7 @@ Task ImportKeyAsync(
+     /// </para>
+     /// </remarks>
+     /// <param name="slot">PIV slot containing private key.</param>
+-    /// <param name="keyType">Key algorithm (must match slot contents).</param>
++    /// <param name="keyType">Shared key type (must match slot contents).</param>
+     /// <param name="data">Data to sign or decrypt.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>Signature or decrypted data.</returns>
+@@ -288,16 +291,16 @@ Task<Memory<byte>> SignOrDecryptAsync(
+         CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+-    /// Sign data or decrypt data using private key in specified slot, auto-detecting the algorithm.
++    /// Sign data or decrypt data using private key in specified slot, auto-detecting the key type.
+     /// </summary>
+     /// <remarks>
+     /// <para>
+     /// <b>Requires YubiKey firmware 5.3+.</b> This overload queries slot metadata to determine
+-    /// the key algorithm automatically, eliminating the need to track algorithms separately.
++    /// the key type automatically, eliminating the need to track key types separately.
+     /// </para>
+     /// <para>
+     /// For YubiKeys with firmware older than 5.3, use the overload that accepts an explicit
+-    /// algorithm parameter.
++    /// keyType parameter.
+     /// </para>
+     /// <para>
+     /// May require PIN verification or touch based on key policy.
+@@ -565,7 +568,7 @@ Task StoreCertificateAsync(
+     /// retained by the session.
+     /// </para>
+     /// </remarks>
+-    /// <param name="pin">PIN as UTF-8 bytes, used if PRINTED is PIN-gated or PIN-derived data is present.</param>
++    /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The PIN-only mode(s) successfully authenticated. <see cref="PinOnlyMode.None"/> if neither succeeded.</returns>
+     /// <exception cref="InvalidPinException">PIN verification is required and the supplied PIN is incorrect.</exception>
+@@ -592,7 +595,7 @@ Task StoreCertificateAsync(
+     /// <para><paramref name="managementKey"/> is NOT zeroed by this method - caller is responsible for secure disposal.</para>
+     /// </remarks>
+     /// <param name="pinOnlyMode"><see cref="PinOnlyMode.None"/> to disable, or <see cref="PinOnlyMode.PinProtected"/> to enable.</param>
+-    /// <param name="pin">PIN as UTF-8 bytes. Required (and verified) when enabling PIN-protected mode; ignored when disabling.</param>
++    /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+     /// <param name="managementKey">
+     /// The active management key to authenticate and protect. Required when enabling PIN-protected mode;
+     /// its length must match <see cref="ManagementKeyType"/>. Ignored when disabling.
+@@ -620,12 +623,12 @@ Task SetPinOnlyModeAsync(
+     /// by this method. If the device reports that the security status is not satisfied, the session
+     /// clears its recorded management authentication state; other command failures preserve it.
+     /// </remarks>
+-    /// <param name="keyType">Management key algorithm.</param>
++    /// <param name="keyType">A symmetric management key type: TripleDES, AES128, AES192, or AES256.</param>
+     /// <param name="newKey">New management key bytes.</param>
+     /// <param name="requireTouch">Require touch for management key operations.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     Task SetManagementKeyAsync(
+-        PivManagementKeyType keyType,
++        KeyType keyType,
+         ReadOnlyMemory<byte> newKey,
+         bool requireTouch = false,
+         CancellationToken cancellationToken = default);
+diff --git a/src/Piv/src/PivManagementKeyType.cs b/src/Piv/src/KeyReference.cs
+similarity index 51%
+rename from src/Piv/src/PivManagementKeyType.cs
+rename to src/Piv/src/KeyReference.cs
+index 78f2f53d..79257fb1 100644
+--- a/src/Piv/src/PivManagementKeyType.cs
++++ b/src/Piv/src/KeyReference.cs
+@@ -1,4 +1,4 @@
+-// Copyright 2024 Yubico AB
++// Copyright 2026 Yubico AB
+ //
+ // Licensed under the Apache License, Version 2.0 (the "License").
+ // You may not use this file except in compliance with the License.
+@@ -14,20 +14,11 @@
+ 
+ namespace Yubico.YubiKit.Piv;
+ 
+-/// <summary>
+-/// PIV management key algorithm types.
+-/// </summary>
+-public enum PivManagementKeyType : byte
++/// <summary>Special applet references, distinct from public asymmetric-key slots.</summary>
++internal static class KeyReference
+ {
+-    /// <summary>3DES key (24 bytes, 8-byte challenge).</summary>
+-    TripleDes = 0x03,
+-
+-    /// <summary>AES-128 key (16 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
+-    Aes128 = 0x08,
+-
+-    /// <summary>AES-192 key (24 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
+-    Aes192 = 0x0A,
+-
+-    /// <summary>AES-256 key (32 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
+-    Aes256 = 0x0C
++    internal const byte Pin = 0x80;
++    internal const byte Puk = 0x81;
++    internal const byte Management = 0x9B;
++    internal const byte Bio = 0x96;
+ }
+\ No newline at end of file
+diff --git a/src/Piv/src/KeyTypeEncoding.cs b/src/Piv/src/KeyTypeEncoding.cs
+index 7b1fa665..141e3f78 100644
+--- a/src/Piv/src/KeyTypeEncoding.cs
++++ b/src/Piv/src/KeyTypeEncoding.cs
+@@ -12,6 +12,7 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
++using System.Collections.Frozen;
+ using Yubico.YubiKit.Core.Cryptography;
+ 
+ namespace Yubico.YubiKit.Piv;
+@@ -19,29 +20,43 @@ namespace Yubico.YubiKit.Piv;
+ /// <summary>Explicit PIV wire identifiers; Core KeyType values are not protocol bytes.</summary>
+ internal static class KeyTypeEncoding
+ {
+-    internal static byte Encode(KeyType keyType) => keyType switch
++    // The single protocol table defines PIV identifiers, not numeric Core enum values.
++    private static readonly FrozenDictionary<KeyType, byte> Identifiers = new Dictionary<KeyType, byte>
+     {
+-        KeyType.RSA1024 => 0x06,
+-        KeyType.RSA2048 => 0x07,
+-        KeyType.RSA3072 => 0x05,
+-        KeyType.RSA4096 => 0x16,
+-        KeyType.ECP256 => 0x11,
+-        KeyType.ECP384 => 0x14,
+-        KeyType.Ed25519 => 0xE0,
+-        KeyType.X25519 => 0xE1,
+-        _ => throw new NotSupportedException($"Key type {keyType} is not supported by PIV.")
+-    };
++        [KeyType.TripleDES] = 0x03,
++        [KeyType.AES128] = 0x08,
++        [KeyType.AES192] = 0x0A,
++        [KeyType.AES256] = 0x0C,
++        [KeyType.RSA1024] = 0x06,
++        [KeyType.RSA2048] = 0x07,
++        [KeyType.RSA3072] = 0x05,
++        [KeyType.RSA4096] = 0x16,
++        [KeyType.ECP256] = 0x11,
++        [KeyType.ECP384] = 0x14,
++        [KeyType.Ed25519] = 0xE0,
++        [KeyType.X25519] = 0xE1
++    }.ToFrozenDictionary();
+ 
+-    internal static KeyType? Decode(byte algorithmId) => algorithmId switch
++    private static readonly FrozenDictionary<byte, KeyType> Types =
++        Identifiers.ToFrozenDictionary(pair => pair.Value, pair => pair.Key);
++
++    internal static byte Encode(KeyType keyType) => Identifiers.TryGetValue(keyType, out byte id)
++        ? id
++        : throw new NotSupportedException($"Key type {keyType} is not supported by PIV.");
++
++    internal static KeyType? Decode(byte algorithmId) => Types.TryGetValue(algorithmId, out var keyType) ? keyType : null;
++
++    internal static byte EncodeAsymmetric(KeyType keyType)
+     {
+-        0x06 => KeyType.RSA1024,
+-        0x07 => KeyType.RSA2048,
+-        0x05 => KeyType.RSA3072,
+-        0x16 => KeyType.RSA4096,
+-        0x11 => KeyType.ECP256,
+-        0x14 => KeyType.ECP384,
+-        0xE0 => KeyType.Ed25519,
+-        0xE1 => KeyType.X25519,
+-        _ => null
+-    };
++        if (!keyType.IsAsymmetric())
++            throw new NotSupportedException($"Key type {keyType} is not an asymmetric PIV key type.");
++        return Encode(keyType);
++    }
++
++    internal static byte EncodeManagement(KeyType keyType)
++    {
++        if (!keyType.IsSymmetric())
++            throw new NotSupportedException($"Key type {keyType} is not a PIV management key type.");
++        return Encode(keyType);
++    }
+ }
+\ No newline at end of file
+diff --git a/src/Piv/src/Keys/KeyProtocol.cs b/src/Piv/src/Keys/KeyProtocol.cs
+index 95890f79..b365f76a 100644
+--- a/src/Piv/src/Keys/KeyProtocol.cs
++++ b/src/Piv/src/Keys/KeyProtocol.cs
+@@ -27,6 +27,34 @@ namespace Yubico.YubiKit.Piv.Keys;
+ 
+ internal static class KeyProtocol
+ {
++    private const byte Cla = 0x00;
++    private const byte InsGenerate = 0x47;
++    private const byte InsImport = 0xFE;
++    private const byte InsMove = 0xF6;
++    private const byte InsAttest = 0xF9;
++    private const byte DeleteDestination = 0xFF;
++    private const byte TagGenerationTemplate = 0xAC;
++    private const byte TagAlgorithm = 0x80;
++    private const byte TagPinPolicy = 0xAA;
++    private const byte TagTouchPolicy = 0xAB;
++    private const int TagPublicKeyTemplate = 0x7F49;
++    private const byte TagPublicPoint = 0x86;
++    private const byte UncompressedPoint = 0x04;
++    private const int ShortTlvHeaderLength = 2;
++    private const int KeyPolicyLength = 3;
++    private const byte SingleByteValueLength = 1;
++    private const byte TagRsaP = 0x01;
++    private const byte TagRsaQ = 0x02;
++    private const byte TagRsaDp = 0x03;
++    private const byte TagRsaDq = 0x04;
++    private const byte TagRsaInverseQ = 0x05;
++    private const byte TagEcScalar = 0x06;
++    private const byte TagEd25519PrivateKey = 0x07;
++    private const byte TagX25519PrivateKey = 0x08;
++    private const byte TagRsaModulus = 0x81;
++    private const byte TagRsaExponent = 0x82;
++    private static ReadOnlySpan<byte> RsaPublicExponent => [0x01, 0x00, 0x01];
++
+     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Keys.KeyProtocol");
+ 
+     /// <summary>
+@@ -52,45 +80,41 @@ internal static async Task<IPublicKey> GenerateKeyAsync(
+ 
+         // Build the command data: TAG 0xAC [ TAG 0x80 (algorithm) + optional policies ]
+         // Pre-compute size: 0xAC + len + (0x80,0x01,algo) + optional (0xAA,0x01,pin) + optional (0xAB,0x01,touch)
+-        int innerLength = 3; // TAG 0x80 (algorithm) is always present
++        int innerLength = KeyPolicyLength; // TAG 0x80 (algorithm) is always present
+         if (pinPolicy != PinPolicy.Default)
+-            innerLength += 3;
++            innerLength += KeyPolicyLength;
+         if (touchPolicy != TouchPolicy.Default)
+-            innerLength += 3;
++            innerLength += KeyPolicyLength;
+ 
+-        var data = new byte[2 + innerLength]; // 0xAC + length byte + inner content
++        var data = new byte[ShortTlvHeaderLength + innerLength]; // 0xAC + length byte + inner content
+         try
+         {
+             int offset = 0;
+ 
+-            // TAG 0xAC (Template)
+-            data[offset++] = 0xAC;
++            data[offset++] = TagGenerationTemplate;
+             data[offset++] = (byte)innerLength;
+ 
+-            // TAG 0x80 (Algorithm)
+-            data[offset++] = 0x80;
+-            data[offset++] = 0x01;
+-            data[offset++] = KeyTypeEncoding.Encode(keyType);
++            data[offset++] = TagAlgorithm;
++            data[offset++] = SingleByteValueLength;
++            data[offset++] = KeyTypeEncoding.EncodeAsymmetric(keyType);
+ 
+-            // TAG 0xAA (PIN policy) - only if not default
+             if (pinPolicy != PinPolicy.Default)
+             {
+-                data[offset++] = 0xAA;
+-                data[offset++] = 0x01;
++                data[offset++] = TagPinPolicy;
++                data[offset++] = SingleByteValueLength;
+                 data[offset++] = (byte)pinPolicy;
+             }
+ 
+-            // TAG 0xAB (Touch policy) - only if not default
+             if (touchPolicy != TouchPolicy.Default)
+             {
+-                data[offset++] = 0xAB;
+-                data[offset++] = 0x01;
++                data[offset++] = TagTouchPolicy;
++                data[offset++] = SingleByteValueLength;
+                 data[offset++] = (byte)touchPolicy;
+             }
+ 
+-            var command = new ApduCommand(0x00, 0x47, 0x00, (byte)slot, data);
++            var command = new ApduCommand(Cla, InsGenerate, 0, (byte)slot, data);
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-            if (response.SW == 0x6D00)
++            if (response.SW == SWConstants.InsNotSupported)
+                 throw new NotSupportedException("PIV key generation is not supported by this YubiKey.");
+ 
+             if (!response.IsOK())
+@@ -131,7 +155,7 @@ internal static async Task ImportKeyAsync(
+         Logger.LogDebug("PIV: Importing key into slot 0x{Slot:X2}, key type {KeyType}", (byte)slot, privateKey.KeyType);
+ 
+         var keyType = privateKey.KeyType;
+-        byte algorithmId = KeyTypeEncoding.Encode(keyType);
++        byte algorithmId = KeyTypeEncoding.EncodeAsymmetric(keyType);
+ 
+         // Build TLV-encoded key data based on algorithm
+         byte[]? keyData = null;
+@@ -148,21 +172,21 @@ internal static async Task ImportKeyAsync(
+             // Add PIN policy TLV if not default
+             if (pinPolicy != PinPolicy.Default)
+             {
+-                using var pinPolicyTlv = new Tlv(0xAA, [(byte)pinPolicy]);
++                using var pinPolicyTlv = new Tlv(TagPinPolicy, [(byte)pinPolicy]);
+                 keyData = AppendTlvZeroingPrevious(keyData!, pinPolicyTlv);
+             }
+ 
+             // Add touch policy TLV if not default
+             if (touchPolicy != TouchPolicy.Default)
+             {
+-                using var touchPolicyTlv = new Tlv(0xAB, [(byte)touchPolicy]);
++                using var touchPolicyTlv = new Tlv(TagTouchPolicy, [(byte)touchPolicy]);
+                 keyData = AppendTlvZeroingPrevious(keyData!, touchPolicyTlv);
+             }
+ 
+             // Send IMPORT KEY command: INS 0xFE, P1 = algorithm, P2 = slot
+-            var command = new ApduCommand(0x00, 0xFE, algorithmId, (byte)slot, keyData);
++            var command = new ApduCommand(Cla, InsImport, algorithmId, (byte)slot, keyData);
+             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-            if (response.SW == 0x6D00)
++            if (response.SW == SWConstants.InsNotSupported)
+                 throw new NotSupportedException("PIV key import is not supported by this YubiKey.");
+ 
+             if (!response.IsOK())
+@@ -214,11 +238,7 @@ private static byte[] EncodeRsaPrivateKey(RSAPrivateKey rsaKey)
+         var parameters = rsaKey.Parameters;
+ 
+         // Validate RSA exponent is 65537 (standard requirement)
+-        if (parameters.Exponent is null ||
+-            !(parameters.Exponent.Length == 3 &&
+-              parameters.Exponent[0] == 0x01 &&
+-              parameters.Exponent[1] == 0x00 &&
+-              parameters.Exponent[2] == 0x01))
++        if (parameters.Exponent is null || !parameters.Exponent.AsSpan().SequenceEqual(RsaPublicExponent))
+         {
+             throw new NotSupportedException("RSA exponent must be 65537 (0x010001)");
+         }
+@@ -230,14 +250,14 @@ private static byte[] EncodeRsaPrivateKey(RSAPrivateKey rsaKey)
+         }
+ 
+         // All components should be half the modulus length
+-        var componentLength = parameters.P.Length;
++        var componentLength = rsaKey.KeyType.GetKeySizeBytes() / 2;
+ 
+         // Create TLVs for each component, padding to correct length
+-        using var pTlv = new Tlv(0x01, PadToLength(parameters.P, componentLength));
+-        using var qTlv = new Tlv(0x02, PadToLength(parameters.Q, componentLength));
+-        using var dpTlv = new Tlv(0x03, PadToLength(parameters.DP, componentLength));
+-        using var dqTlv = new Tlv(0x04, PadToLength(parameters.DQ, componentLength));
+-        using var iqTlv = new Tlv(0x05, PadToLength(parameters.InverseQ, componentLength));
++        using var pTlv = CreatePaddedComponent(TagRsaP, parameters.P, componentLength);
++        using var qTlv = CreatePaddedComponent(TagRsaQ, parameters.Q, componentLength);
++        using var dpTlv = CreatePaddedComponent(TagRsaDp, parameters.DP, componentLength);
++        using var dqTlv = CreatePaddedComponent(TagRsaDq, parameters.DQ, componentLength);
++        using var iqTlv = CreatePaddedComponent(TagRsaInverseQ, parameters.InverseQ, componentLength);
+ 
+         // Concatenate all TLVs
+         return [.. pTlv.AsSpan(),
+@@ -262,7 +282,7 @@ private static byte[] EncodeEcPrivateKey(ECPrivateKey ecKey, KeyType keyType)
+ 
+         // D should be padded to the curve size
+         var curveSize = keyType.GetKeySizeBytes();
+-        using var dTlv = new Tlv(0x06, PadToLength(parameters.D, curveSize));
++        using var dTlv = CreatePaddedComponent(TagEcScalar, parameters.D, curveSize);
+ 
+         return dTlv.AsSpan().ToArray();
+     }
+@@ -274,7 +294,7 @@ private static byte[] EncodeEcPrivateKey(ECPrivateKey ecKey, KeyType keyType)
+     /// </summary>
+     private static byte[] EncodeCurve25519PrivateKey(Curve25519PrivateKey curveKey)
+     {
+-        var tag = curveKey.KeyType == KeyType.Ed25519 ? 0x07 : 0x08;
++        var tag = curveKey.KeyType == KeyType.Ed25519 ? TagEd25519PrivateKey : TagX25519PrivateKey;
+         using var tlv = new Tlv(tag, curveKey.PrivateKey.Span);
+ 
+         return tlv.AsSpan().ToArray();
+@@ -283,17 +303,23 @@ private static byte[] EncodeCurve25519PrivateKey(Curve25519PrivateKey curveKey)
+     /// <summary>
+     /// Pads byte array to target length with leading zeros if needed.
+     /// </summary>
+-    private static byte[] PadToLength(byte[] data, int targetLength)
++    private static Tlv CreatePaddedComponent(byte tag, ReadOnlySpan<byte> data, int targetLength)
+     {
+-        if (data.Length >= targetLength)
++        if (data.Length > targetLength)
++            throw new ArgumentException("Private component exceeds the canonical key size.", nameof(data));
++        // Supported PIV components are at most 256 bytes. Tlv takes its own copy; no padded
++        // private-material array is abandoned, and caller-owned key parameters are never cleared.
++        Span<byte> padded = stackalloc byte[targetLength];
++        try
+         {
+-            return data;
++            padded.Clear();
++            data.CopyTo(padded[(targetLength - data.Length)..]);
++            return new Tlv(tag, padded);
++        }
++        finally
++        {
++            CryptographicOperations.ZeroMemory(padded);
+         }
+-
+-        var result = new byte[targetLength];
+-        var padding = targetLength - data.Length;
+-        Buffer.BlockCopy(data, 0, result, padding, data.Length);
+-        return result;
+     }
+ 
+     /// <summary>
+@@ -317,10 +343,9 @@ internal static async Task MoveKeyAsync(
+             throw new InvalidOperationException("Cannot move attestation key");
+         }
+ 
+-        // INS 0xF6, P1 = destination slot, P2 = source slot, NO DATA
+-        var command = new ApduCommand(0x00, 0xF6, (byte)destinationSlot, (byte)sourceSlot);
++        var command = new ApduCommand(Cla, InsMove, (byte)destinationSlot, (byte)sourceSlot);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-        if (response.SW == 0x6D00)
++        if (response.SW == SWConstants.InsNotSupported)
+             throw new NotSupportedException("PIV key move is not supported by this YubiKey.");
+ 
+         if (!response.IsOK())
+@@ -340,10 +365,9 @@ internal static async Task DeleteKeyAsync(
+     {
+         Logger.LogDebug("PIV: Deleting key from slot 0x{Slot:X2}", (byte)slot);
+ 
+-        // INS 0xF6, P1 = 0xFF (delete), P2 = slot to delete, NO DATA
+-        var command = new ApduCommand(0x00, 0xF6, 0xFF, (byte)slot);
++        var command = new ApduCommand(Cla, InsMove, DeleteDestination, (byte)slot);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-        if (response.SW == 0x6D00)
++        if (response.SW == SWConstants.InsNotSupported)
+             throw new NotSupportedException("PIV key deletion is not supported by this YubiKey.");
+ 
+         if (!response.IsOK())
+@@ -363,11 +387,10 @@ internal static async Task<X509Certificate2> AttestKeyAsync(
+     {
+         Logger.LogDebug("PIV: Attesting key in slot 0x{Slot:X2}", (byte)slot);
+ 
+-        // INS 0xF9 (ATTEST), P1 = slot, P2 = 0, NO DATA, no explicit Le
+         // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
+-        var command = new ApduCommand(0x00, 0xF9, (byte)slot, 0x00);
++        var command = new ApduCommand(Cla, InsAttest, (byte)slot, 0);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+-        if (response.SW == 0x6D00)
++        if (response.SW == SWConstants.InsNotSupported)
+             throw new NotSupportedException("PIV key attestation is not supported by this YubiKey.");
+ 
+         if (!response.IsOK())
+@@ -386,7 +409,7 @@ private static IPublicKey ParsePublicKey(ReadOnlyMemory<byte> data, KeyType keyT
+     {
+         // Parse 0x7F49 (Public key template) - Tlv handles 2-byte tags
+         using var template = Tlv.Create(data.Span);
+-        if (template.Tag != 0x7F49)
++        if (template.Tag != TagPublicKeyTemplate)
+         {
+             throw new ApduException("Invalid public key response format");
+         }
+@@ -407,29 +430,29 @@ KeyType.RSA1024 or KeyType.RSA2048 or KeyType.RSA3072 or KeyType.RSA4096
+     private static IPublicKey ParseEccPublicKey(ReadOnlySpan<byte> data, KeyType keyType)
+     {
+         // ECC public key format: TAG 0x86 (EC point)
+-        if (data.Length < 2 || data[0] != 0x86)
++        if (data.Length < ShortTlvHeaderLength || data[0] != TagPublicPoint)
+         {
+             throw new ApduException("Invalid ECC public key format");
+         }
+ 
+-        int offset = 1;
+-        int length = data[offset];
+-        offset++;
+-
+-        var point = data.Slice(offset, length);
++        using var pointTlv = Tlv.Create(data);
++        var point = pointTlv.Value.Span;
+ 
+         // Convert to ECPublicKey using the Core cryptography types
+-        var curve = keyType == KeyType.ECP256
+-            ? ECCurve.NamedCurves.nistP256
+-            : ECCurve.NamedCurves.nistP384;
++        var definition = keyType.GetKeyDefinition();
++        var curve = ECCurve.CreateFromOid(new Oid(definition.CurveOid
++            ?? throw new NotSupportedException($"Key type {keyType} has no EC curve OID.")));
++        int coordinateSize = definition.LengthInBytes;
++        if (point.Length != 1 + 2 * coordinateSize || point[0] != UncompressedPoint)
++            throw new ApduException("Invalid uncompressed EC public point length or format.");
+ 
+         var parameters = new ECParameters
+         {
+             Curve = curve,
+             Q = new ECPoint
+             {
+-                X = point.Slice(1, (point.Length - 1) / 2).ToArray(),
+-                Y = point.Slice(1 + (point.Length - 1) / 2).ToArray()
++                X = point.Slice(1, coordinateSize).ToArray(),
++                Y = point.Slice(1 + coordinateSize, coordinateSize).ToArray()
+             }
+         };
+ 
+@@ -439,17 +462,16 @@ private static IPublicKey ParseEccPublicKey(ReadOnlySpan<byte> data, KeyType key
+     private static IPublicKey ParseCurve25519PublicKey(ReadOnlySpan<byte> data, KeyType keyType)
+     {
+         // Curve25519 public key format: TAG 0x86 (point)
+-        if (data.Length < 2 || data[0] != 0x86)
++        if (data.Length < ShortTlvHeaderLength || data[0] != TagPublicPoint)
+         {
+             throw new ApduException("Invalid Curve25519 public key format");
+         }
+ 
+-        int offset = 1;
+-        int length = data[offset];
+-        offset++;
+-
+-        var point = data.Slice(offset, length);
++        using var pointTlv = Tlv.Create(data);
++        var point = pointTlv.Value.Span;
+ 
++        if (point.Length != keyType.GetKeySizeBytes())
++            throw new ApduException("Public point length does not match the key definition.");
+         return Curve25519PublicKey.CreateFromValue(point.ToArray(), keyType);
+     }
+ 
+@@ -458,12 +480,12 @@ private static IPublicKey ParseRsaPublicKey(ReadOnlySpan<byte> data)
+         // RSA public key format: TAG 0x81 (modulus) + TAG 0x82 (public exponent)
+         var tlvDict = TlvHelper.DecodeDictionary(data);
+ 
+-        if (!tlvDict.TryGetValue(0x81, out var modulusMemory))
++        if (!tlvDict.TryGetValue(TagRsaModulus, out var modulusMemory))
+         {
+             throw new ApduException("Invalid RSA public key format: missing modulus");
+         }
+ 
+-        if (!tlvDict.TryGetValue(0x82, out var exponentMemory))
++        if (!tlvDict.TryGetValue(TagRsaExponent, out var exponentMemory))
+         {
+             throw new ApduException("Invalid RSA public key format: missing exponent");
+         }
+diff --git a/src/Piv/src/Metadata.cs b/src/Piv/src/Metadata.cs
+index 663c68bb..0a15f018 100644
+--- a/src/Piv/src/Metadata.cs
++++ b/src/Piv/src/Metadata.cs
+@@ -36,9 +36,15 @@ public readonly record struct PukMetadata(
+ /// PIV management key metadata information.
+ /// </summary>
+ public readonly record struct ManagementKeyMetadata(
+-    PivManagementKeyType KeyType,
++    KeyType? KeyType,
+     bool IsDefault,
+-    TouchPolicy TouchPolicy);
++    TouchPolicy TouchPolicy)
++{
++    /// <summary>Gets the raw management-key algorithm identifier, including identifiers not yet modeled.</summary>
++    public byte RawAlgorithmId { get; init; } = KeyType is { } known ? KeyTypeEncoding.Encode(known) : (byte)0;
++    /// <summary>Gets the complete metadata response TLVs.</summary>
++    public ReadOnlyMemory<byte> RawData { get; init; }
++}
+ 
+ /// <summary>
+ /// PIV slot metadata information.
+@@ -56,8 +62,13 @@ public readonly record struct SlotMetadata(
+     /// <summary>Gets the complete metadata response TLV sequence, including unknown fields.</summary>
+     public ReadOnlyMemory<byte> RawData { get; init; }
+ 
+-    internal KeyType RequireKeyType() => KeyType ?? throw new NotSupportedException(
+-        $"PIV algorithm 0x{RawAlgorithmId:X2} is not supported by this SDK.");
++    /// <summary>Requires a recognized mapped PIV type; operations separately enforce their asymmetric/symmetric subset.</summary>
++    internal KeyType RequireKeyType()
++    {
++        var known = KeyType ?? throw new NotSupportedException($"PIV algorithm 0x{RawAlgorithmId:X2} is not supported by this SDK.");
++        _ = KeyTypeEncoding.Encode(known);
++        return known;
++    }
+ }
+ 
+ /// <summary>
+diff --git a/src/Piv/src/Metadata/MetadataProtocol.cs b/src/Piv/src/Metadata/MetadataProtocol.cs
+index 2d948e3b..7db93f04 100644
+--- a/src/Piv/src/Metadata/MetadataProtocol.cs
++++ b/src/Piv/src/Metadata/MetadataProtocol.cs
+@@ -13,7 +13,9 @@
+ // limitations under the License.
+ 
+ using Microsoft.Extensions.Logging;
++using System.Buffers.Binary;
+ using Yubico.YubiKit.Core;
++using Yubico.YubiKit.Core.Cryptography;
+ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ using Yubico.YubiKit.Core.Utilities;
+ using Yubico.YubiKit.Piv.Backends;
+@@ -24,6 +26,17 @@ namespace Yubico.YubiKit.Piv.Metadata;
+ 
+ internal static class MetadataProtocol
+ {
++    private const byte Cla = 0x00;
++    private const byte InsGetMetadata = 0xF7;
++    private const byte InsGetSerial = 0xF8;
++    private const byte TagAlgorithm = 0x01;
++    private const byte TagPolicy = 0x02;
++    private const byte TagOrigin = 0x03;
++    private const byte OriginGenerated = 0x01;
++    private const byte TagPublicKey = 0x04;
++    private const byte TagIsDefault = 0x05;
++    private const byte TagRetries = 0x06;
++
+     private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Metadata.MetadataProtocol");
+ 
+     internal static async Task<PinMetadata> GetPinMetadataAsync(
+@@ -32,11 +45,11 @@ internal static async Task<PinMetadata> GetPinMetadataAsync(
+     {
+         Logger.LogDebug("PIV: Getting PIN metadata");
+ 
+-        var command = new ApduCommand(0x00, 0xF7, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
++        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Pin, ReadOnlyMemory<byte>.Empty);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+         // Check for "instruction not supported" which indicates firmware < 5.3
+-        if (response.SW == 0x6D00)
++        if (response.SW == SWConstants.InsNotSupported)
+         {
+             throw new NotSupportedException("PIN metadata requires firmware 5.3.0 or later");
+         }
+@@ -57,8 +70,8 @@ internal static async Task<PinMetadata> GetPinMetadataAsync(
+     private static PinMetadata ParsePinMetadata(ReadOnlyMemory<byte> data)
+     {
+         var fields = DecodeMetadataFields(data);
+-        var defaultValue = RequiredField(fields, 0x05, 1);
+-        var retries = RequiredField(fields, 0x06, 2);
++        var defaultValue = RequiredField(fields, TagIsDefault, 1);
++        var retries = RequiredField(fields, TagRetries, 2);
+         if (defaultValue.Span[0] > 1 || retries.Span[1] > retries.Span[0])
+             throw new ApduException("Invalid PIN/PUK metadata values.");
+         return new PinMetadata(defaultValue.Span[0] != 0, retries.Span[0], retries.Span[1]);
+@@ -94,18 +107,17 @@ private static IDictionary<int, ReadOnlyMemory<byte>> DecodeMetadataFields(ReadO
+     {
+         Logger.LogDebug("PIV: Getting slot metadata for 0x{Slot:X2}", (byte)slot);
+ 
+-        // INS 0xF7 (GET METADATA), P2 = slot
+-        var command = new ApduCommand(0x00, 0xF7, 0x00, (byte)slot, ReadOnlyMemory<byte>.Empty);
++        var command = new ApduCommand(Cla, InsGetMetadata, 0, (byte)slot, ReadOnlyMemory<byte>.Empty);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+         // Check for "instruction not supported" which indicates firmware < 5.3
+-        if (response.SW == 0x6D00)
++        if (response.SW == SWConstants.InsNotSupported)
+         {
+             throw new NotSupportedException("Slot metadata requires firmware 5.3.0 or later");
+         }
+ 
+         // Check for empty slot - 0x6A82 "File not found" or 0x6A88 "Referenced data not found"
+-        if (response.SW is 0x6A82 or 0x6A88)
++        if (response.SW is SWConstants.FileOrApplicationNotFound or SWConstants.DataNotFound)
+         {
+             return null;
+         }
+@@ -119,14 +131,14 @@ private static IDictionary<int, ReadOnlyMemory<byte>> DecodeMetadataFields(ReadO
+         // Parse metadata TLV using TlvHelper
+         var tlvDict = DecodeMetadataFields(response.Data);
+ 
+-        byte algorithmId = RequiredField(tlvDict, 0x01, 1).Span[0];
+-        var policy = RequiredField(tlvDict, 0x02, 2);
++        byte algorithmId = RequiredField(tlvDict, TagAlgorithm, 1).Span[0];
++        var policy = RequiredField(tlvDict, TagPolicy, 2);
+         var pinPolicy = (PinPolicy)policy.Span[0];
+         var touchPolicy = (TouchPolicy)policy.Span[1];
+-        var origin = RequiredField(tlvDict, 0x03, 1);
+-        var isGenerated = origin.Span[0] == 0x01;
++        var origin = RequiredField(tlvDict, TagOrigin, 1);
++        var isGenerated = origin.Span[0] == OriginGenerated;
+ 
+-        ReadOnlyMemory<byte>? publicKey = tlvDict.TryGetValue(0x04, out var pk) ? pk : null;
++        ReadOnlyMemory<byte>? publicKey = tlvDict.TryGetValue(TagPublicKey, out var pk) ? pk : null;
+ 
+         return new SlotMetadata(
+             KeyType: KeyTypeEncoding.Decode(algorithmId),
+@@ -147,12 +159,11 @@ internal static async Task<PukMetadata> GetPukMetadataAsync(
+     {
+         Logger.LogDebug("PIV: Getting PUK metadata");
+ 
+-        // INS 0xF7 (GET METADATA), P2 = 0x81 (PUK slot)
+-        var command = new ApduCommand(0x00, 0xF7, 0x00, 0x81, ReadOnlyMemory<byte>.Empty);
++        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Puk, ReadOnlyMemory<byte>.Empty);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+         // Check for "instruction not supported" which indicates firmware < 5.3
+-        if (response.SW == 0x6D00)
++        if (response.SW == SWConstants.InsNotSupported)
+         {
+             throw new NotSupportedException("PUK metadata requires firmware 5.3.0 or later");
+         }
+@@ -172,15 +183,14 @@ internal static async Task<ManagementKeyMetadata> GetManagementKeyMetadataAsync(
+     {
+         Logger.LogDebug("PIV: Getting management key metadata");
+ 
+-        // INS 0xF7 (GET METADATA), P2 = 0x9B (SLOT_CARD_MANAGEMENT)
+-        const byte InsGetMetadata = 0xF7;
+-        const byte SlotCardManagement = 0x9B;
+ 
+-        var command = new ApduCommand(0x00, InsGetMetadata, 0x00, SlotCardManagement, ReadOnlyMemory<byte>.Empty);
++
++
++        var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Management, ReadOnlyMemory<byte>.Empty);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+         // Check for "instruction not supported" which indicates firmware < 5.3
+-        if (response.SW == 0x6D00)
++        if (response.SW == SWConstants.InsNotSupported)
+         {
+             throw new NotSupportedException("Management key metadata requires firmware 5.3.0 or later");
+         }
+@@ -191,19 +201,17 @@ internal static async Task<ManagementKeyMetadata> GetManagementKeyMetadataAsync(
+         }
+ 
+         // Parse metadata TLV using TlvHelper
+-        // TAG 0x01 = algorithm (ManagementKeyType)
+-        // TAG 0x02 = policy (byte 0 = unused, byte 1 = touch policy)
+-        // TAG 0x05 = isDefault (1 = default, 0 = not default)
+         var tlvDict = DecodeMetadataFields(response.Data);
+ 
+         // Early metadata-capable firmware may omit the algorithm, meaning Triple-DES.
+         // Present known fields must still have their exact protocol lengths.
+-        var keyType = tlvDict.ContainsKey(0x01)
+-            ? (PivManagementKeyType)RequiredField(tlvDict, 0x01, 1).Span[0]
+-            : PivManagementKeyType.TripleDes;
++        byte algorithmId = tlvDict.ContainsKey(TagAlgorithm)
++            ? RequiredField(tlvDict, TagAlgorithm, 1).Span[0]
++            : KeyTypeEncoding.EncodeManagement(KeyType.TripleDES);
++        var keyType = KeyTypeEncoding.Decode(algorithmId);
+ 
+-        var touchPolicy = (TouchPolicy)RequiredField(tlvDict, 0x02, 2).Span[1];
+-        var defaultValue = RequiredField(tlvDict, 0x05, 1).Span[0];
++        var touchPolicy = (TouchPolicy)RequiredField(tlvDict, TagPolicy, 2).Span[1];
++        var defaultValue = RequiredField(tlvDict, TagIsDefault, 1).Span[0];
+         if (defaultValue > 1)
+             throw new ApduException("Invalid management-key default-state metadata.");
+         var isDefault = defaultValue != 0;
+@@ -215,7 +223,8 @@ internal static async Task<ManagementKeyMetadata> GetManagementKeyMetadataAsync(
+             KeyType: keyType,
+             IsDefault: isDefault,
+             TouchPolicy: touchPolicy
+-        );
++        )
++        { RawAlgorithmId = algorithmId, RawData = response.Data.ToArray() };
+     }
+ 
+     internal static async Task<int> GetSerialNumberAsync(IBackend backend, CancellationToken cancellationToken)
+@@ -223,11 +232,11 @@ internal static async Task<int> GetSerialNumberAsync(IBackend backend, Cancellat
+ 
+         Logger.LogDebug("PIV: Getting YubiKey serial number");
+ 
+-        var command = new ApduCommand(0x00, 0xF8, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
++        var command = new ApduCommand(Cla, InsGetSerial, 0, Cla, ReadOnlyMemory<byte>.Empty);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+         // 0x6D00 means INS not supported (firmware < 5.0.0)
+-        if (response.SW == 0x6D00)
++        if (response.SW == SWConstants.InsNotSupported)
+         {
+             throw new NotSupportedException("Serial number retrieval requires firmware 5.0.0 or later");
+         }
+@@ -244,7 +253,7 @@ internal static async Task<int> GetSerialNumberAsync(IBackend backend, Cancellat
+ 
+         // Serial is returned as big-endian 4-byte integer
+         var serialBytes = response.Data.Span;
+-        var serial = (serialBytes[0] << 24) | (serialBytes[1] << 16) | (serialBytes[2] << 8) | serialBytes[3];
++        var serial = BinaryPrimitives.ReadInt32BigEndian(serialBytes);
+ 
+         Logger.LogDebug("PIV: Retrieved serial number: {Serial}", serial);
+         return serial;
+diff --git a/src/Piv/src/PinUtilities.cs b/src/Piv/src/PinUtilities.cs
+index 8f3b9fdb..7ee1f367 100644
+--- a/src/Piv/src/PinUtilities.cs
++++ b/src/Piv/src/PinUtilities.cs
+@@ -23,7 +23,8 @@ internal static class PinUtilities
+     /// <summary>
+     /// The fixed length for encoded PIN/PUK values per PIV specification.
+     /// </summary>
+-    public const int PinLength = 8;
++    internal const int PinLength = 8;
++    internal const byte PaddingByte = 0xFF;
+ 
+     /// <summary>
+     /// Encodes a PIN or PUK value into the 8-byte format required by PIV specification.
+@@ -45,7 +46,7 @@ public static void EncodePinBytes(ReadOnlySpan<char> pin, Span<byte> destination
+         }
+ 
+         // Fill with 0xFF padding first
+-        destination[..PinLength].Fill(0xFF);
++        destination[..PinLength].Fill(PaddingByte);
+ 
+         if (pin.IsEmpty)
+         {
+@@ -138,7 +139,7 @@ public static byte[] EncodePinPairBytes(ReadOnlySpan<byte> currentPin, ReadOnlyS
+         }
+ 
+         byte[] result = new byte[PinLength * 2];
+-        result.AsSpan().Fill(0xFF);
++        result.AsSpan().Fill(PaddingByte);
+         currentPin.CopyTo(result.AsSpan(0, currentPin.Length));
+         newPin.CopyTo(result.AsSpan(PinLength, newPin.Length));
+         return result;
+diff --git a/src/Piv/src/PivSession.cs b/src/Piv/src/PivSession.cs
+index 5c686a24..631deff9 100644
+--- a/src/Piv/src/PivSession.cs
++++ b/src/Piv/src/PivSession.cs
+@@ -41,6 +41,8 @@ namespace Yubico.YubiKit.Piv;
+ /// </summary>
+ public sealed class PivSession : ApplicationSession, IPivSession
+ {
++    private const byte Cla = 0x00;
++
+     // PIV instruction bytes
+     private const byte InsReset = 0xFB;
+ 
+@@ -49,7 +51,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
+     private FirmwareVersion _detectedFirmwareVersion = new(0, 0, 0);
+ 
+     /// <inheritdoc />
+-    public PivManagementKeyType ManagementKeyType { get; private set; } = PivManagementKeyType.TripleDes;
++    public KeyType? ManagementKeyType { get; private set; } = KeyType.TripleDES;
+ 
+     /// <summary>
+     /// Gets the well-known 24-byte factory-default PIV management key value.
+@@ -187,7 +189,7 @@ public async Task ResetAsync(CancellationToken cancellationToken = default)
+         await BlockPukAsync(cancellationToken).ConfigureAwait(false);
+ 
+         // Step 3: Send RESET command
+-        var resetCommand = new ApduCommand(0x00, InsReset, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
++        var resetCommand = new ApduCommand(Cla, InsReset, 0, Cla, ReadOnlyMemory<byte>.Empty);
+         var response = await _backend.SendAsync(resetCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
+ 
+         if (!response.IsOK())
+@@ -217,12 +219,12 @@ public async Task ResetAsync(CancellationToken cancellationToken = default)
+     ///     beta version, which is intended: such a key is at least 5.8.0 and therefore defaults to AES-192.
+     ///     Excluding it here would assume Triple-DES for a development key that does not use it.
+     /// </remarks>
+-    private static PivManagementKeyType GetConservativeDefaultManagementKeyType(FirmwareVersion firmwareVersion) =>
++    private static KeyType GetConservativeDefaultManagementKeyType(FirmwareVersion firmwareVersion) =>
+         firmwareVersion.IsAtLeast(5, 7, 0)
+-            ? PivManagementKeyType.Aes192
+-            : PivManagementKeyType.TripleDes;
++            ? KeyType.AES192
++            : KeyType.TripleDES;
+ 
+-    private async Task<PivManagementKeyType> ResolveManagementKeyTypeAsync(IBackend backend, CancellationToken cancellationToken)
++    private async Task<KeyType?> ResolveManagementKeyTypeAsync(IBackend backend, CancellationToken cancellationToken)
+     {
+         try
+         {
+@@ -233,7 +235,7 @@ private async Task<PivManagementKeyType> ResolveManagementKeyTypeAsync(IBackend
+         {
+             return GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
+         }
+-        catch (ApduException ex) when (ex.SW == 0x6A88)
++        catch (ApduException ex) when (ex.SW == SWConstants.DataNotFound)
+         {
+             return GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
+         }
+@@ -296,7 +298,7 @@ public async Task AuthenticateAsync(ReadOnlyMemory<byte> managementKey, Cancella
+ 
+         SetManagementKeyAuthenticationState(false);
+         cancellationToken.ThrowIfCancellationRequested();
+-        await AuthenticationProtocol.AuthenticateAsync(_backend, ManagementKeyType, managementKey, cancellationToken)
++        await AuthenticationProtocol.AuthenticateAsync(_backend, RequireManagementKeyType(), managementKey, cancellationToken)
+             .ConfigureAwait(false);
+         SetManagementKeyAuthenticationState(true);
+     }
+@@ -314,6 +316,8 @@ public async Task<int> GetPinAttemptsAsync(CancellationToken cancellationToken =
+ 
+         if (IsSupported(Features.Metadata))
+         {
++            // Choose between supported implementations, rather than requiring metadata: older keys
++            // still support the no-data VERIFY retry query. GetPinMetadataAsync itself enforces metadata.
+             try
+             {
+                 return (await MetadataProtocol.GetPinMetadataAsync(_backend, cancellationToken)
+@@ -459,13 +463,13 @@ public async Task<Memory<byte>> SignOrDecryptAsync(
+         EnsureBackend(cancellationToken);
+         ValidateSlot(slot);
+ 
+-        Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting algorithm for slot 0x{Slot:X2}", (byte)slot);
++        Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting key type for slot 0x{Slot:X2}", (byte)slot);
+ 
+         if (!IsSupported(Features.Metadata))
+         {
+             throw new NotSupportedException(
+-                $"Auto-detecting algorithm requires YubiKey firmware 5.3 or later. " +
+-                $"Current firmware: {FirmwareVersion}. Use the overload that accepts an explicit algorithm parameter.");
++                $"Auto-detecting key type requires YubiKey firmware 5.3 or later. " +
++                $"Current firmware: {FirmwareVersion}. Use the overload that accepts an explicit keyType parameter.");
+         }
+ 
+         var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
+@@ -707,6 +711,8 @@ public async Task SetPinOnlyModeAsync(
+         EnsureBackend(cancellationToken);
+         EnsureManagementKeyAuthenticated();
+ 
++        // Only the protected-mode bit may be set; zero disables PIN-only mode. Derived/unavailable
++        // bits describe existing state and are not legal requests for creating a new mode.
+         if ((pinOnlyMode & ~(PinOnlyMode.None | PinOnlyMode.PinProtected)) != 0)
+         {
+             throw new ArgumentException(
+@@ -725,7 +731,7 @@ public async Task SetPinOnlyModeAsync(
+                 throw new ArgumentNullException(nameof(managementKey), "A management key is required to enable PIN-protected mode.");
+             }
+ 
+-            int expectedKeyLength = PinOnlyProtocol.GetManagementKeyLength(ManagementKeyType);
++            int expectedKeyLength = RequireManagementKeyType().GetKeySizeBytes();
+             if (keyToProtect.Length != expectedKeyLength)
+             {
+                 throw new ArgumentException(
+@@ -740,13 +746,14 @@ public async Task SetPinOnlyModeAsync(
+     }
+ 
+     public async Task SetManagementKeyAsync(
+-        PivManagementKeyType keyType,
++        KeyType keyType,
+         ReadOnlyMemory<byte> newKey,
+         bool requireTouch = false,
+         CancellationToken cancellationToken = default)
+     {
+         EnsureBackend(cancellationToken);
+-        if (keyType != PivManagementKeyType.TripleDes)
++        _ = KeyTypeEncoding.EncodeManagement(keyType);
++        if (keyType != KeyType.TripleDES)
+             EnsureSupports(Features.AesKey);
+         if (requireTouch)
+             EnsureSupports(Features.UsagePolicy);
+@@ -888,9 +895,16 @@ private void EnsureManagementKeyAuthenticated()
+             throw new InvalidOperationException("Management key authentication required.");
+     }
+ 
++    private KeyType RequireManagementKeyType()
++    {
++        var known = ManagementKeyType ?? throw new NotSupportedException("The management-key algorithm is not recognized. Inspect its raw metadata identifier.");
++        _ = KeyTypeEncoding.EncodeManagement(known);
++        return known;
++    }
++
+     private void EnsureKeyOperationSupported(KeyType keyType, PinPolicy pinPolicy, TouchPolicy touchPolicy, bool generate)
+     {
+-        _ = KeyTypeEncoding.Encode(keyType);
++        _ = KeyTypeEncoding.EncodeAsymmetric(keyType);
+         Feature? feature = keyType switch
+         {
+             KeyType.ECP384 => Features.P384,
+@@ -918,6 +932,8 @@ private void EnsureKeyPoliciesSupported(PinPolicy pinPolicy, TouchPolicy touchPo
+ 
+     private async Task EnsureBiometricPolicySupportedAsync(PinPolicy policy, CancellationToken cancellationToken)
+     {
++        // Probe the Bio metadata capability for MATCH policies. A successful response proves support,
++        // not fingerprint enrollment: intentionally do not reject IsConfigured == false (Python parity).
+         if (policy is PinPolicy.MatchOnce or PinPolicy.MatchAlways)
+             _ = await GetBioMetadataAsync(cancellationToken).ConfigureAwait(false);
+     }
+@@ -1006,7 +1022,7 @@ private async Task<bool> TryAuthenticateCandidateAsync(ReadOnlyMemory<byte> cand
+ 
+     private async Task<bool> TryAuthenticateDerivedCandidateAsync(ReadOnlyMemory<byte> pin, ReadOnlyMemory<byte> salt, CancellationToken cancellationToken)
+     {
+-        int length = PinOnlyProtocol.GetManagementKeyLength(ManagementKeyType);
++        int length = RequireManagementKeyType().GetKeySizeBytes();
+         byte[] candidate = ArrayPool<byte>.Shared.Rent(length);
+         try
+         {
+@@ -1051,19 +1067,11 @@ private async Task DisablePinOnlyModeAsync(CancellationToken cancellationToken)
+         }
+ 
+         Logger.LogDebug("PIV: Disabling PIN-only management key mode");
+-        int defaultKeyLength = PinOnlyProtocol.GetManagementKeyLength(ManagementKeyType);
+-        byte[] defaultKey = ArrayPool<byte>.Shared.Rent(defaultKeyLength);
+-        try
+-        {
+-            PinOnlyProtocol.FillRepeatingDefaultKeyPattern(defaultKey.AsSpan(0, defaultKeyLength));
+-            await SetManagementKeyAsync(ManagementKeyType, defaultKey.AsMemory(0, defaultKeyLength), false, cancellationToken)
+-                .ConfigureAwait(false);
+-        }
+-        finally
+-        {
+-            CryptographicOperations.ZeroMemory(defaultKey.AsSpan(0, defaultKeyLength));
+-            ArrayPool<byte>.Shared.Return(defaultKey);
+-        }
++        var keyType = RequireManagementKeyType();
++        // Borrow the read-only, nonsecret factory pattern. The setter owns/clears its encoded copy,
++        // never this shared default; only the type-appropriate slice is transmitted.
++        await SetManagementKeyAsync(keyType, AuthenticationProtocol.GetDefaultManagementKey(keyType), false, cancellationToken)
++            .ConfigureAwait(false);
+ 
+         EnsureManagementKeyAuthenticated();
+         await DataObjectProtocol.PutObjectAsync(_backend, DataObject.PrintedInformation, null, cancellationToken)
+diff --git a/src/Piv/src/PublicAPI.Unshipped.txt b/src/Piv/src/PublicAPI.Unshipped.txt
+index b986bd22..92e9270b 100644
+--- a/src/Piv/src/PublicAPI.Unshipped.txt
++++ b/src/Piv/src/PublicAPI.Unshipped.txt
+@@ -62,7 +62,7 @@ Yubico.YubiKit.Piv.IPivSession.GetSerialNumberAsync(System.Threading.Cancellatio
+ Yubico.YubiKit.Piv.IPivSession.GetSlotMetadataAsync(Yubico.YubiKit.Piv.Slot slot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.SlotMetadata?>!
+ Yubico.YubiKit.Piv.IPivSession.ImportKeyAsync(Yubico.YubiKit.Piv.Slot slot, Yubico.YubiKit.Core.Cryptography.IPrivateKey! privateKey, Yubico.YubiKit.Piv.KeyCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.IPivSession.IsManagementKeyAuthenticated.get -> bool
+-Yubico.YubiKit.Piv.IPivSession.ManagementKeyType.get -> Yubico.YubiKit.Piv.PivManagementKeyType
++Yubico.YubiKit.Piv.IPivSession.ManagementKeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType?
+ Yubico.YubiKit.Piv.IPivSession.MoveKeyAsync(Yubico.YubiKit.Piv.Slot sourceSlot, Yubico.YubiKit.Piv.Slot destinationSlot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.IPivSession.PutObjectAsync(int objectId, System.ReadOnlyMemory<byte>? data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.IPivSession.RecoverPinOnlyModeAsync(System.ReadOnlyMemory<byte> pin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.PinOnlyMode>!
+@@ -71,7 +71,7 @@ Yubico.YubiKit.Piv.IPivSession.SetAdminDataAsync(Yubico.YubiKit.Piv.DataObjects.
+ Yubico.YubiKit.Piv.IPivSession.SetCardCapabilityContainerAsync(Yubico.YubiKit.Piv.DataObjects.CardCapabilityContainer cardCapabilityContainer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.IPivSession.SetCardholderUniqueIdAsync(Yubico.YubiKit.Piv.DataObjects.CardholderUniqueId cardholderUniqueId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.IPivSession.SetKeyHistoryAsync(Yubico.YubiKit.Piv.DataObjects.KeyHistory keyHistory, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+-Yubico.YubiKit.Piv.IPivSession.SetManagementKeyAsync(Yubico.YubiKit.Piv.PivManagementKeyType keyType, System.ReadOnlyMemory<byte> newKey, bool requireTouch = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
++Yubico.YubiKit.Piv.IPivSession.SetManagementKeyAsync(Yubico.YubiKit.Core.Cryptography.KeyType keyType, System.ReadOnlyMemory<byte> newKey, bool requireTouch = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.IPivSession.SetPinAttemptsAsync(int pinAttempts, int pukAttempts, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.IPivSession.SetPinOnlyModeAsync(Yubico.YubiKit.Piv.PinOnlyMode pinOnlyMode, System.ReadOnlyMemory<byte> pin, System.ReadOnlyMemory<byte>? managementKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.IPivSession.SignOrDecryptAsync(Yubico.YubiKit.Piv.Slot slot, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Memory<byte>>!
+@@ -112,21 +112,16 @@ Yubico.YubiKit.Piv.KeyCreationOptions.KeyCreationOptions() -> void
+ Yubico.YubiKit.Piv.KeyCreationOptions.TouchPolicy.get -> Yubico.YubiKit.Piv.TouchPolicy
+ Yubico.YubiKit.Piv.KeyCreationOptions.TouchPolicy.init -> void
+ Yubico.YubiKit.Piv.ManagementKeyMetadata
+-Yubico.YubiKit.Piv.ManagementKeyMetadata.Deconstruct(out Yubico.YubiKit.Piv.PivManagementKeyType KeyType, out bool IsDefault, out Yubico.YubiKit.Piv.TouchPolicy TouchPolicy) -> void
++Yubico.YubiKit.Piv.ManagementKeyMetadata.Deconstruct(out Yubico.YubiKit.Core.Cryptography.KeyType? KeyType, out bool IsDefault, out Yubico.YubiKit.Piv.TouchPolicy TouchPolicy) -> void
+ Yubico.YubiKit.Piv.ManagementKeyMetadata.Equals(Yubico.YubiKit.Piv.ManagementKeyMetadata other) -> bool
+ Yubico.YubiKit.Piv.ManagementKeyMetadata.IsDefault.get -> bool
+ Yubico.YubiKit.Piv.ManagementKeyMetadata.IsDefault.init -> void
+-Yubico.YubiKit.Piv.ManagementKeyMetadata.KeyType.get -> Yubico.YubiKit.Piv.PivManagementKeyType
++Yubico.YubiKit.Piv.ManagementKeyMetadata.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType?
+ Yubico.YubiKit.Piv.ManagementKeyMetadata.KeyType.init -> void
+ Yubico.YubiKit.Piv.ManagementKeyMetadata.ManagementKeyMetadata() -> void
+-Yubico.YubiKit.Piv.ManagementKeyMetadata.ManagementKeyMetadata(Yubico.YubiKit.Piv.PivManagementKeyType KeyType, bool IsDefault, Yubico.YubiKit.Piv.TouchPolicy TouchPolicy) -> void
++Yubico.YubiKit.Piv.ManagementKeyMetadata.ManagementKeyMetadata(Yubico.YubiKit.Core.Cryptography.KeyType? KeyType, bool IsDefault, Yubico.YubiKit.Piv.TouchPolicy TouchPolicy) -> void
+ Yubico.YubiKit.Piv.ManagementKeyMetadata.TouchPolicy.get -> Yubico.YubiKit.Piv.TouchPolicy
+ Yubico.YubiKit.Piv.ManagementKeyMetadata.TouchPolicy.init -> void
+-Yubico.YubiKit.Piv.PivManagementKeyType
+-Yubico.YubiKit.Piv.PivManagementKeyType.Aes128 = 8 -> Yubico.YubiKit.Piv.PivManagementKeyType
+-Yubico.YubiKit.Piv.PivManagementKeyType.Aes192 = 10 -> Yubico.YubiKit.Piv.PivManagementKeyType
+-Yubico.YubiKit.Piv.PivManagementKeyType.Aes256 = 12 -> Yubico.YubiKit.Piv.PivManagementKeyType
+-Yubico.YubiKit.Piv.PivManagementKeyType.TripleDes = 3 -> Yubico.YubiKit.Piv.PivManagementKeyType
+ Yubico.YubiKit.Piv.PinMetadata
+ Yubico.YubiKit.Piv.PinMetadata.Deconstruct(out bool IsDefault, out int TotalRetries, out int RetriesRemaining) -> void
+ Yubico.YubiKit.Piv.PinMetadata.Equals(Yubico.YubiKit.Piv.PinMetadata other) -> bool
+@@ -188,7 +183,7 @@ Yubico.YubiKit.Piv.PivSession.GetSerialNumberAsync(System.Threading.Cancellation
+ Yubico.YubiKit.Piv.PivSession.GetSlotMetadataAsync(Yubico.YubiKit.Piv.Slot slot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.SlotMetadata?>!
+ Yubico.YubiKit.Piv.PivSession.ImportKeyAsync(Yubico.YubiKit.Piv.Slot slot, Yubico.YubiKit.Core.Cryptography.IPrivateKey! privateKey, Yubico.YubiKit.Piv.KeyCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.PivSession.IsManagementKeyAuthenticated.get -> bool
+-Yubico.YubiKit.Piv.PivSession.ManagementKeyType.get -> Yubico.YubiKit.Piv.PivManagementKeyType
++Yubico.YubiKit.Piv.PivSession.ManagementKeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType?
+ Yubico.YubiKit.Piv.PivSession.MoveKeyAsync(Yubico.YubiKit.Piv.Slot sourceSlot, Yubico.YubiKit.Piv.Slot destinationSlot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.PivSession.PutObjectAsync(int objectId, System.ReadOnlyMemory<byte>? data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.PivSession.RecoverPinOnlyModeAsync(System.ReadOnlyMemory<byte> pin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.PinOnlyMode>!
+@@ -197,7 +192,7 @@ Yubico.YubiKit.Piv.PivSession.SetAdminDataAsync(Yubico.YubiKit.Piv.DataObjects.A
+ Yubico.YubiKit.Piv.PivSession.SetCardCapabilityContainerAsync(Yubico.YubiKit.Piv.DataObjects.CardCapabilityContainer cardCapabilityContainer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.PivSession.SetCardholderUniqueIdAsync(Yubico.YubiKit.Piv.DataObjects.CardholderUniqueId cardholderUniqueId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.PivSession.SetKeyHistoryAsync(Yubico.YubiKit.Piv.DataObjects.KeyHistory keyHistory, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+-Yubico.YubiKit.Piv.PivSession.SetManagementKeyAsync(Yubico.YubiKit.Piv.PivManagementKeyType keyType, System.ReadOnlyMemory<byte> newKey, bool requireTouch = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
++Yubico.YubiKit.Piv.PivSession.SetManagementKeyAsync(Yubico.YubiKit.Core.Cryptography.KeyType keyType, System.ReadOnlyMemory<byte> newKey, bool requireTouch = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.PivSession.SetPinAttemptsAsync(int pinAttempts, int pukAttempts, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.PivSession.SetPinOnlyModeAsync(Yubico.YubiKit.Piv.PinOnlyMode pinOnlyMode, System.ReadOnlyMemory<byte> pin, System.ReadOnlyMemory<byte>? managementKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+ Yubico.YubiKit.Piv.PivSession.SignOrDecryptAsync(Yubico.YubiKit.Piv.Slot slot, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Memory<byte>>!
+@@ -371,3 +366,7 @@ Yubico.YubiKit.Piv.SlotMetadata.RawAlgorithmId.get -> byte
+ Yubico.YubiKit.Piv.SlotMetadata.RawAlgorithmId.init -> void
+ Yubico.YubiKit.Piv.SlotMetadata.RawData.get -> System.ReadOnlyMemory<byte>
+ Yubico.YubiKit.Piv.SlotMetadata.RawData.init -> void
++Yubico.YubiKit.Piv.ManagementKeyMetadata.RawAlgorithmId.get -> byte
++Yubico.YubiKit.Piv.ManagementKeyMetadata.RawAlgorithmId.init -> void
++Yubico.YubiKit.Piv.ManagementKeyMetadata.RawData.get -> System.ReadOnlyMemory<byte>
++Yubico.YubiKit.Piv.ManagementKeyMetadata.RawData.init -> void
+diff --git a/src/Piv/src/SlotMetadataExtensions.cs b/src/Piv/src/SlotMetadataExtensions.cs
+index 43262f50..71905ca7 100644
+--- a/src/Piv/src/SlotMetadataExtensions.cs
++++ b/src/Piv/src/SlotMetadataExtensions.cs
+@@ -23,6 +23,10 @@ namespace Yubico.YubiKit.Piv;
+ /// </summary>
+ public static class SlotMetadataExtensions
+ {
++    private const byte TagRsaModulus = 0x81;
++    private const byte TagRsaExponent = 0x82;
++    private const byte TagPublicPoint = 0x86;
++    private const byte UncompressedPoint = 0x04;
+     /// <summary>
+     /// Gets the RSA public key from slot metadata.
+     /// </summary>
+@@ -58,13 +62,13 @@ public static RSA GetRsaPublicKey(this SlotMetadata metadata)
+         var rawSpan = metadata.PublicKey.Span;
+         var tlvDict = TlvHelper.DecodeDictionary(rawSpan);
+ 
+-        if (!tlvDict.TryGetValue(0x81, out var modulusMemory))
++        if (!tlvDict.TryGetValue(TagRsaModulus, out var modulusMemory))
+         {
+             throw new InvalidOperationException(
+                 "Public key metadata is missing RSA modulus (tag 0x81).");
+         }
+ 
+-        if (!tlvDict.TryGetValue(0x82, out var exponentMemory))
++        if (!tlvDict.TryGetValue(TagRsaExponent, out var exponentMemory))
+         {
+             throw new InvalidOperationException(
+                 "Public key metadata is missing RSA public exponent (tag 0x82).");
+@@ -122,30 +126,27 @@ public static ECDsa GetECDsaPublicKey(this SlotMetadata metadata)
+         // SlotMetadata.PublicKey stores the raw PIV TLV-encoded EC point:
+         //   [0x86][length][0x04][X bytes][Y bytes]
+         // We need to strip the TLV header and build ECParameters from the raw point.
+-        var rawBytes = metadata.PublicKey.Span;
+-        ReadOnlySpan<byte> ecPoint = rawBytes;
+-
+-        // Strip the outer TLV tag/length if present (tag 0x86 = PIV EC point)
+-        if (rawBytes.Length > 2 && rawBytes[0] == 0x86)
+-        {
+-            int headerLength = rawBytes[1] < 0x80 ? 2 : 2 + (rawBytes[1] & 0x7F);
+-            ecPoint = rawBytes[headerLength..];
+-        }
++        ReadOnlyMemory<byte> pointData = metadata.PublicKey;
++        if (!pointData.IsEmpty && pointData.Span[0] == TagPublicPoint)
++            pointData = TlvHelper.GetValue(TagPublicPoint, pointData.Span);
++        ReadOnlySpan<byte> ecPoint = pointData.Span;
+ 
+         // ecPoint should now be [0x04][X][Y] (uncompressed format)
+-        if (ecPoint.Length < 3 || ecPoint[0] != 0x04)
++        if (ecPoint.Length < 3 || ecPoint[0] != UncompressedPoint)
+         {
+             throw new InvalidOperationException(
+                 "Public key is not in expected uncompressed EC point format (0x04 prefix).");
+         }
+ 
+-        int coordinateSize = (ecPoint.Length - 1) / 2;
++        var definition = keyType.GetKeyDefinition();
++        int coordinateSize = definition.LengthInBytes;
++        if (ecPoint.Length != 1 + 2 * coordinateSize)
++            throw new InvalidOperationException("Public point length does not match the key definition.");
+         var x = ecPoint[1..(1 + coordinateSize)].ToArray();
+         var y = ecPoint[(1 + coordinateSize)..].ToArray();
+ 
+-        var curve = keyType == KeyType.ECP384
+-            ? ECCurve.NamedCurves.nistP384
+-            : ECCurve.NamedCurves.nistP256;
++        var curve = ECCurve.CreateFromOid(new Oid(definition.CurveOid
++            ?? throw new NotSupportedException($"Key type {keyType} has no EC curve OID.")));
+ 
+         var ecParams = new ECParameters
+         {
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivManagementKeyTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivManagementKeyTests.cs
+index 0d32ff0f..ecfb5489 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivManagementKeyTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivManagementKeyTests.cs
+@@ -46,8 +46,8 @@ public async Task SetManagementKeyAsync_ChangesToNewKey(YubiKeyTestState state)
+     {
+         // Use appropriate key type based on firmware
+         var newKeyType = state.FirmwareVersion >= new FirmwareVersion(5, 7, 0)
+-            ? PivManagementKeyType.Aes192
+-            : PivManagementKeyType.TripleDes;
++            ? KeyType.AES192
++            : KeyType.TripleDES;
+         var newKey = new byte[] {
+             0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x11, 0x22,
+             0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x11, 0x22,
+@@ -104,11 +104,11 @@ public async Task SetManagementKeyAsync_AES256_Succeeds(YubiKeyTestState state)
+                 await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+ 
+                 // Change to AES256
+-                await session.SetManagementKeyAsync(PivManagementKeyType.Aes256, aes256Key);
++                await session.SetManagementKeyAsync(KeyType.AES256, aes256Key);
+ 
+                 // Verify via metadata
+                 var metadata = await session.GetManagementKeyMetadataAsync();
+-                Assert.Equal(PivManagementKeyType.Aes256, metadata.KeyType);
++                Assert.Equal(KeyType.AES256, metadata.KeyType);
+                 Assert.False(metadata.IsDefault);
+             }
+ 
+@@ -143,11 +143,11 @@ public async Task SetManagementKeyAsync_AES128_Succeeds(YubiKeyTestState state)
+                 await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+ 
+                 // Change to AES128
+-                await session.SetManagementKeyAsync(PivManagementKeyType.Aes128, aes128Key);
++                await session.SetManagementKeyAsync(KeyType.AES128, aes128Key);
+ 
+                 // Verify via metadata
+                 var metadata = await session.GetManagementKeyMetadataAsync();
+-                Assert.Equal(PivManagementKeyType.Aes128, metadata.KeyType);
++                Assert.Equal(KeyType.AES128, metadata.KeyType);
+                 Assert.False(metadata.IsDefault);
+             }
+ 
+@@ -187,9 +187,9 @@ public async Task SetManagementKeyAsync_SameSessionStateTracksSuccessfulSetAndRe
+             await session.ResetAsync();
+             await session.AuthenticateAsync(DefaultManagementKey);
+ 
+-            await session.SetManagementKeyAsync(PivManagementKeyType.Aes128, aes128Key);
++            await session.SetManagementKeyAsync(KeyType.AES128, aes128Key);
+ 
+-            Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
++            Assert.Equal(KeyType.AES128, session.ManagementKeyType);
+             Assert.True(session.IsManagementKeyAuthenticated);
+ 
+             // Key generation is management-key privileged and proves SET left the new key
+@@ -200,8 +200,8 @@ public async Task SetManagementKeyAsync_SameSessionStateTracksSuccessfulSetAndRe
+ 
+             var resetMetadata = await session.GetManagementKeyMetadataAsync();
+             var expectedResetType = state.FirmwareVersion >= new FirmwareVersion(5, 7, 0)
+-                ? PivManagementKeyType.Aes192
+-                : PivManagementKeyType.TripleDes;
++                ? KeyType.AES192
++                : KeyType.TripleDES;
+             Assert.False(session.IsManagementKeyAuthenticated);
+             Assert.Equal(expectedResetType, session.ManagementKeyType);
+             Assert.Equal(resetMetadata.KeyType, session.ManagementKeyType);
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs
+index a6e22bf9..22d5a00c 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs
+@@ -102,11 +102,11 @@ public async Task GetManagementKeyMetadataAsync_ReturnsValidMetadata(YubiKeyTest
+         // Key type depends on firmware version
+         if (state.FirmwareVersion >= new FirmwareVersion(5, 7, 0))
+         {
+-            Assert.Equal(PivManagementKeyType.Aes192, metadata.KeyType);
++            Assert.Equal(KeyType.AES192, metadata.KeyType);
+         }
+         else
+         {
+-            Assert.Equal(PivManagementKeyType.TripleDes, metadata.KeyType);
++            Assert.Equal(KeyType.TripleDES, metadata.KeyType);
+         }
+     }
+ 
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinOnlyWorkflowTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinOnlyWorkflowTests.cs
+index 3114603f..366ac698 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinOnlyWorkflowTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinOnlyWorkflowTests.cs
+@@ -21,7 +21,7 @@ public async Task PinProtectedMode_ReopensRecoversAndDisablesWithDefaultManageme
+             {
+                 await session.ResetAsync();
+                 await session.AuthenticateAsync(defaultKey);
+-                await session.SetManagementKeyAsync(session.ManagementKeyType, activeKey);
++                await session.SetManagementKeyAsync(session.ManagementKeyType ?? throw new InvalidOperationException("Unknown management key type."), activeKey);
+ 
+                 await session.SetPinOnlyModeAsync(PinOnlyMode.PinProtected, pin, activeKey);
+ 
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs
+index 76973a1d..11167a63 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs
+@@ -49,11 +49,11 @@ public async Task ResetAsync_RestoresToDefaults(YubiKeyTestState state)
+         // Verify default state - management key type resets to TripleDes (or AES for fw >= 5.7.0)
+         if (state.FirmwareVersion >= new FirmwareVersion(5, 7, 0))
+         {
+-            Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
++            Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+         }
+         else
+         {
+-            Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
++            Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
+         }
+ 
+         // Verify we can authenticate with default management key
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/UserPresenceProbeTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/UserPresenceProbeTests.cs
+index 07d6847e..38358b04 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/UserPresenceProbeTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/UserPresenceProbeTests.cs
+@@ -79,7 +79,7 @@ public async Task SignOrDecryptAsync_TouchPolicyAlways_CompletesOnceAndSessionRe
+             $"The management key touch policy is {managementKeyMetadata.TouchPolicy}; refusing an unrelated touch " +
+             "during prerequisite authentication.");
+         Skip.If(
+-            managementKeyMetadata.KeyType is not PivManagementKeyType.TripleDes and not PivManagementKeyType.Aes192,
++            managementKeyMetadata.KeyType is not KeyType.TripleDES and not KeyType.AES192,
+             $"The default management key cannot be used with reported key type {managementKeyMetadata.KeyType}.");
+         Skip.If(
+             session.ManagementKeyType != managementKeyMetadata.KeyType,
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs
+index 616d76cb..4f9ebe79 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs
+@@ -1,7 +1,9 @@
+ using System.Reflection;
+ using System.Security.Cryptography;
++using Yubico.YubiKit.Core.Cryptography;
+ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ using Yubico.YubiKit.Core.Utilities;
++using Yubico.YubiKit.Piv.Authentication;
+ using Yubico.YubiKit.Piv.Backends;
+ using Yubico.YubiKit.Tests.Shared;
+ 
+@@ -54,27 +56,32 @@ await Assert.ThrowsAsync<ApduException>(() => session.SetPinOnlyModeAsync(PinOnl
+     }
+ 
+     [Theory]
+-    [InlineData(PivManagementKeyType.Aes128, 16)]
+-    [InlineData(PivManagementKeyType.Aes192, 24)]
+-    [InlineData(PivManagementKeyType.Aes256, 32)]
+-    [InlineData(PivManagementKeyType.TripleDes, 24)]
+-    public async Task Disable_ReplacesTypeAppropriateDefaultBeforeDeletingRecoveryObjects(PivManagementKeyType type, int length)
++    [InlineData(KeyType.AES128, 16)]
++    [InlineData(KeyType.AES192, 24)]
++    [InlineData(KeyType.AES256, 32)]
++    [InlineData(KeyType.TripleDES, 24)]
++    public async Task Disable_ReplacesTypeAppropriateDefaultBeforeDeletingRecoveryObjects(KeyType type, int length)
+     {
+         using var backend = new WorkflowBackend { HasProtectedMode = true };
+         await using var session = await CreateSessionAsync(backend, type);
++        ReadOnlyMemory<byte> defaultView = AuthenticationProtocol.GetDefaultManagementKey(type);
++        byte[] defaultSnapshot = defaultView.ToArray();
++        Assert.True(defaultView.Equals(AuthenticationProtocol.GetDefaultManagementKey(type)));
+ 
+         await session.SetPinOnlyModeAsync(PinOnlyMode.None, ReadOnlyMemory<byte>.Empty,
+             cancellationToken: TestContext.Current.CancellationToken);
+ 
+         Assert.Equal(new byte[] { 0xCB, 0xFF, 0xDB, 0xDB }, backend.Commands.Select(c => c.Ins));
+         byte[] replacement = backend.CommandData[1];
+-        Assert.Equal((byte)type, replacement[0]);
++        Assert.Equal(KeyTypeEncoding.Encode(type), replacement[0]);
+         Assert.Equal(length, replacement[2]);
+         for (int i = 0; i < length; i++)
+             Assert.Equal((byte)(i % 8 + 1), replacement[i + 3]);
+         Assert.Equal(new byte[] { 0x5C, 0x03, 0x5F, 0xC1, 0x09, 0x53, 0x00 }, backend.CommandData[2]);
+         Assert.Equal(new byte[] { 0x5C, 0x03, 0x5F, 0xFF, 0x00, 0x53, 0x00 }, backend.CommandData[3]);
+         Assert.True(session.IsManagementKeyAuthenticated);
++        Assert.Equal(defaultSnapshot, defaultView.ToArray());
++        Assert.True(defaultView.Equals(AuthenticationProtocol.GetDefaultManagementKey(type)));
+         Assert.All(backend.SecretBuffers, buffer => Assert.All(buffer.ToArray(), b => Assert.Equal(0, b)));
+     }
+ 
+@@ -123,10 +130,10 @@ public async Task Recover_DerivedCandidate_VerifiesPinAuthenticatesAndClearsSecr
+         Assert.All(backend.SecretBuffers, buffer => Assert.All(buffer.ToArray(), b => Assert.Equal(0, b)));
+     }
+ 
+-    private static async Task<PivSession> CreateSessionAsync(WorkflowBackend backend, PivManagementKeyType type = PivManagementKeyType.Aes192)
++    private static async Task<PivSession> CreateSessionAsync(WorkflowBackend backend, KeyType type = KeyType.AES192)
+     {
+         var connection = new RecordingSmartCardConnection([0x90, 0x00], [5, 7, 0, 0x90, 0x00],
+-            [0x01, 0x01, (byte)type, 0x02, 0x02, 0x00, 0x00, 0x05, 0x01, 0x01, 0x90, 0x00]);
++            [0x01, 0x01, KeyTypeEncoding.Encode(type), 0x02, 0x02, 0x00, 0x00, 0x05, 0x01, 0x01, 0x90, 0x00]);
+         var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+         typeof(PivSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, backend);
+         typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs
+index 63ef0adf..c2840900 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs
+@@ -264,7 +264,7 @@ private static void MarkAuthenticated(PivSession session) =>
+ 
+     private static byte[] ManagementKeyMetadataResponse() =>
+     [
+-        0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
++        0x01, 0x01, 0x03,
+         0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
+         0x05, 0x01, 0x01,
+         0x90, 0x00
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Bio/BioProtocolTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Bio/BioProtocolTests.cs
+index 5d1a9032..a1666dcc 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Bio/BioProtocolTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Bio/BioProtocolTests.cs
+@@ -13,6 +13,7 @@
+ // limitations under the License.
+ 
+ using System.Runtime.InteropServices;
++using System.Security.Cryptography;
+ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ using Yubico.YubiKit.Piv.Backends;
+ using Yubico.YubiKit.Piv.Bio;
+@@ -26,6 +27,51 @@ namespace Yubico.YubiKit.Piv.UnitTests.Bio;
+ /// </summary>
+ public class BioProtocolTests
+ {
++    [Theory]
++    [InlineData(UserVerification.Verify, new byte[] { 0x03, 0x00 })]
++    [InlineData(UserVerification.VerifyAndRequestTemporaryPin, new byte[] { 0x02, 0x00 })]
++    [InlineData(UserVerification.CheckOnly, new byte[] { })]
++    public async Task VerifyUvAsync_EncodesTheRequestedCeremony(UserVerification mode, byte[] expectedData)
++    {
++        var backend = new BioCapturingBackend(mode == UserVerification.VerifyAndRequestTemporaryPin ? new byte[16] : []);
++        byte[]? temporaryPin = await BioProtocol.VerifyUvAsync(backend, mode, TestContext.Current.CancellationToken);
++        try
++        {
++            var command = Assert.IsType<ApduCommand>(backend.LastCommand);
++            Assert.Equal(0x20, command.Ins);
++            Assert.Equal(0x96, command.P2);
++            Assert.Equal(expectedData, command.Data.ToArray());
++        }
++        finally
++        {
++            if (temporaryPin is not null)
++                CryptographicOperations.ZeroMemory(temporaryPin);
++        }
++    }
++    [Theory]
++    [InlineData(new byte[] { 0x08, 0x01, 0x01, 0x9F, 0x33, 0x01, 0x42, 0x06, 0x01, 0x07, 0x07, 0x01, 0x00 }, false, 7, true)]
++    [InlineData(new byte[] { 0x06, 0x01, 0x09 }, false, 9, false)]
++    [InlineData(new byte[] { 0x07, 0x01, 0x01, 0x06, 0x01, 0x04 }, true, 4, false)]
++    public async Task GetBioMetadataAsync_ParsesTaggedFieldsRegardlessOfOrder(byte[] data, bool configured, int retries, bool temporaryPin)
++    {
++        var backend = new BioCapturingBackend(data);
++        var metadata = await BioProtocol.GetBioMetadataAsync(backend, TestContext.Current.CancellationToken);
++
++        Assert.Equal(configured, metadata.IsConfigured);
++        Assert.Equal(retries, metadata.RetriesRemaining);
++        Assert.Equal(temporaryPin, metadata.HasTemporaryPin);
++        Assert.Equal(data, backend.SourceData);
++    }
++
++    [Theory]
++    [InlineData(new byte[] { 0x07, 0x01, 0x01 })]
++    [InlineData(new byte[] { 0x06, 0x02, 0x04 })]
++    [InlineData(new byte[] { 0x06, 0x00 })]
++    [InlineData(new byte[] { 0x06, 0x01, 0x04, 0x07, 0x02, 0x00, 0x01 })]
++    public async Task GetBioMetadataAsync_MalformedKnownFields_DoesNotFabricateState(byte[] data)
++    {
++        await Assert.ThrowsAsync<ApduException>(() => BioProtocol.GetBioMetadataAsync(new BioCapturingBackend(data), TestContext.Current.CancellationToken));
++    }
+     [Fact]
+     public async Task VerifyUvAsync_WithTemporaryPin_ZeroesOriginalResponseBuffer()
+     {
+@@ -100,6 +146,8 @@ public Task<ApduResponse> SendAsync(
+ 
+     private sealed class BioCapturingBackend(byte[] responseWithoutSw) : IBackend
+     {
++        public byte[] SourceData => responseWithoutSw;
++        public ApduCommand? LastCommand { get; private set; }
+         public byte[]? CapturedRawDataArray { get; private set; }
+ 
+         public int CapturedOffset { get; private set; }
+@@ -114,6 +162,7 @@ public Task<ApduResponse> SendAsync(
+             bool throwOnError = true,
+             CancellationToken cancellationToken = default)
+         {
++            LastCommand = command;
+             var response = new ApduResponse(responseWithoutSw, unchecked((short)0x9000));
+ 
+             Assert.True(MemoryMarshal.TryGetArray(response.RawData, out var segment));
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/PivDataObjectsTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/PivDataObjectsTests.cs
+index fc7cc2e1..ac56d424 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/PivDataObjectsTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/PivDataObjectsTests.cs
+@@ -418,7 +418,7 @@ private static void MarkAuthenticated(PivSession session) =>
+ 
+     private static byte[] ManagementKeyMetadataResponse() =>
+     [
+-        0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
++        0x01, 0x01, 0x03,
+         0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
+         0x05, 0x01, 0x01,
+         0x90, 0x00
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/KeyDefinitionBehaviorTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/KeyDefinitionBehaviorTests.cs
+new file mode 100644
+index 00000000..5a7f29da
+--- /dev/null
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/KeyDefinitionBehaviorTests.cs
+@@ -0,0 +1,100 @@
++using System.Reflection;
++using System.Security.Cryptography;
++using Yubico.YubiKit.Core.Cryptography;
++using Yubico.YubiKit.Tests.Shared;
++
++namespace Yubico.YubiKit.Piv.UnitTests;
++
++public class KeyDefinitionBehaviorTests
++{
++    [Theory]
++    [InlineData(KeyType.TripleDES, 0x03, 24)]
++    [InlineData(KeyType.AES128, 0x08, 16)]
++    [InlineData(KeyType.AES192, 0x0A, 24)]
++    [InlineData(KeyType.AES256, 0x0C, 32)]
++    public async Task ManagementKey_UsesCanonicalSizeAndWireId_AndMetadataDecodesSameType(KeyType keyType, int algorithmId, int length)
++    {
++        byte[] raw = [0x01, 0x01, (byte)algorithmId, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x00];
++        var connection = Connection([0x90, 0x00], [.. raw, 0x90, 0x00]);
++        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        MarkAuthenticated(session);
++        byte[] key = RandomNumberGenerator.GetBytes(keyType.GetKeySizeBytes());
++        byte[] original = [.. key];
++        try
++        {
++            await session.SetManagementKeyAsync(keyType, key, cancellationToken: TestContext.Current.CancellationToken);
++            byte[] command = connection.TransmittedCommands[^1];
++            Assert.Equal(0xFF, command[1]);
++            byte[] expectedHeader = [(byte)algorithmId, 0x9B, (byte)length];
++            Assert.Equal(expectedHeader, command.AsSpan(5, expectedHeader.Length).ToArray());
++            Assert.True(CryptographicOperations.FixedTimeEquals(original, command.AsSpan(5 + expectedHeader.Length, length)));
++            Assert.True(CryptographicOperations.FixedTimeEquals(original, key));
++
++            var metadata = await session.GetManagementKeyMetadataAsync(TestContext.Current.CancellationToken);
++            Assert.Equal(keyType, metadata.KeyType);
++            Assert.Equal(algorithmId, metadata.RawAlgorithmId);
++            Assert.Equal(raw, metadata.RawData.ToArray());
++        }
++        finally
++        {
++            CryptographicOperations.ZeroMemory(key);
++            CryptographicOperations.ZeroMemory(original);
++        }
++    }
++
++    [Theory]
++    [InlineData(KeyType.ECP256)]
++    [InlineData(KeyType.ECP521)]
++    [InlineData(KeyType.RSA2048)]
++    public async Task ManagementKey_RejectsAsymmetricTypesBeforeMutation(KeyType keyType)
++    {
++        var connection = Connection();
++        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        MarkAuthenticated(session);
++
++        await Assert.ThrowsAsync<NotSupportedException>(() => session.SetManagementKeyAsync(keyType, new byte[32], cancellationToken: TestContext.Current.CancellationToken));
++
++        Assert.Equal(3, connection.TransmittedCommands.Count);
++    }
++
++    [Fact]
++    public async Task UnknownManagementAlgorithm_IsInspectable_AndDoesNotBecomeAFactoryDefault()
++    {
++        byte[] raw = [0x01, 0x01, 0xF1, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x00];
++        var connection = new RecordingSmartCardConnection([0x90, 0x00], [5, 8, 0, 0x90, 0x00], [.. raw, 0x90, 0x00], [.. raw, 0x90, 0x00]);
++        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++
++        var metadata = await session.GetManagementKeyMetadataAsync(TestContext.Current.CancellationToken);
++
++        Assert.Null(session.ManagementKeyType);
++        Assert.Null(metadata.KeyType);
++        Assert.Equal(0xF1, metadata.RawAlgorithmId);
++        Assert.Equal(raw, metadata.RawData.ToArray());
++        await Assert.ThrowsAsync<NotSupportedException>(() => session.AuthenticateAsync(new byte[24], TestContext.Current.CancellationToken));
++        Assert.Equal(4, connection.TransmittedCommands.Count);
++    }
++
++    [Theory]
++    [InlineData(KeyType.ECP256)]
++    [InlineData(KeyType.ECP384)]
++    public void MetadataExtraction_UsesCanonicalCurveAndCoordinateSize(KeyType keyType)
++    {
++        var definition = keyType.GetKeyDefinition();
++        using var expected = ECDsa.Create(ECCurve.CreateFromOid(new Oid(definition.CurveOid ?? throw new InvalidOperationException("Curve OID missing."))));
++        var parameters = expected.ExportParameters(false);
++        byte[] point = [0x04, .. parameters.Q.X ?? throw new InvalidOperationException(), .. parameters.Q.Y ?? throw new InvalidOperationException()];
++        var metadata = new SlotMetadata(keyType, PinPolicy.Default, TouchPolicy.Default, true, (byte[])[0x86, (byte)point.Length, .. point]);
++
++        using var actual = metadata.GetECDsaPublicKey();
++
++        Assert.Equal(definition.LengthInBits, actual.KeySize);
++        Assert.Equal(expected.ExportSubjectPublicKeyInfo(), actual.ExportSubjectPublicKeyInfo());
++    }
++
++    private static void MarkAuthenticated(PivSession session) =>
++        typeof(PivSession).GetField("_isAuthenticated", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(session, true);
++
++    private static RecordingSmartCardConnection Connection(params byte[][] responses) => new(
++        [new byte[] { 0x90, 0x00 }, new byte[] { 5, 8, 0, 0x90, 0x00 },
++            new byte[] { 0x01, 0x01, 0x0A, 0x02, 0x02, 0x00, 0x00, 0x05, 0x01, 0x01, 0x90, 0x00 }, .. responses]);
++}
+\ No newline at end of file
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs
+index bf07b23d..58e2682a 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs
+@@ -84,7 +84,7 @@ public void ManagementKeyType_DefaultsToTripleDes()
+         var session = new PivSession(mockConnection, null);
+ 
+         // Default management key type should be 3DES
+-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
++        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
+     }
+ 
+     [Fact]
+@@ -164,7 +164,7 @@ public async Task CreateAsync_TransmitsSelectVersionAndManagementMetadata()
+ 
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+ 
+-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
++        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
+         Assert.True(connection.TransmittedCommands.Count >= 3);
+         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xA4); // SELECT
+         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xFD); // GET VERSION
+@@ -187,7 +187,7 @@ public async Task CreateAsync_WhenReliableFirmwareManagementMetadataUnavailable_
+             connection,
+             cancellationToken: TestContext.Current.CancellationToken);
+ 
+-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
++        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+     }
+ 
+     /// <summary>
+@@ -217,7 +217,7 @@ public async Task CreateAsync_WhenAlphaFirmwareManagementMetadataUnavailable_Use
+             connection,
+             cancellationToken: TestContext.Current.CancellationToken);
+ 
+-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
++        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+     }
+ 
+     /// <summary>
+@@ -240,7 +240,7 @@ public async Task CreateAsync_WhenPre57FirmwareManagementMetadataUnavailable_Use
+             connection,
+             cancellationToken: TestContext.Current.CancellationToken);
+ 
+-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
++        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
+     }
+ 
+     [Fact]
+@@ -263,7 +263,7 @@ public async Task GetManagementKeyMetadataAsync_TransmitsGetMetadataForManagemen
+ 
+         var metadata = await session.GetManagementKeyMetadataAsync(TestContext.Current.CancellationToken);
+ 
+-        Assert.Equal(PivManagementKeyType.TripleDes, metadata.KeyType);
++        Assert.Equal(KeyType.TripleDES, metadata.KeyType);
+         Assert.Contains(connection.TransmittedCommands, command => command[1] == 0xF7 && command[3] == 0x9B);
+     }
+ 
+@@ -415,7 +415,7 @@ public async Task SetManagementKeyAsync_WhenSuccessful_UpdatesTypeAndPreservesAu
+         try
+         {
+             await session.SetManagementKeyAsync(
+-                PivManagementKeyType.Aes128,
++                KeyType.AES128,
+                 newKey,
+                 cancellationToken: TestContext.Current.CancellationToken);
+         }
+@@ -424,7 +424,7 @@ await session.SetManagementKeyAsync(
+             CryptographicOperations.ZeroMemory(newKey);
+         }
+ 
+-        Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
++        Assert.Equal(KeyType.AES128, session.ManagementKeyType);
+         Assert.True(session.IsManagementKeyAuthenticated);
+         Assert.Equal(0xFF, LastCommand(connection)[1]);
+     }
+@@ -440,7 +440,7 @@ public async Task SetManagementKeyAsync_WhenNonAuthenticationCommandFailureOccur
+         try
+         {
+             await Assert.ThrowsAsync<ApduException>(() => session.SetManagementKeyAsync(
+-                PivManagementKeyType.Aes128,
++                KeyType.AES128,
+                 newKey,
+                 cancellationToken: TestContext.Current.CancellationToken));
+         }
+@@ -449,7 +449,7 @@ await Assert.ThrowsAsync<ApduException>(() => session.SetManagementKeyAsync(
+             CryptographicOperations.ZeroMemory(newKey);
+         }
+ 
+-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
++        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
+         Assert.True(session.IsManagementKeyAuthenticated);
+     }
+ 
+@@ -464,7 +464,7 @@ public async Task SetManagementKeyAsync_SecurityStatusNotSatisfied_ClearsAuthent
+         try
+         {
+             var exception = await Assert.ThrowsAsync<ApduException>(() => session.SetManagementKeyAsync(
+-                PivManagementKeyType.Aes128,
++                KeyType.AES128,
+                 newKey,
+                 cancellationToken: TestContext.Current.CancellationToken));
+             Assert.True(exception.SW == SWConstants.SecurityStatusNotSatisfied);
+@@ -474,7 +474,7 @@ public async Task SetManagementKeyAsync_SecurityStatusNotSatisfied_ClearsAuthent
+             CryptographicOperations.ZeroMemory(newKey);
+         }
+ 
+-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
++        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
+         Assert.False(session.IsManagementKeyAuthenticated);
+     }
+ 
+@@ -499,7 +499,7 @@ public async Task AuthenticateAsync_WhenAttemptFails_ClearsPriorAuthentication()
+         }
+ 
+         Assert.False(session.IsManagementKeyAuthenticated);
+-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
++        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
+         Assert.Equal(0x87, LastCommand(connection)[1]);
+     }
+ 
+@@ -533,15 +533,15 @@ public async Task ResetAsync_WhenSuccessful_RefreshesManagementKeyTypeAndClearsA
+             [0x63, 0xC0], // PIN blocked
+             [0x63, 0xC0], // PUK blocked
+             [0x90, 0x00], // RESET
+-            ManagementKeyMetadataResponse(PivManagementKeyType.Aes128)); // authoritative post-reset metadata
++            ManagementKeyMetadataResponse(KeyType.AES128)); // authoritative post-reset metadata
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+         MarkAuthenticated(session);
+-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
++        await SetManagementKeyForTestAsync(session, KeyType.AES256);
+ 
+         await session.ResetAsync(TestContext.Current.CancellationToken);
+ 
+         Assert.False(session.IsManagementKeyAuthenticated);
+-        Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
++        Assert.Equal(KeyType.AES128, session.ManagementKeyType);
+     }
+ 
+     /// <summary>
+@@ -563,12 +563,12 @@ public async Task ResetAsync_WhenMetadataUnsupportedOnAlphaFirmware_UsesAes192Fa
+             [0x6D, 0x00]); // GET METADATA unsupported
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+         MarkAuthenticated(session);
+-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes128);
++        await SetManagementKeyForTestAsync(session, KeyType.AES128);
+ 
+         await session.ResetAsync(TestContext.Current.CancellationToken);
+ 
+         Assert.False(session.IsManagementKeyAuthenticated);
+-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
++        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+     }
+ 
+     /// <summary>
+@@ -591,7 +591,7 @@ public async Task ResetAsync_WhenMetadataUnsupportedOnPre57Firmware_UsesTripleDe
+         await session.ResetAsync(TestContext.Current.CancellationToken);
+ 
+         Assert.False(session.IsManagementKeyAuthenticated);
+-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
++        Assert.Equal(KeyType.TripleDES, session.ManagementKeyType);
+     }
+ 
+     [Fact]
+@@ -607,12 +607,12 @@ public async Task ResetAsync_WhenReliableFirmwareMetadataUnsupported_UsesAes192F
+             [0x6D, 0x00]); // GET METADATA unsupported
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+         MarkAuthenticated(session);
+-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
++        await SetManagementKeyForTestAsync(session, KeyType.AES256);
+ 
+         await session.ResetAsync(TestContext.Current.CancellationToken);
+ 
+         Assert.False(session.IsManagementKeyAuthenticated);
+-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
++        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+     }
+ 
+     [Theory]
+@@ -630,14 +630,14 @@ public async Task ResetAsync_WhenMetadataRefreshUnexpectedlyFails_UsesReliableFi
+             [(byte)(statusWord >> 8), (byte)statusWord]); // unexpected metadata refresh failure
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+         MarkAuthenticated(session);
+-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
++        await SetManagementKeyForTestAsync(session, KeyType.AES256);
+ 
+         var exception = await Assert.ThrowsAsync<ApduException>(() =>
+             session.ResetAsync(TestContext.Current.CancellationToken));
+ 
+         Assert.True(exception.SW == statusWord);
+         Assert.False(session.IsManagementKeyAuthenticated);
+-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
++        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+     }
+ 
+     [Fact]
+@@ -652,12 +652,12 @@ public async Task ResetAsync_WhenMetadataRefreshUnexpectedlyFailsOnAlphaFirmware
+             [0x6A, 0x80]); // unexpected metadata refresh failure
+         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+         MarkAuthenticated(session);
+-        await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes256);
++        await SetManagementKeyForTestAsync(session, KeyType.AES256);
+ 
+         await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
+ 
+         Assert.False(session.IsManagementKeyAuthenticated);
+-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
++        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+     }
+ 
+     [Fact]
+@@ -714,14 +714,9 @@ private static void MarkAuthenticated(PivSession session) =>
+             .GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)!
+             .SetValue(session, true);
+ 
+-    private static async Task SetManagementKeyForTestAsync(PivSession session, PivManagementKeyType keyType)
++    private static async Task SetManagementKeyForTestAsync(PivSession session, KeyType keyType)
+     {
+-        int keyLength = keyType switch
+-        {
+-            PivManagementKeyType.Aes128 => 16,
+-            PivManagementKeyType.Aes256 => 32,
+-            _ => 24
+-        };
++        int keyLength = keyType.GetKeySizeBytes();
+         byte[] key = new byte[keyLength];
+         try
+         {
+@@ -753,9 +748,9 @@ private static void AssertStartsWith(ReadOnlySpan<byte> actual, byte[] expectedP
+ 
+     // Metadata TLVs: key type(01), touch/default policy(02), generated/default flag(05), then SW 9000.
+     private static byte[] ManagementKeyMetadataResponse(
+-        PivManagementKeyType keyType = PivManagementKeyType.TripleDes) =>
++        KeyType keyType = KeyType.TripleDES) =>
+     [
+-        0x01, 0x01, (byte)keyType,
++        0x01, 0x01, KeyTypeEncoding.Encode(keyType),
+         0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
+         0x05, 0x01, 0x01,
+         0x90, 0x00
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivTypesTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivTypesTests.cs
+index ec8a5096..f9f9745b 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivTypesTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivTypesTests.cs
+@@ -43,13 +43,13 @@ public void PivAlgorithmId_HasCorrectValue(KeyType algo, byte expected)
+     }
+ 
+     [Theory]
+-    [InlineData(PivManagementKeyType.TripleDes, 0x03)]
+-    [InlineData(PivManagementKeyType.Aes128, 0x08)]
+-    [InlineData(PivManagementKeyType.Aes192, 0x0A)]
+-    [InlineData(PivManagementKeyType.Aes256, 0x0C)]
+-    public void PivManagementKeyType_HasCorrectValue(PivManagementKeyType type, byte expected)
++    [InlineData(KeyType.TripleDES, 0x03)]
++    [InlineData(KeyType.AES128, 0x08)]
++    [InlineData(KeyType.AES192, 0x0A)]
++    [InlineData(KeyType.AES256, 0x0C)]
++    public void PivManagementKeyType_HasCorrectValue(KeyType type, byte expected)
+     {
+-        Assert.Equal(expected, (byte)type);
++        Assert.Equal(expected, KeyTypeEncoding.Encode(type));
+     }
+ 
+     [Fact]
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs
+index c80c0221..0401d5f9 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs
+@@ -10,6 +10,25 @@ namespace Yubico.YubiKit.Piv.UnitTests;
+ 
+ public class SessionConsistencyTests
+ {
++    [Fact]
++    public async Task Generate_MatchPolicy_ProbesCapabilityWithoutRequiringEnrollment()
++    {
++        using var ec = ECDsa.Create(ECCurve.NamedCurves.nistP256);
++        var parameters = ec.ExportParameters(false);
++        byte[] publicResponse = [0x7F, 0x49, 0x43, 0x86, 0x41, 0x04,
++            .. parameters.Q.X ?? throw new InvalidOperationException(), .. parameters.Q.Y ?? throw new InvalidOperationException(), 0x90, 0x00];
++        var connection = Connection([0x06, 0x01, 0x04, 0x07, 0x01, 0x00, 0x90, 0x00], publicResponse);
++        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
++
++        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.ECP256,
++            new KeyCreationOptions { PinPolicy = PinPolicy.MatchOnce }, TestContext.Current.CancellationToken);
++
++        Assert.Equal(KeyType.ECP256, publicKey.KeyType);
++        Assert.Equal(0xF7, connection.TransmittedCommands[^2][1]);
++        Assert.Equal(0x96, connection.TransmittedCommands[^2][3]);
++        Assert.Equal(0x47, connection.TransmittedCommands[^1][1]);
++    }
+     [Fact]
+     public async Task Authenticate_CancelledAttempt_ClearsPriorAuthenticationWithoutTraffic()
+     {
+@@ -126,7 +145,7 @@ public async Task FirmwareGatedOperation_OldFirmware_RejectsBeforeTransmission(s
+             "puk" => session.GetPukMetadataAsync(TestContext.Current.CancellationToken),
+             "management" => session.GetManagementKeyMetadataAsync(TestContext.Current.CancellationToken),
+             "slot" => session.GetSlotMetadataAsync(Slot.Authentication, TestContext.Current.CancellationToken),
+-            _ => session.SetManagementKeyAsync(PivManagementKeyType.Aes192, new byte[24], cancellationToken: TestContext.Current.CancellationToken)
++            _ => session.SetManagementKeyAsync(KeyType.AES192, new byte[24], cancellationToken: TestContext.Current.CancellationToken)
+         });
+ 
+         Assert.False(session.IsSupported(Features.Metadata));
+@@ -315,7 +334,7 @@ public async Task Reset_OverrideDoesNotRedefinePhysicalDefaultManagementKey()
+ 
+         await session.ResetAsync(TestContext.Current.CancellationToken);
+ 
+-        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
++        Assert.Equal(KeyType.AES192, session.ManagementKeyType);
+     }
+ 
+     private static RecordingSmartCardConnection Connection(params byte[][] responses) => new(
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/TouchNotificationTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/TouchNotificationTests.cs
+index 6d0bf2ce..552942a1 100644
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/TouchNotificationTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/TouchNotificationTests.cs
+@@ -353,7 +353,7 @@ private static RecordingSmartCardConnection CreateInitializedConnection(params b
+ 
+     private static byte[] ManagementKeyMetadataResponse() =>
+     [
+-        0x01, 0x01, (byte)PivManagementKeyType.TripleDes,
++        0x01, 0x01, 0x03,
+         0x02, 0x02, 0x00, (byte)TouchPolicy.Default,
+         0x05, 0x01, 0x01,
+         0x90, 0x00

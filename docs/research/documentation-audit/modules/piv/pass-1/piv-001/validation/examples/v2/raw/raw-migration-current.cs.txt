@@ -1,0 +1,7 @@
+// Before
+using ISmartCardProtocol protocol = ProtocolFactory.Create(connection);
+await protocol.SelectAsync(applicationId, cancellationToken);
+
+// After
+await using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, cancellationToken);
+await raw.SelectAsync(applicationId, cancellationToken);

@@ -1,0 +1,8 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/verify-v4.py v4 compiled --capture consumer=first --capture annotations=first --capture pivtool=first --live
+PASS: 730 explicit unit dispositions, 45 complete groups, 36 shipping source paths; current bodies, typed wrappers and source/configuration identities reconcile.
+PASS: exact consumer/first actual Csc/source/reference/analyzer/config/assets evidence; current complete compiler bodies match.
+PASS: exact annotations/first actual Csc/source/reference/analyzer/config/assets evidence; current complete compiler bodies match.
+PASS: exact pivtool/first actual Csc/source/reference/analyzer/config/assets evidence; current complete compiler bodies match.
+PASS: live binary/analyzer/assets identities checked.
+
+EXIT=0

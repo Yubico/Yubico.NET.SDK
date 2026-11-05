@@ -1,0 +1,95 @@
+{
+  "status": "prepared-v2-not-compiled-not-executed",
+  "source_methods": [
+    "P01_X25519_Rfc7748AliceAndBobAgree",
+    "P02_PinAlwaysConsumesVerification_PinOnceReusesIt",
+    "P03_MoveAndDeletePreserveIndependentCertificates",
+    "P04_AttestationBindsGeneratedKeyToPreservedIssuer",
+    "P05_ActualPivToolRsaSignsOriginalMessage",
+    "P06_ActualPivToolEd25519SignsOriginalMessage",
+    "P07_CancelTouchWait_DrainThenFreshSameKeyRecovery"
+  ],
+  "project_references": [
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj"
+  ],
+  "frozen_identities": {
+    "hardware/baseline-103.json": "3f160854e948cb01f3e535efe0e59cdf5df5eb67b94cdeb7658b0de9d1223718",
+    "hardware/vendor-state.py": "41aa7200cd912a5f7a1438ad693fff83ad36b32873540b8a70d1b578f976600a",
+    "hardware/vendor-cleanup.py": "8e5aba11c7cb391b454aac9d1b4c478c69f0735671c701793f91d4f7f4bc6a7f",
+    "hardware/vendor-cleanup-v2.py": "6042cef33b929136b3035c904255e3b18691f7cda96c789f2532fe2e7f3ad1a5"
+  },
+  "files": [
+    {
+      "path": "Directory.Build.props",
+      "bytes": 624,
+      "sha256": "65e46bdb6a50ba8e42c3185db5535da7a91bda2bbfea6dc57f65b5636817de1e"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "bytes": 1845,
+      "sha256": "3c2ee24b5a816155bee117eca0670d26b520d1244853cf460cdd28c7e7e7a5b4"
+    },
+    {
+      "path": "capture-compiler.py",
+      "bytes": 2739,
+      "sha256": "28f7c9a656151a8e6c1ae4d28fd80f996781176e184667d03e5c0cb8d46a9641"
+    },
+    {
+      "path": "preparation.md",
+      "bytes": 6080,
+      "sha256": "f5158bb530e4ad9e3df23a93d9d7ad7211da5f0f72a8ae827a40aadfa312ad7f"
+    },
+    {
+      "path": "run-probe.py",
+      "bytes": 9298,
+      "sha256": "5567874389376673c227a094d8d9f1c6bcd7622911e0a2e9f8e92360528706a6"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/CancellationProbe.cs",
+      "bytes": 8480,
+      "sha256": "72f2d562e4d38c0ab5c282a0b6704a46e17c74473bc61990284144ce29a13fc5"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "bytes": 17214,
+      "sha256": "c792960d198ceae6ba0e870846c729f2de27728a5d0a13980ebdd544486bf2c5"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/ProbeSupport.cs",
+      "bytes": 9311,
+      "sha256": "9256d91e7e24c6045cc4afc39c2bbf4c4b9dc6858b914bd72366b12f6480b80f"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests.csproj",
+      "bytes": 1561,
+      "sha256": "f512fcf1acd1acab626b3d5813c7ce6b36e618f472982047a7371460c8295ea9"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/probe.runsettings",
+      "bytes": 124,
+      "sha256": "ab06bf4e39bc6065b842fa96d4ba5ed91ac2e296bc89e059c3439b896f487a5e"
+    },
+    {
+      "path": "tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/xunit.runner.json",
+      "bytes": 131,
+      "sha256": "5cc8a330520e0a1bb764135462bc618961c95ccd429280fbb5dd294750b43b29"
+    },
+    {
+      "path": "vendor-x25519-reference.py",
+      "bytes": 4147,
+      "sha256": "7eebcec8ba63c1b15a35c1039f4b7c24377ed27f5000869915f2025eebfd5b52"
+    }
+  ],
+  "checks": [
+    "Python AST",
+    "XML/JSON structure",
+    "four real project-reference paths",
+    "seven textual source methods",
+    "four frozen hardware artifact identities"
+  ],
+  "execution_scope": "P01-P06 unattended; all physical cases deferred",
+  "previous_manifest_sha256": "713f28d73360c80bd8491ebed03f0fed232578e02ff9fd2c15e36bcdd13ae358"
+}

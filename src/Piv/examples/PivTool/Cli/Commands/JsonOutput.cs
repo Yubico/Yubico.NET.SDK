@@ -22,7 +22,8 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
 
 /// <summary>
 /// Serializes PIV operation results to JSON for machine consumption.
-/// All output goes to stdout; errors go to stderr.
+/// JSON result and failure objects go to stdout, including their error fields.
+/// CLI handlers write separate diagnostics to stderr.
 /// </summary>
 internal static class JsonOutput
 {

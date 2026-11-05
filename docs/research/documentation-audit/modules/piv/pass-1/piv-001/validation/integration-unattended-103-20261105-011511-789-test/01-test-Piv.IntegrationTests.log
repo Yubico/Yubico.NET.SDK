@@ -1,0 +1,120 @@
+$ dotnet test src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "Category!=RequiresUserPresence"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Piv -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Piv.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll
+Test run for /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Piv.IntegrationTests
+[xUnit.net 00:00:00.12]   Discovered:  Yubico.YubiKit.Piv.IntegrationTests
+[xUnit.net 00:00:00.16]   Starting:    Yubico.YubiKit.Piv.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 1 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 2 device(s)
+[YubiKey Infrastructure] Device SN:125 FILTERED (not in allow list)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 1 filtered
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPolicyTests.GenerateKey_PinPolicyNever_CanSignWithoutPin(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [2 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPolicyTests.GenerateKey_PinPolicyAlways_RequiresPinForEachSign(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivImportTests.ImportKeyAsync_X25519_MetadataMatchesImportedKey(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivImportTests.ImportKeyAsync_Rsa2048_CanSignAndVerify(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivImportTests.ImportKeyAsync_Rsa3072_MetadataMatchesImportedKey(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [2 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivImportTests.ImportKeyAsync_Ed25519_CanSignAndVerify(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivDiscoveryContentionTests.FindAllAsync_WhilePivSessionHasVerifiedPin_DoesNotClobberSessionState(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivDiscoveryContentionTests.FindAllAsync_WhileCardBusyWithRsa4096Keygen_CompletesWithoutWaitingForKeygen(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [42 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPinRetryTests.SetPinAttempts_CustomLimit_EnforcedDuringFailedAttempts(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [2 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPinRetryTests.SetPinAttempts_RequiresPin_AndResetsPinAndPukEvenWithUnchangedLimits(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [2 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPinRetryTests.PinRetries_DecrementAfterEachFailedAttempt_MetadataMatches(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPinRetryTests.PinMetadata_IsDefault_ReflectsChanges(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSigningAlgorithmTests.SignRsa2048_WithSha512Hash_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [11 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSigningAlgorithmTests.SignEccP256_WithSha256Hash_ProducesValidSignature(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSigningAlgorithmTests.DecryptRsa2048_OaepSha1_ReturnsExactPlaintext(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [10 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSigningAlgorithmTests.SignEccP384_WithSha384Hash_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=4.0.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSigningAlgorithmTests.SignRsa2048_WithSha384Hash_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [7 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSigningAlgorithmTests.SignRsa2048_WithSha1Hash_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [4 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPinOnlyWorkflowTests.PinProtectedMode_ReopensRecoversAndDisablesWithDefaultManagementKey(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [2 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPukTests.ChangePukAsync_WithCorrectOldPuk_Succeeds(state: YubiKey(Placeholder #0: Conn=SmartCard)) [2 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPukTests.UnblockPinAsync_AfterBlockedPin_RestoresAccess(state: YubiKey(Placeholder #0: Conn=SmartCard)) [2 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPukTests.SetPinAttemptsAsync_CustomLimit_EnforcesLimit(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivPukTests.GetPukMetadataAsync_ReturnsValidMetadata(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [954 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSlotOverwriteTests.GenerateKey_RsaThenEcc_OverwritesWithEcc(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [6 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSlotOverwriteTests.GenerateKey_EccThenRsa_OverwritesWithRsa(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [8 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCompressedCertTests.StoreCertificateAsync_Compressed_RoundTripsCorrectly(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivKeyOperationsTests.GenerateKeyAsync_EccP256_ReturnsPublicKey(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivKeyOperationsTests.GetSerialNumberAsync_ReturnsDeviceSerial(state: YubiKey(Placeholder #0: FW>=5.0.0,Conn=SmartCard)) [21 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivKeyOperationsTests.AttestKeyAsync_GeneratedKey_ReturnsCertificate(state: YubiKey(Placeholder #0: FW>=4.3.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivKeyOperationsTests.GenerateKeyAsync_Ed25519_ReturnsPublicKey(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivKeyOperationsTests.ImportKeyAsync_EccP256_CanSign(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivKeyOperationsTests.PutObjectAsync_GetObjectAsync_RoundTrip(state: YubiKey(Placeholder #0: Conn=SmartCard)) [977 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivKeyOperationsTests.MoveKeyAsync_MovesToNewSlot_KeyRemainsFunctional(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivKeyOperationsTests.DeleteKeyAsync_RemovesKey_SlotBecomesEmpty(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivManagementKeyTests.SetManagementKeyAsync_SameSessionStateTracksSuccessfulSetAndReset(state: YubiKey(Placeholder #0: FW>=5.4.2,Conn=SmartCard)) [3 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivManagementKeyTests.SetManagementKeyAsync_ChangesToNewKey(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivManagementKeyTests.SetManagementKeyAsync_AES256_Succeeds(state: YubiKey(Placeholder #0: FW>=5.4.2,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivManagementKeyTests.SetManagementKeyAsync_AES128_Succeeds(state: YubiKey(Placeholder #0: FW>=5.4.2,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.CalculateSecretAsync_ECDH_ProducesMatchingSharedSecret(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.SignOrDecryptAsync_EccP256Sign_ProducesValidSignature(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.CalculateSecretAsync_X25519_ProducesSharedSecret(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.SignOrDecryptAsync_Rsa2048Decrypt_DecryptsCorrectly(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [5 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.SignOrDecryptAsync_EccP384Sign_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=4.0.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.SignOrDecryptAsync_Rsa3072Sign_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [34 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.SignOrDecryptAsync_Ed25519_ProducesSignature(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.SignOrDecryptAsync_Rsa2048Sign_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [3 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.SignOrDecryptAsync_Rsa4096Sign_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 m 3 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCryptoTests.SignOrDecryptAsync_Rsa1024Sign_ProducesValidSignature(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivMetadataTests.GetPinMetadataAsync_ReturnsValidMetadata(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [938 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivMetadataTests.GetManagementKeyMetadataAsync_ReturnsValidMetadata(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [956 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivMetadataTests.GetSlotMetadataAsync_WithKey_ReturnsMetadata(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [9 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivMetadataTests.GetBioMetadataAsync_NonBioDevice_ThrowsOrReturnsError(state: YubiKey(Placeholder #0: Conn=SmartCard)) [19 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivMetadataTests.GetSlotMetadataAsync_EmptySlot_ReturnsNull(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [932 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivFullWorkflowTests.CompleteWorkflow_MoveKeyBetweenSlots(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivFullWorkflowTests.CompleteWorkflow_GenerateKeySignVerify(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivFullWorkflowTests.CompleteWorkflow_AttestGeneratedKey(state: YubiKey(Placeholder #0: FW>=4.3.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivFullWorkflowTests.CompleteWorkflow_ECDHKeyAgreement(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSessionContentionTests.SecondSession_OnOneLiveConnection_IsRefused(state: YubiKey(Placeholder #0: Conn=SmartCard)) [18 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSessionContentionTests.CreateManagementSessionAsync_WhilePivHoldsCcid_IsRefusedWithoutFallback(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSessionContentionTests.SuccessiveSessions_OverOneCallerOwnedConnection_BothReachTheCard(state: YubiKey(Placeholder #0: Conn=SmartCard)) [39 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSessionContentionTests.GetDeviceInfoAsync_WhilePivSessionHasVerifiedPin_IsRefusedWithoutClobberingState(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivSessionContentionTests.ConnectAsync_SecondSmartCardConnection_WhilePivSessionOpen_IsRefused(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.AuditV2.PivAuditHardwareReproTests.YESDK1632_Ed25519SignsUnmodifiedShortAndLongMessages(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.AuditV2.PivAuditHardwareReproTests.YESDK1630_PinOnceStateSurvivesConnectionDisposal(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivConnectionConcurrencyTests.ConcurrentSignAndObjectRead_OnOneSession_SecondOperationIsRefused(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCertificateTests.DeleteCertificateAsync_IsIdempotent(state: YubiKey(Placeholder #0: Conn=SmartCard)) [983 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCertificateTests.GetCertificateAsync_EmptySlot_ReturnsNull(state: YubiKey(Placeholder #0: Conn=SmartCard)) [947 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCertificateTests.StoreCertificateAsync_GetCertificateAsync_RoundTrip(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivCertificateTests.GetObjectAsync_EmptyObject_ReturnsEmpty(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivResetTests.ResetAsync_ClearsAllSlots(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [2 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivResetTests.ResetAsync_RestoresToDefaults(state: YubiKey(Placeholder #0: Conn=SmartCard)) [958 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivResetTests.ResetAsync_PinMetadataShowsDefault(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard)) [949 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivAuthenticationTests.AuthenticateAsync_WithDefaultKey_Succeeds(state: YubiKey(Placeholder #0: Conn=SmartCard)) [957 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivAuthenticationTests.VerifyPinAsync_WithCorrectPin_Succeeds(state: YubiKey(Placeholder #0: Conn=SmartCard)) [961 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivAuthenticationTests.AuthenticateAsync_WithWrongKey_ThrowsApduException(state: YubiKey(Placeholder #0: Conn=SmartCard)) [947 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivAuthenticationTests.VerifyPinAsync_WithWrongPin_ThrowsInvalidPinException(state: YubiKey(Placeholder #0: Conn=SmartCard)) [956 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivAuthenticationTests.ChangePinAsync_WithCorrectOldPin_Succeeds(state: YubiKey(Placeholder #0: Conn=SmartCard)) [1 s]
+[xUnit.net 00:05:01.79]     Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey [SKIP]
+[xUnit.net 00:05:01.79]       Requires 2 allow-listed firmware-5.7.0+ YubiKeys with a SmartCard interface plugged in simultaneously; found 1.
+[xUnit.net 00:05:01.79]     Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.FindAllAsync_WithOpenSessionOnOneKey_IdentifiesOtherKeysAndPreservesSession [SKIP]
+[xUnit.net 00:05:01.79]       Requires 2 allow-listed YubiKeys with a SmartCard interface plugged in simultaneously; found 1. Plug in additional keys to run this test.
+[xUnit.net 00:05:01.79]     Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.ConcurrentPivSessions_OnTwoKeys_OperateIndependently [SKIP]
+[xUnit.net 00:05:01.79]       Requires 2 allow-listed YubiKeys with a SmartCard interface plugged in simultaneously; found 1. Plug in additional keys to run this test.
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivAuthenticationTests.GetPinAttemptsAsync_ReturnsCorrectCount(state: YubiKey(Placeholder #0: Conn=SmartCard)) [956 ms]
+  Skipped Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.Rsa4096Keygen_OnOneKey_DoesNotDelayPivOperationsOnAnotherKey [1 ms]
+  Skipped Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.FindAllAsync_WithOpenSessionOnOneKey_IdentifiesOtherKeysAndPreservesSession [1 ms]
+  Skipped Yubico.YubiKit.Piv.IntegrationTests.PivMultiKeyContentionTests.ConcurrentPivSessions_OnTwoKeys_OperateIndependently [1 ms]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivDecryptTests.DecryptAsync_Rsa2048OaepSha256_ReturnsExactPlaintext(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [3 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivDecryptTests.DecryptAsync_EccSlot_ThrowsArgumentException(state: YubiKey(Placeholder #0: FW>=4.0.0,Conn=SmartCard)) [1 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivDecryptTests.DecryptAsync_Rsa2048Pkcs1_ReturnsExactPlaintext(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [11 s]
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivDecryptTests.DecryptAsync_Rsa4096Pkcs1_ReturnsExactPlaintext(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard)) [2 m 23 s]
+[xUnit.net 00:07:56.24]   Finished:    Yubico.YubiKit.Piv.IntegrationTests
+  Passed Yubico.YubiKit.Piv.IntegrationTests.PivDecryptTests.DecryptAsync_WrongCiphertextLength_ThrowsArgumentException(state: YubiKey(Placeholder #0: FW>=4.3.5,Conn=SmartCard)) [14 s]
+
+Test Run Successful.
+Total tests: 86
+     Passed: 83
+    Skipped: 3
+ Total time: 7.9423 Minutes

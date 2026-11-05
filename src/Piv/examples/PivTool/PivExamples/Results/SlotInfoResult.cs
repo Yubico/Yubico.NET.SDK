@@ -37,12 +37,12 @@ public sealed record SlotInfo
     public SlotMetadata? Metadata { get; init; }
 
     /// <summary>
-    /// Gets the certificate stored in the slot.
+    /// Gets the caller-owned certificate stored in the slot. Dispose it after using the result.
     /// </summary>
     public X509Certificate2? Certificate { get; init; }
 
     /// <summary>
-    /// Gets whether the slot has a key.
+    /// Gets whether metadata was obtained. On firmware without metadata, false leaves actual key occupancy unknown.
     /// </summary>
     public bool HasKey => Metadata is not null;
 

@@ -1,0 +1,166 @@
+[
+  {
+    "file": "nist-sp800-73-4-part1.pdf",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-73-4.pdf",
+    "accessed_utc": "2026-11-04T23:58:46.132792+00:00",
+    "bytes": 2155155,
+    "sha256": "44c0bbb910f58eb44a2c1e1c90db7d0394d2985d645065a0861d9296bb072244",
+    "status": "captured"
+  },
+  {
+    "file": "nist-sp800-73-4-part2.pdf",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-73-4pt2.pdf",
+    "accessed_utc": "2026-11-04T23:58:46.133371+00:00",
+    "status": "gap",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "file": "nist-sp800-78-4.pdf",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-78-4.pdf",
+    "accessed_utc": "2026-11-04T23:58:46.133883+00:00",
+    "bytes": 519350,
+    "sha256": "cdb1133a4fa1d6335462aefa24741783fcf2581978f87350171dd402c3ae57e8",
+    "status": "captured"
+  },
+  {
+    "file": "nist-fips201-2.pdf",
+    "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.201-2.pdf",
+    "accessed_utc": "2026-11-04T23:58:46.134541+00:00",
+    "bytes": 5155974,
+    "sha256": "db9325983744db54ada7a045af26be3146ecbaa412e4bc51f57bf2a01e50bd37",
+    "status": "captured"
+  },
+  {
+    "file": "nist-fips186-5.pdf",
+    "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf",
+    "accessed_utc": "2026-11-04T23:58:46.135103+00:00",
+    "bytes": 1844414,
+    "sha256": "fbb9c7c2ba442f03c57b63b43c888311903c9d0f29f89b06efdebd9b619140c5",
+    "status": "captured"
+  },
+  {
+    "file": "vendor-reset.html",
+    "url": "https://docs.yubico.com/yesdk/users-manual/application-piv/apdu/reset.html",
+    "accessed_utc": "2026-11-04T23:58:46.135637+00:00",
+    "status": "gap",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "file": "vendor-move.html",
+    "url": "https://docs.yubico.com/yesdk/users-manual/application-piv/apdu/move-key.html",
+    "accessed_utc": "2026-11-04T23:58:46.136117+00:00",
+    "status": "gap",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "file": "vendor-attestation.html",
+    "url": "https://docs.yubico.com/yesdk/users-manual/application-piv/attestation.html",
+    "accessed_utc": "2026-11-04T23:58:46.136542+00:00",
+    "bytes": 25561,
+    "sha256": "b9e58620be83720e1f3956b4ead6ecb8770a1bad1a55f5530791f3f4b5697401",
+    "status": "captured"
+  },
+  {
+    "file": "vendor-pin-puk.html",
+    "url": "https://docs.yubico.com/yesdk/users-manual/application-piv/pin-puk-mgmt-key.html",
+    "accessed_utc": "2026-11-04T23:58:46.424941+00:00",
+    "bytes": 21715,
+    "sha256": "6d2019beddeba7c774dfabe61d38bce263e90d980d2af16ecbe119e7d20b8c64",
+    "status": "captured"
+  },
+  {
+    "file": "vendor-ysa2017-01.html",
+    "url": "https://www.yubico.com/support/security-advisories/ysa-2017-01/",
+    "accessed_utc": "2026-11-04T23:58:46.425309+00:00",
+    "bytes": 501815,
+    "sha256": "8a1eb0d0d5dd1a40b8cd43f0d7b8c03ef093ec7c8ae7117a32aae5a93d0bdcb1",
+    "status": "captured"
+  },
+  {
+    "file": "rfc8017.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc8017.txt",
+    "accessed_utc": "2026-11-04T23:58:46.432278+00:00",
+    "bytes": 154696,
+    "sha256": "1e72dc473d18df3fc5598cdc12795a9f18f36f1aef15abc23a55eb0d58151d11",
+    "status": "captured"
+  },
+  {
+    "file": "rfc8032.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc8032.txt",
+    "accessed_utc": "2026-11-04T23:58:46.576956+00:00",
+    "bytes": 103210,
+    "sha256": "ed63657ff389301282b169b0abde9b5dd2c7e4d524fdfa5da6ff3094fc93c4c3",
+    "status": "captured"
+  },
+  {
+    "file": "rfc7748.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc7748.txt",
+    "accessed_utc": "2026-11-04T23:58:46.644547+00:00",
+    "bytes": 39298,
+    "sha256": "279ca0ecc5e92e2962e27b846986aeb74729d9dd34bd4a04a362f80dcb596ad3",
+    "status": "captured"
+  },
+  {
+    "file": "rfc3279.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc3279.txt",
+    "accessed_utc": "2026-11-04T23:58:46.753900+00:00",
+    "bytes": 53833,
+    "sha256": "6d3f19f18e17fa1c68da5aaf4021327748fabca840d7300443b77357a1fc1614",
+    "status": "captured"
+  },
+  {
+    "file": "python-yubikit-piv.py",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/piv.py",
+    "accessed_utc": "2026-11-04T23:58:46.925595+00:00",
+    "bytes": 51177,
+    "sha256": "f1055e88dca0c8b0ff107a3f1724cd9e03447a95565ecbfde7517f8114ba47fd",
+    "status": "captured"
+  },
+  {
+    "file": "python-ykman-piv.py",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/ykman/piv.py",
+    "accessed_utc": "2026-11-04T23:58:46.940157+00:00",
+    "bytes": 27652,
+    "sha256": "b24c77190286b801ac77b8142f43f78b9aeefdd4599c23b2a7aceb62b378d224",
+    "status": "captured"
+  },
+  {
+    "file": "python-ykman-_cli-piv.py",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/ykman/_cli/piv.py",
+    "accessed_utc": "2026-11-04T23:58:47.003828+00:00",
+    "bytes": 47478,
+    "sha256": "c3e74c46e0952c9471856d6d08f70a6f783f4ae533207447e7e544616cccea5e",
+    "status": "captured"
+  },
+  {
+    "file": "python-tests-test_piv.py",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/tests/test_piv.py",
+    "accessed_utc": "2026-11-04T23:58:47.101343+00:00",
+    "bytes": 8091,
+    "sha256": "5cf505d0e97ceb0635d6bf9ec452aa66a9027e30018c1ddfa46560713f8afac2",
+    "status": "captured"
+  },
+  {
+    "file": "python-tests-device-test_piv.py",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/tests/device/test_piv.py",
+    "accessed_utc": "2026-11-04T23:58:47.195508+00:00",
+    "bytes": 30363,
+    "sha256": "3383c9cd9b31c5a72634c9d5c30aae4c8abf0a447b806769bab945480872f743",
+    "status": "captured"
+  },
+  {
+    "file": "python-tests-device-cli-test_piv.py",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/tests/device/cli/test_piv.py",
+    "accessed_utc": "2026-11-04T23:58:47.219609+00:00",
+    "status": "gap",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "file": "android-PivSession.java",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikit-android/76b89d35142d9a4937b6b72e5c840e057a280620/piv/src/main/java/com/yubico/yubikit/piv/PivSession.java",
+    "accessed_utc": "2026-11-04T23:58:47.345573+00:00",
+    "bytes": 64429,
+    "sha256": "9eff311b71b1d3b42026d66057056eb98c76d1b41ea469264f66d9c83c5c0585",
+    "status": "captured"
+  }
+]

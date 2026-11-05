@@ -1,0 +1,280 @@
+PIV Tool Attestation — YubiKey PIV Tool User Guide  documentation
+YubiKey PIV Tool User Guide
+Contents
+Introduction
+Set up PIV Tool
+PIV Tool Common Tasks
+PIV YKCS11 Module
+PIV Tool Attestation
+What is Attestation
+Getting and Verifying Attestation Certificates
+PIV Tool Command, Options and Actions
+Copyright
+YubiKey PIV Tool User Guide
+PIV Tool Attestation
+View page source
+PIV Tool Attestation
+
+This feature is only available in YubiKey 4.3 and above.
+What is Attestation
+
+The YubiKey is able to create an attestation statement in the form of an X.509 certificate. This provides evidence that a certain key was generated on a YubiKey.
+The certificate can be validated up to Yubico Root CA to prove authenticity and validity. The returned attestation statement is in the form of a PEM encoded X.509 certificate, signed by a key stored in PIV slot f9 on the YubiKey.
+For more information on attestation, see Yubico content:
+Developer documentation,
+PIV attestation
+.NET YubiKey SDK: User’s Manual,
+PIV attestation statements
+Getting and Verifying Attestation Certificates
+
+Each YubiKey comes with a pre-loaded key and certificate. The certificate is signed by Yubico Root Certificate Authority (CA). The pre-loaded key and certificate can be replaced by overriding the content of the slot.
+Important
+If the pre-loaded Yubico factory-issued key or certificate is overwritten, it cannot be restored - even a factory reset does not recover the data.
+The OpenSSL method listed below is an example for verifying the certificate and validating with the Yubico Root CA. This method is for testing the concept of attestation verification only.
+Important
+Yubico recommends using production level evaluation for production verification.
+The following steps assume that the pre-loaded certificate and key in PIV slot f9 have not been overwritten. If they have been overwritten, you need to replace the certificate chain with your own - the one you used for the new key and certificate.
+To get and verify an attestation statement:
+Get and install
+Yubico PIV Tool
+for your platform.
+Make note of the folder/directory where you install the PIV tool. For example, on Windows that folder might be:
+C:\Program
+Files\Yubico\Yubico
+PIV
+Tool\bin
+.
+The Yubico PIV tool launches automatically launches when your run a
+yubico-piv-tool
+command. For example:
+yubico-piv-tool
+--version
+When you run the
+yubico-piv-tool
+, make sure the your platform can access and understand the command:
+Add the install directory to PATH or navigate to the installation folder/directory.
+You might need to add the
+./
+prefix to the command. This tells the system to run the command from the current folder/directory.
+If you are using PowerShell, add the file extension,
+.exe
+, to the PIV tool executable,
+yubico-piv-tool.exe
+.
+Get an attestation statement (X.509 certificate) for a slot.
+yubico
+-
+piv
+-
+tool
+--
+action
+=
+attest
+--
+slot
+=
+9
+a
+--
+out
+<
+PATH
+-
+attestation
+>
+\
+Slot9aAttestation
+.
+pem
+Where –
+<PATH-attestation>
+is where the command stores the attestation statement.
+9a
+is an example for the slot on the YubiKey that contains the key you generated and want to attest. See
+--slot
+command in
+PIV Tool Options
+for possible slots.
+Note
+The attestation fails when there is no key in the designated slot (slot 9a) or if the key in the slot was imported. Error message:
+Failed
+to
+attest
+data
+.
+Get the intermediate CA from slot
+f9
+of the YubiKey.
+yubico
+-
+piv
+-
+tool
+--
+action
+=
+read
+-
+certificate
+--
+slot
+=
+f9
+--
+out
+<
+PATH
+-
+intermediate
+>
+\
+SlotF9Intermediate
+.
+pem
+Where –
+<PATH-intermediate>
+is where the command stores the intermediate CA.
+f9
+is the slot on the YubiKey with the pre-loaded intermediate certificate. See
+--slot
+command in
+PIV Tool Options
+for possible slots.
+Determine the firmware version of your YubiKey.
+yubico-piv-tool
+--action
+=
+version
+Download the certificate(s) appropriate for your YubiKey firmware version.
+For pre-5.7.4 firmware, download the root certificate:
+Yubico PIV Root CA Serial 263751
+For 5.7.4 or newer firmware, download the certificate chain:
+Yubico Attestation Root 1
+and
+Intermediate Certificates
+Note
+Record where the files are stored.
+Make sure the files are saved with the correct file extension
+.pem
+(and not .pem.txt or .txt)!
+Download and install
+openssl
+for your platform.
+See the
+openssl documentation
+for details.
+Note
+These commands don’t work with OpenSSL 1.1.0 on YubiKey 4 series products. To verify certificate chains for such devices, see
+PIV Attestation Verification Fails with OpenSSL 1.1.0
+.
+Verify the attestation certificate using the command appropriate for your YubiKey firmware version.
+For pre-5.7.4 firmware
+openssl
+verify
+-
+CAfile
+<
+PATH
+-
+certs
+>
+\
+yubico
+-
+piv
+-
+ca
+-
+1.
+pem
+-
+untrusted
+<
+PATH
+-
+intermediate
+>
+\
+SlotF9Intermediate
+.
+pem
+<
+PATH
+-
+attestation
+>
+\
+Slot9aAttestation
+.
+pem
+For 5.7.4 and newer firmware
+openssl
+verify
+-
+CAfile
+<
+PATH
+-
+certs
+>
+\
+yubico
+-
+ca
+-
+1.
+pem
+-
+untrusted
+<
+PATH
+-
+intermediate
+>
+\
+yubico
+-
+intermediate
+.
+pem
+-
+untrusted
+<
+PATH
+-
+intermediate
+>
+\
+SlotF9Intermediate
+.
+pem
+<
+PATH
+-
+attestation
+>
+\
+Slot9aAttestation
+.
+pem
+Where –
+<PATH-certs>
+,
+<PATH-intermediate>
+, and
+<PATH-attestation>
+are the locations of the stored Yubico CA, intermediate, and attestation
+.pem
+files identified in Step 1 to Step 5.
+Expected result:
+Slot9Aattestation.pem:
+OK
+Previous
+Next
+©
+Copyright
+2025, Yubico AB.
+Cookies
+|
+Privacy Policy

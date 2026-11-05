@@ -34,9 +34,7 @@ public class PivSessionTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
-        // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // The factory borrows this connection; its creator retains disposal responsibility on failure.
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -46,12 +44,11 @@ public class PivSessionTests
         var mockConnection = Substitute.For<ISmartCardConnection>();
         mockConnection.Transport.Returns(Transport.Usb);
 
-        // This will likely fail during actual PIV selection since it's a mock,
-        // but it tests that the CreateAsync method exists and accepts the right parameters
+        // This substitute supplies no successful initialization responses.
         var exception = await Record.ExceptionAsync(() =>
             PivSession.CreateAsync(mockConnection, cancellationToken: TestContext.Current.CancellationToken));
 
-        // We expect this to fail with an ApduException since the mock doesn't implement real protocol
+        // The assertion checks only that an exception occurred, without establishing its type or stage.
         Assert.NotNull(exception);
     }
 

@@ -1,0 +1,3 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig
+/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig
+/tmp/opencode/piv-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig

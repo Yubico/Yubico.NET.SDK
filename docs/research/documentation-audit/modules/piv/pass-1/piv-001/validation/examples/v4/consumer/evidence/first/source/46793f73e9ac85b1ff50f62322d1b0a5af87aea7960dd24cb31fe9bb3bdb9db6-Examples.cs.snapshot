@@ -1,0 +1,1069 @@
+using System;
+using System.Buffers;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Piv;
+using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Cli.Shared.Output;
+using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
+using Certificates = Yubico.YubiKit.Piv.Examples.PivTool.PivExamples.Certificates;
+namespace AuditPiv001.Examples.V4.Consumer;
+
+public static class ReadmeDiscovery
+{
+public static async Task RunAsync()
+{
+
+
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+await using var session = await device.CreatePivSessionAsync();
+
+int pinAttempts = await session.GetPinAttemptsAsync();
+Console.WriteLine($"PIN attempts remaining: {pinAttempts}");
+
+
+}
+}
+
+public static class ReadmeGeneration
+{
+public static async Task RunAsync(IYubiKey device)
+{
+
+await using var session = await device.CreatePivSessionAsync();
+
+// Evaluation only: this public factory value must match the key currently installed.
+byte[] managementKey = PivSession.DefaultManagementKey.ToArray();
+try
+{
+    await session.AuthenticateAsync(managementKey);
+    var keyOptions = new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never };
+    IPublicKey publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, keyOptions);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+}
+
+
+}
+}
+
+public static class ReadmeCertificate
+{
+public static async Task RunAsync(IYubiKey device, byte[] managementKey, CancellationToken cancellationToken)
+{
+try
+{
+await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+await session.AuthenticateAsync(managementKey, cancellationToken);
+using var certificate = X509CertificateLoader.LoadCertificateFromFile("authentication.cer");
+await session.StoreCertificateAsync(Slot.Authentication, certificate, CertificateCompression.Automatic);
+using X509Certificate2? stored = await session.GetCertificateAsync(Slot.Authentication);
+if (stored is null)
+    throw new InvalidOperationException("The slot has no usable certificate data.");
+
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+}
+}
+}
+
+public static class ReadmeHostSignature
+{
+public static async Task RunAsync(IYubiKey device)
+{
+
+await using var session = await device.CreatePivSessionAsync();
+
+byte[] pin = Encoding.UTF8.GetBytes("123456");
+byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
+Memory<byte> signature = Memory<byte>.Empty;
+try
+{
+    await session.VerifyPinAsync(pin);
+    var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)
+        ?? throw new InvalidOperationException("Generate a P-256 key first.");
+    using var verifier = metadata.GetECDsaPublicKey();
+    signature = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
+    if (!verifier.VerifyHash(digest, signature.Span, DSASignatureFormat.Rfc3279DerSequence))
+        throw new CryptographicException("The slot signature failed host verification.");
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+    CryptographicOperations.ZeroMemory(digest);
+    CryptographicOperations.ZeroMemory(signature.Span);
+}
+
+
+}
+}
+
+public static class ReadmeKnownPlaintext
+{
+public static async Task RunAsync(IYubiKey device)
+{
+
+await using var session = await device.CreatePivSessionAsync();
+using var certificate = await session.GetCertificateAsync(Slot.KeyManagement)
+    ?? throw new InvalidOperationException("Provision a matching RSA certificate first.");
+using var rsa = certificate.GetRSAPublicKey()
+    ?? throw new InvalidOperationException("The certificate must contain an RSA public key.");
+byte[] pin = Encoding.UTF8.GetBytes("123456");
+byte[] expected = Encoding.UTF8.GetBytes("known plaintext");
+Memory<byte> plaintext = Memory<byte>.Empty;
+try
+{
+    byte[] ciphertext = rsa.Encrypt(expected, RSAEncryptionPadding.OaepSHA256);
+    await session.VerifyPinAsync(pin);
+    plaintext = await session.DecryptAsync(Slot.KeyManagement, ciphertext, RSAEncryptionPadding.OaepSHA256);
+    if (!CryptographicOperations.FixedTimeEquals(expected, plaintext.Span))
+        throw new CryptographicException("Decryption returned unexpected plaintext.");
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+    CryptographicOperations.ZeroMemory(expected);
+    CryptographicOperations.ZeroMemory(plaintext.Span);
+}
+
+
+}
+}
+
+public static class ReadmeProtectedRoundtrip
+{
+public static async Task RunAsync(IYubiKey device, byte[] pin, byte[] activeManagementKey, KeyType activeManagementKeyType, CancellationToken cancellationToken)
+{
+    try
+    {
+        if (activeManagementKey.Length != 24 || activeManagementKeyType is not (KeyType.TripleDes or KeyType.Aes192))
+            throw new ArgumentException("Supply the installed 24-byte Triple-DES or AES-192 key and its known algorithm.", nameof(activeManagementKey));
+        await ProtectedAdministrationRoundTripAsync(device, pin, activeManagementKey, cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(pin);
+        CryptographicOperations.ZeroMemory(activeManagementKey);
+    }
+}
+public static async Task ProtectedAdministrationRoundTripAsync(
+    IYubiKey device,
+    ReadOnlyMemory<byte> pin,
+    ReadOnlyMemory<byte> activeManagementKey,
+    CancellationToken cancellationToken)
+{
+    await using (var setup = await device.CreatePivSessionAsync(cancellationToken: cancellationToken))
+    {
+        await setup.AuthenticateAsync(activeManagementKey, cancellationToken);
+        await setup.SetPinOnlyModeAsync(PinOnlyMode.PinProtected, pin, activeManagementKey, cancellationToken);
+    }
+
+    await using (var reopened = await device.CreatePivSessionAsync(cancellationToken: cancellationToken))
+    {
+        PinOnlyMode detected = await reopened.GetPinOnlyModeAsync(cancellationToken);
+        if (!detected.HasFlag(PinOnlyMode.PinProtected))
+            throw new InvalidOperationException("Inspect ADMIN DATA before continuing.");
+        PinOnlyMode recovered = await reopened.RecoverPinOnlyModeAsync(pin, cancellationToken);
+        if (!recovered.HasFlag(PinOnlyMode.PinProtected) || !reopened.IsManagementKeyAuthenticated)
+            throw new InvalidOperationException("Use the backed-up active management key to recover access.");
+
+        // Perform authorized administration here, then restore the type-appropriate public default.
+        await reopened.SetPinOnlyModeAsync(PinOnlyMode.None, pin, cancellationToken: cancellationToken);
+    }
+}
+
+}
+
+public static class ReadmeTouchCallback
+{
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
+}
+
+public static async Task RunAsync(IYubiKey device)
+{
+var options = new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() };
+await using var session = await device.CreatePivSessionAsync(options);
+
+}
+}
+
+public static class FactoryOwnedConnection
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken cancellationToken)
+{
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+
+
+}
+}
+
+public static class FactoryBorrowedConnection
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken cancellationToken)
+{
+
+await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
+await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+
+
+}
+}
+
+public static class StoreAuthenticationCallback
+{
+public static async Task AuthenticateWithStoreAsync(
+    IPivSession session,
+    Action<Memory<byte>> loadManagementKey,
+    CancellationToken cancellationToken)
+{
+    // This example store contract supplies a 24-byte Triple-DES or AES-192 active key.
+    byte[] managementKey = ArrayPool<byte>.Shared.Rent(24);
+    try
+    {
+        loadManagementKey(managementKey.AsMemory(0, 24));
+        await session.AuthenticateAsync(managementKey.AsMemory(0, 24), cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(managementKey.AsSpan(0, 24));
+        ArrayPool<byte>.Shared.Return(managementKey, clearArray: true);
+    }
+}
+
+}
+
+public static class ToolSlotAttestation
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await Attestation.GetAttestationAsync(
+    session, Slot.Authentication, ct);
+
+using var attestCert = result.AttestationCertificate;
+using var signerCert = result.IntermediateCertificate;
+if (result.Success && attestCert is not null)
+{
+    Console.WriteLine($"Retrieved attestation: {attestCert.Subject}");
+}
+
+
+}
+}
+
+public static class ToolF9Retrieval
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await Attestation.GetIntermediateCertificateAsync(session, ct);
+// This helper returns F9 in AttestationCertificate; IntermediateCertificate remains null.
+using var f9Cert = result.AttestationCertificate;
+using var additionalCert = result.IntermediateCertificate;
+if (result.Success && f9Cert is not null)
+{
+    Console.WriteLine(f9Cert.Subject);
+}
+
+
+}
+}
+
+public static class ToolCertificateRead
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await Certificates.GetCertificateAsync(session, Slot.Authentication, ct);
+using var certificate = result.Certificate;
+if (result.Success && certificate is not null)
+{
+    Console.WriteLine($"Subject: {certificate.Subject}");
+}
+
+
+}
+}
+
+public static class ToolCertificateImport
+{
+public static async Task RunAsync(IYubiKey device, byte[] managementKey, CancellationToken ct)
+{
+try
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.AuthenticateAsync(managementKey, ct);
+
+var certData = await File.ReadAllBytesAsync("certificate.pem", ct);
+var result = await Certificates.ImportCertificateAsync(
+    session, Slot.Authentication, certData, compress: false, cancellationToken: ct);
+using var certificate = result.Certificate;
+
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+}
+}
+}
+
+public static class ToolCertificateExport
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await Certificates.ExportCertificatePemAsync(session, Slot.Authentication, ct);
+using var certificate = result.Certificate;
+if (result.Success && certificate is not null)
+{
+    var pem = certificate.ExportCertificatePem();
+    await File.WriteAllTextAsync("certificate.pem", pem, ct);
+}
+
+
+}
+}
+
+public static class ToolCertificateDelete
+{
+public static async Task RunAsync(IYubiKey device, byte[] managementKey, CancellationToken ct)
+{
+try
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.AuthenticateAsync(managementKey, ct);
+
+var result = await Certificates.DeleteCertificateAsync(session, Slot.Authentication, ct);
+
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+}
+}
+}
+
+public static class ToolCertificateSelfSign
+{
+public static async Task RunAsync(IYubiKey device, byte[] managementKey, byte[] pin, CancellationToken ct)
+{
+try
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.AuthenticateAsync(managementKey, ct);
+await session.VerifyPinAsync(pin, ct);
+
+var result = await Certificates.GenerateSelfSignedAsync(
+    session, Slot.Authentication, "CN=Test User", 365, ct);
+using var certificate = result.Certificate;
+
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+    CryptographicOperations.ZeroMemory(pin);
+}
+}
+}
+
+public static class ToolCertificateCsr
+{
+public static async Task RunAsync(IYubiKey device, byte[] pin, CancellationToken ct)
+{
+try
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.VerifyPinAsync(pin, ct); // Borrowed caller-owned PIN; required by the slot policy.
+
+var result = await Certificates.GenerateCsrAsync(
+    session, Slot.Authentication, "CN=Test User", ct);
+
+using var certificate = result.Certificate;
+if (result.Success && result.CsrPem is { } csrPem)
+{
+    await File.WriteAllTextAsync("request.csr", csrPem, ct);
+}
+
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+}
+}
+}
+
+public static class ToolPinVerify
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var pin = Encoding.UTF8.GetBytes("123456");
+try
+{
+    var result = await PinManagement.VerifyPinAsync(session, pin, ct);
+    if (result.Success)
+    {
+        Console.WriteLine("PIN verified");
+    }
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+}
+
+
+}
+}
+
+public static class ToolPinChange
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var oldPin = Encoding.UTF8.GetBytes("123456");
+var newPin = Encoding.UTF8.GetBytes("654321");
+try
+{
+    var result = await PinManagement.ChangePinAsync(session, oldPin, newPin, ct);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(oldPin);
+    CryptographicOperations.ZeroMemory(newPin);
+}
+
+
+}
+}
+
+public static class ToolPinUnblock
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var puk = Encoding.UTF8.GetBytes("12345678");
+var newPin = Encoding.UTF8.GetBytes("123456");
+try
+{
+    var result = await PinManagement.UnblockPinAsync(session, puk, newPin, ct);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(puk);
+    CryptographicOperations.ZeroMemory(newPin);
+}
+
+
+}
+}
+
+public static class ToolManagementAuthenticate
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+// Evaluation only: the session must use the 24-byte factory key with Triple-DES or AES-192.
+var mgmtKey = PivSession.DefaultManagementKey.ToArray();
+try
+{
+    var result = await PinManagement.AuthenticateAsync(session, mgmtKey, ct);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(mgmtKey);
+}
+
+
+}
+}
+
+public static class ToolManagementRotation
+{
+public static async Task RunAsync(IYubiKey device, byte[] currentKey, byte[] newKey, CancellationToken ct)
+{
+try
+{
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+if (currentKey.Length != 24 || newKey.Length != 24)
+    throw new ArgumentException("Supply the active and backed-up replacement 24-byte Triple-DES keys.", nameof(newKey));
+
+// currentKey and newKey are caller-owned buffers; securely back up newKey before this task.
+// This example installs a 24-byte Triple-DES key on a compatible device.
+await session.AuthenticateAsync(currentKey, ct);
+var result = await PinManagement.ChangeManagementKeyAsync(
+    session, newKey, KeyType.TripleDes, requireTouch: false, cancellationToken: ct);
+// Keep the backup through fresh-session authentication; the caller clears both buffers in finally.
+
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(currentKey);
+    CryptographicOperations.ZeroMemory(newKey);
+}
+}
+}
+
+public static class ToolRetryMetadata
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await DeviceInfoQuery.GetPivRetryInfoAsync(session, ct);
+if (result.Success)
+{
+    Console.WriteLine($"PIN retries: {result.PinRetriesRemaining}");
+    Console.WriteLine($"PUK retries: {result.PukRetriesRemaining}");
+}
+
+
+}
+}
+
+public static class ToolKeyGeneration
+{
+public static async Task RunAsync(IYubiKey device, byte[] managementKey, CancellationToken ct)
+{
+try
+{
+
+
+// Requires an authorized target slot and a borrowed active managementKey buffer.
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.AuthenticateAsync(managementKey, ct);
+
+var result = await KeyGeneration.GenerateKeyAsync(
+    session,
+    Slot.Authentication,
+    KeyType.P256,
+    PinPolicy.Once,
+    TouchPolicy.Cached,
+    ct);
+
+if (result.Success)
+{
+    var publicKeyBytes = result.PublicKey;
+}
+
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+}
+}
+}
+
+public static class ToolReset
+{
+public static async Task RunAsync(IYubiKey device, bool userConfirmedReset, CancellationToken ct)
+{
+
+
+// Requires an authorized reset decision; normal reset retains F9 material.
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+// Ensure user confirms this destructive action
+if (userConfirmedReset)
+{
+    var result = await Reset.ResetPivApplicationAsync(session, ct);
+    if (result.Success)
+    {
+        Console.WriteLine("PIV application reset to factory defaults.");
+    }
+}
+
+
+}
+}
+
+public static class ToolSigning
+{
+public static async Task RunAsync(IYubiKey device, IUserPresencePrompt userPresencePrompt, byte[] pin, ReadOnlyMemory<byte> dataBytes, CancellationToken ct)
+{
+try
+{
+
+
+var options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };
+// Requires an application-owned prompt, caller-owned PIN/data and a provisioned P-256/P-384 slot.
+await using var session = await device.CreatePivSessionAsync(options, ct);
+await session.VerifyPinAsync(pin, ct);
+
+var result = await Signing.SignDataAsync(
+    session, 
+    Slot.Signature,
+    dataBytes,
+    HashAlgorithmName.SHA256,
+    ct);
+
+if (result.Success)
+{
+    var signature = result.Signature;
+}
+
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+}
+}
+}
+
+public static class ToolDecryptionInspection
+{
+public static async Task RunAsync(IYubiKey device, IUserPresencePrompt userPresencePrompt, byte[] pin, ReadOnlyMemory<byte> encryptedBytes, CancellationToken ct)
+{
+try
+{
+
+
+var options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };
+await using var session = await device.CreatePivSessionAsync(options, ct);
+await session.VerifyPinAsync(pin, ct);
+
+var result = await Decryption.DecryptDataAsync(
+    session,
+    Slot.KeyManagement,
+    encryptedBytes,
+    cancellationToken: ct);
+
+if (result.Success)
+{
+    var plaintext = result.DecryptedData;
+}
+
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+}
+}
+}
+
+public static class ToolSlotQuery
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken ct)
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await SlotInfoQuery.GetAllSlotsInfoAsync(session, ct);
+try
+{
+    if (result.Success)
+    {
+        foreach (var slot in result.Slots)
+            Console.WriteLine($"{slot.Name}: Key={slot.HasKey}, Cert={slot.HasCertificate}");
+    }
+}
+finally
+{
+    foreach (var slot in result.Slots)
+        slot.Certificate?.Dispose();
+}
+
+
+}
+}
+
+public static class ToolHostVerification
+{
+public static async Task RunAsync(IYubiKey device, ReadOnlyMemory<byte> originalData, ReadOnlyMemory<byte> signatureBytes, CancellationToken ct)
+{
+
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await Verification.VerifySignatureAsync(
+    session,
+    Slot.Signature,
+    originalData,
+    signatureBytes,
+    HashAlgorithmName.SHA256,
+    ct);
+
+if (result.Success && result.IsValid)
+{
+    Console.WriteLine("Signature is valid!");
+}
+
+
+}
+}
+
+public static class RsaExtractor
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken cancellationToken)
+{
+await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+
+// Requires an open session, firmware 5.3+ and a provisioned RSA slot.
+var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)
+    ?? throw new InvalidOperationException("Provision an RSA key first.");
+using var rsa = metadata.GetRsaPublicKey();
+byte[] plaintext = "example"u8.ToArray();
+try
+{
+    byte[] ciphertext = rsa.Encrypt(plaintext, RSAEncryptionPadding.OaepSHA256);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(plaintext);
+}
+
+
+}
+}
+
+public static class EcdsaExtractor
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken cancellationToken)
+{
+await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+
+// Requires an open session, firmware 5.3+ and a provisioned P-256/P-384 slot.
+var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)
+    ?? throw new InvalidOperationException("Provision an EC key first.");
+using var ecdsa = metadata.GetECDsaPublicKey();
+// The host object is now available for signature verification.
+
+
+}
+}
+
+public static class SessionContentionGuard
+{
+public static async Task RunAsync(IYubiKey key, byte[] pin, byte[] digest, CancellationToken ct)
+{
+try
+{
+
+
+    await using var piv = await key.CreatePivSessionAsync(cancellationToken: ct);
+    await piv.VerifyPinAsync(pin, ct);
+    try
+    {
+        await key.GetDeviceInfoAsync(cancellationToken: ct);
+        throw new InvalidOperationException("Expected the ownership guard to reject the second connection.");
+    }
+    catch (ConnectionInUseException)
+    {
+        Memory<byte> signature = await piv.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest, ct);
+        CryptographicOperations.ZeroMemory(signature.Span);
+    }
+    
+
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+    CryptographicOperations.ZeroMemory(digest);
+}
+}
+}
+
+public static class MigrationFactory
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken cancellationToken)
+{
+
+
+await using var piv = await device.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);
+
+
+}
+}
+
+public static class MigrationGeneration
+{
+public static async Task RunAsync(IYubiKey device, CancellationToken cancellationToken)
+{
+
+
+await using var piv = await device.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);
+
+// Evaluation only: the installed active key must be this 24-byte factory value.
+byte[] managementKey = PivSession.DefaultManagementKey.ToArray();
+try
+{
+    await piv.AuthenticateAsync(managementKey, cancellationToken);
+
+    var publicKey = await piv.GenerateKeyAsync(
+        Slot.Authentication,
+        KeyType.P256,
+        new KeyCreationOptions
+        {
+            PinPolicy = PinPolicy.Default,
+            TouchPolicy = TouchPolicy.Default
+        },
+        cancellationToken);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+}
+
+
+}
+}
+
+public static class MigrationProtectedEnable
+{
+public static async Task RunAsync(IYubiKey device, byte[] pin, byte[] activeManagementKey, KeyType activeManagementKeyType, CancellationToken cancellationToken)
+{
+    try
+    {
+        if (activeManagementKey.Length != 24 || activeManagementKeyType is not (KeyType.TripleDes or KeyType.Aes192))
+            throw new ArgumentException("Supply the installed 24-byte Triple-DES or AES-192 key and its known algorithm.", nameof(activeManagementKey));
+        await EnableProtectedAdministrationAsync(device, pin, activeManagementKey, cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(pin);
+        CryptographicOperations.ZeroMemory(activeManagementKey);
+    }
+}
+public 
+static async Task EnableProtectedAdministrationAsync(
+    IYubiKey device,
+    ReadOnlyMemory<byte> pin,
+    ReadOnlyMemory<byte> activeManagementKey,
+    CancellationToken cancellationToken)
+{
+    await using var piv = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+    await piv.AuthenticateAsync(activeManagementKey, cancellationToken);
+    await piv.SetPinOnlyModeAsync(
+        PinOnlyMode.PinProtected,
+        pin,
+        activeManagementKey,
+        cancellationToken);
+}
+
+}
+
+public static class SharedPivTier
+{
+public static async Task RunAsync(IYubiKey yubiKey, CancellationToken cancellationToken)
+{
+
+await using PivSession piv = await yubiKey.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);
+PinMetadata metadata = await piv.GetPinMetadataAsync(cancellationToken);
+
+Console.WriteLine(metadata.RetriesRemaining);
+}
+}
+
+public static class RawSmartcardOwned
+{
+public static async Task RunAsync(IYubiKey yubiKey, FirmwareVersion firmwareVersion, ReadOnlyMemory<byte> applicationId, int cla, int ins, int p1, int p2, ReadOnlyMemory<byte> commandData, CancellationToken cancellationToken)
+{
+
+await using RawSmartCardSession raw =
+    await yubiKey.CreateRawSmartCardSessionAsync(cancellationToken);
+
+// Optional when the firmware version is known. Configure before the first APDU.
+raw.Configure(firmwareVersion);
+
+await raw.SelectAsync(applicationId, cancellationToken);
+ApduResponse response = await raw.TransmitAndReceiveAsync(
+    new ApduCommand(cla, ins, p1, p2, commandData),
+    throwOnError: false,
+    cancellationToken);
+
+try
+{
+    Console.WriteLine($"APDU status: {response.SW1:X2}{response.SW2:X2}");
+}
+finally
+{
+    response.Clear();
+}
+}
+}
+
+public static class RawSmartcardBorrowed
+{
+public static async Task RunAsync(IYubiKey yubiKey, FirmwareVersion firmwareVersion, ReadOnlyMemory<byte> applicationId, ApduCommand command, CancellationToken cancellationToken)
+{
+
+await using ISmartCardConnection connection =
+    await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+
+await using (RawSmartCardSession raw =
+    await RawSmartCardSession.CreateAsync(connection, cancellationToken))
+{
+    raw.Configure(firmwareVersion);
+    await raw.SelectAsync(applicationId, cancellationToken);
+    await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
+}
+
+// RawSmartCardSession borrowed the connection, so it remains available for the next session.
+await using PivSession piv = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+
+
+}
+}
+
+public static class RawScpParameters
+{
+public static async Task RunAsync(IYubiKey yubiKey, FirmwareVersion firmwareVersion, ReadOnlyMemory<byte> applicationId, ApduCommand command, Func<ScpKeyParameters> loadScpParameters, CancellationToken cancellationToken)
+{
+ScpKeyParameters LoadScpParametersFromSecureStorage() => loadScpParameters();
+using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
+await using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(
+    scpParameters,
+    firmwareVersion,
+    cancellationToken: cancellationToken);
+
+await raw.SelectAsync(applicationId, cancellationToken);
+ApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
+
+try
+{
+    Console.WriteLine($"APDU status: {response.SW1:X2}{response.SW2:X2}");
+}
+finally
+{
+    response.Clear();
+}
+}
+}
+
+public static class RawMigrationCurrent
+{
+public static async Task RunAsync(IYubiKey device, ReadOnlyMemory<byte> applicationId, CancellationToken cancellationToken)
+{
+await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
+// After
+await using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, cancellationToken);
+await raw.SelectAsync(applicationId, cancellationToken);
+
+}
+}
+
+public static class SharedConsolePrompt
+{
+public static async Task RunAsync(IYubiKey yubiKey, CancellationToken cancellationToken)
+{
+
+
+var options = new SessionCreationOptions
+{
+    UserPresencePrompt = ConsoleUserPresencePrompt.Instance
+};
+
+await using PivSession session = await yubiKey.CreatePivSessionAsync(
+    options,
+    cancellationToken);
+
+
+}
+}
+
+public sealed class SharedPromptCallbacks : IUserPresencePrompt
+{
+public static string Describe(UserPresenceContext context)
+{
+
+string message = context.Operation switch
+{
+    UserPresenceOperations.Ctap2.MakeCredential => "Touch your YubiKey to create a passkey.",
+    UserPresenceOperations.Ctap2.GetAssertion => "Touch your YubiKey to sign in.",
+    UserPresenceOperations.Piv.SignOrDecrypt => "Touch your YubiKey for the PIV key operation.",
+    _ when context.Application == UserPresenceApplications.Oath => "Touch your YubiKey to generate a code.",
+    _ => "Touch your YubiKey to continue."
+};
+
+return message;
+}
+public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken)
+{
+    string operation = context.Operation switch
+    {
+        UserPresenceOperations.Ctap2.GetAssertion => "sign-in",
+        UserPresenceOperations.Ctap2.MakeCredential => "passkey registration",
+        _ => "key operation"
+    };
+
+    // "Touch your YubiKey to approve the transfer of 500 EUR (sign-in)."
+    Console.WriteLine(context.Intent is { } intent
+        ? $"Touch your YubiKey to {intent} ({operation})."
+        : $"Touch your YubiKey to confirm the {operation}.");
+    return default;
+}
+
+}
+
+public static class SharedIntentAwait
+{
+public static async Task RunAsync(Yubico.YubiKit.WebAuthn.Client.WebAuthnClient client, Yubico.YubiKit.WebAuthn.Client.Authentication.PublicKeyCredentialRequestOptions requestOptions, CancellationToken cancellationToken)
+{
+
+using (UserPresenceIntent.BeginScope("approve the transfer of 500 EUR"))
+{
+    await client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken);
+}
+
+
+}
+}
+

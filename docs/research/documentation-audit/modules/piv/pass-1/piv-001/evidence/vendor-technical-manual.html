@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Card - PIV Compatible Specifics &mdash; YubiKey Technical Manual  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/dist.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/gtm.js"></script>
+        <script src="https://kit.fontawesome.com/ea7c27f2b7.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="OATH Specifics" href="yk5-apps-oath.html" />
+    <link rel="prev" title="FIDO Specifics" href="yk5-apps-fido.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            YubiKey Technical Manual
+              <img src="https://resources.yubico.com/XEG5TAAH/at/8kq7984j7ffgq82qvfgqvbnh/logo.svg?auto=webp&format=svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="yk5-intro.html">Introduction to the YubiKey Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-physical-attributes.html">Physical Attributes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="yk5-apps-index.html">Protocols and Applications</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-fido.html">FIDO Specifics</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Smart Card - PIV Compatible Specifics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#default-values">Default Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#supported-algorithms">Supported Algorithms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#policies">Policies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pin-policy">PIN Policy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#touch-policy">Touch Policy</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#slot-information">Slot Information</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#slot-9a-piv-authentication">Slot 9a: PIV Authentication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#slot-9c-digital-signature">Slot 9c: Digital Signature</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#slot-9d-key-management">Slot 9d: Key Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#slot-9e-card-authentication">Slot 9e: Card Authentication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#slots-82-95-retired-key-management">Slots 82-95: Retired Key Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#slot-f9-attestation">Slot f9: Attestation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-key-management-functions">Advanced Key Management Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#import-a-key">Import a Key</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#move-a-key">Move a Key</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delete-a-key">Delete a Key</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#attestation">Attestation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#firmware">Firmware</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#serial-number">Serial Number</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">PIN Policy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Touch Policy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#form-factor">Form Factor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#piv-metadata">PIV Metadata</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#background-how-piv-attestation-works">Background: How PIV Attestation Works</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#notes-on-piv-attestation">Notes on PIV Attestation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#when-to-use-piv-metadata">When To Use PIV Metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yubico-piv-library-and-metadata-api">Yubico PIV Library and Metadata API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-piv-metadata-with-ykcs11">Using PIV Metadata with YKCS11</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#changes">Changes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#answer-to-reset-atr-and-answer-to-select-ats">Answer to Reset (ATR) and Answer to Select (ATS)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#piv-attestation-root-ca">PIV Attestation Root CA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#easier-identification">Easier Identification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#piv-aes-management-key">PIV AES Management Key</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-oath.html">OATH Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-openpgp.html">OpenPGP Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-otp.html">OTP Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-scp.html">Secure Channel Protocol (SCP03 and SCP11) Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-yubihsm-auth.html">YubiHSM Auth Specifics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-firmware-index.html">YubiKey Firmware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-fips-index.html">YubiKey 5 FIPS Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-bio-specifics.html">YubiKey Bio Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-nfc-id-tech-desc.html">NFC ID Calculation Technical Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-tools.html">Tools and Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-cspn-specifics.html">YubiKey 5 CSPN Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acronyms.html">Acronyms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyright</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">YubiKey Technical Manual</a>
+      </nav>
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="yk5-apps-index.html">Protocols and Applications</a></li>
+      <li class="breadcrumb-item active">Smart Card - PIV Compatible Specifics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/yk5-apps-piv.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="smart-card-piv-compatible-specifics">
+<span id="apps-piv-smart-card-label"></span><h1>Smart Card - PIV Compatible Specifics<a class="headerlink" href="#smart-card-piv-compatible-specifics" title="Permalink to this heading"></a></h1>
+<p>The YubiKey 5 Series provides a PIV-compatible smart card application. PIV, or FIPS 201, is a US government standard. It enables RSA or ECC sign/encrypt operations using a private key stored on a smart card through common interfaces like PKCS#11.</p>
+<p>On Windows, the smart card functionality can be extended with the YubiKey Minidriver. See <a class="reference external" href="https://docs.yubico.com/software/yubikey/tools/minidriver/index.html" target="_blank">YubiKey Minidriver User Guide</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The YubiKey Minidriver is not available for Android, Linux, macOS or iOS.</p>
+</div>
+<p>The YubiKey 5 Series supports extended APDUs, extended <code class="docutils literal notranslate"><span class="pre">Answer</span> <span class="pre">To</span> <span class="pre">Reset</span></code> (ATR), and <code class="docutils literal notranslate"><span class="pre">Answer</span> <span class="pre">To</span> <span class="pre">Select</span></code> (ATS). Using the PIV APDUs on iOS requires the <a class="reference external" href="https://github.com/Yubico/yubikit-ios" target="_blank">Yubico iOS SDK</a>.</p>
+<p>For an overview of the PIV features that became available with the 5.7.x and later firmware, see <a class="reference internal" href="yk5-firmware-5.7.html#piv-enhancements"><span class="std std-ref">PIV Enhancements</span></a>.</p>
+<div class="section" id="default-values">
+<h2>Default Values<a class="headerlink" href="#default-values" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li>PIN: <code class="docutils literal notranslate"><span class="pre">123456</span></code></li>
+<li>PUK: <code class="docutils literal notranslate"><span class="pre">12345678</span></code></li>
+<li>Management Key (3DES):<ul>
+<li>Firmware 5.0.x-5.6.x: <code class="docutils literal notranslate"><span class="pre">010203040506070801020304050607080102030405060708</span></code> (3DES)</li>
+<li>Firmware 5.7.x and later: <code class="docutils literal notranslate"><span class="pre">010203040506070801020304050607080102030405060708</span></code> (AES-192)</li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The Management Key changed to AES-192 in firmware 5.7 and later, however the default value itself did not change.</p>
+</div>
+</div>
+<div class="section" id="supported-algorithms">
+<h2>Supported Algorithms<a class="headerlink" href="#supported-algorithms" title="Permalink to this heading"></a></h2>
+<p>The YubiKey 5 Series supports the following algorithms on the PIV smart card application.</p>
+<table border="1" class="longtable docutils align-default" id="id4">
+<caption><span class="caption-text"><strong>Available PIV Algorithms per Firmware Version</strong></span><a class="headerlink" href="#id4" title="Permalink to this table"></a></caption>
+<colgroup>
+<col width="50%" />
+<col width="13%" />
+<col width="13%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head" rowspan="2">Algorithm (Identifier)</th>
+<th class="head" colspan="3">Firmware Versions</th>
+</tr>
+<tr class="row-even"><th class="head">5.8.x</th>
+<th class="head">5.7.4</th>
+<th class="head">5.0.x-5.6.x</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-odd"><td>RSA-1024 (0x06)</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="row-even"><td>RSA-2048 (0x07)</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="row-odd"><td>RSA-3072 (0x05)</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+</tr>
+<tr class="row-even"><td>RSA-4096 (0x16)</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+</tr>
+<tr class="row-odd"><td>ECC P-256 (0x11)</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="row-even"><td>ECC P-384 (0x14)</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="row-odd"><td>Ed25519/x25519 (0xe0)</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>–</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="policies">
+<h2>Policies<a class="headerlink" href="#policies" title="Permalink to this heading"></a></h2>
+<div class="section" id="pin-policy">
+<h3>PIN Policy<a class="headerlink" href="#pin-policy" title="Permalink to this heading"></a></h3>
+<p>To specify how often the PIN needs to be entered for access to the credential in a given slot, set a PIN policy for that slot. This policy must be set upon key generation or import. It cannot be changed later.</p>
+</div>
+<div class="section" id="touch-policy">
+<h3>Touch Policy<a class="headerlink" href="#touch-policy" title="Permalink to this heading"></a></h3>
+<p>In addition to requiring the PIN, the YubiKey can require a physical touch on the metal contact. Similar to the PIN policy, the touch policy must be set upon key generation or import.</p>
+</div>
+</div>
+<div class="section" id="slot-information">
+<h2>Slot Information<a class="headerlink" href="#slot-information" title="Permalink to this heading"></a></h2>
+<p>The keys and certificates for the smart card application are stored in slots, which are described below. The PIN policies described below are the defaults, before they are overridden with a custom PIN policy. <strong>These slots are separate from the programmable slots in the OTP application.</strong></p>
+<div class="section" id="slot-9a-piv-authentication">
+<h3>Slot 9a: PIV Authentication<a class="headerlink" href="#slot-9a-piv-authentication" title="Permalink to this heading"></a></h3>
+<p>This certificate and its associated private key is used to authenticate the card and the cardholder. This slot is used for system login, etc. To perform any private key operations, the end user PIN is required. Once the correct PIN has been provided, multiple private key operations may be performed without additional cardholder consent.</p>
+</div>
+<div class="section" id="slot-9c-digital-signature">
+<h3>Slot 9c: Digital Signature<a class="headerlink" href="#slot-9c-digital-signature" title="Permalink to this heading"></a></h3>
+<p>This certificate and its associated private key is used for digital signatures for the purpose of document, email, file, and executable signing. To perform any private key operations, the end user PIN is required. The PIN must be submitted immediately before each sign operation to ensure cardholder participation for every digital signature generated.</p>
+</div>
+<div class="section" id="slot-9d-key-management">
+<h3>Slot 9d: Key Management<a class="headerlink" href="#slot-9d-key-management" title="Permalink to this heading"></a></h3>
+<p>This certificate and its associated private key is used for encryption to assure confidentiality. This slot is used for encrypting emails or files. The end user PIN is required to perform any private key operations. Once the correct PIN has been provided, multiple private key operations may be performed without additional cardholder consent.</p>
+</div>
+<div class="section" id="slot-9e-card-authentication">
+<h3>Slot 9e: Card Authentication<a class="headerlink" href="#slot-9e-card-authentication" title="Permalink to this heading"></a></h3>
+<p>This certificate and its associated private key is used to support additional physical access applications, such as providing physical access to buildings through PIV-enabled door locks. The end user PIN is NOT required to perform private key operations for this slot.</p>
+</div>
+<div class="section" id="slots-82-95-retired-key-management">
+<h3>Slots 82-95: Retired Key Management<a class="headerlink" href="#slots-82-95-retired-key-management" title="Permalink to this heading"></a></h3>
+<p>These slots are meant for previously used Key Management keys to be able to decrypt earlier encrypted documents or emails.</p>
+</div>
+<div class="section" id="slot-f9-attestation">
+<h3>Slot f9: Attestation<a class="headerlink" href="#slot-f9-attestation" title="Permalink to this heading"></a></h3>
+<p>This slot is only used for attestation of other keys generated on the device with instruction f9. This slot is not cleared on reset, but can be overwritten.</p>
+</div>
+<div class="section" id="advanced-key-management-functions">
+<h3>Advanced Key Management Functions<a class="headerlink" href="#advanced-key-management-functions" title="Permalink to this heading"></a></h3>
+<p>With the 5.7.x and later firmware, the PIV application supports advanced key management functions such as moving and deleting keys:</p>
+<ul class="simple">
+<li>The ability to move keys enables retaining retired encryption keys on the device to decrypt older messages.</li>
+<li>The ability to delete keys enables destroying key material without overwriting with bogus data or resetting the PIV application.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="import-a-key">
+<h2>Import a Key<a class="headerlink" href="#import-a-key" title="Permalink to this heading"></a></h2>
+<p>For more information, see <a class="reference external" href="https://docs.yubico.com/yesdk/users-manual/application-piv/apdu/import-asym.html" target="_blank">Import asymmetric key pair</a>.</p>
+</div>
+<div class="section" id="move-a-key">
+<h2>Move a Key<a class="headerlink" href="#move-a-key" title="Permalink to this heading"></a></h2>
+<p>Keys can be moved from any slot except F9 (attestation) to any other slot except F9 using the instruction 0xF6.</p>
+<table border="1" class="docutils align-default" id="id5">
+<caption><span class="caption-text"><strong>Moving a Key</strong></span><a class="headerlink" href="#id5" title="Permalink to this table"></a></caption>
+<colgroup>
+<col width="11%" />
+<col width="89%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>CLA</td>
+<td>00</td>
+</tr>
+<tr class="row-even"><td>INS</td>
+<td>F6</td>
+</tr>
+<tr class="row-odd"><td>P1</td>
+<td>Destination slot</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>9A, 9C, 9D, 9E,</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F,</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>90, 91, 92, 93, 94, 95</td>
+</tr>
+<tr class="row-odd"><td>P2</td>
+<td>Source slot</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>9A, 9C, 9D, 9E,</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F,</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>90, 91, 92, 93, 94, 95</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="delete-a-key">
+<h2>Delete a Key<a class="headerlink" href="#delete-a-key" title="Permalink to this heading"></a></h2>
+<p>Any key can be deleted from any slot, including F9 (Attestation) using the instruction 0xF6 with a value of 0xFF for P1.</p>
+<table border="1" class="docutils align-default" id="id6">
+<caption><span class="caption-text"><strong>Deleting a Key</strong></span><a class="headerlink" href="#id6" title="Permalink to this table"></a></caption>
+<colgroup>
+<col width="11%" />
+<col width="89%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>CLA</td>
+<td>00</td>
+</tr>
+<tr class="row-even"><td>INS</td>
+<td>F6</td>
+</tr>
+<tr class="row-odd"><td>P1</td>
+<td>FF</td>
+</tr>
+<tr class="row-even"><td>P2</td>
+<td>Source slot</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>9A, 9C, 9D, 9E,</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F,</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>90, 91, 92, 93, 94, 95</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>F9</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="attestation">
+<h2>Attestation<a class="headerlink" href="#attestation" title="Permalink to this heading"></a></h2>
+<p>Attestation enables you to verify that a key on the smart card application was generated on the YubiKey and was not imported. An X.509 certificate for the key to be attested is created if the key has been generated on the YubiKey. Included in the certificate are the following extensions that provide information about the YubiKey.</p>
+<div class="section" id="firmware">
+<h3>Firmware<a class="headerlink" href="#firmware" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">1.3.6.1.4.1.41482.3.3</span></code>: Firmware version, encoded as three bytes. For example, 050100 indicates firmware version 5.1.0.</p>
+</div>
+<div class="section" id="serial-number">
+<h3>Serial Number<a class="headerlink" href="#serial-number" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">1.3.6.1.4.1.41482.3.7</span></code>: Serial number of the YubiKey, encoded as an integer.</p>
+<p><code class="docutils literal notranslate"><span class="pre">1.3.6.1.4.1.41482.3.8</span></code>: Two bytes, the first encoding the PIN policy and the second encoding the touch policy.</p>
+</div>
+<div class="section" id="id1">
+<h3>PIN Policy<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li>01 - never require PIN</li>
+<li>02 - require PIN once per session</li>
+<li>03 - always require PIN.</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h3>Touch Policy<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li>01 - never require touch</li>
+<li>02 - always require touch</li>
+<li>03 - cache touch for 15 seconds.</li>
+</ul>
+</div>
+<div class="section" id="form-factor">
+<h3>Form Factor<a class="headerlink" href="#form-factor" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">1.3.6.1.4.1.41482.3.9</span></code>: YubiKey form factor, encoded as a one-byte octet-string during manufacturing and returned as a one-byte value.</p>
+<ul class="simple">
+<li>NFC and USB-A keychain: 0x01</li>
+<li>Nano USB-A: 0x02</li>
+<li>NFC and USB-C keychain: 0x03</li>
+<li>Nano USB-C: 0x04</li>
+<li>Lightning and USB-C keychain: 0x05</li>
+<li>UNDEFINED: 0x00</li>
+</ul>
+<p>Keychain form factors also have space for adding to a keychain. See <a class="reference internal" href="yk5-physical-attributes.html#fips-formfactors-label"><span class="std std-ref">YubiKey 5 FIPS Series</span></a>.</p>
+</div>
+</div>
+<div class="section" id="piv-metadata">
+<h2>PIV Metadata<a class="headerlink" href="#piv-metadata" title="Permalink to this heading"></a></h2>
+<div class="section" id="background-how-piv-attestation-works">
+<h3>Background: How PIV Attestation Works<a class="headerlink" href="#background-how-piv-attestation-works" title="Permalink to this heading"></a></h3>
+<p>A technical description of YubiKey PIV attestation is available at the <a class="reference external" href="https://developers.yubico.com/PIV/Introduction/PIV_attestation.html" target="_blank">Yubico developer website</a>.</p>
+<p>Attestation is performed on a public key that has been <em>generated on the YubiKey</em>. For example, consider an asymmetric key-pair that is generated on the YubiKey with the following <code class="docutils literal notranslate"><span class="pre">ykman</span></code> command:</p>
+<p><code class="docutils literal notranslate"><span class="pre">ykman</span> <span class="pre">piv</span> <span class="pre">generate-key</span> <span class="pre">9c</span> <span class="pre">-</span></code></p>
+<p>This command generates an asymmetric key-pair, and stores the private key in the specified slot (9c in this example). The public key that has been generated is returned as output.</p>
+<p>The ykman attestation command can be executed for the key-pair at the slot (9c):</p>
+<p><code class="docutils literal notranslate"><span class="pre">ykman</span> <span class="pre">piv</span> <span class="pre">attest</span> <span class="pre">9c</span> <span class="pre">C:\Test\attestation-cert-9c.cer</span></code></p>
+<p>The generated certificate is generated in real time at the YubiKey. The attestation certificate and private key, which are stored in slot f9, are used for signing the generated certificate for the slot (9c). The attestation certificate is used as template when creating the generated certificate for the slot (9c). In addition to the template attestation certificate, the <a class="reference external" href="https://developers.yubico.com/PIV/Introduction/PIV_attestation.html" target="_blank">extensions and subject details</a> are appended to the generated certificate.</p>
+<p>However, the generated certificate is not the same as the X.509 certificate that may be issued by an external CA or self-signed on the YubiKey. For example, the X.509 certificate could be issued by the Microsoft ADCS and written to the YubiKey. The <a class="reference external" href="https://www.yubico.com/products/yubico-authenticator/" target="_blank">Yubico Authenticator</a> on Windows can be used to generate a key-pair and self-sign the public key at the YubiKey.</p>
+<p>The public key at slot 9a can be attested (signed in real time by the CA attestation certificate) with the same ykman command as above:</p>
+<p><code class="docutils literal notranslate"><span class="pre">ykman</span> <span class="pre">piv</span> <span class="pre">attest</span> <span class="pre">9a</span> <span class="pre">C:\Test\attestation-cert-9a.cer</span></code></p>
+<p>And the X.509 self-signed certificate can be exported from the YubiKey with the following ykman command:</p>
+<p><code class="docutils literal notranslate"><span class="pre">ykman</span> <span class="pre">piv</span> <span class="pre">export-certificate</span> <span class="pre">9a</span> <span class="pre">C:\Test\self-signed-9a.cer</span></code></p>
+</div>
+<div class="section" id="notes-on-piv-attestation">
+<h3>Notes on PIV Attestation<a class="headerlink" href="#notes-on-piv-attestation" title="Permalink to this heading"></a></h3>
+<p>PIV attestation only works for asymmetric keys that have been <em>generated on</em> the YubiKey. It does not work for asymmetric keys that have been <em>imported into</em> the YubiKey as the attestation attests that a private key only exists on that particular YubiKey.</p>
+<p>For example, the following ykman command imports a PKCS #12 file into the YubiKey at slot 9e:</p>
+<p><code class="docutils literal notranslate"><span class="pre">ykman</span> <span class="pre">piv</span> <span class="pre">import-key</span> <span class="pre">9e</span> <span class="pre">C:\\Test\\TestUser1.p12</span> <span class="pre">-P</span> <span class="pre">123456</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">ykman</span> <span class="pre">piv</span> <span class="pre">import-certificate</span> <span class="pre">9e</span> <span class="pre">C:\\Test\\TestUser1.p12</span> <span class="pre">-P</span> <span class="pre">123456</span></code></p>
+<p>These ykman commands unpack the PKCS #12 file, store the private key in the private key slot (9e), and store the X.509 certificate in the corresponding certificate slot.</p>
+<p>Now, if one tries to attest the public key at slot 9e with the ykman attestation command, the operation fails:</p>
+<p><code class="docutils literal notranslate"><span class="pre">ykman</span> <span class="pre">piv</span> <span class="pre">attest</span> <span class="pre">9e</span> <span class="pre">C:\\Test\\attestation-9e.cer</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">Error:</span> <span class="pre">Attestation</span> <span class="pre">failed.</span></code></p>
+<p>One more drawback with PIV attestation is performance, since generation of multiple PIV attestation certificates can be time-consuming.</p>
+</div>
+<div class="section" id="when-to-use-piv-metadata">
+<h3>When To Use PIV Metadata<a class="headerlink" href="#when-to-use-piv-metadata" title="Permalink to this heading"></a></h3>
+<p>PIV metadata should be used for the following cases:</p>
+<ul class="simple">
+<li>If PIV attestation cannot be used (for imported keys),</li>
+<li>If an attestation certificate is not required, PIV metadata can be used for achieving higher performance.</li>
+</ul>
+</div>
+<div class="section" id="yubico-piv-library-and-metadata-api">
+<h3>Yubico PIV Library and Metadata API<a class="headerlink" href="#yubico-piv-library-and-metadata-api" title="Permalink to this heading"></a></h3>
+<p>PIV metadata is supported by YubiKey v5.3.0 firmware and above. YubiKey PIV metadata can be accessed by using the <code class="docutils literal notranslate"><span class="pre">libykpiv</span></code> library.</p>
+<p>The <a class="reference external" href="https://developers.yubico.com/yubico-piv-tool/" target="_blank">Yubico PIV Tool</a> contains the library</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">libykpiv.so</span></code> (for Linux),</li>
+<li><code class="docutils literal notranslate"><span class="pre">libykpiv.dylib</span></code> (for MacOS),</li>
+<li><code class="docutils literal notranslate"><span class="pre">libykpiv.dll</span></code> (for Windows).</li>
+</ul>
+<p>The source code of the <code class="docutils literal notranslate"><span class="pre">libykpiv</span></code> library is published at the <a class="reference external" href="https://github.com/Yubico/yubico-piv-tool" target="_blank">Yubico GitHub repo</a>.</p>
+<div class="section" id="libykpiv-library">
+<h4>libykpiv library<a class="headerlink" href="#libykpiv-library" title="Permalink to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">libykpiv</span></code> library exposes a C API in the header file <a class="reference external" href="https://github.com/Yubico/yubico-piv-tool/blob/master/lib/ykpiv.h" target="_blank">ykpiv.h</a>, which includes the functions <code class="docutils literal notranslate"><span class="pre">ykpiv_get_metadata()</span></code> and <code class="docutils literal notranslate"><span class="pre">ykpiv_util_parse_metadata()</span></code>. The source code of these functions is available in the file <a class="reference external" href="https://github.com/Yubico/yubico-piv-tool/blob/master/lib/ykpiv.c" target="_blank">ykpiv.c</a>.</p>
+<p>In particular, the function <code class="docutils literal notranslate"><span class="pre">ykpiv_get_metadata()</span></code> calls the underlying function <code class="docutils literal notranslate"><span class="pre">_ykpiv_transfer_data()</span></code>, which transfers APDUs to the YubiKey PIV applet over the CCID interface.</p>
+<p>The function <code class="docutils literal notranslate"><span class="pre">_ykpiv_transfer_data()</span></code> takes the input parameter <code class="docutils literal notranslate"><span class="pre">templ</span></code>, which is populated with the APDUs (<code class="docutils literal notranslate"><span class="pre">CLA</span></code>, <code class="docutils literal notranslate"><span class="pre">INS</span></code>, <code class="docutils literal notranslate"><span class="pre">P1</span></code>, <code class="docutils literal notranslate"><span class="pre">P2</span></code>) that are specified at the Yubico developer website for <a class="reference external" href="https://developers.yubico.com/PIV/Introduction/Yubico_extensions.html" target="_blank">PIV extensions</a> under the section <strong>GET METADATA</strong>. The YubiKey returns the tag length values (TLVs) (<code class="docutils literal notranslate"><span class="pre">Algorithm</span></code>, <code class="docutils literal notranslate"><span class="pre">Policy</span></code>, <code class="docutils literal notranslate"><span class="pre">Origin</span></code>, etc.) that are specified in the same <a class="reference external" href="https://developers.yubico.com/PIV/Introduction/Yubico_extensions.html" target="_blank">PIV extensions</a> section, and the TLV-encoded output is returned in the <code class="docutils literal notranslate"><span class="pre">ykpiv_get_metadata()</span></code> parameter data.</p>
+<table border="1" class="longtable docutils align-default" id="id7">
+<caption><span class="caption-text">TLVs Returned</span><a class="headerlink" href="#id7" title="Permalink to this table"></a></caption>
+<colgroup>
+<col width="23%" />
+<col width="9%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Key</th>
+<th class="head">TLV</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Algorithm</td>
+<td>0x01</td>
+<td>Algorithm/type of the key</td>
+</tr>
+<tr class="row-odd"><td>Policy</td>
+<td>0x02</td>
+<td>PIN and Touch policy of the key (keys only)</td>
+</tr>
+<tr class="row-even"><td>Origin</td>
+<td>0x03</td>
+<td>Origin of the key: imported or generated</td>
+</tr>
+<tr class="row-odd"><td>Public key</td>
+<td>0x04</td>
+<td>Public key associated with the private key</td>
+</tr>
+<tr class="row-even"><td>Default value</td>
+<td>0x05</td>
+<td><div class="first last line-block">
+<div class="line">Whether the PIN/key has a default value</div>
+<div class="line">(PIN and PUK and Mgmt key only)</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td>Retries</td>
+<td>0x06</td>
+<td>Number of retries left (PIN and PUK only)</td>
+</tr>
+</tbody>
+</table>
+<p>It is even possible to invoke the function <code class="docutils literal notranslate"><span class="pre">ykpiv_transfer_data()</span></code> directly for low-level APDU communication with the YubiKey’s PIV applet.</p>
+<p>The function <code class="docutils literal notranslate"><span class="pre">ykpiv_util_parse_metadata()</span></code> can be used for parsing the returned TLV-encoded object.</p>
+<p>Therefore, the developer can integrate the <code class="docutils literal notranslate"><span class="pre">libykpiv</span></code> library for low level programming with YubiKey PIV metadata.</p>
+</div>
+</div>
+<div class="section" id="using-piv-metadata-with-ykcs11">
+<h3>Using PIV Metadata with YKCS11<a class="headerlink" href="#using-piv-metadata-with-ykcs11" title="Permalink to this heading"></a></h3>
+<p>The <a class="reference external" href="https://developers.yubico.com/yubico-piv-tool/YKCS11/" target="_blank">YKCS11 library</a> is  part of the Yubico PIV Tool. YKCS11 is a <a class="reference external" href="https://docs.oasis-open.org/pkcs11/pkcs11-base/v2.40/os/pkcs11-base-v2.40-os.html" target="_blank">PKCS#11 module</a> that allows external applications to communicate with the PIV application running on a YubiKey.</p>
+<p>When the PKCS #11 function <code class="docutils literal notranslate"><span class="pre">C_OpenSession()</span></code> is called for a YubiKey PKCS #11 slot (which is a YubiKey PIV application in a PC/SC reader), then the YKCS11 library parses out the public keys for all PIV key slots. If PIV attestation is supported, the PIV attestation certificate is used for parsing out the public key.</p>
+<p>If PIV attestation is not supported, that is, if the key-pair has been imported into a YubiKey, then the YKCS11 library calls the functions <code class="docutils literal notranslate"><span class="pre">ykpiv_get_metadata()</span></code> and <code class="docutils literal notranslate"><span class="pre">ykpiv_util_parse_metadata()</span></code> to parse out the requested public key.</p>
+<p>If both attestation and PIV metadata fail, in that order, YKCS11 falls back to parse the public key from the X.509 certificate.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The X.509 certificate’s public key may not match the private key in the YubiKey PIV slot.</p>
+</div>
+</div>
+</div>
+<div class="section" id="changes">
+<h2>Changes<a class="headerlink" href="#changes" title="Permalink to this heading"></a></h2>
+<div class="section" id="answer-to-reset-atr-and-answer-to-select-ats">
+<h3>Answer to Reset (ATR) and Answer to Select (ATS)<a class="headerlink" href="#answer-to-reset-atr-and-answer-to-select-ats" title="Permalink to this heading"></a></h3>
+<p>The ATR has been changed from <strong>Yubikey 4</strong> to <strong>YubiKey</strong> and adds support for ATS.</p>
+</div>
+<div class="section" id="piv-attestation-root-ca">
+<h3>PIV Attestation Root CA<a class="headerlink" href="#piv-attestation-root-ca" title="Permalink to this heading"></a></h3>
+<p>YubiKeys 5 Series have a PIV attestation root certificate authority different than previous YubiKeys. Download the certificate of the new root certificate authority on the <a class="reference external" href="https://developers.yubico.com/PIV/Introduction/PIV_attestation.html" target="_blank">PIV attestation</a> page.</p>
+</div>
+<div class="section" id="easier-identification">
+<h3>Easier Identification<a class="headerlink" href="#easier-identification" title="Permalink to this heading"></a></h3>
+<p>The YubiKey 5 Series devices can report their form factor through the PIV application whether or not they have an NFC interface. This enables easier, programmatic identification of the physical attributes of the YubiKey. For more information about how to query this information, see the <a class="reference external" href="https://developers.yubico.com/yubikey-manager/Config_Reference.html" target="_blank">YubiKey 5 Series Configuration Reference Guide</a>.</p>
+</div>
+<div class="section" id="piv-aes-management-key">
+<h3>PIV AES Management Key<a class="headerlink" href="#piv-aes-management-key" title="Permalink to this heading"></a></h3>
+<p>Historically, the YubiKey PIV management key is a 3DES key. With the release of the YubiKey firmware version 5.4.2, the YubiKey PIV Management Key can also be an AES key. For more details, see the article on our Developer site, <a class="reference external" href="https://developers.yubico.com/PIV/Introduction/YubiKey_and_PIV.html" target="_blank">YubiKey and PIV</a>.</p>
+<p>Technically speaking, this feature expands the management key type held in PIV slot 9b to include AES keys (128, 192 and 256) as defined in the PIV specification (<a class="reference external" href="https://csrc.nist.gov/pubs/sp/800/73/4/upd1/final" target="_blank">SP800-78-4</a>, section 5). PIV management key in AES format renders the YubiKey compatible with current or future FIPS-compliant CMS services.</p>
+<p>With the release of YubiKey firmware version 5.7 and later the YubiKey PIV Management Key is AES-192 by default.</p>
+<hr class="docutils" />
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="yk5-apps-fido.html" class="btn btn-neutral float-left" title="FIDO Specifics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="yk5-apps-oath.html" class="btn btn-neutral float-right" title="OATH Specifics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="copyright.html">Copyright</a> 2026, Yubico AB.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+<noscript>
+  <iframe
+    title="Blank"
+    aria-hidden="true"
+    src="https://sgtm.yubico.com/ns.html?id=GTM-TCVFSSSJ"
+    height="0"
+    width="0"
+    style="display: none; visibility: hidden"
+  ></iframe>
+</noscript>
+<div>
+  <a
+    href="https://www.yubico.com/support/terms-conditions/cookie-notice/"
+    target="_blank"
+    >Cookies</a
+  >
+  |
+  <a
+    href="https://www.yubico.com/support/terms-conditions/privacy-notice/"
+    target="_blank"
+    >Privacy Policy</a
+  >
+</div>
+
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

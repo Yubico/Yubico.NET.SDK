@@ -86,19 +86,27 @@ PIV handles PINs, PUKs, management keys, private keys, and cryptographic operati
 - Never log PINs, PUKs, management keys, private keys, plaintexts, or signatures. Log metadata only.
 - Do not store privately cloned sensitive `byte[]` values in structs.
 
-Example lifecycle:
+Application-dependent lifecycle fragment: the caller supplies the real credential acquisition callback.
+Keep its buffer alive through authentication and clear it before returning it to the pool.
 
 ```csharp
-byte[]? managementKey = ArrayPool<byte>.Shared.Rent(24);
-try
+static async Task AuthenticateWithStoreAsync(
+    IPivSession session,
+    Action<Memory<byte>> loadManagementKey,
+    CancellationToken cancellationToken)
 {
-    FillManagementKey(managementKey.AsSpan(0, 24));
-    await session.AuthenticateAsync(managementKey.AsMemory(0, 24), cancellationToken);
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(managementKey.AsSpan(0, 24));
-    ArrayPool<byte>.Shared.Return(managementKey, clearArray: true);
+    // This example store contract supplies a 24-byte Triple-DES or AES-192 active key.
+    byte[] managementKey = ArrayPool<byte>.Shared.Rent(24);
+    try
+    {
+        loadManagementKey(managementKey.AsMemory(0, 24));
+        await session.AuthenticateAsync(managementKey.AsMemory(0, 24), cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(managementKey.AsSpan(0, 24));
+        ArrayPool<byte>.Shared.Return(managementKey, clearArray: true);
+    }
 }
 ```
 
@@ -163,12 +171,12 @@ Integration tests must use `[Theory]` plus `[WithYubiKey]` from `Tests.Shared`:
 
 ```csharp
 [SkippableTheory]
-[WithYubiKey(Capability = DeviceCapabilities.Piv)]
+[WithYubiKey(Capability = DeviceCapabilities.Piv, MinFirmware = "5.3.0")]
 public async Task GetMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
 {
     await using var session = await state.Device.CreatePivSessionAsync();
     var metadata = await session.GetPinMetadataAsync();
-    Assert.NotNull(metadata);
+    Assert.InRange(metadata.RetriesRemaining, 0, metadata.TotalRetries);
 }
 ```
 
@@ -220,6 +228,9 @@ detected firmware, independent of compatibility overrides.
 7. **PIN-only transitions**: enabling must authenticate the supplied active management key before PIN verification or writes; disabling restores the type-appropriate default key before deleting PRINTED, then ADMIN DATA.
 8. **Mixed PIN-only recovery**: a returned success flag must match the session's final authenticated candidate; restore an earlier protected-key success after a stale derived candidate fails, or return no success.
 9. **Management-key state**: `IsManagementKeyAuthenticated` reports PIV management-key authentication, distinct from the inherited protocol/SCP `IsAuthenticated`; successful SET updates the type and preserves card-session authentication without retaining key bytes; SET status `0x6982` clears recorded authentication while unrelated command failures preserve authentication and type; every failed authentication attempt and disposal clears prior authentication; initialization and successful RESET share the same conservative default-type fallback when metadata is unavailable, and RESET clears authentication before refresh.
+10. **Reset boundaries**: normal PIV reset retains the F9 attestation key/certificate. PIN/PUK blocking occurs before RESET, so failure can consume retries; metadata refresh can fail after RESET has applied. Preserve the unfinished Bio preflight and route Bio MPE users to the product's device-reset procedure.
+11. **Provisioning shapes**: typed CHUID/CCC readers require the SDK's fixed shape, while raw object access supports inspection of other encodings. ADMIN timestamps currently use trimmed little-endian Unix seconds, differing from Python's fixed big-endian field; preserve that interoperability follow-up.
+12. **Evidence scope**: test names are not cryptographic oracles. Distinguish key generation/output shape, independent host verification, attestation trust and key binding. Hardware qualification is specific to device, firmware, transport and OS.
 
 ## Related Modules
 

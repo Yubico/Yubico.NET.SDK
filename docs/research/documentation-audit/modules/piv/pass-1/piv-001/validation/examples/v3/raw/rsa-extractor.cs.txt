@@ -1,0 +1,14 @@
+
+// Requires an open session, firmware 5.3+ and a provisioned RSA slot.
+var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)
+    ?? throw new InvalidOperationException("Provision an RSA key first.");
+using var rsa = metadata.GetRsaPublicKey();
+byte[] plaintext = "example"u8.ToArray();
+try
+{
+    byte[] ciphertext = rsa.Encrypt(plaintext, RSAEncryptionPadding.OaepSHA256);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(plaintext);
+}

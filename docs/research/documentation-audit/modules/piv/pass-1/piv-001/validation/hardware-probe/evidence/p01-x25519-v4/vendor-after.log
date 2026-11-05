@@ -1,0 +1,4 @@
+$ timeout --signal=TERM --kill-after=5s 240s /usr/bin/python3 /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-cleanup-v2.py --serial 103 --authorize-reset-serial 103 --reader 'Yubico YubiKey OTP+FIDO+CCID 00 00' --baseline /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/baseline-103.json --receipt /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/evidence/p01-x25519-v4/vendor-after.json
+{"status": "restored-and-factory-authenticated", "receipt": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/evidence/p01-x25519-v4/vendor-after.json", "reset_completed": true}
+
+EXIT=0

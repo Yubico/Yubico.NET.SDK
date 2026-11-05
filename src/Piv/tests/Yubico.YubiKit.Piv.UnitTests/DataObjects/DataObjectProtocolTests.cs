@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.Piv.UnitTests.DataObjects;
 
 /// <summary>
 /// Security regression test: <see cref="DataObjectProtocol.PutObjectAsync"/> builds its outgoing
-/// command payload in an internal <c>ArrayBufferWriter&lt;byte&gt;</c>. Per <see cref="ApduCommand"/>'s
+/// command payload in an owned byte array. Per <see cref="ApduCommand"/>'s
 /// documented ownership contract, whoever owns that buffer must zero it after transmission if it may
 /// carry sensitive material (PIV PIN-only mode routes a plaintext management key through this exact
 /// path via <c>PutObjectAsync(PrintedInformation, ...)</c>).
@@ -43,7 +43,7 @@ public class DataObjectProtocolTests
         Assert.NotNull(backend.LastCommand);
         Assert.True(MemoryMarshal.TryGetArray(backend.LastCommand!.Value.Data, out var segment));
 
-        // The full backing array (not just the logical Data slice) must be zeroed - the writer
+        // The full backing array (not just the logical Data slice) must be zeroed - the payload
         // buffer is not shared with anything else after the command is sent.
         Assert.All(segment.Array!.AsSpan(segment.Offset, segment.Count).ToArray(), b => Assert.Equal(0, b));
     }
@@ -131,9 +131,8 @@ public class DataObjectProtocolTests
     [Fact]
     public async Task GetObjectAsync_UnwrappedResponse_DoesNotZeroReturnedBuffer()
     {
-        // The "not wrapped" branch returns the original buffer directly (no extra copy is made),
-        // so GetObjectAsync must NOT zero it here - the returned value IS the caller's deliverable,
-        // and zeroing it would corrupt the data the caller asked for.
+        // The unwrapped branch also returns a distinct owned copy, then clears the raw response.
+        // This assertion checks the deliverable survives that cleanup.
         byte[] notWrapped = [0x30, 0x02, 0xAA, 0xBB]; // does not start with 0x53
 
         var backend = new GetDataCapturingBackend(notWrapped);

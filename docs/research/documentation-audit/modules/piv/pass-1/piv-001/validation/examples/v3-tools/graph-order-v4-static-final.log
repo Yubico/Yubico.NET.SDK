@@ -1,0 +1,5 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare-ordering-v4.py verify
+PASS: exact v3-to-v4 helper/verifier transformations and original evidence identities; read-only strict normalized graph replay consumer=12, annotations=4, pivtool=10; duplicate path/ID rejection and identity/asset difference preservation.
+PENDING: coordinator full verify-v4 --live and existing v3 auxiliary checks. No build, recapture, test runner or device operation was invoked.
+
+EXIT=0

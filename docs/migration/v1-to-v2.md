@@ -122,7 +122,7 @@ below before diagnosing behavior changes.
 | `GetSecurityDomainKeyInfoAsync(scpKeyParams, cancellationToken)` / `ListHsmAuthCredentialsAsync(scpKeyParams, cancellationToken)` | Pass `new SessionCreationOptions { ScpKeyParameters = scpKeyParams }` as the optional second-level creation policy. |
 | A direct applet factory with a mismatched `SessionCreationOptions.PreferredConnectionType` | All eight direct factories now throw `ArgumentException` before device input/output. |
 | Public `DeviceConfig.GetBytes(reboot, currentLockCode, newLockCode)` | Removed. Pass `SetDeviceConfigOptions` to `SetDeviceConfigAsync`; wire encoding is session implementation detail. |
-| Named PIV arguments `ChangePukAsync(pukUtf8: ...)`, `RecoverPinOnlyModeAsync(pin: ...)`, or `SetPinOnlyModeAsync(pin: ...)` | Rename them to `currentPukUtf8:` or `pinUtf8:` as appropriate. |
+| Named PIV credential arguments from earlier previews | Use `currentPuk:`/`newPuk:` for `ChangePukAsync`, and `pin:` for recovery/setup. Inputs remain caller-owned byte buffers. |
 | Named OpenPGP `Kdf.Process(..., pinUtf8Bytes: ...)` argument | Rename it to `pin:`. The parameter is `ReadOnlySpan<byte> pin`; it carries UTF-8 bytes but does not use the `Utf8` suffix. |
 
 The following dependency-injection APIs were removed rather than replaced. Call the normalized static factory or
@@ -362,7 +362,8 @@ using Yubico.YubiKit.Piv;
 await using var piv = await device.CreatePivSessionAsync(
     cancellationToken: cancellationToken);
 
-byte[] managementKey = GetManagementKeyBytes();
+// Evaluation only: the installed active key must be this 24-byte factory value.
+byte[] managementKey = PivSession.DefaultManagementKey.ToArray();
 try
 {
     await piv.AuthenticateAsync(managementKey, cancellationToken);
@@ -630,30 +631,27 @@ piv.KeyCollector = keyCollector;
 piv.SetPinOnlyMode(PivPinOnlyMode.PinProtected, PivAlgorithm.Aes192);
 ```
 
-V2 requires the management key to already be authenticated, and takes the PIN and management key explicitly:
+V2 takes the current PIN and **already active** management key explicitly. This composable method borrows
+both buffers; its caller acquires them from a real credential store, keeps them alive through the awaited
+call and clears them afterward in a finally scope. Securely back up the active key before enabling.
 
 ```csharp
-using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Piv;
 
-await using var piv = await device.CreatePivSessionAsync(
-    cancellationToken: cancellationToken);
-
-byte[] managementKey = GetManagementKeyBytes();
-byte[] pin = GetPinBytes();
-try
+static async Task EnableProtectedAdministrationAsync(
+    IYubiKey device,
+    ReadOnlyMemory<byte> pin,
+    ReadOnlyMemory<byte> activeManagementKey,
+    CancellationToken cancellationToken)
 {
-    await piv.AuthenticateAsync(managementKey, cancellationToken);
+    await using var piv = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+    await piv.AuthenticateAsync(activeManagementKey, cancellationToken);
     await piv.SetPinOnlyModeAsync(
         PinOnlyMode.PinProtected,
         pin,
-        managementKey,
+        activeManagementKey,
         cancellationToken);
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(managementKey);
-    CryptographicOperations.ZeroMemory(pin);
 }
 ```
 
@@ -662,6 +660,12 @@ Migration notes:
 - Only `PinOnlyMode.PinProtected` can be newly enabled in v2. V1's `PinDerived` mode is a deprecated, weaker mechanism; v2 can still detect and recover an existing PIN-derived configuration (`GetPinOnlyModeAsync`/`RecoverPinOnlyModeAsync`) but cannot enable a new one.
 - The caller must authenticate the management key explicitly before calling `SetPinOnlyModeAsync`; v1's `KeyCollector` handled this implicitly.
 - Enabling blocks the PUK and is state-mutating; treat this as a human-reviewed migration like other PIV write operations.
+- Reopen the session and use `RecoverPinOnlyModeAsync(pin)` before privileged administration. Detection alone
+  reads ADMIN DATA. Pass `PinOnlyMode.None` to disable after authentication: the SDK restores the type-appropriate
+  public default management key, deletes PRINTED, then ADMIN DATA. The PUK remains blocked.
+- Each transition spans separate commands without rollback. After failure, inspect objects and credential
+  state, reauthenticate with the active key and use your backup to complete recovery. Raw PIN/key/retry changes
+  leave related recovery objects unchanged. See the [complete reopen/recover/disable task](../../src/Piv/README.md#enable-reopen-recover-and-disable-pin-protected-administration).
 
 ### OATH: Check Password Protection and Retry a Locked Operation
 
@@ -714,6 +718,12 @@ PIN-only management-key mode (`IPivSession.GetPinOnlyModeAsync`/`SetPinOnlyModeA
 
 Migrate v1 touch notification and the removed alpha `PivSession.OnTouchRequired` callback to
 `SessionCreationOptions.UserPresencePrompt`. This does not collect or retry a PIN, PUK, or management key.
+
+Typed CHUID/CCC readers require the SDK provisioning shape; raw object access supports inspection of other
+encodings. ADMIN timestamps currently use trimmed little-endian Unix seconds, differing from Python's fixed
+four-byte big-endian field. Coordinate cross-tool migration rather than assuming byte compatibility.
+Normal PIV reset retains F9 attestation material, consumes PIN/PUK retries before RESET and can throw during
+post-reset metadata refresh after mutation. Preserve backups and inspect fresh state before repeating it.
 
 ### FIDO2
 

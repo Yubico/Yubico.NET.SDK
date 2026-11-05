@@ -1,0 +1,1179 @@
+      Withdrawn NIST Technical Series Publication
+
+                                           Warning Notice
+
+The attached publication has been withdrawn (archived), and is provided solely for historical purposes.
+It may have been superseded by another publication (indicated below).
+
+Withdrawn Publication
+Series/Number            NIST Special Publication (SP) 800-78-4
+Title                    Cryptographic Algorithms and Key Sizes for Personal Identity Verification
+Publication Date(s)      May 2015
+Withdrawal Date          July 15, 2024
+Withdrawal Note          NIST SP 800-78-4 is withdrawn and superseded in its entirety by NIST SP 800-
+                         78-5
+Superseding Publication(s) (if applicable)
+
+The attached publication has been superseded by the following publication(s):
+Series/Number            NIST SP 800-78-5
+Title                    Cryptographic Algorithms and Key Sizes for Personal Identity Verification
+Author(s)                Hildegard Ferraiolo; Andrew Regenscheid
+Publication Date(s)      July 2024
+URL/DOI                  https://doi.org/10.6028/NIST.SP.800-78-5
+Additional Information (if applicable)
+Contact                  Computer Security Division (Information Technology Laboratory)
+Latest revision of the
+attached publication
+Related Information      https://csrc.nist.gov/pubs/sp/800/78/5/final
+Withdrawal
+Announcement Link
+
+
+
+
+Date updated: July 15, 2024
+            NIST Special Publication 800-78-4
+
+
+
+Cryptographic Algorithms and Key
+        Sizes for Personal Identity
+                       Verification
+
+                                             W. Timothy Polk
+                                            Donna F. Dodson
+                                              William E. Burr
+                                           Hildegard Ferraiolo
+                                                David Cooper
+
+
+
+              This publication is available free of charge from:
+                  http://dx.doi.org/10.6028/NIST.SP.800-78-4
+
+
+
+    C O M P U T E R        S E C U R I T Y
+                   NIST Special Publication 800-78-4
+
+
+Cryptographic Algorithms and Key
+        Sizes for Personal Identity
+                       Verification
+                                                         W. Timothy Polk
+                                                         Donna F. Dodson
+                                                          William E. Burr
+                                                       Hildegard Ferraiolo
+                                                            David Cooper
+                                               Computer Security Division
+                                        Information Technology Laboratory
+
+
+                       This publication is available free of charge from:
+                           http://dx.doi.org/10.6028/NIST.SP.800-78-4
+
+
+                                                                          May 2015
+
+
+
+
+                                                       U.S. Department of Commerce
+                                                               Penny Pritzker, Secretary
+
+                                          National Institute of Standards and Technology
+      Willie May, Under Secretary of Commerce for Standards and Technology and Director
+Special Publication 800-78-4                                        Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+                                                    Authority
+
+This publication has been developed by NIST to further its statutory responsibilities under the Federal
+Information Security Modernization Act (FISMA) of 2014, 44 U.S.C. § 3541 et seq., Public Law (P.L.)
+113-283. NIST is responsible for developing information security standards and guidelines, including
+minimum requirements for Federal information systems, but such standards and guidelines shall not
+apply to national security systems without the express approval of appropriate Federal officials
+exercising policy authority over such systems. This guideline is consistent with the requirements of the
+Office of Management and Budget (OMB) Circular A-130, Section 8b(3), Securing Agency Information
+Systems, as analyzed in Circular A-130, Appendix IV: Analysis of Key Sections. Supplemental
+information is provided in Circular A-130, Appendix III, Security of Federal Automated Information
+Resources.
+
+Nothing in this publication should be taken to contradict the standards and guidelines made mandatory
+and binding on Federal agencies by the Secretary of Commerce under statutory authority. Nor should
+these guidelines be interpreted as altering or superseding the existing authorities of the Secretary of
+Commerce, Director of the OMB, or any other Federal official. This publication may be used by
+nongovernmental organizations on a voluntary basis and is not subject to copyright in the United States.
+Attribution would, however, be appreciated by NIST.
+
+           National Institute of Standards and Technology Special Publication 800-78-4
+                  Natl. Inst. Stand. Technol. Spec. Publ. 800-78-4, 24 pages (May 2015)
+                                 http://dx.doi.org/10.6028/NIST.SP.800-78-4
+                                               CODEN: NSPUE2
+
+
+ Certain commercial entities, equipment, or materials may be identified in this document in order to
+ describe an experimental procedure or concept adequately. Such identification is not intended to imply
+ recommendation or endorsement by NIST, nor is it intended to imply that the entities, materials, or
+ equipment are necessarily the best available for the purpose.
+ There may be references in this publication to other publications currently under development by NIST
+ in accordance with its assigned statutory responsibilities. The information in this publication, including
+ concepts and methodologies, may be used by Federal agencies even before the completion of such
+ companion publications. Thus, until each publication is completed, current requirements, guidelines,
+ and procedures, where they exist, remain operative. For planning and transition purposes, Federal
+ agencies may wish to closely follow the development of these new publications by NIST.
+ Organizations are encouraged to review all draft publications during public comment periods and
+ provide feedback to NIST. All NIST Computer Security Division publications, other than the ones
+ noted above, are available at http://csrc.nist.gov/publications.
+
+
+
+
+                       Comments on this publication may be submitted to:
+                             National Institute of Standards and Technology
+                   Attn: Computer Security Division, Information Technology Laboratory
+                    100 Bureau Drive (Mail Stop 8930) Gaithersburg, MD 20899-8930
+                                    Email: piv_comments@nist.gov
+
+
+
+
+                                                         ii
+Special Publication 800-78-4                                  Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+
+                          Reports on Computer Systems Technology
+
+The Information Technology Laboratory (ITL) at the National Institute of Standards and Technology
+(NIST) promotes the U.S. economy and public welfare by providing technical leadership for the
+Nation’s measurement and standards infrastructure. ITL develops tests, test methods, reference data,
+proof of concept implementations, and technical analyses to advance the development and productive
+use of information technology. ITL’s responsibilities include the development of management,
+administrative, technical, and physical standards and guidelines for the cost-effective security and
+privacy of other than national security-related information in Federal information systems. The Special
+Publication 800-series reports on ITL’s research, guidelines, and outreach efforts in information system
+security, and its collaborative activities with industry, government, and academic organizations.
+
+
+                                               Abstract
+Federal Information Processing Standard 201-2 (FIPS 201-2) defines requirements for the Personal
+Identity Verification (PIV) lifecycle activities including identity proofing, registration, PIV Card
+issuance, and PIV Card usage. FIPS 201-2 also defines the structure of an identity credential that
+includes cryptographic keys. This document contains the technical specifications needed for the
+mandatory and optional cryptographic keys specified in FIPS 201-2 as well as the supporting
+infrastructure specified in FIPS 201-2 and the related NIST Special Publication 800-73-4, Interfaces for
+Personal Identity Verification [SP800-73], and NIST SP 800-76-2, Biometric Specifications for Personal
+Identity Verification [SP800-76], that rely on cryptographic functions.
+
+
+
+                                              Keywords
+cryptographic algorithm; FIPS 201; identity credential; Personal Identity Verification (PIV); smart cards
+
+
+                                        Acknowledgments
+Hildegard Ferraiolo and David Cooper wish to thank their co-authors, W. Timothy Polk, Donna F.
+Dodson, and William E. Burr, who developed the earlier revisions of SP 800-78, and Sharon Keller from
+NIST, who contributed to the development of the Cryptographic Algorithm Validation Program
+validation requirements.
+
+
+                                      Trademark Information
+All registered trademarks or trademarks belong to their respective organizations.
+
+
+
+
+                                                   iii
+Special Publication 800-78-4                                                                Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+                                                          Table of Contents
+
+1      INTRODUCTION .............................................................................................................................. 1
+    1.1      PURPOSE ...................................................................................................................................... 1
+    1.2      SCOPE .......................................................................................................................................... 1
+    1.3      AUDIENCE AND ASSUMPTIONS ................................................................................................... 1
+    1.4      DOCUMENT OVERVIEW ............................................................................................................... 1
+2      APPLICATION OF CRYPTOGRAPHY IN FIPS 201-2 ............................................................... 3
+3      ON CARD CRYPTOGRAPHIC REQUIREMENTS ..................................................................... 5
+    3.1     PIV CRYPTOGRAPHIC KEYS ........................................................................................................ 5
+    3.2     AUTHENTICATION INFORMATION STORED ON THE PIV CARD ................................................... 6
+       3.2.1    Specification of Digital Signatures on Authentication Information .................................... 6
+       3.2.2    Specification of Public Keys In X.509 Certificates ............................................................. 7
+       3.2.3    Specification of Message Digests in the SP 800-73-4 Security Object ............................... 8
+4      CERTIFICATE STATUS INFORMATION ................................................................................... 9
+5      PIV CARD APPLICATION ADMINISTRATION KEYS .......................................................... 10
+6      IDENTIFIERS FOR PIV CARD INTERFACES ......................................................................... 11
+    6.1      KEY REFERENCE VALUES ......................................................................................................... 11
+    6.2      PIV CARD ALGORITHM IDENTIFIERS ........................................................................................ 11
+    6.3      ALGORITHM IDENTIFIERS FOR PIV KEY TYPES ........................................................................ 12
+7      CRYPTOGRAPHIC ALGORITHM VALIDATION TESTING REQUIREMENTS .............. 13
+APPENDIX A— ACRONYMS................................................................................................................ 18
+APPENDIX B— REFERENCES ............................................................................................................ 19
+
+
+
+
+                                                              List of Tables
+
+Table 3-1. Algorithm and Key Size Requirements for PIV Key Types..................................................... 6
+Table 3-2. Signature Algorithm and Key Size Requirements for PIV Information................................... 7
+Table 3-3. FIPS 201-2 Signature Algorithm Object Identifiers ................................................................. 7
+Table 3-4. Public Key Object Identifiers for PIV Key Types .................................................................... 8
+Table 3-5. ECC Parameter Object Identifiers for Approved Curves ......................................................... 8
+Table 3-6. Hash Algorithm Object Identifiers ........................................................................................... 8
+Table 5-1. Algorithm and Key Size Requirements for PIV Card Application Administration Keys ...... 10
+Table 6-1. Key References for PIV Key Types ....................................................................................... 11
+Table 6-2. Identifiers for Supported Cryptographic Algorithms ............................................................. 12
+Table 6-3. PIV Card Keys: Key References and Algorithms .................................................................. 12
+Table 7-1. Cryptographic Algorithm Validation Program (CAVP) Validation Requirements................ 13
+
+
+
+
+                                                                            iv
+Special Publication 800-78-4                               Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+1         Introduction
+
+Homeland Security Presidential Directive-12 (HSPD-12) mandated the creation of new standards
+for interoperable identity credentials for physical and logical access to federal government
+locations and systems. Federal Information Processing Standard 201 (FIPS 201), Personal
+Identity Verification (PIV) of Federal Employees and Contractors, was developed to establish
+standards for identity credentials [FIPS201]. This document, NIST Special Publication (SP) 800-
+78-4, specifies the cryptographic algorithms and key sizes for PIV systems and is a companion
+document to FIPS 201-2.
+
+1.1       Purpose
+
+FIPS 201-2 defines requirements for the PIV lifecycle activities including identity proofing,
+registration, PIV Card issuance, and PIV Card usage. FIPS 201-2 also defines the structure of an
+identity credential that includes cryptographic keys. This document contains the technical
+specifications needed for the mandatory and optional cryptographic keys specified in FIPS 201-2
+as well as the supporting infrastructure specified in FIPS 201-2 and the related NIST Special
+Publication 800-73-4, Interfaces for Personal Identity Verification [SP800-73], and SP 800-76-2,
+Biometric Specifications for Personal Identity Verification [SP800-76], that rely on
+cryptographic functions.
+
+1.2       Scope
+
+The scope of this Recommendation encompasses the PIV Card, infrastructure components that
+support issuance and management of the PIV Card, and applications that rely on the credentials
+supported by the PIV Card to provide security services. The Recommendation identifies
+acceptable symmetric and asymmetric encryption algorithms, digital signature algorithms, key
+establishment schemes, and message digest algorithms, and specifies mechanisms to identify the
+algorithms associated with PIV keys or digital signatures.
+
+Algorithms and key sizes have been selected for consistency with applicable federal standards
+and to ensure adequate cryptographic strength for PIV applications. All cryptographic algorithms
+employed in this specification provide at least 112 bits of security strength. For detailed guidance
+on the strength of cryptographic algorithms, see [SP800-57(1)], Recommendation on Key
+Management – Part 1: General.
+
+1.3       Audience and Assumptions
+
+This document is targeted at federal agencies and implementers of PIV systems. Readers are
+assumed to have a working knowledge of cryptography and public key infrastructure (PKI)
+technology.
+
+1.4       Document Overview
+
+The document is organized as follows:
+
+      +    Section 1, Introduction, provides the purpose, scope, audience, and assumptions of the
+           document and outlines its structure.
+
+
+                                                   1
+Special Publication 800-78-4                             Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+    +   Section 2, Application of Cryptography in FIPS 201-2, identifies the cryptographic
+        mechanisms and objects that employ cryptography as specified in FIPS 201-2 and its
+        supporting documents.
+    +   Section 3, On Card Cryptographic Requirements, describes the cryptographic
+        requirements for cryptographic keys and authentication information stored on the PIV
+        Card.
+    +   Section 4, Certificate Status Information, describes the cryptographic requirements for
+        status information generated by PKI certification authorities (CA) and Online Certificate
+        Status Protocol (OCSP) responders.
+    +   Section 5, PIV Card Application Administration Keys, describes the cryptographic
+        requirements for management of information stored on the PIV Card.
+    +   Section 6, Identifiers for PIV Card Interfaces, specifies key reference values and
+        algorithm identifiers for the application programming interface and card commands
+        defined in [SP800-73].
+    +   Section 7, Cryptographic Algorithm Validation Testing Requirements, specifies the
+        cryptographic algorithm validation testing that must be performed on the PIV Card based
+        on the keys and algorithms that it supports.
+    +   Appendix A, Acronyms, contains the list of acronyms used in this document.
+    +   Appendix B, References, contains the list of documents used as references by this
+        document.
+
+
+
+
+                                                2
+Special Publication 800-78-4                              Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+2       Application of Cryptography in FIPS 201-2
+
+FIPS 201-2 employs cryptographic mechanisms to authenticate cardholders, secure information
+stored on the PIV Card, and secure the supporting infrastructure.
+
+FIPS 201-2 and its supporting documents specify a suite of keys to be stored on the PIV Card for
+personal identity verification, digital signature generation, and key management. The PIV
+cryptographic keys specified in FIPS 201-2 and SP 800-73-4 are:
+
+    +    the asymmetric PIV Authentication key;
+    +    an asymmetric Card Authentication key;
+    +    a symmetric Card Authentication key;
+    +    an asymmetric digital signature key for signing documents and messages;
+    +    an asymmetric key management key, supporting key establishment or key transport, and
+         up to twenty retired key management keys;
+    +    a symmetric PIV Card Application Administration Key; and
+    +    an asymmetric PIV Secure Messaging key, supporting the establishment of session keys
+         for use with secure messaging.
+The cryptographic algorithms, key sizes, and parameters that may be used for these keys are
+specified in Section 3.1. PIV Cards must implement private key computations for one or more of
+the algorithms identified in this section.
+
+Cryptographically protected objects specified in FIPS 201-2, SP 800-73-4, and SP 800-76-2
+include:
+
+    +    the X.509 certificates for each asymmetric key on the PIV Card, except the PIV Secure
+         Messaging key;
+    +    a secure messaging card verifiable certificate (CVC) for the PIV Secure Messaging key;
+    +    an Intermediate CVC for the public key needed to verify the signature on the secure
+         messaging CVC;
+    +    a digitally signed Card Holder Unique Identifier (CHUID);
+    +    digitally signed biometrics using the Common Biometric Exchange Formats Framework
+         (CBEFF) signature block; and
+    +    the SP 800-73-4 Security Object, which is a digitally signed hash table.
+The cryptographic algorithms, key sizes, and parameters that may be used to protect these
+objects are specified in Section 3.2. Certification authorities (CA) and card management systems
+that protect these objects must support one or more of the cryptographic algorithms, key sizes,
+and parameters specified in Section 3.2.
+
+
+
+                                                  3
+Special Publication 800-78-4                             Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+Applications may be designed to use any or all of the cryptographic keys and objects stored on
+the PIV Card. Where maximum interoperability is required, applications should support all of the
+identified algorithms, key sizes, and parameters specified in Sections 3.1 and 3.2.
+
+FIPS 201-2 requires CAs and Online Certificate Status Protocol (OCSP) responders to generate
+and distribute digitally signed certificate revocation lists (CRL) and OCSP status messages,
+respectively. These certificate status mechanisms support validation of the PIV Card, the PIV
+cardholder, the cardholder’s digital signature key, and the cardholder’s key management key.
+
+The signed certificate status mechanisms specified in FIPS 201-2 are:
+
+    +   X.509 CRLs that specify the status of a group of X.509 certificates; and
+    +   OCSP status response messages that specify the status of a particular X.509 certificate.
+The cryptographic algorithms, key sizes, and parameters that may be used to sign these
+mechanisms are specified in Section 4. Section 4 also describes rules for encoding the signatures
+to ensure interoperability.
+
+FIPS 201-2 permits optional card management operations. These operations may only be
+performed after the PIV Card authenticates the card management system. Card management
+systems are authenticated through the use of PIV Card Application Administration Keys. The
+cryptographic algorithms and key sizes that may be used for these keys are specified in Section
+5.
+
+
+
+
+                                                 4
+Special Publication 800-78-4                                      Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+3         On Card Cryptographic Requirements
+
+FIPS 201-2 identifies a suite of objects that are stored on the PIV Card for use in authentication
+mechanisms or in other security protocols. These objects may be divided into three classes:
+cryptographic keys, signed authentication information stored on the PIV Card, and message
+digests of information stored on the PIV Card. Cryptographic requirements for PIV keys are
+detailed in Section 3.1. Cryptographic requirements for other stored objects are detailed
+in Section 3.2.
+
+3.1       PIV Cryptographic Keys
+
+FIPS 201-2 and SP 800-73-4 specify six different classes of cryptographic keys to be used as
+credentials by the PIV cardholder:
+
+      +    the mandatory PIV Authentication key;
+      +    the mandatory asymmetric Card Authentication key;
+      +    an optional symmetric Card Authentication key;
+      +    a conditionally mandatory digital signature key;
+      +    a conditionally mandatory key management key; 1 and
+      +    an optional asymmetric key to establish session keys for secure messaging.
+Table 3-1 establishes specific requirements for cryptographic algorithms and key sizes for each
+key type.
+
+In addition to the key sizes, keys must be generated using secure parameters. Rivest, Shamir,
+Adleman (RSA) keys must be generated using a public exponent of 65 537. Elliptic curve keys
+must correspond to one of the following recommended curves from [FIPS186]:
+
+      +    Curve P-256; or
+      +    Curve P-384.
+To promote interoperability, this specification further limits PIV Authentication and Card
+Authentication elliptic curve keys to a single curve (P-256). 2 PIV cryptographic keys for digital
+signatures and key management may use P-256 or P-384, based on application requirements.
+There is no phase out date specified for either curve.
+
+If the PIV Card Application supports the virtual contact interface [SP800-73] and the digital
+signature key, the key management key, or any of the retired key management keys are elliptic
+curve keys corresponding to Curve P-384, then the PIV Secure Messaging key shall use P-384,
+otherwise it may use P-256 or P-384.
+1
+  The digital signature and key management keys are mandatory if the cardholder has a government-issued email
+account at the time of credential issuance.
+2
+  To reduce computation times for authentication for physical access, it is recommended that the asymmetric Card
+Authentication key be an elliptic curve key rather than an RSA key.
+
+
+                                                        5
+Special Publication 800-78-4                                      Cryptographic Algorithms and Key Sizes for PIV
+
+
+                      Table 3-1. Algorithm and Key Size Requirements for PIV Key Types
+
+                        PIV Key Type                    Algorithms and Key Sizes
+                   PIV Authentication key   RSA (2048 bits)
+                                            ECDSA (Curve P-256)
+                   asymmetric Card          RSA (2048 bits)
+                   Authentication key       ECDSA (Curve P-256)
+                                                   3
+                   symmetric Card           3TDEA
+                   Authentication key       AES-128, AES-192, or AES-256
+                   digital signature key    RSA (2048 bits)
+                                            ECDSA (Curve P-256 or P-384)
+                   key management key       RSA key transport (2048 bits);
+                                            ECDH (Curve P-256 or P-384)
+                   PIV Secure Messaging     ECDH (Curve P-256 or P-384)
+                   key
+
+
+While this specification requires that the RSA public exponent associated with PIV keys be
+65 537, applications should be able to process RSA public keys that have any public exponent
+that is an odd positive integer greater than or equal to 65 537 and less than 2256.
+
+This specification requires that the key management key must be an RSA key transport key or an
+Elliptic Curve Diffie-Hellman (ECDH) key. The specifications for RSA key transport are
+[PKCS1] and [SP800-56B]; the specification for ECDH is [SP800-56A].
+
+3.2       Authentication Information Stored on the PIV Card
+3.2.1      Specification of Digital Signatures on Authentication Information
+
+FIPS 201-2 requires the use of digital signatures to protect the integrity and authenticity of
+information stored on the PIV Card. FIPS 201-2 and SP 800-73-4 require digital signatures on
+the following objects stored on the PIV Card:
+
+      +    X.509 public key certificates;
+      +    the optional secure messaging card verifiable certificate (CVC);
+      +    the optional Intermediate CVC;
+      +    the CHUID;
+      +    biometric information (e.g., fingerprints); and
+      +    the SP 800-73-4 Security Object.
+Approved digital signature algorithms are specified in [FIPS186]. Table 3-2 provides specific
+requirements for public key algorithms and key sizes, hash algorithms, and padding schemes for
+generating digital signatures for digitally signed information stored on the PIV Card. Agencies
+are cautioned that generating digital signatures with elliptic curve algorithms may initially limit
+interoperability.
+
+3
+ 3TDEA is Triple DES using Keying Option 1 from [SP800-67], which requires that all three keys be unique (i.e.,
+Key1 ≠ Key2, Key2 ≠ Key3, and Key3 ≠ Key1).
+
+
+                                                       6
+Special Publication 800-78-4                                     Cryptographic Algorithms and Key Sizes for PIV
+
+
+               Table 3-2. Signature Algorithm and Key Size Requirements for PIV Information
+
+                    Public Key Algorithms           Hash Algorithms        Padding Scheme
+                       and Key Sizes
+                 RSA (2048 or 3072)               SHA-256                PKCS #1 v1.5
+                                                  SHA-256                PSS
+                 ECDSA (Curve P-256)              SHA-256                N/A
+                 ECDSA (Curve P-384)              SHA-384                N/A
+
+
+Note: As of January 1, 2011, only SHA-256 may be used to generate RSA signatures on PIV
+objects. RSA signatures may use either the PKCS #1 v1.5 padding scheme or the Probabilistic
+Signature Scheme (PSS) padding as defined in [PKCS1]. The PSS padding scheme object
+identifier (OID) is independent of the hash algorithm; the hash algorithm is specified as a
+parameter (for details, see [PKCS1]).
+
+The secure messaging CVC shall be signed using ECDSA (Curve P-256) with SHA-256 if it
+contains an ECDH (Curve P-256) subject public key, and shall be signed using ECDSA (Curve
+P-384) with SHA-384 otherwise. The Intermediate CVC shall be signed using RSA with SHA-
+256 and PKCS #1 v1.5 padding.
+
+FIPS 201-2, SP 800-73-4, and SP 800-76-2 specify formats for the CHUID, the Security Object,
+the biometric information, and X.509 public key certificates, which rely on OIDs to specify
+which signature algorithm was used to generate the digital signature. The object identifiers
+specified in Table 3-3, below, must be used in FIPS 201-2 implementations to identify the
+signature algorithm. 4,5
+                         Table 3-3. FIPS 201-2 Signature Algorithm Object Identifiers
+
+     Signature Algorithm                                  Object Identifier (OID)
+    RSA with SHA-1 and         sha1WithRSAEncryption ::= {iso(1) member-body(2) us(840) rsadsi(113549)
+    PKCS #1 v1.5 padding       pkcs(1) pkcs-1(1) 5}
+    RSA with SHA-256 and       sha256WithRSAEncryption ::= {iso(1) member-body(2) us(840) rsadsi(113549)
+    PKCS #1 v1.5 padding       pkcs(1) pkcs-1(1) 11}
+    RSA with SHA-256 and       id-RSASSA-PSS ::= {iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1)
+    PSS padding                pkcs-1(1) 10}
+    ECDSA with SHA-256         ecdsa-with-SHA256 ::= {iso(1) member-body(2) us(840) ansi-X9-62(10045)
+                               signatures(4) ecdsa-with-SHA2 (3) 2}
+    ECDSA with SHA-384         ecdsa-with-SHA384 ::= {iso(1) member-body(2) us(840) ansi-X9-62(10045)
+                               signatures(4) ecdsa-with-SHA2 (3) 3}
+
+3.2.2   Specification of Public Keys In X.509 Certificates
+
+FIPS 201-2 requires generation and storage of an X.509 certificate to correspond with each
+asymmetric private key contained on the PIV Card, except the PIV Secure Messaging key. X.509
+certificates include object identifiers to specify the cryptographic algorithm associated with a
+
+
+4
+  The OID for RSA with SHA-1 and PKCS #1 v1.5 padding is included in Table 3-3 since applications may
+encounter X.509 certificates that were signed before January 1, 2011, using this algorithm.
+5
+  For the CHUID, Security Object, and biometric information the signatureAlgorithm field of SignerInfo shall
+contain rsaEncryption (1.2.840.113549.1.1.1) when the signature algorithm is RSA with PKCS #1 v1.5 padding.
+
+
+                                                        7
+Special Publication 800-78-4                                         Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+public key. Table 3-4, below, specifies the object identifiers that may be used in certificates to
+indicate the algorithm for a subject public key.
+                               Table 3-4. Public Key Object Identifiers for PIV Key Types
+
+                                 Asymmetric
+         PIV Key Type                                                  Object Identifier (OID)
+                                  Algorithm
+
+    PIV Authentication key;          RSA        {iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-1(1) 1}
+    Card Authentication key;                    {iso(1) member-body(2) us(840) ansi-X9-62(10045)
+                                    ECDSA
+      digital signature key                     id-publicKeyType(2) 1}
+                                     RSA        {iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-1(1) 1}
+     key management key                         {iso(1) member-body(2) us(840) ansi-X9-62(10045)
+                                    ECDH
+                                                id-publicKeyType(2) 1}
+
+
+A single object identifier is specified in Table 3-4 for all elliptic curve keys. An additional object
+identifier must be supplied in a parameters field to indicate the elliptic curve associated with the
+key. Table 3-5, below, identifies the named curves and associated OIDs. (RSA exponents are
+encoded with the modulus in the certificate’s subject public key, so the OID is not affected.)
+                        Table 3-5. ECC Parameter Object Identifiers for Approved Curves
+
+      Asymmetric
+                                                          Object Identifier (OID)
+       Algorithm
+
+       Curve P-256      ansip256r1 ::= { iso(1) member-body(2) us(840) ansi-X9-62(10045) curves(3) prime(1) 7 }
+       Curve P-384      ansip384r1 ::= { iso(1) identified-organization(3) certicom(132) curve(0) 34 }
+
+
+3.2.3    Specification of Message Digests in the SP 800-73-4 Security Object
+
+SP 800-73-4 mandates inclusion of a Security Object consistent with the Authenticity/Integrity
+Code defined by the International Civil Aviation Organization (ICAO) in [MRTD]. This object
+contains message digests of other digital information stored on the PIV Card and is digitally
+signed. This specification requires that the message digests of digital information be computed
+using the same hash algorithm used to generate the digital signature on the Security Object. The
+set of acceptable algorithms is specified in Table 3-2. The Security Object format identifies the
+hash algorithm used when computing the message digests by inclusion of an object identifier; the
+appropriate object identifiers are identified in Table 3-6. 6
+                                     Table 3-6. Hash Algorithm Object Identifiers
+
+      Hash Algorithm                                       Object Identifier (OID)
+     SHA-1                id-sha1 ::= {iso(1) identified-organization(3) oiw(14) secsig(3) algorithms(2) 26}
+     SHA-256              id-sha256 ::= {joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3)
+                          nistalgorithm(4) hashalgs(2) 1}
+     SHA-384              id-sha384 ::= {joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3)
+                          nistalgorithm(4) hashalgs(2) 2}
+
+
+
+6
+ The OID for SHA-1 is included in Table 3-6 since applications may encounter Security Objects that were signed
+before January 1, 2011, using RSA with SHA-1 and PKCS #1 v1.5 padding.
+
+
+                                                           8
+Special Publication 800-78-4                              Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+4       Certificate Status Information
+
+The FIPS 201-2 functional component PIV Card Issuance and Management Subsystem generates
+and distributes status information for PIV asymmetric keys, other than PIV Secure Messaging
+keys. FIPS 201-2 mandates two formats for certificate status information:
+
+    +    X.509 CRLs; and
+    +    OCSP status response messages.
+The CRLs and OCSP status responses shall be digitally signed to support authentication and
+integrity using a key size and hash algorithm that satisfy the requirements for signing PIV
+information, as specified in Table 3-2, and that are at least as large as the key size and hash
+algorithm used to sign the certificate.
+
+CRLs and OCSP messages rely on object identifiers to specify which signature algorithm was
+used to generate the digital signature. The object identifiers specified in Table 3-3 must be used
+in CRLs and OCSP messages to identify the signature algorithm.
+
+
+
+
+                                                 9
+Special Publication 800-78-4                                 Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+5      PIV Card Application Administration Keys
+
+PIV Cards may support card activation by the card management system to support card
+personalization and post-issuance card update. PIV Cards that support card personalization and
+post-issuance updates perform a challenge response protocol using a symmetric cryptographic
+key (i.e., the PIV Card Application Administration Key) to authenticate the card management
+system. After successful authentication, the card management system can modify information
+stored in the PIV Card. Table 5-1, below, establishes specific requirements for cryptographic
+algorithms and key sizes for PIV Card Application Administration Keys.
+       Table 5-1. Algorithm and Key Size Requirements for PIV Card Application Administration Keys
+
+                      Card Expiration Date                    Algorithm
+                                                 3TDEA
+                         After 12/31/2010
+                                                 AES-128, AES-192, or AES-256
+
+
+
+
+                                                   10
+Special Publication 800-78-4                                          Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+6      Identifiers for PIV Card Interfaces
+
+SP 800-73-4 defines an application programming interface, the PIV Client Application
+Programming Interface (Part 3), and a set of mandatory card commands, the PIV Card
+Application Card Command Interface (Part 2). The command syntaxes for these interfaces
+identify PIV keys using one-byte key references; their associated algorithms (or suites of
+algorithms) are specified using one-byte algorithm identifiers. The same identifiers are used in
+both interfaces.
+
+Section 6.1 specifies the key reference values for each of the PIV key types. Section 6.2 defines
+algorithm identifiers for each cryptographic algorithm supported by this specification. Section
+6.3 identifies valid combinations of key reference values and algorithm identifiers.
+
+6.1    Key Reference Values
+
+A PIV Card key reference is a one-byte identifier that specifies a cryptographic key according to
+its PIV Key Type. Table 6-1 defines the key reference values used on the PIV interfaces for PIV
+Key Types.
+                                   Table 6-1. Key References for PIV Key Types
+
+                                    PIV Key Type               Key Reference Value
+                               PIV Secure Messaging key                     '04'
+                                                                 '82', '83', '84', '85', '86',
+                                                                '87', '88', '89', '8A', '8B',
+                           retired key management key
+                                                               '8C', '8D', '8E', '8F', '90',
+                                                                  '91', '92', '93', '94', '95'
+
+                                PIV Authentication key                      '9A'
+
+                                 PIV Card Application
+                                                                            '9B'
+                                  Administration Key
+
+                                  digital signature key                     '9C'
+
+
+                                 key management key                         '9D'
+
+
+                                Card Authentication key                     '9E'
+
+
+
+
+6.2    PIV Card Algorithm Identifiers
+
+A PIV Card algorithm identifier is a one-byte identifier that specifies a cryptographic algorithm
+and key size, or a suite of algorithms and key sizes. For symmetric cryptographic operations, the
+algorithm identifier also specifies a mode of operation (i.e., ECB). Table 6-2 lists the algorithm
+identifiers for the cryptographic algorithms that may be recognized on the PIV interfaces. All
+other algorithm identifier values are reserved for future use.
+
+
+
+                                                          11
+Special Publication 800-78-4                                       Cryptographic Algorithms and Key Sizes for PIV
+
+
+                        Table 6-2. Identifiers for Supported Cryptographic Algorithms
+
+                   Algorithm Identifier                         Algorithm – Mode
+                               '00'           3 Key Triple DES – ECB
+                               '03'           3 Key Triple DES – ECB
+                                              RSA 1024 bit modulus, 65 537 ≤ exponent ≤ 2
+                                                                                                   256
+                               '06'                                                                      -1
+                                              RSA 2048 bit modulus, 65 537 ≤ exponent ≤ 2
+                                                                                                   256
+                               '07'                                                                      -1
+                               '08'           AES-128 – ECB
+                               '0A'           AES-192 – ECB
+                               '0C'           AES-256 – ECB
+                               '11'           ECC: Curve P-256
+                               '14'           ECC: Curve P-384
+                               '27'           Cipher Suite 2
+                               '2E'           Cipher Suite 7
+
+
+Note that both the '00' and '03' algorithm identifiers correspond to 3 Key Triple DES – ECB.
+
+Algorithm identifiers '27' and '2E' represent suites of algorithms and key sizes for use with secure
+messaging and key establishment. Cipher Suite 2 (CS2) is the cipher suite used to establish
+session keys and for secure messaging when the PIV Secure Messaging key is an ECDH (Curve
+P-256) key, and Cipher Suite 7 (CS7) is the cipher suite used to establish session keys and for
+secure messaging when the PIV Secure Messaging key is an ECDH (Curve P-384) key. Details
+of secure messaging, the key establishment protocol, and the algorithms and key sizes for these
+two cipher suites are specified in SP 800-73-4, Part 2.
+
+6.3    Algorithm Identifiers for PIV Key Types
+
+Table 6-3 summarizes the set of algorithms supported for each key reference value.
+                          Table 6-3. PIV Card Keys: Key References and Algorithms
+
+                                                         Key Reference            Permitted Algorithm
+                          PIV Key Type
+                                                             Value                    Identifiers
+             PIV Secure Messaging key                           '04'                      '27', '2E'
+                                                        '82', '83', '84', '85',
+                                                        '86', '87', '88', '89',
+             retired key management key                '8A', '8B', '8C', '8D',       '06', '07', '11', '14'
+                                                        '8E', '8F', '90', '91',
+                                                         '92', '93', '94', '95'
+             PIV Authentication key                             '9A'                       '07', '11'
+             PIV Card Application Administration Key            '9B'              '00', '03', '08', '0A', '0C'
+             digital signature key                              '9C'                    '07', '11', '14'
+             key management key                                 '9D'                    '07', '11', '14'
+             asymmetric Card Authentication key                 '9E'                       '07', '11'
+             symmetric Card Authentication key                  '9E'              '00', '03', '08', '0A', '0C'
+
+
+
+
+                                                       12
+Special Publication 800-78-4                                        Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+7        Cryptographic Algorithm Validation Testing Requirements
+
+As noted in Section 4.2.2 of [FIPS201], the PIV Card shall be validated under [FIPS140] with an
+overall validation of Level 2 and with Level 3 physical security. The scope of the Cryptographic
+Module Validation Program (CMVP) validation shall include all cryptographic operations
+performed over both the contact and contactless interfaces. Table 7-1 describes the
+Cryptographic Algorithm Validation Program (CAVP) tests that are required, at the time of
+publication, for each supported key and algorithm. If any changes are made to the CAVP
+validation requirements, the changes, along with the deadlines for conformance with these
+requirements, will be posted on NIST’s “Personal Identity Verification Program (NPIVP)” web
+page at http://csrc.nist.gov/groups/SNS/piv/npivp/index.html. 7
+
+Terms used in this section are from the the corresponding algorithm validation list
+at http://csrc.nist.gov/groups/STM/cavp/validation.html.
+             Table 7-1. Cryptographic Algorithm Validation Program (CAVP) Validation Requirements
+
+    Supported        Supported     Required                   Minimum CAVP Validation Requirements
+    Private Keys     Algorithm     Functionality
+    PIV              2048-bit      Key Generation and         Key Generation:
+    Authentication   RSA           Signature Generation       186-2 (for revalidation scenarios only):
+    key                            for 2048-bit RSA with        Key(gen)(MOD: 2048 PubKey Values: 65 537)
+                                   public key exponent          Prerequisite: DRBG or RNG; SHS
+                                   65 537
+                                                              186-4:
+                                                                186-4KEY(gen):
+                                                                  FIPS186-4_Fixed_e (65 537) or FIPS186-4_Random_e
+                                                                  PGM(Prime Generation Methods with supporting
+                                                                                                     variables)
+                                                                  Prerequisites: DRBG or RNG; SHS
+
+                                                              Signature Generation:
+                                                                 RSASP1 component:
+                                                                    (Mod2048)
+                     ECDSA         Key Generation and         Key Generation:
+                     (Curve        Signature Generation        186-2 (for revalidation scenarios only):
+                     P-256)        for Curve P-256               PKG (Public Key Generation): CURVE(P-256)
+                                                                 Prerequisites: DRBG or RNG
+
+                                                              186-4:
+                                                                PKG (Public Key Generation): CURVE(P-256
+                                                                (ExtraRandomBits and/or TestingCandidates))
+                                                                Prerequisites: DRBG or RNG
+
+                                                              Signature Generation:
+                                                               ECDSA Signature Generation component:
+                                                                 CURVE(P-256 tested with input length 256 bits)
+                                                               Prerequisites: DRBG or RNG
+
+
+
+7
+  Many cryptographic operations listed in Table 7-1 require the use of a random bit generator (those operations that
+include a prerequisite of “DRBG or RNG”). Please refer to [SP800-131A] for more information about approved
+random bit generators.
+
+
+                                                         13
+Special Publication 800-78-4                                 Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+
+ Supported        Supported    Required                Minimum CAVP Validation Requirements
+ Private Keys     Algorithm    Functionality
+ asymmetric       2048-bit     Signature Generation    Key Generation (if key can be generated on card):
+ Card             RSA          for 2048-bit RSA        186-2 (for revalidation scenarios only):
+ Authentication                                          Key(gen)(MOD: 2048 PubKey Values: 65 537)
+ key                                                     Prerequisite: DRBG or RNG; SHS
+
+                                                       186-4:
+                                                         186-4KEY(gen):
+                                                           FIPS186-4_Fixed_e (65 537) or FIPS186-4_Random_e
+                                                           PGM(Prime Generation Methods with supporting
+                                                                                              variables)
+                                                           Prerequisites: DRBG or RNG; SHS
+
+                                                       Signature Generation:
+                                                          RSASP1 component:
+                                                          (Mod2048)
+                  ECDSA        Signature Generation    Key Generation (if key can be generated on card):
+                  (Curve       for Curve P-256          186-2 (for revalidation scenarios only):
+                  P-256)                                  PKG (Public Key Generation): CURVE(P-256)
+                                                          Prerequisites: DRBG or RNG
+
+                                                       186-4:
+                                                         PKG (Public Key Generation): CURVE(P-256
+                                                         (ExtraRandomBits and/or TestingCandidates))
+                                                         Prerequisites: DRBG or RNG
+
+                                                       Signature Generation:
+                                                        ECDSA Signature Generation component:
+                                                          CURVE(P-256 tested with input length 256 bits)
+                                                        Prerequisites: DRBG or RNG
+ symmetric        3TDEA        Encryption and          TECB( e/d; KO 1 )
+ Card                          Decryption for
+ Authentication                3TDEA
+ key              AES-128      Encryption and          ECB ( e/d; 128 )
+                               Decryption for
+                               AES-128
+                  AES-192      Encryption and          ECB ( e/d; 192 )
+                               Decryption for
+                               AES-192
+                  AES-256      Encryption and          ECB ( e/d; 256 )
+                               Decryption for
+                               AES-256
+
+
+
+
+                                                  14
+Special Publication 800-78-4                                  Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+ Supported        Supported    Required                 Minimum CAVP Validation Requirements
+ Private Keys     Algorithm    Functionality
+ digital          2048-bit     Key Generation and       Key Generation:
+ signature key    RSA          Signature Generation     186-2 (for revalidation scenarios only):
+                               for 2048-bit RSA with      Key(gen)(MOD: 2048 PubKey Values: 65 537)
+                               public key exponent        Prerequisite: DRBG or RNG; SHS
+                               65 537
+                                                        186-4:
+                                                          186-4KEY(gen):
+                                                            FIPS186-4_Fixed_e (65 537) or FIPS186-4_Random_e
+                                                            PGM(Prime Generation Methods with supporting
+                                                                                               variables)
+                                                            Prerequisites: DRBG or RNG; SHS
+
+                                                        Signature Generation:
+                                                           RSASP1 component:
+                                                           (Mod2048)
+                  ECDSA        Key Generation and       Key Generation:
+                  (Curve       Signature Generation      186-2 (for revalidation scenarios only):
+                  P-256)       for Curve P-256             PKG (Public Key Generation): CURVE(P-256)
+                                                           Prerequisites: DRBG or RNG
+
+                                                        186-4:
+                                                          PKG (Public Key Generation): CURVE(P-256
+                                                          (ExtraRandomBits and/or TestingCandidates))
+                                                          Prerequisites: DRBG or RNG
+
+                                                        Signature Generation:
+                                                         ECDSA Signature Generation component:
+                                                           CURVE(P-256 tested with input length 256 bits)
+                                                         Prerequisites: DRBG or RNG
+                  ECDSA        Key Generation and       Key Generation:
+                  (Curve       Signature Generation      186-2 (for revalidation scenarios only):
+                  P-384)       for Curve P-384             PKG (Public Key Generation): CURVE(P-384)
+                                                           Prerequisites: DRBG or RNG
+
+                                                        186-4:
+                                                          PKG (Public Key Generation): CURVE(P-384
+                                                          (ExtraRandomBits and/or TestingCandidates))
+                                                          Prerequisites: DRBG or RNG
+
+                                                        Signature Generation:
+                                                         ECDSA Signature Generation component:
+                                                           CURVE(P-384 tested with input length 384 bits)
+                                                         Prerequisites: DRBG or RNG
+
+
+
+
+                                                   15
+Special Publication 800-78-4                                  Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+ Supported        Supported    Required                 Minimum CAVP Validation Requirements
+ Private Keys     Algorithm    Functionality
+ key              2048-bit     2048-bit RSA Key         Key Generation (if key can be generated on card):
+ management       RSA          Transport                186-2 (for revalidation scenarios only):
+ key                                                      Key(gen)(MOD: 2048 PubKey Values: 65 537)
+                                                          Prerequisite: DRBG or RNG; SHS
+
+                                                        186-4:
+                                                          186-4KEY(gen):
+                                                            FIPS186-4_Fixed_e (65 537) or FIPS186-4_Random_e
+                                                            PGM(Prime Generation Methods with supporting
+                                                                                               variables)
+                                                            Prerequisites: DRBG or RNG; SHS
+
+                                                        Key Transport:
+                                                          SP 800-56B RSADP component
+                  ECDH         Key Agreement for        Key Generation (if key can be generated on card):
+                  (Curve       Curve P-256              186-2 (for revalidation scenarios only):
+                  P-256)                                  PKG (Public Key Generation): CURVE(P-256)
+                                                          Prerequisites: DRBG or RNG
+
+                                                        186-4:
+                                                          PKG (Public Key Generation): CURVE(P-256
+                                                          (ExtraRandomBits and/or TestingCandidates))
+                                                          Prerequisites: DRBG or RNG
+
+                                                        Key Agreement:
+                                                        SP 800-56A Section 5.7.1.2 ECC CDH primitive
+                                                        component: CURVE(P-256)
+                  ECDH         Key Agreement for        Key Generation (if key can be generated on card):
+                  (Curve       Curve P-384              186-2 (for revalidation scenarios only):
+                  P-384)                                  PKG (Public Key Generation): CURVE(P-384)
+                                                          Prerequisites: DRBG or RNG
+
+                                                        186-4:
+                                                          PKG (Public Key Generation): CURVE(P-384
+                                                          (ExtraRandomBits and/or TestingCandidates))
+                                                          Prerequisites: DRBG or RNG
+
+                                                        Key Agreement:
+                                                        SP 800-56A Section 5.7.1.2 ECC CDH primitive
+                                                        component: CURVE(P-384)
+ PIV Card         3TDEA        Encryption and           TECB( e/d; KO 1 )
+ Application                   Decryption for
+ Administration                3TDEA
+ Key              AES-128      Encryption and           ECB ( e/d; 128 )
+                               Decryption for
+                               AES-128
+                  AES-192      Encryption and           ECB ( e/d; 192 )
+                               Decryption for
+                               AES-192
+                  AES-256      Encryption and           ECB ( e/d; 256 )
+                               Decryption for
+                               AES-256
+
+
+
+
+                                                   16
+Special Publication 800-78-4                                     Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+ Supported        Supported      Required                  Minimum CAVP Validation Requirements
+ Private Keys     Algorithm      Functionality
+ PIV Secure       Cipher Suite   Key Generation for        Key Generation (of card’s static ECDH key):
+ Messaging key    2              Curve P-256               186-2 (for revalidation scenarios only):
+                                                             PKG (Public Key Generation): CURVE(P-256)
+                                                             Prerequisites: DRBG or RNG
+                                                           186-4:
+                                                             PKG (Public Key Generation): CURVE(P-256
+                                                             (ExtraRandomBits and/or TestingCandidates))
+                                                             Prerequisites: DRBG or RNG
+                                 C(1e, 1s, ECC CDH)        ECC: SCHEME[ OnePassDH ( KC <KARole:
+                                 with Curve P-256               Responder > < KCRole: Provider > < KCType:
+                                                                Unilateral > < KDF: Concat > ) ( EC: P-256
+                                                                (SHA256 CMAC_AES128) ) ]
+                                                                 Prerequisite: DRBG or RNG; SHS
+                                 CMAC with AES-128         AES CMAC (Generation/Verification) (KS: 128;
+                                                                Block Size(s): Full / Partial; Msg Len(s) Min:
+                                                                32 Max: 12 745 ; Tag Length(s): 16 )
+                                 Encryption and            AES CBC ( e/d; 128 )
+                                 Decryption for AES
+                                 CBC 128
+                  Cipher Suite   Key Generation for        Key Generation (of card’s static ECDH key):
+                  7              Curve P-384               186-2 (for revalidation scenarios only):
+                                                             PKG (Public Key Generation): CURVE(P-384)
+                                                             Prerequisites: DRBG or RNG
+                                                           186-4:
+                                                             PKG (Public Key Generation): CURVE(P-384
+                                                             (ExtraRandomBits and/or TestingCandidates))
+                                                             Prerequisites: DRBG or RNG
+                                 C(1e, 1s, ECC CDH)        ECC: SCHEME[ OnePassDH ( KC <KARole:
+                                 with Curve P-384               Responder > < KCRole: Provider > < KCType:
+                                                                Unilateral > < KDF: Concat > ) ( ED: P-384
+                                                                (SHA384 CMAC_AES256) ) ]
+                                                                 Prerequisite: DRBG or RNG; SHS
+                                 CMAC with AES-256         AES CMAC (Generation/Verification) (KS: 256;
+                                                                Block Size(s): Full / Partial; Msg Len(s) Min:
+                                                                32 Max: 12 745 ; Tag Length(s): 16 )
+                                 Encryption and            AES CBC ( e/d; 256 )
+                                 Decryption for AES
+                                 CBC 256
+
+
+
+
+                                                      17
+Special Publication 800-78-4                                Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+Appendix A—Acronyms
+
+The following abbreviations and acronyms are used in this standard:
+
+3TDEA           Three key TDEA (TDEA with Keying Option 1 [SP800-67])
+AES             Advanced Encryption Standard [FIPS197]
+CA              Certification Authority
+CAVP            Cryptographic Algorithm Validation Program
+CBC             Cipher Block Chaining
+CBEFF           Common Biometric Exchange Formats Framework
+CDH             Cofactor Diffie-Hellman
+CHUID           Card Holder Unique Identifier
+CMAC            Cipher-Based Message Authentication Code
+CMVP            Cryptographic Module Validation Program
+CRL             Certificate Revocation List
+CVC             Card Verifiable Certificate
+DES             Data Encryption Standard
+DRBG            Deterministic Random Bit Generator
+ECB             Electronic Codebook
+ECC             Elliptic Curve Cryptography
+ECDH            Elliptic Curve Diffie-Hellman
+ECDSA           Elliptic Curve Digital Signature Algorithm
+FIPS            Federal Information Processing Standards
+FISMA           Federal Information Security Management Act
+ICAO            International Civil Aviation Organization
+ITL             Information Technology Laboratory
+NIST            National Institute of Standards and Technology
+OCSP            Online Certificate Status Protocol
+OID             Object Identifier
+OMB             Office of Management and Budget
+PIV             Personal Identity Verification
+PKCS            Public-Key Cryptography Standards
+PKI             Public Key Infrastructure
+PSS             Probabilistic Signature Scheme
+RNG             Random Number Generator
+RSA             Rivest, Shamir, Adleman cryptographic algorithm
+SHA             Secure Hash Algorithm
+SHS             Secure Hash Standard
+SP              Special Publication
+TDEA            Triple Data Encryption Algorithm; Triple DEA
+TECB            TDEA Electronic Codebook
+
+
+
+                                                 18
+Special Publication 800-78-4                              Cryptographic Algorithms and Key Sizes for PIV
+
+
+
+Appendix B—References
+
+[FIPS140]          Federal Information Processing Standard 140-2, Security Requirements for
+                   Cryptographic Modules, May 25, 2001. http://csrc.nist.gov/publications/.
+
+[FIPS186]          Federal Information Processing Standard 186-4, Digital Signature Standard
+                   (DSS), July 2013. http://dx.doi.org/10.6028/NIST.FIPS.186-4.
+
+[FIPS197]          Federal Information Processing Standard 197, Advanced Encryption Standard
+                   (AES), November 2001. http://csrc.nist.gov/publications/.
+
+[FIPS201]          Federal Information Processing Standard 201-2, Personal Identity Verification
+                   (PIV) of Federal Employees and Contractors, August
+                   2013. http://dx.doi.org/10.6028/NIST.FIPS.201-2.
+
+[MRTD]             ICAO Doc 9303, Machine Readable Travel Documents, Part 3: Machine
+                   Readable Official Travel Documents, Volume 2: Specifications for
+                   Electronically Enabled MRtds with Biometric Identification Capability, 3rd
+                   edition, International Civil Aviation Organization: Montreal, Quebec, Canada,
+                   2008. http://www.icao.int/publications/pages/publication.aspx?docnum=9303.
+
+[PKCS1]            Jakob Jonsson and Burt Kaliski, PKCS #1: RSA Cryptography Specifications
+                   Version 2.1, RFC 3447, February 2003. http://www.rfc-editor.org/info/rfc3447.
+
+[SP800-56A]        NIST Special Publication 800-56A Revision 2, Recommendation for Pair-Wise
+                   Key Establishment Schemes Using Discrete Logarithm Cryptography, May
+                   2013. http://dx.doi.org/10.6028/NIST.SP.800-56Ar2.
+
+[SP800-56B]        NIST Special Publication 800-56B Revision 1, Recommendation for Pair-Wise
+                   Key-Establishment Schemes Using Integer Factorization Cryptography,
+                   September 2014. http://dx.doi.org/10.6028/NIST.SP.800-56Br1.
+
+[SP800-57(1)] NIST Special Publication 800-57, Recommendation for Key Management – Part
+              1: General (Revision 3), July 2012. http://csrc.nist.gov/publications/.
+
+[SP800-67]         NIST Special Publication 800-67 Revision 1, Recommendation for the Triple
+                   Data Encryption Algorithm (TDEA) Block Cipher, January
+                   2012. http://csrc.nist.gov/publications/.
+
+[SP800-73]         NIST Special Publication 800-73-4, Interfaces for Personal Identity
+                   Verification, May 2015. http://dx.doi.org/10.6028/NIST.SP.800-73-4.
+
+[SP800-76]         NIST Special Publication 800-76-2, Biometric Specifications for Personal
+                   Identity Verification, July 2013. http://dx.doi.org/10.6028/NIST.SP.800-76-2.
+
+[SP800-131A] NIST Special Publication 800-131A, Transitions: Recommendation for
+             Transitioning the Use of Cryptographic Algorithms and Key Lengths, January
+             2011. http://csrc.nist.gov/publications/.
+
+
+                                                 19
+

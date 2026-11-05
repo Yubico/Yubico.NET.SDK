@@ -1,0 +1,19 @@
+{
+  "status": "source-only-preparation",
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "final_extraction": "Await fresh accepted content and scoped formatter completion",
+  "project_prefix": "Yubico.YubiKit.AuditPiv001.Examples.",
+  "workspace_prefix": "/tmp/opencode/piv-001-examples-",
+  "shipping_context": "Actual src/Piv/examples/PivTool project with all 36 current source paths and ordinary bin/obj",
+  "capture_policy": [
+    "Retain actual Csc command and source/reference/analyzer/config membership immediately after each real build",
+    "Use exact new revision/context/attempt identities; retain failed attempts separately",
+    "Require real /warn:9999 and /warnaserror+; require analyzer/compiler execution and exact argument/item membership",
+    "Prove both canonical NetAnalyzers 9.0.0 DLL identities through generated NuGet imports/assets and actual Csc; package replacement can set EnableNETAnalyzers=false",
+    "Record host Version and YubiKitVersion independently; SDK reference DLL identities establish binding",
+    "Retain source/config/import/assets/project text and binary dependency hashes, with exact late capture hook identity",
+    "Use typed prerequisites and complete resource scopes; keep compilation and hardware execution as separate claims"
+  ],
+  "prepared_helper": "analyzer_policy.py: identity/nodes/prove reused from corrected frozen OpenPGP analyzer-package-1; historical receipt/result coupling removed",
+  "future_owner": "Coordinator assigns final extraction and full actual-Csc capture preparation after reviewed formatting"
+}

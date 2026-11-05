@@ -1,0 +1,1767 @@
+{
+  "schema": 1,
+  "status": "restored-and-factory-authenticated",
+  "reset_completed": true,
+  "utc": "2026-11-05T07:10:57.211245+00:00",
+  "cleanup_helper_sha256": "6042cef33b929136b3035c904255e3b18691f7cda96c789f2532fe2e7f3ad1a5",
+  "events": [
+    {
+      "operation": "public-capture-start",
+      "label": "before",
+      "command": [
+        "/usr/bin/python3",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py",
+        "final",
+        "--serial",
+        "103",
+        "--reader",
+        "Yubico YubiKey OTP+FIDO+CCID 00 00",
+        "--output",
+        "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/multikey-after-103.before.json"
+      ]
+    },
+    {
+      "operation": "public-capture-exit",
+      "label": "before",
+      "returncode": 0
+    },
+    {
+      "operation": "public-capture-verified",
+      "label": "before",
+      "serial": 103,
+      "differences": 5
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00a40400"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00a40400",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0100"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0100",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0100"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0100",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00a40400"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00a40400",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00fd0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00fd0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00fd0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00fd0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f80000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f80000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "live-identity-verified",
+      "serial": 103,
+      "firmware": "5.8.0.beta.0",
+      "applet_version": "0.0.1"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f70096"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f70096",
+      "sw": "0x6A88"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f700f9"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f700f9",
+      "sw": "0x6117"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00c00000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00c00000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "attestation-public-certificate",
+      "header": "00cb3fff"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "attestation-public-certificate",
+      "header": "00cb3fff",
+      "sw": "0x6100"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000",
+      "sw": "0x6100"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000",
+      "sw": "0x6126"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "attestation-public-certificate",
+      "header": "00c00000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "attestation-public-identity-preserved-before-reset"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x80",
+      "attempt": 1,
+      "remaining_before": 3,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00200080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00200080",
+      "sw": "0x63C2"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x80",
+      "attempt": 2,
+      "remaining_before": 2,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00200080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00200080",
+      "sw": "0x63C1"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x80",
+      "attempt": 3,
+      "remaining_before": 1,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00200080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00200080",
+      "sw": "0x6983"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-pin",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-pin",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "reference-blocked",
+      "reference": "0x80",
+      "attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x81",
+      "attempt": 1,
+      "remaining_before": 3,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "002c0080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "002c0080",
+      "sw": "0x63C2"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x81",
+      "attempt": 2,
+      "remaining_before": 2,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "002c0080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "002c0080",
+      "sw": "0x63C1"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "blocking-attempt",
+      "reference": "0x81",
+      "attempt": 3,
+      "remaining_before": 1,
+      "maximum_attempts": 3
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "002c0080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "002c0080",
+      "sw": "0x6983"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "block-puk",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "block-puk",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "reference-blocked",
+      "reference": "0x81",
+      "attempts": 3
+    },
+    {
+      "operation": "reset-issued",
+      "serial": 103
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "reset",
+      "header": "00fb0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "reset",
+      "header": "00fb0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "reset-completed",
+      "serial": 103
+    },
+    {
+      "operation": "connection-closed"
+    },
+    {
+      "operation": "public-capture-start",
+      "label": "after-reset",
+      "command": [
+        "/usr/bin/python3",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py",
+        "final",
+        "--serial",
+        "103",
+        "--reader",
+        "Yubico YubiKey OTP+FIDO+CCID 00 00",
+        "--output",
+        "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/multikey-after-103.after-reset.json"
+      ]
+    },
+    {
+      "operation": "public-capture-exit",
+      "label": "after-reset",
+      "returncode": 0
+    },
+    {
+      "operation": "public-capture-verified",
+      "label": "after-reset",
+      "serial": 103,
+      "differences": 0
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00a40400"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00a40400",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0100"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0100",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "001d0100"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "001d0100",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00a40400"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00a40400",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00fd0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00fd0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00fd0000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00fd0000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f80000"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f80000",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "live-identity-verified",
+      "serial": 103,
+      "firmware": "5.8.0.beta.0",
+      "applet_version": "0.0.1"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f70080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f70080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f70081"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f70081",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "identity",
+      "header": "00f7009b"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "identity",
+      "header": "00f7009b",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "factory-pin",
+      "header": "00200080"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "factory-pin",
+      "header": "00200080",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "factory-pin-verified",
+      "serial": 103
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "factory-management",
+      "header": "00f7009b"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "factory-management",
+      "header": "00f7009b",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "factory-management",
+      "header": "00870a9b"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "factory-management",
+      "header": "00870a9b",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "apdu-start",
+      "phase": "factory-management",
+      "header": "00870a9b"
+    },
+    {
+      "operation": "apdu-finish",
+      "phase": "factory-management",
+      "header": "00870a9b",
+      "sw": "0x9000"
+    },
+    {
+      "operation": "factory-management-authenticated",
+      "serial": 103,
+      "algorithm": "AES192",
+      "algorithm_id": 10,
+      "credential_source": "installed public DEFAULT_MANAGEMENT_KEY"
+    },
+    {
+      "operation": "connection-closed"
+    },
+    {
+      "operation": "public-capture-start",
+      "label": "after-auth",
+      "command": [
+        "/usr/bin/python3",
+        "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py",
+        "final",
+        "--serial",
+        "103",
+        "--reader",
+        "Yubico YubiKey OTP+FIDO+CCID 00 00",
+        "--output",
+        "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/multikey-after-103.after-auth.json"
+      ]
+    },
+    {
+      "operation": "public-capture-exit",
+      "label": "after-auth",
+      "returncode": 0
+    },
+    {
+      "operation": "public-capture-verified",
+      "label": "after-auth",
+      "serial": 103,
+      "differences": 0
+    }
+  ],
+  "authorization": {
+    "serial": 103,
+    "authorize_reset_serial": 103,
+    "reader": "Yubico YubiKey OTP+FIDO+CCID 00 00"
+  },
+  "command": [
+    "/usr/bin/python3",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-cleanup-v2.py",
+    "--serial",
+    "103",
+    "--authorize-reset-serial",
+    "103",
+    "--reader",
+    "Yubico YubiKey OTP+FIDO+CCID 00 00",
+    "--baseline",
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/baseline-103.json",
+    "--receipt",
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/multikey-after-103.json"
+  ],
+  "baseline": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/baseline-103.json",
+    "sha256": "3f160854e948cb01f3e535efe0e59cdf5df5eb67b94cdeb7658b0de9d1223718"
+  },
+  "vendor_provenance": {
+    "python": "3.14.8 (main, Oct  2 2026, 10:23:31) [GCC 16.2.1 20260810]",
+    "executable": "/usr/bin/python3",
+    "distribution_version": "5.9.2",
+    "manifest_sha256": "ebd4aa11daec37265b8c2b027d31bdfdd871d850b7b7b637a4a5ffb07fa96f5d",
+    "files": {
+      "ykman.device": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/device.py",
+        "sha256": "398338584cce6a3980387fe1b7b0e8b1ced7bc1330252b363ff40be0689d4c2e"
+      },
+      "ykman.piv": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/piv.py",
+        "sha256": "b24c77190286b801ac77b8142f43f78b9aeefdd4599c23b2a7aceb62b378d224"
+      },
+      "ykman._cli.piv": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/_cli/piv.py",
+        "sha256": "c3e74c46e0952c9471856d6d08f70a6f783f4ae533207447e7e544616cccea5e"
+      },
+      "yubikit.piv": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/piv.py",
+        "sha256": "f1055e88dca0c8b0ff107a3f1724cd9e03447a95565ecbfde7517f8114ba47fd"
+      },
+      "yubikit.management": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/management.py",
+        "sha256": "7cc29f5803f36c945ec613849c65ee9ea83f7d4e260880ebab7096a4dcbe3192"
+      },
+      "yubikit.support": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/support.py",
+        "sha256": "c1a1722619fc7f3e6649cad66c638d6eaec5887804e86c9efdee01e57c24d8f5"
+      },
+      "yubikit.core": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/core/__init__.py",
+        "sha256": "524305273499d3a0fc37ff58c207a180cf3d280490bb48c4596507ed8a56061c"
+      },
+      "yubikit.core.smartcard": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/core/smartcard/__init__.py",
+        "sha256": "595be784aa2ede30488263cbc63686e94365a68d598b96fb350c71c1b5d694bd"
+      },
+      "ykman.pcsc": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/pcsc/__init__.py",
+        "sha256": "7df388a53eb3a1784f498c3e854a3cc272bef59233b3e0feaaeb72de6ad1199c"
+      }
+    },
+    "reviewed_api_shape": {
+      "ykman.pcsc.list_devices": "(name_filter=None)",
+      "ScardSmartCardConnection": "(connection)",
+      "ScardSmartCardConnection.send_and_receive": "(self, apdu)",
+      "PivSession.__init__": "(self, connection: 'SmartCardConnection', scp_key_params: 'ScpKeyParams | None' = None)",
+      "PivSession.get_serial": "(self) -> 'int'",
+      "PivSession.get_pin_metadata": "(self) -> 'PinMetadata'",
+      "PivSession.get_puk_metadata": "(self) -> 'PinMetadata'",
+      "PivSession.get_management_key_metadata": "(self) -> 'ManagementKeyMetadata'",
+      "PivSession.get_slot_metadata": "(self, slot: 'SLOT') -> 'SlotMetadata'",
+      "PivSession.get_bio_metadata": "(self) -> 'BioMetadata'",
+      "PivSession.get_object": "(self, object_id: 'int') -> 'bytes'",
+      "PivSession.get_certificate": "(self, slot: 'SLOT') -> 'x509.Certificate'",
+      "PivSession.reset": "(self) -> 'None'",
+      "PivSession.verify_pin": "(self, pin: 'str') -> 'None'",
+      "PivSession.authenticate": "(self, *args, **kwargs) -> 'None'",
+      "PivSession.change_puk": "(self, old_puk: 'str', new_puk: 'str') -> 'None'",
+      "ManagementSession.__init__": "(self, connection: 'OtpConnection | SmartCardConnection | FidoConnection', scp_key_params: 'ScpKeyParams | None' = None)",
+      "ManagementSession.read_device_info": "(self) -> 'DeviceInfo'",
+      "PinMetadata": "(default_value: 'bool', total_attempts: 'int', attempts_remaining: 'int') -> None",
+      "SlotMetadata": "(key_type: 'KEY_TYPE', pin_policy: 'PIN_POLICY', touch_policy: 'TOUCH_POLICY', generated: 'bool', public_key_encoded: 'bytes') -> None",
+      "ManagementKeyMetadata": "(key_type: 'MANAGEMENT_KEY_TYPE', default_value: 'bool', touch_policy: 'TOUCH_POLICY') -> None",
+      "list_all_devices": "(connection_types: Iterable[type[yubikit.core.Connection] | type[fido2.ctap.CtapDevice]] = dict_keys([<class 'yubikit.core.smartcard.SmartCardConnection'>, <class 'yubikit.core.otp.OtpConnection'>, <class 'fido2.ctap.CtapDevice'>])) -> list[tuple[ykman.base.YkmanDevice, yubikit.management.DeviceInfo]]"
+    },
+    "helper_sha256": "41aa7200cd912a5f7a1438ad693fff83ad36b32873540b8a70d1b578f976600a"
+  },
+  "readbacks": [
+    {
+      "label": "before",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/multikey-after-103.before.json",
+      "sha256": "935fe95a4f0c4c1216f308c0a075a21496cc198407b1f8ff7ce54d47fc957ee8",
+      "baseline_differences": [
+        {
+          "path": "/apdu",
+          "baseline": [
+            {
+              "phase": "management-identity",
+              "header": "00a40400",
+              "sw": "0x9000",
+              "response_length": 30
+            },
+            {
+              "phase": "management-identity",
+              "header": "001d0000",
+              "sw": "0x9000",
+              "response_length": 60
+            },
+            {
+              "phase": "management-identity",
+              "header": "001d0100",
+              "sw": "0x9000",
+              "response_length": 58
+            },
+            {
+              "phase": "management-identity",
+              "header": "001d0000",
+              "sw": "0x9000",
+              "response_length": 60
+            },
+            {
+              "phase": "management-identity",
+              "header": "001d0100",
+              "sw": "0x9000",
+              "response_length": 58
+            },
+            {
+              "phase": "piv-initialization",
+              "header": "00a40400",
+              "sw": "0x9000",
+              "response_length": 19
+            },
+            {
+              "phase": "piv-initialization",
+              "header": "00fd0000",
+              "sw": "0x9000",
+              "response_length": 3,
+              "public_response_hex": "000001"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00fd0000",
+              "sw": "0x9000",
+              "response_length": 3,
+              "public_response_hex": "000001"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f80000",
+              "sw": "0x9000",
+              "response_length": 4,
+              "public_response_hex": "00000067"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f70080",
+              "sw": "0x9000",
+              "response_length": 10,
+              "public_response_hex": "0101ff05010106020303"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f70081",
+              "sw": "0x9000",
+              "response_length": 10,
+              "public_response_hex": "0101ff05010106020303"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f7009b",
+              "sw": "0x9000",
+              "response_length": 10,
+              "public_response_hex": "01010a02020001050101"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f70096",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x9A",
+              "header": "00f7009a",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x9A",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x9C",
+              "header": "00f7009c",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x9C",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x9D",
+              "header": "00f7009d",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x9D",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x9E",
+              "header": "00f7009e",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x9E",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x82",
+              "header": "00f70082",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x82",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x83",
+              "header": "00f70083",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x83",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x84",
+              "header": "00f70084",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x84",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x85",
+              "header": "00f70085",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x85",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x86",
+              "header": "00f70086",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x86",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x87",
+              "header": "00f70087",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x87",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x88",
+              "header": "00f70088",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x88",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x89",
+              "header": "00f70089",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x89",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8A",
+              "header": "00f7008a",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8A",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8B",
+              "header": "00f7008b",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8B",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8C",
+              "header": "00f7008c",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8C",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8D",
+              "header": "00f7008d",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8D",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8E",
+              "header": "00f7008e",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8E",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8F",
+              "header": "00f7008f",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8F",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x90",
+              "header": "00f70090",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x90",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x91",
+              "header": "00f70091",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x91",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x92",
+              "header": "00f70092",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x92",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x93",
+              "header": "00f70093",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x93",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x94",
+              "header": "00f70094",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x94",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x95",
+              "header": "00f70095",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x95",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00f700f9",
+              "sw": "0x6117",
+              "response_length": 256,
+              "public_response_hex": "010107020202010301020482010981820100c13ac4a4cff727cde36f2dbec56d4a2ba26ba23261b995e11b292b8c18c443d712aecd60f0ad4e531e493c3b180ac05fa21cbd4f95287227ea9311adc35ed4c4991e22d705b23ad659b09aea5f33b34331009cbe13f324f4e330a4accbc9edf4c6972e014507db8d080c3009173e2de49b9b82fd4010840182960385ac17b6fc8f9411c3b0718f94008148764b68becd29a85572a0edb15a8f89e2c677140f24455e851c959160fd887c82ff05583b07d5299f9e3962bf1b7d49760feae633ff64dde0535a2069b527ce02a83dadf7958e580fe3a0fad49f8b5dfc997be6c5b83bd44af4af83426d7bbd48a9ce6a"
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00c00000",
+              "sw": "0x9000",
+              "response_length": 23
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00cb3fff",
+              "sw": "0x6100",
+              "response_length": 256
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00c00000",
+              "sw": "0x6100",
+              "response_length": 256
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00c00000",
+              "sw": "0x6126",
+              "response_length": 256
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00c00000",
+              "sw": "0x9000",
+              "response_length": 38
+            },
+            {
+              "phase": "piv-public-objects",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-public-objects",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-public-objects",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-public-objects",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            }
+          ],
+          "actual": [
+            {
+              "phase": "management-identity",
+              "header": "00a40400",
+              "sw": "0x9000",
+              "response_length": 30
+            },
+            {
+              "phase": "management-identity",
+              "header": "001d0000",
+              "sw": "0x9000",
+              "response_length": 60
+            },
+            {
+              "phase": "management-identity",
+              "header": "001d0100",
+              "sw": "0x9000",
+              "response_length": 58
+            },
+            {
+              "phase": "management-identity",
+              "header": "001d0000",
+              "sw": "0x9000",
+              "response_length": 60
+            },
+            {
+              "phase": "management-identity",
+              "header": "001d0100",
+              "sw": "0x9000",
+              "response_length": 58
+            },
+            {
+              "phase": "piv-initialization",
+              "header": "00a40400",
+              "sw": "0x9000",
+              "response_length": 19
+            },
+            {
+              "phase": "piv-initialization",
+              "header": "00fd0000",
+              "sw": "0x9000",
+              "response_length": 3,
+              "public_response_hex": "000001"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00fd0000",
+              "sw": "0x9000",
+              "response_length": 3,
+              "public_response_hex": "000001"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f80000",
+              "sw": "0x9000",
+              "response_length": 4,
+              "public_response_hex": "00000067"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f70080",
+              "sw": "0x9000",
+              "response_length": 10,
+              "public_response_hex": "0101ff05010106020303"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f70081",
+              "sw": "0x9000",
+              "response_length": 10,
+              "public_response_hex": "0101ff05010106020303"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f7009b",
+              "sw": "0x9000",
+              "response_length": 10,
+              "public_response_hex": "01010a02020001050101"
+            },
+            {
+              "phase": "piv-public-state",
+              "header": "00f70096",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x9A",
+              "header": "00f7009a",
+              "sw": "0x9000",
+              "response_length": 79,
+              "public_response_hex": "010111020202010301010443864104a709d0eb2f3cc6795287b2e56fca5df68dcfde3ac71c9cec64b18bf4a4e0a5a75e22f6bfee676fcc25f535394bfa975c2134c87d8818806fea97908759d3b8d3"
+            },
+            {
+              "phase": "piv-slot-0x9A",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x9C",
+              "header": "00f7009c",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x9C",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x9D",
+              "header": "00f7009d",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x9D",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x9E",
+              "header": "00f7009e",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x9E",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x82",
+              "header": "00f70082",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x82",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x83",
+              "header": "00f70083",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x83",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x84",
+              "header": "00f70084",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x84",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x85",
+              "header": "00f70085",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x85",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x86",
+              "header": "00f70086",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x86",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x87",
+              "header": "00f70087",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x87",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x88",
+              "header": "00f70088",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x88",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x89",
+              "header": "00f70089",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x89",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8A",
+              "header": "00f7008a",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8A",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8B",
+              "header": "00f7008b",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8B",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8C",
+              "header": "00f7008c",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8C",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8D",
+              "header": "00f7008d",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8D",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8E",
+              "header": "00f7008e",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8E",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x8F",
+              "header": "00f7008f",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x8F",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x90",
+              "header": "00f70090",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x90",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x91",
+              "header": "00f70091",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x91",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x92",
+              "header": "00f70092",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x92",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x93",
+              "header": "00f70093",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x93",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x94",
+              "header": "00f70094",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x94",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0x95",
+              "header": "00f70095",
+              "sw": "0x6A88",
+              "response_length": 0,
+              "public_response_hex": ""
+            },
+            {
+              "phase": "piv-slot-0x95",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00f700f9",
+              "sw": "0x6117",
+              "response_length": 256,
+              "public_response_hex": "010107020202010301020482010981820100c13ac4a4cff727cde36f2dbec56d4a2ba26ba23261b995e11b292b8c18c443d712aecd60f0ad4e531e493c3b180ac05fa21cbd4f95287227ea9311adc35ed4c4991e22d705b23ad659b09aea5f33b34331009cbe13f324f4e330a4accbc9edf4c6972e014507db8d080c3009173e2de49b9b82fd4010840182960385ac17b6fc8f9411c3b0718f94008148764b68becd29a85572a0edb15a8f89e2c677140f24455e851c959160fd887c82ff05583b07d5299f9e3962bf1b7d49760feae633ff64dde0535a2069b527ce02a83dadf7958e580fe3a0fad49f8b5dfc997be6c5b83bd44af4af83426d7bbd48a9ce6a"
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00c00000",
+              "sw": "0x9000",
+              "response_length": 23
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00cb3fff",
+              "sw": "0x6100",
+              "response_length": 256
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00c00000",
+              "sw": "0x6100",
+              "response_length": 256
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00c00000",
+              "sw": "0x6126",
+              "response_length": 256
+            },
+            {
+              "phase": "piv-slot-0xF9",
+              "header": "00c00000",
+              "sw": "0x9000",
+              "response_length": 38
+            },
+            {
+              "phase": "piv-public-objects",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-public-objects",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-public-objects",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            },
+            {
+              "phase": "piv-public-objects",
+              "header": "00cb3fff",
+              "sw": "0x6A82",
+              "response_length": 0
+            }
+          ]
+        },
+        {
+          "path": "/slots/0x9A/metadata/error_type",
+          "baseline": "ApduError",
+          "actual": null
+        },
+        {
+          "path": "/slots/0x9A/metadata/state",
+          "baseline": "absent",
+          "actual": "present"
+        },
+        {
+          "path": "/slots/0x9A/metadata/sw",
+          "baseline": "0x6A88",
+          "actual": null
+        },
+        {
+          "path": "/slots/0x9A/metadata/value",
+          "baseline": null,
+          "actual": {
+            "algorithm_id": 17,
+            "algorithm": "ECCP256",
+            "pin_policy_id": 2,
+            "pin_policy": "ONCE",
+            "touch_policy_id": 1,
+            "touch_policy": "NEVER",
+            "origin": "generated",
+            "public_key_encoded_sha256": "ee2503f5462f81b6c5b43cd3c75b83d1252bade3fcf266bd59048cf4c354336f",
+            "spki_sha256": "44339bad5e96daf3e1f32153199f1f0572b850d1282b53f58b39fc9e1f8b5172",
+            "spki_length": 91
+          }
+        }
+      ]
+    },
+    {
+      "label": "after-reset",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/multikey-after-103.after-reset.json",
+      "sha256": "b6c4c8a8c059b4c65e293b02adfb65779c1376835b311b8b4423ca034bdd3fba",
+      "baseline_differences": []
+    },
+    {
+      "label": "after-auth",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/multikey-after-103.after-auth.json",
+      "sha256": "3de5c0c545bcfe21bf1ddfa98960bb9f8d8ff3ab7a801f4848c75af630266093",
+      "baseline_differences": []
+    }
+  ],
+  "comparison_exceptions": [
+    "utc",
+    "mode"
+  ]
+}

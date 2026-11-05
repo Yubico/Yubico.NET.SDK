@@ -1,0 +1,20 @@
+$ ykman --reader 'Yubico YubiKey OTP+FIDO+CCID 01 00' info
+UTC 2026-11-05T00:06:01.935731+00:00
+Device type: YubiKey 5 NFC - Enhanced PIN
+Serial number: 125
+Firmware version: 5.8.0.alpha.2
+Form factor: Keychain (USB-A)
+Enabled USB interfaces: OTP, FIDO, CCID
+NFC transport is enabled
+PIN complexity is enforced
+
+Applications	USB    	NFC    
+Yubico OTP  	Enabled	Enabled
+FIDO U2F    	Enabled	Enabled
+FIDO2       	Enabled	Enabled
+OATH        	Enabled	Enabled
+PIV         	Enabled	Enabled
+OpenPGP     	Enabled	Enabled
+YubiHSM Auth	Enabled	Enabled
+
+EXIT=0

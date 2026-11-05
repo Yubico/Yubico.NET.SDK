@@ -1,0 +1,26 @@
+[
+  {
+    "path": "capture-compiler.py",
+    "snapshot": "capture-v1-preserved/capture-compiler.py.snapshot",
+    "sha256": "28f7c9a656151a8e6c1ae4d28fd80f996781176e184667d03e5c0cb8d46a9641",
+    "bytes": 2739
+  },
+  {
+    "path": "run-probe.py",
+    "snapshot": "capture-v1-preserved/run-probe.py.snapshot",
+    "sha256": "5567874389376673c227a094d8d9f1c6bcd7622911e0a2e9f8e92360528706a6",
+    "bytes": 9298
+  },
+  {
+    "path": "Directory.Build.props",
+    "snapshot": "capture-v1-preserved/Directory.Build.props.snapshot",
+    "sha256": "65e46bdb6a50ba8e42c3185db5535da7a91bda2bbfea6dc57f65b5636817de1e",
+    "bytes": 624
+  },
+  {
+    "path": "Directory.Build.targets",
+    "snapshot": "capture-v1-preserved/Directory.Build.targets.snapshot",
+    "sha256": "3c2ee24b5a816155bee117eca0670d26b520d1244853cf460cdd28c7e7e7a5b4",
+    "bytes": 1845
+  }
+]

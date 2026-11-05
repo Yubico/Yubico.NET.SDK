@@ -1,0 +1,10 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare.py
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare.py", line 79, in <module>
+    require(current == row['final_sha256'] == accepted_map[path]['sha256'], 'Current post-format accepted file changed: ' + path)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare.py", line 22, in require
+    raise ValueError(message)
+ValueError: Current post-format accepted file changed: src/Piv/README.md
+
+EXIT=1

@@ -138,9 +138,8 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
     }
 
     /// <summary>
-    ///     Fully parallel PIV sessions on two distinct physical keys: per-device serialization must
-    ///     not cross-wire devices — operations on key A and key B run concurrently and every
-    ///     response must come back correct for its own device.
+    ///     Runs concurrent signing loops on two physical keys and checks completion/nonempty outputs.
+    ///     Independent verification against each key's public key would additionally establish binding.
     /// </summary>
     [SkippableFact]
     public async Task ConcurrentPivSessions_OnTwoKeys_OperateIndependently()
@@ -303,7 +302,8 @@ public class PivMultiKeyContentionTests(ITestOutputHelper output)
         }
         finally
         {
-            // Never abandon an in-flight native transmit, including on a timeout or failed assertion.
+            // Drain key generation before disposal. The responsive WaitAsync task above can still
+            // outlive a timeout; complete drainage of that path remains separate cleanup work.
             await ((Task)keygenTask).ConfigureAwait(
                 ConfigureAwaitOptions.SuppressThrowing | ConfigureAwaitOptions.ContinueOnCapturedContext);
         }

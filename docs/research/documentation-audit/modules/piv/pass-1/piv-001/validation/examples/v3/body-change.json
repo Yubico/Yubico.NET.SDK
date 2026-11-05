@@ -1,0 +1,110 @@
+{
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "parent_inventory": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/inventory.json",
+    "bytes": 329070,
+    "sha256": "6bc88316e5f5bf7ff5d772bcb209af5895ea58f1020f25aac6627e5c8ebf2ff0"
+  },
+  "current_inventory": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/inventory.json",
+    "bytes": 329183,
+    "sha256": "32bcffff1170d13e1bffcefa6517ed266ef646ab479f704bfedea68738ff4933"
+  },
+  "changes": [
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "index": 6,
+      "before_sha256": "9d130e74836e29004f6c427ef935ce40cd88d276d10837180b765902660c4e67",
+      "after_sha256": "4464f14bda4ed114d1cbbb0c3994bc0af74fab338095a7eb6ee9ba5a756d213e"
+    }
+  ],
+  "inline_selector_changes": [
+    {
+      "path": "src/Piv/README.md",
+      "index": 128,
+      "before": {
+        "path": "src/Piv/README.md",
+        "index": 128,
+        "line": 414,
+        "scope": "module",
+        "headings": [
+          "Yubico.YubiKit.Piv",
+          "Maintainer verification"
+        ],
+        "body": "dotnet toolchain.cs -- test --project Piv",
+        "body_sha256": "6a8b4f6f156897a42702feb3525a1bf24a0a228bd13692405a997e4b7b3d8d4a"
+      },
+      "after": {
+        "path": "src/Piv/README.md",
+        "index": 128,
+        "line": 414,
+        "scope": "module",
+        "headings": [
+          "Yubico.YubiKit.Piv",
+          "Maintainer verification"
+        ],
+        "body": "dotnet toolchain.cs -- test --project Yubico.YubiKit.Piv",
+        "body_sha256": "c08faa483022761f3713e1453fa3f0c6b71bb6068eb349152afae150ccf996fa"
+      }
+    },
+    {
+      "path": "src/Piv/README.md",
+      "index": 129,
+      "before": {
+        "path": "src/Piv/README.md",
+        "index": 129,
+        "line": 415,
+        "scope": "module",
+        "headings": [
+          "Yubico.YubiKit.Piv",
+          "Maintainer verification"
+        ],
+        "body": "dotnet toolchain.cs -- test --integration --project Piv --smoke",
+        "body_sha256": "bb211d33e983f4b81ec9b39fe47a57b1922898bf24a023cf0a705e9695a5eec7"
+      },
+      "after": {
+        "path": "src/Piv/README.md",
+        "index": 129,
+        "line": 415,
+        "scope": "module",
+        "headings": [
+          "Yubico.YubiKit.Piv",
+          "Maintainer verification"
+        ],
+        "body": "dotnet toolchain.cs -- test --integration --project Yubico.YubiKit.Piv --smoke",
+        "body_sha256": "4e50e2a2c3744c0c65b6abfdb787e492ae6b7b08fb1bdd9e2f8a83a9a6f983dd"
+      }
+    },
+    {
+      "path": "src/Piv/README.md",
+      "index": 130,
+      "before": {
+        "path": "src/Piv/README.md",
+        "index": 130,
+        "line": 416,
+        "scope": "module",
+        "headings": [
+          "Yubico.YubiKit.Piv",
+          "Maintainer verification"
+        ],
+        "body": "dotnet toolchain.cs -- test --integration --project Piv --filter \"Category!=RequiresUserPresence\"",
+        "body_sha256": "20325a764313a9d6394f870d177019c310546cefe5480f09db4ece785c5005ae"
+      },
+      "after": {
+        "path": "src/Piv/README.md",
+        "index": 130,
+        "line": 416,
+        "scope": "module",
+        "headings": [
+          "Yubico.YubiKit.Piv",
+          "Maintainer verification"
+        ],
+        "body": "dotnet toolchain.cs -- test --integration --project Yubico.YubiKit.Piv --filter \"Category!=RequiresUserPresence\"",
+        "body_sha256": "cff23dddbe15468e237d10cc81b74de5f1a70a8b82a9e95fe21de354f0fd3871"
+      }
+    }
+  ],
+  "unchanged_current_bodies": 59,
+  "unchanged_consumer_groups": 44,
+  "prior_compilation_scope": "The accepted v2 consumer capture stays attached to v2; all new v3 hosts await fresh compilation."
+}

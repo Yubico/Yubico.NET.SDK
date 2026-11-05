@@ -17,7 +17,7 @@ namespace Yubico.YubiKit.Piv;
 /// <summary>Specifies how a certificate is compressed before storage.</summary>
 public enum CertificateCompression
 {
-    /// <summary>Compresses the certificate only when its uncompressed encoding exceeds the applet threshold.</summary>
+    /// <summary>Uses GZip when the DER encoding exceeds the SDK's 1856-byte threshold; this is not a hard device storage maximum.</summary>
     Automatic = 0,
 
     /// <summary>Always compresses the certificate.</summary>

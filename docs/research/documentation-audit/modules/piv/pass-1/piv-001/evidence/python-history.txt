@@ -1,0 +1,230 @@
+dd173ee542acace5e9ebabc794b85dc946bd628f 2026-03-19 pre-commit fixes
+d4982afa43a3be3b21874bfcb2733afcf3f6375f 2026-01-28 Simplify PIV zlib support for Net iD
+3005461aeb919b2a4be0b48a0ac8e45c4993f455 2026-01-20 Add tests
+1004d545d75321d2214396625e662dfcb510a263 2026-01-20 Clean up decompress logic
+15bde4c87f06c3688324796d4e30cf7dc7c63945 2026-01-16 Typo
+e29576727468d34401ae9bc97effc3aebe9f2322 2026-01-16 Add the CXF decompress method for X509 certificates fetching
+6aead5852c8f6c153f39c18e44a47bc069c9973a 2025-12-30 Remove redundant cast
+21722099042b77ec8d7af75ec36555f17d408a96 2025-11-13 Correct string for PIV PIN attempts >=15
+d81541e18ea7994fd1e6778f72dbaec2f30b2215 2025-09-26 Prefer from_rfc4514_string from cryptography
+b8756f584446e48b3cd64d4e15288e45bcc5588e 2025-07-21 Add get_serial for PIV
+0b1aa9eee58b6f97db4c7b5072ba71bd7735d063 2025-07-16 Use kwargs_only (Python 3.10)
+c9b97fa78164d40088357471ac4f65db7aad117d 2025-07-08 Fix types for older library versions
+93e8faca9813d39b8dff3df60442004b2877a330 2025-06-27 Refactor to pass pyright checks
+3928b791707a50f52e9567616e6512690cf38bc2 2025-06-26 Remove extra comma
+7371d001778ea174da7968b868e877a79add7262 2025-06-18 Replace bandit with ruff
+492808b5b48c2733832009218d3d15209c219bf6 2025-06-18 Use postponed evaluation of annotations
+c7d9a04900cb0903c134056bfe42ec9e32b211c5 2025-06-18 Drop Python 3.9 support
+dced60789fdb288b25adfff3bba4d4843deab19c 2025-06-18 Retain specified PIV slot order
+8dcbc89d28e02b198da7410804ebcf50fd064805 2025-06-05 Update PIN complexity tests
+72de2de88da3aa152edb8c74028b497799718c35 2025-05-13 Auto-organize import
+ff907d3533115e3d9dee9b0075eb43c035269ad4 2025-05-13 Support Click 8.2.0
+c910e5d25ba675ac2bfc97d35f14a4cc0314864f 2025-04-22 Override version checks for 0.0.1
+fe91d0ecc8d568a3ccbce3d276f1871af25d0aa0 2025-04-30 Improve error handling for printed slot
+fcc239b502ee997f2543b81c18f0117f1c4a265b 2025-04-30 Fix pyright errors
+ea63b4d1cd0479875321ec8afc90e97fe563c7f6 2025-04-30 Require Python 3.9, update type annotations
+19cb065c1a66408ba2e97499d6e1fbcd747228d8 2025-04-01 PIV: Catch error decompressing certificate
+4d38c24535e7184ae09bb34ff6283a4817600369 2025-03-17 Update pre-commit hooks and reformat
+48ecde9054b3c9d9418fe4a83632b9568e7477ac 2025-03-17 Improve errors when attempting to use PUK on MPE
+81648243439fa7c0754bfa3324ce0ab1de0c0674 2024-10-01 Fix deprecation warning (#636)
+92af831ea6faa6d19819e44d3d15f0a50a905c1d 2024-08-30 Make version handling for dev keys more explicit
+80697252746cf96b294d28c942c55aa327e9016f 2024-08-19 PIV: Use UUID4 for GUID generation
+6af66b152d6cf33bbab3188cee6c0f09b2676297 2024-08-06 Python < 3.11 compatibility
+17aab9a6f38c8b5e26364839b956018e237eaa33 2024-07-25 Add dataclasses for CHUID and FASC-N
+d175d4a3e0117006e3c17e928bca1901915ae552 2024-07-24 Type fixes
+1568c89bb581d8047461de6bd184a28ccca636ad 2024-06-25 Improve docstrings
+b00294dbf25e07b211971d74428dca40d9964e9c 2024-06-19 Improve handling of PIN/PUK/RESET for Bio MPE
+c5c8b80e1c9d3677319b9f65f3f1a862e70a04a7 2024-06-17 PIV: Update management_key_type after reset
+bf4db5aad7a55fe93548dd54f803dc4470945679 2024-06-05 More consistent CLI output
+04c8cda4b7c23686f840490203e5c515aa2fa61f 2024-05-30 Improve error handling when attempting to send too large APDUs
+eb908919bd660dc2bcc14533e9467523813a6463 2024-05-29 CLI Improve error output.
+0403339ebc827690303086467940d2d4b3c7be76 2024-05-26 Fix device tests
+e127cd0e2316d86c8753a328e6490ee2bb949734 2024-05-23 PIV: Deprecate explicitly passing management key type to authenticate
+f32cbc6617f1f05d153ed3c4fdbb32cb34c21877 2024-05-22 Minor PIV updates
+a60ae832f895cfbffc2bb602b41cd6ba20cb2a0e 2024-05-09 Add ScpKeyParams to session constructors
+a10d3b3b249c6dcdba3691824e24758d40994647 2024-05-08 Refactor SCP
+e4b24c5ea846b964e1582c392ec95e2c04baeac3 2023-09-26 Add SCP03 support to CLI.
+8706337cc0682ccffd6baae6563e02d4bf993036 2023-09-26 Refactor SCP03 implementation.
+67fbf5f83fef741fba2cc2af9c59b7d9bc3621d5 2024-04-24 PIV: Update tests for FIPS
+9909740c44c5a16a74de3676b8b7146cac32d89b 2024-04-18 PIV: Check parameters and FIPS state
+5a9d4960508d566145f4796a46808da302d53ba5 2024-04-18 PIV: Update verify_uv
+5f55ff046441b2a80f228a626235ceb17986f3ec 2024-04-16 Improve info output
+8f8cdc9f01478d87a1b2f46729df66ec97015f4f 2024-02-23 Update PIV tests for FIPS
+ca3a441f9039c14ba3e2b9ddb617baa6f0daf6d9 2024-03-14 FIDO: Add more min PIN length checks
+a65660eb628429d3e47af2edbe330fe4754a4d65 2024-02-23 Extract function for common PIN code
+377823882ec4c8dd8903159a254f3461303de694 2024-01-26 Fix bio metadata handling on older devices.
+1f320e9045871c12545c12fe3dd35c6c20a68227 2024-01-26 Show key information in "piv info" output
+4806db8d86c2364ed6700619cfb045b287f7d260 2024-01-26 Remove OrderedDict, no longer needed
+3da935b67ae66a003d165c765564f604783b843a 2024-01-26 Don't assume default mgm key type in tests
+72de4264018bfd5a1251e1571f01f5383062e2ef 2024-01-26 Check for bio before reset
+f80a7c75b2b4f9ef4bdcfa8421e11ec73a07d5c8 2024-01-25 Add config reset command.
+0fb9d6349257b6d1c463d715ad1a9eaaa06b79e8 2024-01-19 PIV: Fix some docstrings.
+1b410931ad77e2cef3b14c91a745c42b0c2e092d 2023-12-21 Fix tests.
+4ad6e8a23dd7e386c16e0fddb86b8f5f06b467e5 2023-12-21 Add CLI commands for delete/move keys.
+55470cbb78951bd72eb1603a9a6d4511798cd34f 2023-12-20 Add support for Ed25519 and X25519.
+70e11d77942acd5c5f7c627e398cf5119c64fc55 2023-12-20 Add PIV RSA 3072 and 4096.
+dbd854184e7e8edde06f4b650b6b9735f793b02f 2023-12-20 Don't use session.version in tests.
+d3ba7ebee9170e73fd52194196335644c7b6e220 2023-12-20 Add PIV move/delete slot.
+44bc443180aed29775a90055907dd547d56ef08d 2023-07-24 Add preview bio support for PIV.
+23233a690b6fa52ff570edf734d819028df3deea 2024-01-23 Fix cryptography deprecations.
+42cee4e8e101aa8020ae539d4c5caf37ac711bc6 2024-01-11 Ignore pivman.puk_blocked when metadata is available.
+36dc38ffbbf0fb58331afd49639cbbb1295b1862 2024-01-10 Reset "PUK blocked" flag on set-retries.
+349852a24500944a2b4e01dc1204c53d39b34b90 2023-11-24 PIV: Improve handling of malformed certificate data object.
+ac205f4b351d8dd19ee9368914311fad24d49513 2023-08-21 Minor fixes.
+852f9a7ba7859f964d9ad0c228525254a78b3cb6 2023-08-16 Add documentation for `yubikit` and `ykman`
+cd192be0c5b42c5ea6bb97f9b9aeb4ca729a5791 2023-08-02 Use InvalidPinError in OpenPGP.
+255ebd8b696e8c77fa4a0f0f740649aa77c35207 2023-05-12 PIV: Add support for compressed certificates.
+bdeab10cb58f638d85863b07c67fa6ffc1c7641c 2023-04-17 Fix __str__ on PIV SLOT for Python <3.11 (#552).
+508975fd078fd05f0f7d5c98f920631a47fe9276 2023-04-04 Merge yubikit.openpgp API.
+4c409690081350a6fdae14b7f80d74bb27d64d35 2023-04-04 Fix typing issues.
+14ae687678f2e4d207ca05b357196e6f6de5a460 2023-01-30 PIV: Make better use of metadata and add key info command.
+34a59be1d04e5483629a265aa00145ac1dd78015 2023-01-17 Remove (no longer needed) fallbacks.
+b73228df5245b44aa700eac73e18d128ec1f78a4 2022-12-29 PIV: Support Prehashed.
+6894662eb09ede6e4315cab633e427d678d8007f 2022-10-19 Remove SHA1 PIV tests.
+88639bc0951b33084ab0a1e6ed55bf666971350e 2022-10-06 Update pre-commit and add fixes.
+db0043fcedbb3dfba61e9269a8f2f0e1a873f656 2022-04-26 Support dotted-string OIDs when parsing RFC4514.
+3d54f257890c1b7372be190e44fee5fa8e919dce 2022-03-11 Remove is_yk4_fips_version.
+f8ef71cb463c17b48e7a1488b3c8c16a1d734e2f 2022-02-19 Rename is_fips_version -> is_yk4_fips_version.
+dee54a50969e873388d1ab5ecf6c7877ef1c3bb2 2022-02-19 Refactor core yubikit and ykman classes.
+7e064f08c38773efdb1a5ddc213aa03c40b67dd5 2022-02-21 piv info: Format dates as strings.
+36f172dbd32ad9c3778270e3199581bcc41ef9cb 2022-02-18 Add a lot of logging.
+399973cb402609a8c2909dab17b1c4066d89c93b 2022-02-17 Use structured data for diagnose.
+a11abb181770c83487c93c114cabe2309d6baa6f 2022-02-15 Update ykman CLI logging.
+5d42a551d1962b5eb422189eeda50992548fb677 2022-01-24 Fix logic for clearing out old data.
+59a71affcd6ee9fb5b36739fd22297dd3b9d2cee 2021-06-02 Fix feature detection for ykpiv 0.1.4.
+3b89995d4f252ce6be78ce2e479ebc4c431fe12b 2021-05-14 Skip ECCP384 tests on NEO.
+21fd4a35b78c0507f41a634a048caa4684975ba9 2021-04-20 Allow specifying hash algorithm for certs/CSRs.
+5cd5ede6b3497f77e5e4987021bbf97192a12941 2021-04-14 Add tests for PIV slot metadata.
+b285618e27f88660876cd857b02544fa571eb4d1 2021-04-13 Respect touch argument when setting PIV mgmt key.
+001fd3548cb7eb6c64878e05c3fcbf54bbca93ae 2021-04-11 Update pre-commit checks.
+902b7569efeb034c0a3804ea809d0f7085128035 2021-04-11 Clean up types in tests.
+d57f3888fd5745d1983b4b427cd851cf554697d5 2021-04-10 Add more type checking.
+3b483e18fbe2b84cb138557a9933633a37a87346 2021-03-18 Make enums more serializable.
+ba38eb61b542dd50043736e2acd344f6fcb5608e 2021-02-24 Cleanups.
+4df48266552ce4e50305460c73afe9b759cd43ae 2021-02-24 PIV: Add RFE4514 parsing for subjects.
+30ca8793d8fcb7c9fbc1ec921abf1b6878d4807f 2021-02-18 Use f-strings.
+8f162a756809de94b1acee3114e36d946d983cdd 2021-02-12 Add more specific error messages for unsupported PIV keys (close #361).
+28ad77f924c3a42aa4af0fa81385b298af1741ae 2021-02-09 Fixes for FIPS.
+a8d16b077d7ac58b1e91d11db52b7e690cafbc44 2021-02-08 Replace usage of int_to/from_bytes.
+acc0f449412c0ad01661c06bcae37690ece7ff4a 2021-02-08 Add --full-help.
+52daff773dfea40c40eb0bc76448bbc0ef70d680 2021-01-25 Fixup tests.
+4530dcb7ddfdc8b4e440a4cde053970ff94adb70 2021-01-25 Migrate remaining tests to pytest.
+ea6af4d0aefdfa6c5176a7577200c18d5a1f609c 2021-01-19 Fixes for NEO.
+c45a0f1a0b54c0ebbabfdce445829ff9a4ac9444 2021-01-16 Support PIV stored management keys using other algorithms.
+6f066863dbf9af0ca21852f8e310912fadb2ff2b 2020-12-10 Incorporate fix from #353.
+728ab33f7e14fa6afa6d3383781d42dfe7605447 2020-12-04 Add PIV MANAGEMENT_KEY_TYPE.
+6adf7d8bd9962e9976a500c637b0039caa1b0390 2020-11-15 Exempt major version 0 from version checks.
+73ddafd0c5145615d6f7375a6b1c6df2c5ab2ab1 2020-11-09 Add diagnostics.
+08f3ae0bcd16daaf0b756d68258aae24ce33eb21 2020-10-27 Refactor ykman.piv to get rid of PivController.
+0bb988058a642b297572273ecdfa36372b1f6e12 2020-10-15 Rename Tlv.unwrap to Tlv.unpack
+aeae9908f8c9de7925a4d7bb0b4b3814e816d186 2020-10-11 Make YubiKeyDevice Connection support discoverable.
+657277d40faa0d20df403fee56b1f9a02f65d4c4 2020-10-07 Clean up source headers.
+3e74dd0b751d9a07250f22f032ce115ac4aff8c1 2020-10-06 Introduce more Python 3 features.
+5ebcf54c55143c41f9df7e2dddfca897aab33387 2020-10-05 Better PIV import key checks.
+bb5ba2d797909a2fbe7174f7958a76eb37762a82 2020-10-04 Drop support for Python 2.
+a6ca9b9953fd50b0d4c26246b7f4e820ac284eb0 2020-09-24 Rename Application to Session.
+6ac3c33651363186127ab6acdd26bfe30e793ff1 2020-09-10 Fix tests and discovered bugs.
+8ebff997c32d35b7ae0960052a4724f7683850af 2020-09-08 Fix CLI piv command.
+bed59a977548e19dd2cdf1f3723442e833e2f57d 2020-09-03 Reformat everything with Black.
+dca022b348d86dc5d1fbb6a52cf0c421f331a094 2020-06-12 bandit: add # nosec suppression to false positives
+6287e71b454e82dfe05a2c0547a7e09c9e19c63c 2020-01-10 Don't crash piv info when a slot has an invalid cert
+028eb386a3992aabebf98eba3b19708eaf56fada 2019-08-15 Add TLV utility functions, and do more checking.
+ed494bda731b4421927dd1756dd6f2e80988c81d 2019-08-12 Support and use 2-byte tags in Tlv.
+3d23ef4287877965835dcdac6883b9a3e1febde1 2019-06-26 Make super() calls compatible with Python 2
+cabde31fef2e3236511fcebb4bacdf97fef328f8 2019-06-17 Remove unused from_string class methods
+fd333d0927ba15b82ee35bbb0c0896d948dc5db5 2019-06-17 piv: use public key api added in cryptography 2.5
+f0cf61f7c50c7806a60cb60b9183b0f0b8f0ea46 2019-06-14 Fix flake8 complaints
+5b1494a5a61e6a784bfc3b6a8521d5415d8bb90a 2019-02-25 fix flake8 errors
+e47b4c74fb13d99d83303a8c71ea3736a57689f9 2019-02-19 piv: on import, support touch prompt
+54092abc7398657cf5b0778d53af4de5f1233e2e 2019-01-17 piv: support reading the discovery object
+87243654e9be6267ff05aa69f299da03942bfbd1 2019-01-02 piv: chuid: add description of fields in CHUID
+81f74ad0a72b5552660b6fba6b937b5150836884 2019-01-02 piv: chuid: fix 4-bit + odd parity BCD encoding of FASC-N field
+d81c5c48fddf2a71c344077a2cb0e4b44da5f1f9 2018-12-19 Default verify to False in import_certificate
+2bf4b121ccb2ff3547ea642f41a1ca54b7735095 2018-12-19 Sign static data instead of random data in import_certificate verification
+ea42fe4df1a79873a17e0d46503781b8e0b8b78a 2018-12-19 Add error type KeypairMismatch
+071467a3368ae4729c2162422952f3ba7d2b08d8 2018-12-13 Fix flake8 complaints
+09d6553dfd4c83183f7f258059d0bf52b9f2ebe4 2018-12-13 Fix cross-type key pairing verification logic
+db329d1bcdbf0483257c54f1ee0e6ca63a14165d 2018-12-13 Verify that imported cert belongs to the key in the slot
+e4102dcd2a6262a6b4ea25a8d92359d7257d105d 2018-11-22 Merge pull request #181 from Yubico/piv-supported-algorithms
+b3e9b9bc148b9359b37bc2156979834a52727d6e 2018-11-21 Extract is_fips logic into static method on YubiKey
+2f1d08e42ec2db1227cedabbc2633ae3688a3307 2018-11-21 Simplify supported_algorithms implementation
+a019b96552ec650bab0c67f6316c10d3f3a47413 2018-11-21 Merge branch 'master' into dev-2.x
+7dc9cab3eeeb57637e9eb70bd908ab76143ef281 2018-11-21 Merge branch 'piv-update-chuid-ccc-on-init'
+7f2631a1a326489e89e9d5419f90150f64770fe8 2018-11-21 Extract method PivController.supported_algorithms
+8560b6d64d111e88296e155dc9aaed621dc710e5 2018-11-21 Fix incorrect format specifier
+8b6dd4327ee801941d89faa4dc5e5cb62727bc41 2018-11-21 piv: set CHUID and CCC on init
+b6dff540c3ffff8bdbbfa8ff4ac9537be32d47c1 2018-11-19 piv: update CHUID when importing certificate
+7548831cb1a89ac7141c7ae9508d4676405a9de0 2018-11-09 piv: fix unintended default algorithm in gen-key
+e271b15894ad7a3a43c3337bf12ff77c199eb4a4 2018-11-08 Merge piv submodules into one piv.py module
+01cab808c74340d9153cfb7dabaf881a17fd41c8 2018-11-07 spelling: initialize
+3ddf01e6e9c701e45f01c773408dd7376297db9e 2018-10-12 Rename ykman/piv.py to ykman/piv/__init__.py
+61502557dfaeaf3df4e457f1fcbcc26fd47b0203 2018-11-07 Validate status word range in SW.tries_left
+92706f441bd7f9b40139800d54523c5c5ab32d5b 2018-11-07 Condition is_verify_fail and tries_left on PIV applet version
+359947db548879500b1fbc1582fc2d41baddbfa6 2018-11-07 Expand is_verify_fail to include all 0x63cX status words
+51d329c1d0b20bb22d2f4ad2f60b98f387ecc7b6 2018-10-15 Use @staticmethod instead of @classmethod
+3f7eb47d50fd594be96b0b3ccdf1780a79111a3e 2018-10-12 Move method PivController._parse_tries_left to classmethod SW.tries_left
+a27b66869df026636683a3e7cda05fb407c10ac1 2018-10-11 Add class methods for inspecting verify fail (0x63cX) status words
+61dac31aab26b91e66ead85b5e369aeae0673fab 2018-05-03 piv: use verify instead of verifier
+9d1a4e0f79b4f6b98071e0fa6db20546e4b03b0b 2018-03-23 Merge pull request #80 from Yubico/piv-mgm-key-length-error
+6317025366313e073f7c7d8aa98b36838571e2f4 2018-03-23 Merge branch 'master' into piv-mgm-key-length-error
+e1ec2ed89e94ae95505a9342446ab8a75f5243c3 2018-03-21 Merge branch 'master' into generate-flag
+e9bed3234dcc5819056d9fe71363eea3e577ed20 2018-03-21 Re-verify PIN after unlocking protected management key
+67dfaee6f847ae41d61c0f796c773a87404db6b7 2018-03-19 Add error message if PIV mgm key is != 24 bytes long
+536c547b27a4187633160f80fcb4614cdb60cd08 2018-03-19 Raise ValueError in PivController.set_mgm_key if non-stored key is not given
+a132c5721081ed435feea1632bada0f996fdb91f 2018-03-08 Simplify supported_pin_policies to Boolean supports_pin_policies
+2e4abad7088854c2f945b5876af5a86cacb39f62 2018-03-05 Add enum constant piv.SW.INCORRECT_PARAMETERS
+44fba358cc4fa9b94e194ee259e96e517e4f3def 2018-03-02 Extract property methods PivController.supported_{pin,touch}_policies()
+cc958659395c1122ffa962e215d6d61edb45a3fc 2018-03-01 Move guts of PIV CSR generation code into lib module
+a0e14ff72f0db8501b8f73d20fd567463f9d5c52 2018-03-01 Accept valid_from and valid_to in generate_self_signed_certificate
+569aafeed7decb559a837d520e924a5813b09503 2018-03-01 Move guts of PIV generate_certificate logic into lib module
+dcdb1817fa7a01b4e526738a94520044564118d9 2018-02-26 Use bare raise instead of raise e
+4bed9bb997741c967bc16dc7f9acd6df2ad8f47a 2018-02-23 Pass test_set_stored_mgm_key_does_not_destroy_key_if_pin_not_verified
+f5e44831cb9b1d4239ff37e320af3ed4aee6caf6 2018-02-22 Remove try-except from PivController.get_{pin,puk}_tries()
+d6e5a11d57da6aed53eaa157b774570a1cb91139 2018-02-22 Re-read _pivman_data after reset
+11656239febc6f3f5ea11ab2e4717095ba57a541 2018-02-14 Generate random management key in piv module instead of cli.piv
+ad6865546d4b886c8ac632c686b43a07700ab2e5 2018-02-08 Move function cli.piv._generate_random_management_key() to piv module
+ecf1606a94fbd22ca4aa50d8cad001e3378033c1 2018-02-14 Fix PIV CSR signatures (closes #55).
+61a84ec1493822bf029cdac5a421d4e1f849582a 2018-02-07 Return number of retries on PUK change failure
+4ef752c1c1fa027c729ff41bc52d34ddbde35c0a 2018-01-23 pin -> PIN
+5e4e281583d17847a67ef5a1d063c062a1522242 2018-01-22 Revert unnecessary variable introduction
+d84f3ab9ef471f88a656a43bdcb0157f8cc2b87b 2018-01-22 Log lightly handled errors
+d588041ee1246083b97645e56de7959696446632 2017-11-01 Update pre-commit rules and fix flake8 issues.
+0717f648f7ebe8184af73db3dfa704e5a7b3a04d 2017-10-16 piv: Refuse to generate RSA keys on CVE-2017-15361 affected YubiKeys
+461452cfae0b5540ae51221a1b418b00132f1a0f 2017-10-16 piv: Add classmethod ALGO.is_rsa(algorithm_int)
+0c3d60de4d53673d31e66b121324993674705ed7 2017-08-10 piv: never overwrite porotected data
+b272162f2bc6a1d8304c18b8dfb58c9f6440bdbe 2017-08-09 piv: move touch timer cleanup to finally block
+7547811a65286a8e9f97e9420139adc8f7156be5 2017-08-09 piv: clear old store key if possible
+2f69815fe7c47973ad0fad17120876957e2a3307 2017-08-08 piv: always update flag for stored key
+e15ba64b2eb033a4a66f5576508ade51aa48926e 2017-08-08 piv: small refactor
+036936ec6810fa820050b9096c2f887289ad9650 2017-08-08 piv: small rename
+6f02a3fabdc96216ca1303f99d9988284ae4c08c 2017-08-07 piv: use stored mgm key if needed
+8ef79167c5ba2e345a1ff4aea08ba6d830047b65 2017-08-07 piv: add support for random mgm key
+3620784638d053c69435b541320665e6b4675816 2017-08-07 piv: cancel touch prompting when auth fails
+9fb75a0066d727110778836ef32608cdf4adf9fe 2017-06-19 piv: use a callback for touch prompting
+55a03bb6bde8edf33a7e1ca5a9456ef0e5e8bb5c 2017-06-16 piv: fix touch policy and pin policy in gen key
+ab082a1200a3c197690eb386619faad3cc5cef17 2017-06-15 piv: fix reading of pin tries on old fw
+89bd426edb794b5ba2822516cd6cf9aab14a5f8f 2017-06-14 piv: py2 fix for mgm key functions
+7bcd93996d329a8459b5bee3bfd2d1971463a655 2017-06-14 piv: handle PIN and PUK APDUErrors
+adf0e391ca373c8ef737be75e1c669ca30e5c2bd 2017-06-08 piv: support setting a derived mgm key
+95ae211130e012253121b96c461e4d18a9ea6fe9 2017-06-01 piv: refactor reset functionality
+0483c41d845a47286cb4cbbbe708c7ca9b223dda 2017-06-01 piv: fix error in get_pin_retries
+8080c982aff2474de27b956cea6a478390b513f6 2017-06-01 piv: support derived management keys better
+eee1e617ef26d582d1e2a064a3d53f25dbf01546 2017-05-31 piv: add command to change PUK
+e7b3f68422af834415e33e8ba3895ff3cb7e2a8d 2017-05-30 piv: allow default mangement key on blank prompt
+7577e5bb352cf1183ae971ca343cb1264c50e423 2017-05-30 piv: add command to delete certificate
+61be88097d48d275d70cf773e15eace983f25d09 2017-05-29 piv: handle 15+ pin retries better
+d2303e301eba9bf109279b73f557202c3d6eaf54 2017-05-24 piv: add init command (set CHUID and CCC)
+3a2fc63b35b2ebabceaf0f574a54c8486147ddff 2017-05-24 piv: fix for reading cert from attestation slot
+74b0e1266662af653eb5c4385725cc8b86226d85 2017-05-23 piv: fixes for touch/pin policy in library
+b330b0a86c6f8718541489aaab382f31c8f3c3d2 2017-05-22 piv: don't crash when chuid or ccc not set
+091151b17c01ac21ab1f1b1d5c1ca893c8c6b3a5 2017-05-22 piv: add touch and pin policy to generate
+a8f53d4827e7a2adf2acd39028375cd268eb440f 2017-05-22 piv: fix python2 in generate function
+b0d4cdd1c3f2514ff5b84c42dfeadbb1071bca19 2017-05-22 piv: add from_string method on algorithm enum
+ef2d3640ac81d51410c677acbd6cf4b50a185270 2017-05-18 PIV list slots, better info, start handling pivman data.
+ad5e13614d10d7f37c5c1f9c16023a843836695d 2017-05-13 Add signing of x509 certificates and CSRs.
+bfd8c7869fba7ad65f296cc30030ab7205b8a868 2017-05-11 Rename send_apdu/send_cmd in piv.
+10d4a21c82648036a68bdc5e78bc115b3622392f 2017-05-11 Add read_certificate, attest, and sign_data.
+5cd61ae95c0a5cd733b9657facf9759d7b5fbbd2 2017-05-10 Add import cert and set PIN retries.
+ef77451c126f9432351fedb8a7a9155d8cc04273 2017-05-10 Add key import/generation.
+82ee7bb531bc657c0fb2bc6d862e063250ae0300 2017-05-09 Add authenticate and set_mgm_key.
+f0a9a77626524f8109afe4c2577811a9f16d3f23 2017-05-09 Add initial piv functionality.

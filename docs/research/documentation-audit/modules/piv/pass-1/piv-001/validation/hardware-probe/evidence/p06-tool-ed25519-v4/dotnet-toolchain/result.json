@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditPiv001.Hardware.IntegrationTests --filter FullyQualifiedName~P06_ActualPivToolEd25519SignsOriginalMessage",
+  "started": "2026-11-05T08:16:06.6307162+01:00",
+  "durationSeconds": 9.6,
+  "runDirectory": "artifacts/toolchain/runs/20261105-081606-630-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 9.6,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditPiv001.Hardware.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "AuditPiv001.Hardware.IntegrationTests.HardwareProbeTests.P06_ActualPivToolEd25519SignsOriginalMessage(state: YubiKey(Placeholder #0: FW>=5.7.0,Conn=SmartCard,Filter=Serial103Filter))",
+          "message": "PIVIMP-005: actual PivTool Ed25519 result must verify over the original unmodified message."
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261105-081606-630-test/01-test-AuditPiv001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project AuditPiv001.Hardware.IntegrationTests --filter \"FullyQualifiedName~AuditPiv001.Hardware.IntegrationTests.HardwareProbeTests.P06_ActualPivToolEd25519SignsOriginalMessage\""
+  ]
+}

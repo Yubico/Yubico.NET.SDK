@@ -1,0 +1,15 @@
+{
+  "command": "python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/bind-source-context-v2.py",
+  "exit": 1,
+  "phase": "static baseline-body provenance normalization",
+  "tool_sha256": "7895fcf5e4d040850a6e5bc889e72637987731494d8737ba2fd9e11a3e9cea8a",
+  "error": "ValueError: Original editor body hash mismatch: src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs#1",
+  "observed_sha256": "5fbfe3169d561be183b1babcfbb5622019b8062a488ea66a92057b307527fd34",
+  "expected_editor_sha256": "2d2a016c43bb37fff40045d71e2a213bd9d238378abb67e1667457f4d4a47616",
+  "cause": "The first normalizer retained the indentation on the closing XML code tag as trailing body whitespace. The editor hashing rule trims that trailing whitespace while preserving leading code indentation.",
+  "bounded_correction": {
+    "before": "html.unescape(match).strip('\\n') + '\\n'",
+    "after": "html.unescape(match).strip('\\n').rstrip() + '\\n'"
+  },
+  "scope": "Preparation/provenance failure before source-context artifacts were written. Compiler and hardware execution remained separate and pending. Baseline/product text and earlier extraction results stayed unchanged."
+}

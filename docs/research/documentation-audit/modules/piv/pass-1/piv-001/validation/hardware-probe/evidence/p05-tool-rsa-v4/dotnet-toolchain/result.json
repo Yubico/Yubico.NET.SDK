@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditPiv001.Hardware.IntegrationTests --filter FullyQualifiedName~P05_ActualPivToolRsaSignsOriginalMessage",
+  "started": "2026-11-05T08:15:39.7491352+01:00",
+  "durationSeconds": 18.8,
+  "runDirectory": "artifacts/toolchain/runs/20261105-081539-749-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 18.7,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditPiv001.Hardware.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "AuditPiv001.Hardware.IntegrationTests.HardwareProbeTests.P05_ActualPivToolRsaSignsOriginalMessage(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard,Filter=Serial103Filter))",
+          "message": "PIVIMP-005: actual PivTool RSA result must verify as SHA256/PKCS1 over the original message."
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261105-081539-749-test/01-test-AuditPiv001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project AuditPiv001.Hardware.IntegrationTests --filter \"FullyQualifiedName~AuditPiv001.Hardware.IntegrationTests.HardwareProbeTests.P05_ActualPivToolRsaSignsOriginalMessage\""
+  ]
+}

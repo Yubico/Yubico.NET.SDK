@@ -1,0 +1,75 @@
+{
+  "distribution": "yubikey-manager",
+  "version": "5.9.2",
+  "files": {
+    "ykman.device": {
+      "installed_path": "/usr/lib/python3.14/site-packages/ykman/device.py",
+      "snapshot": "ykman.device.py",
+      "sha256": "398338584cce6a3980387fe1b7b0e8b1ced7bc1330252b363ff40be0689d4c2e"
+    },
+    "ykman.piv": {
+      "installed_path": "/usr/lib/python3.14/site-packages/ykman/piv.py",
+      "snapshot": "ykman.piv.py",
+      "sha256": "b24c77190286b801ac77b8142f43f78b9aeefdd4599c23b2a7aceb62b378d224"
+    },
+    "ykman._cli.piv": {
+      "installed_path": "/usr/lib/python3.14/site-packages/ykman/_cli/piv.py",
+      "snapshot": "ykman._cli.piv.py",
+      "sha256": "c3e74c46e0952c9471856d6d08f70a6f783f4ae533207447e7e544616cccea5e"
+    },
+    "yubikit.piv": {
+      "installed_path": "/usr/lib/python3.14/site-packages/yubikit/piv.py",
+      "snapshot": "yubikit.piv.py",
+      "sha256": "f1055e88dca0c8b0ff107a3f1724cd9e03447a95565ecbfde7517f8114ba47fd"
+    },
+    "yubikit.management": {
+      "installed_path": "/usr/lib/python3.14/site-packages/yubikit/management.py",
+      "snapshot": "yubikit.management.py",
+      "sha256": "7cc29f5803f36c945ec613849c65ee9ea83f7d4e260880ebab7096a4dcbe3192"
+    },
+    "yubikit.support": {
+      "installed_path": "/usr/lib/python3.14/site-packages/yubikit/support.py",
+      "snapshot": "yubikit.support.py",
+      "sha256": "c1a1722619fc7f3e6649cad66c638d6eaec5887804e86c9efdee01e57c24d8f5"
+    },
+    "yubikit.core": {
+      "installed_path": "/usr/lib/python3.14/site-packages/yubikit/core/__init__.py",
+      "snapshot": "yubikit.core.py",
+      "sha256": "524305273499d3a0fc37ff58c207a180cf3d280490bb48c4596507ed8a56061c"
+    },
+    "yubikit.core.smartcard": {
+      "installed_path": "/usr/lib/python3.14/site-packages/yubikit/core/smartcard/__init__.py",
+      "snapshot": "yubikit.core.smartcard.py",
+      "sha256": "595be784aa2ede30488263cbc63686e94365a68d598b96fb350c71c1b5d694bd"
+    },
+    "ykman.pcsc": {
+      "installed_path": "/usr/lib/python3.14/site-packages/ykman/pcsc/__init__.py",
+      "snapshot": "ykman.pcsc.py",
+      "sha256": "7df388a53eb3a1784f498c3e854a3cc272bef59233b3e0feaaeb72de6ad1199c"
+    }
+  },
+  "api": {
+    "ykman.pcsc.list_devices": "(name_filter=None)",
+    "ScardSmartCardConnection": "(connection)",
+    "ScardSmartCardConnection.send_and_receive": "(self, apdu)",
+    "PivSession.__init__": "(self, connection: 'SmartCardConnection', scp_key_params: 'ScpKeyParams | None' = None)",
+    "PivSession.get_serial": "(self) -> 'int'",
+    "PivSession.get_pin_metadata": "(self) -> 'PinMetadata'",
+    "PivSession.get_puk_metadata": "(self) -> 'PinMetadata'",
+    "PivSession.get_management_key_metadata": "(self) -> 'ManagementKeyMetadata'",
+    "PivSession.get_slot_metadata": "(self, slot: 'SLOT') -> 'SlotMetadata'",
+    "PivSession.get_bio_metadata": "(self) -> 'BioMetadata'",
+    "PivSession.get_object": "(self, object_id: 'int') -> 'bytes'",
+    "PivSession.get_certificate": "(self, slot: 'SLOT') -> 'x509.Certificate'",
+    "PivSession.reset": "(self) -> 'None'",
+    "PivSession.verify_pin": "(self, pin: 'str') -> 'None'",
+    "PivSession.authenticate": "(self, *args, **kwargs) -> 'None'",
+    "PivSession.change_puk": "(self, old_puk: 'str', new_puk: 'str') -> 'None'",
+    "ManagementSession.__init__": "(self, connection: 'OtpConnection | SmartCardConnection | FidoConnection', scp_key_params: 'ScpKeyParams | None' = None)",
+    "ManagementSession.read_device_info": "(self) -> 'DeviceInfo'",
+    "PinMetadata": "(default_value: 'bool', total_attempts: 'int', attempts_remaining: 'int') -> None",
+    "SlotMetadata": "(key_type: 'KEY_TYPE', pin_policy: 'PIN_POLICY', touch_policy: 'TOUCH_POLICY', generated: 'bool', public_key_encoded: 'bytes') -> None",
+    "ManagementKeyMetadata": "(key_type: 'MANAGEMENT_KEY_TYPE', default_value: 'bool', touch_policy: 'TOUCH_POLICY') -> None",
+    "list_all_devices": "(connection_types: Iterable[type[yubikit.core.Connection] | type[fido2.ctap.CtapDevice]] = dict_keys([<class 'yubikit.core.smartcard.SmartCardConnection'>, <class 'yubikit.core.otp.OtpConnection'>, <class 'fido2.ctap.CtapDevice'>])) -> list[tuple[ykman.base.YkmanDevice, yubikit.management.DeviceInfo]]"
+  }
+}

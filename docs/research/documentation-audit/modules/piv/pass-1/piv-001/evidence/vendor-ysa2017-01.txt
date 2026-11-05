@@ -1,0 +1,168 @@
+Security advisory YSA-2017-01 | Yubico
+OpenAI mandates hardware-backed passkeys for Trusted Access for Cyber members.
+Read more.
+Skip to content
+English
+Français
+Deutsch
+日本語
+Español
+Svenska
+Investors
+Contact Sales
+Partners
+Support
+About
+Products
+Enterprise
+Resources
+Solutions
+0
+All YubiKeys
+Compare YubiKeys
+What is a YubiKey?
+Set up your YubiKey
+YubiKey 5 Series
+Learn more
+Buy
+YubiKey 5 FIPS Series
+Learn more
+Buy
+YubiKey Bio Series
+Learn more
+Buy
+Security Key Series
+Learn more
+Buy
+YubiHSM 2 & YubiHSM 2 FIPS
+Learn more
+Buy
+Accessories
+Buy
+Home
+/
+Support
+/
+Security advisories
+/
+Security advisory YSA-2017-01
+Security advisory YSA-2017-01
+Security advisory YSA-2017-01  – Infineon weak RSA key generation
+Published date:
+2017-10-16
+Tracking IDs:
+YSA-2017-01
+CVE:
+CVE-2017-15361
+Background
+Infineon Technologies, one of Yubico’s secure element vendors, informed us of a
+security issue
+in their firmware cryptographic libraries. The issue weakens the strength of on-chip RSA key generation and affects some use cases for the Personal Identity Verification (PIV) smart card and OpenPGP functionality of the YubiKey 4 platform.
+Other functions of the YubiKey 4, including PIV Smart Cards with ECC keys, FIDO U2F, Yubico OTP, and OATH functions, are not affected. YubiKey NEO and FIDO U2F Security Key are not impacted.
+We have created a
+dedicated customer portal
+to provide additional information to help customers determine if they are affected and to provide mitigation recommendations.
+Summary of the issue
+The Infineon RSA key generation issue was
+discovered
+by an independent team of researchers from the University of Masaryk in the Czech Republic. The researchers found a method to identify mathematical weaknesses of particular algorithms for prime number generation.The method allows an attacker who only has the public portion of an RSA key pair generated on the secure element to compute the private key faster than the current state of the art attack.
+Infineon confirms that the RSA key generation implemented in one of their cryptographic libraries is affected. The root cause of the issue lies within the cryptographic software library, not in the secure element itself – the symmetric and asymmetric hardware co-processors are not affected.
+Solution
+To ensure the YubiKey 4 offers strong security for all functions, Yubico switched to a different, broadly scrutinized and deployed key generation function. All YubiKey 4 products shipped by Yubico after June 6, 2017 (version 4.3.5 or higher) use this new implementation. The new implementation has been vetted by the security researchers who discovered the original issue as well as by professional security auditors.
+Recommendation
+Affected customers may find options for how to address this issue on the
+dedicated customer portal
+.
+Mitigation
+For users of the PIV smart card feature who have previously generated private RSA keys on the YubiKey 4 (version 4.2.6 – 4.3.4), we recommend either regenerating private keys using ECC algorithms, or if RSA keys are required, regenerating keys off the YubiKey 4 and loading them onto the YubiKey 4.
+For users of OpenPGP who have previously generated private RSA keys on the YubiKey 4 (version 4.2.6 – 4.3.4) we recommend regenerating private keys off the YubiKey 4 and loading the new keys onto the YubiKey 4.
+For more detailed information please refer to the Yubico Mitigation Recommendations accessible on the
+dedicated customer portal
+.
+Timeline
+2017/05/12
+Infineon Technologies informed Yubico, under strict
+Coordinated Vulnerability Disclosure
+restrictions, of the issue discovered in an Infineon cryptographic library.
+2017/06/06
+Yubico remedied this issue in all shipping YubiKey 4 devices.
+2017/06/06 –
+2017/10/16
+Yubico works with Infineon and the team of researchers from the University of Masaryk to assess potentially impacted services.
+2017/10/16
+The security researchers from the University of Masaryk publish their research and the Coordinated Vulnerability Disclosure embargo is lifted. Yubico issues this Security Advisory to customers, offering mitigation recommendations and a
+key replacement program
+for affected customers.
+Join our newsletter
+Distributed monthly, it includes product news, new applications, case studies, events, and
+  discounts. Unsubscribe anytime.
+By subscribing you agree to our
+Privacy Policy
+.
+Subscribe
+About us
+About us
+The team
+Innovation history
+Secure it forward program
+Yubico blog
+Press Room
+Events
+Partner programs
+Careers
+Investors
+Products
+YubiKey 5 Series
+YubiKey 5 FIPS Series
+Security Key Series
+YubiKey Bio Series
+YubiHSM 2 & YubiHSM 2 FIPS
+Accessories
+Yubico Authenticator
+Computer login tools
+Software Development kits
+Enterprise
+YubiKey as a Service
+Delivery
+Contact Sales
+Enrollment
+Professional Services
+Solutions
+All Solutions
+Initiatives
+Industries
+Use cases
+Technologies
+Resources
+Setting up your YubiKey
+Find the right YubiKey
+Works with YubiKey Catalog
+What is a YubiKey
+Case studies
+Webinars
+White papers and reports
+Documentation
+All downloads
+Support Home
+Support services
+Buying and shipping information
+Social
+LinkedIn
+YouTube
+Instagram
+X
+Facebook
+English
+Français
+Deutsch
+日本語
+Español
+Svenska
+Sitemap
+Cookies
+Legal
+Privacy
+Terms of use
+Accessibility
+Legal Imprint
+EU Right of Withdrawal

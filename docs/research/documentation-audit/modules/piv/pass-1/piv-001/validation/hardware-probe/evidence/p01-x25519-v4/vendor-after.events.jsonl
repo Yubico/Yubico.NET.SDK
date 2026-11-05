@@ -1,0 +1,120 @@
+{"operation": "public-capture-start", "label": "before", "command": ["/usr/bin/python3", "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py", "final", "--serial", "103", "--reader", "Yubico YubiKey OTP+FIDO+CCID 00 00", "--output", "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/evidence/p01-x25519-v4/vendor-after.before.json"]}
+{"operation": "public-capture-exit", "label": "before", "returncode": 0}
+{"operation": "public-capture-verified", "label": "before", "serial": 103, "differences": 5}
+{"operation": "apdu-start", "phase": "identity", "header": "00a40400"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00a40400", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0100"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0100", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0100"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0100", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00a40400"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00a40400", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00fd0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00fd0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00fd0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00fd0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f80000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f80000", "sw": "0x9000"}
+{"operation": "live-identity-verified", "serial": 103, "firmware": "5.8.0.beta.0", "applet_version": "0.0.1"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f70096"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f70096", "sw": "0x6A88"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f700f9"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f700f9", "sw": "0x6117"}
+{"operation": "apdu-start", "phase": "identity", "header": "00c00000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00c00000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "attestation-public-certificate", "header": "00cb3fff"}
+{"operation": "apdu-finish", "phase": "attestation-public-certificate", "header": "00cb3fff", "sw": "0x6100"}
+{"operation": "apdu-start", "phase": "attestation-public-certificate", "header": "00c00000"}
+{"operation": "apdu-finish", "phase": "attestation-public-certificate", "header": "00c00000", "sw": "0x6100"}
+{"operation": "apdu-start", "phase": "attestation-public-certificate", "header": "00c00000"}
+{"operation": "apdu-finish", "phase": "attestation-public-certificate", "header": "00c00000", "sw": "0x6126"}
+{"operation": "apdu-start", "phase": "attestation-public-certificate", "header": "00c00000"}
+{"operation": "apdu-finish", "phase": "attestation-public-certificate", "header": "00c00000", "sw": "0x9000"}
+{"operation": "attestation-public-identity-preserved-before-reset"}
+{"operation": "apdu-start", "phase": "block-pin", "header": "00f70080"}
+{"operation": "apdu-finish", "phase": "block-pin", "header": "00f70080", "sw": "0x9000"}
+{"operation": "blocking-attempt", "reference": "0x80", "attempt": 1, "remaining_before": 3, "maximum_attempts": 3}
+{"operation": "apdu-start", "phase": "block-pin", "header": "00200080"}
+{"operation": "apdu-finish", "phase": "block-pin", "header": "00200080", "sw": "0x63C2"}
+{"operation": "apdu-start", "phase": "block-pin", "header": "00f70080"}
+{"operation": "apdu-finish", "phase": "block-pin", "header": "00f70080", "sw": "0x9000"}
+{"operation": "blocking-attempt", "reference": "0x80", "attempt": 2, "remaining_before": 2, "maximum_attempts": 3}
+{"operation": "apdu-start", "phase": "block-pin", "header": "00200080"}
+{"operation": "apdu-finish", "phase": "block-pin", "header": "00200080", "sw": "0x63C1"}
+{"operation": "apdu-start", "phase": "block-pin", "header": "00f70080"}
+{"operation": "apdu-finish", "phase": "block-pin", "header": "00f70080", "sw": "0x9000"}
+{"operation": "blocking-attempt", "reference": "0x80", "attempt": 3, "remaining_before": 1, "maximum_attempts": 3}
+{"operation": "apdu-start", "phase": "block-pin", "header": "00200080"}
+{"operation": "apdu-finish", "phase": "block-pin", "header": "00200080", "sw": "0x6983"}
+{"operation": "apdu-start", "phase": "block-pin", "header": "00f70080"}
+{"operation": "apdu-finish", "phase": "block-pin", "header": "00f70080", "sw": "0x9000"}
+{"operation": "reference-blocked", "reference": "0x80", "attempts": 3}
+{"operation": "apdu-start", "phase": "block-puk", "header": "00f70081"}
+{"operation": "apdu-finish", "phase": "block-puk", "header": "00f70081", "sw": "0x9000"}
+{"operation": "blocking-attempt", "reference": "0x81", "attempt": 1, "remaining_before": 3, "maximum_attempts": 3}
+{"operation": "apdu-start", "phase": "block-puk", "header": "002c0080"}
+{"operation": "apdu-finish", "phase": "block-puk", "header": "002c0080", "sw": "0x63C2"}
+{"operation": "apdu-start", "phase": "block-puk", "header": "00f70081"}
+{"operation": "apdu-finish", "phase": "block-puk", "header": "00f70081", "sw": "0x9000"}
+{"operation": "blocking-attempt", "reference": "0x81", "attempt": 2, "remaining_before": 2, "maximum_attempts": 3}
+{"operation": "apdu-start", "phase": "block-puk", "header": "002c0080"}
+{"operation": "apdu-finish", "phase": "block-puk", "header": "002c0080", "sw": "0x63C1"}
+{"operation": "apdu-start", "phase": "block-puk", "header": "00f70081"}
+{"operation": "apdu-finish", "phase": "block-puk", "header": "00f70081", "sw": "0x9000"}
+{"operation": "blocking-attempt", "reference": "0x81", "attempt": 3, "remaining_before": 1, "maximum_attempts": 3}
+{"operation": "apdu-start", "phase": "block-puk", "header": "002c0080"}
+{"operation": "apdu-finish", "phase": "block-puk", "header": "002c0080", "sw": "0x6983"}
+{"operation": "apdu-start", "phase": "block-puk", "header": "00f70081"}
+{"operation": "apdu-finish", "phase": "block-puk", "header": "00f70081", "sw": "0x9000"}
+{"operation": "reference-blocked", "reference": "0x81", "attempts": 3}
+{"operation": "reset-issued", "serial": 103}
+{"operation": "apdu-start", "phase": "reset", "header": "00fb0000"}
+{"operation": "apdu-finish", "phase": "reset", "header": "00fb0000", "sw": "0x9000"}
+{"operation": "reset-completed", "serial": 103}
+{"operation": "connection-closed"}
+{"operation": "public-capture-start", "label": "after-reset", "command": ["/usr/bin/python3", "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py", "final", "--serial", "103", "--reader", "Yubico YubiKey OTP+FIDO+CCID 00 00", "--output", "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/evidence/p01-x25519-v4/vendor-after.after-reset.json"]}
+{"operation": "public-capture-exit", "label": "after-reset", "returncode": 0}
+{"operation": "public-capture-verified", "label": "after-reset", "serial": 103, "differences": 0}
+{"operation": "apdu-start", "phase": "identity", "header": "00a40400"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00a40400", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0100"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0100", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "001d0100"}
+{"operation": "apdu-finish", "phase": "identity", "header": "001d0100", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00a40400"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00a40400", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00fd0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00fd0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00fd0000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00fd0000", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f80000"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f80000", "sw": "0x9000"}
+{"operation": "live-identity-verified", "serial": 103, "firmware": "5.8.0.beta.0", "applet_version": "0.0.1"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f70080"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f70080", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f70081"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f70081", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "identity", "header": "00f7009b"}
+{"operation": "apdu-finish", "phase": "identity", "header": "00f7009b", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "factory-pin", "header": "00200080"}
+{"operation": "apdu-finish", "phase": "factory-pin", "header": "00200080", "sw": "0x9000"}
+{"operation": "factory-pin-verified", "serial": 103}
+{"operation": "apdu-start", "phase": "factory-management", "header": "00f7009b"}
+{"operation": "apdu-finish", "phase": "factory-management", "header": "00f7009b", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "factory-management", "header": "00870a9b"}
+{"operation": "apdu-finish", "phase": "factory-management", "header": "00870a9b", "sw": "0x9000"}
+{"operation": "apdu-start", "phase": "factory-management", "header": "00870a9b"}
+{"operation": "apdu-finish", "phase": "factory-management", "header": "00870a9b", "sw": "0x9000"}
+{"operation": "factory-management-authenticated", "serial": 103, "algorithm": "AES192", "algorithm_id": 10, "credential_source": "installed public DEFAULT_MANAGEMENT_KEY"}
+{"operation": "connection-closed"}
+{"operation": "public-capture-start", "label": "after-auth", "command": ["/usr/bin/python3", "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py", "final", "--serial", "103", "--reader", "Yubico YubiKey OTP+FIDO+CCID 00 00", "--output", "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/evidence/p01-x25519-v4/vendor-after.after-auth.json"]}
+{"operation": "public-capture-exit", "label": "after-auth", "returncode": 0}
+{"operation": "public-capture-verified", "label": "after-auth", "serial": 103, "differences": 0}

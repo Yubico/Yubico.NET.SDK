@@ -1,0 +1,4 @@
+$ /usr/bin/python3 /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/capture-v3.py /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/evidence/p04-attestation-v4/compiler
+{"status": "qualified", "destination": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/evidence/p04-attestation-v4/compiler", "counts": {"source": 7, "reference": 216, "analyzer": 12, "analyzer-config": 3}}
+
+EXIT=0

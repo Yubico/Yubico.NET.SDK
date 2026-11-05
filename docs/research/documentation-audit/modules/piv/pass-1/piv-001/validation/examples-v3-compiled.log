@@ -1,0 +1,14 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-v3.py v3 compiled --capture consumer=first --capture annotations=first --capture pivtool=first --live
+PASS: 730 explicit unit dispositions, 45 complete groups, 36 shipping source paths; current bodies, typed wrappers and source/configuration identities reconcile.
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-v3.py", line 97, in <module>
+    verify_project_proof(data['project_reference_proof'], evidence, args.live)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/project_graph_v3.py", line 188, in verify_project_proof
+    require(current == graph, 'Live project/restore/Csc/bin graph identities changed')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/inventory.py", line 19, in require
+    raise ValueError(message)
+ValueError: Live project/restore/Csc/bin graph identities changed
+
+EXIT=1

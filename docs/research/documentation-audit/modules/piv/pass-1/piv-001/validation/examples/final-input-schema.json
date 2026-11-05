@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PIV released complete-body grouping plan",
+  "type": "object",
+  "required": ["baseline", "inventory_sha256", "helpers_reviewed_as_application_code", "imports", "groups", "dispositions"],
+  "properties": {
+    "baseline": { "const": "727fe43afc430c5d8364d868a6436de50626e476" },
+    "inventory_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "helpers_reviewed_as_application_code": { "const": true },
+    "imports": {
+      "type": "object",
+      "properties": {
+        "consumer": { "type": "array", "items": { "type": "string" } },
+        "annotations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "additional_project_references": {
+      "description": "Explicit genuine src/**/*.csproj paths, per consumer/annotations context; final generated hosts retain these exact inputs.",
+      "type": "object"
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "context", "units", "template", "prerequisites", "resource_lifetimes", "transform"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "context": { "enum": ["consumer", "annotations"] },
+          "units": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+          "template": { "type": "string", "description": "Complete typed application-owned wrapper. Insert each full body once using {{unit:EXACT-UNIT-ID}}. Use actual SDK APIs and application helpers with explicit responsibilities." },
+          "prerequisites": { "type": "array", "minItems": 1 },
+          "resource_lifetimes": { "type": "array", "minItems": 1 },
+          "transform": { "type": "string", "minLength": 1 },
+          "body_changes": { "type": "object", "description": "Optional exact unit-ID keyed lists of {before,after,count,reason}; complete originals remain retained and every wrapper transformation stays reviewable." }
+        }
+      }
+    },
+    "dispositions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "reason"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "enum": ["compile", "historical", "noncompiling-by-design", "symbolic", "other-applet", "non-csharp", "non-executable"] },
+          "group": { "type": "string" },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

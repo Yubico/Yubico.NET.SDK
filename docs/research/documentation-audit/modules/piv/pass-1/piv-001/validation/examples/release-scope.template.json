@@ -1,0 +1,15 @@
+{
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "editor_complete": false,
+  "reviewer_complete": false,
+  "formatter_complete": false,
+  "notification": "Coordinator supplies the exact final reviewed/formatted release here",
+  "editor_report": { "path": "RUN-RELATIVE-EDITOR-REPORT", "sha256": "EXACT-SHA256" },
+  "final_review": { "path": "RUN-RELATIVE-FINAL-REVIEWED-FILES", "sha256": "EXACT-SHA256" },
+  "formatter_record": { "path": "RUN-RELATIVE-FORMATTER-RECEIPT", "sha256": "EXACT-SHA256" },
+  "edited_paths": [],
+  "shared_paths": [],
+  "whole_shared_paths": [],
+  "shared_sections": {},
+  "task_units": []
+}

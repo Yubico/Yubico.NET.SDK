@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+      <title>The PIV PIN, PUK, and management key </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="The PIV PIN, PUK, and management key ">
+      
+      
+      <link rel="icon" href="../.././images/favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/Yubico/Yubico.NET.SDK/blob/develop/docs/users-manual/application-piv/pin-puk-mgmt-key.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-WLE96T8XZ3"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-WLE96T8XZ3');
+      </script>
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../.././images/yubico-circle-y-mark-white.png" alt="Yubico">
+            Yubico
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="UsersManualPinPukMgmtKey">
+<h1 id="the-piv-pin-puk-and-management-key">The PIV PIN, PUK, and management key</h1>
+<!-- Copyright 2021 Yubico AB
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<p>Per the standard, there are three keys/secret values in PIV (Personal Identity
+Verification):</p>
+<ul>
+<li>PIN (Personal Identification Number)</li>
+<li>PUK (PIN Unblocking Key)</li>
+<li>Management key</li>
+</ul>
+<p>The main purpose of the PIN is to authenticate the user for signing and decrypting,
+although there are other operations that need it as well. The standard specifies that it
+is a 6- to 8-byte value, each of the bytes an ASCII number ('0' to '9', which in ASCII is
+<code>0x30</code> to <code>0x39</code>). The YubiKey allows the PIN to be any ASCII character: numbers, letters
+(upper- and lower-case), and even non-alphanumeric characters such as !, %, or # (among
+others).</p>
+<p>The PUK is used to unblock the PIN (see the section below on <a href="#blocking">blocking</a>). The standard
+specifies that the PUK is to be an 8-byte value, with each of the bytes any binary value from <code>0x00</code> to
+<code>0xFF</code>. The YubiKey, however, will accept a PUK of 6 to 8 characters. For YubiKeys with firmware versions prior to 5.7, the key will accept any value in the <code>0x00</code> -
+<code>0xFF</code> range in the PUK. For YubiKeys with firmware version 5.7 and above, the key will only accept values in the <code>0x00</code> -
+<code>0x7F</code> range. Values from <code>0x80</code> - <code>0xFF</code> will be considered invalid by the key, and any attempt to change the PUK to a byte array containing one of these values will fail.</p>
+<p>These restrictions are due to the YubiKey's PUK length requirements: for firmware versions prior to 5.7, the YubiKey simply requires a PUK length of 6-8 bytes, but for firmware version 5.7 and above, that requirement has changed to 6-8 <em>Unicode code points</em> in length. This is an important change because the byte representation (UTF-8 encoding) of a single code point can be 1-4 bytes in length, which means that a 6-byte PUK may be less than 6 code points. In order to accommodate keys of varying firmware versions, the SDK maintains a 6-8 byte length requirement when calling <a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_TryChangePuk">PivSession.TryChangePuk</a> or <a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.Commands.ChangeReferenceDataCommand.html">Piv.Commands.ChangeReferenceDataCommand</a>. However, keys with firmware 5.7 and above will only accept values that represent single-byte code points, hence the restricted range of <code>0x00</code> - <code>0x7F</code> (the range of <code>0x80</code> - <code>0xFF</code> represents code points of two bytes in length). For additional information on Unicode, UTF-8, and the SDK, see the <a class="xref" href="../application-fido2/fido2-pin.html">FIDO2 documentation</a>.</p>
+<div class="NOTE">
+<h5>Note</h5>
+<p>If your application uses the keyboard to insert the PUK, you might limit the user
+to ASCII characters, regardless of a key's firmware version.</p>
+</div>
+<p>The management key is used to authenticate the entity allowed to perform many YubiKey
+management operations, such as generating a key pair. On YubiKeys before version 5.4.2, it
+is a Triple-DES key, which means it is 24 bytes long. Beginning with 5.4.2, the management
+key can be an AES key, either 128, 192, or 256 bits (16, 24, or 32 bytes). The management
+key is binary (each byte is a value from 0x00 to 0xFF). If it is a Triple-DES key, the key
+data is 192 bits long, but because of the &quot;parity bits&quot;, only 168 bits supply the key's
+strength. In addition, because of certain attacks on Triple-DES, the actual effective bit
+strength of a key is 112.</p>
+<p>The YubiKey is manufactured with the following default PIN, PUK, and management key values:</p>
+<ul>
+<li>PIN: &quot;123456&quot;</li>
+<li>PUK: &quot;12345678&quot;</li>
+<li>Management Key: &quot;010203040506070801020304050607080102030405060708&quot;</li>
+</ul>
+<p>Note that the PIV standard specifies these default values. And while the management key value is
+consistent across YubiKeys, the management key <em>algorithm</em> depends on a key's firmware version.
+For firmware 5.6 and earlier, the default management key algorithm is Triple-DES; for firmware
+5.7 and later, the default algorithm is AES-192.</p>
+<p>Upon receipt of the YubiKey, it is a good idea to change the PIN, PUK, and management key from the default values. See
+<a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_TryChangePin_">PivSession.TryChangePin</a>, <a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_TryChangePuk">PivSession.TryChangePuk</a>,
+and
+<a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_TryChangeManagementKey_">PivSession.TryChangeManagementKey</a>.</p>
+<h3 id="entering-binary-data">Entering binary data</h3>
+<p>If your application takes PIN, PUK, and management key input from the user typing on a
+keyboard, how do they enter binary data? If the PIN is &quot;stG83C&quot; that's easy to enter at a
+keyboard. But if the PUK is 0x8F2B00CA716A, how does one type that at a keyboard?</p>
+<p>The byte 0x2B is '+', 0x71 is 'q' and 0x6A is 'j', but what about 0x8F, 0x00, and 0xCA?</p>
+<p>One solution is to simply limit your application's PUK to be only ASCII characters. Even
+though the standard allows any binary byte, you will allow only keyboard characters. This
+will likely be acceptable because there is a retry count, which limits the attacker's
+ability to launch a brute-force attack.</p>
+<p>But what about the management key? You could specify only keyboard characters there, 24
+bytes and 24 keystrokes. But this is very problematic because this severely limits the
+number of possible Triple-DES keys, and there is no retry limit on the management key.</p>
+<p>The answer is to simply require the user enter the data as hex. For example, if the
+management key is the default (0x010203...), then the user enters &quot;0102030405060708...&quot;.</p>
+<p>They enter 48 ASCII characters ('0' '1' '0' '2' ... which is 0x30 31 30 32 ...) but your
+application reads it as 24 bytes.</p>
+<p>But whatever you do, please document it. Don't simply put a box into the UI and say,
+&quot;Enter PUK&quot; or &quot;Enter management key&quot;. Let the user know they must enter the data as hex
+values. Or if the PUK is limited to keyboard characters, let them know. Even for the PIN,
+you can document that the input can be letters, numbers, or even some set of special
+characters.</p>
+<p>Otherwise the user might enter something that is incorrect, get an error message (&quot;invalid
+PUK&quot; or &quot;management key not 24 bytes&quot;) and have to figure it out through trial and error.</p>
+<h2 id="blocking">Blocking</h2>
+<p>A PIN or PUK can be blocked. This happens when the wrong value is entered too many times
+in a row. How many is too many? Upon manufacture, the number (the &quot;retry count&quot;) is 3 for
+both the PIN and PUK. It is possible to change the retry count using
+<a href="commands.html#set-pin-retries">Set PIN retries</a>. The retry count can be any number from
+1 to 255 (inclusive).</p>
+<p>When a PIN is blocked, any operation that requires the PIN will not work, even if you
+supply the correct PIN. You can unblock the PIN using the PUK (PIN Unblocking Key) in the
+<a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_TryResetPin">PivSession.TryResetPin</a> method.</p>
+<p>If you try to reset the PIN using the PUK, and provide the wrong PUK its retry count times
+in a row, the PUK will be blocked. At that point, you cannot unblock the PIN, even if you
+supply the correct PUK. There is no way to unblock the PUK, not even with the management
+key.</p>
+<p>When both the PIN and PUK are blocked, there is not much useful work you can do with the
+YubiKey's PIV application. At this point, all you can do is reset the PIV application:
+<a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_ResetApplication">PivSession.Reset</a>. This
+deletes the keys in all PIV slots and resets the PIN, PUK, and management key to their
+defaults. Note that this has no effect on the other YubiKey applications (OTP, FIDO,
+etc.).</p>
+<div class="NOTE">
+<h5>Note</h5>
+<p><code>PivSession.Reset()</code> cannot be used with YubiKey Bio Multi-protocol Edition (MPE) keys — use the <a class="xref" href="../sdk-programming-guide/bio-mpe.html#resetting-a-yubikey-bio-mpe">device-wide reset</a> instead. YubiKey Bio MPE keys also do not have PUKs, so it is not possible to unblock a blocked PIN. See <a class="xref" href="../sdk-programming-guide/bio-mpe.html#">YubiKey Bio Multi-protocol Edition considerations and quirks</a> for more information.</p>
+</div>
+<p>The management key cannot be blocked. If an attacker wants to try to break your management
+key, they can try a brute-force attack (with a Triple-DES it is a modified brute-force
+attack), which means trying every possible key until &quot;stumbling&quot; onto the correct one.
+That will take thousands of years for a Triple-DES key and trillions of years with an AES
+key.</p>
+<h2 id="changing-the-retry-counts">Changing the retry counts</h2>
+<p>The YubiKey is manufactured with a retry count of three for both the PIN and PUK. If you
+would like to change that, call the
+<a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_ChangePinAndPukRetryCounts_">Change retry counts</a>
+method. This call will change the retry counts for both the PIN and PUK.</p>
+<div class="NOTE">
+<h5>Note</h5>
+<p>You must change the retry counts of both the PIN and PUK. There is no way to change the
+retry count for only one secret.</p>
+</div>
+<div class="WARNING">
+<h5>Warning</h5>
+<p>Changing the retry counts will also reset the PIN and PUK to their default values.
+Even if you do not reset the application or change the PIN and PUK, after changing
+the retry counts, the PIN will be &quot;123456&quot; and the PUK will be &quot;12345678&quot;.</p>
+</div>
+<p>The minimum retry count is one, and the maximum retry count is 255. A retry count of one
+means there are no retries. If the user enters the wrong PIN or PUK just once, the secret
+is blocked.</p>
+<p>Because changing the retry count will reset the PIN and PUK to their default values, it is
+a good idea to combine this operation with changing the PIN and PUK. That is, instead of
+three options or menu items of &quot;change retry count&quot;, &quot;change PIN&quot;, and &quot;change PUK&quot;, your
+application could have one option or menu item that changes the PIN, PUK, and retry count
+all at once. Alternatively, your application could set the retry count once during user
+initiation, when the PIN, PUK, and management key are first changed from the default. Then
+never offer the option of changing the retry count again.</p>
+<h2 id="operations-that-require-the-management-key">Operations that require the management key</h2>
+<ul>
+<li><a href="commands.html#put-data">Put data</a></li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_GenerateKeyPair_">Generate a new key pair</a></li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_ImportPrivateKey_">Import a private key</a></li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_ImportCertificate_">Import a certificate</a></li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_ChangePinAndPukRetryCounts_">Change the retry counts</a><br>
+also requires the PIN</li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_ChangeManagementKey_">Change the management key</a></li>
+</ul>
+<h2 id="operations-that-require-the-pin">Operations that require the PIN</h2>
+<ul>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_TryVerifyPin_">Verify the PIN</a></li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_TryChangePin_">Change the PIN</a></li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_ChangePinAndPukRetryCounts_">Change the retry counts</a><br>
+also requires the management key</li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_Sign_">Sign</a></li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_Decrypt_">Decrypt</a></li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_KeyAgree_">Key Agreement</a></li>
+<li>Get data for some data objects: <a href="commands.html#get-data">Get data</a></li>
+</ul>
+<p>Note that it is possible, on YubiKey 4.0 and later, to change the PIN policy of the sign
+and decrypt operations, so that the PIN is not required. See the user's manual entry on
+<a href="pin-touch-policies.html">Pin and touch policies</a>.</p>
+<h2 id="operations-that-require-the-puk">Operations that require the PUK</h2>
+<ul>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_TryChangePuk_">Change the PUK</a></li>
+<li><a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_TryResetPin_">Reset the PIN</a></li>
+</ul>
+<h2 id="examples">Examples</h2>
+<p>Suppose the &quot;retry count&quot; for the PIN is 4. You try to sign but enter the wrong PIN. The
+operation fails and the &quot;remaining count&quot; is decremented to 3. The retry count is still 4,
+but you have only 3 tries remaining. Try again with the correct PIN, the operation
+succeeds, and the remaining count is restored to 4.</p>
+<p>The PIN retry count (and remaining count) is 4, but you know you have forgotten the PIN,
+so you don't even try to verify it. You simply use the PUK to reset/unblock the PIN. This
+works, because it is not necessary for the remaining count to go to zero before you use
+the PUK to reset the PIN.</p>
+<p>You changed the PIN and PUK when you first got the YubiKey. Now, you decide you want to
+change the PIN again. This is certainly allowed, simply call the
+<a href="commands.html#change-reference-data">Change Reference Data command</a>.</p>
+<h2 id="pin-only">PIN only</h2>
+<p>It is possible to set a YubiKey to be PIN only. This means the YubiKey is configured to
+require he PIN only when performing operations, even those functions that normally require
+management key authentication.</p>
+<div class="WARNING">
+<h5>Warning</h5>
+<p>A YubiKey in PIN only mode is less secure than one that requires the management
+key. However, there are applications for which entering a management key is simply not
+possible, so this feature is offered.</p>
+</div>
+<p>There are two ways to achieve this: PIN-protected and PIN-derived. It is possible to have
+both methods active for a YubiKey.</p>
+<div class="WARNING">
+<h5>Warning</h5>
+<p>PIN-derived mode is not secure. You should not use this technique. It is offered only
+for backwards compatibility.</p>
+</div>
+<p>Yubico recommends that if you must set a YubiKey to PIN only, you set it to use only
+PIN-protected.</p>
+<h3 id="minidriver-compatibility">Minidriver compatibility</h3>
+<p>The Yubico minidriver will configure a YubiKey to PIN-protected mode. Hence, if you know
+that your application will be running alongside Microsoft Windows machines using the
+YubiKey Minidriver, you should strongly consider adding support for setting YubiKeys to
+PIN-protected mode. See the User's manual <a href="pin-only.html">entry on PIN-only</a>.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/Yubico/Yubico.NET.SDK/blob/develop/docs/users-manual/application-piv/pin-puk-mgmt-key.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,2346 @@
+{
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "revision": "v2",
+  "extraction_manifest_sha256": "a546699cafc42f34abd93089a90e2e4c5b500a24c31afc30dfcf2111b6d2e7f7",
+  "release_sha256": "07803ec6f2429cda0cbd5e71df1587d09a32c22c40c3323b10ce7e49e3f1cb8f",
+  "original_editor_report": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/edit-report.md",
+    "bytes": 37299,
+    "sha256": "60f5ed5a96112b9743cc398d2cad134dc8721315b08371ffb57c2cbffc423eab"
+  },
+  "authoritative_corrections": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/edit-corrections.md",
+    "bytes": 9010,
+    "sha256": "50bd6dc6b21a15efba8091ae9813df1261d3741a8f647ab71859da164be8a3f0"
+  },
+  "original_bodies": [
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 1,
+      "baseline_line": 39,
+      "sha256": "0af477e01e3a221a1fa69d8a02ab34dbd010dddad8d0f8aa3e5b51587c01ee5c",
+      "body": "await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);\n"
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 2,
+      "baseline_line": 45,
+      "sha256": "e700a69044060c5758652c2fa9760bd10c840c2f3f2f23c5365078fe7cb47d14",
+      "body": "await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);\nawait using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);\n"
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 3,
+      "baseline_line": 52,
+      "sha256": "7edf983d15f3e18d72c798ae92b24b900c16a476643d4c8615e9031c58059c93",
+      "body": "PivSession public method\n  -> validate arguments and session state\n  -> ensure feature support when firmware-gated\n  -> call one shallow internal protocol helper\n  -> helper builds visible APDU/TLV payload\n  -> transmit through Core SmartCard protocol\n  -> parse response\n  -> zero sensitive source/intermediate buffers in finally\n"
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 4,
+      "baseline_line": 91,
+      "sha256": "36be32c03907b979d6daea547bf29c58a9f05167e09ceaf8160f72726f0df687",
+      "body": "byte[]? managementKey = ArrayPool<byte>.Shared.Rent(24);\ntry\n{\n    FillManagementKey(managementKey.AsSpan(0, 24));\n    await session.AuthenticateAsync(managementKey.AsMemory(0, 24), cancellationToken);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(managementKey.AsSpan(0, 24));\n    ArrayPool<byte>.Shared.Return(managementKey, clearArray: true);\n}\n"
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 5,
+      "baseline_line": 115,
+      "sha256": "4c9bd11db4b25743b64fd4c3279d947c67699584f1e6c9c78b558b5b34919036",
+      "body": "PivSession.GenerateKeyAsync\n  -> KeyProtocol.GenerateKeyAsync\n  -> builds key-generation TLV/APDU visibly\n  -> parses returned public key\n"
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 6,
+      "baseline_line": 164,
+      "sha256": "9d130e74836e29004f6c427ef935ce40cd88d276d10837180b765902660c4e67",
+      "body": "[SkippableTheory]\n[WithYubiKey(Capability = DeviceCapabilities.Piv)]\npublic async Task GetMetadata_ReadOnly_Succeeds(YubiKeyTestState state)\n{\n    await using var session = await state.Device.CreatePivSessionAsync();\n    var metadata = await session.GetPinMetadataAsync();\n    Assert.NotNull(metadata);\n}\n"
+    },
+    {
+      "path": "src/Piv/PACKAGE_README.md",
+      "ordinal": 1,
+      "baseline_line": 14,
+      "sha256": "74716490a0a242972fe228090ba3a51c426652f62de606c37d62f470687fc2f9",
+      "body": "dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha\ndotnet add package Yubico.YubiKit.Piv --prerelease\n"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "ordinal": 1,
+      "baseline_line": 25,
+      "sha256": "74716490a0a242972fe228090ba3a51c426652f62de606c37d62f470687fc2f9",
+      "body": "dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha\ndotnet add package Yubico.YubiKit.Piv --prerelease\n"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "ordinal": 2,
+      "baseline_line": 34,
+      "sha256": "207b4faf9f255923887b5bd96189d155c974fb304bbf836a2de307d6754e942d",
+      "body": "using System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Piv;\n\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nawait using var session = await device.CreatePivSessionAsync();\n\nint pinAttempts = await session.GetPinAttemptsAsync();\nConsole.WriteLine($\"PIN attempts remaining: {pinAttempts}\");\n"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "ordinal": 3,
+      "baseline_line": 61,
+      "sha256": "05a32803214a6b9a1043bed8c336942d8555e46ba9757e91ba243f8bac506fc3",
+      "body": "await using var session = await device.CreatePivSessionAsync();\n\nbyte[] managementKey = Convert.FromHexString(\"010203040506070801020304050607080102030405060708\");\ntry\n{\n    await session.AuthenticateAsync(managementKey);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(managementKey);\n}\nvar keyOptions = new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never };\nIPublicKey publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, keyOptions);\n"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "ordinal": 4,
+      "baseline_line": 83,
+      "sha256": "8a19109945481c91fa6bdcff30ddb1fa12f774a6a21aee809d55b991d646ff39",
+      "body": "using var certificate = X509CertificateLoader.LoadCertificateFromFile(\"authentication.cer\");\nawait session.StoreCertificateAsync(Slot.Authentication, certificate, CertificateCompression.Automatic);\nusing X509Certificate2? stored = await session.GetCertificateAsync(Slot.Authentication);\n"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "ordinal": 5,
+      "baseline_line": 91,
+      "sha256": "a7c309676e67bd85c7dd8fcf141aac1bc45fb41f021db3ad71aeeb3bf5499bcf",
+      "body": "await using var session = await device.CreatePivSessionAsync();\n\nbyte[] pin = Encoding.UTF8.GetBytes(\"123456\");\ntry\n{\n    await session.VerifyPinAsync(pin);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(pin);\n}\nbyte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes(\"message to sign\"));\nMemory<byte> signature = await session.SignOrDecryptAsync(Slot.Authentication, digest);\n"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "ordinal": 6,
+      "baseline_line": 119,
+      "sha256": "ca8fe727d322c778aabf304fd3260fb21de2c9619067f783b11892536be2b6ae",
+      "body": "sealed class TouchPrompt : IUserPresencePrompt\n{\n    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>\n        new(Console.Out.WriteLineAsync($\"Touch your YubiKey for {context.Application} {context.Scope}.\"));\n}\n"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "ordinal": 7,
+      "baseline_line": 127,
+      "sha256": "f0255a5d67fbf9956f2e67a1a9b16be868f0b2bb985edd5e8c0f231bba31d2f1",
+      "body": "var options = new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() };\nawait using var session = await device.CreatePivSessionAsync(options);\n"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "ordinal": 8,
+      "baseline_line": 201,
+      "sha256": "11e682c0686ab1fa8be7904fe81d6fb2ff213b0c5ecea7b4796cd12b820b1f91",
+      "body": "dotnet run --project src/Piv/examples/PivTool/PivTool.csproj\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+      "ordinal": 1,
+      "baseline_line": 42,
+      "sha256": "df512e7108b4b0e06898f98cef3652a37c77573c6b4e74faa8355d1a23b3a8b2",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\n\nvar result = await Attestation.GetAttestationAsync(\n    session, Slot.Authentication, ct);\n\nif (result.Success)\n{\n    var attestCert = result.AttestationCertificate;\n    Console.WriteLine($\"Key attested: {attestCert!.Subject}\");\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+      "ordinal": 2,
+      "baseline_line": 88,
+      "sha256": "47932bd6408dce1ad3b494c8196995d6e89b2a0da406e89c37dd2a9c0169e9f5",
+      "body": "var result = await Attestation.GetIntermediateCertificateAsync(session, ct);\nif (result.Success)\n{\n    var intermediateCert = result.IntermediateCertificate;\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 1,
+      "baseline_line": 47,
+      "sha256": "e57235c01e15c1fdddc406d688a1c111699fa62b76b3036d1844438d1d009099",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\n\nvar result = await Certificates.GetCertificateAsync(session, Slot.Authentication, ct);\nif (result.Success)\n{\n    Console.WriteLine($\"Subject: {result.Certificate!.Subject}\");\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 2,
+      "baseline_line": 87,
+      "sha256": "d90b6b7d19455d9705f4f7debdbdb3cee657bfd6772f6edfedfd512bcd121785",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\nawait session.AuthenticateAsync(managementKey, ct);\n\nvar certData = await File.ReadAllBytesAsync(\"certificate.pem\", ct);\nvar result = await Certificates.ImportCertificateAsync(\n    session, Slot.Authentication, certData, CertificateCompression.Automatic, ct);\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 3,
+      "baseline_line": 137,
+      "sha256": "3790fb2c237b39e9d76ab637dbf2b9e7c741913fba9315416fefb8ab5f471712",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\n\nvar result = await Certificates.ExportCertificatePemAsync(session, Slot.Authentication, ct);\nif (result.Success && result.Certificate is not null)\n{\n    var pem = result.Certificate.ExportCertificatePem();\n    await File.WriteAllTextAsync(\"certificate.pem\", pem, ct);\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 4,
+      "baseline_line": 179,
+      "sha256": "0fef4dcb5f4b3688b22c9cf24cf1c7a1aab73bb11a015d2f2fb930bf3770c87f",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\nawait session.AuthenticateAsync(managementKey, ct);\n\nvar result = await Certificates.DeleteCertificateAsync(session, Slot.Authentication, ct);\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 5,
+      "baseline_line": 214,
+      "sha256": "8a8091d202ae5da1df459195da45fd5dea309f432ae507377543bef80479067e",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\nawait session.AuthenticateAsync(managementKey, ct);\nawait session.VerifyPinAsync(pin, ct);\n\nvar result = await Certificates.GenerateSelfSignedAsync(\n    session, Slot.Authentication, \"CN=Test User\", 365, ct);\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 6,
+      "baseline_line": 324,
+      "sha256": "2249384de683fad2f7c19100ecd76a4fde40a21171c4a1945c7c06fbfa74ec69",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\n\nvar result = await Certificates.GenerateCsrAsync(\n    session, Slot.Authentication, \"CN=Test User\", ct);\n\nif (result.Success)\n{\n    await File.WriteAllTextAsync(\"request.csr\", result.CsrPem!, ct);\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Decryption.cs",
+      "ordinal": 1,
+      "baseline_line": 42,
+      "sha256": "57c9c29cf98e9bbbb035f056e2a1aa573680b8d3309443487fb237be9577e326",
+      "body": "var options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };\nawait using var session = await device.CreatePivSessionAsync(options, ct);\nawait session.VerifyPinAsync(pin, ct);\n\nvar result = await Decryption.DecryptDataAsync(\n    session,\n    Slot.KeyManagement,\n    encryptedBytes,\n    ct);\n\nif (result.Success)\n{\n    var plaintext = result.DecryptedData;\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs",
+      "ordinal": 1,
+      "baseline_line": 37,
+      "sha256": "c6db0fdceafbbd89a7e5c1e79c153c381500e2d1eb56f2594ef5cfa01c50b88f",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\n\nvar result = await DeviceInfoQuery.GetPivRetryInfoAsync(session, ct);\nif (result.Success)\n{\n    Console.WriteLine($\"PIN retries: {result.PinRetriesRemaining}\");\n    Console.WriteLine($\"PUK retries: {result.PukRetriesRemaining}\");\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs",
+      "ordinal": 1,
+      "baseline_line": 46,
+      "sha256": "a3033d3847bd704a576365ac5e44e196abcb8a70c3091d39506a6623bc1f3003",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\nawait session.AuthenticateAsync(managementKey, ct);\n\nvar result = await KeyGeneration.GenerateKeyAsync(\n    session,\n    Slot.Authentication,\n    KeyType.P256,\n    PinPolicy.Once,\n    TouchPolicy.Cached,\n    ct);\n\nif (result.Success)\n{\n    var publicKeyBytes = result.PublicKey;\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 1,
+      "baseline_line": 44,
+      "sha256": "bb2c92c79589db7da894bff2c9cc83c108f3aac91843c0014b2b75e5de542597",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\n\nvar pin = Encoding.UTF8.GetBytes(\"123456\");\ntry\n{\n    var result = await PinManagement.VerifyPinAsync(session, pin, ct);\n    if (result.Success)\n    {\n        Console.WriteLine(\"PIN verified\");\n    }\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(pin);\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 2,
+      "baseline_line": 95,
+      "sha256": "dc238ed1a73070f01d4c5f56691d32f65c3c5ce26f20651928aaf7847d744f36",
+      "body": "var oldPin = Encoding.UTF8.GetBytes(\"123456\");\nvar newPin = Encoding.UTF8.GetBytes(\"654321\");\ntry\n{\n    var result = await PinManagement.ChangePinAsync(session, oldPin, newPin, ct);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(oldPin);\n    CryptographicOperations.ZeroMemory(newPin);\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 3,
+      "baseline_line": 176,
+      "sha256": "5edfc4189a762d3890fc1c218a9fa827095ad88fa7c7f6cc99cac79b5fc27333",
+      "body": "var puk = Encoding.UTF8.GetBytes(\"12345678\");\nvar newPin = Encoding.UTF8.GetBytes(\"123456\");\ntry\n{\n    var result = await PinManagement.UnblockPinAsync(session, puk, newPin, ct);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(puk);\n    CryptographicOperations.ZeroMemory(newPin);\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 4,
+      "baseline_line": 246,
+      "sha256": "e666c396c881515c16b21e15f0421dd1c567cfec119752925a8ee3b5f3ecd809",
+      "body": "var mgmtKey = new byte[] { /* 24 bytes for 3DES, or 16/24/32 for AES */ };\ntry\n{\n    var result = await PinManagement.AuthenticateAsync(session, mgmtKey, ct);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(mgmtKey);\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 5,
+      "baseline_line": 286,
+      "sha256": "19af3851854ce2c3295df104a04e8b9a03fbc2c17be1f4f0ed2f6d72a3c5e2a5",
+      "body": "// Authenticate with current key first\nawait session.AuthenticateAsync(currentKey);\n\n// Then change to new key\nvar newKey = new byte[24]; // or 16/32 for AES\nRandomNumberGenerator.Fill(newKey);\nvar result = await PinManagement.ChangeManagementKeyAsync(\n    session, newKey, KeyType.TripleDes, ct);\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Reset.cs",
+      "ordinal": 1,
+      "baseline_line": 41,
+      "sha256": "2fc29efde0e51219fd96960d1e9b975344e47d00cf59a77d0207492317df899f",
+      "body": "// WARNING: This destroys all PIV data!\nawait using var session = await device.CreatePivSessionAsync(ct);\n\n// Ensure user confirms this destructive action\nif (userConfirmedReset)\n{\n    var result = await Reset.ResetPivApplicationAsync(session, ct);\n    if (result.Success)\n    {\n        Console.WriteLine(\"PIV application reset to factory defaults.\");\n    }\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Signing.cs",
+      "ordinal": 1,
+      "baseline_line": 46,
+      "sha256": "81e8957ea960306c5537e1a35097421ca1a3c12eeaac925ede5268f9d43d7dc9",
+      "body": "var options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };\nawait using var session = await device.CreatePivSessionAsync(options, ct);\nawait session.VerifyPinAsync(pin, ct);\n\nvar result = await Signing.SignDataAsync(\n    session, \n    Slot.Signature,\n    dataBytes,\n    HashAlgorithmName.SHA256,\n    ct);\n\nif (result.Success)\n{\n    var signature = result.Signature;\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/SlotInfo.cs",
+      "ordinal": 1,
+      "baseline_line": 45,
+      "sha256": "e0656770e7714e6fbadf0371868cfe936709c666478af85819c295ea17916e2e",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\n\nvar result = await SlotInfoQuery.GetAllSlotsInfoAsync(session, ct);\nif (result.Success)\n{\n    foreach (var slot in result.Slots)\n    {\n        Console.WriteLine($\"{slot.Name}: Key={slot.HasKey}, Cert={slot.HasCertificate}\");\n    }\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Verification.cs",
+      "ordinal": 1,
+      "baseline_line": 44,
+      "sha256": "588869dc8404fa9dc81e0f35c6800e04e5fde8bff70db6118073282eb0baa501",
+      "body": "await using var session = await device.CreatePivSessionAsync(ct);\n\nvar result = await Verification.VerifySignatureAsync(\n    session,\n    Slot.Signature,\n    originalData,\n    signatureBytes,\n    HashAlgorithmName.SHA256,\n    ct);\n\nif (result.Success && result.IsValid)\n{\n    Console.WriteLine(\"Signature is valid!\");\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/README.md",
+      "ordinal": 1,
+      "baseline_line": 9,
+      "sha256": "c76db116efb58487e48fe5b2e91cd1a737d79251e03b4882da62d403c80ff1b0",
+      "body": "PivTool/\n\u251c\u2500\u2500 PivExamples/           # \ud83d\udc68\u200d\ud83d\udcbb PURE SDK EXAMPLES - Look here first!\n\u2502   \u251c\u2500\u2500 Results/           # Immutable result types\n\u2502   \u2502   \u251c\u2500\u2500 SigningResult.cs\n\u2502   \u2502   \u251c\u2500\u2500 DecryptionResult.cs\n\u2502   \u2502   \u251c\u2500\u2500 CertificateResult.cs\n\u2502   \u2502   \u2514\u2500\u2500 ...\n\u2502   \u251c\u2500\u2500 Signing.cs         # Signing operations\n\u2502   \u251c\u2500\u2500 Decryption.cs      # RSA decryption\n\u2502   \u251c\u2500\u2500 Verification.cs    # Signature verification\n\u2502   \u251c\u2500\u2500 Certificates.cs    # Certificate management\n\u2502   \u251c\u2500\u2500 KeyGeneration.cs   # Key generation\n\u2502   \u251c\u2500\u2500 PinManagement.cs   # PIN/PUK operations\n\u2502   \u251c\u2500\u2500 Attestation.cs     # Key attestation\n\u2502   \u251c\u2500\u2500 SlotInfo.cs        # Slot queries\n\u2502   \u251c\u2500\u2500 DeviceInfo.cs      # Device queries\n\u2502   \u2514\u2500\u2500 Reset.cs           # PIV reset\n\u2502\n\u251c\u2500\u2500 Cli/                   # CLI framework code (Spectre.Console)\n\u2502   \u251c\u2500\u2500 Output/            # Console formatting helpers\n\u2502   \u2514\u2500\u2500 Prompts/           # User input prompts\n\u2502\n\u251c\u2500\u2500 Features/              # Interactive menus (uses SDK + CLI)\n\u2502   \u2514\u2500\u2500 *.cs               # Feature implementations\n\u2502\n\u2514\u2500\u2500 Program.cs             # Application entry point\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/README.md",
+      "ordinal": 2,
+      "baseline_line": 42,
+      "sha256": "604a06efff7da950e482b957ca0b0fb84c868dcd6058a9f6dc1fccd80869ca18",
+      "body": "// Example: Sign data with a PIV key\nawait using var session = await device.CreatePivSessionAsync(ct);\nawait session.VerifyPinAsync(pin, ct);\n\nvar result = await Signing.SignDataAsync(\n    session, \n    Slot.Signature,\n    dataToSign,\n    HashAlgorithmName.SHA256,\n    ct);\n\nif (result.Success)\n{\n    Console.WriteLine($\"Signature: {Convert.ToBase64String(result.Signature.ToArray())}\");\n}\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/README.md",
+      "ordinal": 3,
+      "baseline_line": 78,
+      "sha256": "622ca79d8f2830758a2481e13a12a931b966c39bb6351db47cad08103fdbb841",
+      "body": "# From the repository root\ndotnet toolchain.cs build\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/README.md",
+      "ordinal": 4,
+      "baseline_line": 85,
+      "sha256": "07738755f8ced758be7d91d5324dd1c5cfb784fe772a3f67c181d82ecb9c224c",
+      "body": "# From the repository root\ndotnet run --project src/Piv/examples/PivTool/PivTool.csproj\n"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/README.md",
+      "ordinal": 5,
+      "baseline_line": 94,
+      "sha256": "d3c62bf1137c874f156cfcd47c115001f9cd3cdb63a512ba9d0cba32e649558f",
+      "body": "\ud83d\udccb Device Info         - Show connected YubiKey information\n\ud83d\udd10 PIN Management      - Manage PIN, PUK, and management key\n\ud83d\udd11 Key Generation      - Generate keys in PIV slots\n\ud83d\udcdc Certificate Ops     - Manage certificates in slots\n\u270d\ufe0f  Crypto Operations   - Sign, decrypt, verify operations\n\ud83d\udee1\ufe0f  Key Attestation     - Verify on-device key generation\n\ud83d\udcca Slot Overview       - View all PIV slots at a glance\n\u26a0\ufe0f  Reset PIV           - Reset to factory defaults\n"
+    },
+    {
+      "path": "src/Piv/src/SlotMetadataExtensions.cs",
+      "ordinal": 1,
+      "baseline_line": 44,
+      "sha256": "267965a0b9e0636a83a64b3021ecab2c8fc0864479303aa4b42ef31230e49bfc",
+      "body": "var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);\nusing var rsa = metadata.Value.GetRsaPublicKey();\nvar request = new CertificateRequest(\"CN=Test\", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);\n"
+    },
+    {
+      "path": "src/Piv/src/SlotMetadataExtensions.cs",
+      "ordinal": 2,
+      "baseline_line": 104,
+      "sha256": "6ec3ffe9c26773f3a4e392e308c57d729e8c06846357cbca8782c7ef9f0dffac",
+      "body": "var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);\nusing var ecdsa = metadata.Value.GetECDsaPublicKey();\nvar request = new CertificateRequest(\"CN=Test\", ecdsa, HashAlgorithmName.SHA256);\n"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+      "ordinal": 1,
+      "baseline_line": 35,
+      "sha256": "2d2a016c43bb37fff40045d71e2a213bd9d238378abb67e1667457f4d4a47616",
+      "body": "    await using var piv = await key.CreatePivSessionAsync();  // CCID handle #1, SELECT PIV\n    await piv.VerifyPinAsync(pin);                            // security state established\n    var info = await key.GetDeviceInfoAsync();                // CCID handle #2, SELECT Management\n    await piv.SignAsync(...);                                 // pre-fix: SW=0x6D00\n"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 9,
+      "baseline_line": 317,
+      "sha256": "450f1dc005293d383aab52e5ad4ac271d2db98b6748d92a758f87edb4226b1c0",
+      "body": "using Yubico.YubiKey.Piv;\n\nusing var piv = new PivSession(device);\n"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 10,
+      "baseline_line": 325,
+      "sha256": "a5be9db52856b7c16ce8eb9cd283599340950c059bc3170f667d67b29fe47f4b",
+      "body": "using Yubico.YubiKit.Piv;\n\nawait using var piv = await device.CreatePivSessionAsync(\n    cancellationToken: cancellationToken);\n"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 11,
+      "baseline_line": 342,
+      "sha256": "c5cfe5e3e7fa3372b28eb71fed84bfd32ea87aa216af034acb0eea77699b4351",
+      "body": "using Yubico.YubiKey.Piv;\n\nusing var piv = new PivSession(device);\npiv.KeyCollector = keyCollector;\n\nvar publicKey = piv.GenerateKeyPair(\n    PivSlot.Authentication,\n    PivAlgorithm.EccP256,\n    PivPinPolicy.Default,\n    PivTouchPolicy.Default);\n"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 12,
+      "baseline_line": 357,
+      "sha256": "3825872d2aae8b79bf254cf64e3d35e2fd865c84b475787e3df1e0af3842efb7",
+      "body": "using System.Security.Cryptography;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Piv;\n\nawait using var piv = await device.CreatePivSessionAsync(\n    cancellationToken: cancellationToken);\n\nbyte[] managementKey = GetManagementKeyBytes();\ntry\n{\n    await piv.AuthenticateAsync(managementKey, cancellationToken);\n\n    var publicKey = await piv.GenerateKeyAsync(\n        Slot.Authentication,\n        KeyType.P256,\n        new KeyCreationOptions\n        {\n            PinPolicy = PinPolicy.Default,\n            TouchPolicy = TouchPolicy.Default\n        },\n        cancellationToken);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(managementKey);\n}\n"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 21,
+      "baseline_line": 624,
+      "sha256": "a8cf26edd87802d6241acf5d10b69f67ca7e9daf8d294a38a638057e30db9619",
+      "body": "using Yubico.YubiKey.Piv;\n\nusing var piv = new PivSession(device);\npiv.KeyCollector = keyCollector;\n\npiv.SetPinOnlyMode(PivPinOnlyMode.PinProtected, PivAlgorithm.Aes192);\n"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 22,
+      "baseline_line": 635,
+      "sha256": "820a4e1d7dc2a20e5a16cbaadab764b25ecc8916f51c67bba0d4f27643ff1d28",
+      "body": "using System.Security.Cryptography;\nusing Yubico.YubiKit.Piv;\n\nawait using var piv = await device.CreatePivSessionAsync(\n    cancellationToken: cancellationToken);\n\nbyte[] managementKey = GetManagementKeyBytes();\nbyte[] pin = GetPinBytes();\ntry\n{\n    await piv.AuthenticateAsync(managementKey, cancellationToken);\n    await piv.SetPinOnlyModeAsync(\n        PinOnlyMode.PinProtected,\n        pin,\n        managementKey,\n        cancellationToken);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(managementKey);\n    CryptographicOperations.ZeroMemory(pin);\n}\n"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 1,
+      "baseline_line": 11,
+      "sha256": "d70cb2ba21c45b2bce6196d1fc064592c1bf991890afd532333032f6da860f4e",
+      "body": "await using PivSession piv = await yubiKey.CreatePivSessionAsync(\n    cancellationToken: cancellationToken);\nPinMetadata metadata = await piv.GetPinMetadataAsync(cancellationToken);\n"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 2,
+      "baseline_line": 38,
+      "sha256": "318e1d600007d9682a330cd9ee0ab8fb02fa9031bc36b3b37edbc4c4732ccc36",
+      "body": "await using RawSmartCardSession raw =\n    await yubiKey.CreateRawSmartCardSessionAsync(cancellationToken);\n\n// Optional when the firmware version is known. Configure before the first APDU.\nraw.Configure(firmwareVersion);\n\nawait raw.SelectAsync(applicationId, cancellationToken);\nApduResponse response = await raw.TransmitAndReceiveAsync(\n    new ApduCommand(cla, ins, p1, p2, commandData),\n    throwOnError: false,\n    cancellationToken);\n"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 3,
+      "baseline_line": 64,
+      "sha256": "c89973710405dc9355bbeb345e86ef0d6fc52a79b76b33bfbb75cb50b5f84340",
+      "body": "await using ISmartCardConnection connection =\n    await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);\n\nawait using (RawSmartCardSession raw =\n    await RawSmartCardSession.CreateAsync(connection, cancellationToken))\n{\n    raw.Configure(firmwareVersion);\n    await raw.SelectAsync(applicationId, cancellationToken);\n    await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);\n}\n\n// RawSmartCardSession borrowed the connection, so it remains available for the next session.\nawait using PivSession piv = await PivSession.CreateAsync(connection, cancellationToken);\n"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 4,
+      "baseline_line": 82,
+      "sha256": "b2298d166d6a76d130750ebed9ab3775d271b2679426f79fe2252c924a8ca415",
+      "body": "await using RawCtapHidSession raw =\n    await yubiKey.CreateRawCtapHidSessionAsync(cancellationToken);\n\nReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(\n    ctapHidCommand,\n    payload,\n    cancellationToken);\n"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 5,
+      "baseline_line": 98,
+      "sha256": "d3f9d4e02bf88ccf779784dcd47f1599056155e59afb8bb6529198cd729764e1",
+      "body": "await using RawOtpHidSession raw =\n    await yubiKey.CreateRawOtpHidSessionAsync(cancellationToken);\n\nReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(\n    commandOrSlot,\n    payload,\n    cancellationToken);\n"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 6,
+      "baseline_line": 112,
+      "sha256": "d1ebf13f8409ed7cf58cd2a24008902092e1d5d5403af8744b51332f33877f0f",
+      "body": "if (response.Length < expectedLength + 2 ||\n    !ChecksumUtils.CheckCrc(response.Span, expectedLength + 2))\n{\n    throw new InvalidOperationException(\"OTP response CRC validation failed.\");\n}\n"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 7,
+      "baseline_line": 131,
+      "sha256": "3bd0b61590590b2f50200473ccaf72d9ea010b73bf81ac18d4e1577ca04fc4f2",
+      "body": "using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();\nawait using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(\n    scpParameters,\n    firmwareVersion,\n    cancellationToken: cancellationToken);\n\nawait raw.SelectAsync(applicationId, cancellationToken);\nApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);\n"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 8,
+      "baseline_line": 264,
+      "sha256": "048e4a43422e260a9df70e5e85b7e1576cb644c625850265b5811e1ca4e311d5",
+      "body": "// Before\nusing ISmartCardProtocol protocol = ProtocolFactory.Create(connection);\nawait protocol.SelectAsync(applicationId, cancellationToken);\n\n// After\nawait using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, cancellationToken);\nawait raw.SelectAsync(applicationId, cancellationToken);\n"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "ordinal": 1,
+      "baseline_line": 15,
+      "sha256": "a59f59abcbcf3f6a92fea0b7a1fd9de3755c1c256c92ac35bb0ea67ab389f951",
+      "body": "using Yubico.YubiKit.Cli.Shared.Output;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Piv;\n\nvar options = new SessionCreationOptions\n{\n    UserPresencePrompt = ConsoleUserPresencePrompt.Instance\n};\n\nawait using PivSession session = await yubiKey.CreatePivSessionAsync(\n    options,\n    cancellationToken);\n"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "ordinal": 2,
+      "baseline_line": 75,
+      "sha256": "aadb7f3aa7711e6babbfbb6f67170eae06bec69826decf184b495644af78529a",
+      "body": "using Yubico.YubiKit.Core.Credentials;\n\nstring message = context.Operation switch\n{\n    UserPresenceOperations.Ctap2.MakeCredential => \"Touch your YubiKey to create a passkey.\",\n    UserPresenceOperations.Ctap2.GetAssertion => \"Touch your YubiKey to sign in.\",\n    UserPresenceOperations.Piv.SignOrDecrypt => \"Touch your YubiKey for the PIV key operation.\",\n    _ when context.Application == UserPresenceApplications.Oath => \"Touch your YubiKey to generate a code.\",\n    _ => \"Touch your YubiKey to continue.\"\n};\n"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "ordinal": 3,
+      "baseline_line": 99,
+      "sha256": "109cd113261d954faf24c614590f0ffd85ec337e78394d0ef3a1c046f050d5a3",
+      "body": "using (UserPresenceIntent.BeginScope(\"approve the transfer of 500 EUR\"))\n{\n    await client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken);\n}\n"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "ordinal": 4,
+      "baseline_line": 106,
+      "sha256": "cdb35996f0077d9974a37ad4ecf16805b34fd470e34c9cd7208f081d168728af",
+      "body": "public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken)\n{\n    string operation = context.Operation switch\n    {\n        UserPresenceOperations.Ctap2.GetAssertion => \"sign-in\",\n        UserPresenceOperations.Ctap2.MakeCredential => \"passkey registration\",\n        _ => \"key operation\"\n    };\n\n    // \"Touch your YubiKey to approve the transfer of 500 EUR (sign-in).\"\n    Console.WriteLine(context.Intent is { } intent\n        ? $\"Touch your YubiKey to {intent} ({operation}).\"\n        : $\"Touch your YubiKey to confirm the {operation}.\");\n    return default;\n}\n"
+    }
+  ],
+  "current_bodies": [
+    {
+      "id": "fence:docs/architecture/raw-access-tiers.md:1",
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 1,
+      "exact_body_sha256": "d70cb2ba21c45b2bce6196d1fc064592c1bf991890afd532333032f6da860f4e",
+      "editor_normalized_sha256": "d70cb2ba21c45b2bce6196d1fc064592c1bf991890afd532333032f6da860f4e",
+      "body": "await using PivSession piv = await yubiKey.CreatePivSessionAsync(\n    cancellationToken: cancellationToken);\nPinMetadata metadata = await piv.GetPinMetadataAsync(cancellationToken);\n",
+      "disposition": {
+        "id": "fence:docs/architecture/raw-access-tiers.md:1",
+        "status": "compile",
+        "group": "shared-piv-tier",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/architecture/raw-access-tiers.md:2",
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 2,
+      "exact_body_sha256": "318e1d600007d9682a330cd9ee0ab8fb02fa9031bc36b3b37edbc4c4732ccc36",
+      "editor_normalized_sha256": "318e1d600007d9682a330cd9ee0ab8fb02fa9031bc36b3b37edbc4c4732ccc36",
+      "body": "await using RawSmartCardSession raw =\n    await yubiKey.CreateRawSmartCardSessionAsync(cancellationToken);\n\n// Optional when the firmware version is known. Configure before the first APDU.\nraw.Configure(firmwareVersion);\n\nawait raw.SelectAsync(applicationId, cancellationToken);\nApduResponse response = await raw.TransmitAndReceiveAsync(\n    new ApduCommand(cla, ins, p1, p2, commandData),\n    throwOnError: false,\n    cancellationToken);\n",
+      "disposition": {
+        "id": "fence:docs/architecture/raw-access-tiers.md:2",
+        "status": "compile",
+        "group": "raw-smartcard-owned",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/architecture/raw-access-tiers.md:3",
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 3,
+      "exact_body_sha256": "7802e5691c3bbc08c8f15780d5ea0df01626bd9cd0d3546dfd8951b1a03ecf6d",
+      "editor_normalized_sha256": "7802e5691c3bbc08c8f15780d5ea0df01626bd9cd0d3546dfd8951b1a03ecf6d",
+      "body": "await using ISmartCardConnection connection =\n    await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);\n\nawait using (RawSmartCardSession raw =\n    await RawSmartCardSession.CreateAsync(connection, cancellationToken))\n{\n    raw.Configure(firmwareVersion);\n    await raw.SelectAsync(applicationId, cancellationToken);\n    await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);\n}\n\n// RawSmartCardSession borrowed the connection, so it remains available for the next session.\nawait using PivSession piv = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);\n",
+      "disposition": {
+        "id": "fence:docs/architecture/raw-access-tiers.md:3",
+        "status": "compile",
+        "group": "raw-smartcard-borrowed",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/architecture/raw-access-tiers.md:4",
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 4,
+      "exact_body_sha256": "b2298d166d6a76d130750ebed9ab3775d271b2679426f79fe2252c924a8ca415",
+      "editor_normalized_sha256": "b2298d166d6a76d130750ebed9ab3775d271b2679426f79fe2252c924a8ca415",
+      "body": "await using RawCtapHidSession raw =\n    await yubiKey.CreateRawCtapHidSessionAsync(cancellationToken);\n\nReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(\n    ctapHidCommand,\n    payload,\n    cancellationToken);\n",
+      "disposition": {
+        "id": "fence:docs/architecture/raw-access-tiers.md:4",
+        "status": "other-applet",
+        "reason": "FIDO/OTP command and CRC guidance belongs to other applets; preserve the complete shared body outside PIV task compilation."
+      }
+    },
+    {
+      "id": "fence:docs/architecture/raw-access-tiers.md:5",
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 5,
+      "exact_body_sha256": "d3f9d4e02bf88ccf779784dcd47f1599056155e59afb8bb6529198cd729764e1",
+      "editor_normalized_sha256": "d3f9d4e02bf88ccf779784dcd47f1599056155e59afb8bb6529198cd729764e1",
+      "body": "await using RawOtpHidSession raw =\n    await yubiKey.CreateRawOtpHidSessionAsync(cancellationToken);\n\nReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(\n    commandOrSlot,\n    payload,\n    cancellationToken);\n",
+      "disposition": {
+        "id": "fence:docs/architecture/raw-access-tiers.md:5",
+        "status": "other-applet",
+        "reason": "FIDO/OTP command and CRC guidance belongs to other applets; preserve the complete shared body outside PIV task compilation."
+      }
+    },
+    {
+      "id": "fence:docs/architecture/raw-access-tiers.md:6",
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 6,
+      "exact_body_sha256": "d1ebf13f8409ed7cf58cd2a24008902092e1d5d5403af8744b51332f33877f0f",
+      "editor_normalized_sha256": "d1ebf13f8409ed7cf58cd2a24008902092e1d5d5403af8744b51332f33877f0f",
+      "body": "if (response.Length < expectedLength + 2 ||\n    !ChecksumUtils.CheckCrc(response.Span, expectedLength + 2))\n{\n    throw new InvalidOperationException(\"OTP response CRC validation failed.\");\n}\n",
+      "disposition": {
+        "id": "fence:docs/architecture/raw-access-tiers.md:6",
+        "status": "other-applet",
+        "reason": "FIDO/OTP command and CRC guidance belongs to other applets; preserve the complete shared body outside PIV task compilation."
+      }
+    },
+    {
+      "id": "fence:docs/architecture/raw-access-tiers.md:7",
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 7,
+      "exact_body_sha256": "3bd0b61590590b2f50200473ccaf72d9ea010b73bf81ac18d4e1577ca04fc4f2",
+      "editor_normalized_sha256": "3bd0b61590590b2f50200473ccaf72d9ea010b73bf81ac18d4e1577ca04fc4f2",
+      "body": "using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();\nawait using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(\n    scpParameters,\n    firmwareVersion,\n    cancellationToken: cancellationToken);\n\nawait raw.SelectAsync(applicationId, cancellationToken);\nApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);\n",
+      "disposition": {
+        "id": "fence:docs/architecture/raw-access-tiers.md:7",
+        "status": "compile",
+        "group": "raw-scp-parameters",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/architecture/raw-access-tiers.md:8",
+      "path": "docs/architecture/raw-access-tiers.md",
+      "ordinal": 8,
+      "exact_body_sha256": "048e4a43422e260a9df70e5e85b7e1576cb644c625850265b5811e1ca4e311d5",
+      "editor_normalized_sha256": "048e4a43422e260a9df70e5e85b7e1576cb644c625850265b5811e1ca4e311d5",
+      "body": "// Before\nusing ISmartCardProtocol protocol = ProtocolFactory.Create(connection);\nawait protocol.SelectAsync(applicationId, cancellationToken);\n\n// After\nawait using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, cancellationToken);\nawait raw.SelectAsync(applicationId, cancellationToken);\n",
+      "disposition": {
+        "id": "fence:docs/architecture/raw-access-tiers.md:8",
+        "status": "compile",
+        "group": "raw-migration-current",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/migration/v1-to-v2.md:9",
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 9,
+      "exact_body_sha256": "450f1dc005293d383aab52e5ad4ac271d2db98b6748d92a758f87edb4226b1c0",
+      "editor_normalized_sha256": "450f1dc005293d383aab52e5ad4ac271d2db98b6748d92a758f87edb4226b1c0",
+      "body": "using Yubico.YubiKey.Piv;\n\nusing var piv = new PivSession(device);\n",
+      "disposition": {
+        "id": "fence:docs/migration/v1-to-v2.md:9",
+        "status": "historical",
+        "reason": "Historical v1 half paired with the current PIV migration recipe; original body remains retained and outside current-v2 compilation."
+      }
+    },
+    {
+      "id": "fence:docs/migration/v1-to-v2.md:10",
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 10,
+      "exact_body_sha256": "a5be9db52856b7c16ce8eb9cd283599340950c059bc3170f667d67b29fe47f4b",
+      "editor_normalized_sha256": "a5be9db52856b7c16ce8eb9cd283599340950c059bc3170f667d67b29fe47f4b",
+      "body": "using Yubico.YubiKit.Piv;\n\nawait using var piv = await device.CreatePivSessionAsync(\n    cancellationToken: cancellationToken);\n",
+      "disposition": {
+        "id": "fence:docs/migration/v1-to-v2.md:10",
+        "status": "compile",
+        "group": "migration-factory",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/migration/v1-to-v2.md:11",
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 11,
+      "exact_body_sha256": "c5cfe5e3e7fa3372b28eb71fed84bfd32ea87aa216af034acb0eea77699b4351",
+      "editor_normalized_sha256": "c5cfe5e3e7fa3372b28eb71fed84bfd32ea87aa216af034acb0eea77699b4351",
+      "body": "using Yubico.YubiKey.Piv;\n\nusing var piv = new PivSession(device);\npiv.KeyCollector = keyCollector;\n\nvar publicKey = piv.GenerateKeyPair(\n    PivSlot.Authentication,\n    PivAlgorithm.EccP256,\n    PivPinPolicy.Default,\n    PivTouchPolicy.Default);\n",
+      "disposition": {
+        "id": "fence:docs/migration/v1-to-v2.md:11",
+        "status": "historical",
+        "reason": "Historical v1 half paired with the current PIV migration recipe; original body remains retained and outside current-v2 compilation."
+      }
+    },
+    {
+      "id": "fence:docs/migration/v1-to-v2.md:12",
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 12,
+      "exact_body_sha256": "452cbf3268c6a11cf6e4958df785df954011c9d29041d8a224d67f3b37f96c64",
+      "editor_normalized_sha256": "452cbf3268c6a11cf6e4958df785df954011c9d29041d8a224d67f3b37f96c64",
+      "body": "using System.Security.Cryptography;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Piv;\n\nawait using var piv = await device.CreatePivSessionAsync(\n    cancellationToken: cancellationToken);\n\n// Evaluation only: the installed active key must be this 24-byte factory value.\nbyte[] managementKey = PivSession.DefaultManagementKey.ToArray();\ntry\n{\n    await piv.AuthenticateAsync(managementKey, cancellationToken);\n\n    var publicKey = await piv.GenerateKeyAsync(\n        Slot.Authentication,\n        KeyType.P256,\n        new KeyCreationOptions\n        {\n            PinPolicy = PinPolicy.Default,\n            TouchPolicy = TouchPolicy.Default\n        },\n        cancellationToken);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(managementKey);\n}\n",
+      "disposition": {
+        "id": "fence:docs/migration/v1-to-v2.md:12",
+        "status": "compile",
+        "group": "migration-generation",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/migration/v1-to-v2.md:21",
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 21,
+      "exact_body_sha256": "a8cf26edd87802d6241acf5d10b69f67ca7e9daf8d294a38a638057e30db9619",
+      "editor_normalized_sha256": "a8cf26edd87802d6241acf5d10b69f67ca7e9daf8d294a38a638057e30db9619",
+      "body": "using Yubico.YubiKey.Piv;\n\nusing var piv = new PivSession(device);\npiv.KeyCollector = keyCollector;\n\npiv.SetPinOnlyMode(PivPinOnlyMode.PinProtected, PivAlgorithm.Aes192);\n",
+      "disposition": {
+        "id": "fence:docs/migration/v1-to-v2.md:21",
+        "status": "historical",
+        "reason": "Historical v1 half paired with the current PIV migration recipe; original body remains retained and outside current-v2 compilation."
+      }
+    },
+    {
+      "id": "fence:docs/migration/v1-to-v2.md:22",
+      "path": "docs/migration/v1-to-v2.md",
+      "ordinal": 22,
+      "exact_body_sha256": "d60887342483e088ad1e39dd4520613d9d38323f6eee9a98223977c2d2b5b8f5",
+      "editor_normalized_sha256": "d60887342483e088ad1e39dd4520613d9d38323f6eee9a98223977c2d2b5b8f5",
+      "body": "using Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Piv;\n\nstatic async Task EnableProtectedAdministrationAsync(\n    IYubiKey device,\n    ReadOnlyMemory<byte> pin,\n    ReadOnlyMemory<byte> activeManagementKey,\n    CancellationToken cancellationToken)\n{\n    await using var piv = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);\n    await piv.AuthenticateAsync(activeManagementKey, cancellationToken);\n    await piv.SetPinOnlyModeAsync(\n        PinOnlyMode.PinProtected,\n        pin,\n        activeManagementKey,\n        cancellationToken);\n}\n",
+      "disposition": {
+        "id": "fence:docs/migration/v1-to-v2.md:22",
+        "status": "compile",
+        "group": "migration-protected-enable",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/usage/user-interaction.md:1",
+      "path": "docs/usage/user-interaction.md",
+      "ordinal": 1,
+      "exact_body_sha256": "a59f59abcbcf3f6a92fea0b7a1fd9de3755c1c256c92ac35bb0ea67ab389f951",
+      "editor_normalized_sha256": "a59f59abcbcf3f6a92fea0b7a1fd9de3755c1c256c92ac35bb0ea67ab389f951",
+      "body": "using Yubico.YubiKit.Cli.Shared.Output;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Piv;\n\nvar options = new SessionCreationOptions\n{\n    UserPresencePrompt = ConsoleUserPresencePrompt.Instance\n};\n\nawait using PivSession session = await yubiKey.CreatePivSessionAsync(\n    options,\n    cancellationToken);\n",
+      "disposition": {
+        "id": "fence:docs/usage/user-interaction.md:1",
+        "status": "compile",
+        "group": "shared-console-prompt",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/usage/user-interaction.md:2",
+      "path": "docs/usage/user-interaction.md",
+      "ordinal": 2,
+      "exact_body_sha256": "aadb7f3aa7711e6babbfbb6f67170eae06bec69826decf184b495644af78529a",
+      "editor_normalized_sha256": "aadb7f3aa7711e6babbfbb6f67170eae06bec69826decf184b495644af78529a",
+      "body": "using Yubico.YubiKit.Core.Credentials;\n\nstring message = context.Operation switch\n{\n    UserPresenceOperations.Ctap2.MakeCredential => \"Touch your YubiKey to create a passkey.\",\n    UserPresenceOperations.Ctap2.GetAssertion => \"Touch your YubiKey to sign in.\",\n    UserPresenceOperations.Piv.SignOrDecrypt => \"Touch your YubiKey for the PIV key operation.\",\n    _ when context.Application == UserPresenceApplications.Oath => \"Touch your YubiKey to generate a code.\",\n    _ => \"Touch your YubiKey to continue.\"\n};\n",
+      "disposition": {
+        "id": "fence:docs/usage/user-interaction.md:2",
+        "status": "compile",
+        "group": "shared-prompt-callbacks",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/usage/user-interaction.md:3",
+      "path": "docs/usage/user-interaction.md",
+      "ordinal": 3,
+      "exact_body_sha256": "109cd113261d954faf24c614590f0ffd85ec337e78394d0ef3a1c046f050d5a3",
+      "editor_normalized_sha256": "109cd113261d954faf24c614590f0ffd85ec337e78394d0ef3a1c046f050d5a3",
+      "body": "using (UserPresenceIntent.BeginScope(\"approve the transfer of 500 EUR\"))\n{\n    await client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken);\n}\n",
+      "disposition": {
+        "id": "fence:docs/usage/user-interaction.md:3",
+        "status": "compile",
+        "group": "shared-intent-await",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:docs/usage/user-interaction.md:4",
+      "path": "docs/usage/user-interaction.md",
+      "ordinal": 4,
+      "exact_body_sha256": "cdb35996f0077d9974a37ad4ecf16805b34fd470e34c9cd7208f081d168728af",
+      "editor_normalized_sha256": "cdb35996f0077d9974a37ad4ecf16805b34fd470e34c9cd7208f081d168728af",
+      "body": "public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken)\n{\n    string operation = context.Operation switch\n    {\n        UserPresenceOperations.Ctap2.GetAssertion => \"sign-in\",\n        UserPresenceOperations.Ctap2.MakeCredential => \"passkey registration\",\n        _ => \"key operation\"\n    };\n\n    // \"Touch your YubiKey to approve the transfer of 500 EUR (sign-in).\"\n    Console.WriteLine(context.Intent is { } intent\n        ? $\"Touch your YubiKey to {intent} ({operation}).\"\n        : $\"Touch your YubiKey to confirm the {operation}.\");\n    return default;\n}\n",
+      "disposition": {
+        "id": "fence:docs/usage/user-interaction.md:4",
+        "status": "compile",
+        "group": "shared-prompt-callbacks",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/CLAUDE.md:1",
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 1,
+      "exact_body_sha256": "0af477e01e3a221a1fa69d8a02ab34dbd010dddad8d0f8aa3e5b51587c01ee5c",
+      "editor_normalized_sha256": "0af477e01e3a221a1fa69d8a02ab34dbd010dddad8d0f8aa3e5b51587c01ee5c",
+      "body": "await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);\n",
+      "disposition": {
+        "id": "fence:src/Piv/CLAUDE.md:1",
+        "status": "compile",
+        "group": "factory-owned-connection",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/CLAUDE.md:2",
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 2,
+      "exact_body_sha256": "e700a69044060c5758652c2fa9760bd10c840c2f3f2f23c5365078fe7cb47d14",
+      "editor_normalized_sha256": "e700a69044060c5758652c2fa9760bd10c840c2f3f2f23c5365078fe7cb47d14",
+      "body": "await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);\nawait using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);\n",
+      "disposition": {
+        "id": "fence:src/Piv/CLAUDE.md:2",
+        "status": "compile",
+        "group": "factory-borrowed-connection",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/CLAUDE.md:3",
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 3,
+      "exact_body_sha256": "7edf983d15f3e18d72c798ae92b24b900c16a476643d4c8615e9031c58059c93",
+      "editor_normalized_sha256": "7edf983d15f3e18d72c798ae92b24b900c16a476643d4c8615e9031c58059c93",
+      "body": "PivSession public method\n  -> validate arguments and session state\n  -> ensure feature support when firmware-gated\n  -> call one shallow internal protocol helper\n  -> helper builds visible APDU/TLV payload\n  -> transmit through Core SmartCard protocol\n  -> parse response\n  -> zero sensitive source/intermediate buffers in finally\n",
+      "disposition": {
+        "id": "fence:src/Piv/CLAUDE.md:3",
+        "status": "non-executable",
+        "reason": "Protocol-flow diagram retained as explanatory structure."
+      }
+    },
+    {
+      "id": "fence:src/Piv/CLAUDE.md:4",
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 4,
+      "exact_body_sha256": "83cdf478ae14d6ba3440ab3626acdb2a5b41afc9d148e37f3757121e75429259",
+      "editor_normalized_sha256": "83cdf478ae14d6ba3440ab3626acdb2a5b41afc9d148e37f3757121e75429259",
+      "body": "static async Task AuthenticateWithStoreAsync(\n    IPivSession session,\n    Action<Memory<byte>> loadManagementKey,\n    CancellationToken cancellationToken)\n{\n    // This example store contract supplies a 24-byte Triple-DES or AES-192 active key.\n    byte[] managementKey = ArrayPool<byte>.Shared.Rent(24);\n    try\n    {\n        loadManagementKey(managementKey.AsMemory(0, 24));\n        await session.AuthenticateAsync(managementKey.AsMemory(0, 24), cancellationToken);\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(managementKey.AsSpan(0, 24));\n        ArrayPool<byte>.Shared.Return(managementKey, clearArray: true);\n    }\n}\n",
+      "disposition": {
+        "id": "fence:src/Piv/CLAUDE.md:4",
+        "status": "compile",
+        "group": "store-authentication-callback",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/CLAUDE.md:5",
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 5,
+      "exact_body_sha256": "4c9bd11db4b25743b64fd4c3279d947c67699584f1e6c9c78b558b5b34919036",
+      "editor_normalized_sha256": "4c9bd11db4b25743b64fd4c3279d947c67699584f1e6c9c78b558b5b34919036",
+      "body": "PivSession.GenerateKeyAsync\n  -> KeyProtocol.GenerateKeyAsync\n  -> builds key-generation TLV/APDU visibly\n  -> parses returned public key\n",
+      "disposition": {
+        "id": "fence:src/Piv/CLAUDE.md:5",
+        "status": "non-executable",
+        "reason": "Protocol-flow diagram retained as explanatory structure."
+      }
+    },
+    {
+      "id": "fence:src/Piv/CLAUDE.md:6",
+      "path": "src/Piv/CLAUDE.md",
+      "ordinal": 6,
+      "exact_body_sha256": "9d130e74836e29004f6c427ef935ce40cd88d276d10837180b765902660c4e67",
+      "editor_normalized_sha256": "9d130e74836e29004f6c427ef935ce40cd88d276d10837180b765902660c4e67",
+      "body": "[SkippableTheory]\n[WithYubiKey(Capability = DeviceCapabilities.Piv)]\npublic async Task GetMetadata_ReadOnly_Succeeds(YubiKeyTestState state)\n{\n    await using var session = await state.Device.CreatePivSessionAsync();\n    var metadata = await session.GetPinMetadataAsync();\n    Assert.NotNull(metadata);\n}\n",
+      "disposition": {
+        "id": "fence:src/Piv/CLAUDE.md:6",
+        "status": "compile",
+        "group": "metadata-test-annotation",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/PACKAGE_README.md:1",
+      "path": "src/Piv/PACKAGE_README.md",
+      "ordinal": 1,
+      "exact_body_sha256": "74716490a0a242972fe228090ba3a51c426652f62de606c37d62f470687fc2f9",
+      "editor_normalized_sha256": "74716490a0a242972fe228090ba3a51c426652f62de606c37d62f470687fc2f9",
+      "body": "dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha\ndotnet add package Yubico.YubiKit.Piv --prerelease\n",
+      "disposition": {
+        "id": "fence:src/Piv/PACKAGE_README.md:1",
+        "status": "non-csharp",
+        "reason": "Complete shell command example retained; command/device execution stays separately authorized."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:1",
+      "path": "src/Piv/README.md",
+      "ordinal": 1,
+      "exact_body_sha256": "74716490a0a242972fe228090ba3a51c426652f62de606c37d62f470687fc2f9",
+      "editor_normalized_sha256": "74716490a0a242972fe228090ba3a51c426652f62de606c37d62f470687fc2f9",
+      "body": "dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha\ndotnet add package Yubico.YubiKit.Piv --prerelease\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:1",
+        "status": "non-csharp",
+        "reason": "Complete shell command example retained; command/device execution stays separately authorized."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:2",
+      "path": "src/Piv/README.md",
+      "ordinal": 2,
+      "exact_body_sha256": "207b4faf9f255923887b5bd96189d155c974fb304bbf836a2de307d6754e942d",
+      "editor_normalized_sha256": "207b4faf9f255923887b5bd96189d155c974fb304bbf836a2de307d6754e942d",
+      "body": "using System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Piv;\n\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nawait using var session = await device.CreatePivSessionAsync();\n\nint pinAttempts = await session.GetPinAttemptsAsync();\nConsole.WriteLine($\"PIN attempts remaining: {pinAttempts}\");\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:2",
+        "status": "compile",
+        "group": "readme-discovery",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:3",
+      "path": "src/Piv/README.md",
+      "ordinal": 3,
+      "exact_body_sha256": "5984cd4646d56a9960eec8f0bf2ed5dc825b6d45b12bc441af0391c270d35315",
+      "editor_normalized_sha256": "5984cd4646d56a9960eec8f0bf2ed5dc825b6d45b12bc441af0391c270d35315",
+      "body": "await using var session = await device.CreatePivSessionAsync();\n\n// Evaluation only: this public factory value must match the key currently installed.\nbyte[] managementKey = PivSession.DefaultManagementKey.ToArray();\ntry\n{\n    await session.AuthenticateAsync(managementKey);\n    var keyOptions = new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never };\n    IPublicKey publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, keyOptions);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(managementKey);\n}\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:3",
+        "status": "compile",
+        "group": "readme-generation",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:4",
+      "path": "src/Piv/README.md",
+      "ordinal": 4,
+      "exact_body_sha256": "399e078e67ea215e2a7b8278156501559f2aab4c983769bee1161bf7e617130a",
+      "editor_normalized_sha256": "399e078e67ea215e2a7b8278156501559f2aab4c983769bee1161bf7e617130a",
+      "body": "using var certificate = X509CertificateLoader.LoadCertificateFromFile(\"authentication.cer\");\nawait session.StoreCertificateAsync(Slot.Authentication, certificate, CertificateCompression.Automatic);\nusing X509Certificate2? stored = await session.GetCertificateAsync(Slot.Authentication);\nif (stored is null)\n    throw new InvalidOperationException(\"The slot has no usable certificate data.\");\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:4",
+        "status": "compile",
+        "group": "readme-certificate",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:5",
+      "path": "src/Piv/README.md",
+      "ordinal": 5,
+      "exact_body_sha256": "57f26da810500d5e15a7819c3e013e9df37043f9bf7179bc0509e69df70a3200",
+      "editor_normalized_sha256": "57f26da810500d5e15a7819c3e013e9df37043f9bf7179bc0509e69df70a3200",
+      "body": "await using var session = await device.CreatePivSessionAsync();\n\nbyte[] pin = Encoding.UTF8.GetBytes(\"123456\");\nbyte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes(\"message to sign\"));\nMemory<byte> signature = Memory<byte>.Empty;\ntry\n{\n    await session.VerifyPinAsync(pin);\n    var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)\n        ?? throw new InvalidOperationException(\"Generate a P-256 key first.\");\n    using var verifier = metadata.GetECDsaPublicKey();\n    signature = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);\n    if (!verifier.VerifyHash(digest, signature.Span, DSASignatureFormat.Rfc3279DerSequence))\n        throw new CryptographicException(\"The slot signature failed host verification.\");\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(pin);\n    CryptographicOperations.ZeroMemory(digest);\n    CryptographicOperations.ZeroMemory(signature.Span);\n}\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:5",
+        "status": "compile",
+        "group": "readme-host-signature",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:6",
+      "path": "src/Piv/README.md",
+      "ordinal": 6,
+      "exact_body_sha256": "f85f61978e9c320e64f928f66fb671e28faa2feeb09a51863f63cd92b342d573",
+      "editor_normalized_sha256": "f85f61978e9c320e64f928f66fb671e28faa2feeb09a51863f63cd92b342d573",
+      "body": "await using var session = await device.CreatePivSessionAsync();\nusing var certificate = await session.GetCertificateAsync(Slot.KeyManagement)\n    ?? throw new InvalidOperationException(\"Provision a matching RSA certificate first.\");\nusing var rsa = certificate.GetRSAPublicKey()\n    ?? throw new InvalidOperationException(\"The certificate must contain an RSA public key.\");\nbyte[] pin = Encoding.UTF8.GetBytes(\"123456\");\nbyte[] expected = Encoding.UTF8.GetBytes(\"known plaintext\");\nMemory<byte> plaintext = Memory<byte>.Empty;\ntry\n{\n    byte[] ciphertext = rsa.Encrypt(expected, RSAEncryptionPadding.OaepSHA256);\n    await session.VerifyPinAsync(pin);\n    plaintext = await session.DecryptAsync(Slot.KeyManagement, ciphertext, RSAEncryptionPadding.OaepSHA256);\n    if (!CryptographicOperations.FixedTimeEquals(expected, plaintext.Span))\n        throw new CryptographicException(\"Decryption returned unexpected plaintext.\");\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(pin);\n    CryptographicOperations.ZeroMemory(expected);\n    CryptographicOperations.ZeroMemory(plaintext.Span);\n}\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:6",
+        "status": "compile",
+        "group": "readme-known-plaintext",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:7",
+      "path": "src/Piv/README.md",
+      "ordinal": 7,
+      "exact_body_sha256": "2339fa6f1c979845e14b4fd8c8c949effb1f7bf146d33bc224771773567570cd",
+      "editor_normalized_sha256": "2339fa6f1c979845e14b4fd8c8c949effb1f7bf146d33bc224771773567570cd",
+      "body": "static async Task ProtectedAdministrationRoundTripAsync(\n    IYubiKey device,\n    ReadOnlyMemory<byte> pin,\n    ReadOnlyMemory<byte> activeManagementKey,\n    CancellationToken cancellationToken)\n{\n    await using (var setup = await device.CreatePivSessionAsync(cancellationToken: cancellationToken))\n    {\n        await setup.AuthenticateAsync(activeManagementKey, cancellationToken);\n        await setup.SetPinOnlyModeAsync(PinOnlyMode.PinProtected, pin, activeManagementKey, cancellationToken);\n    }\n\n    await using (var reopened = await device.CreatePivSessionAsync(cancellationToken: cancellationToken))\n    {\n        PinOnlyMode detected = await reopened.GetPinOnlyModeAsync(cancellationToken);\n        if (!detected.HasFlag(PinOnlyMode.PinProtected))\n            throw new InvalidOperationException(\"Inspect ADMIN DATA before continuing.\");\n        PinOnlyMode recovered = await reopened.RecoverPinOnlyModeAsync(pin, cancellationToken);\n        if (!recovered.HasFlag(PinOnlyMode.PinProtected) || !reopened.IsManagementKeyAuthenticated)\n            throw new InvalidOperationException(\"Use the backed-up active management key to recover access.\");\n\n        // Perform authorized administration here, then restore the type-appropriate public default.\n        await reopened.SetPinOnlyModeAsync(PinOnlyMode.None, pin, cancellationToken: cancellationToken);\n    }\n}\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:7",
+        "status": "compile",
+        "group": "readme-protected-roundtrip",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:8",
+      "path": "src/Piv/README.md",
+      "ordinal": 8,
+      "exact_body_sha256": "ca8fe727d322c778aabf304fd3260fb21de2c9619067f783b11892536be2b6ae",
+      "editor_normalized_sha256": "ca8fe727d322c778aabf304fd3260fb21de2c9619067f783b11892536be2b6ae",
+      "body": "sealed class TouchPrompt : IUserPresencePrompt\n{\n    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>\n        new(Console.Out.WriteLineAsync($\"Touch your YubiKey for {context.Application} {context.Scope}.\"));\n}\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:8",
+        "status": "compile",
+        "group": "readme-touch-callback",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:9",
+      "path": "src/Piv/README.md",
+      "ordinal": 9,
+      "exact_body_sha256": "f0255a5d67fbf9956f2e67a1a9b16be868f0b2bb985edd5e8c0f231bba31d2f1",
+      "editor_normalized_sha256": "f0255a5d67fbf9956f2e67a1a9b16be868f0b2bb985edd5e8c0f231bba31d2f1",
+      "body": "var options = new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() };\nawait using var session = await device.CreatePivSessionAsync(options);\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:9",
+        "status": "compile",
+        "group": "readme-touch-callback",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "fence:src/Piv/README.md:10",
+      "path": "src/Piv/README.md",
+      "ordinal": 10,
+      "exact_body_sha256": "11e682c0686ab1fa8be7904fe81d6fb2ff213b0c5ecea7b4796cd12b820b1f91",
+      "editor_normalized_sha256": "11e682c0686ab1fa8be7904fe81d6fb2ff213b0c5ecea7b4796cd12b820b1f91",
+      "body": "dotnet run --project src/Piv/examples/PivTool/PivTool.csproj\n",
+      "disposition": {
+        "id": "fence:src/Piv/README.md:10",
+        "status": "non-csharp",
+        "reason": "Complete shell command example retained; command/device execution stays separately authorized."
+      }
+    },
+    {
+      "id": "fence:src/Piv/examples/PivTool/README.md:1",
+      "path": "src/Piv/examples/PivTool/README.md",
+      "ordinal": 1,
+      "exact_body_sha256": "452783cd3be6b36ab5e899074f3b9f77e1d5de9f5c09cc54c1d25149e2b05e73",
+      "editor_normalized_sha256": "452783cd3be6b36ab5e899074f3b9f77e1d5de9f5c09cc54c1d25149e2b05e73",
+      "body": "dotnet run --project src/Piv/examples/PivTool/PivTool.csproj\ndotnet run --project src/Piv/examples/PivTool/PivTool.csproj -- device-info --json\ndotnet run --project src/Piv/examples/PivTool/PivTool.csproj -- slot-info --serial 12345678 --json\n",
+      "disposition": {
+        "id": "fence:src/Piv/examples/PivTool/README.md:1",
+        "status": "non-csharp",
+        "reason": "Complete shell command example retained; command/device execution stays separately authorized."
+      }
+    },
+    {
+      "id": "fence:src/Piv/examples/PivTool/README.md:2",
+      "path": "src/Piv/examples/PivTool/README.md",
+      "ordinal": 2,
+      "exact_body_sha256": "26f8f6dc1939051c38b3a50640c482260b600efa015c5bfba8df9894b7833869",
+      "editor_normalized_sha256": "26f8f6dc1939051c38b3a50640c482260b600efa015c5bfba8df9894b7833869",
+      "body": "dotnet run --project src/Piv/examples/PivTool/PivTool.csproj -- key-generate --slot 9a --key-type eccp256 --pin-policy once --touch-policy never --management-key 010203040506070801020304050607080102030405060708 --json\ndotnet run --project src/Piv/examples/PivTool/PivTool.csproj -- cert-self-sign --slot 9a --pin 123456 --management-key 010203040506070801020304050607080102030405060708 --subject \"CN=PIV evaluation\" --validity-days 30 --json\ndotnet run --project src/Piv/examples/PivTool/PivTool.csproj -- sign --slot 9a --pin 123456 --input message.bin --output signature.bin --hash sha256 --json\ndotnet run --project src/Piv/examples/PivTool/PivTool.csproj -- verify-signature --slot 9a --data message.bin --signature signature.bin --hash sha256 --json\n",
+      "disposition": {
+        "id": "fence:src/Piv/examples/PivTool/README.md:2",
+        "status": "non-csharp",
+        "reason": "Complete shell command example retained; command/device execution stays separately authorized."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Attestation.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "993c34a92f7ce4223fbc4a806830179745d3f8b0266b0281441c23ab830725ae",
+      "editor_normalized_sha256": "00cc9d533b5c2708ecf784a39b0138b2b0a42e9432dd6879a5bb61b5948bd34a",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\n\nvar result = await Attestation.GetAttestationAsync(\n    session, Slot.Authentication, ct);\n\nusing var attestCert = result.AttestationCertificate;\nusing var signerCert = result.IntermediateCertificate;\nif (result.Success && attestCert is not null)\n{\n    Console.WriteLine($\"Retrieved attestation: {attestCert.Subject}\");\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Attestation.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-slot-attestation",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Attestation.cs:3:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+      "ordinal": 2,
+      "exact_body_sha256": "46daea07268a243ae22477e1c2627e23e339ad9b7b4cd3b29c4dc4644e84e29b",
+      "editor_normalized_sha256": "c26c99a88224f73c91b9d2821843aec7abd049d7cd4fb36c9618be9a574a0ccc",
+      "body": "\nvar result = await Attestation.GetIntermediateCertificateAsync(session, ct);\n// This helper returns F9 in AttestationCertificate; IntermediateCertificate remains null.\nusing var f9Cert = result.AttestationCertificate;\nusing var additionalCert = result.IntermediateCertificate;\nif (result.Success && f9Cert is not null)\n{\n    Console.WriteLine(f9Cert.Subject);\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Attestation.cs:3:code:1",
+        "status": "compile",
+        "group": "tool-f9-retrieval",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "2b52e6dd517e67020b76370130dd2ab8c6c3017a80ff20e6b580a1b69ad5ed8a",
+      "editor_normalized_sha256": "beed0d1766b0b38f7ccbf2b71f3d31364a2c9083436315841f63f58238aee8ba",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\n\nvar result = await Certificates.GetCertificateAsync(session, Slot.Authentication, ct);\nusing var certificate = result.Certificate;\nif (result.Success && certificate is not null)\n{\n    Console.WriteLine($\"Subject: {certificate.Subject}\");\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-certificate-read",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:3:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 2,
+      "exact_body_sha256": "6c0392cfc81f07f4216916a6fbbbf8617068c5c6aa50cf7eb3429da9f9beaf4a",
+      "editor_normalized_sha256": "0a30aad4238770afc4f9376a57070ae065a8e558c0aed38059565551196c0102",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\nawait session.AuthenticateAsync(managementKey, ct);\n\nvar certData = await File.ReadAllBytesAsync(\"certificate.pem\", ct);\nvar result = await Certificates.ImportCertificateAsync(\n    session, Slot.Authentication, certData, compress: false, cancellationToken: ct);\nusing var certificate = result.Certificate;\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:3:code:1",
+        "status": "compile",
+        "group": "tool-certificate-import",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:4:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 3,
+      "exact_body_sha256": "ed4ab93fdd6d677a60408a356befc6e1e1d66ce1f4c3ed0f526f1c70841e30b8",
+      "editor_normalized_sha256": "c8c626349a9eb320d2a119d44a086e287cb5d600f15a9c2a633d18518f3a268b",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\n\nvar result = await Certificates.ExportCertificatePemAsync(session, Slot.Authentication, ct);\nusing var certificate = result.Certificate;\nif (result.Success && certificate is not null)\n{\n    var pem = certificate.ExportCertificatePem();\n    await File.WriteAllTextAsync(\"certificate.pem\", pem, ct);\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:4:code:1",
+        "status": "compile",
+        "group": "tool-certificate-export",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:5:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 4,
+      "exact_body_sha256": "4f4e402bcce40e9d33d76b251804ce048c5b614ec6c87911ce756d1a18518636",
+      "editor_normalized_sha256": "a130dbaa0260aabfe5eafb53d96767e99cf7811d2ed460d188ca462172bc1283",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\nawait session.AuthenticateAsync(managementKey, ct);\n\nvar result = await Certificates.DeleteCertificateAsync(session, Slot.Authentication, ct);\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:5:code:1",
+        "status": "compile",
+        "group": "tool-certificate-delete",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:6:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 5,
+      "exact_body_sha256": "3d9392273c4ae0eabfa54d921b546314fd83abbe6f652811addcf1777101923e",
+      "editor_normalized_sha256": "3e152cba7a32c4dab3169eda41013aa62ac3d2a18113df278b6c9be67dcbf220",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\nawait session.AuthenticateAsync(managementKey, ct);\nawait session.VerifyPinAsync(pin, ct);\n\nvar result = await Certificates.GenerateSelfSignedAsync(\n    session, Slot.Authentication, \"CN=Test User\", 365, ct);\nusing var certificate = result.Certificate;\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:6:code:1",
+        "status": "compile",
+        "group": "tool-certificate-self-sign",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:7:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "ordinal": 6,
+      "exact_body_sha256": "c276f2dc5cdb04f61e9f66224924e66c4d784c69acaec81b0a96053251507872",
+      "editor_normalized_sha256": "86dbad84ece385bbfb9ca20cb2b4528fe7622168ab52cc27771cdd23555f2a25",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\nawait session.VerifyPinAsync(pin, ct); // Borrowed caller-owned PIN; required by the slot policy.\n\nvar result = await Certificates.GenerateCsrAsync(\n    session, Slot.Authentication, \"CN=Test User\", ct);\n\nusing var certificate = result.Certificate;\nif (result.Success && result.CsrPem is { } csrPem)\n{\n    await File.WriteAllTextAsync(\"request.csr\", csrPem, ct);\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Certificates.cs:7:code:1",
+        "status": "compile",
+        "group": "tool-certificate-csr",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Decryption.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Decryption.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "4dd4776b2445650555b01b2b9854abbe59d8322487faa88ccbb780d3530fecbb",
+      "editor_normalized_sha256": "d85461d0f8aa27769ecb644b32990681b83e830824e6fd14b9bdcd2f686c2e26",
+      "body": "\nvar options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };\nawait using var session = await device.CreatePivSessionAsync(options, ct);\nawait session.VerifyPinAsync(pin, ct);\n\nvar result = await Decryption.DecryptDataAsync(\n    session,\n    Slot.KeyManagement,\n    encryptedBytes,\n    cancellationToken: ct);\n\nif (result.Success)\n{\n    var plaintext = result.DecryptedData;\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Decryption.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-decryption-inspection",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "6c8eefd47cd09b4af6b22b25fddc49d8338bd2070c38f8c9a8880cfd5b1d18d4",
+      "editor_normalized_sha256": "79eab3463c91e6cbebe713b8d86b196a135cc9dbecda626c55fc85e8c387a162",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\n\nvar result = await DeviceInfoQuery.GetPivRetryInfoAsync(session, ct);\nif (result.Success)\n{\n    Console.WriteLine($\"PIN retries: {result.PinRetriesRemaining}\");\n    Console.WriteLine($\"PUK retries: {result.PukRetriesRemaining}\");\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-retry-metadata",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "c593a2c9659c67039524a619afc53fec5ca50c8fae3fed03ed091a54c3f5b27d",
+      "editor_normalized_sha256": "8c9161884ee46727d10d38f971a1bae067129348618914d1bf4091b70c9c667f",
+      "body": "\n// Requires an authorized target slot and a borrowed active managementKey buffer.\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\nawait session.AuthenticateAsync(managementKey, ct);\n\nvar result = await KeyGeneration.GenerateKeyAsync(\n    session,\n    Slot.Authentication,\n    KeyType.P256,\n    PinPolicy.Once,\n    TouchPolicy.Cached,\n    ct);\n\nif (result.Success)\n{\n    var publicKeyBytes = result.PublicKey;\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-key-generation",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "2180bcc04af32e54d47a5f936c2777752ae8a35fc44cee0141c3f03d87f390b3",
+      "editor_normalized_sha256": "75d76af2476ce10959b20fcce0c97f46ad5b2d89c46966f4f674b5f7d9a735ca",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\n\nvar pin = Encoding.UTF8.GetBytes(\"123456\");\ntry\n{\n    var result = await PinManagement.VerifyPinAsync(session, pin, ct);\n    if (result.Success)\n    {\n        Console.WriteLine(\"PIN verified\");\n    }\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(pin);\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-pin-verify",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:3:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 2,
+      "exact_body_sha256": "d43af70158e6897596eecc9b7cbefc9bb43efb6a8cfbdb52c3368f6dbe5aeee8",
+      "editor_normalized_sha256": "dc238ed1a73070f01d4c5f56691d32f65c3c5ce26f20651928aaf7847d744f36",
+      "body": "\nvar oldPin = Encoding.UTF8.GetBytes(\"123456\");\nvar newPin = Encoding.UTF8.GetBytes(\"654321\");\ntry\n{\n    var result = await PinManagement.ChangePinAsync(session, oldPin, newPin, ct);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(oldPin);\n    CryptographicOperations.ZeroMemory(newPin);\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:3:code:1",
+        "status": "compile",
+        "group": "tool-pin-change",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:5:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 3,
+      "exact_body_sha256": "83bf25944bf38e4613915239e7b2459eb03cf46be285b7bd51ff34f3688c4c47",
+      "editor_normalized_sha256": "5edfc4189a762d3890fc1c218a9fa827095ad88fa7c7f6cc99cac79b5fc27333",
+      "body": "\nvar puk = Encoding.UTF8.GetBytes(\"12345678\");\nvar newPin = Encoding.UTF8.GetBytes(\"123456\");\ntry\n{\n    var result = await PinManagement.UnblockPinAsync(session, puk, newPin, ct);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(puk);\n    CryptographicOperations.ZeroMemory(newPin);\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:5:code:1",
+        "status": "compile",
+        "group": "tool-pin-unblock",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:7:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 4,
+      "exact_body_sha256": "941ba85075b86f7f9c19878e8529b9ee37616b8694e823e3423ad2ef4afea700",
+      "editor_normalized_sha256": "25611c53e506990eecdb3dc137eb565ea0785ac746116f519168c4308e96ad21",
+      "body": "\n// Evaluation only: the session must use the 24-byte factory key with Triple-DES or AES-192.\nvar mgmtKey = PivSession.DefaultManagementKey.ToArray();\ntry\n{\n    var result = await PinManagement.AuthenticateAsync(session, mgmtKey, ct);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(mgmtKey);\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:7:code:1",
+        "status": "compile",
+        "group": "tool-management-authenticate",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:8:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "ordinal": 5,
+      "exact_body_sha256": "9ca3318b1de5a07cdd0648016ace9ee2fc91c7c1804a0a9abd1fbedaca6584bf",
+      "editor_normalized_sha256": "5308874e3fe2fc0c37b9d7e60381e2f369f0a1415fbb209e5502f2756c936cb4",
+      "body": "\n// currentKey and newKey are caller-owned buffers; securely back up newKey before this task.\n// This example installs a 24-byte Triple-DES key on a compatible device.\nawait session.AuthenticateAsync(currentKey, ct);\nvar result = await PinManagement.ChangeManagementKeyAsync(\n    session, newKey, KeyType.TripleDes, requireTouch: false, cancellationToken: ct);\n// Keep the backup through fresh-session authentication; the caller clears both buffers in finally.\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/PinManagement.cs:8:code:1",
+        "status": "compile",
+        "group": "tool-management-rotation",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Reset.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Reset.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "0a885a52c60cdc3fcd7c2a5c68278cd8e3544f6a1121bcb4f6a2221f8e241861",
+      "editor_normalized_sha256": "82c0e05ecc68942b74c8526f519feca59a2e4200979bab2390e50c3751bd253f",
+      "body": "\n// Requires an authorized reset decision; normal reset retains F9 material.\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\n\n// Ensure user confirms this destructive action\nif (userConfirmedReset)\n{\n    var result = await Reset.ResetPivApplicationAsync(session, ct);\n    if (result.Success)\n    {\n        Console.WriteLine(\"PIV application reset to factory defaults.\");\n    }\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Reset.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-reset",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Signing.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Signing.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "da981b89fa4edab16f2bd76c91af12a4a20c3b39936350fa44e521d1f906af81",
+      "editor_normalized_sha256": "8ed84a88e44e21d3597c7f81182c2c30f3ae79fe39a0da9e34874d94e5d098ad",
+      "body": "\nvar options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };\n// Requires an application-owned prompt, caller-owned PIN/data and a provisioned P-256/P-384 slot.\nawait using var session = await device.CreatePivSessionAsync(options, ct);\nawait session.VerifyPinAsync(pin, ct);\n\nvar result = await Signing.SignDataAsync(\n    session, \n    Slot.Signature,\n    dataBytes,\n    HashAlgorithmName.SHA256,\n    ct);\n\nif (result.Success)\n{\n    var signature = result.Signature;\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Signing.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-signing",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/SlotInfo.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/SlotInfo.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "5c2eecc2d091c10c7f0cfaaab8164f87e9444131f3590cc8067f25bf1d201352",
+      "editor_normalized_sha256": "2d86478c5d6ed1fbbbfabedda073686357a3adf3406d4e2bf317055b0fa46834",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\n\nvar result = await SlotInfoQuery.GetAllSlotsInfoAsync(session, ct);\ntry\n{\n    if (result.Success)\n    {\n        foreach (var slot in result.Slots)\n            Console.WriteLine($\"{slot.Name}: Key={slot.HasKey}, Cert={slot.HasCertificate}\");\n    }\n}\nfinally\n{\n    foreach (var slot in result.Slots)\n        slot.Certificate?.Dispose();\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/SlotInfo.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-slot-query",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/examples/PivTool/PivExamples/Verification.cs:2:code:1",
+      "path": "src/Piv/examples/PivTool/PivExamples/Verification.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "8096946d5f822b49f32363bf4c815f309c16dbb4079175bf15f2ee3e066d7750",
+      "editor_normalized_sha256": "e4bbfed1e7ce4921b340728a551f7d85f955a121077119e360400261ff788700",
+      "body": "\nawait using var session = await device.CreatePivSessionAsync(cancellationToken: ct);\n\nvar result = await Verification.VerifySignatureAsync(\n    session,\n    Slot.Signature,\n    originalData,\n    signatureBytes,\n    HashAlgorithmName.SHA256,\n    ct);\n\nif (result.Success && result.IsValid)\n{\n    Console.WriteLine(\"Signature is valid!\");\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/examples/PivTool/PivExamples/Verification.cs:2:code:1",
+        "status": "compile",
+        "group": "tool-host-verification",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/src/SlotMetadataExtensions.cs:2:code:1",
+      "path": "src/Piv/src/SlotMetadataExtensions.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "35d45576cb2bcfb6f5b0e47a7fe91825c3d04a66d992e5fb4eb672226f81a2bb",
+      "editor_normalized_sha256": "f51636139fe3d7b49537de677484e89c8623a003def94d0eb3f96a16d4f52be6",
+      "body": "\n// Requires an open session, firmware 5.3+ and a provisioned RSA slot.\nvar metadata = await session.GetSlotMetadataAsync(Slot.Authentication)\n    ?? throw new InvalidOperationException(\"Provision an RSA key first.\");\nusing var rsa = metadata.GetRsaPublicKey();\nbyte[] plaintext = \"example\"u8.ToArray();\ntry\n{\n    byte[] ciphertext = rsa.Encrypt(plaintext, RSAEncryptionPadding.OaepSHA256);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(plaintext);\n}\n",
+      "disposition": {
+        "id": "xml:src/Piv/src/SlotMetadataExtensions.cs:2:code:1",
+        "status": "compile",
+        "group": "rsa-extractor",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/src/SlotMetadataExtensions.cs:3:code:1",
+      "path": "src/Piv/src/SlotMetadataExtensions.cs",
+      "ordinal": 2,
+      "exact_body_sha256": "a57b38d82eb8522ae59454110eb1b86643148bb2a06a0cf8de999c3076d6504f",
+      "editor_normalized_sha256": "55c546bd9491a72abb1a3335c49617652b50905e722023662c0a4076ec2757f8",
+      "body": "\n// Requires an open session, firmware 5.3+ and a provisioned P-256/P-384 slot.\nvar metadata = await session.GetSlotMetadataAsync(Slot.Authentication)\n    ?? throw new InvalidOperationException(\"Provision an EC key first.\");\nusing var ecdsa = metadata.GetECDsaPublicKey();\n// The host object is now available for signature verification.\n",
+      "disposition": {
+        "id": "xml:src/Piv/src/SlotMetadataExtensions.cs:3:code:1",
+        "status": "compile",
+        "group": "ecdsa-extractor",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    },
+    {
+      "id": "xml:src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs:1:code:1",
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+      "ordinal": 1,
+      "exact_body_sha256": "c96434ec4ca2122fa52b6d9217f06571b722975048b60bf55c38ab380bca3386",
+      "editor_normalized_sha256": "cc104f0f35044a49f16efdda927046a4d67814c74e9f64a9d27f4e60ba79969f",
+      "body": "\n    await using var piv = await key.CreatePivSessionAsync(cancellationToken: ct);\n    await piv.VerifyPinAsync(pin, ct);\n    try\n    {\n        await key.GetDeviceInfoAsync(cancellationToken: ct);\n        throw new InvalidOperationException(\"Expected the ownership guard to reject the second connection.\");\n    }\n    catch (ConnectionInUseException)\n    {\n        Memory<byte> signature = await piv.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest, ct);\n        CryptographicOperations.ZeroMemory(signature.Span);\n    }\n    ",
+      "disposition": {
+        "id": "xml:src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs:1:code:1",
+        "status": "compile",
+        "group": "session-contention-guard",
+        "reason": "Complete current body compiled in the named typed task with original text/hash retained."
+      }
+    }
+  ],
+  "module_sources": [
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+      "bytes": 43774,
+      "sha256": "bf59c61431a198fde239e788433ae3b37a95403bfa4a4ecbfbf157dfa5a81490"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs",
+      "bytes": 7918,
+      "sha256": "1705e8e9a46d0c02d9879165b4286531591bcec221ac8d6e3b53ebae8c92f6b9"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/JsonOutput.cs",
+      "bytes": 8632,
+      "sha256": "5ac995e43f8f15fd63a8e3c698511b424df97bcfc67d1a4a3361baad6b64a70d"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/AttestationMenu.cs",
+      "bytes": 3245,
+      "sha256": "6a1e6887a150ea622bd7eab09d33ad738f864cc0892fb7ec10d4385ed4695bff"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/CertificatesMenu.cs",
+      "bytes": 9354,
+      "sha256": "726f0a38fe528da4ff3db34021900126f94253f0331db772621bebde79a7c39f"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/CryptoMenu.cs",
+      "bytes": 8808,
+      "sha256": "3f4adafeb275f61c44b0d91d8df362f48de7e97a6cd911725159e1c6851b097f"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/DeviceInfoMenu.cs",
+      "bytes": 4070,
+      "sha256": "da65740db06dc34a0e5110b67a99b029a73e4d53b6f08a9c45b90b94d24b0493"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/KeyGenerationMenu.cs",
+      "bytes": 4132,
+      "sha256": "3aca33fa3a7516668268fbf1532b4eb6aebc57223253e1e23cb9d7e51ef9f17e"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/PinManagementMenu.cs",
+      "bytes": 7543,
+      "sha256": "02a7cfeba0f60027056de32a0289345e04b1bd4324f0e2ecf77f92f5cd8a84d6"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/ResetMenu.cs",
+      "bytes": 2831,
+      "sha256": "169317e3da93da8b2ba8bf57982dcd085d5a74151e068c3ec2fe8ac9567e55f7"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/SlotOverviewMenu.cs",
+      "bytes": 2704,
+      "sha256": "03df859f7fc01671f1f34d37df40f0902a360f733a6564dc60f787c3b6db8fa0"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Output/OutputHelpers.cs",
+      "bytes": 6891,
+      "sha256": "7a8bcc3c82b45a955f1b48e21cd60eeea884a46ccce6b45581cc0240340b6bdb"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/DeviceSelector.cs",
+      "bytes": 7349,
+      "sha256": "02a6c454af535404322cbfa3e4886a7addcbd129416b3c38794a341608124235"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/PinPrompt.cs",
+      "bytes": 12653,
+      "sha256": "765be0b36316a0e2754ae63992d3d987cf5fc32069d8b671a942b2112a20d09d"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/SlotSelector.cs",
+      "bytes": 2185,
+      "sha256": "5862a86780e18d2e0e44c9b9fb8d0eafbab1aa524d91d8b60019bdd3fe2d7157"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+      "bytes": 4645,
+      "sha256": "bc4a2f1589d7aab7de025e70937682ab429c22ddc71a650c85965085f6683c6e"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "bytes": 23382,
+      "sha256": "41e5abc57e3bcf845d615bfe0d2b056a96befddc4c6816f40ad2bbfd5ea3d305"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Decryption.cs",
+      "bytes": 4081,
+      "sha256": "5599ec21588d32e757d71abd672f7fdb06e9348c7484d65f53004e5d1e0b738e"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs",
+      "bytes": 3106,
+      "sha256": "7e912c1df3bbb704f72fe4cc4f03065afca8244846c8457b0da6bbf00c96618c"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs",
+      "bytes": 3565,
+      "sha256": "c41428412c5a3e12a67c988889f39cbe64c612e885756b56ee6de568bf040f22"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "bytes": 11351,
+      "sha256": "6b56f821b86dd6bc98b58cdbe179310edd2c82932b4176f2439057c576c9918c"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Reset.cs",
+      "bytes": 2859,
+      "sha256": "a21ecfe271e0b89100c28d89f20c47143f6a768ab6b55ee05ca50ff2e73c59a9"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/AttestationResult.cs",
+      "bytes": 2086,
+      "sha256": "92cc55977521ceacacb5fb6b90433749965ed56a9df857bd680a30938030ef32"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/CertificateResult.cs",
+      "bytes": 2475,
+      "sha256": "359076d803af9307dfe5d2688275ee036c38398f8ace05968012da09a376a733"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/DecryptionResult.cs",
+      "bytes": 1962,
+      "sha256": "30ea891dcc60fb4f337cca027abbd19933bcd9f54d10775379b2ac3ece6e5c5c"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/DeviceInfoResult.cs",
+      "bytes": 2299,
+      "sha256": "de31128cd206152fdbe4d55fa0e599bba4808c8b0b356928f24882402f0269e0"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/KeyGenerationResult.cs",
+      "bytes": 1980,
+      "sha256": "40fc6deada93c639a1f2fcb5e542a87d7f8998859d422e02a68986fd9900fb3b"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/PinOperationResult.cs",
+      "bytes": 1698,
+      "sha256": "d17cad1ba29b00868ec797f592c64b5a2ddb46be788fc60b0faaff9771442535"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/ResetResult.cs",
+      "bytes": 1379,
+      "sha256": "198d59f315cd2d39d7e18bb3265433e046fc2936120f1ac6f2ac18dc3cef8236"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/SigningResult.cs",
+      "bytes": 1790,
+      "sha256": "e5d50b7eca2f076711726d90cac94e381cf132eec2ff736969e5dfe77fed2158"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/SlotInfoResult.cs",
+      "bytes": 2669,
+      "sha256": "fb0236ec4b0ee5d01ab779b7d45f82e5d878175778f5868448376f1d9f1ead27"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/VerificationResult.cs",
+      "bytes": 2068,
+      "sha256": "3eb0bfa22623faf83aaea0a1a43620525818d901702bc96d1439f6271ec089d4"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Signing.cs",
+      "bytes": 4712,
+      "sha256": "ab44ec7d9c4a99f8660d140f2d0fdf9ffe53e23141bf5d7dddad0bd1c81360ba"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/SlotInfo.cs",
+      "bytes": 5014,
+      "sha256": "60601004476a3178d4573445e0fc5c1d2518f4529af9e1e6ac8308891ca1709f"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Verification.cs",
+      "bytes": 4552,
+      "sha256": "b38d88dd16be9f0a1e01b05cce3869eb1300539d53a68698510f6809761254a5"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Program.cs",
+      "bytes": 1360,
+      "sha256": "f50960e58d32c8eb1723da61f07909ffca66fbd2b7092f91318a7bdfc3b9ffaa"
+    },
+    {
+      "path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+      "bytes": 35118,
+      "sha256": "77576173cc494cc5ebac63ad4987a0e84585ee443f1924b238d76a5d208c3fdc"
+    },
+    {
+      "path": "src/Piv/src/Authentication/PinOnlyProtocol.cs",
+      "bytes": 6443,
+      "sha256": "eaa59c1b1d9e433292a450cdb53bb6713a3f0864db08d6ff9a13f15baf673956"
+    },
+    {
+      "path": "src/Piv/src/Backends/IBackend.cs",
+      "bytes": 960,
+      "sha256": "fecffe0bc8dce8fe195bea5b8c68c69c8b4325f21a754e1126e22ca841d78af5"
+    },
+    {
+      "path": "src/Piv/src/Backends/SmartCardBackend.cs",
+      "bytes": 2393,
+      "sha256": "e05eca79d472c6680a2216abedf4aceacb21bca17cd289fec95e9c384d67259b"
+    },
+    {
+      "path": "src/Piv/src/Bio/BioProtocol.cs",
+      "bytes": 6466,
+      "sha256": "44c282dbeac035f67270639636b811ee70d16c87cc6fb60641e61ac91590b404"
+    },
+    {
+      "path": "src/Piv/src/CertificateCompression.cs",
+      "bytes": 975,
+      "sha256": "d229fdb110535d17646bef18bc509758233effcfe6e019e324bf5b248109d5a2"
+    },
+    {
+      "path": "src/Piv/src/Certificates/CertificateProtocol.cs",
+      "bytes": 7394,
+      "sha256": "1407c8a362a2533c2c12575467daa87d6538989c949a0d91ea9b105db69ff3a4"
+    },
+    {
+      "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "bytes": 19379,
+      "sha256": "a7f46ccbe9bf1d2f8839fb7403f5344a07bd700eb4da3b9e021b75ce4245066a"
+    },
+    {
+      "path": "src/Piv/src/DataObject.cs",
+      "bytes": 4336,
+      "sha256": "98975748dd19e99bf4bfd3df1bbe19f1bd3ed0d5beebc0ce84689bd695947d40"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/AdminData.cs",
+      "bytes": 9989,
+      "sha256": "e7515fc7f2dd410988e6c0d90888451c8a58414cc7d62c881dfe7e817e0c86ab"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/CardCapabilityContainer.cs",
+      "bytes": 8649,
+      "sha256": "9057ec98060d80e8ec2692e2dfdd2eafcef01dd4163180c663792e05bdba438c"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/CardholderUniqueId.cs",
+      "bytes": 6583,
+      "sha256": "782125a30e962093a2d0e976c0313717951f8ff2cd0f6310dc1c3970981caef7"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/DataObjectProtocol.cs",
+      "bytes": 5050,
+      "sha256": "6c2d4917f5b40d5734678b243b4b5faa873640a79fefaf9d3cb41ca2182c6bb2"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/KeyHistory.cs",
+      "bytes": 6848,
+      "sha256": "5c61a94605065cdcf3462d4e5c33e8ad25707c1fc1abea585507a140e16021bc"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/TypedDataObjectProtocol.cs",
+      "bytes": 5113,
+      "sha256": "dc6867240ea2f8ef50d5a4f98c0ae169efb4c6ba23ee7b49ce11ee02803215fd"
+    },
+    {
+      "path": "src/Piv/src/Features.cs",
+      "bytes": 2683,
+      "sha256": "f9f47079f5c021600209673e17bedb9d3235c0d60e778cd31d434b9f3533dd05"
+    },
+    {
+      "path": "src/Piv/src/IPivSession.cs",
+      "bytes": 37940,
+      "sha256": "1d3f05a16d3cd60f892def4beb1c20ea8a9e1226d19520e957540f35d7994447"
+    },
+    {
+      "path": "src/Piv/src/IYubiKeyExtensions.cs",
+      "bytes": 2710,
+      "sha256": "98d029b71988128578d8ffa4bf094c45f130d6846edf2081f6f0246477e44ef5"
+    },
+    {
+      "path": "src/Piv/src/InvalidPinException.cs",
+      "bytes": 2653,
+      "sha256": "d4f2136e0540e3bdaa9c2c045155dce7a5839d40febb4b7a3e4c15ed5757e25e"
+    },
+    {
+      "path": "src/Piv/src/KeyCreationOptions.cs",
+      "bytes": 1186,
+      "sha256": "98a203048d3b060a3fc5d66d534c8fa888584ac954f7ac9942ccc0f8d1c04651"
+    },
+    {
+      "path": "src/Piv/src/KeyReference.cs",
+      "bytes": 900,
+      "sha256": "eaf461d7c4e240e4eb46816287fee6c7fa4fd445e8694189966dc44bb832b198"
+    },
+    {
+      "path": "src/Piv/src/KeyTypeEncoding.cs",
+      "bytes": 2416,
+      "sha256": "3c8fcc44fa193a48bd93285a2703ab2d308d23c92fba0743e4e137423e9aa5a2"
+    },
+    {
+      "path": "src/Piv/src/Keys/KeyProtocol.cs",
+      "bytes": 21652,
+      "sha256": "73e56967adfc051d2ae34e084a5aec0132b651b694eef15d367c931dc2b61918"
+    },
+    {
+      "path": "src/Piv/src/Metadata.cs",
+      "bytes": 4536,
+      "sha256": "b86244e207d0010cd191331c11ca46e56b28fd82cd4bbd6cc5cf2ee1d39831f6"
+    },
+    {
+      "path": "src/Piv/src/Metadata/MetadataProtocol.cs",
+      "bytes": 10549,
+      "sha256": "22099891e3ab1499aa729ecbe50ee4d45513c00e56308f5c25a2359b8060417b"
+    },
+    {
+      "path": "src/Piv/src/PinOnlyMode.cs",
+      "bytes": 2333,
+      "sha256": "5ad86dba03c3813ba0afb5879e72304a16effc5ff2e1fcd4e4b618b305ccabb8"
+    },
+    {
+      "path": "src/Piv/src/PinPolicy.cs",
+      "bytes": 1580,
+      "sha256": "77347e46922d52bda05677a99d9b764467ddaf85c3ec55614345209719a05b25"
+    },
+    {
+      "path": "src/Piv/src/PinUtilities.cs",
+      "bytes": 6919,
+      "sha256": "5a70827231f45509095dc0649bd1f11d91388bed61578265199cabcd65dbf560"
+    },
+    {
+      "path": "src/Piv/src/PivSession.cs",
+      "bytes": 46191,
+      "sha256": "4b6b75402b8d6007a1e98b065b61fb6e856ac607b13275df3a378a8739f8e9e4"
+    },
+    {
+      "path": "src/Piv/src/Slot.cs",
+      "bytes": 2775,
+      "sha256": "0696f046cd3e95855a68256e4d4273c1b587f2f48a24ad3e1a7c21715f9bc130"
+    },
+    {
+      "path": "src/Piv/src/SlotMetadataExtensions.cs",
+      "bytes": 7576,
+      "sha256": "758d3c5ffef0ef0c18d35d8a86e131c85970434970088b6b5d7de156ce1f6c34"
+    },
+    {
+      "path": "src/Piv/src/TouchPolicy.cs",
+      "bytes": 1083,
+      "sha256": "2683ea87bdfe2aa57434136841a68ba9a7c99c5eb557a94386a238375d83fa2f"
+    },
+    {
+      "path": "src/Piv/src/UserVerification.cs",
+      "bytes": 1063,
+      "sha256": "5fa31e18b4670bca9436ab29484c2b9eee8149176a072e92fb712cc1635fa8f3"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+      "bytes": 6711,
+      "sha256": "cc61a30ede310a67f422793311bf769537d605e78664efb94b1d70c539e0cb10"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivAuthenticationTests.cs",
+      "bytes": 5045,
+      "sha256": "da4bc4b8a1dde77d76b24571b911ea169037dc3a59d2f0d271037ddf9a4bf8c1"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCertificateTests.cs",
+      "bytes": 4277,
+      "sha256": "e5f10d788126f3043e26a7318623493a6586ccc62ebe48fad6f9f42c3efe3463"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCompressedCertTests.cs",
+      "bytes": 3686,
+      "sha256": "419447991eb84da3a2c1580b033e8536b552d95469b30ad83ac967ecfa469c32"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+      "bytes": 3509,
+      "sha256": "cf328dd691a6eadbfae238cd197fd6a018dd0b404a05f5fe51f9b7698a33d4e9"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCryptoTests.cs",
+      "bytes": 17811,
+      "sha256": "6d3f42cc32a37ca6d2a9194aeab905817785676d904d42adc48fecf24cb7a0b3"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDecryptTests.cs",
+      "bytes": 8487,
+      "sha256": "01577d93862508097a2ba3ec11d5e675c145009721e6785119e060ef868e51e3"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDiscoveryContentionTests.cs",
+      "bytes": 6256,
+      "sha256": "dd3d63f0cd04bf6cb0938bd4bcf4096b8802405532a1a07029eb51db96eb4073"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivFullWorkflowTests.cs",
+      "bytes": 7587,
+      "sha256": "b9f9421c17861db6480e678c0da5e67852e73b79af632beb8e44a89c5521db19"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+      "bytes": 5209,
+      "sha256": "34ee403dc5148558ba2ee5e9512679eec7317b32c2af753d6ebddb0371c6bfd9"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivImportTests.cs",
+      "bytes": 7604,
+      "sha256": "6898a0b7f88ae9e11982a2297a982a0aea8c6c66934eca903454774fd1225189"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivKeyOperationsTests.cs",
+      "bytes": 8814,
+      "sha256": "c46ce5a8746cf9abd67ba08fa044b62fa440e547243d54a9425fa4be08c2e9d3"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivManagementKeyTests.cs",
+      "bytes": 9216,
+      "sha256": "e30a4ccc1718d76d472b6435f3525a689f1a600e8fae100446fa4f413dafd2fd"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs",
+      "bytes": 5408,
+      "sha256": "6793bccb152810ad62adc90d4d60a129edbab4b63b035b82631c0be826e46b02"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMultiKeyContentionTests.cs",
+      "bytes": 14125,
+      "sha256": "284bce4179e958bd9f5c0b572691451cd0776d508dc4df51b25daf2c94f56e39"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinOnlyWorkflowTests.cs",
+      "bytes": 3122,
+      "sha256": "97555037f227c3f1285870e363e522038d1974d6dd0ebc8f02e87fb5a7134600"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinRetryTests.cs",
+      "bytes": 9492,
+      "sha256": "b9437050a00b862f67270344fb2151044075af4becec79714766579dd6b5c19f"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPolicyTests.cs",
+      "bytes": 4665,
+      "sha256": "19333ec77cfc9ca21984096ee83e092b57e41950960b6e6ffb90ceec1a77d4e8"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPukTests.cs",
+      "bytes": 5967,
+      "sha256": "745506a6dd77dc76a63e18da52a9080a90bcef738c6b7ed591e4ba9c5640bbf2"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs",
+      "bytes": 3633,
+      "sha256": "6df98192531586b21e414f8169323987fde52128a3a588e79bcd34c563e23b63"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+      "bytes": 11041,
+      "sha256": "b796294333e363e0c5dc68f904f9dda011f7916c793a7a12f419b46d72c26824"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSigningAlgorithmTests.cs",
+      "bytes": 12517,
+      "sha256": "5a10ada019f924fe835d1c2e58b16ce8d80533ebc95ca86de9cc961b4e39139f"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSlotOverwriteTests.cs",
+      "bytes": 7234,
+      "sha256": "66c282f93a0e18428771cbcb617578cf503229afe6be6fe09d642792a7d209de"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/UserPresenceProbeTests.cs",
+      "bytes": 9322,
+      "sha256": "113cad4a5fdbca1ef2c940ce5e38fb439e2ce0a186884c0df9855b1d250d6306"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/AuditV2/PivAuditReproTests.cs",
+      "bytes": 4189,
+      "sha256": "3850abf8f6cf58b40f0fea5977f0865c285aefc0e3414478ab0f4ae008a18ba2"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyProtocolTests.cs",
+      "bytes": 5346,
+      "sha256": "3b313b84de49599056a3dcbcdb2d2b35e08af184ef55289089795ca726c889fe"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs",
+      "bytes": 10659,
+      "sha256": "f13f0812e0c554620c054b76f825b4946e29c386ce4beb7f45b8c540dfa74aac"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs",
+      "bytes": 22190,
+      "sha256": "299f4b8063d4e3fb84dec2ca9f305c869007af8e23f5f402a7e6be40ec988f7a"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Bio/BioProtocolTests.cs",
+      "bytes": 7237,
+      "sha256": "57bd5dcfb54cce0abf5a1bbcc72af9f24c84bb76addd59a5ecd2b52e6be45445"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/CatalogBehaviorTests.cs",
+      "bytes": 5263,
+      "sha256": "bc5c0c27275e3b185adc78958fe64f6a7a8f68fd97f78b1ccdc6e73a7d5902a3"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/CatalogCapabilityBoundaryTests.cs",
+      "bytes": 2833,
+      "sha256": "436c1b7c3de8fdb134f2234e7bcf915230da7f9fa90326759b73dcfb8a743add"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Certificates/PivCertificateObjectIdTests.cs",
+      "bytes": 3133,
+      "sha256": "028322ee4c86aa1e81d7fce7f70a56c548b225c3383fb20f4cbc4225d1999f98"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Cryptography/PrivateKeyOperationsTests.cs",
+      "bytes": 10092,
+      "sha256": "8c2ae6d348924c541b9118597d9f16483be151fb744a95a756ef55a419f0fe17"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+      "bytes": 8055,
+      "sha256": "a4ea10714d01506c3d97ac10cdabbf54c3dd54c37da9f3d2dabf2b02929c3d62"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/PivDataObjectsTests.cs",
+      "bytes": 15876,
+      "sha256": "cd13e6fc331995a340db3b3884f4b35bbebd0a313b823695e6572707f67bc706"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Keys/KeyProtocolTests.cs",
+      "bytes": 3411,
+      "sha256": "1ba67e1b67dac980ea9fa98a62e6bf28d0cead1d4dccf87c208300effdfa62d4"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Metadata/MetadataProtocolTests.cs",
+      "bytes": 2603,
+      "sha256": "501bce1df615a46ede4220d04d34a6af4ce4ea28e2131f8808b90d532471ff40"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+      "bytes": 33606,
+      "sha256": "c6f24e1db58b8258b65c7398959f85bf6319496c89859ce9fc3d02eb9e5277e2"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivTypesTests.cs",
+      "bytes": 3052,
+      "sha256": "914695b4bc1245729634d3fae842d5f67dfcd3f407c383199d2ee609bf3c66ec"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs",
+      "bytes": 19092,
+      "sha256": "5f9870050aaef0a93617b458f064385cba4b67512203aafc29284656ddde5e1b"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SlotMetadataExtensionsTests.cs",
+      "bytes": 3728,
+      "sha256": "f6da3cc916ae9e59cb44b6549ffab40055835210a12ab96d9da5d9e80ff83f71"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/TouchNotificationTests.cs",
+      "bytes": 16768,
+      "sha256": "5b6b3bb25515b150ec42a0dfe39e8dc847beab22d3c7c3d069128291cc53c5e8"
+    }
+  ],
+  "documents": [
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "bytes": 21879,
+      "sha256": "9950b492af9334a5f7d37bfe01a0f6d9360b25f384ba27240bacbcd4b2af5a4d"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "bytes": 41638,
+      "sha256": "cbf6f91795c7cc3125a9bff28e89105a5f29bca5940f03843d056db0bb2ecdd9"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "bytes": 64986,
+      "sha256": "8b04e58ce32954a35c4a2873be095361e1cd27c3e35049e3d254c51d1c432566"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "bytes": 58602,
+      "sha256": "820fff12aff06ed3d509204136b5c926663aa5ab2409d10d4df0a733f2374014"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "bytes": 15034,
+      "sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831"
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "bytes": 11127,
+      "sha256": "fd293b29198664e52aa1fd46cbe660689469083aa1fd52ae354bff3c52891f4c"
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "bytes": 14428,
+      "sha256": "8d486c8a309ed7fcf821463d8a505320470e4b25e345c83e5c73bbf860de8695"
+    },
+    {
+      "path": "src/Piv/PACKAGE_README.md",
+      "bytes": 1107,
+      "sha256": "21856af4f59d44bd83c204aef7a505c6ffcf0a14b8aa7dfab02d26da22f0eb70"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "bytes": 27456,
+      "sha256": "01c9b2dea26c3a27988fce87d629708eea8f580aaf44a1d8488ad6c280fe45f1"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/README.md",
+      "bytes": 10562,
+      "sha256": "7ef84e6d8c2c0306cc9e6678b2814dfb8a86f14325e1ca0481c13e30aaf8ddf3"
+    }
+  ],
+  "compiled_groups": 45,
+  "compiled_bodies": 47,
+  "active_contexts": [
+    "annotations",
+    "consumer",
+    "pivtool"
+  ],
+  "native_project": {
+    "path": "src/Piv/examples/PivTool/PivTool.csproj",
+    "bytes": 950,
+    "sha256": "9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349",
+    "retained": {
+      "path": "native-project/PivTool.csproj.snapshot",
+      "bytes": 950,
+      "sha256": "9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349"
+    }
+  },
+  "native_sources": [
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+      "bytes": 43774,
+      "sha256": "bf59c61431a198fde239e788433ae3b37a95403bfa4a4ecbfbf157dfa5a81490",
+      "retained": {
+        "path": "native-source/bf59c61431a198fde239e788433ae3b37a95403bfa4a4ecbfbf157dfa5a81490-CliRunner.cs.snapshot",
+        "bytes": 43774,
+        "sha256": "bf59c61431a198fde239e788433ae3b37a95403bfa4a4ecbfbf157dfa5a81490"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs",
+      "bytes": 7918,
+      "sha256": "1705e8e9a46d0c02d9879165b4286531591bcec221ac8d6e3b53ebae8c92f6b9",
+      "retained": {
+        "path": "native-source/1705e8e9a46d0c02d9879165b4286531591bcec221ac8d6e3b53ebae8c92f6b9-DeviceHelper.cs.snapshot",
+        "bytes": 7918,
+        "sha256": "1705e8e9a46d0c02d9879165b4286531591bcec221ac8d6e3b53ebae8c92f6b9"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/JsonOutput.cs",
+      "bytes": 8632,
+      "sha256": "5ac995e43f8f15fd63a8e3c698511b424df97bcfc67d1a4a3361baad6b64a70d",
+      "retained": {
+        "path": "native-source/5ac995e43f8f15fd63a8e3c698511b424df97bcfc67d1a4a3361baad6b64a70d-JsonOutput.cs.snapshot",
+        "bytes": 8632,
+        "sha256": "5ac995e43f8f15fd63a8e3c698511b424df97bcfc67d1a4a3361baad6b64a70d"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/AttestationMenu.cs",
+      "bytes": 3245,
+      "sha256": "6a1e6887a150ea622bd7eab09d33ad738f864cc0892fb7ec10d4385ed4695bff",
+      "retained": {
+        "path": "native-source/6a1e6887a150ea622bd7eab09d33ad738f864cc0892fb7ec10d4385ed4695bff-AttestationMenu.cs.snapshot",
+        "bytes": 3245,
+        "sha256": "6a1e6887a150ea622bd7eab09d33ad738f864cc0892fb7ec10d4385ed4695bff"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/CertificatesMenu.cs",
+      "bytes": 9354,
+      "sha256": "726f0a38fe528da4ff3db34021900126f94253f0331db772621bebde79a7c39f",
+      "retained": {
+        "path": "native-source/726f0a38fe528da4ff3db34021900126f94253f0331db772621bebde79a7c39f-CertificatesMenu.cs.snapshot",
+        "bytes": 9354,
+        "sha256": "726f0a38fe528da4ff3db34021900126f94253f0331db772621bebde79a7c39f"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/CryptoMenu.cs",
+      "bytes": 8808,
+      "sha256": "3f4adafeb275f61c44b0d91d8df362f48de7e97a6cd911725159e1c6851b097f",
+      "retained": {
+        "path": "native-source/3f4adafeb275f61c44b0d91d8df362f48de7e97a6cd911725159e1c6851b097f-CryptoMenu.cs.snapshot",
+        "bytes": 8808,
+        "sha256": "3f4adafeb275f61c44b0d91d8df362f48de7e97a6cd911725159e1c6851b097f"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/DeviceInfoMenu.cs",
+      "bytes": 4070,
+      "sha256": "da65740db06dc34a0e5110b67a99b029a73e4d53b6f08a9c45b90b94d24b0493",
+      "retained": {
+        "path": "native-source/da65740db06dc34a0e5110b67a99b029a73e4d53b6f08a9c45b90b94d24b0493-DeviceInfoMenu.cs.snapshot",
+        "bytes": 4070,
+        "sha256": "da65740db06dc34a0e5110b67a99b029a73e4d53b6f08a9c45b90b94d24b0493"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/KeyGenerationMenu.cs",
+      "bytes": 4132,
+      "sha256": "3aca33fa3a7516668268fbf1532b4eb6aebc57223253e1e23cb9d7e51ef9f17e",
+      "retained": {
+        "path": "native-source/3aca33fa3a7516668268fbf1532b4eb6aebc57223253e1e23cb9d7e51ef9f17e-KeyGenerationMenu.cs.snapshot",
+        "bytes": 4132,
+        "sha256": "3aca33fa3a7516668268fbf1532b4eb6aebc57223253e1e23cb9d7e51ef9f17e"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/PinManagementMenu.cs",
+      "bytes": 7543,
+      "sha256": "02a7cfeba0f60027056de32a0289345e04b1bd4324f0e2ecf77f92f5cd8a84d6",
+      "retained": {
+        "path": "native-source/02a7cfeba0f60027056de32a0289345e04b1bd4324f0e2ecf77f92f5cd8a84d6-PinManagementMenu.cs.snapshot",
+        "bytes": 7543,
+        "sha256": "02a7cfeba0f60027056de32a0289345e04b1bd4324f0e2ecf77f92f5cd8a84d6"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/ResetMenu.cs",
+      "bytes": 2831,
+      "sha256": "169317e3da93da8b2ba8bf57982dcd085d5a74151e068c3ec2fe8ac9567e55f7",
+      "retained": {
+        "path": "native-source/169317e3da93da8b2ba8bf57982dcd085d5a74151e068c3ec2fe8ac9567e55f7-ResetMenu.cs.snapshot",
+        "bytes": 2831,
+        "sha256": "169317e3da93da8b2ba8bf57982dcd085d5a74151e068c3ec2fe8ac9567e55f7"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/SlotOverviewMenu.cs",
+      "bytes": 2704,
+      "sha256": "03df859f7fc01671f1f34d37df40f0902a360f733a6564dc60f787c3b6db8fa0",
+      "retained": {
+        "path": "native-source/03df859f7fc01671f1f34d37df40f0902a360f733a6564dc60f787c3b6db8fa0-SlotOverviewMenu.cs.snapshot",
+        "bytes": 2704,
+        "sha256": "03df859f7fc01671f1f34d37df40f0902a360f733a6564dc60f787c3b6db8fa0"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Output/OutputHelpers.cs",
+      "bytes": 6891,
+      "sha256": "7a8bcc3c82b45a955f1b48e21cd60eeea884a46ccce6b45581cc0240340b6bdb",
+      "retained": {
+        "path": "native-source/7a8bcc3c82b45a955f1b48e21cd60eeea884a46ccce6b45581cc0240340b6bdb-OutputHelpers.cs.snapshot",
+        "bytes": 6891,
+        "sha256": "7a8bcc3c82b45a955f1b48e21cd60eeea884a46ccce6b45581cc0240340b6bdb"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/DeviceSelector.cs",
+      "bytes": 7349,
+      "sha256": "02a6c454af535404322cbfa3e4886a7addcbd129416b3c38794a341608124235",
+      "retained": {
+        "path": "native-source/02a6c454af535404322cbfa3e4886a7addcbd129416b3c38794a341608124235-DeviceSelector.cs.snapshot",
+        "bytes": 7349,
+        "sha256": "02a6c454af535404322cbfa3e4886a7addcbd129416b3c38794a341608124235"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/PinPrompt.cs",
+      "bytes": 12653,
+      "sha256": "765be0b36316a0e2754ae63992d3d987cf5fc32069d8b671a942b2112a20d09d",
+      "retained": {
+        "path": "native-source/765be0b36316a0e2754ae63992d3d987cf5fc32069d8b671a942b2112a20d09d-PinPrompt.cs.snapshot",
+        "bytes": 12653,
+        "sha256": "765be0b36316a0e2754ae63992d3d987cf5fc32069d8b671a942b2112a20d09d"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/SlotSelector.cs",
+      "bytes": 2185,
+      "sha256": "5862a86780e18d2e0e44c9b9fb8d0eafbab1aa524d91d8b60019bdd3fe2d7157",
+      "retained": {
+        "path": "native-source/5862a86780e18d2e0e44c9b9fb8d0eafbab1aa524d91d8b60019bdd3fe2d7157-SlotSelector.cs.snapshot",
+        "bytes": 2185,
+        "sha256": "5862a86780e18d2e0e44c9b9fb8d0eafbab1aa524d91d8b60019bdd3fe2d7157"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+      "bytes": 4645,
+      "sha256": "bc4a2f1589d7aab7de025e70937682ab429c22ddc71a650c85965085f6683c6e",
+      "retained": {
+        "path": "native-source/bc4a2f1589d7aab7de025e70937682ab429c22ddc71a650c85965085f6683c6e-Attestation.cs.snapshot",
+        "bytes": 4645,
+        "sha256": "bc4a2f1589d7aab7de025e70937682ab429c22ddc71a650c85965085f6683c6e"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "bytes": 23382,
+      "sha256": "41e5abc57e3bcf845d615bfe0d2b056a96befddc4c6816f40ad2bbfd5ea3d305",
+      "retained": {
+        "path": "native-source/41e5abc57e3bcf845d615bfe0d2b056a96befddc4c6816f40ad2bbfd5ea3d305-Certificates.cs.snapshot",
+        "bytes": 23382,
+        "sha256": "41e5abc57e3bcf845d615bfe0d2b056a96befddc4c6816f40ad2bbfd5ea3d305"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Decryption.cs",
+      "bytes": 4081,
+      "sha256": "5599ec21588d32e757d71abd672f7fdb06e9348c7484d65f53004e5d1e0b738e",
+      "retained": {
+        "path": "native-source/5599ec21588d32e757d71abd672f7fdb06e9348c7484d65f53004e5d1e0b738e-Decryption.cs.snapshot",
+        "bytes": 4081,
+        "sha256": "5599ec21588d32e757d71abd672f7fdb06e9348c7484d65f53004e5d1e0b738e"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs",
+      "bytes": 3106,
+      "sha256": "7e912c1df3bbb704f72fe4cc4f03065afca8244846c8457b0da6bbf00c96618c",
+      "retained": {
+        "path": "native-source/7e912c1df3bbb704f72fe4cc4f03065afca8244846c8457b0da6bbf00c96618c-DeviceInfo.cs.snapshot",
+        "bytes": 3106,
+        "sha256": "7e912c1df3bbb704f72fe4cc4f03065afca8244846c8457b0da6bbf00c96618c"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs",
+      "bytes": 3565,
+      "sha256": "c41428412c5a3e12a67c988889f39cbe64c612e885756b56ee6de568bf040f22",
+      "retained": {
+        "path": "native-source/c41428412c5a3e12a67c988889f39cbe64c612e885756b56ee6de568bf040f22-KeyGeneration.cs.snapshot",
+        "bytes": 3565,
+        "sha256": "c41428412c5a3e12a67c988889f39cbe64c612e885756b56ee6de568bf040f22"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "bytes": 11351,
+      "sha256": "6b56f821b86dd6bc98b58cdbe179310edd2c82932b4176f2439057c576c9918c",
+      "retained": {
+        "path": "native-source/6b56f821b86dd6bc98b58cdbe179310edd2c82932b4176f2439057c576c9918c-PinManagement.cs.snapshot",
+        "bytes": 11351,
+        "sha256": "6b56f821b86dd6bc98b58cdbe179310edd2c82932b4176f2439057c576c9918c"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Reset.cs",
+      "bytes": 2859,
+      "sha256": "a21ecfe271e0b89100c28d89f20c47143f6a768ab6b55ee05ca50ff2e73c59a9",
+      "retained": {
+        "path": "native-source/a21ecfe271e0b89100c28d89f20c47143f6a768ab6b55ee05ca50ff2e73c59a9-Reset.cs.snapshot",
+        "bytes": 2859,
+        "sha256": "a21ecfe271e0b89100c28d89f20c47143f6a768ab6b55ee05ca50ff2e73c59a9"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/AttestationResult.cs",
+      "bytes": 2086,
+      "sha256": "92cc55977521ceacacb5fb6b90433749965ed56a9df857bd680a30938030ef32",
+      "retained": {
+        "path": "native-source/92cc55977521ceacacb5fb6b90433749965ed56a9df857bd680a30938030ef32-AttestationResult.cs.snapshot",
+        "bytes": 2086,
+        "sha256": "92cc55977521ceacacb5fb6b90433749965ed56a9df857bd680a30938030ef32"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/CertificateResult.cs",
+      "bytes": 2475,
+      "sha256": "359076d803af9307dfe5d2688275ee036c38398f8ace05968012da09a376a733",
+      "retained": {
+        "path": "native-source/359076d803af9307dfe5d2688275ee036c38398f8ace05968012da09a376a733-CertificateResult.cs.snapshot",
+        "bytes": 2475,
+        "sha256": "359076d803af9307dfe5d2688275ee036c38398f8ace05968012da09a376a733"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/DecryptionResult.cs",
+      "bytes": 1962,
+      "sha256": "30ea891dcc60fb4f337cca027abbd19933bcd9f54d10775379b2ac3ece6e5c5c",
+      "retained": {
+        "path": "native-source/30ea891dcc60fb4f337cca027abbd19933bcd9f54d10775379b2ac3ece6e5c5c-DecryptionResult.cs.snapshot",
+        "bytes": 1962,
+        "sha256": "30ea891dcc60fb4f337cca027abbd19933bcd9f54d10775379b2ac3ece6e5c5c"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/DeviceInfoResult.cs",
+      "bytes": 2299,
+      "sha256": "de31128cd206152fdbe4d55fa0e599bba4808c8b0b356928f24882402f0269e0",
+      "retained": {
+        "path": "native-source/de31128cd206152fdbe4d55fa0e599bba4808c8b0b356928f24882402f0269e0-DeviceInfoResult.cs.snapshot",
+        "bytes": 2299,
+        "sha256": "de31128cd206152fdbe4d55fa0e599bba4808c8b0b356928f24882402f0269e0"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/KeyGenerationResult.cs",
+      "bytes": 1980,
+      "sha256": "40fc6deada93c639a1f2fcb5e542a87d7f8998859d422e02a68986fd9900fb3b",
+      "retained": {
+        "path": "native-source/40fc6deada93c639a1f2fcb5e542a87d7f8998859d422e02a68986fd9900fb3b-KeyGenerationResult.cs.snapshot",
+        "bytes": 1980,
+        "sha256": "40fc6deada93c639a1f2fcb5e542a87d7f8998859d422e02a68986fd9900fb3b"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/PinOperationResult.cs",
+      "bytes": 1698,
+      "sha256": "d17cad1ba29b00868ec797f592c64b5a2ddb46be788fc60b0faaff9771442535",
+      "retained": {
+        "path": "native-source/d17cad1ba29b00868ec797f592c64b5a2ddb46be788fc60b0faaff9771442535-PinOperationResult.cs.snapshot",
+        "bytes": 1698,
+        "sha256": "d17cad1ba29b00868ec797f592c64b5a2ddb46be788fc60b0faaff9771442535"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/ResetResult.cs",
+      "bytes": 1379,
+      "sha256": "198d59f315cd2d39d7e18bb3265433e046fc2936120f1ac6f2ac18dc3cef8236",
+      "retained": {
+        "path": "native-source/198d59f315cd2d39d7e18bb3265433e046fc2936120f1ac6f2ac18dc3cef8236-ResetResult.cs.snapshot",
+        "bytes": 1379,
+        "sha256": "198d59f315cd2d39d7e18bb3265433e046fc2936120f1ac6f2ac18dc3cef8236"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/SigningResult.cs",
+      "bytes": 1790,
+      "sha256": "e5d50b7eca2f076711726d90cac94e381cf132eec2ff736969e5dfe77fed2158",
+      "retained": {
+        "path": "native-source/e5d50b7eca2f076711726d90cac94e381cf132eec2ff736969e5dfe77fed2158-SigningResult.cs.snapshot",
+        "bytes": 1790,
+        "sha256": "e5d50b7eca2f076711726d90cac94e381cf132eec2ff736969e5dfe77fed2158"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/SlotInfoResult.cs",
+      "bytes": 2669,
+      "sha256": "fb0236ec4b0ee5d01ab779b7d45f82e5d878175778f5868448376f1d9f1ead27",
+      "retained": {
+        "path": "native-source/fb0236ec4b0ee5d01ab779b7d45f82e5d878175778f5868448376f1d9f1ead27-SlotInfoResult.cs.snapshot",
+        "bytes": 2669,
+        "sha256": "fb0236ec4b0ee5d01ab779b7d45f82e5d878175778f5868448376f1d9f1ead27"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/VerificationResult.cs",
+      "bytes": 2068,
+      "sha256": "3eb0bfa22623faf83aaea0a1a43620525818d901702bc96d1439f6271ec089d4",
+      "retained": {
+        "path": "native-source/3eb0bfa22623faf83aaea0a1a43620525818d901702bc96d1439f6271ec089d4-VerificationResult.cs.snapshot",
+        "bytes": 2068,
+        "sha256": "3eb0bfa22623faf83aaea0a1a43620525818d901702bc96d1439f6271ec089d4"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Signing.cs",
+      "bytes": 4712,
+      "sha256": "ab44ec7d9c4a99f8660d140f2d0fdf9ffe53e23141bf5d7dddad0bd1c81360ba",
+      "retained": {
+        "path": "native-source/ab44ec7d9c4a99f8660d140f2d0fdf9ffe53e23141bf5d7dddad0bd1c81360ba-Signing.cs.snapshot",
+        "bytes": 4712,
+        "sha256": "ab44ec7d9c4a99f8660d140f2d0fdf9ffe53e23141bf5d7dddad0bd1c81360ba"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/SlotInfo.cs",
+      "bytes": 5014,
+      "sha256": "60601004476a3178d4573445e0fc5c1d2518f4529af9e1e6ac8308891ca1709f",
+      "retained": {
+        "path": "native-source/60601004476a3178d4573445e0fc5c1d2518f4529af9e1e6ac8308891ca1709f-SlotInfo.cs.snapshot",
+        "bytes": 5014,
+        "sha256": "60601004476a3178d4573445e0fc5c1d2518f4529af9e1e6ac8308891ca1709f"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Verification.cs",
+      "bytes": 4552,
+      "sha256": "b38d88dd16be9f0a1e01b05cce3869eb1300539d53a68698510f6809761254a5",
+      "retained": {
+        "path": "native-source/b38d88dd16be9f0a1e01b05cce3869eb1300539d53a68698510f6809761254a5-Verification.cs.snapshot",
+        "bytes": 4552,
+        "sha256": "b38d88dd16be9f0a1e01b05cce3869eb1300539d53a68698510f6809761254a5"
+      }
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Program.cs",
+      "bytes": 1360,
+      "sha256": "f50960e58d32c8eb1723da61f07909ffca66fbd2b7092f91318a7bdfc3b9ffaa",
+      "retained": {
+        "path": "native-source/f50960e58d32c8eb1723da61f07909ffca66fbd2b7092f91318a7bdfc3b9ffaa-Program.cs.snapshot",
+        "bytes": 1360,
+        "sha256": "f50960e58d32c8eb1723da61f07909ffca66fbd2b7092f91318a7bdfc3b9ffaa"
+      }
+    }
+  ],
+  "f9_qualification": "Actual helper populates AttestationCertificate; JSON attestationCertificate carries F9 metadata and intermediateCertificate remains null. Certificate using scopes remain single-owner. Retrieval adds no chain-trust/key-binding claim.",
+  "preparation_tools": [
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/analyzer_policy.py",
+      "bytes": 6715,
+      "sha256": "da0e26e4daad4a704b00ac3d96450df0986183bb8317c25e03f9c15db46ba855"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/bind-source-context-v2.py",
+      "bytes": 6675,
+      "sha256": "a32e262490ce56049d9314b823556d193db030b5eded96105efac60cf17aa3ac"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/capture.py",
+      "bytes": 11511,
+      "sha256": "68560398ebab8feee7100010211a6b8863f8a4af421211477324018ca06031f4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/compiler_policy.py",
+      "bytes": 8083,
+      "sha256": "691e233a30c6c8dc4dabd5a53e1b57a16a0cbfcf27887c5d0d87640ba54c8de1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/group-v2.py",
+      "bytes": 24272,
+      "sha256": "1d9988fd46281c360fca131f9523fc57f1a2fd5c08b3bdde6ac2a2cc4bdbb97b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/inventory.py",
+      "bytes": 10073,
+      "sha256": "bb92a1221b4797071b0c74bab73e3a50e94180617edd72760272cbd8a4fd503f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/prepare-final.py",
+      "bytes": 9063,
+      "sha256": "d00bc66e758329431d6bc10ca9094650501936a4ca3ace131cdd3e5f1ce2e71c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/prepare-tools.py",
+      "bytes": 12448,
+      "sha256": "5466342884627920036034d1acb1e1e6c40a02461941dbb9577686a531ce5051"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/provenance.py",
+      "bytes": 4183,
+      "sha256": "5c62f97c4ed5c518f451be55b366e8b2c208284ffd3de9b3e35024796c84f29e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/release-final.py",
+      "bytes": 3921,
+      "sha256": "691c882e7d90d197cae676a07c8e5cdca6ba43c1e8fee51fa3eda957386090a3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/sdk-policy.py",
+      "bytes": 2944,
+      "sha256": "6ae48d93202d4827a5c03b2cc4d743d85d149fc60027a7a04c39e63ea60779c1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/verify-skeleton.py",
+      "bytes": 5248,
+      "sha256": "435ed53c3bfb63d92750e1cf539c2e8bf2d4a54d444927afe4a99b7a3fe5c44b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/verify-v2.py",
+      "bytes": 4906,
+      "sha256": "9305c42ab5ecefdf9f51b4e3129949b90329ed69ea052b1c5a26e6bf4bc2b4a6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/verify.py",
+      "bytes": 9710,
+      "sha256": "7e14ba20705695bf540308a2b04ae09212050cc5eaba3e9a3eb8e4c03c0a2b61"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/host-scope-v2.py",
+      "bytes": 4171,
+      "sha256": "559dae822e616cabf078dcefb5c923d26fabe06c3d95fcc4cff7ed3cb665c71d"
+    }
+  ],
+  "limits": "Prepared final inputs and immutable current/baseline body/source identities. Coordinator builds, actual Csc captures/analyzers and live dependency checks remain pending; hardware evidence has separate owners.",
+  "host_scope_receipt": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/host-scope-1/receipt.json",
+    "bytes": 2871,
+    "sha256": "b335c70a18962bb51fbc122f132fec226e216d9a997b2c995df8e84944876469"
+  }
+}

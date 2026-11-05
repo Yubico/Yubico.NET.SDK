@@ -1,0 +1,71 @@
+# Supplemental host preparation record
+
+## Source and instruction basis
+
+Prepared for `piv-001` after the coordinator reported the successful version-2 cleanup
+control. The worker read root/module guidance, the complete Tests.Shared instructions,
+Tests.Shared README, current PIV API signatures and metadata/crypto helpers, actual
+PivTool `Signing.cs` and `SigningResult.cs`, canonical policy/import/metadata/presence and
+AuditV2 tests, the investigator's `hardware-test-plan.md`, memory/credential guidance and
+actual toolchain discovery/test command construction. Device execution remains serialized
+under the coordinator; the active canonical batch supplies no supplemental result here.
+
+The host's local props/targets and compiler-capture shape are adapted from
+`modules/openpgp/pass-1/openpgp-001/validation/hardware-probe/`:
+
+- `Directory.Build.props` keeps the real repository import pattern and uses a unique PIV
+  obj/bin workspace.
+- `Directory.Build.targets` keeps actual compiler item/argument/policy capture, with unique
+  target names. The project keeps strict inherited analyzer/warning policy.
+- `capture-compiler.py` keeps immediate retained dependency hashes and adds the actual
+  PivTool reference/strict-policy preconditions plus sample source identities.
+- `run-probe.py` keeps serialized raw toolchain exit/log retention and independent vendor
+  cleanup. Its bounded PIV-specific flow uses immutable vendor-v2 cleanup and holds reset
+  when P07 recovery or process termination evidence is incomplete.
+
+These are narrow adaptations; no old source case, captured output or hardware result was
+relabelled as a new PIV run. The prepared host has exactly seven named source methods.
+Current statuses are `prepared`, with compilation/discovery/execution still outstanding.
+
+## Documentation and oracle checks
+
+Context7 lookups used `/dotnet/docs` for host crypto/DER certificate handling and
+`/openssl/openssl` for PureEd25519 verification. Returned references included:
+
+- <https://github.com/dotnet/docs/blob/main/docs/standard/security/cryptographic-signatures.md>
+- <https://github.com/dotnet/docs/blob/main/docs/standard/security/cross-platform-cryptography.md>
+- <https://github.com/dotnet/docs/blob/main/docs/fundamentals/syslib-diagnostics/syslib0057.md>
+- <https://github.com/openssl/openssl/blob/master/CHANGES.md>, describing Ed25519 raw input
+  behavior and the newer implied `-rawin` behavior. The probe explicitly supplies `-rawin`
+  for compatibility with the earlier OpenSSL 3 CLI already used by the canonical test.
+- <https://github.com/openssl/openssl/blob/master/providers/implementations/signature/eddsa_sig.c>,
+  corroborating raw-message verification and the absence of an external Ed25519 digest.
+
+The original <https://www.rfc-editor.org/rfc/rfc7748.txt> was read, especially §5 encoding
+and §6.1's Alice/Bob vector. P01 uses its exact Alice scalar/public value, Bob public value
+and shared secret. The fixture inputs/results are 32-byte little-endian u-coordinate/raw
+scalar encodings; the test applies no KDF. The same-key Python vendor reference provides
+an independently encoded agreement path before cleanup when the imported fixture exists.
+Its source shape was checked against the frozen installed `yubikit.piv.py` public
+`calculate_secret()` implementation and the existing serial/metadata provenance helper.
+
+The actual sample implementation currently hashes every input and passes that digest to
+raw `SignOrDecryptAsync`. P05/P06 retain strong desired original-message assertions and
+independent raw-SDK controls. RSA needs the full EMSA encoding supplied by P05's control;
+PureEd25519 needs the unchanged message supplied by P06's control. The original helper and
+its read-only result memory remain unchanged. Failure of those desired assertions remains
+PIV-IMP-005 evidence, while setup/oracle/cleanup failures retain separate dispositions.
+
+## Validation boundary
+
+`prepared-files.json` records prepared file hashes, the textual seven-method inventory,
+real project-reference targets and frozen baseline/helper identities. Static preparation
+parses Python AST, XML and JSON and checks referenced project paths. It executes no Python
+probe/wrapper, compiler, test runner, formatter or device command. Those checks establish
+source/artifact structure, not C# compilation or hardware correctness.
+
+The coordinator's next gate is a clean unique-project build with zero warnings, immediate
+actual-Csc membership/capture review, then individual case execution. Preserve any first
+compiler or capture failure and make a narrow versioned correction. Runtime DLL events,
+exact sample/source identities, before/after binary hashes and independent vendor receipts
+bind later claims to their actual execution context.

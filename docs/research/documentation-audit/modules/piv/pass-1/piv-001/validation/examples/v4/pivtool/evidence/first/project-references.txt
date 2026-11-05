@@ -1,0 +1,10 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj

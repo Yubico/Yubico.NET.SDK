@@ -1,0 +1,33 @@
+[
+  {
+    "source": "reviewed-files.json",
+    "retained": "validation/reconciliation-v1/reviewed-files.json",
+    "sha256": "f3d53c24a507c47d99705c7ce53baf8c0f29b828511fd6e9bb3e16fbd7867602"
+  },
+  {
+    "source": "coverage-final.json",
+    "retained": "validation/reconciliation-v1/coverage-final.json",
+    "sha256": "9f3adbbadb3124f3f48c8112cf53f0da2c7b632f5e73e812da588702dc00b85c"
+  },
+  {
+    "source": "sampling-final.json",
+    "retained": "validation/reconciliation-v1/sampling-final.json",
+    "sha256": "b050373fd05990613033d5be7dd6f3346f33522d967cae35f00ed2cfd8d48384"
+  },
+  {
+    "source": "validation/format-transform.json",
+    "retained": "validation/reconciliation-v1/validation--format-transform.json",
+    "sha256": "83c44161061686576e738fd55d99d5b067d3ed7d971c69f0cc7db7537b57508d"
+  },
+  {
+    "source": "validation/reconcile-acceptance.py",
+    "retained": "validation/reconciliation-v1/validation--reconcile-acceptance.py",
+    "sha256": "7ae8bc405c306705ba19b9772dcb03f2acccf53cb0099185627ae8ce895547f2"
+  },
+  {
+    "source": "src/Piv/CLAUDE.md",
+    "retained": "validation/reconciliation-v1/CLAUDE.md.snapshot",
+    "sha256": "8d486c8a309ed7fcf821463d8a505320470e4b25e345c83e5c73bbf860de8695",
+    "reconstruction": "Invert exactly two documentation-example lines; original accepted whole-file hash matched"
+  }
+]

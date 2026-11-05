@@ -124,10 +124,11 @@ public class PivCryptoTests
         var curve25519Key = (Curve25519PublicKey)publicKey;
         Assert.Equal(CryptographicDefinitions.Keys.Ed25519.KeySizeBytes, curve25519Key.PublicPoint.Length);
 
-        // .NET has no Ed25519 verifier, so use determinism (RFC 8032 §8.2) to show the message reaches
-        // the key unchanged: a message and its zero-padded form, and two long messages sharing their
-        // first 32 bytes, must produce different signatures. A client that padded or truncated the
-        // message to 32 bytes would produce identical ones.
+        // Compare short/padded and long/common-prefix message pairs, then repeat one message.
+        // These differential checks catch the selected 32-byte padding/truncation regressions and
+        // check repeatability; a deterministic hash-first implementation can also distinguish the pairs.
+        // See PivAuditHardwareReproTests.YESDK1632_Ed25519SignsUnmodifiedShortAndLongMessages
+        // in AuditV2/PivAuditHardwareReproTests.cs for independent OpenSSL message/key verification.
         byte[] paddedTo32 = new byte[32];
         dataToSign.CopyTo(paddedTo32, 0);
         var paddedSignature = await session.SignOrDecryptAsync(Slot.Signature, KeyType.Ed25519, paddedTo32);
@@ -185,10 +186,8 @@ public class PivCryptoTests
         var curve25519Key = (Curve25519PublicKey)publicKey;
         Assert.Equal(CryptographicDefinitions.Keys.Ed25519.KeySizeBytes, curve25519Key.PublicPoint.Length);
 
-        // NOTE: Software verification of X25519 shared secret would require
-        // creating a compatible peer X25519 key and comparing raw secrets.
-        // .NET System.Security.Cryptography supports ECDiffieHellman but not
-        // directly for Curve25519. Full verification is TBD.
+        // This method checks generation and public-point width only; it performs no agreement call.
+        // TODO: Add a compatible peer X25519 implementation and compare raw shared secrets.
     }
 
     // SHA-256 DigestInfo prefix for PKCS#1 v1.5 padding

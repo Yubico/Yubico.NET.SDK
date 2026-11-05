@@ -1,0 +1,303 @@
+{
+  "status": "source-only-tools-awaiting-final-release",
+  "transformations": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/inventory.py",
+        "bytes": 10073,
+        "sha256": "bb92a1221b4797071b0c74bab73e3a50e94180617edd72760272cbd8a4fd503f"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/inventory.py",
+        "bytes": 10083,
+        "sha256": "bd4f674e0dc86d9da935887a27a082ba13ec2358bc8450a72995948c07e1bd35"
+      },
+      "substitutions": [
+        {
+          "before": "HERE = Path(__file__).resolve().parent",
+          "after": "HERE = Path(__file__).resolve().parent.parent",
+          "count": 1
+        },
+        {
+          "before": "HERE / 'extraction-scope.json'",
+          "after": "HERE / 'v3/extraction-scope.json'",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/compiler_policy.py",
+        "bytes": 8083,
+        "sha256": "691e233a30c6c8dc4dabd5a53e1b57a16a0cbfcf27887c5d0d87640ba54c8de1"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/compiler_policy.py",
+        "bytes": 8093,
+        "sha256": "2e4dcf7d4f14639108bfe6432dd46565626189a729dbd126e772280b0b600384"
+      },
+      "substitutions": [
+        {
+          "before": "HERE = Path(__file__).resolve().parent",
+          "after": "HERE = Path(__file__).resolve().parent.parent",
+          "count": 1
+        },
+        {
+          "before": "HERE / 'tooling-provenance.json'",
+          "after": "HERE / 'v3/tooling-provenance.json'",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/sdk-policy.py",
+        "bytes": 2944,
+        "sha256": "6ae48d93202d4827a5c03b2cc4d743d85d149fc60027a7a04c39e63ea60779c1"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/sdk-policy.py",
+        "bytes": 2944,
+        "sha256": "6ae48d93202d4827a5c03b2cc4d743d85d149fc60027a7a04c39e63ea60779c1"
+      },
+      "substitutions": []
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/project_graph_v3.py",
+        "bytes": 13635,
+        "sha256": "ca4bcd8f38f5ed4c32c152e8c0166cfa3314e448ef7ad56e88f42cffdea3dd71"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/project_graph_v3.py",
+        "bytes": 13647,
+        "sha256": "8bfcf8f10c1a234340d43c63a4de239f1bcd91e8482093aa6213beabfde5302c"
+      },
+      "substitutions": [
+        {
+          "before": "HERE / 'project-graph-1/receipt.json'",
+          "after": "HERE / 'v3/project-graph-acceptance.json'",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/capture-v3.py",
+        "bytes": 11662,
+        "sha256": "801a4f4b34e9112c4ce3ae044e0535d1d6540ac20d158b6264407d7b6f1f11be"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/capture-v3.py",
+        "bytes": 11696,
+        "sha256": "3906a229fc02328c27ae06c43d39c79b04ac72e5f16479df87665fd6a929994f"
+      },
+      "substitutions": [
+        {
+          "before": "HERE / 'sdk-policy.py'",
+          "after": "Path(__file__).resolve().parent / 'sdk-policy.py'",
+          "count": 1
+        },
+        {
+          "before": "HERE / 'tooling-provenance.json'",
+          "after": "HERE / 'v3/tooling-provenance.json'",
+          "count": 1
+        },
+        {
+          "before": "HERE / 'project-graph-1/receipt.json'",
+          "after": "HERE / 'v3/project-graph-acceptance.json'",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/verify-v3.py",
+        "bytes": 9940,
+        "sha256": "45e5fdad8862e50b2310cb4527118d239c7352bfd7717251f4296d6f5f1e88cb"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-v3.py",
+        "bytes": 9944,
+        "sha256": "82df46dca5e2762556469c04ead9ed69c10ab0c2ba9f738581e4f253cba5c83e"
+      },
+      "substitutions": [
+        {
+          "before": "HERE / 'project-graph-1/receipt.json'",
+          "after": "HERE / 'v3/project-graph-acceptance.json'",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/prepare-final.py",
+        "bytes": 9063,
+        "sha256": "d00bc66e758329431d6bc10ca9094650501936a4ca3ace131cdd3e5f1ce2e71c"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare-final.py",
+        "bytes": 9171,
+        "sha256": "93b3366ce1cb7790e9fed8bda6fa7f8121977c22538877537253a2a80bbd4a64"
+      },
+      "substitutions": [
+        {
+          "before": "code = '\\n'.join(imports + context_code[context]) + '\\n'",
+          "after": "code = '\\n'.join(imports) + f'\\nnamespace AuditPiv001.Examples.V3.{context.title()};\\n\\n' + '\\n'.join(context_code[context]) + '\\n'",
+          "count": 1
+        },
+        {
+          "before": "sorted(HERE.glob('*.py'))",
+          "after": "sorted(Path(__file__).resolve().parent.glob('*.py'))",
+          "count": 1
+        },
+        {
+          "before": "HERE / 'tooling-provenance.json'",
+          "after": "HERE / 'v3/tooling-provenance.json'",
+          "count": 1
+        },
+        {
+          "before": "HERE / 'extraction-scope.json'",
+          "after": "HERE / 'v3/extraction-scope.json'",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/bind-source-context-v2.py",
+        "bytes": 6675,
+        "sha256": "a32e262490ce56049d9314b823556d193db030b5eded96105efac60cf17aa3ac"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/bind-source-context-v3.py",
+        "bytes": 6705,
+        "sha256": "190c1d57d1638286d338f46cb0277b79656db239188f0e26558887d8ed4c87c7"
+      },
+      "substitutions": [
+        {
+          "before": "folder = HERE / 'v2'",
+          "after": "folder = HERE / 'v3'",
+          "count": 1
+        },
+        {
+          "before": "revision='v2'",
+          "after": "revision='v3'",
+          "count": 1
+        },
+        {
+          "before": "HERE / 'extraction-scope.json'",
+          "after": "HERE / 'v3/extraction-scope.json'",
+          "count": 1
+        },
+        {
+          "before": "sorted(HERE.glob('*.py'))",
+          "after": "sorted(Path(__file__).resolve().parent.glob('*.py'))",
+          "count": 1
+        },
+        {
+          "before": "final v2 verification",
+          "after": "final v3 verification",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/verify-v2.py",
+        "bytes": 4906,
+        "sha256": "9305c42ab5ecefdf9f51b4e3129949b90329ed69ea052b1c5a26e6bf4bc2b4a6"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-source-context-v3.py",
+        "bytes": 4965,
+        "sha256": "d07e11c9348cac80c31aa3a23b7806749c981c6a7328e78cbe011a74ae1ee79a"
+      },
+      "substitutions": [
+        {
+          "before": "folder = HERE / 'v2'",
+          "after": "folder = HERE / 'v3'",
+          "count": 1
+        },
+        {
+          "before": "HERE / 'extraction-scope.json'",
+          "after": "HERE / 'v3/extraction-scope.json'",
+          "count": 1
+        },
+        {
+          "before": "HERE.glob('*.py')",
+          "after": "Path(__file__).resolve().parent.glob('*.py')",
+          "count": 1
+        },
+        {
+          "before": "print('PASS: 61 baseline originals",
+          "after": "print(f'PASS: 61 baseline originals",
+          "count": 1
+        },
+        {
+          "before": "730 explicit dispositions",
+          "after": "{len(manifest[\"dispositions\"])} explicit dispositions",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/bind-source-context-v3.py",
+      "bytes": 6705,
+      "sha256": "190c1d57d1638286d338f46cb0277b79656db239188f0e26558887d8ed4c87c7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/capture-v3.py",
+      "bytes": 11696,
+      "sha256": "3906a229fc02328c27ae06c43d39c79b04ac72e5f16479df87665fd6a929994f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/compiler_policy.py",
+      "bytes": 8093,
+      "sha256": "2e4dcf7d4f14639108bfe6432dd46565626189a729dbd126e772280b0b600384"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/inventory.py",
+      "bytes": 10083,
+      "sha256": "bd4f674e0dc86d9da935887a27a082ba13ec2358bc8450a72995948c07e1bd35"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare-final.py",
+      "bytes": 9171,
+      "sha256": "93b3366ce1cb7790e9fed8bda6fa7f8121977c22538877537253a2a80bbd4a64"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare.py",
+      "bytes": 17674,
+      "sha256": "4cf7dc27cb5f223de5d60bffacb23501fe1d22929c5e7717cc46df9e28671425"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/project_graph_v3.py",
+      "bytes": 13647,
+      "sha256": "8bfcf8f10c1a234340d43c63a4de239f1bcd91e8482093aa6213beabfde5302c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/sdk-policy.py",
+      "bytes": 2944,
+      "sha256": "6ae48d93202d4827a5c03b2cc4d743d85d149fc60027a7a04c39e63ea60779c1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-preparation.py",
+      "bytes": 7172,
+      "sha256": "321552d7157a1c2568cf3ad88170177db93816eade49254346b0d2e45d8dc85b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-source-context-v3.py",
+      "bytes": 4965,
+      "sha256": "d07e11c9348cac80c31aa3a23b7806749c981c6a7328e78cbe011a74ae1ee79a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-v3.py",
+      "bytes": 9944,
+      "sha256": "82df46dca5e2762556469c04ead9ed69c10ab0c2ba9f738581e4f253cba5c83e"
+    }
+  ],
+  "release_requirement": "Latest independently accepted review-accepted-v3.json plus matching coordinator reviewed-files/format-transform identities; README inline selector changes and the annotation fence are reconciled separately."
+}

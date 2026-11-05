@@ -1,0 +1,7 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/prepare.py
+Retained 730 complete current fence/inline/XML/mapping/task bodies in docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4/inventory.json; assign every identity an explicit disposition before extraction.
+Prepared 45 complete task groups/730 explicit body dispositions and actual 36-source PivTool context; coordinator compilation/capture follows.
+Bound 61 original body hashes, 60 current bodies (42 module + 18 shared), all 111 module C# identities, ten document identities and complete original 36-source actual PivTool/project text; corrected F9 result/JSON qualification retained.
+Prepared fresh v4: 59 accepted product paths / 50 formatted C# paths; 730 current dispositions; unchanged complete bodies/wrappers and fresh 111-source/ten-document identities. All three builds/captures remain coordinator-owned.
+
+EXIT=0

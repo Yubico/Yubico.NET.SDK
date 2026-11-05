@@ -1,0 +1,17 @@
+$ dotnet build docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/annotations/src/Yubico.YubiKit.AuditPiv001.Examples.v2.annotations.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/annotations/src/Yubico.YubiKit.AuditPiv001.Examples.v2.annotations.csproj (in 579 ms).
+  4 of 5 projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Piv -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/annotations/src/Examples.cs(17,5): error xUnit2002: Do not use Assert.NotNull() on value type 'PinMetadata'. Remove this assert. (https://xunit.net/xunit.analyzers/rules/xUnit2002) [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/annotations/src/Yubico.YubiKit.AuditPiv001.Examples.v2.annotations.csproj]
+
+Build FAILED.
+
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/annotations/src/Examples.cs(17,5): error xUnit2002: Do not use Assert.NotNull() on value type 'PinMetadata'. Remove this assert. (https://xunit.net/xunit.analyzers/rules/xUnit2002) [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/annotations/src/Yubico.YubiKit.AuditPiv001.Examples.v2.annotations.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:02.32

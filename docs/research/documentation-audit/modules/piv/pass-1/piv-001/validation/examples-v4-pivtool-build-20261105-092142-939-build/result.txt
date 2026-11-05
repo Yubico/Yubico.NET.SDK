@@ -1,0 +1,8 @@
+RESULT: PASSED  (dotnet toolchain.cs -- build --project AuditPiv001.Examples.Shipping.PivTool --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      3.0s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261105-092142-939-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

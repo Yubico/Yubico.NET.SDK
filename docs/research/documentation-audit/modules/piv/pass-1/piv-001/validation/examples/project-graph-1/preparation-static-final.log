@@ -1,0 +1,5 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/project-graph-1/verify.py
+PASS: original v2 manifest/tool/source/failure identities preserved (175 artifacts); exact hardware graph-source adaptation and two versioned capture/verify transformations replayed; Python syntax and direct/recursive metadata contexts reconcile: consumer 5/12, annotations 2/4, pivtool 5/10.
+PENDING: coordinator consumer second capture on its intact compiler workspace, annotation/shipping builds and first captures, corrected final --live verification. This static preparation performs no build, test, capture or device operation.
+
+EXIT=0

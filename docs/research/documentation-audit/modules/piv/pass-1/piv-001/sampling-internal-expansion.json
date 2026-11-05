@@ -1,0 +1,66 @@
+{
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "trigger": "Final candidate closure identified incorrect RSA re-wrap probability rationale",
+  "samples": [
+    {
+      "id": "src/Piv/src/DataObjects/TypedDataObjectProtocol.cs:24-135",
+      "path": "src/Piv/src/DataObjects/TypedDataObjectProtocol.cs",
+      "start": 24,
+      "end": 135,
+      "name": "xml:/// <summary>",
+      "category": "internal-test",
+      "sha256": "c0eb7b8716f60f3a608594f1376109d95bbd43af8b344ff9458f3c1b8f586b8e",
+      "read_status": "full-semantic-read",
+      "disposition": "clean-nominee",
+      "candidate_ids": [],
+      "independent_review": "pending",
+      "sample": "semantic-pass-expanded-internal-comment",
+      "sampling_eligible": true,
+      "coordinator": "Astra",
+      "sampled_file_sha256": "dc6867240ea2f8ef50d5a4f98c0ae169efb4c6ba23ee7b49ce11ee02803215fd",
+      "body_text": "/// <summary>\n/// Reads and writes typed PIV data objects (CHUID, CCC, ADMIN DATA, Key History) on top of the\n/// raw <see cref=\"DataObjectProtocol\"/> GET/PUT DATA helpers.\n/// </summary>\ninternal static class TypedDataObjectProtocol\n{\n    private static ILogger Logger => YubiKitLogging.CreateLogger(\"Yubico.YubiKit.Piv.DataObjects.TypedDataObjectProtocol\");\n\n    internal static async Task<CardholderUniqueId> GetCardholderUniqueIdAsync(\n        IBackend backend,\n        CancellationToken cancellationToken = default)\n    {\n        Logger.LogDebug(\"PIV: Getting CHUID\");\n        var raw = await DataObjectProtocol.GetObjectAsync(backend, DataObject.Chuid, cancellationToken).ConfigureAwait(false);\n\n        if (!CardholderUniqueId.TryDecode(raw, out var value))\n        {\n            throw new ApduException(\"CHUID object is not encoded as expected.\");\n        }\n\n        return value;\n    }\n\n    internal static Task SetCardholderUniqueIdAsync(\n        IBackend backend,\n        CardholderUniqueId cardholderUniqueId,\n        CancellationToken cancellationToken = default)\n    {\n        Logger.LogDebug(\"PIV: Setting CHUID\");\n        var encoded = cardholderUniqueId.Encode();\n        return DataObjectProtocol.PutObjectAsync(\n            backend, DataObject.Chuid, encoded.IsEmpty ? null : encoded, cancellationToken);\n    }\n\n    internal static async Task<CardCapabilityContainer> GetCardCapabilityContainerAsync(\n        IBackend backend,\n        CancellationToken cancellationToken = default)\n    {\n        Logger.LogDebug(\"PIV: Getting CCC\");\n        var raw = await DataObjectProtocol.GetObjectAsync(backend, DataObject.Capability, cancellationToken).ConfigureAwait(false);\n\n        if (!CardCapabilityContainer.TryDecode(raw, out var value))\n        {\n            throw new ApduException(\"CCC object is not encoded as expected.\");\n        }\n\n        return value;\n    }\n\n    internal static Task SetCardCapabilityContainerAsync(\n        IBackend backend,\n        CardCapabilityContainer cardCapabilityContainer,\n        CancellationToken cancellationToken = default)\n    {\n        Logger.LogDebug(\"PIV: Setting CCC\");\n        var encoded = cardCapabilityContainer.Encode();\n        return DataObjectProtocol.PutObjectAsync(\n            backend, DataObject.Capability, encoded.IsEmpty ? null : encoded, cancellationToken);\n    }\n\n    internal static async Task<AdminData> GetAdminDataAsync(\n        IBackend backend,\n        CancellationToken cancellationToken = default)\n    {\n        Logger.LogDebug(\"PIV: Getting ADMIN DATA\");\n        var raw = await DataObjectProtocol.GetObjectAsync(backend, DataObject.AdminData, cancellationToken).ConfigureAwait(false);\n\n        if (!AdminData.TryDecode(raw, out var value))\n        {\n            throw new ApduException(\"ADMIN DATA object is not encoded as expected.\");\n        }\n\n        return value;\n    }\n\n    internal static Task SetAdminDataAsync(\n        IBackend backend,\n        AdminData adminData,\n        CancellationToken cancellationToken = default)\n    {\n        Logger.LogDebug(\"PIV: Setting ADMIN DATA\");\n        var encoded = adminData.Encode();\n        return DataObjectProtocol.PutObjectAsync(\n            backend, DataObject.AdminData, encoded.IsEmpty ? null : encoded, cancellationToken);\n    }\n\n    internal static async Task<KeyHistory> GetKeyHistoryAsync(\n        IBackend backend,\n        CancellationToken cancellationToken = default)\n    {\n        Logger.LogDebug(\"PIV: Getting Key History\");\n        var raw = await DataObjectProtocol.GetObjectAsync(backend, DataObject.KeyHistory, cancellationToken).ConfigureAwait(false);\n\n        if (!KeyHistory.TryDecode(raw, out var value))\n        {\n            throw new ApduException(\"Key History object is not encoded as expected.\");\n        }\n\n        return value;\n    }\n\n    internal static Task SetKeyHistoryAsync(\n        IBackend backend,\n        KeyHistory keyHistory,\n        CancellationToken cancellationToken = default)\n    {\n        Logger.LogDebug(\"PIV: Setting Key History\");\n        var encoded = keyHistory.Encode();\n        return DataObjectProtocol.PutObjectAsync(\n            backend, DataObject.KeyHistory, encoded.IsEmpty ? null : encoded, cancellationToken);\n    }\n}"
+    },
+    {
+      "id": "src/Piv/src/KeyReference.cs:17-24",
+      "path": "src/Piv/src/KeyReference.cs",
+      "start": 17,
+      "end": 24,
+      "name": "xml:/// <summary>Special applet references, distinct from public asymmetric-key slots.</summary>",
+      "category": "internal-test",
+      "sha256": "124c353466b38e2b5b5d83b749103e02c57424544c293f13b38e6a0251acd73a",
+      "read_status": "full-semantic-read",
+      "disposition": "clean-nominee",
+      "candidate_ids": [],
+      "independent_review": "pending",
+      "sample": "semantic-pass-expanded-internal-comment",
+      "sampling_eligible": true,
+      "coordinator": "Astra",
+      "sampled_file_sha256": "eaf461d7c4e240e4eb46816287fee6c7fa4fd445e8694189966dc44bb832b198",
+      "body_text": "/// <summary>Special applet references, distinct from public asymmetric-key slots.</summary>\ninternal static class KeyReference\n{\n    internal const byte Pin = 0x80;\n    internal const byte Puk = 0x81;\n    internal const byte Management = 0x9B;\n    internal const byte Bio = 0x96;\n}"
+    },
+    {
+      "id": "src/Piv/src/KeyTypeEncoding.cs:20-62",
+      "path": "src/Piv/src/KeyTypeEncoding.cs",
+      "start": 20,
+      "end": 62,
+      "name": "xml:/// <summary>Explicit PIV wire identifiers; Core KeyType values are not protocol bytes.</summary>",
+      "category": "internal-test",
+      "sha256": "4b3b2ea1bf4d50cc4d02ecb8e8625e98ebf0ffb43c3523b1c117fcc4fb274b7a",
+      "read_status": "full-semantic-read",
+      "disposition": "clean-nominee",
+      "candidate_ids": [],
+      "independent_review": "pending",
+      "sample": "semantic-pass-expanded-internal-comment",
+      "sampling_eligible": true,
+      "coordinator": "Astra",
+      "sampled_file_sha256": "3c8fcc44fa193a48bd93285a2703ab2d308d23c92fba0743e4e137423e9aa5a2",
+      "body_text": "/// <summary>Explicit PIV wire identifiers; Core KeyType values are not protocol bytes.</summary>\ninternal static class KeyTypeEncoding\n{\n    // The single protocol table defines PIV identifiers, not numeric Core enum values.\n    private static readonly FrozenDictionary<KeyType, byte> Identifiers = new Dictionary<KeyType, byte>\n    {\n        [KeyType.TripleDes] = 0x03,\n        [KeyType.Aes128] = 0x08,\n        [KeyType.Aes192] = 0x0A,\n        [KeyType.Aes256] = 0x0C,\n        [KeyType.Rsa1024] = 0x06,\n        [KeyType.Rsa2048] = 0x07,\n        [KeyType.Rsa3072] = 0x05,\n        [KeyType.Rsa4096] = 0x16,\n        [KeyType.P256] = 0x11,\n        [KeyType.P384] = 0x14,\n        [KeyType.Ed25519] = 0xE0,\n        [KeyType.X25519] = 0xE1\n    }.ToFrozenDictionary();\n\n    private static readonly FrozenDictionary<byte, KeyType> Types =\n        Identifiers.ToFrozenDictionary(pair => pair.Value, pair => pair.Key);\n\n    internal static byte Encode(KeyType keyType) => Identifiers.TryGetValue(keyType, out byte id)\n        ? id\n        : throw new NotSupportedException($\"Key type {keyType} is not supported by PIV.\");\n\n    internal static KeyType? Decode(byte algorithmId) => Types.TryGetValue(algorithmId, out var keyType) ? keyType : null;\n\n    internal static byte EncodeAsymmetric(KeyType keyType)\n    {\n        if (!keyType.IsAsymmetric())\n            throw new NotSupportedException($\"Key type {keyType} is not an asymmetric PIV key type.\");\n        return Encode(keyType);\n    }\n\n    internal static byte EncodeManagement(KeyType keyType)\n    {\n        if (!keyType.IsSymmetric())\n            throw new NotSupportedException($\"Key type {keyType} is not a PIV management key type.\");\n        return Encode(keyType);\n    }\n}"
+    }
+  ],
+  "context_reads": [
+    "src/Piv/src/Backends/IBackend.cs",
+    "src/Piv/src/Backends/SmartCardBackend.cs"
+  ],
+  "scope": "Three additional nonempty internal explanatory units and complete source context; two comment-free backend contexts were read but not counted",
+  "result": "PASS; reference/algorithm distinctions and typed-object delegation match source; no new material miss"
+}

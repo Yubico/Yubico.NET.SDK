@@ -1,0 +1,13 @@
+await using ISmartCardConnection connection =
+    await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+
+await using (RawSmartCardSession raw =
+    await RawSmartCardSession.CreateAsync(connection, cancellationToken))
+{
+    raw.Configure(firmwareVersion);
+    await raw.SelectAsync(applicationId, cancellationToken);
+    await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
+}
+
+// RawSmartCardSession borrowed the connection, so it remains available for the next session.
+await using PivSession piv = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);

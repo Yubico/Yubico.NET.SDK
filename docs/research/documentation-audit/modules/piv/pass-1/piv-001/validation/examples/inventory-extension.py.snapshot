@@ -1,0 +1,5 @@
+
+
+def identities(inventory):
+    """Bind every complete current body, source/document identity and task unit."""
+    return inventory

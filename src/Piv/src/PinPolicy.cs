@@ -19,21 +19,21 @@ namespace Yubico.YubiKit.Piv;
 /// </summary>
 public enum PinPolicy : byte
 {
-    /// <summary>Use YubiKey default PIN policy.</summary>
+    /// <summary>Use the slot's device default: normally Always for Signature, Never for Card Authentication and Once otherwise.</summary>
     Default = 0x00,
 
     /// <summary>PIN verification is never required.</summary>
     Never = 0x01,
 
-    /// <summary>PIN verification required once per session.</summary>
+    /// <summary>The card reuses successful PIN verification for subsequent private-key operations while its verification state remains valid.</summary>
     Once = 0x02,
 
     /// <summary>PIN verification required for every operation.</summary>
     Always = 0x03,
 
-    /// <summary>PIN verification required once per session, with biometric match.</summary>
+    /// <summary>The card reuses successful fingerprint verification while its verification state remains valid; requires a capable, configured Bio device.</summary>
     MatchOnce = 0x04,
 
-    /// <summary>PIN verification required for every operation, with biometric match.</summary>
+    /// <summary>Fingerprint verification is required for every private-key operation; requires a capable, configured Bio device.</summary>
     MatchAlways = 0x05
 }

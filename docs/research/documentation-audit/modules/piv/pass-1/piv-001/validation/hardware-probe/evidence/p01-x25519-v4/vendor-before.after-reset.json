@@ -1,0 +1,1191 @@
+{
+  "schema": 1,
+  "mode": "final",
+  "requested_serial": 103,
+  "utc": "2026-11-05T07:13:03.239525+00:00",
+  "apdu": [
+    {
+      "phase": "management-identity",
+      "header": "00a40400",
+      "sw": "0x9000",
+      "response_length": 30
+    },
+    {
+      "phase": "management-identity",
+      "header": "001d0000",
+      "sw": "0x9000",
+      "response_length": 60
+    },
+    {
+      "phase": "management-identity",
+      "header": "001d0100",
+      "sw": "0x9000",
+      "response_length": 58
+    },
+    {
+      "phase": "management-identity",
+      "header": "001d0000",
+      "sw": "0x9000",
+      "response_length": 60
+    },
+    {
+      "phase": "management-identity",
+      "header": "001d0100",
+      "sw": "0x9000",
+      "response_length": 58
+    },
+    {
+      "phase": "piv-initialization",
+      "header": "00a40400",
+      "sw": "0x9000",
+      "response_length": 19
+    },
+    {
+      "phase": "piv-initialization",
+      "header": "00fd0000",
+      "sw": "0x9000",
+      "response_length": 3,
+      "public_response_hex": "000001"
+    },
+    {
+      "phase": "piv-public-state",
+      "header": "00fd0000",
+      "sw": "0x9000",
+      "response_length": 3,
+      "public_response_hex": "000001"
+    },
+    {
+      "phase": "piv-public-state",
+      "header": "00f80000",
+      "sw": "0x9000",
+      "response_length": 4,
+      "public_response_hex": "00000067"
+    },
+    {
+      "phase": "piv-public-state",
+      "header": "00f70080",
+      "sw": "0x9000",
+      "response_length": 10,
+      "public_response_hex": "0101ff05010106020303"
+    },
+    {
+      "phase": "piv-public-state",
+      "header": "00f70081",
+      "sw": "0x9000",
+      "response_length": 10,
+      "public_response_hex": "0101ff05010106020303"
+    },
+    {
+      "phase": "piv-public-state",
+      "header": "00f7009b",
+      "sw": "0x9000",
+      "response_length": 10,
+      "public_response_hex": "01010a02020001050101"
+    },
+    {
+      "phase": "piv-public-state",
+      "header": "00f70096",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x9A",
+      "header": "00f7009a",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x9A",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x9C",
+      "header": "00f7009c",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x9C",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x9D",
+      "header": "00f7009d",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x9D",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x9E",
+      "header": "00f7009e",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x9E",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x82",
+      "header": "00f70082",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x82",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x83",
+      "header": "00f70083",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x83",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x84",
+      "header": "00f70084",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x84",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x85",
+      "header": "00f70085",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x85",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x86",
+      "header": "00f70086",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x86",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x87",
+      "header": "00f70087",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x87",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x88",
+      "header": "00f70088",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x88",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x89",
+      "header": "00f70089",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x89",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x8A",
+      "header": "00f7008a",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x8A",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x8B",
+      "header": "00f7008b",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x8B",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x8C",
+      "header": "00f7008c",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x8C",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x8D",
+      "header": "00f7008d",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x8D",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x8E",
+      "header": "00f7008e",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x8E",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x8F",
+      "header": "00f7008f",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x8F",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x90",
+      "header": "00f70090",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x90",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x91",
+      "header": "00f70091",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x91",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x92",
+      "header": "00f70092",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x92",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x93",
+      "header": "00f70093",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x93",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x94",
+      "header": "00f70094",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x94",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0x95",
+      "header": "00f70095",
+      "sw": "0x6A88",
+      "response_length": 0,
+      "public_response_hex": ""
+    },
+    {
+      "phase": "piv-slot-0x95",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-slot-0xF9",
+      "header": "00f700f9",
+      "sw": "0x6117",
+      "response_length": 256,
+      "public_response_hex": "010107020202010301020482010981820100c13ac4a4cff727cde36f2dbec56d4a2ba26ba23261b995e11b292b8c18c443d712aecd60f0ad4e531e493c3b180ac05fa21cbd4f95287227ea9311adc35ed4c4991e22d705b23ad659b09aea5f33b34331009cbe13f324f4e330a4accbc9edf4c6972e014507db8d080c3009173e2de49b9b82fd4010840182960385ac17b6fc8f9411c3b0718f94008148764b68becd29a85572a0edb15a8f89e2c677140f24455e851c959160fd887c82ff05583b07d5299f9e3962bf1b7d49760feae633ff64dde0535a2069b527ce02a83dadf7958e580fe3a0fad49f8b5dfc997be6c5b83bd44af4af83426d7bbd48a9ce6a"
+    },
+    {
+      "phase": "piv-slot-0xF9",
+      "header": "00c00000",
+      "sw": "0x9000",
+      "response_length": 23
+    },
+    {
+      "phase": "piv-slot-0xF9",
+      "header": "00cb3fff",
+      "sw": "0x6100",
+      "response_length": 256
+    },
+    {
+      "phase": "piv-slot-0xF9",
+      "header": "00c00000",
+      "sw": "0x6100",
+      "response_length": 256
+    },
+    {
+      "phase": "piv-slot-0xF9",
+      "header": "00c00000",
+      "sw": "0x6126",
+      "response_length": 256
+    },
+    {
+      "phase": "piv-slot-0xF9",
+      "header": "00c00000",
+      "sw": "0x9000",
+      "response_length": 38
+    },
+    {
+      "phase": "piv-public-objects",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-public-objects",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-public-objects",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    },
+    {
+      "phase": "piv-public-objects",
+      "header": "00cb3fff",
+      "sw": "0x6A82",
+      "response_length": 0
+    }
+  ],
+  "failures": [],
+  "metadata_fallbacks": [
+    {
+      "reference": "0x80",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x81",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x9B",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x9A",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x9C",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x9D",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x9E",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x82",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x83",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x84",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x85",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x86",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x87",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x88",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x89",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x8A",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x8B",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x8C",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x8D",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x8E",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x8F",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x90",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x91",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x92",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x93",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x94",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0x95",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    },
+    {
+      "reference": "0xF9",
+      "applet_version": "0.0.1",
+      "device_version": "5.8.0",
+      "source": "yubikit.piv.py:1069-1109,1466-1474",
+      "operation": "public protocol.send_apdu(0,0xF7,0,reference)",
+      "reason": "development sentinel fails installed public API version gate"
+    }
+  ],
+  "provenance": {
+    "python": "3.14.8 (main, Oct  2 2026, 10:23:31) [GCC 16.2.1 20260810]",
+    "executable": "/usr/bin/python3",
+    "distribution_version": "5.9.2",
+    "manifest_sha256": "ebd4aa11daec37265b8c2b027d31bdfdd871d850b7b7b637a4a5ffb07fa96f5d",
+    "files": {
+      "ykman.device": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/device.py",
+        "sha256": "398338584cce6a3980387fe1b7b0e8b1ced7bc1330252b363ff40be0689d4c2e"
+      },
+      "ykman.piv": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/piv.py",
+        "sha256": "b24c77190286b801ac77b8142f43f78b9aeefdd4599c23b2a7aceb62b378d224"
+      },
+      "ykman._cli.piv": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/_cli/piv.py",
+        "sha256": "c3e74c46e0952c9471856d6d08f70a6f783f4ae533207447e7e544616cccea5e"
+      },
+      "yubikit.piv": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/piv.py",
+        "sha256": "f1055e88dca0c8b0ff107a3f1724cd9e03447a95565ecbfde7517f8114ba47fd"
+      },
+      "yubikit.management": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/management.py",
+        "sha256": "7cc29f5803f36c945ec613849c65ee9ea83f7d4e260880ebab7096a4dcbe3192"
+      },
+      "yubikit.support": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/support.py",
+        "sha256": "c1a1722619fc7f3e6649cad66c638d6eaec5887804e86c9efdee01e57c24d8f5"
+      },
+      "yubikit.core": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/core/__init__.py",
+        "sha256": "524305273499d3a0fc37ff58c207a180cf3d280490bb48c4596507ed8a56061c"
+      },
+      "yubikit.core.smartcard": {
+        "path": "/usr/lib/python3.14/site-packages/yubikit/core/smartcard/__init__.py",
+        "sha256": "595be784aa2ede30488263cbc63686e94365a68d598b96fb350c71c1b5d694bd"
+      },
+      "ykman.pcsc": {
+        "path": "/usr/lib/python3.14/site-packages/ykman/pcsc/__init__.py",
+        "sha256": "7df388a53eb3a1784f498c3e854a3cc272bef59233b3e0feaaeb72de6ad1199c"
+      }
+    },
+    "reviewed_api_shape": {
+      "ykman.pcsc.list_devices": "(name_filter=None)",
+      "ScardSmartCardConnection": "(connection)",
+      "ScardSmartCardConnection.send_and_receive": "(self, apdu)",
+      "PivSession.__init__": "(self, connection: 'SmartCardConnection', scp_key_params: 'ScpKeyParams | None' = None)",
+      "PivSession.get_serial": "(self) -> 'int'",
+      "PivSession.get_pin_metadata": "(self) -> 'PinMetadata'",
+      "PivSession.get_puk_metadata": "(self) -> 'PinMetadata'",
+      "PivSession.get_management_key_metadata": "(self) -> 'ManagementKeyMetadata'",
+      "PivSession.get_slot_metadata": "(self, slot: 'SLOT') -> 'SlotMetadata'",
+      "PivSession.get_bio_metadata": "(self) -> 'BioMetadata'",
+      "PivSession.get_object": "(self, object_id: 'int') -> 'bytes'",
+      "PivSession.get_certificate": "(self, slot: 'SLOT') -> 'x509.Certificate'",
+      "PivSession.reset": "(self) -> 'None'",
+      "PivSession.verify_pin": "(self, pin: 'str') -> 'None'",
+      "PivSession.authenticate": "(self, *args, **kwargs) -> 'None'",
+      "PivSession.change_puk": "(self, old_puk: 'str', new_puk: 'str') -> 'None'",
+      "ManagementSession.__init__": "(self, connection: 'OtpConnection | SmartCardConnection | FidoConnection', scp_key_params: 'ScpKeyParams | None' = None)",
+      "ManagementSession.read_device_info": "(self) -> 'DeviceInfo'",
+      "PinMetadata": "(default_value: 'bool', total_attempts: 'int', attempts_remaining: 'int') -> None",
+      "SlotMetadata": "(key_type: 'KEY_TYPE', pin_policy: 'PIN_POLICY', touch_policy: 'TOUCH_POLICY', generated: 'bool', public_key_encoded: 'bytes') -> None",
+      "ManagementKeyMetadata": "(key_type: 'MANAGEMENT_KEY_TYPE', default_value: 'bool', touch_policy: 'TOUCH_POLICY') -> None",
+      "list_all_devices": "(connection_types: Iterable[type[yubikit.core.Connection] | type[fido2.ctap.CtapDevice]] = dict_keys([<class 'yubikit.core.smartcard.SmartCardConnection'>, <class 'yubikit.core.otp.OtpConnection'>, <class 'fido2.ctap.CtapDevice'>])) -> list[tuple[ykman.base.YkmanDevice, yubikit.management.DeviceInfo]]"
+    },
+    "helper_sha256": "41aa7200cd912a5f7a1438ad693fff83ad36b32873540b8a70d1b578f976600a"
+  },
+  "selected_reader": "Yubico YubiKey OTP+FIDO+CCID 00 00",
+  "device": {
+    "serial": 103,
+    "firmware": "5.8.0",
+    "version_name": "5.8.0.beta.0",
+    "management_applet_version": "5.8.0",
+    "version_qualifier": {
+      "version": "5.8.0",
+      "type": "BETA",
+      "iteration": 0
+    },
+    "provenance": "fresh ManagementSession.read_device_info on selected CCID connection",
+    "transport": "USB",
+    "form_factor": "USB_A_KEYCHAIN",
+    "fips": false,
+    "reset_blocked": 0
+  },
+  "piv": {
+    "public_api_version": "0.0.1",
+    "raw_applet_version_hex": "000001",
+    "version_source": "PIV GET VERSION (FD), independent of Management DeviceInfo",
+    "serial": {
+      "state": "present",
+      "value": 103
+    }
+  },
+  "serial_fallback": "source-pinned public GET SERIAL F8; development sentinel",
+  "pin": {
+    "state": "present",
+    "value": {
+      "default_value": true,
+      "total_attempts": 3,
+      "attempts_remaining": 3
+    }
+  },
+  "puk": {
+    "state": "present",
+    "value": {
+      "default_value": true,
+      "total_attempts": 3,
+      "attempts_remaining": 3
+    }
+  },
+  "management_key": {
+    "state": "present",
+    "value": {
+      "key_type": 10,
+      "default_value": true,
+      "touch_policy": 1
+    }
+  },
+  "bio": {
+    "state": "unsupported",
+    "error_type": "NotSupportedError"
+  },
+  "slots": {
+    "0x9A": {
+      "name": "AUTHENTICATION",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x9C": {
+      "name": "SIGNATURE",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x9D": {
+      "name": "KEY_MANAGEMENT",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x9E": {
+      "name": "CARD_AUTH",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x82": {
+      "name": "RETIRED1",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x83": {
+      "name": "RETIRED2",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x84": {
+      "name": "RETIRED3",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x85": {
+      "name": "RETIRED4",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x86": {
+      "name": "RETIRED5",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x87": {
+      "name": "RETIRED6",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x88": {
+      "name": "RETIRED7",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x89": {
+      "name": "RETIRED8",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x8A": {
+      "name": "RETIRED9",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x8B": {
+      "name": "RETIRED10",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x8C": {
+      "name": "RETIRED11",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x8D": {
+      "name": "RETIRED12",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x8E": {
+      "name": "RETIRED13",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x8F": {
+      "name": "RETIRED14",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x90": {
+      "name": "RETIRED15",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x91": {
+      "name": "RETIRED16",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x92": {
+      "name": "RETIRED17",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x93": {
+      "name": "RETIRED18",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x94": {
+      "name": "RETIRED19",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0x95": {
+      "name": "RETIRED20",
+      "metadata": {
+        "state": "absent",
+        "sw": "0x6A88",
+        "error_type": "ApduError"
+      },
+      "certificate": {
+        "state": "absent",
+        "sw": "0x6A82",
+        "error_type": "ApduError"
+      }
+    },
+    "0xF9": {
+      "name": "ATTESTATION",
+      "metadata": {
+        "state": "present",
+        "value": {
+          "algorithm_id": 7,
+          "algorithm": "RSA2048",
+          "pin_policy_id": 2,
+          "pin_policy": "ONCE",
+          "touch_policy_id": 1,
+          "touch_policy": "NEVER",
+          "origin": "imported-or-other",
+          "public_key_encoded_sha256": "ecfa95a10dcae396dac67186c6252fec446f56521eaaf6d69284de886b9ffe89",
+          "spki_sha256": "4937e8476bc5ce737220992930cde1a74fe7c031d04032338c3da520e0b94ad4",
+          "spki_length": 294
+        }
+      },
+      "certificate": {
+        "state": "present",
+        "value": {
+          "der_sha256": "fb2e0abe368a14f434bdf76d398bb62daca62cfa8478cc6c19fc2b48e4aa446a",
+          "der_length": 793,
+          "spki_sha256": "4937e8476bc5ce737220992930cde1a74fe7c031d04032338c3da520e0b94ad4",
+          "spki_length": 294
+        }
+      }
+    }
+  },
+  "objects": {
+    "CHUID": {
+      "state": "absent",
+      "sw": "0x6A82",
+      "error_type": "ApduError"
+    },
+    "CAPABILITY": {
+      "state": "absent",
+      "sw": "0x6A82",
+      "error_type": "ApduError"
+    },
+    "KEY_HISTORY": {
+      "state": "absent",
+      "sw": "0x6A82",
+      "error_type": "ApduError"
+    }
+  },
+  "admin": {
+    "state": "absent",
+    "sw": "0x6A82",
+    "error_type": "ApduError"
+  },
+  "protected_management_data": {
+    "state": "excluded",
+    "reason": "Protected-key presence comes from public ADMIN flags; PRINTED is never requested"
+  },
+  "attestation_preservation": {
+    "slot": "0xF9",
+    "observation": "public key metadata and certificate hashes",
+    "private_key_possession": "requires separately coordinated attestation oracle",
+    "cleanup_constraint": "retain existing F9 private key, certificate and policy"
+  },
+  "status": "captured"
+}

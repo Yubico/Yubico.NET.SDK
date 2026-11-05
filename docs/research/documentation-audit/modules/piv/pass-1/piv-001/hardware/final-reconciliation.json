@@ -1,0 +1,27 @@
+{
+  "devices": [
+    {
+      "serial": 103,
+      "baseline_sha256": "3f160854e948cb01f3e535efe0e59cdf5df5eb67b94cdeb7658b0de9d1223718",
+      "final_sha256": "5857f85822ec6b2090297194be789c8a6f65d3cd3948da1ed3e96668dd855075",
+      "all_captured_stable_fields_equal": true,
+      "excluded_observation_fields": [
+        "utc",
+        "mode"
+      ]
+    },
+    {
+      "serial": 125,
+      "baseline_sha256": "1bac12341dfa823dfc5106a7b4ce78dee4497c2d14edcfd0cf3f112d9fd92705",
+      "final_sha256": "3606d1220f1e8576077c5779c31627f40c89c9e396030acbb169d089a6fbe6b9",
+      "all_captured_stable_fields_equal": true,
+      "excluded_observation_fields": [
+        "utc",
+        "mode"
+      ]
+    }
+  ],
+  "original_allowlist_restored": true,
+  "allowlist_sha256": "6500728c3ad148f7231b52db4a33c22a3c274b5e7ff8612aa5c1e61ecd04c414",
+  "limitations": "Public captured state equality and prior successful factory authentication; no private-key export or native cancellation qualification"
+}

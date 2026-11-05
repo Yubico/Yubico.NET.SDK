@@ -26,8 +26,9 @@ namespace Yubico.YubiKit.Piv;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Implements NIST SP 800-73 PIV application functionality for smart card operations
-/// including key generation, certificate management, and cryptographic operations.
+/// Provides PIV smart-card operations and Yubico extensions, including key generation,
+/// certificate management and cryptographic operations. Algorithm availability alone is not
+/// a claim of conformance to a federal PIV deployment profile.
 /// </para>
 /// <para>Credential inputs are caller-owned buffers. PIN/PUK inputs are UTF-8 bytes; byte-length
 /// checks do not imply ASCII-only, digit-only, or UTF-8-validity checks. Returned mutable memory is
@@ -63,14 +64,17 @@ public interface IPivSession : IApplicationSession
     /// </summary>
     /// <remarks>
     /// <para>
-    /// WARNING: This permanently destroys all PIV data, keys, and certificates.
-    /// Device-specific biometric/reset restrictions may apply and are reported by the device.
+    /// The SDK blocks the PIN and PUK, then resets normal key slots, certificates, objects and
+    /// credentials. The F9 attestation key and certificate survive normal PIV reset. Management
+    /// authentication is unnecessary. Failure or cancellation before RESET can leave retries consumed.
+    /// Bio MPE requires its device-reset procedure; the PIV Bio preflight is unfinished.
     /// </para>
     /// <para>
     /// A successful reset clears management-key authentication and refreshes
     /// <see cref="ManagementKeyType"/> from post-reset metadata. If metadata is unavailable, the
     /// session uses detected firmware (not a compatibility override): AES-192 for 5.7+ and development
-    /// versions, or Triple-DES for older released versions. Unexpected metadata errors propagate.
+    /// versions, or Triple-DES for older released versions. Unexpected metadata errors propagate,
+    /// including after the physical reset has succeeded. Inspect fresh device state before retrying.
     /// </para>
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -84,7 +88,7 @@ public interface IPivSession : IApplicationSession
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The management key is NOT zeroed by this method - caller is responsible for secure disposal.
+    /// The caller retains ownership of the management-key buffer and clears it after use.
     /// Authentication enables key generation, import, certificate storage, and management operations.
     /// A failed authentication attempt clears any previously recorded management authentication state.
     /// </para>
@@ -99,8 +103,9 @@ public interface IPivSession : IApplicationSession
     /// </summary>
     /// <remarks>
     /// <para>
-    /// PIN must be 6-8 encoded bytes. The SDK does not enforce ASCII-only or digit-only content.
-    /// PIN input is never zeroed by this method; the caller is responsible for secure disposal.
+    /// Supply 6–8 encoded bytes. SDK validation checks length; the device/product profile governs
+    /// credential content. The caller retains the input buffer and clears it after use. The referenced
+    /// SP 800-73-4 Part 2 §2.4.3 profile specifies ASCII decimal PINs; UTF-8 byte acceptance is an SDK mechanism.
     /// </para>
     /// </remarks>
     /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
@@ -123,7 +128,7 @@ public interface IPivSession : IApplicationSession
     /// Verify temporary PIN from biometric authentication.
     /// </summary>
     /// <remarks>
-    /// Temporary PIN is NOT zeroed by this method - caller must zero it after use.
+    /// The caller owns the temporary-PIN buffer and clears it after the awaited operation.
     /// </remarks>
     /// <param name="temporaryPin">16-byte temporary PIN from VerifyUvAsync.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -134,6 +139,8 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Change PIN from old PIN to new PIN.
     /// </summary>
+    /// <remarks>Both inputs must contain 6–8 encoded bytes. Changing the PIN leaves legacy
+    /// PIN-derived management-key recovery data unchanged; coordinate that migration separately.</remarks>
     /// <param name="currentPin">Current PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="newPin">New PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -143,6 +150,8 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Change PUK from old PUK to new PUK.
     /// </summary>
+    /// <remarks>The pair encoder accepts up to eight bytes per input; the device enforces further
+    /// policy. A blocked PUK requires a separate recovery/reset decision.</remarks>
     /// <param name="currentPuk">Current PUK as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="newPuk">New PUK as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -152,6 +161,8 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Unblock PIN using PUK and set new PIN.
     /// </summary>
+    /// <remarks>Requires a usable PUK. The pair encoder accepts up to eight bytes per input;
+    /// the device enforces further policy. This updates the PIN without synchronizing PIN-only objects.</remarks>
     /// <param name="puk">PUK as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="newPin">New PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -168,7 +179,9 @@ public interface IPivSession : IApplicationSession
     ///         <b>This resets both credentials.</b> The YubiKey sets the PIN back to <c>123456</c> and the PUK
     ///         to <c>12345678</c> every time this command runs, even when the limits do not change. Follow it
     ///         with <see cref="ChangePinAsync" /> and <see cref="ChangePukAsync" /> to set real values. The
-    ///         three commands are separate; a failure between them leaves the defaults in place.
+    ///         three commands are separate. A failure during the subsequent changes can leave one or
+    ///         both credentials at their defaults; inspect state and complete the remaining changes
+    ///         before deployment.
     ///     </para>
     /// </remarks>
     /// <param name="pinAttempts">PIN retry limit (1-255).</param>
@@ -179,6 +192,9 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Get remaining PIN attempts.
     /// </summary>
+    /// <remarks>Uses metadata when available, falling back only when the metadata instruction is
+    /// unsupported. The no-data VERIFY query consumes no retries. Its 63CX status carries at most 15;
+    /// success without a count raises <see cref="InvalidOperationException"/>. Metadata can report larger counts.</remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Number of PIN attempts remaining before lockout.</returns>
     Task<int> GetPinAttemptsAsync(CancellationToken cancellationToken = default);
@@ -191,7 +207,8 @@ public interface IPivSession : IApplicationSession
     /// <remarks>
     /// <para>
     /// Requires management key authentication. RSA 4096 generation may take 30+ seconds.
-    /// Generated private key cannot be exported but public key is returned for certificate generation.
+    /// The device retains the private key and returns its public key for enrollment.
+    /// Generating a replacement key leaves any separately stored certificate unchanged.
     /// </para>
     /// </remarks>
     /// <param name="slot">PIV slot for key storage.</param>
@@ -210,7 +227,9 @@ public interface IPivSession : IApplicationSession
     /// Import private key into specified slot.
     /// </summary>
     /// <remarks>
-    /// Requires management key authentication. Private key is NOT zeroed by this method.
+    /// Requires management-key authentication. The caller keeps <paramref name="privateKey"/> alive
+    /// through the awaited operation and disposes it afterward. RSA import requires exponent 65537.
+    /// Key import leaves separately stored certificates unchanged.
     /// </remarks>
     /// <param name="slot">PIV slot for key storage.</param>
     /// <param name="privateKey">Private key to import.</param>
@@ -226,7 +245,8 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Move key from source slot to destination slot.
     /// </summary>
-    /// <remarks>Requires YubiKey 5.7+ and management key authentication.</remarks>
+    /// <remarks>Requires YubiKey 5.7+ and management-key authentication. Move between distinct slots
+    /// with an empty destination; F9 is excluded. Certificates remain in their original storage locations.</remarks>
     /// <param name="sourceSlot">Source slot containing key to move.</param>
     /// <param name="destinationSlot">Destination slot (must be empty).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -236,7 +256,8 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Delete key from specified slot.
     /// </summary>
-    /// <remarks>Requires YubiKey 5.7+ and management key authentication.</remarks>
+    /// <remarks>Requires YubiKey 5.7+ and management-key authentication. The separately stored
+    /// certificate remains. Deleting F9 material is a separate, potentially irreversible provisioning decision.</remarks>
     /// <param name="slot">PIV slot to clear.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="NotSupportedException">YubiKey does not support key deletion.</exception>
@@ -246,8 +267,9 @@ public interface IPivSession : IApplicationSession
     /// Generate attestation certificate for key in specified slot.
     /// </summary>
     /// <remarks>
-    /// Requires YubiKey 4.3+ and key must exist in slot.
-    /// Attestation proves the key was generated on-device and provides key metadata.
+    /// Requires YubiKey 4.3+ and an on-device-generated key. The caller validates the signer chain
+    /// against its trust policy and binds the attested public key to the intended slot. Retrieval alone
+    /// supplies no trust decision. The caller owns and disposes the returned certificate.
     /// </remarks>
     /// <param name="slot">PIV slot containing key to attest.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -264,15 +286,19 @@ public interface IPivSession : IApplicationSession
     /// <para>
     /// The YubiKey performs the raw private-key operation; what <paramref name="data" /> must contain
     /// depends on the algorithm:
-    /// - RSA: the complete encoded block (PKCS#1 v1.5, OAEP or PSS), at most the modulus length. The SDK
-    ///   adds no padding; a shorter block is left-padded with zeros, a longer one throws
-    ///   <see cref="ArgumentException" />.
-    /// - ECDSA: the digest. A digest longer than the curve order uses its leftmost bytes
-    ///   (FIPS 186-5 §6.4.1); a shorter one is left-padded, which keeps its integer value.
-    /// - EdDSA (Ed25519): the message itself, passed through unchanged (RFC 8032 PureEdDSA). The SDK
-    ///   applies no length limit; the device does.
-    /// - X25519: not supported here (use CalculateSecretAsync)
     /// </para>
+    /// <list type="bullet">
+    /// <item><description>RSA: a complete representative, at most the modulus length. For signing,
+    /// prepare EMSA-PKCS1-v1_5 or EMSA-PSS on the host; for decryption, pass the ciphertext.
+    /// The SDK left-pads shorter inputs with zeros and rejects oversized inputs. It returns a
+    /// modulus-sized raw result; use <see cref="DecryptAsync"/> for host encryption-padding removal.</description></item>
+    /// <item><description>ECDSA: a digest. Longer digests use the leftmost curve-order bytes
+    /// (FIPS 186-5 §6.4.1); shorter digests are zero-left-padded to preserve their integer value.
+    /// The result is ASN.1 DER SEQUENCE(r,s), suitable for Rfc3279DerSequence host verification.</description></item>
+    /// <item><description>Ed25519: the original message, passed through unchanged (RFC 8032 PureEdDSA).
+    /// The device governs message limits. The result is a raw 64-byte signature.</description></item>
+    /// <item><description>X25519 agreement uses <see cref="CalculateSecretAsync"/>.</description></item>
+    /// </list>
     /// <para>
     /// May require PIN verification or touch based on key policy.
     /// </para>
@@ -281,7 +307,7 @@ public interface IPivSession : IApplicationSession
     /// <param name="keyType">Shared key type (must match slot contents).</param>
     /// <param name="data">Data to sign or decrypt.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Signature or decrypted data.</returns>
+    /// <returns>Caller-owned mutable signature or raw RSA output. Clear sensitive results after use.</returns>
     // Both declarations are established alpha entry points: explicit and metadata-driven algorithms.
 #pragma warning disable RS0026
     Task<Memory<byte>> SignOrDecryptAsync(
@@ -309,7 +335,8 @@ public interface IPivSession : IApplicationSession
     /// <param name="slot">PIV slot containing private key.</param>
     /// <param name="data">Data to sign or decrypt.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Signature or decrypted data.</returns>
+    /// <returns>Caller-owned mutable signature or raw RSA output. Formats follow the explicit-key-type
+    /// overload: ECDSA digest/DER, Ed25519 message/raw signature, RSA complete representative/raw result.</returns>
     /// <exception cref="NotSupportedException">YubiKey firmware is older than 5.3 and does not support metadata retrieval.</exception>
     /// <exception cref="InvalidOperationException">Slot is empty (no key present).</exception>
     Task<Memory<byte>> SignOrDecryptAsync(
@@ -328,9 +355,9 @@ public interface IPivSession : IApplicationSession
     /// specified padding scheme to return the original plaintext.
     /// </para>
     /// <para>
-    /// Supported padding schemes:
-    /// - <see cref="RSAEncryptionPadding.Pkcs1"/> — PKCS#1 v1.5 (most common)
-    /// - <see cref="RSAEncryptionPadding.OaepSHA1"/> / OaepSHA256 etc. — OAEP
+    /// Select <see cref="RSAEncryptionPadding.Pkcs1"/> or the OAEP hash matching the sender.
+    /// Slot metadata is queried first, requiring firmware 5.3+. A successful device/touch completion
+    /// can precede a local padding error. The caller owns and clears the mutable plaintext after use.
     /// </para>
     /// <para>
     /// Slot must contain an RSA key. May require PIN verification before calling.
@@ -353,7 +380,9 @@ public interface IPivSession : IApplicationSession
     /// Calculate ECDH shared secret with peer public key.
     /// </summary>
     /// <remarks>
-    /// Slot must contain EC or X25519 private key. May require PIN verification or touch.
+    /// Slot must contain a P-256, P-384 or X25519 private key matching the peer's type.
+    /// May require PIN verification or touch. The caller authenticates the peer and applies its
+    /// protocol's KDF to the raw result, then clears the caller-owned mutable secret.
     /// </remarks>
     /// <param name="slot">PIV slot containing EC private key.</param>
     /// <param name="peerPublicKey">Peer's public key for ECDH.</param>
@@ -371,15 +400,18 @@ public interface IPivSession : IApplicationSession
     /// </summary>
     /// <param name="slot">PIV slot to read certificate from.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>X.509 certificate or null if slot is empty.</returns>
+    /// <returns>A caller-owned certificate to dispose, or null when usable certificate data is absent.
+    /// Private-key occupancy is independent of certificate storage.</returns>
     Task<X509Certificate2?> GetCertificateAsync(Slot slot, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Store certificate in specified slot.
     /// </summary>
     /// <remarks>
-    /// Requires management key authentication. Certificates larger than 1856 bytes are
-    /// automatically compressed.
+    /// Requires management-key authentication. Automatic compression uses GZip when DER exceeds
+    /// 1856 bytes; this SDK threshold is a recommended PIV length, not a hard storage maximum.
+    /// The caller retains the certificate. Validate its public-key binding to the slot before enrollment;
+    /// storage itself performs no binding check.
     /// </remarks>
     /// <param name="slot">PIV slot for certificate storage.</param>
     /// <param name="certificate">X.509 certificate to store.</param>
@@ -394,7 +426,8 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Delete certificate from specified slot.
     /// </summary>
-    /// <remarks>Requires management key authentication. Idempotent - no error if slot already empty.</remarks>
+    /// <remarks>Requires management-key authentication. Deleting absent certificate data succeeds.
+    /// The private key remains in the slot.</remarks>
     /// <param name="slot">PIV slot to clear certificate from.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task DeleteCertificateAsync(Slot slot, CancellationToken cancellationToken = default);
@@ -447,15 +480,19 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Read PIV data object.
     /// </summary>
-    /// <param name="objectId">PIV data object identifier.</param>
+    /// <param name="objectId">PIV object identifier. Prefer defined DataObject values;
+    /// arbitrary integer requests currently reach the encoder without a range guard.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Object data or empty if object does not exist.</returns>
+    /// <returns>Caller-owned mutable inner object bytes, excluding the outer 53 wrapper, or empty
+    /// if absent. Clear sensitive contents after use; public provisioning data needs no secret cleanup.</returns>
     Task<Memory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Write PIV data object.
     /// </summary>
-    /// <remarks>Requires management key authentication. Pass null data to delete object.</remarks>
+    /// <remarks>Requires management-key authentication. Pass null data to delete an object.
+    /// The caller retains the input buffer through the awaited operation and clears sensitive contents afterward.
+    /// Prefer defined DataObject identifiers; the current encoder has no arbitrary-integer range guard.</remarks>
     /// <param name="objectId">PIV data object identifier.</param>
     /// <param name="data">Object data or null to delete.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -466,6 +503,7 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Get the typed CHUID (CardHolder Unique Identifier) object.
     /// </summary>
+    /// <remarks>Reads the SDK's fixed provisioning shape. Inspect other valid encodings with GetObjectAsync.</remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The CHUID, or <see cref="CardholderUniqueId.Empty"/> if not present.</returns>
     /// <exception cref="ApduException">The stored object is not encoded as a valid CHUID.</exception>
@@ -482,6 +520,7 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Get the typed CCC (Card Capability Container) object.
     /// </summary>
+    /// <remarks>Reads the SDK's fixed provisioning shape. Inspect other valid encodings with GetObjectAsync.</remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The CCC, or <see cref="CardCapabilityContainer.Empty"/> if not present.</returns>
     /// <exception cref="ApduException">The stored object is not encoded as a valid CCC.</exception>
@@ -537,7 +576,7 @@ public interface IPivSession : IApplicationSession
     /// the contents of the ADMIN DATA object.
     /// </summary>
     /// <remarks>
-    /// This does not authenticate the management key; it only inspects ADMIN DATA. If ADMIN DATA
+    /// This inspects ADMIN DATA while leaving authentication unchanged. If ADMIN DATA
     /// is present but not encoded as expected (for example, overwritten by another application),
     /// both <see cref="PinOnlyMode.PinProtectedUnavailable"/> and
     /// <see cref="PinOnlyMode.PinDerivedUnavailable"/> are set.
@@ -566,6 +605,8 @@ public interface IPivSession : IApplicationSession
     /// <para>
     /// The PIN-derived candidate key is discarded and zeroed after each attempt; it is never
     /// retained by the session.
+    /// When no candidate is available, a None result can preserve preexisting authentication.
+    /// Only a security-status 6982 response rejects a candidate; unrelated failures propagate.
     /// </para>
     /// </remarks>
     /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
@@ -592,7 +633,10 @@ public interface IPivSession : IApplicationSession
     /// key to the type-appropriate well-known default, then clears PRINTED and ADMIN DATA in that
     /// order. Disabling is a no-op if neither PIN-protected nor PIN-derived mode is currently set.
     /// </para>
-    /// <para><paramref name="managementKey"/> is NOT zeroed by this method - caller is responsible for secure disposal.</para>
+    /// <para>These writes are separate commands with no rollback. Failure can leave PRINTED or ADMIN
+    /// updated and the PUK blocked. Disabling leaves the PUK blocked. Inspect the objects and active
+    /// credentials and reauthenticate before retrying. Keep an independent secure backup of the active key.
+    /// The caller owns and clears <paramref name="managementKey"/> and the PIN buffer after use.</para>
     /// </remarks>
     /// <param name="pinOnlyMode"><see cref="PinOnlyMode.None"/> to disable, or <see cref="PinOnlyMode.PinProtected"/> to enable.</param>
     /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
@@ -619,8 +663,9 @@ public interface IPivSession : IApplicationSession
     /// <remarks>
     /// Requires current management key authentication. After success, <see cref="ManagementKeyType"/>
     /// reflects <paramref name="keyType"/> and management authentication remains active for the newly
-    /// installed key in the card session. The session does not retain key bytes. New key is NOT zeroed
-    /// by this method. If the device reports that the security status is not satisfied, the session
+    /// installed key in the card session. The caller owns, backs up and clears the new-key buffer;
+    /// the session retains no key bytes. Existing PIN-only objects require separate coordination.
+    /// If the device reports that the security status is not satisfied, the session
     /// clears its recorded management authentication state; other command failures preserve it.
     /// </remarks>
     /// <param name="keyType">A symmetric management key type: TripleDES, AES128, AES192, or AES256.</param>

@@ -1,0 +1,173 @@
+# Supplemental PIV hardware probes
+
+## Prepared scope
+
+Seven audit-only cases address material gaps left by the canonical integration assertions.
+Their unique assembly is `AuditPiv001.Hardware.IntegrationTests`, with a discoverable
+project named `Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests.csproj` under
+`../validation/hardware-probe/tests/.../src/`. Real project references supply PIV, Core,
+Tests.Shared and the complete actual PivTool executable assembly. The probes call the
+public SDK and real sample helper; they introduce no product implementation or assertion
+changes.
+
+The coordinator reported the version-2 cleanup control passed RESET, factory PIN and
+AES192 management authentication, three fresh public captures and unchanged F9. That is
+the prerequisite control for this packet, distinct from future supplemental results. The
+canonical unattended batch is still coordinator-owned. This worker performs source
+preparation only and opens no device.
+
+Every case uses `[SkippableTheory]`, real `[WithYubiKey]`, a `Serial103Filter`, explicit
+SmartCard selection and an additional live serial assertion. The coordinator keeps the
+existing tracked shared allowlist temporarily at exactly `[103]`; the wrapper checks that
+configuration before starting. Serial 125 remains outside mutation scope. The coordinator
+preserves/restores the original tracked configuration under its existing assignment.
+
+## Case matrix
+
+| Case / filter suffix | Hypothesis and independent oracle | Persistent effects and restoration |
+| --- | --- | --- |
+| `P01_X25519_Rfc7748AliceAndBobAgree` | Import RFC7748 §6.1 Alice's scalar into 9D; metadata must report imported X25519 and the exact Alice public u-coordinate. CalculateSecret with Bob's raw public key must equal the RFC's 32-byte little-endian shared secret, compared in constant time. | Imports 9D with PinOnce/TouchNever; verifies factory PIN. Clears caller scalar, expected secret, copied disposable private key and returned mutable secret. Independent vendor cleanup follows process termination. |
+| `P02_PinAlwaysConsumesVerification_PinOnceReusesIt` | Generate P256 9C/Always and 9A/Once. Verify PIN, host-verify first 9C signature, observe second unverified 9C operation, then reverify and host-verify the same key. Two 9A signatures follow one verification. Desired second-Always rejection stays asserted after same-key controls. | Creates 9C and 9A, supplies correct factory PIN only. All owned digests/signatures are cleared. No reset inside the test. |
+| `P03_MoveAndDeletePreserveIndependentCertificates` | Generate 9A P256; store real software-key certificates in 9A and Retired1 whose SPKI deliberately differs from the slot key. Move key to Retired1, require exact moved metadata SPKI and host-verified signature, then delete it. Both certificates retain exact DER through move and delete. | Generates 9A, writes certificates 9A/82, moves/deletes the ordinary key. Software private key stays in a disposable host crypto object; no private file/export. Vendor cleanup clears residual ordinary certificate objects. |
+| `P04_AttestationBindsGeneratedKeyToPreservedIssuer` | Generate P256 9A; parse complete attestation DER, verify TBSCertificate's SHA256/PKCS1 signature with captured F9 RSA public key, and compare attested/generated/metadata SPKI. Require unchanged issuer certificate bytes. | Generates 9A PinNever/TouchNever and attests it. F9 stays read-only. This proves generated-key/issuer binding and continued F9 private-key use, while manufacturer CA-chain trust remains outside the claim. |
+| `P05_ActualPivToolRsaSignsOriginalMessage` | Generate RSA2048 9C. Independently construct EMSA-PKCS1-v1_5 SHA256 block, use raw SDK signing and host VerifyData as a control. Call actual `Signing.SignDataAsync` and require its output to host-verify SHA256/PKCS1 over the preserved original message. | Generates 9C/Once/Never and verifies correct PIN. Expected PIV-IMP-005 failure remains a failed assertion; wrapper still retains raw exit and performs vendor cleanup. |
+| `P06_ActualPivToolEd25519SignsOriginalMessage` | Generate Ed25519 9C. Independent OpenSSL verifies a raw SDK message signature first. Actual sample helper output must verify over the original message. A separate verification against SHA256(message) identifies the suspected prehash behavior without weakening the original-message assertion. | Generates 9C/Once/Never. OpenSSL receives only public SPKI, known public message/digest fixtures and signatures. Expected PIV-IMP-005 failure remains visible. |
+| `P07_CancelTouchWait_DrainThenFreshSameKeyRecovery` | Human leaves TouchAlways Retired20 untouched. Observe prompt, allow one second for the exchange to start, cancel, then require terminal task before disposal. Open a fresh session and human-touch the same key; compare metadata SPKI and host-verify the recovery signature before reset. Record callback/operation timestamps and actual terminal status. Desired cancellation and Cancelled callback assertions follow recovery. | Generates only Retired20 P256/Never/Always. `RequiresUserPresence` and `Slow` traits separate the ceremony. Pending/drain markers prevent automatic reset until same-key evidence is complete. |
+
+P02 records the exception type and any unexpected signature's independent validity. The
+current SDK maps raw `6982` to `InvalidOperationException` with the security-status message
+in `PrivateKeyOperations.cs`; that mapped-status provenance is recorded explicitly. This
+probe does not label the exception as an independently captured raw status word.
+
+After P01's .NET process terminates, the wrapper runs one serial/reader/source-guarded
+vendor reference on the same 9D key before cleanup. The installed Python public
+`calculate_secret()` uses its own request/response encoding and cryptography's Bob public
+key. Its metadata check requires the imported RFC Alice public value, then its agreement
+must match the RFC secret. It records only public metadata and equality booleans. A .NET
+mismatch with successful vendor agreement narrows the defect to the SDK path; two
+mismatches retain firmware/reference-format questions. A missing imported fixture records
+an unmet same-key precondition rather than inventing agreement evidence. The sidecar has
+a 30-second external process bound; timeout holds cleanup for coordinator investigation.
+Its Python immutable vendor intermediates have the same zeroization limitation as the
+factory-default helper; owned mutable expected/result copies are cleared and no secret
+or secret hash is logged. The inputs are published RFC fixtures, not production keys.
+
+Each normal case has a 90-second cooperative token; sample cases use 120 seconds. P07 has
+a 150-second envelope, 10 seconds for the request, 45 seconds for terminal drain and 60
+seconds for fresh same-key recovery. The normal runner has a 180-second test-session
+watchdog, while the outer hardware-bearing command uses a 300-second TERM/KILL bound.
+RSA2048 generation is included in its explicit case budget. Native I/O may outlive a
+cooperative token; the wrapper treats watchdog termination as an evidence boundary.
+
+## Coordinator commands
+
+Serialize these commands after the current canonical batch has fully terminated. Run
+the build/test skills for coordinator execution as required by root instructions. The
+prepared wrapper issues only the repository `dotnet toolchain.cs` build/test entry points.
+From the repository root:
+
+```bash
+python docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe.py P01_X25519_Rfc7748AliceAndBobAgree --name p01-x25519-v1
+python docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe.py P02_PinAlwaysConsumesVerification_PinOnceReusesIt --name p02-pin-policy-v1
+python docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe.py P03_MoveAndDeletePreserveIndependentCertificates --name p03-key-cert-v1
+python docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe.py P04_AttestationBindsGeneratedKeyToPreservedIssuer --name p04-attestation-v1
+python docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe.py P05_ActualPivToolRsaSignsOriginalMessage --name p05-tool-rsa-v1
+python docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe.py P06_ActualPivToolEd25519SignsOriginalMessage --name p06-tool-ed25519-v1
+```
+
+Run the human ceremony separately when the user can first withhold touch and then supply
+the requested fresh-recovery touch:
+
+```bash
+python docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe.py P07_CancelTouchWait_DrainThenFreshSameKeyRecovery --name p07-cancellation-v1 --human-coordinated
+```
+
+Each invocation creates a new exclusive `hardware-probe/evidence/<name>/` directory.
+The wrapper clean-builds only the unique audit project through toolchain, immediately
+retains actual Csc context, runs independent vendor-v2 restoration before the case, runs
+exactly the named method through toolchain and retains its raw exit/RESULT logs, then runs
+independent vendor-v2 cleanup after the runner has terminated—even after ordinary assertion
+failure. Vendor cleanup retains its own before/after/auth readbacks. P05/P06 intentionally
+return failure if the desired original-message contract fails; `expected_failure` in the
+receipt describes the hypothesis and never converts failure into success.
+
+The wrapper retains build/test logs before toolchain rotation, exact cleanup receipts,
+tool source identities, all compiled DLL hashes before and after the test, and loaded host,
+PIV, Tests.Shared and PivTool DLL path/hash events. Different binaries after an incremental
+test build invalidate the original compiler binding and require a new versioned capture.
+The build/compiler record remains retained so a failed membership assumption can be
+corrected narrowly without erasing its original output.
+
+The audit filename also matches the toolchain's broad `--project Piv` substring selector.
+For subsequent canonical-only runs, use `--project Yubico.YubiKit.Piv.IntegrationTests`.
+The current already-started batch remains coordinator-owned. Direct audit execution
+without the wrapper's evidence-directory environment fails before opening a PIV session.
+
+## Compiler and runtime provenance
+
+`Directory.Build.props` imports the repository's real props, keeps net10/C#14, nullable,
+warnings-as-errors and analyzers, and isolates this host's obj/bin under
+`/tmp/opencode/piv-001-hardware`. The project filename contains the repository prefix and
+its path contains both `tests` and `src`, matching the current toolchain's actual project
+discovery. Its assembly/root namespace are unique. No root solution or product project
+is edited to admit the audit host.
+
+The local targets preserve actual `CscCommandLineArgs`, Compile paths, resolved reference
+assemblies, analyzers, analyzer configuration and final policy immediately after the clean
+build. `capture-compiler.py` requires actual PivTool reference membership, strict policy
+flags and hashes all listed dependencies. It separately records all current PivTool source
+identities; the real helper remains in the project reference rather than a copied stand-in.
+The capture pattern is adapted from the corrected OpenPGP hardware host; the original
+OpenPGP archive remains untouched. `preparation.md` records provenance and preparation
+checks. The coordinator must inspect the full actual-Csc reference/analyzer argument lists
+and zero-warning RESULT, rather than treating capture creation as a complete compilation
+verdict.
+
+The wrapper records the OpenSSL executable hash and `version -a` output. P06's three
+verification child processes each have a 10-second budget, drain redirected streams,
+kill/await the child on timeout and retain public fixtures for independent replay. Missing
+OpenSSL or an unsupported provider is an oracle prerequisite failure, distinct from an SDK
+signature mismatch. .NET's host crypto performs P256 and RSA verification independently
+from the device operation. RFC7748 §6.1 supplies the published X25519 byte-level oracle.
+
+## Drain and preservation boundaries
+
+P07 writes `recovery-pending.txt` before starting the private-key operation. The original
+task runs on a worker so the caller can request cancellation even if native exchange entry
+blocks synchronously. A watchdog writes `drain-blocked.txt` and exits the host if request,
+drain or recovery exceeds its bound. This avoids concurrent session disposal or RESET
+against an active exchange. The runner's exit alone supplies no native-cancellation
+guarantee. The wrapper holds cleanup when a pending/drain marker remains or its outer
+timeout fired. The coordinator preserves that state and establishes terminal/drain and
+same-key recovery evidence before any subsequent reset decision.
+
+After terminal operation observation, the old session/connection disposes before a fresh
+session opens. Only successful fresh-session host verification and disposal rename the
+pending marker to `recovery-completed.txt`. An unexpected completion/error still receives
+the recovery control before the desired cancellation assertion. An early setup/assertion
+failure after the pending marker conservatively holds cleanup. This is a material evidence
+boundary rather than an automatic destructive recovery path.
+
+F9 receives public certificate/metadata reads and its normal attestation signing role
+only. Every generation/import/move/delete/write targets ordinary slots. The suite sets
+reversible Never/Once/Always policies and configures no F9 policy, Bio enrollment or fixed
+policy. Existing successful touch coverage can remain a separate canonical ceremony;
+cached touch is outside these seven bounded supplemental cases.
+
+All credential clones and owned secret/private-input/output buffers clear in `finally` or
+their private-key disposer. Probe code borrows caller views without casting them writable.
+The actual sample exposes `SigningResult.Signature` as read-only memory. Its caller can
+dispose references but has no public zeroing owner; this probe records that limitation and
+leaves the sample-owned backing buffer untouched. Public signature/fixture files contain
+no private scalars, management key, PIN, protected management secret or production data.
+
+## Result rows and current status
+
+The prepared denominator is **seven source methods**, each with one serial-filtered theory
+row when prerequisites bind. Compilation, discovery, execution, assertions, independent
+cleanup and platform qualification are separate result fields. All seven supplemental
+cases are currently **prepared / not executed by this worker**. Populate new execution
+rows from the retained runner and receipt evidence; prior PR745, canonical batch and cleanup
+control results keep their original scopes and counts. Linux USB development-firmware
+results will leave NFC, older releases, other operating systems, Bio and AOT qualification
+outstanding.

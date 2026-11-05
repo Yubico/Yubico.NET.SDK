@@ -1,0 +1,380 @@
+RSA.VerifyData Method (System.Security.Cryptography) | Microsoft Learn
+Skip to main content
+Skip to in-page navigation
+Skip to Ask Learn chat experience
+This browser is no longer supported.
+Upgrade to Microsoft Edge to take advantage of the latest features, security updates, and technical support.
+Download Microsoft Edge
+More info about Internet Explorer and Microsoft Edge
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Language
+csharp
+vb
+fsharp
+cpp
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try
+signing in
+or
+changing directories
+.
+Access to this page requires authorization. You can try
+changing directories
+.
+RSA.
+Verify
+Data Method
+Definition
+Namespace:
+System.Security.Cryptography
+Assemblies:
+netstandard.dll, System.Security.Cryptography.dll
+Assemblies:
+netstandard.dll, System.Security.Cryptography.Algorithms.dll
+Assembly:
+System.Security.Cryptography.Algorithms.dll
+Assembly:
+mscorlib.dll
+Assembly:
+netstandard.dll
+Important
+Some information relates to prerelease product that may be substantially modified before it’s released. Microsoft makes no warranties, express or implied, with respect to the information provided here.
+Verifies that a digital signature is valid.
+Overloads
+Name
+Description
+VerifyData(Byte[], Byte[], HashAlgorithmName, RSASignaturePadding)
+Verifies that a digital signature is valid by calculating the hash value of the specified data using the specified hash algorithm and padding, and comparing it to the provided signature.
+VerifyData(Stream, Byte[], HashAlgorithmName, RSASignaturePadding)
+Verifies that a digital signature is valid by calculating the hash value of the specified stream using the specified hash algorithm and padding, and comparing it to the provided signature.
+VerifyData(ReadOnlySpan<Byte>, ReadOnlySpan<Byte>, HashAlgorithmName, RSASignaturePadding)
+Verifies that a digital signature is valid by calculating the hash value of the specified data using the specified hash algorithm and padding, and comparing it to the provided signature.
+VerifyData(Byte[], Int32, Int32, Byte[], HashAlgorithmName, RSASignaturePadding)
+Verifies that a digital signature is valid by calculating the hash value of the data in a portion of a byte array using the specified hash algorithm and padding, and comparing it to the provided signature.
+VerifyData(Byte[], Byte[], HashAlgorithmName, RSASignaturePadding)
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Verifies that a digital signature is valid by calculating the hash value of the specified data using the specified hash algorithm and padding, and comparing it to the provided signature.
+public:
+ bool VerifyData(cli::array <System::Byte> ^ data, cli::array <System::Byte> ^ signature, System::Security::Cryptography::HashAlgorithmName hashAlgorithm, System::Security::Cryptography::RSASignaturePadding ^ padding);
+public bool VerifyData(byte[] data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding);
+member this.VerifyData : byte[] * byte[] * System.Security.Cryptography.HashAlgorithmName * System.Security.Cryptography.RSASignaturePadding -> bool
+Public Function VerifyData (data As Byte(), signature As Byte(), hashAlgorithm As HashAlgorithmName, padding As RSASignaturePadding) As Boolean
+Parameters
+data
+Byte
+[]
+The signed data.
+signature
+Byte
+[]
+The signature data to be verified.
+hashAlgorithm
+HashAlgorithmName
+The hash algorithm used to create the hash value of the data.
+padding
+RSASignaturePadding
+The padding mode.
+Returns
+Boolean
+true
+if the signature is valid; otherwise,
+false
+.
+Exceptions
+ArgumentNullException
+data
+is
+null
+.
+-or-
+signature
+is
+null
+.
+-or-
+padding
+is
+null
+.
+ArgumentException
+hashAlgorithm
+.
+Name
+is
+null
+or
+Empty
+.
+CryptographicException
+padding
+is unknown, or not supported by this implementation.
+Applies to
+VerifyData(Stream, Byte[], HashAlgorithmName, RSASignaturePadding)
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Verifies that a digital signature is valid by calculating the hash value of the specified stream using the specified hash algorithm and padding, and comparing it to the provided signature.
+public:
+ bool VerifyData(System::IO::Stream ^ data, cli::array <System::Byte> ^ signature, System::Security::Cryptography::HashAlgorithmName hashAlgorithm, System::Security::Cryptography::RSASignaturePadding ^ padding);
+public bool VerifyData(System.IO.Stream data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding);
+member this.VerifyData : System.IO.Stream * byte[] * System.Security.Cryptography.HashAlgorithmName * System.Security.Cryptography.RSASignaturePadding -> bool
+Public Function VerifyData (data As Stream, signature As Byte(), hashAlgorithm As HashAlgorithmName, padding As RSASignaturePadding) As Boolean
+Parameters
+data
+Stream
+The signed data.
+signature
+Byte
+[]
+The signature data to be verified.
+hashAlgorithm
+HashAlgorithmName
+The hash algorithm used to create the hash value of the data.
+padding
+RSASignaturePadding
+The padding mode.
+Returns
+Boolean
+true
+if the signature is valid; otherwise,
+false
+.
+Exceptions
+ArgumentNullException
+data
+is
+null
+.
+-or-
+signature
+is
+null
+.
+-or-
+padding
+is
+null
+.
+ArgumentException
+hashAlgorithm
+.
+Name
+is
+null
+or
+Empty
+.
+CryptographicException
+padding
+is unknown, or not supported by this implementation.
+Applies to
+VerifyData(ReadOnlySpan<Byte>, ReadOnlySpan<Byte>, HashAlgorithmName, RSASignaturePadding)
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Verifies that a digital signature is valid by calculating the hash value of the specified data using the specified hash algorithm and padding, and comparing it to the provided signature.
+public:
+ virtual bool VerifyData(ReadOnlySpan<System::Byte> data, ReadOnlySpan<System::Byte> signature, System::Security::Cryptography::HashAlgorithmName hashAlgorithm, System::Security::Cryptography::RSASignaturePadding ^ padding);
+public virtual bool VerifyData(ReadOnlySpan<byte> data, ReadOnlySpan<byte> signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding);
+abstract member VerifyData : ReadOnlySpan<byte> * ReadOnlySpan<byte> * System.Security.Cryptography.HashAlgorithmName * System.Security.Cryptography.RSASignaturePadding -> bool
+override this.VerifyData : ReadOnlySpan<byte> * ReadOnlySpan<byte> * System.Security.Cryptography.HashAlgorithmName * System.Security.Cryptography.RSASignaturePadding -> bool
+Public Overridable Function VerifyData (data As ReadOnlySpan(Of Byte), signature As ReadOnlySpan(Of Byte), hashAlgorithm As HashAlgorithmName, padding As RSASignaturePadding) As Boolean
+Parameters
+data
+ReadOnlySpan
+<
+Byte
+>
+The signed data.
+signature
+ReadOnlySpan
+<
+Byte
+>
+The signature data to be verified.
+hashAlgorithm
+HashAlgorithmName
+The hash algorithm used to create the hash value of the data.
+padding
+RSASignaturePadding
+The padding mode.
+Returns
+Boolean
+true
+if the signature is valid; otherwise,
+false
+.
+Exceptions
+ArgumentException
+hashAlgorithm
+.
+Name
+is
+null
+or
+Empty
+.
+CryptographicException
+padding
+is unknown, or not supported by this implementation.
+Applies to
+VerifyData(Byte[], Int32, Int32, Byte[], HashAlgorithmName, RSASignaturePadding)
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Source:
+RSA.cs
+Verifies that a digital signature is valid by calculating the hash value of the data in a portion of a byte array using the specified hash algorithm and padding, and comparing it to the provided signature.
+public:
+ virtual bool VerifyData(cli::array <System::Byte> ^ data, int offset, int count, cli::array <System::Byte> ^ signature, System::Security::Cryptography::HashAlgorithmName hashAlgorithm, System::Security::Cryptography::RSASignaturePadding ^ padding);
+public virtual bool VerifyData(byte[] data, int offset, int count, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding);
+abstract member VerifyData : byte[] * int * int * byte[] * System.Security.Cryptography.HashAlgorithmName * System.Security.Cryptography.RSASignaturePadding -> bool
+override this.VerifyData : byte[] * int * int * byte[] * System.Security.Cryptography.HashAlgorithmName * System.Security.Cryptography.RSASignaturePadding -> bool
+Public Overridable Function VerifyData (data As Byte(), offset As Integer, count As Integer, signature As Byte(), hashAlgorithm As HashAlgorithmName, padding As RSASignaturePadding) As Boolean
+Parameters
+data
+Byte
+[]
+The signed data.
+offset
+Int32
+The starting index at which to compute the hash.
+count
+Int32
+The number of bytes to hash.
+signature
+Byte
+[]
+The signature data to be verified.
+hashAlgorithm
+HashAlgorithmName
+The hash algorithm used to create the hash value of the data.
+padding
+RSASignaturePadding
+The padding mode.
+Returns
+Boolean
+true
+if the signature is valid; otherwise,
+false
+.
+Exceptions
+ArgumentNullException
+data
+is
+null
+.
+-or-
+signature
+is
+null
+.
+-or-
+padding
+is
+null
+.
+ArgumentException
+hashAlgorithm
+.
+Name
+is
+null
+or
+Empty
+.
+ArgumentOutOfRangeException
+offset
+is less than zero.
+-or-
+count
+is less than zero.
+-or-
+offset
++
+count
+- 1 results in an index that is beyond the upper bound of
+data
+.
+CryptographicException
+padding
+is unknown, or not supported by this implementation.
+Applies to
+Collaborate with us on GitHub
+The source for this content can be found on GitHub, where you can also create and review issues and pull requests. For more information, see
+our contributor guide
+.
+.NET
+Open a documentation issue
+Provide product feedback
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+In this article
+Was this page helpful?
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+en-us
+Your Privacy Choices
+Theme
+Light
+Dark
+High contrast
+AI Disclaimer
+Previous Versions
+Blog
+Contribute
+Privacy
+Consumer Health Privacy
+Terms of Use
+Trademarks
+© Microsoft 2026

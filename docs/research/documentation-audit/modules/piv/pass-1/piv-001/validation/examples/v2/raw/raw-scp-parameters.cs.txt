@@ -1,0 +1,8 @@
+using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
+await using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(
+    scpParameters,
+    firmwareVersion,
+    cancellationToken: cancellationToken);
+
+await raw.SelectAsync(applicationId, cancellationToken);
+ApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);

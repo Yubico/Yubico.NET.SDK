@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <RepositoryRoot>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)', 'toolchain.cs'))</RepositoryRoot>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <Import Project="$(RepositoryRoot)/Directory.Build.props" />
+  <PropertyGroup>
+    <ProbeWorkspace>/tmp/opencode/piv-001-hardware</ProbeWorkspace>
+    <BaseIntermediateOutputPath>$(ProbeWorkspace)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(ProbeWorkspace)/obj/</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(ProbeWorkspace)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

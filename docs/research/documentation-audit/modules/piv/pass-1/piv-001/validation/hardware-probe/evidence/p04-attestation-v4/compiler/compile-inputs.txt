@@ -1,0 +1,7 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/CancellationProbe.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/HardwareProbeTests.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/ProbeSupport.cs
+/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
+/tmp/opencode/piv-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests.GlobalUsings.g.cs
+/tmp/opencode/piv-001-hardware/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/piv-001-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests.AssemblyInfo.cs

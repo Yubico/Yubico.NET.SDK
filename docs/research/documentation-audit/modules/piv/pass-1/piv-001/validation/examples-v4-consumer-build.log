@@ -1,0 +1,37 @@
+$ dotnet toolchain.cs -- build --project AuditPiv001.Examples.v4.consumer --clean
+▶ toolchain: build  (log: artifacts/toolchain/runs/20261105-091841-245-build/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet clean docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v4.consumer.csproj -c Release
+  output: artifacts/toolchain/runs/20261105-091841-245-build/01-clean-AuditPiv001.Examples.v4.consumer.log
+▶ RUN dotnet build docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v4.consumer.csproj -c Release --no-incremental
+  output: artifacts/toolchain/runs/20261105-091841-245-build/02-build-AuditPiv001.Examples.v4.consumer.log
+✓ Built 1 project(s) matching 'AuditPiv001.Examples.v4.consumer': AuditPiv001.Examples.v4.consumer
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- build --project AuditPiv001.Examples.v4.consumer --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      5.5s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261105-091841-245-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================
+
+EXIT=0

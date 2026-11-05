@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- build --project AuditPiv001.Examples.v4.consumer --clean",
+  "started": "2026-11-05T09:18:41.2454480+01:00",
+  "durationSeconds": 5.6,
+  "runDirectory": "artifacts/toolchain/runs/20261105-091841-245-build",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "durationSeconds": 5.5,
+      "error": null
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

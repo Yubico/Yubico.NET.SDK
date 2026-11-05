@@ -1,0 +1,12 @@
+
+var puk = Encoding.UTF8.GetBytes("12345678");
+var newPin = Encoding.UTF8.GetBytes("123456");
+try
+{
+    var result = await PinManagement.UnblockPinAsync(session, puk, newPin, ct);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(puk);
+    CryptographicOperations.ZeroMemory(newPin);
+}

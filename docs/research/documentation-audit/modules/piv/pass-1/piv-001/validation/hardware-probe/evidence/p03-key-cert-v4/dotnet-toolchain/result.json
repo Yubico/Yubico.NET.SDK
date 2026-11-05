@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project AuditPiv001.Hardware.IntegrationTests --filter FullyQualifiedName~P03_MoveAndDeletePreserveIndependentCertificates",
+  "started": "2026-11-05T08:15:03.6410621+01:00",
+  "durationSeconds": 9.4,
+  "runDirectory": "artifacts/toolchain/runs/20261105-081503-641-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 9.3,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "AuditPiv001.Hardware.IntegrationTests",
+      "outcome": "passed",
+      "reason": "1 executed, 0 skipped",
+      "executed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261105-081503-641-test/01-test-AuditPiv001.Hardware.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

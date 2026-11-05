@@ -1,0 +1,342 @@
+{
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "accepted_manifest_sha256": "78c746e7763448b36d3d98515ca4bbd760db0605fe393b3131efea69d900d4dc",
+  "files": [
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+      "before_sha256": "080baf3140c9213a81940c44330614cd2dfa128c78c80fdb1a7c1d5cb432d260",
+      "after_sha256": "bf59c61431a198fde239e788433ae3b37a95403bfa4a4ecbfbf157dfa5a81490",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/JsonOutput.cs",
+      "before_sha256": "0c7f23d049d6fefb6498cee25f57df73bd062276486171cc6d4d6610e85b99aa",
+      "after_sha256": "5ac995e43f8f15fd63a8e3c698511b424df97bcfc67d1a4a3361baad6b64a70d",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/PinPrompt.cs",
+      "before_sha256": "ff35c5ede31f42e9184a249513aadced5b7bedc3c234297967300d33883e4452",
+      "after_sha256": "765be0b36316a0e2754ae63992d3d987cf5fc32069d8b671a942b2112a20d09d",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+      "before_sha256": "7aa99e2420e2696e57df9a0551bcd562539737f9f7900d5ecc1b5c83302a3666",
+      "after_sha256": "bc4a2f1589d7aab7de025e70937682ab429c22ddc71a650c85965085f6683c6e",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "before_sha256": "1281897e05222d624f70a532e42694e86daccdf5a44a263e5b95023dd8a75e1a",
+      "after_sha256": "41e5abc57e3bcf845d615bfe0d2b056a96befddc4c6816f40ad2bbfd5ea3d305",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Decryption.cs",
+      "before_sha256": "e32d5bf9b2ed2ff55109dce84fcb68481f6c1e36fefa2aaa21f3bc8a03a6f037",
+      "after_sha256": "5599ec21588d32e757d71abd672f7fdb06e9348c7484d65f53004e5d1e0b738e",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs",
+      "before_sha256": "727569b664964b68fe46ef7154c8d76a09f3fb9aa3eac420675adddc4acdfa9a",
+      "after_sha256": "7e912c1df3bbb704f72fe4cc4f03065afca8244846c8457b0da6bbf00c96618c",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs",
+      "before_sha256": "c99434ed791a0b832fb06ead79e12941bd31a0ac2f63e824842c99291bf8c674",
+      "after_sha256": "c41428412c5a3e12a67c988889f39cbe64c612e885756b56ee6de568bf040f22",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "before_sha256": "a2bfa1e430c5f3cd0de41c35ac3f7da2d57d71b9b5ac2671f341edef2d62bf8b",
+      "after_sha256": "6b56f821b86dd6bc98b58cdbe179310edd2c82932b4176f2439057c576c9918c",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Reset.cs",
+      "before_sha256": "329013ebd2cac9f8e83d6f42acc2cc112881a0465438f84cdfe9bec5db2f48f3",
+      "after_sha256": "a21ecfe271e0b89100c28d89f20c47143f6a768ab6b55ee05ca50ff2e73c59a9",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/AttestationResult.cs",
+      "before_sha256": "13d915cd6e6080f333c82ec2aef4f2dbbd27938d79bdd2c0c6bed36b8d33d2ab",
+      "after_sha256": "92cc55977521ceacacb5fb6b90433749965ed56a9df857bd680a30938030ef32",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/CertificateResult.cs",
+      "before_sha256": "0072f5ad3d635fc2580ab5f79da813a0d8658d6ef6d89f646265e4dd5351abac",
+      "after_sha256": "359076d803af9307dfe5d2688275ee036c38398f8ace05968012da09a376a733",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/DecryptionResult.cs",
+      "before_sha256": "492044b615cbe5e4bcae7718e244201716af60ffe068028cf8bf0f59ce560ec0",
+      "after_sha256": "30ea891dcc60fb4f337cca027abbd19933bcd9f54d10775379b2ac3ece6e5c5c",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/SlotInfoResult.cs",
+      "before_sha256": "c3679d97cd30633b24ce07053ff0b774725e00826192efb154c5a02e0fbe5840",
+      "after_sha256": "fb0236ec4b0ee5d01ab779b7d45f82e5d878175778f5868448376f1d9f1ead27",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Signing.cs",
+      "before_sha256": "099d9baffcd8f0a445349448c9c02a71e10c1892e5f78f7e799a4b2929b45346",
+      "after_sha256": "ab44ec7d9c4a99f8660d140f2d0fdf9ffe53e23141bf5d7dddad0bd1c81360ba",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/SlotInfo.cs",
+      "before_sha256": "a03437410dd4e817987c35dd2c2d7e556235fadd05ea23036ce5fe7af81ae3cd",
+      "after_sha256": "60601004476a3178d4573445e0fc5c1d2518f4529af9e1e6ac8308891ca1709f",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Verification.cs",
+      "before_sha256": "3c298d917b2e90cc3136d9a54eb0a4c75aa2d28e595a68dfa1d92d45f89de177",
+      "after_sha256": "b38d88dd16be9f0a1e01b05cce3869eb1300539d53a68698510f6809761254a5",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Program.cs",
+      "before_sha256": "c2957ae15caad9f85b00916d650d597727a9a194b4e2f5532559369fbd5b4970",
+      "after_sha256": "f50960e58d32c8eb1723da61f07909ffca66fbd2b7092f91318a7bdfc3b9ffaa",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+      "before_sha256": "aef3d82252c547103cb873518ca042f1b7cc6b9ba1bc79e3cbfae1c798bc83f8",
+      "after_sha256": "77576173cc494cc5ebac63ad4987a0e84585ee443f1924b238d76a5d208c3fdc",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/CertificateCompression.cs",
+      "before_sha256": "9ce4a9088b0adc92564b577ed454729d8cbbea1edb6696600af673f58495842b",
+      "after_sha256": "d229fdb110535d17646bef18bc509758233effcfe6e019e324bf5b248109d5a2",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/DataObjects/AdminData.cs",
+      "before_sha256": "c0946bbd2c706c6be18acf82af67663a6044f52811e17dfd746295bdfc0983ae",
+      "after_sha256": "e7515fc7f2dd410988e6c0d90888451c8a58414cc7d62c881dfe7e817e0c86ab",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/DataObjects/CardCapabilityContainer.cs",
+      "before_sha256": "6668b64c2a984227831ec98f8d876571facce00e608232d390e43c77fe5df5ac",
+      "after_sha256": "9057ec98060d80e8ec2692e2dfdd2eafcef01dd4163180c663792e05bdba438c",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/DataObjects/CardholderUniqueId.cs",
+      "before_sha256": "3c079eb23911a14bfab29839f1f765f6b77d57b34def3c692bc45dd5c842d169",
+      "after_sha256": "782125a30e962093a2d0e976c0313717951f8ff2cd0f6310dc1c3970981caef7",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/DataObjects/KeyHistory.cs",
+      "before_sha256": "5320449c85e6059fee5a8b8dc25d29c30d2f5da55819844bfb9970158bc25a6b",
+      "after_sha256": "5c61a94605065cdcf3462d4e5c33e8ad25707c1fc1abea585507a140e16021bc",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/Features.cs",
+      "before_sha256": "17259917860e900c84b0ba0b52809e3b130697156e15bf3898e4eae7ab3e5d9e",
+      "after_sha256": "f9f47079f5c021600209673e17bedb9d3235c0d60e778cd31d434b9f3533dd05",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/IPivSession.cs",
+      "before_sha256": "d049f8aeff1bfa648f9ef7dc83c99264e2b920bc6e926d2b1ca930ae52f346c5",
+      "after_sha256": "1d3f05a16d3cd60f892def4beb1c20ea8a9e1226d19520e957540f35d7994447",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/InvalidPinException.cs",
+      "before_sha256": "23b5b025ff35a38e28f78aa4e04e71e8850531338c8dceb12141a869c63e899b",
+      "after_sha256": "d4f2136e0540e3bdaa9c2c045155dce7a5839d40febb4b7a3e4c15ed5757e25e",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/KeyCreationOptions.cs",
+      "before_sha256": "acaaece4112b01b42b51c4f90006e8c23679b31761b6a9122be83931af12d8a9",
+      "after_sha256": "98a203048d3b060a3fc5d66d534c8fa888584ac954f7ac9942ccc0f8d1c04651",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/Metadata.cs",
+      "before_sha256": "f41fbcfbf579c7f9e9095e57f3143b32dcee332fd3b3103b1ae0cd3567ef3521",
+      "after_sha256": "b86244e207d0010cd191331c11ca46e56b28fd82cd4bbd6cc5cf2ee1d39831f6",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/PinOnlyMode.cs",
+      "before_sha256": "2808b8bb1cfba5254d7cd1fe24e3dab9932ea46cf656e628a34acefb5f1cd797",
+      "after_sha256": "5ad86dba03c3813ba0afb5879e72304a16effc5ff2e1fcd4e4b618b305ccabb8",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/PinPolicy.cs",
+      "before_sha256": "8bddf163172b80b306ff3639ec1752b8af767bee0555227d4b653efe560bc362",
+      "after_sha256": "77347e46922d52bda05677a99d9b764467ddaf85c3ec55614345209719a05b25",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/PinUtilities.cs",
+      "before_sha256": "41010a5c40e0f7b468d1a2e1416725e3663eb19afe6d13207bcbbcfd047a21c2",
+      "after_sha256": "5a70827231f45509095dc0649bd1f11d91388bed61578265199cabcd65dbf560",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/PivSession.cs",
+      "before_sha256": "6bc077507bd14dd118e98d96d5fb63c16f5f3dbd66b0152bf0f6e69f709b3954",
+      "after_sha256": "4b6b75402b8d6007a1e98b065b61fb6e856ac607b13275df3a378a8739f8e9e4",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/src/SlotMetadataExtensions.cs",
+      "before_sha256": "d36a4ba2a91fcfcb7cea037f2a278864dfda0b32c56927259092ccede51937ba",
+      "after_sha256": "758d3c5ffef0ef0c18d35d8a86e131c85970434970088b6b5d7de156ce1f6c34",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCryptoTests.cs",
+      "before_sha256": "098e223b1c36936b86308dec7b4be2a9bf9bcb2601427a709ec81c9020f410c9",
+      "after_sha256": "6d3f42cc32a37ca6d2a9194aeab905817785676d904d42adc48fecf24cb7a0b3",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDecryptTests.cs",
+      "before_sha256": "ab62ddead80c206670e147fe33a096953d4fad8869d09d3f9577d61f59973749",
+      "after_sha256": "01577d93862508097a2ba3ec11d5e675c145009721e6785119e060ef868e51e3",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDiscoveryContentionTests.cs",
+      "before_sha256": "ff0c0c69ded5e38a7a5f95bb2b7f9986157b5bedbe96e76b12ef2f6adb1bc0e0",
+      "after_sha256": "dd3d63f0cd04bf6cb0938bd4bcf4096b8802405532a1a07029eb51db96eb4073",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivFullWorkflowTests.cs",
+      "before_sha256": "264957570c6348523845862a7c181feb1ae68a07f096212d5e8d708f63509346",
+      "after_sha256": "b9f9421c17861db6480e678c0da5e67852e73b79af632beb8e44a89c5521db19",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivImportTests.cs",
+      "before_sha256": "7b11785824b1c93c73a460a3a4ac0817b79264bffc14b2275da7dbf341c83342",
+      "after_sha256": "6898a0b7f88ae9e11982a2297a982a0aea8c6c66934eca903454774fd1225189",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMultiKeyContentionTests.cs",
+      "before_sha256": "6b204d130d80ec67d2c95d8e1420314900918bae15f6b01a7d95eeeeefe9e2bc",
+      "after_sha256": "284bce4179e958bd9f5c0b572691451cd0776d508dc4df51b25daf2c94f56e39",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPolicyTests.cs",
+      "before_sha256": "b2881c697b567a79454f705224664ba4a42cb80de413f6d5b8e8126156b73680",
+      "after_sha256": "19333ec77cfc9ca21984096ee83e092b57e41950960b6e6ffb90ceec1a77d4e8",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs",
+      "before_sha256": "de8e0361a96f77b1159ae99b50a220c8882546577c4f802b143943c21a9b396f",
+      "after_sha256": "6df98192531586b21e414f8169323987fde52128a3a588e79bcd34c563e23b63",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+      "before_sha256": "c2676ee812b7640e9cf94bc308b916427d6cf0380af51ec8f7e2e7ad15cf41de",
+      "after_sha256": "b796294333e363e0c5dc68f904f9dda011f7916c793a7a12f419b46d72c26824",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSigningAlgorithmTests.cs",
+      "before_sha256": "0682b32b1cdb77292af9d9a758b0eddccca1e733ab4497183837bd4ab8cbfa10",
+      "after_sha256": "5a10ada019f924fe835d1c2e58b16ce8d80533ebc95ca86de9cc961b4e39139f",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Bio/BioProtocolTests.cs",
+      "before_sha256": "0592e5416ec43e69c613fa0cb945c66aa1ceb0d9d33b913a317f4b5605b7ce67",
+      "after_sha256": "57bd5dcfb54cce0abf5a1bbcc72af9f24c84bb76addd59a5ecd2b52e6be45445",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Cryptography/PrivateKeyOperationsTests.cs",
+      "before_sha256": "d7b28780188e5d97a1fd4e986f69653b015afd64663b027c24f6c06473d4e1f6",
+      "after_sha256": "8c2ae6d348924c541b9118597d9f16483be151fb744a95a756ef55a419f0fe17",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+      "before_sha256": "b1c55a9e1f9b8896433e6db26fdc3d2751c85fba0f75d2007b86ba8b4f287bdc",
+      "after_sha256": "a4ea10714d01506c3d97ac10cdabbf54c3dd54c37da9f3d2dabf2b02929c3d62",
+      "whitespace_only": true,
+      "imports_identical": true
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+      "before_sha256": "f656db1258c4f8623fc8f39828fb87f66866fc40a8678ed19f5993859d04e01e",
+      "after_sha256": "c6f24e1db58b8258b65c7398959f85bf6319496c89859ce9fc3d02eb9e5277e2",
+      "whitespace_only": true,
+      "imports_identical": true
+    }
+  ]
+}

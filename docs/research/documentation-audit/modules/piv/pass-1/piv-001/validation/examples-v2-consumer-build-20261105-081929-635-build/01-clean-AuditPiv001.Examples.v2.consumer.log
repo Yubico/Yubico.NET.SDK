@@ -1,0 +1,411 @@
+$ dotnet clean docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj -c Release
+Build started 11/5/2026 8:19:29 AM.
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Creating directory "/tmp/opencode/piv-001-examples-v2-consumer/obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" (6:2) on node 4 (Clean target(s)).
+     6>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj" (4:2) on node 2 (Clean target(s)).
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+     6>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.GeneratedMSBuildEditorConfig.editorconfig".
+     6>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfoInputs.cache".
+     6>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.Y.4CE3D1A9.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/refint/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.xml".
+     6>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.csproj.AssemblyReference.cache".
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" (3:2) on node 5 (Clean target(s)).
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.xml".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.pdb".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+     6>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.Y.25DE18DB.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/refint/Yubico.YubiKit.Cli.Shared.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+     6>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+     6>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Shared.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.Y.74B071DD.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/refint/Yubico.YubiKit.WebAuthn.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/ref/Yubico.YubiKit.WebAuthn.dll".
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj" (5:2) on node 3 (Clean target(s)).
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.runtimeconfig.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Logging.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Options.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Primitives.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Spectre.Console.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Spectre.Console.Cli.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/System.Formats.Cbor.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/de/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/fr/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/sv/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/linux-arm64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/linux-x64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/osx-arm64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/osx-x64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/win-arm64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/win-x64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/win-x86/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.csproj.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/refint/PivTool.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.genruntimeconfig.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/ref/PivTool.dll".
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj" (1) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj" (2:2) on node 1 (Clean target(s)).
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.Y.DA2F2C9D.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/refint/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll".
+   3:2>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" (3:2) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (8:3) on node 4 (Clean target(s)).
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.Y.4E81C14A.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/refint/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll".
+   4:2>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj" (4:2) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj" (10:5) on node 2 (Clean target(s)).
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/refint/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll".
+   5:2>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj" (5:2) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" (11:2) on node 8 (Clean target(s)).
+    11>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+    10>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj" (Clean target(s)).
+    11>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.csproj.AssemblyReference.cache".
+   5:2>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj" (5:2) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj" (9:2) on node 5 (Clean target(s)).
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+   5:2>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj" (5:2) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (12:2) on node 6 (Clean target(s)).
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.csproj.AssemblyReference.cache".
+    11>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.GeneratedMSBuildEditorConfig.editorconfig".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.GeneratedMSBuildEditorConfig.editorconfig".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.AssemblyInfoInputs.cache".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.csproj.CoreCompileInputs.cache".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.csproj.AssemblyReference.cache".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.sourcelink.json".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.GeneratedMSBuildEditorConfig.editorconfig".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.Y.F52E7702.Up2Date".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.AssemblyInfoInputs.cache".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.dll".
+     4>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj" (Clean target(s)).
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/refint/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.xml".
+    11>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.AssemblyInfoInputs.cache".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/ref/Yubico.YubiKit.Oath.dll".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.sourcelink.json".
+    11>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.csproj.CoreCompileInputs.cache".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.Y.064A78F6.Up2Date".
+    11>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.Y.4967535B.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+    11>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/refint/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/refint/Yubico.YubiKit.OpenPgp.dll".
+   5:2>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj" (5:2) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (13:2) on node 7 (Clean target(s)).
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.deps.json".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+    11>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiOtp.dll".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/ref/Yubico.YubiKit.OpenPgp.dll".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.Y.AA6D3182.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/refint/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiHsm.dll".
+     8>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (Clean target(s)).
+     6>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" (Clean target(s)).
+   5:2>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj" (5:2) is building "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj" (7:2) on node 3 (Clean target(s)).
+     7>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.deps.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+    13>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (Clean target(s)).
+     7>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.csproj.CoreCompileInputs.cache".
+     9>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/Yubico.YubiKit.Oath.csproj" (Clean target(s)).
+     7>CoreClean:
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.Y.EAF34B01.Up2Date".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/refint/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+         Deleting file "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Commands.dll".
+     3>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" (Clean target(s)).
+    11>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" (Clean target(s)).
+    12>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (Clean target(s)).
+     2>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj" (Clean target(s)).
+     7>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj" (Clean target(s)).
+     5>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj" (Clean target(s)).
+     1>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/consumer/src/Yubico.YubiKit.AuditPiv001.Examples.v2.consumer.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.39

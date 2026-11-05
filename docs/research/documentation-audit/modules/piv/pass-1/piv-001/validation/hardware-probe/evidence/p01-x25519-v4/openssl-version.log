@@ -1,0 +1,13 @@
+$ /usr/bin/openssl version -a
+OpenSSL 3.6.5 29 Sep 2026 (Library: OpenSSL 3.6.5 29 Sep 2026)
+built on: Tue Sep 29 15:51:51 2026 UTC
+platform: linux-x86_64
+options:  bn(64,64)
+compiler: gcc -fPIC -pthread -m64 -Wa,--noexecstack -march=x86-64 -mtune=generic -O2 -pipe -fno-plt -fexceptions         -Wp,-D_FORTIFY_SOURCE=3 -Wformat -Werror=format-security         -fstack-clash-protection -fcf-protection         -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -g -ffile-prefix-map=/build/openssl/src=/usr/src/debug/openssl -flto=auto -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_BUILDING_OPENSSL -DBROTLI -DZLIB -DZSTD -DNDEBUG
+OPENSSLDIR: "/etc/ssl"
+ENGINESDIR: "/usr/lib/engines-3"
+MODULESDIR: "/usr/lib/ossl-modules"
+Seeding source: os-specific
+CPUINFO: OPENSSL_ia32cap=0x7ffaf3ffffebffff:0x98c007bc239c27eb:0x00400810fc18c410:0x0000000000040000:0x0000000000000000
+
+EXIT=0

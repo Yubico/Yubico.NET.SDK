@@ -1,0 +1,41 @@
+{
+  "captures": [
+    {
+      "capture": "validation/hardware-probe/evidence/p01-x25519-v4/compiler/capture.json",
+      "sha256": "f02b8d1e5a978e963b2f560fac361d5fb2c78cc7e3583af453a125f8e064ee71",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p02-pin-policy-v4/compiler/capture.json",
+      "sha256": "784b3a9357d14f79d91db9a59bfd8a1722175c1ffd3d2fd61fe9415c40c281e9",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p03-key-cert-v4/compiler/capture.json",
+      "sha256": "c625eb1aa377a36a2d29cdb5538a50ff52a1364fca28e37e74a409f4c2c2fdda",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p04-attestation-v4/compiler/capture.json",
+      "sha256": "0c1b375ea4edc7017934825dff568410411ed6c25977d16a63438a9e4a2a0dcc",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p05-tool-rsa-v4/compiler/capture.json",
+      "sha256": "6e7908d402b391d0450a90ac08930b7320cc1813780e6a14b5e1eefd41cb74f4",
+      "checked_entries": 361,
+      "mismatches": []
+    },
+    {
+      "capture": "validation/hardware-probe/evidence/p06-tool-ed25519-v4/compiler/capture.json",
+      "sha256": "bd47569982e4fd6a6b10e070d9f0cbc63537956f02294dd44422ecf0f3838645",
+      "checked_entries": 361,
+      "mismatches": []
+    }
+  ],
+  "scope": "Live Csc source/reference/analyzer/config and runtime output binary identities; original temporary allowlist is retained in each capture and restored separately"
+}

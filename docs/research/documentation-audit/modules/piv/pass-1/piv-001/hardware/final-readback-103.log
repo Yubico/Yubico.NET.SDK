@@ -1,0 +1,5 @@
+$ /usr/bin/python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py final --serial 103 --reader 'Yubico YubiKey OTP+FIDO+CCID 00 00' --output docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/final-103.json
+UTC 2026-11-05T07:17:08.686282+00:00
+{"status": "captured", "output": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/final-103.json", "failures": []}
+
+EXIT=0

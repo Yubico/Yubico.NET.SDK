@@ -1,0 +1,307 @@
+{
+  "files": 8,
+  "links": [
+    {
+      "source": "docs/architecture/raw-access-tiers.md",
+      "target": "../../src/Core/README.md#send-raw-apdus",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/architecture/raw-access-tiers.md",
+      "target": "../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/architecture/raw-access-tiers.md",
+      "target": "../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/architecture/raw-access-tiers.md",
+      "target": "../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2-gaps.md",
+      "target": "../../src/YubiOtp/README.md#calculate-an-hmac-sha1-response",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2-gaps.md",
+      "target": "../../src/OpenPgp/README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2-gaps.md",
+      "target": "../architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../architecture/raw-access-tiers.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/Piv/README.md#preview-api-migration",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/Management/README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/Oath/README.md#add-a-credential-from-decoded-bytes",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/Oath/README.md#credential-names-and-renaming",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/Core/README.md#decode-base32-text",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/Oath/README.md#migrating-reset-callers",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/YubiOtp/README.md#calculate-an-hmac-sha1-response",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/Piv/README.md#enable-reopen-recover-and-disable-pin-protected-administration",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/WebAuthn/README.md#rp-authorization-belongs-to-the-application",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/YubiOtp/README.md#constraints",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/OpenPgp/README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/migration/v1-to-v2.md",
+      "target": "../../src/YubiHsm/README.md#common-operations",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/usage/user-interaction.md",
+      "target": "../../src/Piv/README.md#user-interaction",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/usage/user-interaction.md",
+      "target": "../../src/OpenPgp/README.md#configure-touch-and-signature-policy",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/usage/user-interaction.md",
+      "target": "../../src/YubiHsm/README.md#user-interaction",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "migration/v1-to-v2.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "architecture/applet-public-api.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "live-documentation-governance.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "../src/Core/README.md#decode-base32-text",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "architecture/device-discovery-guarantees.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "migration/v1-to-v2-gaps.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "../src/OpenPgp/README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "v2-highlights.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "architecture/device-discovery-guarantees.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "docs/v1-to-v2-comparison.md",
+      "target": "../src/YubiHsm/README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/CLAUDE.md",
+      "target": "README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/CLAUDE.md",
+      "target": "../../CLAUDE.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/CLAUDE.md",
+      "target": "../Core/README.md#cryptographic-metadata",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/CLAUDE.md",
+      "target": "../../docs/TESTING.md#hardware-authorization",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../docs/linux-setup.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../Core/README.md#cryptographic-metadata",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../Core/README.md#cryptographic-metadata",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../Core/README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../SecurityDomain/README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../docs/usage/user-interaction.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../docs/usage/device-discovery.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/README.md",
+      "target": "../../docs/DEV-GUIDE.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/examples/PivTool/README.md",
+      "target": "../../README.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/examples/PivTool/README.md",
+      "target": "../../../../docs/linux-setup.md",
+      "exists": true,
+      "anchor_valid": true
+    },
+    {
+      "source": "src/Piv/examples/PivTool/README.md",
+      "target": "../../README.md#verify-the-pin-sign-and-verify-on-the-host",
+      "exists": true,
+      "anchor_valid": true
+    }
+  ],
+  "failures": [],
+  "scope": "Local target existence and Markdown heading/explicit-anchor checks; other-module contents read only for anchor metadata, external URLs remain original-citation evidence"
+}

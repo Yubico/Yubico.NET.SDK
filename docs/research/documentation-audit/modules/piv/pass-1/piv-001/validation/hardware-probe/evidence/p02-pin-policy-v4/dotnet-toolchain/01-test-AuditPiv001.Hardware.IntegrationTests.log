@@ -1,0 +1,36 @@
+$ dotnet test docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~P02_PinAlwaysConsumesVerification_PinOnceReusesIt"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Oath -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.YubiHsm -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Piv -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.YubiOtp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll
+  Yubico.YubiKit.Ctap2 -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Cli.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Cli.Commands -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll
+  PivTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.dll
+  Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests -> /tmp/opencode/piv-001-hardware/bin/Release/net10.0/AuditPiv001.Hardware.IntegrationTests.dll
+Test run for /tmp/opencode/piv-001-hardware/bin/Release/net10.0/AuditPiv001.Hardware.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.11]   Discovering: AuditPiv001.Hardware.IntegrationTests (app domain = off, method display = ClassAndMethod, method display options = None)
+[xUnit.net 00:00:00.20]   Discovered:  AuditPiv001.Hardware.IntegrationTests (7 test cases to be run)
+[xUnit.net 00:00:00.23]   Starting:    AuditPiv001.Hardware.IntegrationTests (parallel test collections = off, stop on fail = off, explicit = off)
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 1 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 2 device(s)
+[YubiKey Infrastructure] Device SN:125 FILTERED (not in allow list)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 1 filtered
+[xUnit.net 00:00:02.09]   Finished:    AuditPiv001.Hardware.IntegrationTests
+  Passed AuditPiv001.Hardware.IntegrationTests.HardwareProbeTests.P02_PinAlwaysConsumesVerification_PinOnceReusesIt(state: YubiKey(Placeholder #0: FW>=5.3.0,Conn=SmartCard,Filter=Serial103Filter)) [1 s]
+
+Test Run Successful.
+Total tests: 1
+     Passed: 1
+ Total time: 2.6385 Seconds

@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/reconcile-acceptance.py --post-format-review evidence/review-accepted-v4.json --late-coverage
+PASS:59 accepted paths,50 whitespace-only C# transforms/imports unchanged,123 module identities,64/385 clean samples (minimum39).
+
+EXIT=0

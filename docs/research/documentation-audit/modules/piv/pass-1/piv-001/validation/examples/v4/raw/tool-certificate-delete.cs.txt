@@ -1,0 +1,5 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.AuthenticateAsync(managementKey, ct);
+
+var result = await Certificates.DeleteCertificateAsync(session, Slot.Authentication, ct);

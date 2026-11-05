@@ -1,0 +1,15 @@
+
+var options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };
+await using var session = await device.CreatePivSessionAsync(options, ct);
+await session.VerifyPinAsync(pin, ct);
+
+var result = await Decryption.DecryptDataAsync(
+    session,
+    Slot.KeyManagement,
+    encryptedBytes,
+    cancellationToken: ct);
+
+if (result.Success)
+{
+    var plaintext = result.DecryptedData;
+}

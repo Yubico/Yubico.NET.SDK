@@ -1,0 +1,66 @@
+{
+  "status": "source-only-readiness-correction",
+  "changes": [
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe.py",
+      "snapshot": "preparation-v1-snapshot/run-probe.py.snapshot",
+      "before_sha256": "eedd6b4096bbc832611de908826dea2e0d99593e02a9ab92f45b2ba6390716be",
+      "after_sha256": "5567874389376673c227a094d8d9f1c6bcd7622911e0a2e9f8e92360528706a6",
+      "changed": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/ProbeSupport.cs",
+      "snapshot": "preparation-v1-snapshot/ProbeSupport.cs.snapshot",
+      "before_sha256": "0c27edd76b282798211238ff3b9deeabb10746baa20287ab5b2d22fadd3afc74",
+      "after_sha256": "9256d91e7e24c6045cc4afc39c2bbf4c4b9dc6858b914bd72366b12f6480b80f",
+      "changed": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+      "snapshot": "preparation-v1-snapshot/HardwareProbeTests.cs.snapshot",
+      "before_sha256": "aa268d1eb396a2c31d6372f4fc82a4d565cd35e63f01e2670e1e33d2d5a41ab0",
+      "after_sha256": "c792960d198ceae6ba0e870846c729f2de27728a5d0a13980ebdd544486bf2c5",
+      "changed": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/preparation.md",
+      "snapshot": "preparation-v1-snapshot/preparation.md.snapshot",
+      "before_sha256": "edeb2c063b4e4830198780c3f0e196b83dba78c7d6fb31dbbe4a06e2c5f1741d",
+      "after_sha256": "f5158bb530e4ad9e3df23a93d9d7ad7211da5f0f72a8ae827a40aadfa312ad7f",
+      "changed": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/prepared-files.json",
+      "snapshot": "preparation-v1-snapshot/prepared-files.json.snapshot",
+      "before_sha256": "713f28d73360c80bd8491ebed03f0fed232578e02ff9fd2c15e36bcdd13ae358",
+      "after_sha256": "713f28d73360c80bd8491ebed03f0fed232578e02ff9fd2c15e36bcdd13ae358",
+      "changed": false
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/supplemental-plan.md",
+      "snapshot": "preparation-v1-snapshot/supplemental-plan.md.snapshot",
+      "before_sha256": "820223c026a7cb3ef4b2d425a290f06861e6f30988d9b7d4c9e4ebcbba9ad2e9",
+      "after_sha256": "54eabc8bd0dfcc9558f356c41b3ae222e3037a76b8ff85b1ae2ecdafd9f5ea71",
+      "changed": true
+    }
+  ],
+  "configuration": {
+    "path": "src/Tests.Shared/appsettings.json",
+    "sha256": "a801916fd4cfb260d75f6a83cd827940242b6f9457a906d57b3bb12827b9660a",
+    "full_line_comment_parse": "accepted",
+    "allowed_serials": [
+      103
+    ],
+    "source_bytes_unchanged": true
+  },
+  "transformation_scope": [
+    "full-line comment parse only",
+    "external public fixture directory with UTF-8 identities",
+    "one executed case and zero skips plus actual host evidence",
+    "physical wrapper selections deferred",
+    "PIVIMP-005 stable ID; old spelling historical alias"
+  ],
+  "frozen_hardware_artifacts": "all four unchanged",
+  "validation": "Python AST and XML/JSON source/data checks only; no wrapper, compiler, test runner or hardware operation executed",
+  "current_manifest_sha256": "2f3d9f4aaebb14977aed6e2eb42b4f95cb4a75ed2422db00351540a7d925b532"
+}

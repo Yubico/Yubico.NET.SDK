@@ -1,0 +1,9 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await DeviceInfoQuery.GetPivRetryInfoAsync(session, ct);
+if (result.Success)
+{
+    Console.WriteLine($"PIN retries: {result.PinRetriesRemaining}");
+    Console.WriteLine($"PUK retries: {result.PukRetriesRemaining}");
+}

@@ -21,12 +21,13 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 /// </summary>
 /// <remarks>
 /// <para>
-/// WARNING: Resetting the PIV application permanently destroys all PIV data,
-/// keys, and certificates. This operation cannot be undone.
+/// Reset removes normal-slot keys, certificates, objects and credentials while retaining F9
+/// attestation material. Authorize this destructive operation and preserve required backups first.
 /// </para>
 /// <para>
-/// A reset can only be performed when both PIN and PUK are blocked
-/// (zero retries remaining), or when biometrics are not configured.
+/// The SDK blocks both PIN and PUK before RESET. Failure can leave retries consumed, and
+/// post-reset metadata refresh can fail after mutation. Inspect state before repeating the task.
+/// Bio MPE uses its product device-reset procedure; the PIV Bio preflight is unfinished.
 /// </para>
 /// </remarks>
 public static class Reset
@@ -39,8 +40,8 @@ public static class Reset
     /// <returns>Result indicating success or failure.</returns>
     /// <example>
     /// <code>
-    /// // WARNING: This destroys all PIV data!
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// // Requires an authorized reset decision; normal reset retains F9 material.
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// // Ensure user confirms this destructive action
     /// if (userConfirmedReset)

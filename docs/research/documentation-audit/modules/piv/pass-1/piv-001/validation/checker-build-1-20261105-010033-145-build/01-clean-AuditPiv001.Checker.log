@@ -1,0 +1,12 @@
+$ dotnet clean docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/checker/src/Yubico.YubiKit.AuditPiv001.Checker.csproj -c Release
+Build started 11/5/2026 1:00:33 AM.
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/checker/src/Yubico.YubiKit.AuditPiv001.Checker.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Creating directory "/tmp/opencode/piv-001-doccheck/obj/Release/net10.0/".
+     1>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/checker/src/Yubico.YubiKit.AuditPiv001.Checker.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.22

@@ -1,0 +1,7 @@
+
+// currentKey and newKey are caller-owned buffers; securely back up newKey before this task.
+// This example installs a 24-byte Triple-DES key on a compatible device.
+await session.AuthenticateAsync(currentKey, ct);
+var result = await PinManagement.ChangeManagementKeyAsync(
+    session, newKey, KeyType.TripleDes, requireTouch: false, cancellationToken: ct);
+// Keep the backup through fresh-session authentication; the caller clears both buffers in finally.

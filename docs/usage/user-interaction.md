@@ -190,6 +190,15 @@ The source of that certainty differs by applet and transport:
   unknown touch value on a found YubiHSM Auth credential produce `PolicyMayRequire`. A missing YubiHSM
   Auth credential remains silent. No smart-card timeout is inferred from these notifications.
 
+For PIV, notifications cover `SignOrDecrypt`, `Decrypt` and `CalculateSecret`. Explicit-algorithm signing
+and agreement look up touch policy only when a prompt is configured; metadata-driven signing/decryption
+already require slot metadata. Default/Never policy and an empty slot stay silent. A request callback
+failure prevents the private-key command. A successful response is parsed before Completed resolution,
+then output transfers or host RSA unpadding runs; local padding failure can therefore follow Completed.
+Management authentication and biometric verification use separate ceremonies. Cancellation remains
+cooperative: await terminal work and transport drain, then inspect state before retrying a mutation.
+See the [PIV task guide](../../src/Piv/README.md#user-interaction) for policy and ownership details.
+
 For OpenPGP, attestation reports scope `Att` because ATT performs the private-key operation. The session
 uses cached UIF, reads the slot directly if that entry is absent, and reports `PolicyMayRequire` on a failed
 lookup other than cancellation. `Off` and firmware without UIF support stay silent. Device APDU errors resolve as

@@ -1,0 +1,12 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.VerifyPinAsync(pin, ct); // Borrowed caller-owned PIN; required by the slot policy.
+
+var result = await Certificates.GenerateCsrAsync(
+    session, Slot.Authentication, "CN=Test User", ct);
+
+using var certificate = result.Certificate;
+if (result.Success && result.CsrPem is { } csrPem)
+{
+    await File.WriteAllTextAsync("request.csr", csrPem, ct);
+}

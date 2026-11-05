@@ -1,0 +1,15 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+
+var result = await Verification.VerifySignatureAsync(
+    session,
+    Slot.Signature,
+    originalData,
+    signatureBytes,
+    HashAlgorithmName.SHA256,
+    ct);
+
+if (result.Success && result.IsValid)
+{
+    Console.WriteLine("Signature is valid!");
+}

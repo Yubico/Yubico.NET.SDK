@@ -1,0 +1,17 @@
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Piv;
+
+static async Task EnableProtectedAdministrationAsync(
+    IYubiKey device,
+    ReadOnlyMemory<byte> pin,
+    ReadOnlyMemory<byte> activeManagementKey,
+    CancellationToken cancellationToken)
+{
+    await using var piv = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+    await piv.AuthenticateAsync(activeManagementKey, cancellationToken);
+    await piv.SetPinOnlyModeAsync(
+        PinOnlyMode.PinProtected,
+        pin,
+        activeManagementKey,
+        cancellationToken);
+}

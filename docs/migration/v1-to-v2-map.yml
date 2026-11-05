@@ -376,25 +376,25 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Piv/PivSession.Pinonly.cs
       - yubikit:src/Piv/src/IPivSession.cs
-      - yubikit:src/Piv/src/Authentication/PivPinOnlyProtocol.cs
-      - yubikit:src/Piv/src/PivPinOnlyMode.cs
+      - yubikit:src/Piv/src/Authentication/PinOnlyProtocol.cs
+      - yubikit:src/Piv/src/PinOnlyMode.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: PIV PIN-only mode was absent from the initial v2 snapshot (see historical `docs/migration/v1-to-v2-gaps.md` finding 3) and was restored by the `yubikit-gaps` remediation effort. V2 narrows the enable/disable surface to `PivPinOnlyMode.PinProtected` only; PIN-derived mode remains detectable via `GetPinOnlyModeAsync` and recoverable via `RecoverPinOnlyModeAsync`, but cannot be newly enabled (v1's `PinDerived` is a deprecated, weaker mechanism kept only for backwards compatibility). `SetPinOnlyModeAsync` requires the caller to have already authenticated the management key and pass it again explicitly; PIN-derived candidate key material is zeroed internally after each recovery attempt. Review any v1 code enabling `PivPinOnlyMode.PinDerived` manually, since v2 has no enable path for it.
+    notes: Protected setup uses PinOnlyMode.PinProtected and disabling uses None. Authenticate first and supply the already-active key again for enabling. Recovery supports existing protected/legacy-derived configurations; new derived setup is excluded. Enable authenticates the supplied key, verifies PIN, stores PRINTED, blocks PUK and updates ADMIN. Disable restores the type-appropriate public default before deleting PRINTED then ADMIN, leaving PUK blocked. Separate commands provide no rollback; keep a secure key backup and inspect/re-authenticate after partial failure. Raw PIN/key/retry changes leave recovery objects unchanged. Reopen and recover to validate migration; see the module task guide.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: piv-typed-data-objects
     status: assisted
     confidence: high
     migration_kind: type
     v1: Yubico.YubiKey.Piv.Objects.CardholderUniqueId / CardCapabilityContainer / AdminData / KeyHistory
-    v2: Yubico.YubiKit.Piv.DataObjects.PivCardholderUniqueId / PivCardCapabilityContainer / PivAdminData / PivKeyHistory
+    v2: Yubico.YubiKit.Piv.DataObjects.CardholderUniqueId / CardCapabilityContainer / AdminData / KeyHistory
     evidence:
-      - yubikit:src/Piv/src/DataObjects/PivCardholderUniqueId.cs
-      - yubikit:src/Piv/src/DataObjects/PivCardCapabilityContainer.cs
-      - yubikit:src/Piv/src/DataObjects/PivAdminData.cs
-      - yubikit:src/Piv/src/DataObjects/PivKeyHistory.cs
+      - yubikit:src/Piv/src/DataObjects/CardholderUniqueId.cs
+      - yubikit:src/Piv/src/DataObjects/CardCapabilityContainer.cs
+      - yubikit:src/Piv/src/DataObjects/AdminData.cs
+      - yubikit:src/Piv/src/DataObjects/KeyHistory.cs
       - yubikit:src/Piv/src/IPivSession.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: Typed PIV data objects were absent from the initial v2 snapshot (historical gap 10; v2's `PivDataObject.cs` was only tag constants) and were restored by the `yubikit-gaps` remediation effort with golden-vector round-trip tests. V2 exposes them as `readonly record struct` types read/written through `IPivSession.Get{Chuid,CardCapabilityContainer,AdminData,KeyHistory}Async`/`Set*Async`, replacing v1's mutable `PivDataObject`-derived classes with `Encode()`/`Decode()`/`TryDecode()`. Field names and encode/decode call shape are not guaranteed one-to-one; review call sites that read or write CHUID/CCC/AdminData/KeyHistory fields directly.
+    notes: Typed models are readonly record structs with Encode/TryDecode and IPivSession GetCardholderUniqueIdAsync, GetCardCapabilityContainerAsync, GetAdminDataAsync, GetKeyHistoryAsync and corresponding setters. They replace the mutable v1 base-class hierarchy. CHUID/CCC accept fixed SDK provisioning shapes; raw GET/PUT supports other encodings. Constructors borrow identifier/salt memory and decoders copy it. KeyHistory counts describe retired keys and its validation is narrower than the full federal profile. ADMIN timestamps use trimmed little-endian Unix seconds, differing from Python's fixed four-byte big-endian field; coordinate cross-tool writes.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: oath-password-protection-state
     status: assisted

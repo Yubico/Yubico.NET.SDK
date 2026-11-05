@@ -1,0 +1,31 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- build --project AuditPiv001.Examples.v2.annotations --clean",
+  "started": "2026-11-05T08:29:29.9021683+01:00",
+  "durationSeconds": 3.1,
+  "runDirectory": "artifacts/toolchain/runs/20261105-082929-902-build",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "failed",
+      "durationSeconds": 3,
+      "error": "`dotnet build docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v2/annotations/src/Yubico.YubiKit.AuditPiv001.Examples.v2.annotations.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261105-082929-902-build/02-build-AuditPiv001.Examples.v2.annotations.log"
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

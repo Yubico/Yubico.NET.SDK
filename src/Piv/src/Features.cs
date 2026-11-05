@@ -53,10 +53,10 @@ public static class Features
 
     /// <summary>
     /// Checks if RSA key generation is supported for the given firmware version.
-    /// RSA generation is broken on YubiKey firmware 4.2.6-4.3.4 due to ROCA vulnerability.
+    /// The SDK excludes ROCA-affected firmware 4.2.6–4.3.4. Other device/profile constraints still apply.
     /// </summary>
     /// <param name="version">Firmware version to check.</param>
-    /// <returns>True if RSA generation is supported and safe.</returns>
+    /// <returns>True when the version falls outside the modeled ROCA exclusion interval.</returns>
     public static bool SupportsRsaGeneration(FirmwareVersion version) =>
         version < new FirmwareVersion(4, 2, 6) || version >= new FirmwareVersion(4, 3, 5);
 }

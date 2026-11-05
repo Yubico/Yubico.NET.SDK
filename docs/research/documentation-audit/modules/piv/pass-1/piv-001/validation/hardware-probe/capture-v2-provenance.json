@@ -1,0 +1,190 @@
+{
+  "status": "prepared-source-only-pending-fresh-clean-build",
+  "originals": [
+    {
+      "path": "capture-compiler.py",
+      "snapshot": "capture-v1-preserved/capture-compiler.py.snapshot",
+      "sha256": "28f7c9a656151a8e6c1ae4d28fd80f996781176e184667d03e5c0cb8d46a9641",
+      "bytes": 2739
+    },
+    {
+      "path": "run-probe.py",
+      "snapshot": "capture-v1-preserved/run-probe.py.snapshot",
+      "sha256": "5567874389376673c227a094d8d9f1c6bcd7622911e0a2e9f8e92360528706a6",
+      "bytes": 9298
+    },
+    {
+      "path": "Directory.Build.props",
+      "snapshot": "capture-v1-preserved/Directory.Build.props.snapshot",
+      "sha256": "65e46bdb6a50ba8e42c3185db5535da7a91bda2bbfea6dc57f65b5636817de1e",
+      "bytes": 624
+    },
+    {
+      "path": "Directory.Build.targets",
+      "snapshot": "capture-v1-preserved/Directory.Build.targets.snapshot",
+      "sha256": "3c2ee24b5a816155bee117eca0670d26b520d1244853cf460cdd28c7e7e7a5b4",
+      "bytes": 1845
+    }
+  ],
+  "build_hook_transformations": [
+    {
+      "path": "capture-compiler.py",
+      "before_sha256": "28f7c9a656151a8e6c1ae4d28fd80f996781176e184667d03e5c0cb8d46a9641",
+      "after_sha256": "28f7c9a656151a8e6c1ae4d28fd80f996781176e184667d03e5c0cb8d46a9641",
+      "unified_diff": ""
+    },
+    {
+      "path": "run-probe.py",
+      "before_sha256": "5567874389376673c227a094d8d9f1c6bcd7622911e0a2e9f8e92360528706a6",
+      "after_sha256": "5567874389376673c227a094d8d9f1c6bcd7622911e0a2e9f8e92360528706a6",
+      "unified_diff": ""
+    },
+    {
+      "path": "Directory.Build.props",
+      "before_sha256": "65e46bdb6a50ba8e42c3185db5535da7a91bda2bbfea6dc57f65b5636817de1e",
+      "after_sha256": "1e6e14bb799c680ffa2157ca231e8e0e0083c788c6de4f2fb62c830adbde008b",
+      "unified_diff": "--- preserved/Directory.Build.props\n+++ current/Directory.Build.props\n@@ -5,6 +5,7 @@\n   </PropertyGroup>\n   <Import Project=\"$(RepositoryRoot)/Directory.Build.props\" />\n   <PropertyGroup>\n+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>\n     <ProbeWorkspace>/tmp/opencode/piv-001-hardware</ProbeWorkspace>\n     <BaseIntermediateOutputPath>$(ProbeWorkspace)/obj/</BaseIntermediateOutputPath>\n     <MSBuildProjectExtensionsPath>$(ProbeWorkspace)/obj/</MSBuildProjectExtensionsPath>\n"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "before_sha256": "3c2ee24b5a816155bee117eca0670d26b520d1244853cf460cdd28c7e7e7a5b4",
+      "after_sha256": "05d8438881ffe235bd51616c4b0eb8fdb19bc58132d5610e45b5d562bbf18b7b",
+      "unified_diff": "--- preserved/Directory.Build.targets\n+++ current/Directory.Build.targets\n@@ -6,18 +6,27 @@\n     <WriteLinesToFile File=\"$(ProbeWorkspace)/resolved-references.txt\" Lines=\"@(ReferencePathWithRefAssemblies-&gt;'%(FullPath)|%(FusionName)')\" Overwrite=\"true\" />\n     <WriteLinesToFile File=\"$(ProbeWorkspace)/analyzers.txt\" Lines=\"@(Analyzer-&gt;'%(FullPath)')\" Overwrite=\"true\" />\n     <WriteLinesToFile File=\"$(ProbeWorkspace)/analyzer-configs.txt\" Lines=\"@(EditorConfigFiles-&gt;'%(FullPath)')\" Overwrite=\"true\" />\n+    <WriteLinesToFile File=\"$(ProbeWorkspace)/project-references.txt\" Lines=\"@(ProjectReference-&gt;'%(FullPath)')\" Overwrite=\"true\" />\n+    <WriteLinesToFile File=\"$(ProbeWorkspace)/resolved-project-references.txt\" Lines=\"@(_ResolvedProjectReferencePaths-&gt;'%(FullPath)|%(MSBuildSourceProjectFile)')\" Overwrite=\"true\" />\n+    <WriteLinesToFile File=\"$(ProbeWorkspace)/imported-projects.txt\" Lines=\"$(MSBuildAllProjects)\" Overwrite=\"true\" />\n   </Target>\n   <Target Name=\"CaptureAuditPiv001HardwarePolicy\" AfterTargets=\"CoreCompile\">\n     <WriteLinesToFile File=\"$(ProbeWorkspace)/csc-command-line.txt\" Lines=\"@(CscCommandLineArgs)\" Overwrite=\"true\" />\n     <ItemGroup>\n       <ProbePolicy Include=\"NETCoreSdkVersion=$(NETCoreSdkVersion)\" />\n+      <ProbePolicy Include=\"MSBuildProjectFullPath=$(MSBuildProjectFullPath)\" />\n+      <ProbePolicy Include=\"ProjectAssetsFile=$(ProjectAssetsFile)\" />\n+      <ProbePolicy Include=\"Configuration=$(Configuration)\" />\n       <ProbePolicy Include=\"TargetFramework=$(TargetFramework)\" />\n       <ProbePolicy Include=\"LangVersion=$(LangVersion)\" />\n       <ProbePolicy Include=\"TreatWarningsAsErrors=$(TreatWarningsAsErrors)\" />\n+      <ProbePolicy Include=\"WarningLevel=$(WarningLevel)\" />\n       <ProbePolicy Include=\"AnalysisLevel=$(AnalysisLevel)\" />\n       <ProbePolicy Include=\"AnalysisMode=$(AnalysisMode)\" />\n       <ProbePolicy Include=\"EnableNETAnalyzers=$(EnableNETAnalyzers)\" />\n       <ProbePolicy Include=\"RunAnalyzersDuringBuild=$(RunAnalyzersDuringBuild)\" />\n+      <ProbePolicy Include=\"RunAnalyzers=$(RunAnalyzers)\" />\n+      <ProbePolicy Include=\"SkipAnalyzers=$(SkipAnalyzers)\" />\n       <ProbePolicy Include=\"SkipCompilerExecution=$(SkipCompilerExecution)\" />\n       <ProbePolicy Include=\"NoWarn=$([System.String]::Copy('$(NoWarn)').Replace(';', ','))\" />\n     </ItemGroup>\n"
+    }
+  ],
+  "tools": [
+    {
+      "path": "capture-v2.py",
+      "bytes": 10126,
+      "sha256": "11140e2147b1fb84476a1725555c31cd631c65c1f56dba1f96a9c6c3ec043b69"
+    },
+    {
+      "path": "analyzer-policy-v2.py",
+      "bytes": 8083,
+      "sha256": "691e233a30c6c8dc4dabd5a53e1b57a16a0cbfcf27887c5d0d87640ba54c8de1"
+    },
+    {
+      "path": "run-probe-v3.py",
+      "bytes": 9286,
+      "sha256": "0514f38179aa60669b1611a4506e4a445eb6b7f424079d407eea73b61d07dd9a"
+    }
+  ],
+  "algorithm_sources": [
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/capture.py",
+      "sha256": "68560398ebab8feee7100010211a6b8863f8a4af421211477324018ca06031f4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/provenance.py",
+      "sha256": "5c62f97c4ed5c518f451be55b366e8b2c208284ffd3de9b3e35024796c84f29e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/compiler_policy.py",
+      "sha256": "691e233a30c6c8dc4dabd5a53e1b57a16a0cbfcf27887c5d0d87640ba54c8de1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/validation/hardware-probe/retain-inputs.py",
+      "sha256": "08970dc5d76411833b6d54232a2064448e1709603a19479627c3b8cb97fe5628"
+    }
+  ],
+  "canonical_analyzer_proof_exact_copy": true,
+  "wrapper_transform": {
+    "before": "capture-compiler.py",
+    "after": "capture-v2.py",
+    "occurrences": 2,
+    "exact_forward_match": true
+  },
+  "failed_historical_artifacts": [
+    {
+      "path": "evidence/p01-x25519-v2/build-toolchain/01-clean-AuditPiv001.Hardware.IntegrationTests.log",
+      "bytes": 50054,
+      "sha256": "11671f54928123abca55ec35d54413679975107c9c0e396003c6142e37336e80"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/build-toolchain/02-build-AuditPiv001.Hardware.IntegrationTests.log",
+      "bytes": 2411,
+      "sha256": "261f60192a7cc5f04d4d51b6307211cd79a165f1217ad5930aec4e28c916c970"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/build-toolchain/result.json",
+      "bytes": 731,
+      "sha256": "67e5b6831efce4e87cdb8e6f0b3ef2659cb0bffbf362fd8c416dc627380edffe"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/build-toolchain/run.log",
+      "bytes": 2335,
+      "sha256": "7cd25d79bc8aff5e6c8d6b8c1d94fb9bf03bff70d604c66870e75be1bae51bcf"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/build.log",
+      "bytes": 2093,
+      "sha256": "e7507ca9a03a73cdbaf04632040de9ec47892c41eb2b6511cd65fd8266c85493"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/compiler/analyzer-configs.txt",
+      "bytes": 352,
+      "sha256": "4bdd08d0e948b01a524f180d639289fa16283512ac31f47ec675547913558cc1"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/compiler/analyzers.txt",
+      "bytes": 1660,
+      "sha256": "6bb424008a642d2f2ec9b33b43db86b434748783a3fcccd211e33156a295ac6d"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/compiler/compile-inputs.txt",
+      "bytes": 1081,
+      "sha256": "717f78508944790d041b2f2f77810fe2ef8c5eafdc9c0dea89ca5081745bd8e1"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/compiler/csc-command-line.txt",
+      "bytes": 33657,
+      "sha256": "8f3c3b2a8a0b7951077b9cb8bd2dc3924e2e25124ae02e976371f532b1b577aa"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/compiler/policy-final.txt",
+      "bytes": 317,
+      "sha256": "1309afd01c3bce3323e7871698df4136bbce77833b5d82c1d523722cb8f92d94"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/compiler/resolved-references.txt",
+      "bytes": 47324,
+      "sha256": "5c23470d58c08587b6a769b80619e66296a2c65ca5871bb7adb3ce791dc6183f"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/compiler-capture.log",
+      "bytes": 385,
+      "sha256": "8c23a49820b009a65f2ce1fa35196730c87aee577e6c82aef2848084f782ed3e"
+    },
+    {
+      "path": "evidence/p01-x25519-v2/result.json",
+      "bytes": 2162,
+      "sha256": "a6b501192df24e35a6890d833bda426c35558d54973a8a7993861636f5567e3d"
+    }
+  ],
+  "old_context_read_only_observation": {
+    "actual_membership_counts": {
+      "resolved-references.txt": 216,
+      "analyzers.txt": 12,
+      "analyzer-configs.txt": 3,
+      "compile-inputs.txt": 7
+    },
+    "analysis_mode": "Recommended",
+    "builtin_analyzer_selection": "false",
+    "qualification": "failed historical capture only; current product source hashes are not rebound to this old compilation"
+  },
+  "current_product_source_identity_claim": "none: editor corrected source after first build; only future fresh compile/capture may bind current full product sources",
+  "new_policy": {
+    "mode": "AllEnabledByDefault",
+    "canonical_analyzers": "explicit NetAnalyzers 9.0.0 pair with unchanged canonical proof",
+    "capture_requires": "fresh rich metadata; exact actual Csc sets; four real project ref bindings; WAE/warn9999/net10/C#14/no skip; full text/assets snapshots; live DLL identities"
+  },
+  "checks": [
+    "Python AST",
+    "XML structure",
+    "exact analyzer proof byte copy",
+    "exact two-path wrapper substitution",
+    "original tools/snapshots unchanged",
+    "read-only old Csc set reconciliation"
+  ],
+  "executed": "no capture helper, build, test, hardware, formatter, commit or subagent"
+}

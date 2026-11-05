@@ -307,7 +307,7 @@ internal static class AuthenticationProtocol
         if (keyType == KeyType.TripleDes)
         {
             // Preserve explicit EDE for the public factory default, which .NET rejects as a
-            // weak TripleDES key even though PIV requires it. Each DES component is still valid.
+            // weak TripleDES key. Yubico uses this factory pattern; each DES component is still valid.
             if (encrypt)
                 TripleDesEncryptManual(key, input, output);
             else
@@ -333,7 +333,7 @@ internal static class AuthenticationProtocol
     /// <summary>
     /// Manually implements 3DES-ECB decryption using individual DES operations.
     /// This avoids .NET's TripleDES weak key rejection, which blocks the default
-    /// PIV management key (0102030405060708 repeated) mandated by the PIV spec.
+    /// Yubico factory management key (0102030405060708 repeated).
     /// 3DES Decrypt = DES-Decrypt(K1) ∘ DES-Encrypt(K2) ∘ DES-Decrypt(K3)
     /// </summary>
     private static void TripleDesDecryptManual(ReadOnlySpan<byte> key24, ReadOnlySpan<byte> input, Span<byte> output)
@@ -410,11 +410,11 @@ internal static class AuthenticationProtocol
     /// <remarks>
     /// <para>
     /// PIN verification is required for certain operations like signing and decryption.
-    /// The verification persists until the session ends or another application is selected.
+    /// The card controls verification lifetime according to the key policy and card/application state.
     /// </para>
     /// <para>
-    /// After 3 consecutive failed attempts, the PIN becomes blocked and must be unblocked
-    /// with the PUK (PIN Unblocking Key).
+    /// Failed attempts consume the configured retry budget (factory default three). A usable PUK
+    /// can unblock the PIN; when both credentials are blocked, recovery needs a separate reset decision.
     /// </para>
     /// <para>
     /// Default PIN: 123456
@@ -472,9 +472,10 @@ internal static class AuthenticationProtocol
     /// Gets the number of PIN verification attempts remaining.
     /// </summary>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>Number of attempts remaining (0-3).</returns>
+    /// <returns>A status-word retry count from 0–15. Success without a count raises InvalidOperationException.</returns>
     /// <remarks>
-    /// This method performs an empty PIN verify as fallback for older firmware.
+    /// This fallback sends VERIFY with absent data, which queries state without consuming retries.
+    /// It differs from submitting a padded empty credential while deliberately blocking the PIN.
     /// </remarks>
     internal static async Task<int> GetPinAttemptsAsync(
         IBackend backend,
@@ -483,7 +484,7 @@ internal static class AuthenticationProtocol
         Logger.LogDebug("PIV: Getting PIN attempt count");
 
         cancellationToken.ThrowIfCancellationRequested();
-        // Fallback: empty PIN verify to get retry count
+        // Fallback: absent-data VERIFY queries retry state without presenting a credential.
         var command = new ApduCommand(Cla, InsVerify, 0, KeyReference.Pin, ReadOnlyMemory<byte>.Empty);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
@@ -605,7 +606,7 @@ internal static class AuthenticationProtocol
             data[2] = (byte)newKey.Length;
             newKey.Span.CopyTo(data.AsSpan(ManagementKeyHeaderLength));
 
-            // P2 = touch policy: 0xFF (no touch), 0xFE (touch required), 0xFD (cached touch)
+            // The boolean API selects P2 FF (no touch) or FE (touch required).
             byte p2 = requireTouch ? TouchRequiredParameter : NoTouchParameter;
             var command = new ApduCommand(Cla, InsSetManagementKey, SetManagementKeyParameter, p2, data);
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);

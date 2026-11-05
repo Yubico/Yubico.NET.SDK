@@ -1,0 +1,27 @@
+[
+  {
+    "source": "reviewed-files.json",
+    "retained": "validation/reconciliation-v3/reviewed-files.json",
+    "sha256": "b20c1f14d7c91383e5282775c3ab83aca8ffbf2a4eaed27c8446a45e346a45b9"
+  },
+  {
+    "source": "coverage-final.json",
+    "retained": "validation/reconciliation-v3/coverage-final.json",
+    "sha256": "4107792e2164d664f264e7c9c682f0aed5873de96bdd9436213feb257a08ab67"
+  },
+  {
+    "source": "sampling-final.json",
+    "retained": "validation/reconciliation-v3/sampling-final.json",
+    "sha256": "b050373fd05990613033d5be7dd6f3346f33522d967cae35f00ed2cfd8d48384"
+  },
+  {
+    "source": "validation/format-transform.json",
+    "retained": "validation/reconciliation-v3/validation--format-transform.json",
+    "sha256": "038b0a564e05dcf8f376222cac5963dd4bfe35b75d057d4dad9b37d63cef3ad4"
+  },
+  {
+    "source": "validation/reconcile-acceptance.py",
+    "retained": "validation/reconciliation-v3/validation--reconcile-acceptance.py",
+    "sha256": "0dc91c015732d8c9e58784c1c95a0a60240b22b36259dc6756c7d05d13abaaae"
+  }
+]

@@ -1,0 +1,477 @@
+Smart Card - PIV Compatible Specifics — YubiKey Technical Manual  documentation
+YubiKey Technical Manual
+Contents
+Introduction to the YubiKey Series
+Physical Attributes
+Protocols and Applications
+FIDO Specifics
+Smart Card - PIV Compatible Specifics
+Default Values
+Supported Algorithms
+Policies
+PIN Policy
+Touch Policy
+Slot Information
+Slot 9a: PIV Authentication
+Slot 9c: Digital Signature
+Slot 9d: Key Management
+Slot 9e: Card Authentication
+Slots 82-95: Retired Key Management
+Slot f9: Attestation
+Advanced Key Management Functions
+Import a Key
+Move a Key
+Delete a Key
+Attestation
+Firmware
+Serial Number
+PIN Policy
+Touch Policy
+Form Factor
+PIV Metadata
+Background: How PIV Attestation Works
+Notes on PIV Attestation
+When To Use PIV Metadata
+Yubico PIV Library and Metadata API
+Using PIV Metadata with YKCS11
+Changes
+Answer to Reset (ATR) and Answer to Select (ATS)
+PIV Attestation Root CA
+Easier Identification
+PIV AES Management Key
+OATH Specifics
+OpenPGP Specifics
+OTP Specifics
+Secure Channel Protocol (SCP03 and SCP11) Specifics
+YubiHSM Auth Specifics
+YubiKey Firmware
+YubiKey 5 FIPS Series Specifics
+YubiKey Bio Series Specifics
+NFC ID Calculation Technical Description
+Tools and Troubleshooting
+YubiKey 5 CSPN Series Specifics
+Acronyms
+Copyright
+YubiKey Technical Manual
+Protocols and Applications
+Smart Card - PIV Compatible Specifics
+View page source
+Smart Card - PIV Compatible Specifics
+
+The YubiKey 5 Series provides a PIV-compatible smart card application. PIV, or FIPS 201, is a US government standard. It enables RSA or ECC sign/encrypt operations using a private key stored on a smart card through common interfaces like PKCS#11.
+On Windows, the smart card functionality can be extended with the YubiKey Minidriver. See
+YubiKey Minidriver User Guide
+.
+Note
+The YubiKey Minidriver is not available for Android, Linux, macOS or iOS.
+The YubiKey 5 Series supports extended APDUs, extended
+Answer
+To
+Reset
+(ATR), and
+Answer
+To
+Select
+(ATS). Using the PIV APDUs on iOS requires the
+Yubico iOS SDK
+.
+For an overview of the PIV features that became available with the 5.7.x and later firmware, see
+PIV Enhancements
+.
+Default Values
+
+PIN:
+123456
+PUK:
+12345678
+Management Key (3DES):
+Firmware 5.0.x-5.6.x:
+010203040506070801020304050607080102030405060708
+(3DES)
+Firmware 5.7.x and later:
+010203040506070801020304050607080102030405060708
+(AES-192)
+Note
+The Management Key changed to AES-192 in firmware 5.7 and later, however the default value itself did not change.
+Supported Algorithms
+
+The YubiKey 5 Series supports the following algorithms on the PIV smart card application.
+Available PIV Algorithms per Firmware Version
+
+Algorithm (Identifier)
+Firmware Versions
+5.8.x
+5.7.4
+5.0.x-5.6.x
+RSA-1024 (0x06)
+Yes
+Yes
+Yes
+RSA-2048 (0x07)
+Yes
+Yes
+Yes
+RSA-3072 (0x05)
+Yes
+Yes
+–
+RSA-4096 (0x16)
+Yes
+Yes
+–
+ECC P-256 (0x11)
+Yes
+Yes
+Yes
+ECC P-384 (0x14)
+Yes
+Yes
+Yes
+Ed25519/x25519 (0xe0)
+Yes
+Yes
+–
+Policies
+
+PIN Policy
+
+To specify how often the PIN needs to be entered for access to the credential in a given slot, set a PIN policy for that slot. This policy must be set upon key generation or import. It cannot be changed later.
+Touch Policy
+
+In addition to requiring the PIN, the YubiKey can require a physical touch on the metal contact. Similar to the PIN policy, the touch policy must be set upon key generation or import.
+Slot Information
+
+The keys and certificates for the smart card application are stored in slots, which are described below. The PIN policies described below are the defaults, before they are overridden with a custom PIN policy.
+These slots are separate from the programmable slots in the OTP application.
+Slot 9a: PIV Authentication
+
+This certificate and its associated private key is used to authenticate the card and the cardholder. This slot is used for system login, etc. To perform any private key operations, the end user PIN is required. Once the correct PIN has been provided, multiple private key operations may be performed without additional cardholder consent.
+Slot 9c: Digital Signature
+
+This certificate and its associated private key is used for digital signatures for the purpose of document, email, file, and executable signing. To perform any private key operations, the end user PIN is required. The PIN must be submitted immediately before each sign operation to ensure cardholder participation for every digital signature generated.
+Slot 9d: Key Management
+
+This certificate and its associated private key is used for encryption to assure confidentiality. This slot is used for encrypting emails or files. The end user PIN is required to perform any private key operations. Once the correct PIN has been provided, multiple private key operations may be performed without additional cardholder consent.
+Slot 9e: Card Authentication
+
+This certificate and its associated private key is used to support additional physical access applications, such as providing physical access to buildings through PIV-enabled door locks. The end user PIN is NOT required to perform private key operations for this slot.
+Slots 82-95: Retired Key Management
+
+These slots are meant for previously used Key Management keys to be able to decrypt earlier encrypted documents or emails.
+Slot f9: Attestation
+
+This slot is only used for attestation of other keys generated on the device with instruction f9. This slot is not cleared on reset, but can be overwritten.
+Advanced Key Management Functions
+
+With the 5.7.x and later firmware, the PIV application supports advanced key management functions such as moving and deleting keys:
+The ability to move keys enables retaining retired encryption keys on the device to decrypt older messages.
+The ability to delete keys enables destroying key material without overwriting with bogus data or resetting the PIV application.
+Import a Key
+
+For more information, see
+Import asymmetric key pair
+.
+Move a Key
+
+Keys can be moved from any slot except F9 (attestation) to any other slot except F9 using the instruction 0xF6.
+Moving a Key
+
+CLA
+00
+INS
+F6
+P1
+Destination slot
+9A, 9C, 9D, 9E,
+82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F,
+90, 91, 92, 93, 94, 95
+P2
+Source slot
+9A, 9C, 9D, 9E,
+82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F,
+90, 91, 92, 93, 94, 95
+P2
+Delete a Key
+
+Any key can be deleted from any slot, including F9 (Attestation) using the instruction 0xF6 with a value of 0xFF for P1.
+Deleting a Key
+
+CLA
+00
+INS
+F6
+P1
+FF
+P2
+Source slot
+9A, 9C, 9D, 9E,
+82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F,
+90, 91, 92, 93, 94, 95
+F9
+Attestation
+
+Attestation enables you to verify that a key on the smart card application was generated on the YubiKey and was not imported. An X.509 certificate for the key to be attested is created if the key has been generated on the YubiKey. Included in the certificate are the following extensions that provide information about the YubiKey.
+Firmware
+
+1.3.6.1.4.1.41482.3.3
+: Firmware version, encoded as three bytes. For example, 050100 indicates firmware version 5.1.0.
+Serial Number
+
+1.3.6.1.4.1.41482.3.7
+: Serial number of the YubiKey, encoded as an integer.
+1.3.6.1.4.1.41482.3.8
+: Two bytes, the first encoding the PIN policy and the second encoding the touch policy.
+PIN Policy
+
+01 - never require PIN
+02 - require PIN once per session
+03 - always require PIN.
+Touch Policy
+
+01 - never require touch
+02 - always require touch
+03 - cache touch for 15 seconds.
+Form Factor
+
+1.3.6.1.4.1.41482.3.9
+: YubiKey form factor, encoded as a one-byte octet-string during manufacturing and returned as a one-byte value.
+NFC and USB-A keychain: 0x01
+Nano USB-A: 0x02
+NFC and USB-C keychain: 0x03
+Nano USB-C: 0x04
+Lightning and USB-C keychain: 0x05
+UNDEFINED: 0x00
+Keychain form factors also have space for adding to a keychain. See
+YubiKey 5 FIPS Series
+.
+PIV Metadata
+
+Background: How PIV Attestation Works
+
+A technical description of YubiKey PIV attestation is available at the
+Yubico developer website
+.
+Attestation is performed on a public key that has been
+generated on the YubiKey
+. For example, consider an asymmetric key-pair that is generated on the YubiKey with the following
+ykman
+command:
+ykman
+piv
+generate-key
+9c
+-
+This command generates an asymmetric key-pair, and stores the private key in the specified slot (9c in this example). The public key that has been generated is returned as output.
+The ykman attestation command can be executed for the key-pair at the slot (9c):
+ykman
+piv
+attest
+9c
+C:\Test\attestation-cert-9c.cer
+The generated certificate is generated in real time at the YubiKey. The attestation certificate and private key, which are stored in slot f9, are used for signing the generated certificate for the slot (9c). The attestation certificate is used as template when creating the generated certificate for the slot (9c). In addition to the template attestation certificate, the
+extensions and subject details
+are appended to the generated certificate.
+However, the generated certificate is not the same as the X.509 certificate that may be issued by an external CA or self-signed on the YubiKey. For example, the X.509 certificate could be issued by the Microsoft ADCS and written to the YubiKey. The
+Yubico Authenticator
+on Windows can be used to generate a key-pair and self-sign the public key at the YubiKey.
+The public key at slot 9a can be attested (signed in real time by the CA attestation certificate) with the same ykman command as above:
+ykman
+piv
+attest
+9a
+C:\Test\attestation-cert-9a.cer
+And the X.509 self-signed certificate can be exported from the YubiKey with the following ykman command:
+ykman
+piv
+export-certificate
+9a
+C:\Test\self-signed-9a.cer
+Notes on PIV Attestation
+
+PIV attestation only works for asymmetric keys that have been
+generated on
+the YubiKey. It does not work for asymmetric keys that have been
+imported into
+the YubiKey as the attestation attests that a private key only exists on that particular YubiKey.
+For example, the following ykman command imports a PKCS #12 file into the YubiKey at slot 9e:
+ykman
+piv
+import-key
+9e
+C:\\Test\\TestUser1.p12
+-P
+123456
+ykman
+piv
+import-certificate
+9e
+C:\\Test\\TestUser1.p12
+-P
+123456
+These ykman commands unpack the PKCS #12 file, store the private key in the private key slot (9e), and store the X.509 certificate in the corresponding certificate slot.
+Now, if one tries to attest the public key at slot 9e with the ykman attestation command, the operation fails:
+ykman
+piv
+attest
+9e
+C:\\Test\\attestation-9e.cer
+Error:
+Attestation
+failed.
+One more drawback with PIV attestation is performance, since generation of multiple PIV attestation certificates can be time-consuming.
+When To Use PIV Metadata
+
+PIV metadata should be used for the following cases:
+If PIV attestation cannot be used (for imported keys),
+If an attestation certificate is not required, PIV metadata can be used for achieving higher performance.
+Yubico PIV Library and Metadata API
+
+PIV metadata is supported by YubiKey v5.3.0 firmware and above. YubiKey PIV metadata can be accessed by using the
+libykpiv
+library.
+The
+Yubico PIV Tool
+contains the library
+libykpiv.so
+(for Linux),
+libykpiv.dylib
+(for MacOS),
+libykpiv.dll
+(for Windows).
+The source code of the
+libykpiv
+library is published at the
+Yubico GitHub repo
+.
+libykpiv library
+
+The
+libykpiv
+library exposes a C API in the header file
+ykpiv.h
+, which includes the functions
+ykpiv_get_metadata()
+and
+ykpiv_util_parse_metadata()
+. The source code of these functions is available in the file
+ykpiv.c
+.
+In particular, the function
+ykpiv_get_metadata()
+calls the underlying function
+_ykpiv_transfer_data()
+, which transfers APDUs to the YubiKey PIV applet over the CCID interface.
+The function
+_ykpiv_transfer_data()
+takes the input parameter
+templ
+, which is populated with the APDUs (
+CLA
+,
+INS
+,
+P1
+,
+P2
+) that are specified at the Yubico developer website for
+PIV extensions
+under the section
+GET METADATA
+. The YubiKey returns the tag length values (TLVs) (
+Algorithm
+,
+Policy
+,
+Origin
+, etc.) that are specified in the same
+PIV extensions
+section, and the TLV-encoded output is returned in the
+ykpiv_get_metadata()
+parameter data.
+TLVs Returned
+
+Key
+TLV
+Description
+Algorithm
+0x01
+Algorithm/type of the key
+Policy
+0x02
+PIN and Touch policy of the key (keys only)
+Origin
+0x03
+Origin of the key: imported or generated
+Public key
+0x04
+Public key associated with the private key
+Default value
+0x05
+Whether the PIN/key has a default value
+(PIN and PUK and Mgmt key only)
+Retries
+0x06
+Number of retries left (PIN and PUK only)
+It is even possible to invoke the function
+ykpiv_transfer_data()
+directly for low-level APDU communication with the YubiKey’s PIV applet.
+The function
+ykpiv_util_parse_metadata()
+can be used for parsing the returned TLV-encoded object.
+Therefore, the developer can integrate the
+libykpiv
+library for low level programming with YubiKey PIV metadata.
+Using PIV Metadata with YKCS11
+
+The
+YKCS11 library
+is  part of the Yubico PIV Tool. YKCS11 is a
+PKCS#11 module
+that allows external applications to communicate with the PIV application running on a YubiKey.
+When the PKCS #11 function
+C_OpenSession()
+is called for a YubiKey PKCS #11 slot (which is a YubiKey PIV application in a PC/SC reader), then the YKCS11 library parses out the public keys for all PIV key slots. If PIV attestation is supported, the PIV attestation certificate is used for parsing out the public key.
+If PIV attestation is not supported, that is, if the key-pair has been imported into a YubiKey, then the YKCS11 library calls the functions
+ykpiv_get_metadata()
+and
+ykpiv_util_parse_metadata()
+to parse out the requested public key.
+If both attestation and PIV metadata fail, in that order, YKCS11 falls back to parse the public key from the X.509 certificate.
+Note
+The X.509 certificate’s public key may not match the private key in the YubiKey PIV slot.
+Changes
+
+Answer to Reset (ATR) and Answer to Select (ATS)
+
+The ATR has been changed from
+Yubikey 4
+to
+YubiKey
+and adds support for ATS.
+PIV Attestation Root CA
+
+YubiKeys 5 Series have a PIV attestation root certificate authority different than previous YubiKeys. Download the certificate of the new root certificate authority on the
+PIV attestation
+page.
+Easier Identification
+
+The YubiKey 5 Series devices can report their form factor through the PIV application whether or not they have an NFC interface. This enables easier, programmatic identification of the physical attributes of the YubiKey. For more information about how to query this information, see the
+YubiKey 5 Series Configuration Reference Guide
+.
+PIV AES Management Key
+
+Historically, the YubiKey PIV management key is a 3DES key. With the release of the YubiKey firmware version 5.4.2, the YubiKey PIV Management Key can also be an AES key. For more details, see the article on our Developer site,
+YubiKey and PIV
+.
+Technically speaking, this feature expands the management key type held in PIV slot 9b to include AES keys (128, 192 and 256) as defined in the PIV specification (
+SP800-78-4
+, section 5). PIV management key in AES format renders the YubiKey compatible with current or future FIPS-compliant CMS services.
+With the release of YubiKey firmware version 5.7 and later the YubiKey PIV Management Key is AES-192 by default.
+Previous
+Next
+©
+Copyright
+2026, Yubico AB.
+Cookies
+|
+Privacy Policy

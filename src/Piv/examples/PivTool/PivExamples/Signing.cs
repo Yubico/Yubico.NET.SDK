@@ -29,6 +29,9 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 /// <para>
 /// PIN verification may be required depending on the slot's PIN policy.
 /// Touch may be required depending on the slot's touch policy.
+/// This helper hashes every input and is suitable for the ECDSA demonstration below. RSA needs
+/// host EMSA encoding, which this helper omits; Ed25519 needs the original message, whereas this
+/// helper signs its hash. Use the direct SDK for those algorithms and CalculateSecretAsync for X25519.
 /// </para>
 /// </remarks>
 public static class Signing
@@ -36,7 +39,7 @@ public static class Signing
     /// <summary>
     /// Signs data using the private key in a PIV slot.
     /// </summary>
-    /// <param name="session">An authenticated PIV session with PIN already verified if required.</param>
+    /// <param name="session">A metadata-capable PIV session with PIN already verified if the key policy requires it.</param>
     /// <param name="slot">The slot containing the signing key.</param>
     /// <param name="dataToSign">The data to sign (will be hashed).</param>
     /// <param name="hashAlgorithm">Hash algorithm to use (SHA256, SHA384, or SHA512).</param>
@@ -45,6 +48,7 @@ public static class Signing
     /// <example>
     /// <code>
     /// var options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };
+    /// // Requires an application-owned prompt, caller-owned PIN/data and a provisioned P-256/P-384 slot.
     /// await using var session = await device.CreatePivSessionAsync(options, ct);
     /// await session.VerifyPinAsync(pin, ct);
     /// 

@@ -1,0 +1,8 @@
+
+await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+await session.AuthenticateAsync(managementKey, ct);
+
+var certData = await File.ReadAllBytesAsync("certificate.pem", ct);
+var result = await Certificates.ImportCertificateAsync(
+    session, Slot.Authentication, certData, compress: false, cancellationToken: ct);
+using var certificate = result.Certificate;

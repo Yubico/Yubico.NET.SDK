@@ -27,12 +27,13 @@ public sealed record AttestationResult
     public bool Success { get; init; }
 
     /// <summary>
-    /// Gets the attestation certificate for the key.
+    /// Gets the caller-owned slot attestation certificate, or the F9 signer certificate returned
+    /// by GetIntermediateCertificateAsync. Dispose it after use.
     /// </summary>
     public X509Certificate2? AttestationCertificate { get; init; }
 
     /// <summary>
-    /// Gets the intermediate certificate (Yubico PIV CA).
+    /// Gets the caller-owned intermediate certificate (Yubico PIV CA). Dispose it after use.
     /// </summary>
     public X509Certificate2? IntermediateCertificate { get; init; }
 

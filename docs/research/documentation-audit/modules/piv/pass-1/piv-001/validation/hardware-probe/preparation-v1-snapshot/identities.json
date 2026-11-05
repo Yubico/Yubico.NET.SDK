@@ -1,0 +1,32 @@
+[
+  {
+    "source": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe.py",
+    "snapshot": "preparation-v1-snapshot/run-probe.py.snapshot",
+    "sha256": "eedd6b4096bbc832611de908826dea2e0d99593e02a9ab92f45b2ba6390716be"
+  },
+  {
+    "source": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/ProbeSupport.cs",
+    "snapshot": "preparation-v1-snapshot/ProbeSupport.cs.snapshot",
+    "sha256": "0c27edd76b282798211238ff3b9deeabb10746baa20287ab5b2d22fadd3afc74"
+  },
+  {
+    "source": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/tests/Yubico.YubiKit.AuditPiv001.Hardware.IntegrationTests/src/HardwareProbeTests.cs",
+    "snapshot": "preparation-v1-snapshot/HardwareProbeTests.cs.snapshot",
+    "sha256": "aa268d1eb396a2c31d6372f4fc82a4d565cd35e63f01e2670e1e33d2d5a41ab0"
+  },
+  {
+    "source": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/preparation.md",
+    "snapshot": "preparation-v1-snapshot/preparation.md.snapshot",
+    "sha256": "edeb2c063b4e4830198780c3f0e196b83dba78c7d6fb31dbbe4a06e2c5f1741d"
+  },
+  {
+    "source": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/prepared-files.json",
+    "snapshot": "preparation-v1-snapshot/prepared-files.json.snapshot",
+    "sha256": "713f28d73360c80bd8491ebed03f0fed232578e02ff9fd2c15e36bcdd13ae358"
+  },
+  {
+    "source": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/supplemental-plan.md",
+    "snapshot": "preparation-v1-snapshot/supplemental-plan.md.snapshot",
+    "sha256": "820223c026a7cb3ef4b2d425a290f06861e6f30988d9b7d4c9e4ebcbba9ad2e9"
+  }
+]

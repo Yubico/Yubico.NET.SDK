@@ -1,0 +1,10 @@
+RESULT: PASSED  (dotnet toolchain.cs -- test --integration --project Piv.IntegrationTests --filter "Category!=RequiresUserPresence")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ test                     483.8s
+Projects (test):
+  ✓ PASS      Piv.IntegrationTests  83 executed, 3 skipped
+Totals: projects: 1 passed, 0 failed, 0 with no tests executed; tests: 83 executed, 0 failed, 3 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261105-011511-789-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

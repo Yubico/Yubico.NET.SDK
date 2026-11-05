@@ -1,0 +1,20 @@
+[
+  {
+    "source": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/capture-v2.py",
+    "snapshot": "capture-v2-preserved/capture-v2.py.snapshot",
+    "sha256": "11140e2147b1fb84476a1725555c31cd631c65c1f56dba1f96a9c6c3ec043b69",
+    "bytes": 10126
+  },
+  {
+    "source": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe-v3.py",
+    "snapshot": "capture-v2-preserved/run-probe-v3.py.snapshot",
+    "sha256": "0514f38179aa60669b1611a4506e4a445eb6b7f424079d407eea73b61d07dd9a",
+    "bytes": 9286
+  },
+  {
+    "source": "/tmp/opencode/piv-001-hardware/project-references.txt",
+    "snapshot": "capture-v2-preserved/project-references.txt.snapshot",
+    "sha256": "5462332fd67a78f4705a2fe7d2e76a19d5dcdca871ce72bcae8a2e9483e26ff0",
+    "bytes": 1042
+  }
+]

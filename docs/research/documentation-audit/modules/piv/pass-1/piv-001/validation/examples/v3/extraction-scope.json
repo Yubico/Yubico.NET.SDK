@@ -1,0 +1,124 @@
+{
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "editor_complete": true,
+  "reviewer_complete": true,
+  "formatter_complete": true,
+  "notification": "Coordinator released v3 final inputs after independent acceptance of the Markdown annotation correction and qualified canonical README project selectors. Fresh v3 consumer, annotation and actual-shipping contexts require their own compilation/captures.",
+  "editor_report": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/edit-corrections.md",
+    "sha256": "50bd6dc6b21a15efba8091ae9813df1261d3741a8f647ab71859da164be8a3f0"
+  },
+  "final_review": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/reviewed-files.json",
+    "sha256": "b20c1f14d7c91383e5282775c3ab83aca8ffbf2a4eaed27c8446a45e346a45b9"
+  },
+  "formatter_record": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/format-transform.json",
+    "sha256": "038b0a564e05dcf8f376222cac5963dd4bfe35b75d057d4dad9b37d63cef3ad4"
+  },
+  "accepted_review": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/evidence/review-accepted-v3.json",
+    "sha256": "f42cd302c8210179a32d7e13419f7a2dfaaf41aa66b1ab9aa70b9c0bb229ae11"
+  },
+  "correction_acceptance": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-corrections.md",
+    "sha256": "b2b42f0d951d4049e55ffb0a84a2b966ece4e71c07078aecc543cb46a7d1adf1"
+  },
+  "original_editor_report": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/edit-report.md",
+    "sha256": "60f5ed5a96112b9743cc398d2cad134dc8721315b08371ffb57c2cbffc423eab"
+  },
+  "edited_paths": [
+    "docs/architecture/raw-access-tiers.md",
+    "docs/migration/v1-to-v2-gaps.md",
+    "docs/migration/v1-to-v2-map.yml",
+    "docs/migration/v1-to-v2.md",
+    "docs/usage/user-interaction.md",
+    "docs/v1-to-v2-comparison.md",
+    "src/Piv/CLAUDE.md",
+    "src/Piv/README.md",
+    "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+    "src/Piv/examples/PivTool/Cli/Commands/JsonOutput.cs",
+    "src/Piv/examples/PivTool/Cli/Prompts/PinPrompt.cs",
+    "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+    "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+    "src/Piv/examples/PivTool/PivExamples/Decryption.cs",
+    "src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs",
+    "src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs",
+    "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+    "src/Piv/examples/PivTool/PivExamples/Reset.cs",
+    "src/Piv/examples/PivTool/PivExamples/Results/AttestationResult.cs",
+    "src/Piv/examples/PivTool/PivExamples/Results/CertificateResult.cs",
+    "src/Piv/examples/PivTool/PivExamples/Results/DecryptionResult.cs",
+    "src/Piv/examples/PivTool/PivExamples/Results/SlotInfoResult.cs",
+    "src/Piv/examples/PivTool/PivExamples/Signing.cs",
+    "src/Piv/examples/PivTool/PivExamples/SlotInfo.cs",
+    "src/Piv/examples/PivTool/PivExamples/Verification.cs",
+    "src/Piv/examples/PivTool/Program.cs",
+    "src/Piv/examples/PivTool/README.md",
+    "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+    "src/Piv/src/CertificateCompression.cs",
+    "src/Piv/src/DataObjects/AdminData.cs",
+    "src/Piv/src/DataObjects/CardCapabilityContainer.cs",
+    "src/Piv/src/DataObjects/CardholderUniqueId.cs",
+    "src/Piv/src/DataObjects/KeyHistory.cs",
+    "src/Piv/src/Features.cs",
+    "src/Piv/src/IPivSession.cs",
+    "src/Piv/src/InvalidPinException.cs",
+    "src/Piv/src/KeyCreationOptions.cs",
+    "src/Piv/src/Metadata.cs",
+    "src/Piv/src/PinOnlyMode.cs",
+    "src/Piv/src/PinPolicy.cs",
+    "src/Piv/src/PinUtilities.cs",
+    "src/Piv/src/PivSession.cs",
+    "src/Piv/src/SlotMetadataExtensions.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCryptoTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDecryptTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDiscoveryContentionTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivFullWorkflowTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivImportTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMultiKeyContentionTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPolicyTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSigningAlgorithmTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Bio/BioProtocolTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Cryptography/PrivateKeyOperationsTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs"
+  ],
+  "shared_paths": [
+    "docs/architecture/raw-access-tiers.md",
+    "docs/migration/v1-to-v2-gaps.md",
+    "docs/migration/v1-to-v2-map.yml",
+    "docs/migration/v1-to-v2.md",
+    "docs/usage/user-interaction.md",
+    "docs/v1-to-v2-comparison.md"
+  ],
+  "whole_shared_paths": [
+    "docs/architecture/raw-access-tiers.md",
+    "docs/usage/user-interaction.md"
+  ],
+  "shared_sections": {
+    "docs/migration/v1-to-v2.md": [
+      "PIV"
+    ],
+    "docs/migration/v1-to-v2-gaps.md": [
+      "PIV"
+    ],
+    "docs/v1-to-v2-comparison.md": [
+      "PIV"
+    ]
+  },
+  "task_units": [],
+  "annotation_correction_review": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-example-correction.md",
+    "bytes": 5069,
+    "sha256": "05ef1872a797e90dea7f228caabd84e8422d4ec1956aa2457eee7fd29e6e32f7"
+  },
+  "selector_correction_review": {
+    "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-selector-correction.md",
+    "bytes": 5086,
+    "sha256": "03d8ad5ae83ce0b66c5c2d7df371a04ddb23c9582be71398e38975fef532721a"
+  }
+}

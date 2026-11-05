@@ -1,0 +1,33 @@
+{
+  "source": "artifacts/toolchain/runs/20261105-080854-529-test",
+  "files": [
+    {
+      "path": "01-test-Piv.IntegrationTests.log",
+      "bytes": 3142,
+      "sha256": "de823feef9b049b950463ba6f40be048fe01decd40c693b4d964a652ef0661c9",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.json",
+      "bytes": 993,
+      "sha256": "7aaa1f7568f76983220e65a7678db19b7fd28379c0e677e0eee217eb9a721063",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "result.txt",
+      "bytes": 653,
+      "sha256": "2a8d3a54b39b2493b723176d42934feba40d2441413fe71da5cb996f77ca980b",
+      "retained": true,
+      "exclusion": null
+    },
+    {
+      "path": "run.log",
+      "bytes": 2016,
+      "sha256": "eb026ae6084af028772ff6c21181c4320cf9c51096e90e390f90a583320509da",
+      "retained": true,
+      "exclusion": null
+    }
+  ]
+}

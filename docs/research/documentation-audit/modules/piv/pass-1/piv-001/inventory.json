@@ -1,0 +1,743 @@
+{
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "files": [
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "bytes": 13096,
+      "sha256": "54facf850d3ce72617a3a7a26f020df1b600f27866c5d09f44311ec8aab4c45a",
+      "git_sha256": "54facf850d3ce72617a3a7a26f020df1b600f27866c5d09f44311ec8aab4c45a"
+    },
+    {
+      "path": "src/Piv/PACKAGE_README.md",
+      "bytes": 1107,
+      "sha256": "21856af4f59d44bd83c204aef7a505c6ffcf0a14b8aa7dfab02d26da22f0eb70",
+      "git_sha256": "21856af4f59d44bd83c204aef7a505c6ffcf0a14b8aa7dfab02d26da22f0eb70"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "bytes": 11632,
+      "sha256": "dd9d4cf813eb6a0f654137ace7e270409238b730e084572704534a85768448c4",
+      "git_sha256": "dd9d4cf813eb6a0f654137ace7e270409238b730e084572704534a85768448c4"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+      "bytes": 43751,
+      "sha256": "613ac6123584ef210e32b363b10c046724c25d85d2725fc0bc7461af7772fd0d",
+      "git_sha256": "613ac6123584ef210e32b363b10c046724c25d85d2725fc0bc7461af7772fd0d"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs",
+      "bytes": 7918,
+      "sha256": "1705e8e9a46d0c02d9879165b4286531591bcec221ac8d6e3b53ebae8c92f6b9",
+      "git_sha256": "1705e8e9a46d0c02d9879165b4286531591bcec221ac8d6e3b53ebae8c92f6b9"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/JsonOutput.cs",
+      "bytes": 8549,
+      "sha256": "65d67b1508f0bfc5dffca1470439292bfb06420f041c9f7d640b513a7fac7f34",
+      "git_sha256": "65d67b1508f0bfc5dffca1470439292bfb06420f041c9f7d640b513a7fac7f34"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/AttestationMenu.cs",
+      "bytes": 3245,
+      "sha256": "6a1e6887a150ea622bd7eab09d33ad738f864cc0892fb7ec10d4385ed4695bff",
+      "git_sha256": "6a1e6887a150ea622bd7eab09d33ad738f864cc0892fb7ec10d4385ed4695bff"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/CertificatesMenu.cs",
+      "bytes": 9354,
+      "sha256": "726f0a38fe528da4ff3db34021900126f94253f0331db772621bebde79a7c39f",
+      "git_sha256": "726f0a38fe528da4ff3db34021900126f94253f0331db772621bebde79a7c39f"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/CryptoMenu.cs",
+      "bytes": 8808,
+      "sha256": "3f4adafeb275f61c44b0d91d8df362f48de7e97a6cd911725159e1c6851b097f",
+      "git_sha256": "3f4adafeb275f61c44b0d91d8df362f48de7e97a6cd911725159e1c6851b097f"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/DeviceInfoMenu.cs",
+      "bytes": 4070,
+      "sha256": "da65740db06dc34a0e5110b67a99b029a73e4d53b6f08a9c45b90b94d24b0493",
+      "git_sha256": "da65740db06dc34a0e5110b67a99b029a73e4d53b6f08a9c45b90b94d24b0493"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/KeyGenerationMenu.cs",
+      "bytes": 4132,
+      "sha256": "3aca33fa3a7516668268fbf1532b4eb6aebc57223253e1e23cb9d7e51ef9f17e",
+      "git_sha256": "3aca33fa3a7516668268fbf1532b4eb6aebc57223253e1e23cb9d7e51ef9f17e"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/PinManagementMenu.cs",
+      "bytes": 7543,
+      "sha256": "02a7cfeba0f60027056de32a0289345e04b1bd4324f0e2ecf77f92f5cd8a84d6",
+      "git_sha256": "02a7cfeba0f60027056de32a0289345e04b1bd4324f0e2ecf77f92f5cd8a84d6"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/ResetMenu.cs",
+      "bytes": 2831,
+      "sha256": "169317e3da93da8b2ba8bf57982dcd085d5a74151e068c3ec2fe8ac9567e55f7",
+      "git_sha256": "169317e3da93da8b2ba8bf57982dcd085d5a74151e068c3ec2fe8ac9567e55f7"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/SlotOverviewMenu.cs",
+      "bytes": 2704,
+      "sha256": "03df859f7fc01671f1f34d37df40f0902a360f733a6564dc60f787c3b6db8fa0",
+      "git_sha256": "03df859f7fc01671f1f34d37df40f0902a360f733a6564dc60f787c3b6db8fa0"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Output/OutputHelpers.cs",
+      "bytes": 6891,
+      "sha256": "7a8bcc3c82b45a955f1b48e21cd60eeea884a46ccce6b45581cc0240340b6bdb",
+      "git_sha256": "7a8bcc3c82b45a955f1b48e21cd60eeea884a46ccce6b45581cc0240340b6bdb"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/DeviceSelector.cs",
+      "bytes": 7349,
+      "sha256": "02a6c454af535404322cbfa3e4886a7addcbd129416b3c38794a341608124235",
+      "git_sha256": "02a6c454af535404322cbfa3e4886a7addcbd129416b3c38794a341608124235"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/PinPrompt.cs",
+      "bytes": 12429,
+      "sha256": "b305142a84fa75a94c26851c7bbb23c1044ea4f4de51383aa04f25bbb7b5334c",
+      "git_sha256": "b305142a84fa75a94c26851c7bbb23c1044ea4f4de51383aa04f25bbb7b5334c"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/SlotSelector.cs",
+      "bytes": 2185,
+      "sha256": "5862a86780e18d2e0e44c9b9fb8d0eafbab1aa524d91d8b60019bdd3fe2d7157",
+      "git_sha256": "5862a86780e18d2e0e44c9b9fb8d0eafbab1aa524d91d8b60019bdd3fe2d7157"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+      "bytes": 4233,
+      "sha256": "fd49d1dfe38aeb871d94ffbe8a210157397050cc45c5c46ae89a36555c42c920",
+      "git_sha256": "fd49d1dfe38aeb871d94ffbe8a210157397050cc45c5c46ae89a36555c42c920"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "bytes": 22486,
+      "sha256": "2119ce6a7037de15960c9fc065413079e7826c6c1ac4c7ab65547d5096126167",
+      "git_sha256": "2119ce6a7037de15960c9fc065413079e7826c6c1ac4c7ab65547d5096126167"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Decryption.cs",
+      "bytes": 3750,
+      "sha256": "1f5258641332c7cba7eeff8fc4394255bda6c964439440ba839f28fe14744267",
+      "git_sha256": "1f5258641332c7cba7eeff8fc4394255bda6c964439440ba839f28fe14744267"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs",
+      "bytes": 3088,
+      "sha256": "a5cd87909367239dc5f105a4d8069e1c8e89956c04f631eb1fe187485d1d3270",
+      "git_sha256": "a5cd87909367239dc5f105a4d8069e1c8e89956c04f631eb1fe187485d1d3270"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs",
+      "bytes": 3456,
+      "sha256": "6bc519c769e42100a8c4792a8b6a818bdc77766b57bec2b9bb6296bfb8ecb0a2",
+      "git_sha256": "6bc519c769e42100a8c4792a8b6a818bdc77766b57bec2b9bb6296bfb8ecb0a2"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "bytes": 11028,
+      "sha256": "7ae3fb71691d2871e314b6deee61c8099ec58bf68a7e8222709ed757da07bf36",
+      "git_sha256": "7ae3fb71691d2871e314b6deee61c8099ec58bf68a7e8222709ed757da07bf36"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Reset.cs",
+      "bytes": 2610,
+      "sha256": "2bcb34bd8a6b083632973f04858b9d5b2a2928b29eab10210a67b57f2a38ff53",
+      "git_sha256": "2bcb34bd8a6b083632973f04858b9d5b2a2928b29eab10210a67b57f2a38ff53"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/AttestationResult.cs",
+      "bytes": 1942,
+      "sha256": "18fc216edb27ca2b3de9b28febdc70c539932f5517b0cbd99695c1ef36a4230a",
+      "git_sha256": "18fc216edb27ca2b3de9b28febdc70c539932f5517b0cbd99695c1ef36a4230a"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/CertificateResult.cs",
+      "bytes": 2386,
+      "sha256": "dfa09d1e155198482df0e2038cdba70d64115ac5a18756ad3c6dbc46a66049b0",
+      "git_sha256": "dfa09d1e155198482df0e2038cdba70d64115ac5a18756ad3c6dbc46a66049b0"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/DecryptionResult.cs",
+      "bytes": 1812,
+      "sha256": "64ddd6e0b23b5bd031c1e4451e29867b3abb8873b7c736146d9b83e7e30f8f56",
+      "git_sha256": "64ddd6e0b23b5bd031c1e4451e29867b3abb8873b7c736146d9b83e7e30f8f56"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/DeviceInfoResult.cs",
+      "bytes": 2299,
+      "sha256": "de31128cd206152fdbe4d55fa0e599bba4808c8b0b356928f24882402f0269e0",
+      "git_sha256": "de31128cd206152fdbe4d55fa0e599bba4808c8b0b356928f24882402f0269e0"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/KeyGenerationResult.cs",
+      "bytes": 1980,
+      "sha256": "40fc6deada93c639a1f2fcb5e542a87d7f8998859d422e02a68986fd9900fb3b",
+      "git_sha256": "40fc6deada93c639a1f2fcb5e542a87d7f8998859d422e02a68986fd9900fb3b"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/PinOperationResult.cs",
+      "bytes": 1698,
+      "sha256": "d17cad1ba29b00868ec797f592c64b5a2ddb46be788fc60b0faaff9771442535",
+      "git_sha256": "d17cad1ba29b00868ec797f592c64b5a2ddb46be788fc60b0faaff9771442535"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/ResetResult.cs",
+      "bytes": 1379,
+      "sha256": "198d59f315cd2d39d7e18bb3265433e046fc2936120f1ac6f2ac18dc3cef8236",
+      "git_sha256": "198d59f315cd2d39d7e18bb3265433e046fc2936120f1ac6f2ac18dc3cef8236"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/SigningResult.cs",
+      "bytes": 1790,
+      "sha256": "e5d50b7eca2f076711726d90cac94e381cf132eec2ff736969e5dfe77fed2158",
+      "git_sha256": "e5d50b7eca2f076711726d90cac94e381cf132eec2ff736969e5dfe77fed2158"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/SlotInfoResult.cs",
+      "bytes": 2545,
+      "sha256": "e38436edc8dc72814c7660b72978c30afc4ebd51f3608cb49b85c63a5cb17191",
+      "git_sha256": "e38436edc8dc72814c7660b72978c30afc4ebd51f3608cb49b85c63a5cb17191"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Results/VerificationResult.cs",
+      "bytes": 2068,
+      "sha256": "3eb0bfa22623faf83aaea0a1a43620525818d901702bc96d1439f6271ec089d4",
+      "git_sha256": "3eb0bfa22623faf83aaea0a1a43620525818d901702bc96d1439f6271ec089d4"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Signing.cs",
+      "bytes": 4287,
+      "sha256": "f6f45d3f299d7185249fc886d92e80e2611191e0f793bf450d35e98c66bbf56b",
+      "git_sha256": "f6f45d3f299d7185249fc886d92e80e2611191e0f793bf450d35e98c66bbf56b"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/SlotInfo.cs",
+      "bytes": 4843,
+      "sha256": "f73707efc43a5036168bf25526e30dbb961662b4dec9c59a67bc36618d3ab84e",
+      "git_sha256": "f73707efc43a5036168bf25526e30dbb961662b4dec9c59a67bc36618d3ab84e"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivExamples/Verification.cs",
+      "bytes": 4533,
+      "sha256": "2b2ba8d0011172ce82612d7bee488cfae5ffcf3ee4c4f63be02d23ffa8fea633",
+      "git_sha256": "2b2ba8d0011172ce82612d7bee488cfae5ffcf3ee4c4f63be02d23ffa8fea633"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivTool.csproj",
+      "bytes": 950,
+      "sha256": "9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349",
+      "git_sha256": "433eeea4393117404166580fe809f84631b60a422df7accf5dd14feec2c622b4"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Program.cs",
+      "bytes": 1326,
+      "sha256": "1bc96176eb28dde25304d397aff701b2716c4240e8465ece49981a79ce26543f",
+      "git_sha256": "1bc96176eb28dde25304d397aff701b2716c4240e8465ece49981a79ce26543f"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/README.md",
+      "bytes": 5120,
+      "sha256": "1bbeaec112d19887cefff9e3c398b86f8f1e2d20912e08378db91fb6fbeee8ad",
+      "git_sha256": "1bbeaec112d19887cefff9e3c398b86f8f1e2d20912e08378db91fb6fbeee8ad"
+    },
+    {
+      "path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+      "bytes": 34845,
+      "sha256": "54445e7059fedd59adc0ab6bc896d744e81a99f489139a6c8dd413ea8c666adb",
+      "git_sha256": "54445e7059fedd59adc0ab6bc896d744e81a99f489139a6c8dd413ea8c666adb"
+    },
+    {
+      "path": "src/Piv/src/Authentication/PinOnlyProtocol.cs",
+      "bytes": 6443,
+      "sha256": "eaa59c1b1d9e433292a450cdb53bb6713a3f0864db08d6ff9a13f15baf673956",
+      "git_sha256": "eaa59c1b1d9e433292a450cdb53bb6713a3f0864db08d6ff9a13f15baf673956"
+    },
+    {
+      "path": "src/Piv/src/Backends/IBackend.cs",
+      "bytes": 960,
+      "sha256": "fecffe0bc8dce8fe195bea5b8c68c69c8b4325f21a754e1126e22ca841d78af5",
+      "git_sha256": "fecffe0bc8dce8fe195bea5b8c68c69c8b4325f21a754e1126e22ca841d78af5"
+    },
+    {
+      "path": "src/Piv/src/Backends/SmartCardBackend.cs",
+      "bytes": 2393,
+      "sha256": "e05eca79d472c6680a2216abedf4aceacb21bca17cd289fec95e9c384d67259b",
+      "git_sha256": "e05eca79d472c6680a2216abedf4aceacb21bca17cd289fec95e9c384d67259b"
+    },
+    {
+      "path": "src/Piv/src/Bio/BioProtocol.cs",
+      "bytes": 6466,
+      "sha256": "44c282dbeac035f67270639636b811ee70d16c87cc6fb60641e61ac91590b404",
+      "git_sha256": "44c282dbeac035f67270639636b811ee70d16c87cc6fb60641e61ac91590b404"
+    },
+    {
+      "path": "src/Piv/src/CertificateCompression.cs",
+      "bytes": 954,
+      "sha256": "b9f352c82f34722dc373f3d978789e9c48b973f084e4ba867f20359fa3eaf039",
+      "git_sha256": "b9f352c82f34722dc373f3d978789e9c48b973f084e4ba867f20359fa3eaf039"
+    },
+    {
+      "path": "src/Piv/src/Certificates/CertificateProtocol.cs",
+      "bytes": 7394,
+      "sha256": "1407c8a362a2533c2c12575467daa87d6538989c949a0d91ea9b105db69ff3a4",
+      "git_sha256": "1407c8a362a2533c2c12575467daa87d6538989c949a0d91ea9b105db69ff3a4"
+    },
+    {
+      "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "bytes": 19379,
+      "sha256": "a7f46ccbe9bf1d2f8839fb7403f5344a07bd700eb4da3b9e021b75ce4245066a",
+      "git_sha256": "a7f46ccbe9bf1d2f8839fb7403f5344a07bd700eb4da3b9e021b75ce4245066a"
+    },
+    {
+      "path": "src/Piv/src/DataObject.cs",
+      "bytes": 4336,
+      "sha256": "98975748dd19e99bf4bfd3df1bbe19f1bd3ed0d5beebc0ce84689bd695947d40",
+      "git_sha256": "98975748dd19e99bf4bfd3df1bbe19f1bd3ed0d5beebc0ce84689bd695947d40"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/AdminData.cs",
+      "bytes": 9777,
+      "sha256": "0206004e72ecf574234f205d896d88db39d52e8000b6957e28bf0012eca27c5c",
+      "git_sha256": "0206004e72ecf574234f205d896d88db39d52e8000b6957e28bf0012eca27c5c"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/CardCapabilityContainer.cs",
+      "bytes": 8447,
+      "sha256": "eb49821f969913839d4d2145cdb879ac4662a1c5c758912725d722a72c64fb06",
+      "git_sha256": "eb49821f969913839d4d2145cdb879ac4662a1c5c758912725d722a72c64fb06"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/CardholderUniqueId.cs",
+      "bytes": 6362,
+      "sha256": "6aae5af5bc5b6f46e14d08f5bce436fd9cdb0904e939a74591e5be4e2e803d32",
+      "git_sha256": "6aae5af5bc5b6f46e14d08f5bce436fd9cdb0904e939a74591e5be4e2e803d32"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/DataObjectProtocol.cs",
+      "bytes": 5050,
+      "sha256": "6c2d4917f5b40d5734678b243b4b5faa873640a79fefaf9d3cb41ca2182c6bb2",
+      "git_sha256": "6c2d4917f5b40d5734678b243b4b5faa873640a79fefaf9d3cb41ca2182c6bb2"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/KeyHistory.cs",
+      "bytes": 6585,
+      "sha256": "d0deffe97b7f37984ca58f5e15b440884e1ac67b3619484b4df8118041145de9",
+      "git_sha256": "d0deffe97b7f37984ca58f5e15b440884e1ac67b3619484b4df8118041145de9"
+    },
+    {
+      "path": "src/Piv/src/DataObjects/TypedDataObjectProtocol.cs",
+      "bytes": 5113,
+      "sha256": "dc6867240ea2f8ef50d5a4f98c0ae169efb4c6ba23ee7b49ce11ee02803215fd",
+      "git_sha256": "dc6867240ea2f8ef50d5a4f98c0ae169efb4c6ba23ee7b49ce11ee02803215fd"
+    },
+    {
+      "path": "src/Piv/src/Features.cs",
+      "bytes": 2639,
+      "sha256": "89bf3668a088d6e078135e9a8e5478714f03e94c6ab09bd970173b729066c5fd",
+      "git_sha256": "89bf3668a088d6e078135e9a8e5478714f03e94c6ab09bd970173b729066c5fd"
+    },
+    {
+      "path": "src/Piv/src/IPivSession.cs",
+      "bytes": 33095,
+      "sha256": "39aa9ec417249fb3424475c316ccb7a1c47116419650df8babec0137e4f3bd0b",
+      "git_sha256": "39aa9ec417249fb3424475c316ccb7a1c47116419650df8babec0137e4f3bd0b"
+    },
+    {
+      "path": "src/Piv/src/IYubiKeyExtensions.cs",
+      "bytes": 2710,
+      "sha256": "98d029b71988128578d8ffa4bf094c45f130d6846edf2081f6f0246477e44ef5",
+      "git_sha256": "98d029b71988128578d8ffa4bf094c45f130d6846edf2081f6f0246477e44ef5"
+    },
+    {
+      "path": "src/Piv/src/InvalidPinException.cs",
+      "bytes": 2587,
+      "sha256": "64f759109fda3fcea54fdec54699038152cb3ee9435d7b7941c62bbd578a9fd8",
+      "git_sha256": "64f759109fda3fcea54fdec54699038152cb3ee9435d7b7941c62bbd578a9fd8"
+    },
+    {
+      "path": "src/Piv/src/KeyCreationOptions.cs",
+      "bytes": 1057,
+      "sha256": "1d3c39499744e45b541efdaa4c6d1868ec47f3c7048b5840e89efb85bf42351a",
+      "git_sha256": "1d3c39499744e45b541efdaa4c6d1868ec47f3c7048b5840e89efb85bf42351a"
+    },
+    {
+      "path": "src/Piv/src/KeyReference.cs",
+      "bytes": 900,
+      "sha256": "eaf461d7c4e240e4eb46816287fee6c7fa4fd445e8694189966dc44bb832b198",
+      "git_sha256": "eaf461d7c4e240e4eb46816287fee6c7fa4fd445e8694189966dc44bb832b198"
+    },
+    {
+      "path": "src/Piv/src/KeyTypeEncoding.cs",
+      "bytes": 2416,
+      "sha256": "3c8fcc44fa193a48bd93285a2703ab2d308d23c92fba0743e4e137423e9aa5a2",
+      "git_sha256": "3c8fcc44fa193a48bd93285a2703ab2d308d23c92fba0743e4e137423e9aa5a2"
+    },
+    {
+      "path": "src/Piv/src/Keys/KeyProtocol.cs",
+      "bytes": 21652,
+      "sha256": "73e56967adfc051d2ae34e084a5aec0132b651b694eef15d367c931dc2b61918",
+      "git_sha256": "73e56967adfc051d2ae34e084a5aec0132b651b694eef15d367c931dc2b61918"
+    },
+    {
+      "path": "src/Piv/src/Metadata.cs",
+      "bytes": 2764,
+      "sha256": "cb3018581e2f2b37601d75d5e4299483629a755bcdeb0fac9a8304571c7dd7ce",
+      "git_sha256": "cb3018581e2f2b37601d75d5e4299483629a755bcdeb0fac9a8304571c7dd7ce"
+    },
+    {
+      "path": "src/Piv/src/Metadata/MetadataProtocol.cs",
+      "bytes": 10549,
+      "sha256": "22099891e3ab1499aa729ecbe50ee4d45513c00e56308f5c25a2359b8060417b",
+      "git_sha256": "22099891e3ab1499aa729ecbe50ee4d45513c00e56308f5c25a2359b8060417b"
+    },
+    {
+      "path": "src/Piv/src/PinOnlyMode.cs",
+      "bytes": 2248,
+      "sha256": "71fd5aff90994bcd90235f814009f5530bc97d12da38710a8ff52d57328dee89",
+      "git_sha256": "71fd5aff90994bcd90235f814009f5530bc97d12da38710a8ff52d57328dee89"
+    },
+    {
+      "path": "src/Piv/src/PinPolicy.cs",
+      "bytes": 1301,
+      "sha256": "31415a9c4446c7697401b7d9c5d5d875ed69acccf2d3164bcf5f7b38b2a5a6b5",
+      "git_sha256": "31415a9c4446c7697401b7d9c5d5d875ed69acccf2d3164bcf5f7b38b2a5a6b5"
+    },
+    {
+      "path": "src/Piv/src/PinUtilities.cs",
+      "bytes": 6649,
+      "sha256": "d1baf0c84255809a1d456707c9b587320777f08e1e92f499b973562486473949",
+      "git_sha256": "d1baf0c84255809a1d456707c9b587320777f08e1e92f499b973562486473949"
+    },
+    {
+      "path": "src/Piv/src/PivSession.cs",
+      "bytes": 45392,
+      "sha256": "19bcecc6bec14e6f4f6390388b02d3f44beba5e4956764bd033c1017e12e17fd",
+      "git_sha256": "19bcecc6bec14e6f4f6390388b02d3f44beba5e4956764bd033c1017e12e17fd"
+    },
+    {
+      "path": "src/Piv/src/PublicAPI.Shipped.txt",
+      "bytes": 17,
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "git_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/Piv/src/PublicAPI.Unshipped.txt",
+      "bytes": 45767,
+      "sha256": "47a8ec228596fa558c78ec5e3ac2b6c41de81c1449092b7f01ee0a19127a4ecd",
+      "git_sha256": "47a8ec228596fa558c78ec5e3ac2b6c41de81c1449092b7f01ee0a19127a4ecd"
+    },
+    {
+      "path": "src/Piv/src/Slot.cs",
+      "bytes": 2775,
+      "sha256": "0696f046cd3e95855a68256e4d4273c1b587f2f48a24ad3e1a7c21715f9bc130",
+      "git_sha256": "0696f046cd3e95855a68256e4d4273c1b587f2f48a24ad3e1a7c21715f9bc130"
+    },
+    {
+      "path": "src/Piv/src/SlotMetadataExtensions.cs",
+      "bytes": 6863,
+      "sha256": "221422cf63fce503eccfc358edfa7afa563beb9836cd01fd2507349427665070",
+      "git_sha256": "221422cf63fce503eccfc358edfa7afa563beb9836cd01fd2507349427665070"
+    },
+    {
+      "path": "src/Piv/src/TouchPolicy.cs",
+      "bytes": 1083,
+      "sha256": "2683ea87bdfe2aa57434136841a68ba9a7c99c5eb557a94386a238375d83fa2f",
+      "git_sha256": "2683ea87bdfe2aa57434136841a68ba9a7c99c5eb557a94386a238375d83fa2f"
+    },
+    {
+      "path": "src/Piv/src/UserVerification.cs",
+      "bytes": 1063,
+      "sha256": "5fa31e18b4670bca9436ab29484c2b9eee8149176a072e92fb712cc1635fa8f3",
+      "git_sha256": "5fa31e18b4670bca9436ab29484c2b9eee8149176a072e92fb712cc1635fa8f3"
+    },
+    {
+      "path": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "bytes": 1135,
+      "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978",
+      "git_sha256": "d92eeb8cd428395fce5436e31954c5c0714748db810a9fce60f52ff781200dbf"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+      "bytes": 6711,
+      "sha256": "cc61a30ede310a67f422793311bf769537d605e78664efb94b1d70c539e0cb10",
+      "git_sha256": "cc61a30ede310a67f422793311bf769537d605e78664efb94b1d70c539e0cb10"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivAuthenticationTests.cs",
+      "bytes": 5045,
+      "sha256": "da4bc4b8a1dde77d76b24571b911ea169037dc3a59d2f0d271037ddf9a4bf8c1",
+      "git_sha256": "da4bc4b8a1dde77d76b24571b911ea169037dc3a59d2f0d271037ddf9a4bf8c1"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCertificateTests.cs",
+      "bytes": 4277,
+      "sha256": "e5f10d788126f3043e26a7318623493a6586ccc62ebe48fad6f9f42c3efe3463",
+      "git_sha256": "e5f10d788126f3043e26a7318623493a6586ccc62ebe48fad6f9f42c3efe3463"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCompressedCertTests.cs",
+      "bytes": 3686,
+      "sha256": "419447991eb84da3a2c1580b033e8536b552d95469b30ad83ac967ecfa469c32",
+      "git_sha256": "419447991eb84da3a2c1580b033e8536b552d95469b30ad83ac967ecfa469c32"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+      "bytes": 3509,
+      "sha256": "cf328dd691a6eadbfae238cd197fd6a018dd0b404a05f5fe51f9b7698a33d4e9",
+      "git_sha256": "cf328dd691a6eadbfae238cd197fd6a018dd0b404a05f5fe51f9b7698a33d4e9"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCryptoTests.cs",
+      "bytes": 17781,
+      "sha256": "562004d28414bf6592590bc6422437f239fbf0dfbdb865b59bbffe14e18f10ce",
+      "git_sha256": "562004d28414bf6592590bc6422437f239fbf0dfbdb865b59bbffe14e18f10ce"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDecryptTests.cs",
+      "bytes": 8442,
+      "sha256": "2f10d880a4979f87f72b478ae575110949e5421e31050d3504b95fde3d989226",
+      "git_sha256": "2f10d880a4979f87f72b478ae575110949e5421e31050d3504b95fde3d989226"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDiscoveryContentionTests.cs",
+      "bytes": 6943,
+      "sha256": "cebbc317888e7e58ae44849cc12e5c7b5fb5f30f9134dc7e0e13965830ec5093",
+      "git_sha256": "cebbc317888e7e58ae44849cc12e5c7b5fb5f30f9134dc7e0e13965830ec5093"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivFullWorkflowTests.cs",
+      "bytes": 7462,
+      "sha256": "57b73a58d2f4f3a659f396b27b0ad7b653cf0866c7439d07b8c3c4612a1b0c60",
+      "git_sha256": "57b73a58d2f4f3a659f396b27b0ad7b653cf0866c7439d07b8c3c4612a1b0c60"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+      "bytes": 5209,
+      "sha256": "34ee403dc5148558ba2ee5e9512679eec7317b32c2af753d6ebddb0371c6bfd9",
+      "git_sha256": "34ee403dc5148558ba2ee5e9512679eec7317b32c2af753d6ebddb0371c6bfd9"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivImportTests.cs",
+      "bytes": 7494,
+      "sha256": "49841dbdc390d4a459ad2f297945d85e213fb5bf955c8d4b12e3bed52baf0f62",
+      "git_sha256": "49841dbdc390d4a459ad2f297945d85e213fb5bf955c8d4b12e3bed52baf0f62"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivKeyOperationsTests.cs",
+      "bytes": 8814,
+      "sha256": "c46ce5a8746cf9abd67ba08fa044b62fa440e547243d54a9425fa4be08c2e9d3",
+      "git_sha256": "c46ce5a8746cf9abd67ba08fa044b62fa440e547243d54a9425fa4be08c2e9d3"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivManagementKeyTests.cs",
+      "bytes": 9216,
+      "sha256": "e30a4ccc1718d76d472b6435f3525a689f1a600e8fae100446fa4f413dafd2fd",
+      "git_sha256": "e30a4ccc1718d76d472b6435f3525a689f1a600e8fae100446fa4f413dafd2fd"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs",
+      "bytes": 5408,
+      "sha256": "6793bccb152810ad62adc90d4d60a129edbab4b63b035b82631c0be826e46b02",
+      "git_sha256": "6793bccb152810ad62adc90d4d60a129edbab4b63b035b82631c0be826e46b02"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMultiKeyContentionTests.cs",
+      "bytes": 14086,
+      "sha256": "6c01e7f59ae3e2cf47de071464e20879060c90a983150c3d062a4ab263807059",
+      "git_sha256": "6c01e7f59ae3e2cf47de071464e20879060c90a983150c3d062a4ab263807059"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinOnlyWorkflowTests.cs",
+      "bytes": 3122,
+      "sha256": "97555037f227c3f1285870e363e522038d1974d6dd0ebc8f02e87fb5a7134600",
+      "git_sha256": "97555037f227c3f1285870e363e522038d1974d6dd0ebc8f02e87fb5a7134600"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinRetryTests.cs",
+      "bytes": 9492,
+      "sha256": "b9437050a00b862f67270344fb2151044075af4becec79714766579dd6b5c19f",
+      "git_sha256": "b9437050a00b862f67270344fb2151044075af4becec79714766579dd6b5c19f"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPolicyTests.cs",
+      "bytes": 4557,
+      "sha256": "6f358fe7a59ccc800696ea974f1716f788b8b64ed7a4e1e69398b3bc322ba595",
+      "git_sha256": "6f358fe7a59ccc800696ea974f1716f788b8b64ed7a4e1e69398b3bc322ba595"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPukTests.cs",
+      "bytes": 5967,
+      "sha256": "745506a6dd77dc76a63e18da52a9080a90bcef738c6b7ed591e4ba9c5640bbf2",
+      "git_sha256": "745506a6dd77dc76a63e18da52a9080a90bcef738c6b7ed591e4ba9c5640bbf2"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs",
+      "bytes": 3599,
+      "sha256": "f145c354f1276cf7794ffe4d7dae3058ea7f97aa60440d5bacc4dad9f965298a",
+      "git_sha256": "f145c354f1276cf7794ffe4d7dae3058ea7f97aa60440d5bacc4dad9f965298a"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+      "bytes": 10759,
+      "sha256": "ab12817af53c4645dc52a748968b49cd9a330b7318b59e9e05708d0d9e6a3604",
+      "git_sha256": "ab12817af53c4645dc52a748968b49cd9a330b7318b59e9e05708d0d9e6a3604"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSigningAlgorithmTests.cs",
+      "bytes": 12591,
+      "sha256": "ee048090a022c638b6e29b63840c6d2c409cb9e0ad54d68725ffbb94bef628db",
+      "git_sha256": "ee048090a022c638b6e29b63840c6d2c409cb9e0ad54d68725ffbb94bef628db"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSlotOverwriteTests.cs",
+      "bytes": 7234,
+      "sha256": "66c282f93a0e18428771cbcb617578cf503229afe6be6fe09d642792a7d209de",
+      "git_sha256": "66c282f93a0e18428771cbcb617578cf503229afe6be6fe09d642792a7d209de"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/UserPresenceProbeTests.cs",
+      "bytes": 9322,
+      "sha256": "113cad4a5fdbca1ef2c940ce5e38fb439e2ce0a186884c0df9855b1d250d6306",
+      "git_sha256": "113cad4a5fdbca1ef2c940ce5e38fb439e2ce0a186884c0df9855b1d250d6306"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj",
+      "bytes": 1836,
+      "sha256": "e0f6adebe2ca56036347347c97a3cb1b92ff13ade217ade82c103080020ed3e7",
+      "git_sha256": "517d1a9d798ed360883307d072b626f4d0ba01f12e1d8950a5dbb505877882cb"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/xunit.runner.json",
+      "bytes": 201,
+      "sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4",
+      "git_sha256": "b81c785bb178b5c297300c90fb5cc30a38499ded35d1012524fba72763c15bf4"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/AuditV2/PivAuditReproTests.cs",
+      "bytes": 4189,
+      "sha256": "3850abf8f6cf58b40f0fea5977f0865c285aefc0e3414478ab0f4ae008a18ba2",
+      "git_sha256": "3850abf8f6cf58b40f0fea5977f0865c285aefc0e3414478ab0f4ae008a18ba2"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyProtocolTests.cs",
+      "bytes": 5346,
+      "sha256": "3b313b84de49599056a3dcbcdb2d2b35e08af184ef55289089795ca726c889fe",
+      "git_sha256": "3b313b84de49599056a3dcbcdb2d2b35e08af184ef55289089795ca726c889fe"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs",
+      "bytes": 10659,
+      "sha256": "f13f0812e0c554620c054b76f825b4946e29c386ce4beb7f45b8c540dfa74aac",
+      "git_sha256": "f13f0812e0c554620c054b76f825b4946e29c386ce4beb7f45b8c540dfa74aac"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs",
+      "bytes": 22190,
+      "sha256": "299f4b8063d4e3fb84dec2ca9f305c869007af8e23f5f402a7e6be40ec988f7a",
+      "git_sha256": "299f4b8063d4e3fb84dec2ca9f305c869007af8e23f5f402a7e6be40ec988f7a"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Bio/BioProtocolTests.cs",
+      "bytes": 7239,
+      "sha256": "be4e15a24b29550f3a2ba03deb5cfb6570894c1f1d0f8022a7c77332e0e1d815",
+      "git_sha256": "be4e15a24b29550f3a2ba03deb5cfb6570894c1f1d0f8022a7c77332e0e1d815"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/CatalogBehaviorTests.cs",
+      "bytes": 5263,
+      "sha256": "bc5c0c27275e3b185adc78958fe64f6a7a8f68fd97f78b1ccdc6e73a7d5902a3",
+      "git_sha256": "bc5c0c27275e3b185adc78958fe64f6a7a8f68fd97f78b1ccdc6e73a7d5902a3"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/CatalogCapabilityBoundaryTests.cs",
+      "bytes": 2833,
+      "sha256": "436c1b7c3de8fdb134f2234e7bcf915230da7f9fa90326759b73dcfb8a743add",
+      "git_sha256": "436c1b7c3de8fdb134f2234e7bcf915230da7f9fa90326759b73dcfb8a743add"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Certificates/PivCertificateObjectIdTests.cs",
+      "bytes": 3133,
+      "sha256": "028322ee4c86aa1e81d7fce7f70a56c548b225c3383fb20f4cbc4225d1999f98",
+      "git_sha256": "028322ee4c86aa1e81d7fce7f70a56c548b225c3383fb20f4cbc4225d1999f98"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Cryptography/PrivateKeyOperationsTests.cs",
+      "bytes": 10094,
+      "sha256": "6e2e6ca9d9e1312bd23a8224f48c8498b40617623a038fd8c8dc30c63feaf96f",
+      "git_sha256": "6e2e6ca9d9e1312bd23a8224f48c8498b40617623a038fd8c8dc30c63feaf96f"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+      "bytes": 8183,
+      "sha256": "127ac5e76a52a3af9346b3352b85a187ceff466afebaf2deccd965fc3b1c3482",
+      "git_sha256": "127ac5e76a52a3af9346b3352b85a187ceff466afebaf2deccd965fc3b1c3482"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/PivDataObjectsTests.cs",
+      "bytes": 15876,
+      "sha256": "cd13e6fc331995a340db3b3884f4b35bbebd0a313b823695e6572707f67bc706",
+      "git_sha256": "cd13e6fc331995a340db3b3884f4b35bbebd0a313b823695e6572707f67bc706"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Keys/KeyProtocolTests.cs",
+      "bytes": 3411,
+      "sha256": "1ba67e1b67dac980ea9fa98a62e6bf28d0cead1d4dccf87c208300effdfa62d4",
+      "git_sha256": "1ba67e1b67dac980ea9fa98a62e6bf28d0cead1d4dccf87c208300effdfa62d4"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Metadata/MetadataProtocolTests.cs",
+      "bytes": 2603,
+      "sha256": "501bce1df615a46ede4220d04d34a6af4ce4ea28e2131f8808b90d532471ff40",
+      "git_sha256": "501bce1df615a46ede4220d04d34a6af4ce4ea28e2131f8808b90d532471ff40"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+      "bytes": 33862,
+      "sha256": "aedd95a2341e2426782c6d72fa403503fa6525b6297048bf176fb4979e860268",
+      "git_sha256": "aedd95a2341e2426782c6d72fa403503fa6525b6297048bf176fb4979e860268"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivTypesTests.cs",
+      "bytes": 3052,
+      "sha256": "914695b4bc1245729634d3fae842d5f67dfcd3f407c383199d2ee609bf3c66ec",
+      "git_sha256": "914695b4bc1245729634d3fae842d5f67dfcd3f407c383199d2ee609bf3c66ec"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs",
+      "bytes": 19092,
+      "sha256": "5f9870050aaef0a93617b458f064385cba4b67512203aafc29284656ddde5e1b",
+      "git_sha256": "5f9870050aaef0a93617b458f064385cba4b67512203aafc29284656ddde5e1b"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SlotMetadataExtensionsTests.cs",
+      "bytes": 3728,
+      "sha256": "f6da3cc916ae9e59cb44b6549ffab40055835210a12ab96d9da5d9e80ff83f71",
+      "git_sha256": "f6da3cc916ae9e59cb44b6549ffab40055835210a12ab96d9da5d9e80ff83f71"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/TouchNotificationTests.cs",
+      "bytes": 16768,
+      "sha256": "5b6b3bb25515b150ec42a0dfe39e8dc847beab22d3c7c3d069128291cc53c5e8",
+      "git_sha256": "5b6b3bb25515b150ec42a0dfe39e8dc847beab22d3c7c3d069128291cc53c5e8"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj",
+      "bytes": 1039,
+      "sha256": "032948bb2a388fd948e84d536996986dbd489c9b1a9e143bf8a859637f003fdc",
+      "git_sha256": "ef410fa855563dfa14d15901f20ace85eecc75e6e535d14fb23bdd6482aaa692"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/xunit.runner.json",
+      "bytes": 77,
+      "sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+      "git_sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad"
+    }
+  ]
+}

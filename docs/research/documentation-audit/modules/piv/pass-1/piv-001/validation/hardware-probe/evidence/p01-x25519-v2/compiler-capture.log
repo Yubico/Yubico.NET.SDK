@@ -1,0 +1,4 @@
+$ /usr/bin/python3 /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/capture-compiler.py /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/evidence/p01-x25519-v2/compiler
+Compiler policy mismatch: EnableNETAnalyzers=true
+
+EXIT=1

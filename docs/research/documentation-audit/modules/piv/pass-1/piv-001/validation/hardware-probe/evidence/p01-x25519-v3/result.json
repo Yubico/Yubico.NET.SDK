@@ -1,0 +1,28 @@
+{
+  "case": "P01_X25519_Rfc7748AliceAndBobAgree",
+  "utc": "2026-11-05T07:06:03.191758+00:00",
+  "build_exit": 0,
+  "test_exit": null,
+  "cleanup_exit": null,
+  "expected_failure": false,
+  "configuration_reader": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/appsettings.json",
+    "sha256": "a801916fd4cfb260d75f6a83cd827940242b6f9457a906d57b3bb12827b9660a",
+    "transformation": "Remove full-line // comments only; configuration file remains unchanged"
+  },
+  "public_fixture_directory": "/tmp/opencode/piv-001-hardware-fixtures/p01-x25519-v3",
+  "input_identity": {
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/run-probe-v3.py": "0514f38179aa60669b1611a4506e4a445eb6b7f424079d407eea73b61d07dd9a",
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/capture-v2.py": "11140e2147b1fb84476a1725555c31cd631c65c1f56dba1f96a9c6c3ec043b69",
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/hardware-probe/vendor-x25519-reference.py": "7eebcec8ba63c1b15a35c1039f4b7c24377ed27f5000869915f2025eebfd5b52",
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/baseline-103.json": "3f160854e948cb01f3e535efe0e59cdf5df5eb67b94cdeb7658b0de9d1223718",
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-cleanup-v2.py": "6042cef33b929136b3035c904255e3b18691f7cda96c789f2532fe2e7f3ad1a5",
+    "docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/vendor-state.py": "41aa7200cd912a5f7a1438ad693fff83ad36b32873540b8a70d1b578f976600a",
+    "src/Tests.Shared/appsettings.json": "a801916fd4cfb260d75f6a83cd827940242b6f9457a906d57b3bb12827b9660a",
+    "src/Piv/examples/PivTool/PivExamples/Signing.cs": "ab44ec7d9c4a99f8660d140f2d0fdf9ffe53e23141bf5d7dddad0bd1c81360ba",
+    "src/Piv/examples/PivTool/PivExamples/Results/SigningResult.cs": "e5d50b7eca2f076711726d90cac94e381cf132eec2ff736969e5dfe77fed2158"
+  },
+  "capture_exit": 1,
+  "wrapper_error_type": "RuntimeError",
+  "cleanup_disposition": "probe-unstarted; inspect prerequisite/build/pre-cleanup evidence"
+}

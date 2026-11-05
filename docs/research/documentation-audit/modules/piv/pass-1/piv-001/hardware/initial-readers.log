@@ -1,0 +1,6 @@
+$ ykman list --readers
+UTC 2026-11-05T00:01:58.984170+00:00
+Yubico YubiKey OTP+FIDO+CCID 00 00
+Yubico YubiKey OTP+FIDO+CCID 01 00
+
+EXIT=0

@@ -1,0 +1,4 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/capture-v4.py v4 pivtool first
+PASS: pivtool/first: 39 actual Csc sources, 190 references, 10 analyzers; source/config/assets text retained.
+
+EXIT=0

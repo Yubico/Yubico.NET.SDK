@@ -1,0 +1,89 @@
+commit d3ba7ebee9170e73fd52194196335644c7b6e220
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Wed Dec 20 09:46:03 2023 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Tue Jan 23 12:00:36 2024 +0100
+
+    Add PIV move/delete slot.
+
+diff --git a/tests/device/test_piv.py b/tests/device/test_piv.py
+index f2f94a54..3815c615 100644
+--- a/tests/device/test_piv.py
++++ b/tests/device/test_piv.py
+@@ -623,3 +623,33 @@ class TestMetadata:
+             encoding=serialization.Encoding.DER,
+             format=serialization.PublicFormat.SubjectPublicKeyInfo,
+         )
++
++
++class TestMoveAndDelete:
++    @pytest.fixture(autouse=True)
++    @condition.min_version(5, 7)
++    def preconditions(self):
++        pass
++
++    def test_move_key(self, session):
++        key = ec.generate_private_key(ec.SECP256R1(), default_backend())
++        session.authenticate(MANAGEMENT_KEY_TYPE.TDES, DEFAULT_MANAGEMENT_KEY)
++        session.put_key(SLOT.AUTHENTICATION, key)
++        data_a = session.get_slot_metadata(SLOT.AUTHENTICATION)
++
++        session.move_key(SLOT.AUTHENTICATION, SLOT.SIGNATURE)
++        data_s = session.get_slot_metadata(SLOT.SIGNATURE)
++
++        assert data_a == data_s
++        with pytest.raises(ApduError):
++            session.get_slot_metadata(SLOT.AUTHENTICATION)
++
++    def test_delete_key(self, session):
++        key = ec.generate_private_key(ec.SECP256R1(), default_backend())
++        session.authenticate(MANAGEMENT_KEY_TYPE.TDES, DEFAULT_MANAGEMENT_KEY)
++        session.put_key(SLOT.AUTHENTICATION, key)
++        session.get_slot_metadata(SLOT.AUTHENTICATION)
++
++        session.delete_key(SLOT.AUTHENTICATION)
++        with pytest.raises(ApduError):
++            session.get_slot_metadata(SLOT.AUTHENTICATION)
+diff --git a/yubikit/piv.py b/yubikit/piv.py
+index e6543106..d5a30184 100755
+--- a/yubikit/piv.py
++++ b/yubikit/piv.py
+@@ -263,6 +263,7 @@ INS_GENERATE_ASYMMETRIC = 0x47
+ INS_AUTHENTICATE = 0x87
+ INS_GET_DATA = 0xCB
+ INS_PUT_DATA = 0xDB
++INS_MOVE_KEY = 0xF6
+ INS_GET_METADATA = 0xF7
+ INS_ATTEST = 0xF9
+ INS_SET_PIN_RETRIES = 0xFA
+@@ -1034,6 +1035,30 @@ class PivSession:
+         logger.debug(f"Attested key in slot {slot}")
+         return x509.load_der_x509_certificate(response, default_backend())
+ 
++    def move_key(self, from_slot: SLOT, to_slot: SLOT) -> None:
++        """Move key from one slot to another.
++
++        :param from_slot: The slot containing the key to move.
++        :param to_slot: The new slot to move the key to.
++        """
++        require_version(self.version, (5, 7, 0))
++        from_slot = SLOT(from_slot)
++        to_slot = SLOT(to_slot)
++        logger.debug(f"Moving key from slot {from_slot} to {to_slot}")
++        self.protocol.send_apdu(0, INS_MOVE_KEY, to_slot, from_slot)
++        logger.info(f"Key moved from slot {from_slot} to {to_slot}")
++
++    def delete_key(self, slot: SLOT) -> None:
++        """Delete a key in a slot.
++
++        :param slot: The slot containing the key to delete.
++        """
++        require_version(self.version, (5, 7, 0))
++        slot = SLOT(slot)
++        logger.debug(f"Deleting key in slot {slot}")
++        self.protocol.send_apdu(0, INS_MOVE_KEY, 0xFF, slot)
++        logger.info(f"Key deleted in slot {slot}")
++
+     def _change_reference(self, ins, p2, value1, value2):
+         try:
+             self.protocol.send_apdu(

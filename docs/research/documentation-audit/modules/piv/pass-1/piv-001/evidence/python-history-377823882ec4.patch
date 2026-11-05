@@ -1,0 +1,36 @@
+commit 377823882ec4c8dd8903159a254f3461303de694
+Author:     Dain Nilsson <dain@yubico.com>
+AuthorDate: Fri Jan 26 14:43:10 2024 +0100
+Commit:     Dain Nilsson <dain@yubico.com>
+CommitDate: Fri Jan 26 14:43:10 2024 +0100
+
+    Fix bio metadata handling on older devices.
+
+diff --git a/ykman/piv.py b/ykman/piv.py
+index 1fc1985e..f5911ae2 100644
+--- a/ykman/piv.py
++++ b/ykman/piv.py
+@@ -546,9 +546,9 @@ def get_piv_info(session: PivSession):
+             ] = f"Configured, {bio.attempts_remaining} attempts remaining"
+         else:
+             info["Biometrics"] = "Not configured"
+-
+     except NotSupportedError:
+         pass
++
+     try:
+         metadata = session.get_management_key_metadata()
+         if metadata.default_value:
+diff --git a/yubikit/piv.py b/yubikit/piv.py
+index c7cd03e7..93612ac2 100755
+--- a/yubikit/piv.py
++++ b/yubikit/piv.py
+@@ -786,7 +786,7 @@ class PivSession:
+                 self.protocol.send_apdu(0, INS_GET_METADATA, 0, SLOT_OCC_AUTH)
+             )
+         except ApduError as e:
+-            if e.sw == SW.REFERENCE_DATA_NOT_FOUND:
++            if e.sw in (SW.REFERENCE_DATA_NOT_FOUND, SW.INVALID_INSTRUCTION):
+                 raise NotSupportedError(
+                     "Biometric verification not supported by this YuibKey"
+                 )

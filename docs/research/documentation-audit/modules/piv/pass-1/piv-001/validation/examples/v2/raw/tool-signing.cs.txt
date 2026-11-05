@@ -1,0 +1,17 @@
+
+var options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };
+// Requires an application-owned prompt, caller-owned PIN/data and a provisioned P-256/P-384 slot.
+await using var session = await device.CreatePivSessionAsync(options, ct);
+await session.VerifyPinAsync(pin, ct);
+
+var result = await Signing.SignDataAsync(
+    session, 
+    Slot.Signature,
+    dataBytes,
+    HashAlgorithmName.SHA256,
+    ct);
+
+if (result.Success)
+{
+    var signature = result.Signature;
+}

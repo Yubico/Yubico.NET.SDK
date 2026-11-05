@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.YubiHsm</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.YubiHsm</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>YubiHSM Auth applet support for YubiKey devices. Stores the credentials used to authenticate to a YubiHSM 2 and derives its session keys; it does not communicate with the YubiHSM 2 itself.</Description>
+    <PackageTags>yubikey;yubico;yubihsm;hsm;hardware-security-module;crypto</PackageTags>
+
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,4 @@
+using Yubico.YubiKit.Piv;
+
+await using var piv = await device.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);

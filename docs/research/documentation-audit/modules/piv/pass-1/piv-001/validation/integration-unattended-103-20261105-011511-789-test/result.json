@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project Piv.IntegrationTests --filter \"Category!=RequiresUserPresence\"",
+  "started": "2026-11-05T01:15:11.7896964+01:00",
+  "durationSeconds": 483.8,
+  "runDirectory": "artifacts/toolchain/runs/20261105-011511-789-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 483.8,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Piv.IntegrationTests",
+      "outcome": "passed",
+      "reason": "83 executed, 3 skipped",
+      "executed": 83,
+      "failed": 0,
+      "skipped": 3,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261105-011511-789-test/01-test-Piv.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

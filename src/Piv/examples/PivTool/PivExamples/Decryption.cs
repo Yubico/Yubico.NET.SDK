@@ -25,6 +25,9 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 /// <para>
 /// This class provides examples of decrypting data with RSA private keys stored in PIV slots.
 /// Only RSA keys support decryption; ECC keys cannot be used for this operation.
+/// The SDK's metadata-driven decryption requires firmware 5.3+. This example result exposes
+/// read-only plaintext without a clearing API. Use direct SDK DecryptAsync for a mutable owned
+/// result and clear its Span after use, as shown in the module README; preserve ownership boundaries.
 /// </para>
 /// </remarks>
 public static class Decryption
@@ -32,7 +35,7 @@ public static class Decryption
     /// <summary>
     /// Decrypts data using the RSA private key in a PIV slot.
     /// </summary>
-    /// <param name="session">An authenticated PIV session with PIN already verified if required.</param>
+    /// <param name="session">A metadata-capable PIV session with PIN already verified if the key policy requires it.</param>
     /// <param name="slot">The slot containing the RSA decryption key.</param>
     /// <param name="encryptedData">The data encrypted with the corresponding public key.</param>
     /// <param name="padding">RSA padding scheme used when encrypting. Defaults to PKCS#1 v1.5.</param>
@@ -48,7 +51,7 @@ public static class Decryption
     ///     session,
     ///     Slot.KeyManagement,
     ///     encryptedBytes,
-    ///     ct);
+    ///     cancellationToken: ct);
     /// 
     /// if (result.Success)
     /// {

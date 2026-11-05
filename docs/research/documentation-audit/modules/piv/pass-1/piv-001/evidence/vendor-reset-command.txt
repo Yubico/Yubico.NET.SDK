@@ -1,0 +1,106 @@
+Class ResetPivCommand
+Yubico
+Table of Contents
+Class ResetPivCommand
+Namespace
+Yubico
+.
+YubiKey
+.
+Piv
+.
+Commands
+Assembly
+Yubico.YubiKey.dll
+Reset the YubiKey's PIV application.
+public sealed class ResetPivCommand : IYubiKeyCommand<ResetPivResponse>
+Inheritance
+object
+ResetPivCommand
+Implements
+IYubiKeyCommand
+<
+ResetPivResponse
+>
+Remarks
+The partner Response class is
+ResetPivResponse
+.
+This will delete all keys and certs in all the asymmetric key slots other
+than F9, and set the PIN, PUK, and management key to their default
+values. See the User's Manual entry on the PIV PIN, PUK, and management
+key for more information on this topic.
+The PIV application can be reset only if both the PIN and PUK are
+blocked. That is, if an incorrect PIN has been entered retry count times
+in a row, it will be blocked. To unblock it, use the PUK (PIN Unblocking
+Key) with the
+ResetRetryCommand
+. If the incorrect PUK is
+used retry count times in a row, it will be blocked. If both are blocked,
+there are very few things the PIV application can do on the YubiKey any
+more.
+At this point, because the YubiKey's PIV application is no longer useful,
+the user can reset the entire application. All keys in all asymmetric key
+slots (other than F9) are deleted. This means those keys are no longer
+usable. But that was the case with both the PIN and PUK blocked, so
+resetting the application does not make the situation worse. But it does
+improve things somewhat, because you can use the PIV application again.
+You just need to generate new key pairs.
+After resetting the PIV application, all the asymmetric key slots (other
+than F9) will be empty, and the PIN, PUK, and management key will be the
+default values again ("123456", "12345678", and 0x0102030405060708 three
+times).
+Example:
+IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
+Command resetPivCmd = new ResetPivCommand();
+ResetPivResponse resetPivRsp = connection.SendCommand(resetPivCmd);
+if (resetPivResponse.Status != ResponseStatus.Success)
+{
+    // Handle error
+}
+This command does not work with YubiKey Bio Multi-protocol Edition (MPE) keys. For MPE keys, use
+DeviceResetCommand
+instead.
+Constructors
+ResetPivCommand()
+Initializes a new instance of the ResetPivCommand class. This command
+has no input.
+public ResetPivCommand()
+Properties
+Application
+Gets the YubiKeyApplication to which this command belongs. For this
+command it's PIV.
+public YubiKeyApplication Application { get; }
+Property Value
+YubiKeyApplication
+YubiKeyApplication.Piv
+Methods
+CreateCommandApdu()
+Creates a well-formed CommandApdu to send to the YubiKey.
+public CommandApdu CreateCommandApdu()
+Returns
+CommandApdu
+A valid CommandApdu that is ready to be sent to the YubiKey, or passed along
+to additional encoders for further processing.
+Remarks
+This method will first perform validation on all of the parameters and data provided
+to it. The CommandAPDU it creates should contain all of the data payload for the
+command, even if it exceeds 65,535 bytes as specified by the ISO 7816-4 specification.
+The APDU will be properly chained by the device connection prior to being sent to the
+YubiKey, and the responses will collapsed into a single result.
+CreateResponseForApdu(ResponseApdu)
+Creates the corresponding IYubiKeyResponse implementation for the
+current command.
+public ResetPivResponse CreateResponseForApdu(ResponseApdu responseApdu)
+Parameters
+responseApdu
+ResponseApdu
+The ResponseApdu returned by the YubiKey.
+Returns
+ResetPivResponse
+The implementation of
+IYubiKeyResponse
+that parses and
+presents ths response APDU.
+Made with
+docfx

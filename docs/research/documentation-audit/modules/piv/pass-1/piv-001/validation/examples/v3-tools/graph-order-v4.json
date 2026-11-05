@@ -1,0 +1,144 @@
+{
+  "id": "graph-order-v4",
+  "baseline": "727fe43afc430c5d8364d868a6436de50626e476",
+  "policy": "Verification-only correction: compare copied graph-node lists in canonical project-path order after rejecting duplicate paths and project IDs. Complete dictionaries retain exact value equality. Original closure, membership, deferred XML edge, source, DLL, assets, analyzer and policy checks remain unchanged. Preserve all original capture bytes and the failed verifier output; compilation/capture contexts stay v3.",
+  "transformations": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/project_graph_v3.py",
+        "bytes": 13647,
+        "sha256": "8bfcf8f10c1a234340d43c63a4de239f1bcd91e8482093aa6213beabfde5302c"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/project_graph_v4.py",
+        "bytes": 14214,
+        "sha256": "74a6d9cb40698616ccc37ba6e3c368e2eb3069a4102267b84a8a32a0f9b9e5a4"
+      },
+      "substitutions": [
+        {
+          "before": "def verify_project_proof(proof, evidence, live):",
+          "after": "def canonical_graph_nodes(value):\n    \"\"\"Return a shallow comparison copy with unique graph nodes ordered by project path.\"\"\"\n    nodes = value['graph']\n    paths = [node['project']['path'] for node in nodes]\n    project_ids = [node['project_id'] for node in nodes]\n    require(len(paths) == len(set(paths)) and len(project_ids) == len(set(project_ids)),\n            'Graph comparison requires unique project paths and project IDs')\n    return dict(value, graph=sorted(nodes, key=lambda node: node['project']['path']))\n\n\ndef verify_project_proof(proof, evidence, live):",
+          "count": 1
+        },
+        {
+          "before": "require(current == graph, 'Live project/restore/Csc/bin graph identities changed')",
+          "after": "require(canonical_graph_nodes(current) == canonical_graph_nodes(graph), 'Live project/restore/Csc/bin graph identities changed')",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-v3.py",
+        "bytes": 9944,
+        "sha256": "82df46dca5e2762556469c04ead9ed69c10ab0c2ba9f738581e4f253cba5c83e"
+      },
+      "target": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-v4.py",
+        "bytes": 10391,
+        "sha256": "3c53d9813895ca9838f6015c4c31a490708fa8babe596c1df7c22a9c1fd660be"
+      },
+      "substitutions": [
+        {
+          "before": "from project_graph_v3 import verify_project_proof, acceptance_receipt",
+          "after": "from project_graph_v4 import verify_project_proof, acceptance_receipt",
+          "count": 1
+        },
+        {
+          "before": "correction = acceptance_receipt()\n",
+          "after": "correction = acceptance_receipt()\nordering_receipt = json.loads((Path(__file__).resolve().parent / 'graph-order-v4.json').read_text())\nfor ordering_file in ordering_receipt['preserved'] + ordering_receipt['tools']:\n    ordering_bytes = Path(ordering_file['path']).read_bytes()\n    require(len(ordering_bytes) == ordering_file['bytes'] and sha(ordering_bytes) == ordering_file['sha256'],\n            'Ordering correction source/evidence identity changed: ' + ordering_file['path'])\n",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "preserved": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/annotations/evidence/first/manifest.json",
+      "bytes": 114959,
+      "sha256": "f34ca6f90cb29e4120a95fcf24d708138a4ad8fa693e56db4433fa4bc67fa7d3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/consumer/evidence/first/manifest.json",
+      "bytes": 132638,
+      "sha256": "2e8fc10fe8b7743b36a110f70039591df773d4032562fcf21c8516f1c2a31d71"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/manifest.json",
+      "bytes": 757220,
+      "sha256": "b91b443122e1cc87b4cda16017b388bcda11cb59d06105ec12807d61a2d14e80"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/pivtool/evidence/first/manifest.json",
+      "bytes": 148977,
+      "sha256": "ba875a0184c4b9670ef8984cc9539d4c19c80e62fff8227f0f0c13e57c38810d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/project-graph-acceptance.json",
+      "bytes": 97041,
+      "sha256": "7bd394a5dee7a096fcfd17c058ff1bec09e3aae1fa8cecba0153342f7fd206bd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/source-context.json",
+      "bytes": 138609,
+      "sha256": "1ce4a57f0cd2ea4346c727056a9e4ca4213c6b68807dcfa547cb71331058625d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3/tooling-provenance.json",
+      "bytes": 96441,
+      "sha256": "40e231854774284e85b5326589e115b68c434d9ea6dbad5439a0295a46c8cd3e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/capture-v3.py",
+      "bytes": 11696,
+      "sha256": "3906a229fc02328c27ae06c43d39c79b04ac72e5f16479df87665fd6a929994f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/compiler_policy.py",
+      "bytes": 8093,
+      "sha256": "2e4dcf7d4f14639108bfe6432dd46565626189a729dbd126e772280b0b600384"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/inventory.py",
+      "bytes": 10083,
+      "sha256": "bd4f674e0dc86d9da935887a27a082ba13ec2358bc8450a72995948c07e1bd35"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/project_graph_v3.py",
+      "bytes": 13647,
+      "sha256": "8bfcf8f10c1a234340d43c63a4de239f1bcd91e8482093aa6213beabfde5302c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-v3.py",
+      "bytes": 9944,
+      "sha256": "82df46dca5e2762556469c04ead9ed69c10ab0c2ba9f738581e4f253cba5c83e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples-v3-compiled.log",
+      "bytes": 1389,
+      "sha256": "cf7ca672ca7a15c03d5d3875855408a34468bf9f7efa196ddb400b6c89f6ec8c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples-v3-graph-order-diagnosis.json",
+      "bytes": 5510,
+      "sha256": "405ff3b1accc8028e98f8dadbddccdb9ec603de7603b4f8c0ea16880bf1da67e"
+    }
+  ],
+  "tools": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/project_graph_v4.py",
+      "bytes": 14214,
+      "sha256": "74a6d9cb40698616ccc37ba6e3c368e2eb3069a4102267b84a8a32a0f9b9e5a4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/verify-v4.py",
+      "bytes": 10391,
+      "sha256": "3c53d9813895ca9838f6015c4c31a490708fa8babe596c1df7c22a9c1fd660be"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v3-tools/prepare-ordering-v4.py",
+      "bytes": 8559,
+      "sha256": "af4ac2bef00f7f6cd8e69be30247fba3fcefd61d0f0e07bb235c5b316c827cf6"
+    }
+  ]
+}

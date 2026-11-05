@@ -1,0 +1,12 @@
+$ python3 -B docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/capture.py v2 consumer first
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/capture.py", line 139, in <module>
+    project_proof = project_reference_proof(actual_project, policy, references, dest)
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/provenance.py", line 21, in project_reference_proof
+    require(declared == actual and bool(actual), 'Actual project references differ from the compiled project metadata')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/inventory.py", line 19, in require
+    raise ValueError(message)
+ValueError: Actual project references differ from the compiled project metadata
+
+EXIT=1

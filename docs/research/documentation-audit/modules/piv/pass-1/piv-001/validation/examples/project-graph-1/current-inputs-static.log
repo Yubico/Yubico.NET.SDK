@@ -1,0 +1,14 @@
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/verify-v3.py v2 prepared
+PASS: 730 explicit unit dispositions, 45 complete groups, 36 shipping source paths; current bodies, typed wrappers and source/configuration identities reconcile.
+PENDING: builds, C# binding/analyzers and actual compiler captures. Example/sample/test/hardware execution remains separately scoped.
+
+EXIT=0
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/verify-v2.py
+PASS: 61 baseline originals, 60 current bodies, 47 selected bodies in 45 typed groups; 730 explicit dispositions; 111 module sources / four module and six shared documents; all 36 original actual-PivTool sources/project retained; complete wrapper transforms and corrected F9 shape reconcile.
+PENDING: coordinator consumer/annotation/actual-shipping builds, actual Csc/source/reference/analyzer/config/assets captures and live dependency verification. Preparation establishes no new compilation or device result.
+
+EXIT=0
+$ python3 docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/host-scope-v2.py verify
+PASS: two generated hosts have explicit application namespaces; original extraction manifest/source-context/host sources remain pinned snapshots; complete body/wrapper bytes and compiler policy are preserved.
+
+EXIT=0

@@ -100,6 +100,12 @@
       "entries": ["SCardGetReaderDeviceInstanceId#5AAB0CDCBA28"]
     },
     {
+      "path": "Devices/DiscoveryReadAdmission.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Devices/DiscoveryReadAdmission.cs:AcquireAsync checks the complete gate set and consumes permits under AdmissionLock; ineligible requests await a release notification without reservations.", "DiscoveryReadSchedulingTests.FindAllAsync_LiveUnknownPidWaiter_DoesNotBlockDifferentPidMetadata pins healthy known-PID progress while an unknown request remains pending in a live scope."],
+      "status": ["documented", "outstanding"],
+      "entries": ["AcquireAsync#DFEC26A91F30#async-blocked#SemaphoreSlim.Wait(0) consumes an already-available permit under the same lock as complete-set eligibility and release; it cannot wait for a held PID. Ineligible requests await release asynchronously, not by polling. This source classification does not prove subsequent native reads are nonblocking."]
+    },
+    {
       "path": "Devices/DisposalGate.cs", "reviewOwner": "Core maintainers", "rationale": "",
       "evidence": ["Devices/DisposalGate.cs:39 blocks only the synchronous Dispose path while sharing the async disposal completion."],
       "status": ["documented", "outstanding"],

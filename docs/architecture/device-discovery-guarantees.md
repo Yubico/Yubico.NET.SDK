@@ -88,10 +88,13 @@ waiter would still let its abandoned native operation overlap a later sibling re
 
 Before native-worker admission, USB reads therefore acquire process-wide PID admission. All interfaces
 with the same known PID serialize, even when they belong to distinct keys or different finders. An unknown
-USB PID (including an unparsed CCID reader name) acquires all known PID gates in order, because it may be
-a sibling of any enumerated HID PID. Known different PIDs and non-USB readers remain independent. This
-intentionally conservative scheduling does not strengthen merge evidence or change registry member claims.
-It stores neither device metadata nor serial/topology aliases globally.
+USB PID (including an unparsed CCID reader name) acquires all known PID gates atomically, because it may be
+a sibling of any enumerated HID PID. Admission checks and complete grants share a short lock with release;
+an ineligible request awaits a release notification without reserving any gates. A pending unknown-PID
+request therefore cannot block an available known PID, even after its caller's budget expires in a live
+finder. Known different PIDs and non-USB readers remain independent. This intentionally conservative
+scheduling does not strengthen merge evidence or change registry member claims. It stores neither device
+metadata nor serial/topology aliases globally.
 
 The admission transfers to the native discovery lease, surviving bounded waiter timeout, cancellation,
 scope retirement, and failed built-in teardown that retains the quarantined lease. Scope retirement cancels
@@ -100,9 +103,13 @@ four-worker bound are unchanged. A blocked same-PID owner can therefore leave ot
 that scan rather than admitting unsafe overlapping work.
 
 Pinned by `DiscoveryReadSchedulingTests.FindAllAsync_PotentialSiblingReads_WaitForNativeDisposal`,
-`ScanAsync_ExitKeepsNativeAdmissionAndRetiresQueuedSiblings`, and
-`FindAllAsync_DifferentPidMetadata_ProgressesWhileNativeDisposalIsHeld`; retained native-failure admission
-is exercised by the isolated `PcscDiscoveryLifetimeTests` cleanup probes.
+`ScanAsync_ExitKeepsNativeAdmissionAndRetiresQueuedSiblings`,
+`FindAllAsync_DifferentPidMetadata_ProgressesWhileNativeDisposalIsHeld`, and
+`FindAllAsync_LiveUnknownPidWaiter_DoesNotBlockDifferentPidMetadata`; retained native-failure admission is
+exercised by the isolated `PcscDiscoveryLifetimeTests` cleanup probes. The live-unknown vector holds 0407
+disposal, lets the unknown read's bounded scan return without retiring its finder, proves a second scan is
+still waiting, and obtains 0404 metadata before retiring the unknown scope or releasing 0407. It also pins
+that the retired unknown request never opens when the held native owner finally drains.
 
 ### Scoped lifecycle
 

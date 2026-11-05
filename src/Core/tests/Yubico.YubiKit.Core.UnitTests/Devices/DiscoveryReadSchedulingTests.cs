@@ -96,8 +96,8 @@ public class DiscoveryReadSchedulingTests
                 .WaitAsync(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
             Assert.Empty(fresh.OpenCalls);
 
-            // The unknown-PID waiter acquired earlier PID gates before blocking on the native owner's
-            // gate. Retirement must roll those partial acquisitions back without waiting for that owner.
+            // Retiring the unknown-PID waiter must complete without waiting for the native owner;
+            // unrelated PID admission remains available throughout.
             var unrelated = new ScopeRig { PrimaryReader = "Yubico YubiKey CCID", ProductId = 0x0404 };
             Assert.NotNull(Assert.Single(await unrelated.CreateFinder(ConnectionType.SmartCard)
                 .FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken)
@@ -119,6 +119,69 @@ public class DiscoveryReadSchedulingTests
             release.TrySetResult();
             await cancellation.CancelAsync();
             // Observe cancellation and drain the detached owner before this collection can run another test.
+            _ = await Record.ExceptionAsync(() => scan.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None));
+            await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(CancellationToken.None);
+        }
+    }
+
+    [Fact]
+    public async Task FindAllAsync_LiveUnknownPidWaiter_DoesNotBlockDifferentPidMetadata()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        var rig = new ScopeRig();
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var (held, _) = HoldFirstDisposal(rig, release.Task);
+        var owner = rig.CreateFinder(ConnectionType.SmartCard);
+        var scan = owner.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+        var unknown = new ScopeRig { PrimaryReader = "Yubico YubiKey future USB reader" };
+        var waiter = unknown.CreateFinder(ConnectionType.SmartCard);
+        var unrelated = new ScopeRig { PrimaryReader = "Yubico YubiKey CCID", ProductId = 0x0404 };
+        var healthyFinder = unrelated.CreateFinder(ConnectionType.SmartCard);
+        Task<IReadOnlyList<IYubiKey>>? pendingScan = null;
+        Task<IReadOnlyList<IYubiKey>>? healthyScan = null;
+        try
+        {
+            // Hold 0407 before starting the unknown read. Unlike ScanAsync, this finder stays live
+            // after its bounded identity wait returns, so retirement cannot mask partial reservations.
+            await held.DisposalEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            var unread = Assert.Single(await waiter.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken)
+                .WaitAsync(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken));
+            Assert.Null(unread.CachedDeviceInfo);
+            Assert.Single(unknown.CreatedSlots);
+            Assert.Empty(unknown.OpenCalls);
+
+            // A second scan joins the still-pending read. Prove the scope has not retired before
+            // asking an independent 0404 finder for real metadata, with 0407 still held throughout.
+            pendingScan = waiter.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+            await Assert.ThrowsAsync<TimeoutException>(() =>
+                pendingScan.WaitAsync(TimeSpan.FromMilliseconds(150), TestContext.Current.CancellationToken));
+            healthyScan = healthyFinder.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+            var healthy = Assert.Single(await healthyScan
+                .WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken));
+            Assert.Equal(111, healthy.CachedDeviceInfo?.SerialNumber);
+            Assert.Single(unrelated.OpenCalls);
+            Assert.False(pendingScan.IsCompleted);
+            Assert.Empty(unknown.OpenCalls);
+            Assert.Equal(0, held.DisposeCount);
+
+            waiter.RetireReadScope();
+            _ = await pendingScan.WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+            release.SetResult();
+            await scan.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+            Assert.Empty(unknown.OpenCalls);
+        }
+        finally
+        {
+            waiter.RetireReadScope();
+            owner.RetireReadScope();
+            healthyFinder.RetireReadScope();
+            release.TrySetResult();
+            // Retire queued work and drain the held native fake even if the runner canceled the test.
+            if (pendingScan is not null)
+                _ = await Record.ExceptionAsync(() => pendingScan.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None));
+            if (healthyScan is not null)
+                _ = await Record.ExceptionAsync(() => healthyScan.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None));
             _ = await Record.ExceptionAsync(() => scan.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None));
             await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(CancellationToken.None);
         }

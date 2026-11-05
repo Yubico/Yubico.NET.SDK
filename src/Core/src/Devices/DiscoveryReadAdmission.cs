@@ -20,9 +20,11 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 internal sealed class DiscoveryReadAdmission : IDisposable
 {
+    private static readonly Lock AdmissionLock = new();
     private static readonly Dictionary<ushort, SemaphoreSlim[]> PidGates = ReaderNamePidParser.KnownProductIds
         .ToDictionary(pid => pid, _ => (SemaphoreSlim[])[new(1, 1)]);
-    private static readonly SemaphoreSlim[] AllUsbGates = [.. PidGates.OrderBy(pair => pair.Key).SelectMany(pair => pair.Value)];
+    private static readonly SemaphoreSlim[] AllUsbGates = [.. PidGates.Values.SelectMany(gates => gates)];
+    private static TaskCompletionSource _availabilityChanged = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private readonly IReadOnlyList<SemaphoreSlim> _gates;
     private int _disposed;
@@ -31,8 +33,8 @@ internal sealed class DiscoveryReadAdmission : IDisposable
     private DiscoveryReadAdmission(IReadOnlyList<SemaphoreSlim> gates) => _gates = gates;
 
     // Unknown USB identity must exclude every known PID too: an unparsed CCID reader can be a sibling
-    // of any HID descriptor. Ordered multi-gate acquisition avoids deadlock without globally serializing
-    // ordinary reads of distinct known PIDs. No topology/serial aliases survive a discovery operation.
+    // of any HID descriptor. Grant the entire set atomically: a blocked unknown request must not reserve
+    // available PIDs before it can run. No topology/serial aliases survive a discovery operation.
     internal static IReadOnlyList<SemaphoreSlim> GatesFor(ushort? pid) =>
         pid is { } known && PidGates.TryGetValue(known, out var gates) ? gates : AllUsbGates;
 
@@ -40,22 +42,26 @@ internal sealed class DiscoveryReadAdmission : IDisposable
         IReadOnlyList<SemaphoreSlim> gates,
         CancellationToken cancellationToken)
     {
-        var acquired = new List<SemaphoreSlim>(gates.Count);
-        try
+        while (true)
         {
-            foreach (var gate in gates)
+            Task changed;
+            lock (AdmissionLock)
             {
-                await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
-                acquired.Add(gate);
+                cancellationToken.ThrowIfCancellationRequested();
+                if (gates.All(gate => gate.CurrentCount != 0))
+                {
+                    // All acquisition and release use AdmissionLock; these waits cannot block.
+                    foreach (var gate in gates)
+                        _ = gate.Wait(0);
+                    return new DiscoveryReadAdmission(gates);
+                }
+
+                // Capture under the same lock as the eligibility check so no release is missed.
+                changed = _availabilityChanged.Task;
             }
 
-            return new DiscoveryReadAdmission(acquired);
-        }
-        catch
-        {
-            for (var i = acquired.Count - 1; i >= 0; i--)
-                acquired[i].Release();
-            throw;
+            // Event-driven retry only: no reservations, native workers, timers, or polling while queued.
+            await changed.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -72,7 +78,15 @@ internal sealed class DiscoveryReadAdmission : IDisposable
         if (Interlocked.Exchange(ref _disposed, 1) != 0)
             return;
 
-        for (var i = _gates.Count - 1; i >= 0; i--)
-            _gates[i].Release();
+        TaskCompletionSource changed;
+        lock (AdmissionLock)
+        {
+            foreach (var gate in _gates)
+                gate.Release();
+            changed = _availabilityChanged;
+            _availabilityChanged = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
+
+        changed.SetResult();
     }
 }

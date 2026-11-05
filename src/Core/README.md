@@ -356,8 +356,9 @@ device with `Yubico.YubiKit.SecurityDomain`.
   as ordinarily busy. Custom connections do not inherit those native-release guarantees.
 - Discovery serializes USB metadata/identity reads that may target sibling interfaces, including native
   connection disposal. Without reliable physical identity yet, distinct same-PID keys share this admission;
-  known different PIDs remain independent. An unknown USB PID conservatively excludes all USB discovery
-  reads. Caller timeout/cancellation does not release an active native owner's admission or extend discovery
+  known different PIDs remain independent. An admitted unknown USB PID conservatively excludes all USB
+  discovery reads, but a pending unknown-PID request reserves nothing and cannot block an available known
+  PID. Caller timeout/cancellation does not release an active native owner's admission or extend discovery
   budgets. This is discovery scheduling, not a new public connection or cross-process ownership guarantee.
 - `ProtocolFactory` and the `IProtocol` family are internal. Use `Raw*Session.CreateAsync(connection)`.
 

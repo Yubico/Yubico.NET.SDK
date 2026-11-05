@@ -148,9 +148,10 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
-    public async Task Monitor_EventuallyPopulatesMetadataOnEveryRetainedDevice()
+    public async Task Monitor_EventuallyPopulatesMetadata_AndRetainsUnchangedGroups()
     {
-        // This contract is about retained objects, so observe one owned monitor rather than new Find views.
+        // Later identity reads may regroup standalone interfaces. Only unchanged groups must retain
+        // their published objects, so observe one owned monitor rather than independent Find views.
         await using var monitor = await YubiKeyManager.CreateMonitorAsync();
         var initial = monitor.CurrentDevices;
         IReadOnlyList<IYubiKey> devices = initial;
@@ -162,9 +163,33 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
             await Task.Delay(TimeSpan.FromSeconds(6));
         }
 
+        AssertMetadataReadyAndStableGroupsRetained(initial, devices);
+    }
+
+    internal static void AssertMetadataReadyAndStableGroupsRetained(
+        IReadOnlyList<IYubiKey> initial, IReadOnlyList<IYubiKey> devices)
+    {
         Assert.NotEmpty(devices);
         Assert.All(devices, device => Assert.NotNull(Assert.IsType<YubiKeyDevice>(device).DeviceInfo));
-        Assert.All(initial, device => Assert.Contains(devices, retained => ReferenceEquals(device, retained)));
+        // Compare the full member multiset, not device counts: regrouping must not lose or duplicate
+        // an interface, even when several initial objects become one composite object.
+        Assert.Equal(
+            initial.SelectMany(device => Assert.IsType<YubiKeyDevice>(device).InterfaceIds).Order(StringComparer.Ordinal),
+            devices.SelectMany(device => Assert.IsType<YubiKeyDevice>(device).InterfaceIds).Order(StringComparer.Ordinal));
+        var currentByIdentity = devices.ToDictionary(YubiKeyDevice.PhysicalIdentityKeyFor, StringComparer.Ordinal);
+        foreach (var previous in initial)
+        {
+            if (!currentByIdentity.TryGetValue(YubiKeyDevice.PhysicalIdentityKeyFor(previous), out var current) ||
+                previous.AvailableConnections != current.AvailableConnections)
+                continue;
+
+            // Different known serials prove substitution even on identical member/connection sets.
+            // Learning a formerly unknown serial (or a later serial-less read) does not.
+            var serialContradiction = previous.SerialNumber is { } previousSerial &&
+                current.SerialNumber is { } currentSerial && previousSerial != currentSerial;
+            if (!serialContradiction)
+                Assert.Same(previous, current);
+        }
     }
 
     [Fact]

@@ -71,6 +71,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         using var cts = new CancellationTokenSource(Bound);
         var firstScan = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([firstScan]);
+        IYubiKey published = Assert.Single(repository.GetAll());
+        Assert.Null(published.CachedDeviceInfo);
 
         await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
         var metadata = default(DeviceInfo) with
@@ -88,7 +90,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
 
         var retained = Assert.Single(cached);
         Assert.Same(firstScan, retained);
-        Assert.Equal(metadata, firstScan.DeviceInfo);
+        Assert.Equal(metadata, published.CachedDeviceInfo);
+        Assert.Equal(metadata, retained.CachedDeviceInfo);
         Assert.Empty(events);
     }
 
@@ -113,8 +116,9 @@ public class YubiKeyDeviceRepositoryCompositeTests
         var cached = repository.GetAll();
         var events = await watcher.DrainAsync(repository, cts.Token);
 
-        Assert.Same(firstScan, Assert.Single(cached));
-        Assert.Equal(metadata, firstScan.DeviceInfo);
+        var retained = Assert.Single(cached);
+        Assert.Same(firstScan, retained);
+        Assert.Equal(metadata, retained.CachedDeviceInfo);
         Assert.Empty(events);
     }
 
@@ -145,14 +149,16 @@ public class YubiKeyDeviceRepositoryCompositeTests
             {
                 Assert.Equal(DeviceAction.Removed, removed.Action);
                 Assert.Same(existing, removed.Device);
+                Assert.Equal(oldMetadata, removed.Device.CachedDeviceInfo);
             },
             added =>
             {
                 Assert.Equal(DeviceAction.Added, added.Action);
                 Assert.Same(updated, added.Device);
+                Assert.Equal(updatedMetadata, added.Device.CachedDeviceInfo);
             });
         Assert.Same(updated, Assert.Single(cached));
-        Assert.Equal(oldMetadata, existing.DeviceInfo);
+        Assert.Equal(oldMetadata, ((IYubiKey)existing).CachedDeviceInfo);
         Assert.Equal(103, existing.SerialNumber);
     }
 
@@ -382,7 +388,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
     {
         using var repository = new YubiKeyDeviceRepository();
         using var cts = new CancellationTokenSource(Bound);
-        var twoInterfaces = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
+        var metadata = default(DeviceInfo) with { SerialNumber = 103, IsLocked = true };
+        var twoInterfaces = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", metadata);
         repository.UpdateCache([twoInterfaces]);
 
         await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
@@ -402,8 +409,10 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Equal(2, events.Count);
         Assert.Equal(DeviceAction.Removed, events[0].Action);
         Assert.Same(twoInterfaces, events[0].Device);
+        Assert.Equal(metadata, events[0].Device.CachedDeviceInfo);
         Assert.Equal(DeviceAction.Added, events[1].Action);
         Assert.Same(threeInterfaces, events[1].Device);
+        Assert.Null(events[1].Device.CachedDeviceInfo);
         Assert.NotSame(twoInterfaces, Assert.Single(cached));
     }
 
@@ -452,7 +461,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
     {
         using var repository = new YubiKeyDeviceRepository();
         using var cts = new CancellationTokenSource(Bound);
-        var beforeRemoval = Published("ykphysical:103", "pcsc:a", "hid-fido:a", deviceInfo: null);
+        var metadata = default(DeviceInfo) with { SerialNumber = 103, IsLocked = true };
+        var beforeRemoval = Published("ykphysical:103", "pcsc:a", "hid-fido:a", metadata);
         repository.UpdateCache([beforeRemoval]);
 
         await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
@@ -466,8 +476,10 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Equal(2, events.Count);
         Assert.Equal(DeviceAction.Removed, events[0].Action);
         Assert.Same(beforeRemoval, events[0].Device);
+        Assert.Equal(metadata, events[0].Device.CachedDeviceInfo);
         Assert.Equal(DeviceAction.Added, events[1].Action);
         Assert.Same(afterReinsertion, events[1].Device);
+        Assert.Null(events[1].Device.CachedDeviceInfo);
         Assert.NotSame(beforeRemoval, afterReinsertion);
     }
 

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Cli.Shared.Cli;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.YubiOtp.Examples.OtpTool;
 using Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
@@ -23,11 +22,8 @@ try
 {
     var options = CliOptions.Parse(args);
 
-    YubiKeyManager.StartMonitoring();
-
     int exitCode = await RunCommandAsync(options, cts.Token);
 
-    await YubiKeyManager.ShutdownAsync();
     return exitCode;
 }
 catch (ArgumentException ex)

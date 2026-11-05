@@ -2,7 +2,8 @@
 
 This document defines the SDK's in-process ownership contract:
 
-> A physical YubiKey has at most one live connection, which hosts at most one live session.
+> A grouped physical YubiKey has at most one live connection across its known member interfaces,
+> and a connection hosts at most one live session.
 > Connections and sessions are reused sequentially; overlapping ownership attempts throw.
 
 Cross-process contention is outside this registry's scope. Another process holding PC/SC may still
@@ -26,7 +27,8 @@ opening another native handle.
 
 The hardware investigation also established that Management can communicate over HID while CCID is
 held. That remains useful protocol evidence, but it is no longer a supported parallel ownership mode.
-The product contract is one connection for the physical key, regardless of interface.
+The supported usage contract remains one connection for the physical key, regardless of interface;
+enforcement is bounded by the known-member scope described below.
 
 ## One physical device, one connection
 
@@ -53,6 +55,27 @@ Physical-device exclusivity is only as strong as discovery's evidence. When disc
 that standalone records belong to one key, it does not guess. Each record then has a one-element lease
 scope, so protection degrades conservatively to per-interface exclusion. See
 [Device Discovery Guarantees](device-discovery-guarantees.md).
+
+The same bound applies to `YubiKeyManager.Find…Async(interfaces: ...)`: a scoped view deliberately knows only in-scope
+members. Repeated scans and all/scoped views with any shared member ID exclude each other's connections
+in either acquisition order. Two disjoint views, such as SmartCard-only and FIDO-only, have **no shared
+claim**, even if they report the same serial or topology key. The registry does not register global
+serial/topology aliases or import membership from earlier scans. A prior all-interface observation does
+not itself expand later views' claims. Coordinate disjoint views explicitly; their independent claims
+are a documented limit, not a recommendation to use one physical key concurrently. Discovery leases are
+also per-interface: a scan can still probe an unclaimed sibling while a scoped connection holds another
+interface of that key. Pinned by
+`ScopedViews_OverlappingAllAndScopedConnectionsExcludeEachOtherInBothDirections` and
+`ScopedViews_DisjointMembersEvenWithSameSerial_HaveOnlyPerInterfaceExclusion` in `FindYubiKeysScopeTests`.
+
+An owned monitor has independent discovery evidence and scans All; a one-shot `interfaces` request neither
+pauses nor restricts it. Do not assume a monitor is a hardware broker for independent scoped/raw views.
+For explicit metadata comparisons over different interfaces, finish scans and dispose tracking before
+opening sequential live connections when sibling overlap cannot be ruled out. Disposing a monitor does
+not dispose application-owned sessions or connections. Its one ten-second managed-loop drain is not a
+timeout for native listener cleanup or total disposal. Already-open discovery reads retain their actual
+admission/lease until native teardown, even past that drain budget. No late uncommitted result can
+repopulate disposed membership or emit new deltas; already-committed history may still drain.
 
 ## One connection, one session
 
@@ -98,6 +121,18 @@ Discovery leases remain per-interface and nonblocking:
 
 Idle ownership records remain for the process lifetime to avoid unsafe remove/recreate races. Their
 count is bounded by unique interface IDs observed.
+
+Separately, discovery's native-read admission serializes potentially sibling USB probes by PID before
+they request a worker or interface lease. It covers both identity and metadata reads, including connection
+disposal, across finders and evidence epochs. An unknown USB PID conservatively acquires all known PID
+gates atomically. Pending requests reserve no gates and await release notifications, so an unknown request
+blocked by one PID does not prevent an available different PID from progressing. These fixed gates are
+scheduling only: they contain no metadata and add no public connection claims.
+Once an interface lease is acquired, it owns this admission until native release; an abandoned waiter or
+retired scope cannot release it. Built-in native owners that cannot prove teardown retain it with their
+quarantined interface claim. See [native discovery scheduling](device-discovery-guarantees.md#native-discovery-scheduling)
+for the throughput tradeoff and pinning tests. Direct raw reads outside the finder and caller-owned public
+connections do not acquire these discovery PID gates; the grouping bound above remains unchanged.
 
 ## Session transport selection
 

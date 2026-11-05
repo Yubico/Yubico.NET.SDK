@@ -103,6 +103,9 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
         }
     }
 
+    /// <inheritdoc />
+    public DeviceInfo? CachedDeviceInfo => DeviceInfo;
+
     /// <summary>
     ///     The latched hardware serial number per the <see cref="IYubiKey.SerialNumber" /> contract:
     ///     null until a metadata read delivering a serial succeeds, monotonically non-null afterward.

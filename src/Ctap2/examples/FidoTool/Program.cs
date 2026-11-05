@@ -14,7 +14,6 @@
 
 using Spectre.Console;
 using Yubico.YubiKit.Cli.Shared.Cli;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 using Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Output;
 using Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
@@ -28,9 +27,6 @@ AnsiConsole.Write(
 
 AnsiConsole.MarkupLine("[grey]YubiKey CTAP2 Tool - SDK Example Application[/]");
 AnsiConsole.WriteLine();
-
-// Start monitoring for device events
-YubiKeyManager.StartMonitoring();
 
 using var cts = CommandHelper.CreateConsoleCts();
 
@@ -55,8 +51,6 @@ else
         .AddItem("Factory Reset", ct => ResetMenu.RunAsync(ct))
         .RunAsync(cts.Token);
 }
-
-await YubiKeyManager.ShutdownAsync();
 
 return exitCode;
 

@@ -11,11 +11,9 @@ namespace Yubico.YubiKit.Cli.Commands.Infrastructure;
 /// <summary>
 ///     Abstract base class for all <c>yk</c> commands. Handles the common lifecycle:
 ///     <list type="number">
-///         <item>Start YubiKeyManager monitoring.</item>
 ///         <item>Select device (filtered by <see cref="AppletTransports" /> and optional <c>--serial</c>).</item>
 ///         <item>Enrich context via ManagementSession (<see cref="YkDeviceContext.Info" />).</item>
 ///         <item>Delegate to <see cref="ExecuteCommandAsync" /> with the enriched context.</item>
-///         <item>Shut down YubiKeyManager on exit.</item>
 ///     </list>
 /// </summary>
 public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
@@ -30,8 +28,6 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
     /// <inheritdoc />
     public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
     {
-        YubiKeyManager.StartMonitoring();
-
         try
         {
             if (!TryParseTransport(settings.Transport, out var requestedTransport))
@@ -94,10 +90,6 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
         {
             OutputHelpers.WriteError(ex.Message);
             return ExitCode.GenericError;
-        }
-        finally
-        {
-            await YubiKeyManager.ShutdownAsync();
         }
     }
 

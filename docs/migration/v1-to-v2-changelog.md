@@ -1,5 +1,18 @@
 # V1 to V2 Migration Documentation Changelog
 
+## 2026-11-05 - Independent Find and explicitly owned monitoring
+
+- Updated current guide/map/highlights for `Find…Async(predicate, interfaces, cancellationToken)` with fresh
+  per-call evidence, and `CreateMonitorAsync` returning an initialized, disposable `YubiKeyMonitor`.
+  `CurrentDevices` is no-I/O membership; `WatchAsync` supplies atomic initial Added replay and changes.
+- Documented earlier-prerelease migration away from `ScanAsync`, `forceRescan`, and static monitoring/
+  shutdown. Old result filters need All plus local filtering where full composite slots are required.
+  Overflow recovery re-enumerates the same monitor rather than pairing independent Find with an event tail.
+- Clarified optional last-known metadata versus live Management reads and independent object lifetimes.
+  Added targeted two-key read-only hardware coverage; attended removal/reinsertion acceptance remains a
+  separate pending pass gate. Historical changelog entries and `.state.yml` are unchanged; this is not a
+  claim that the follow-up feature has merged.
+
 ## 2026-10-31 - Application-owned WebAuthn RP authorization
 
 - YESDK-1623 / audit 15 replaces `PublicSuffixChecker`, `EnterpriseRpIds`, and `WebAuthnOrigin.IsRpIdValid` with required synchronous `WebAuthnClientOptions.RpIdValidator(WebAuthnOrigin origin, string rpId)` returning bool. Applications own RP validity (including domain/URI syntax) AND caller/RP binding. The SDK checks only nonempty RP text that can be encoded faithfully as UTF-8, and adds no independent domain/URI parser, IDNA, PSL, or browser syntax/binding policy. The approved callback-owned validity boundary supersedes the earlier independent syntax gate.

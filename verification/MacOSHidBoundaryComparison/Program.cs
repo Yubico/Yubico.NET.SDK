@@ -233,7 +233,7 @@ internal static class Program
         string phase = "discovery";
         try
         {
-            var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido, forceRescan: true);
+            var devices = await YubiKeyManager.FindAllAsync();
             var matches = devices.Where(d => d.SerialNumber == Serial && d.SupportsConnection(ConnectionType.HidFido)).ToArray();
             if (matches.Length != 1) return 4;
             var device = matches[0];
@@ -301,7 +301,6 @@ internal static class Program
                 watch ?? Stopwatch.StartNew(), exception.GetType().Name);
             return 6;
         }
-        finally { await YubiKeyManager.ShutdownAsync(); }
     }
 
     private static string Hash(string path) => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));

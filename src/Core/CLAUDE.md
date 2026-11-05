@@ -391,10 +391,50 @@ substitution and emits `Removed` for the predecessor followed by `Added` for a n
 serials never trigger identity-based republication. If no listener event invalidates discovery caches and no scan
 observes absence, same-interface substitution remains unknowable from cached evidence.
 
-Use `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` when absence is exceptional and
-`FindFirstOrDefaultAsync(predicate, cancellationToken)` when it is not. They are thin, one-shot selections over
-cached `FindAllAsync`; they do not wait for insertion, and callers must not treat discovery order as stable. The
-token is passed to discovery, but a cached result may complete without observing cancellation.
+`IYubiKey.CachedDeviceInfo` exposes the existing nullable Core `DeviceInfo` snapshot without I/O; its default
+interface implementation returns `null` for custom implementations. `YubiKeyDevice` delegates directly to
+`DeviceInfo`, whose getter reads the atomically published `DeviceInfoSnapshot` reference. Do not introduce a
+second cache or infer freshness from this property. Existing discovery/repository updates replace the
+snapshot without a device event, and null updates preserve the last successful value. Retained objects can
+expose stale metadata after configuration changes or disconnect. `ManagementSession.GetDeviceInfoAsync` is
+the live-read API and does not promise to update discovery metadata. The independent `SerialNumber` latch
+and identity contract remain unchanged, even if a newer metadata snapshot omits its serial. No-hardware
+coverage is in `YubiKeyDeviceTests` (no connection on access, snapshot replacement, default implementations,
+serial independence) and `YubiKeyDeviceRepositoryCompositeTests` (retention and replacement isolation).
+
+Use `YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken)` when absence is exceptional and
+`FindFirstOrDefaultAsync` when it is not. They select after one independent fresh `FindAllAsync` operation;
+they do not wait for insertion, and callers must not treat discovery order as stable. Token-only forwarding
+overloads retain the same operation, not a separate mode or lifetime.
+
+`YubiKeyManager.FindAllAsync(interfaces, cancellationToken)` is always one-shot, not a monitor rescan.
+It constructs `FindYubiKeys.CreateForScope` per call with an immutable concrete scope; no manager/cache,
+repository publication, watcher events, or monitor lifecycle participates. Keep `FindYubiKeys.Create()`
+all-interface and `IFindYubiKeys.FindAllAsync(type, ...)` a post-merge result filter. Never reuse a finder
+across different scopes: its cache eviction treats unobserved members as absent. Excluded backend
+factories are not called. Filter HID by concrete type before slot creation/topology/protocol reads;
+OTP and FIDO necessarily share OS descriptor enumeration. Ignore undefined scope bits like `Matches`.
+Do not reinterpret partial scope as PID completeness or import sibling slots from prior scans.
+
+One-shot exit terminally retires its read scope in `finally`, including cancellation and budget expiry.
+This cancels queued identity admission and prevents later opens; already-open native work keeps its
+worker and registry lease until teardown. Do not dispose admission/lease owners at the wait boundary.
+Dispatched native enumeration is still awaited after cancellation, so the public task can remain pending
+until enumeration returns; only identity/metadata waits are bounded. This boundary and the absence of
+post-enumeration slots/probes are pinned by
+`FindAllAsync_CancellationDuringEnumeration_WaitsForEnumerationThenSkipsSlotsAndProbes`.
+No global registry identity aliases are added: all/scoped views exclude connections only when their
+known member-ID sets overlap; disjoint CCID/FIDO views remain uncoordinated even with matching serials.
+`FindYubiKeysScopeTests` pins filtering, partial same-PID grouping, evidence isolation, retirement, and
+the ownership bound; `YubiKeyManagerStaticTests` pins no initialization/publication/monitor interference.
+`FindAllAsync_ReturnedViewCanConnectSequentiallyAfterDiscoveryScopeRetires` additionally pins that retiring
+one-shot discovery does not retire the returned view's public connection slots. The public hardware
+companion is `ScopedDiscoveryReadOnlyTests` in Management's integration project (the appropriate place
+for its live-read dependency), not Core's unit tests. It uses all attached authorized serial-bearing USB
+fixtures, permits conservative fragments, and compares metadata over sequential concrete connections.
+Keep native disjoint-view races out of hardware coverage; use the deterministic ownership vectors above.
+Fixture requirements and the explicit read-only filter are in
+[device discovery testing](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
 handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by production discovery.
@@ -410,41 +450,109 @@ one-to-one mapping between operating-system interfaces and physical USB interfac
 
 ### Device Event Delivery
 
-One public surface over one internal pipeline, both BCL-typed:
+`YubiKeyManager.CreateMonitorAsync(ct)` creates a new initialized `YubiKeyMonitor`, the sole
+composition/teardown owner of its repository and internal `YubiKeyMonitorWorker`. There is no global manager/cache,
+static Start/Stop/Watch/Shutdown, `ScanAsync`, or `forceRescan` alias. Short commands and most applet tests
+use one-shot discovery; tracking consumers explicitly own/share a monitor. Old result filters must be
+applied locally after All discovery where callers need full composite slots. The factory starts listeners
+first and awaits the loop's own initial scan-and-publication signal, not a separate manual rescan.
+Empty success is ready; initial scan or
+publication failure is propagated and disposes partial ownership. Creation cancellation cancels the wait
+and triggers cleanup; the worker's lifetime token is independent of the creation token after return.
+Each worker is initialized once, runs once, and is disposed once by its public owner. There are no manual
+rescans, stop/start modes, interval replacement, restarts, or monitor generations. Initial, listener-driven,
+and fallback scans all await full repository publication inside one sequential loop. No scan semaphore or
+worker publication gate is needed because no second producer exists. The production fallback interval
+remains five seconds; test timing stays internal.
 
-- `YubiKeyManager.WatchAsync(ct)` — `IAsyncEnumerable<DeviceEvent>`. There is no observable surface;
-  `DeviceChanges` was removed outright and has no replacement shim.
+Repository diffs serialize on `_cacheLock` and build a private successor dictionary plus ordered event list;
+published dictionaries are never mutated. Cached reads use an atomically replaced, read-only membership
+list published only at the end of a complete diff. The short `_stateLock` coordinates snapshot admission,
+event enqueue, capture/registration, disposal, and failure, without making teardown wait for a parked diff
+(including device getters/logging). A failed diff commits neither partial membership nor partial deltas.
+Reads do not enumerate a dictionary being modified or touch hardware. Lists are historical membership
+snapshots, not deeply immutable devices.
+Worker retirement suppresses a late discovery result before diffing, but an already-admitted diff may
+overlap teardown. Its final `_stateLock` check rejects membership/event commits after repository disposal
+or failure. The owner closes public access first, shares disposal completion through `DisposalGate`, and
+disposes the repository in `finally` after worker teardown rather than emptying a still-live cache.
+Worker disposal retires queued built-in finder reads without releasing actual native admission/leases and
+waits once for the sole loop, including any publication, with a ten-second managed-drain budget. This is
+not a timeout for native listener cleanup or total disposal. Already-committed history can still drain.
+Unexpected terminal loop failure faults active/future subscriptions and rejects snapshot access before
+best-effort diagnostic logging; ordinary later scan failures retain the last snapshot and retry on later
+hints/fallback. Recovery creates a new monitor with independent repository/finder ownership.
 
-One internal type backs it:
+Owned `WatchAsync` uses `YubiKeyDeviceRepository.WatchWithSnapshotAsync`: its first `MoveNextAsync` captures the
+read-only snapshot and eagerly registers a hub subscription under `_stateLock`, then yields initial Added
+events and drains ordered deltas outside the lock. Replay does not consume delta-buffer capacity. Never
+prepend an uncoordinated `CurrentDevices` read or register via a still-lazy hub iterator. Cancellation
+during replay unregisters that enumeration. Captured replay/published history can drain after disposal or
+terminal failure; new enumerations after disposal are empty, and after terminal failure fault without replay.
+Recovery from overflow is to clear the consumer projection and re-enumerate the **same monitor**.
+`YubiKeyMonitorTests` and gated repository tests pin these contracts without hardware.
+
+One public stream: `YubiKeyMonitor.WatchAsync(ct)` — initial Added replay plus changes.
+There is no observable surface; `DeviceChanges` was removed outright and has no replacement shim.
+The repository/hub retain an internal delta-only seam for focused publication tests, never a public lifecycle.
+
+The internal fan-out type is:
 
 - `DeviceEventHub` — asynchronous fan-out, owned by `YubiKeyDeviceRepository`. Copy-on-write watcher
   array; `Publish` reads a lock-free snapshot and only ever calls `TryWrite` on a per-watcher bounded
-  channel (256, `AllowSynchronousContinuations = false`). Mutations take a short lock.
+  channel (256, `AllowSynchronousContinuations = false`). Mutations take a short lock. Its eager internal
+  subscription handle lets the repository register atomically without invoking a lazy iterator. No logging
+  provider is called on overflow while publication holds `_stateLock`; the terminal error carries recovery advice.
 
 The load-bearing property is that **no consumer code ever runs on the publication path**. That is
-what lets the monitor hold `_publishGate` across `UpdateCache` without a slow, abandoned, or throwing
-watcher wedging device monitoring — and it is why the lifecycle tests that need an in-flight
-publication use the `PublishAdmittedForTest` seam rather than a blocking subscriber.
+what lets the repository enqueue a complete diff under its short `_stateLock` without a slow, abandoned,
+or throwing watcher wedging device monitoring. Lifecycle tests park a publication at
+`PublishAdmittedForTest` or inside a device getter, not in a blocking subscriber; release the barrier and
+await `MonitoringCompletionForTest` to drain the actual abandoned loop.
 
 Contracts worth knowing before editing:
 
-- **`WatchAsync` subscribes on first enumeration**, not when it is called. Events raised in the gap
-  are not observed.
+- **The stream subscribes on first `MoveNextAsync`**, not on the method call or `GetAsyncEnumerator`.
+  It captures then-current membership and registers atomically with publication.
 - **Every watcher is independent.** Overflow, cancellation, abandonment, and a consumer that throws
   out of its own loop terminate only that watcher. The publisher and the other watchers continue.
 - **Overflow faults rather than drops**, because `DeviceEvent` is a delta and a dropped event
-  permanently desynchronises the consumer's device list. Recover by re-enumerating and calling
-  `FindAllAsync`.
-- **Repository disposal ends active watchers normally** — not faulted, not cancelled.
-- **Enumerating after completion** ends immediately rather than throwing or hanging.
+  permanently desynchronises the consumer's device list. Owned watchers clear the projection and
+  re-enumerate the same monitor. Independent one-shot discovery cannot safely resynchronize an event tail.
+- **Repository disposal ends healthy active watchers normally** — not faulted, not cancelled. A terminal
+  monitoring failure instead faults subscriptions; later disposal does not erase an already-published fault.
+- **Enumerating after healthy completion** ends immediately; a terminal monitoring fault stays observable.
 - **Ordering across concurrent `Publish` calls belongs to the producer.** The monitor's publication
-  gate provides it. `Publish` after `Complete` is a silent no-op.
+  order follows from its sole sequential worker loop; the repository enqueues each diff under `_stateLock`.
+  `Publish` after `Complete` is a silent no-op.
 
 ### Listener Event Semantics
 
-HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diagnostic only and are never public physical-device truth. `YubiKeyManager.WatchAsync` must remain repository-diffed output after a rescan. Unknown HID removals still trigger a rescan fallback rather than being suppressed, because the removed interface may be the only native signal for a physical-device diff.
+HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diagnostic only and are never public physical-device truth. `YubiKeyMonitor.WatchAsync` must remain repository-diffed output after a rescan. Unknown HID removals still trigger a rescan fallback rather than being suppressed, because the removed interface may be the only native signal for a physical-device diff.
 
-`YubiKeyDeviceMonitorService` logs hint details at ingress and carries only a capacity-one occurrence signal into its single-reader loop; payloads are not queued. Startup is best-effort and degrades gracefully: each listener is started independently, and a listener that throws or reports a post-`Start()` status other than `Started` is logged, individually stopped/disposed, and skipped — it never aborts the other listener or the monitoring loop. Monitoring always starts (worst case, with no listeners at all, it relies solely on the interval fallback rescan), because device truth comes from the full `FindAllAsync` + repository diff, not from listeners. When a transport's *service* is simply unavailable (for example, no PC/SC service, no PC/SC native library, or no readers), that transport enumerates to empty and the other transports are still scanned and diffed every interval, so a transport whose listener is unavailable is still detected. This mirrors canonical yubikit (Rust/Python), where a transport that fails to enumerate is skipped and discovery continues with the others. Listeners are therefore optional latency accelerators, not correctness dependencies. One narrower case is not yet fully isolated at the scan layer: if PC/SC *enumeration itself throws* (discovery-worker saturation, or an `SCardGetStatusChange` error), `FindYubiKeys.FindAllAsync` aborts that single scan before HID is enumerated — deliberately, so a failed PC/SC probe is never committed as a false-empty snapshot that would emit spurious removals — and the monitor's `RescanSafelyAsync` retries on the next interval. Making HID still enumerate when PC/SC enumeration throws (per-transport scan isolation, without reintroducing false removals) is tracked for the polling-migration follow-up. `StartMonitoring` does not throw for listener unavailability (only for an invalid interval or a disposed service). Individually failed listeners are still cleaned up so no partial resources leak, and each listener callback captures its attempt's signal so a detached/stale callback cannot enqueue into a later monitoring run. The loop consumes one occurrence per wake-up before checking debounce/max-coalesce time, so continuously refilled signals cannot starve the deadline check.
+`YubiKeyMonitorWorker` logs hint details at ingress and carries only a private capacity-one occurrence
+signal into its single-reader loop; payloads are not queued. Each listener starts independently. A listener
+that throws or reports a post-`Start()` status other than `Started` is logged, stopped/disposed, and skipped,
+without aborting the other listener or loop. With no listeners the loop relies on its interval fallback.
+These are optional latency accelerators; discovery plus repository diffs supply device truth.
+
+A simply unavailable transport service (no PC/SC service/library/readers) can enumerate empty while other
+transports are scanned. This is best-effort partial discovery, not proof that all OS interfaces were
+accessible. If PC/SC enumeration itself throws (worker saturation or `SCardGetStatusChange` error), the
+finder aborts before HID enumeration instead of committing false-empty removals. During initial creation
+this failure propagates and tears down the partial monitor; later scans retain the last publication and
+`RescanSafelyAsync` retries. Per-transport scan isolation without false removals remains separate work.
+
+`InitializeAsync` tolerates listener unavailability but the public factory still requires the first
+successful scan/publication. Hints during initialization remain pending for an ordered follow-up scan.
+Under the worker's only lock, `_ingressLock`, a callback checks retirement, globally invalidates finder
+evidence, then signals work. Final finder read-scope retirement shares that lock: an admitted callback
+finishes before retirement, while a captured late callback cannot install fresh evidence or queue work.
+Lock order is ingress → finder evidence → read-scope gate. Read-scope retirement cancels internal queued
+admission waits; those callbacks do not wait for the worker or re-enter ingress. Worker-token cancellation,
+logging, listener Start/Stop/Dispose, discovery, diffing, and awaits stay outside ingress. Do not describe
+retirement as callback-free or release native leases early. The loop consumes one occurrence per wake-up
+before checking debounce/max-coalesce time; refilled signals cannot starve that check.
 
 ## Session Base Class
 
@@ -527,6 +635,19 @@ var result = await protocol.SelectAsync(ApplicationIds.Piv, CancellationToken.No
 // Verify commands sent
 Assert.Single(fakeConnection.SentCommands);
 ```
+
+### Discovery hardware contracts
+
+Management's `OwnedMonitorReadOnlyTests` uses Core's public factory, snapshot, and stream with at least two
+attached allow-listed serial-bearing USB fixtures. It requires the initial snapshot immediately after
+return, without polling away partial discovery, then checks initial replay, object retention, subscriber
+cancellation, disposal/recreate, convenience selection/no-match, and sequential live metadata comparisons
+only after monitor disposal. `ScopedDiscoveryReadOnlyTests` covers concrete/combined scopes independently;
+its complete serial-less-bystander readiness behavior must remain intact. No prompts, UV/UP, hotplug,
+resets, or writes are in this unattended filter. `CurrentDevices_PopulatedSnapshot_PerformsNoBackendEnumerationProbesOrOpens`
+in `YubiKeyMonitorTests` proves no-I/O using actual finder backend/slot/topology/open counters, not hardware
+timing. Required attended removal/reinsertion/event-lifetime acceptance remains separate and pending until
+the user is present. See the [explicit test filters](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 
 ### Integration Test Base
 
@@ -635,9 +756,16 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 - **Cancellation is checked at entry only.** Once an exchange claims the guard, constituent transmits use `CancellationToken.None` so chained APDU, CTAP/OTP frame, and SCP state cannot be stranded.
 - **The guard is protocol-instance scoped.** An SCP wrapper shares its base PC/SC guard, but independently created raw protocol instances over one connection are not coordinated. The supported contract prevents that shape by admitting one `ApplicationSession` per connection; connection-wide raw protocol ownership is a separate API decision.
 - **Discovery/connection ownership is atomic.** A connection to a grouped physical key claims every known stable member interface ID before native open. A second connection through any member throws `ConnectionInUseException` immediately. Claims are sorted, deduplicated, rolled back on failure, and released only after physical teardown. Standalone records use one-element scopes when discovery cannot prove grouping. Discovery remains per-interface and nonblocking; connections may wait cancellably for active discovery, while waiting connections retain priority. One level down, `ConnectionSessionGuard` allows one live `ApplicationSession` per connection and supports sequential reuse. In-process only — cross-process contention is not covered.
-- **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently within one finder. A finder owns one atomic evidence epoch containing identity cache, metadata cache, and read scope; transport activity terminally retires that scope and replaces the whole evidence object, so stale completion writes only into unreachable caches and a replacement manager cannot join its predecessor's reads. Superseded reads that have not yet opened their interface fail fast, including queued admission waits behind hung workers. Cache entries also record the PID observed at read time so a hit under a different PID is a miss. Eviction is deliberately not transport-scoped because a composite swap's events can arrive on one transport first, and retained sibling evidence would mix two keys. Without monitoring running there are no listener events and staleness detection degrades to scan-observed absence — see the identity-cache section of `docs/architecture/device-discovery-guarantees.md`.
-- **Monitor lifecycle is an epoch model, not a state machine.** Each `StartMonitoring` builds an immutable `MonitorGeneration` (`{ Id, ScanGate, Signal, Cts }`) held in one field; the loop, manual rescans, and listener callbacks capture that reference once, so a torn gate/generation pair is not representable. Publication is where safety is enforced: all publications from all generations are mutually exclusive under the never-disposed `_publishGate`, held across the admission check and `UpdateCache`, and a snapshot is admitted only if its generation is still current and the service undisposed. Superseded snapshots — including a scan hung in native I/O that returns long after its generation was retired — are discarded. Because publications never interleave, a successor's snapshot is serialized strictly after any in-flight predecessor's, so newer truth always lands last. This currently relies on `UpdateCache` enqueuing into every watcher's buffer synchronously and finishing before it returns — publication is ordered at enqueue time, not at delivery time, so a slow consumer cannot reorder a successor's snapshot ahead of its predecessor's. Lifecycle operations take only the small `_publishLock`, never `_publishGate`, so a stalled publication cannot wedge start/stop/dispose, and restart after an abandoned stop always succeeds. Nothing disposes a semaphore anyone can still acquire: scan gates live in their generation and are never disposed, and an abandoned generation is unreachable garbage. `DisposeAsync` drains `_publishGate` with the shutdown bound and, on timeout, warns and abandons — a publication already admitted may then complete after `DisposeAsync` returns, which the manager's subsequent repository disposal silences. That is a documented contract, not an accident. When editing this file, keep the three primitives one-job-each; the design collapsed a four-concept state machine and re-merging their responsibilities is what previously produced the races.
-  Safety is not liveness: after abandoning a hung scan, discovery *liveness* is owned by `FindYubiKeys` (its `_scanLock` wait takes the loop's token, so blocked generations do not accumulate) and recovers when the upstream time-bounds release. The epoch model neither causes nor cures a PC/SC enumeration hang.
+- **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently within one finder. A finder owns one atomic evidence epoch containing identity cache, metadata cache, and read scope; transport activity terminally retires that scope and replaces the whole evidence object, so stale completion writes only into unreachable caches and a successor monitor cannot join its predecessor's reads. Superseded reads that have not yet opened their interface fail fast, including queued admission waits behind hung workers. Cache entries also record the PID observed at read time so a hit under a different PID is a miss. Eviction is deliberately not transport-scoped because a composite swap's events can arrive on one transport first, and retained sibling evidence would mix two keys. Within a monitor, absent listener hints degrade staleness detection to scan-observed absence. Public Find calls instead use fresh evidence per invocation and retire their scope on exit — see `docs/architecture/device-discovery-guarantees.md`.
+- **Potentially sibling discovery reads do not overlap.** Before worker admission, USB reads take a process-wide PID gate; an unknown USB PID takes all known PID gates atomically. Eligibility checks, complete grants, and releases share one short lock. Ineligible requests await a release notification without reserving any gates, so a pending unknown-PID request cannot spread a held PID's stall to unrelated PIDs, even in a live finder after its caller's budget expires. This conservative policy also serializes distinct same-PID keys, but known different PIDs and NFC remain independent. It changes no merge evidence or public connection claims. `FindYubiKeys` registers in-scope candidates in its read scope for both identity and metadata reads. The granted admission transfers to the discovery registry lease before native open and follows native release, including retained/quarantined built-in owners. Never release it at a bounded wait, cancellation, scope retirement, or merely because failed native disposal completed its task. Queued admission observes epoch retirement without occupying a native worker. `DiscoveryReadSchedulingTests` pins disposal, abandonment, retirement, and independent-PID progress with a live unknown-PID waiter; `PcscDiscoveryLifetimeTests` pins failed native-release retention.
+- **The monitor is a single owned lifetime with one producer.** `YubiKeyMonitor` composes and tears down;
+  `YubiKeyMonitorWorker` owns listeners and sequential scans/publications; `YubiKeyDeviceRepository` owns
+  membership/identity retention and the final commit/snapshot/subscription/failure/disposal boundary;
+  `DeviceEventHub` owns isolated watcher buffers. See [Device Event Delivery](#device-event-delivery) for
+  ingress ordering and the one managed-loop drain. Removed monitor generations are **not** finder evidence
+  epochs/read scopes: those remain essential to hotplug safety and actual native ownership. A loop abandoned
+  at its drain deadline can retain its timer-less lifetime cancellation source because its work may still
+  register with the token. No disposal deadline proves native completion or cures a PC/SC enumeration hang.
 - **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Existing HID registered-wrapper release behavior is unchanged.
 
 ## Known Gotchas

@@ -1,4 +1,8 @@
 #nullable enable
+Yubico.YubiKit.Core.Devices.YubiKeyMonitor
+Yubico.YubiKit.Core.Devices.YubiKeyMonitor.CurrentDevices.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!
+Yubico.YubiKit.Core.Devices.YubiKeyMonitor.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Yubico.YubiKit.Core.Devices.YubiKeyMonitor.WatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.Core.DeviceEvent!>!
 
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Clear() -> void
 
@@ -18,6 +22,7 @@ Yubico.YubiKit.Core.Abstractions.IDevice
 Yubico.YubiKit.Core.Abstractions.IDevice.ReaderName.get -> string!
 Yubico.YubiKit.Core.Abstractions.IYubiKey
 Yubico.YubiKit.Core.Abstractions.IYubiKey.AvailableConnections.get -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Abstractions.IYubiKey.CachedDeviceInfo.get -> Yubico.YubiKit.Core.Devices.DeviceInfo?
 Yubico.YubiKit.Core.Abstractions.IYubiKey.ConnectAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Abstractions.IConnection!>!
 Yubico.YubiKit.Core.Abstractions.IYubiKey.ConnectAsync<TConnection>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TConnection!>!
 Yubico.YubiKit.Core.Abstractions.IYubiKey.DeviceId.get -> string!
@@ -998,16 +1003,12 @@ static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateSessionOver
 static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.ResolvePreferredConnection(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, params Yubico.YubiKit.Core.Devices.ConnectionType[]! preferenceOrder) -> Yubico.YubiKit.Core.Devices.ConnectionType
 static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.ResolveSessionTransport(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Devices.ConnectionType? preferredConnection, string! sessionName, params Yubico.YubiKit.Core.Devices.ConnectionType[]! defaultOrder) -> Yubico.YubiKit.Core.Devices.ConnectionType
 static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindAllAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!>!
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindAllAsync(Yubico.YubiKit.Core.Devices.ConnectionType type = Yubico.YubiKit.Core.Devices.ConnectionType.All, bool forceRescan = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!>!
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindFirstAsync(System.Func<Yubico.YubiKit.Core.Abstractions.IYubiKey!, bool>? predicate = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindFirstOrDefaultAsync(System.Func<Yubico.YubiKit.Core.Abstractions.IYubiKey!, bool>? predicate = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Abstractions.IYubiKey?>!
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.IsMonitoring.get -> bool
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.Shutdown() -> void
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.ShutdownAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.StartMonitoring() -> void
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.StartMonitoring(System.TimeSpan interval) -> void
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.StopMonitoring() -> void
-static Yubico.YubiKit.Core.Devices.YubiKeyManager.WatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.Core.DeviceEvent!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.CreateMonitorAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Devices.YubiKeyMonitor!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindAllAsync(Yubico.YubiKit.Core.Devices.ConnectionType interfaces = Yubico.YubiKit.Core.Devices.ConnectionType.All, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindFirstAsync(System.Func<Yubico.YubiKit.Core.Abstractions.IYubiKey!, bool>? predicate = null, Yubico.YubiKit.Core.Devices.ConnectionType interfaces = Yubico.YubiKit.Core.Devices.ConnectionType.All, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindFirstAsync(System.Func<Yubico.YubiKit.Core.Abstractions.IYubiKey!, bool>? predicate, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindFirstOrDefaultAsync(System.Func<Yubico.YubiKit.Core.Abstractions.IYubiKey!, bool>? predicate = null, Yubico.YubiKit.Core.Devices.ConnectionType interfaces = Yubico.YubiKit.Core.Devices.ConnectionType.All, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Abstractions.IYubiKey?>!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindFirstOrDefaultAsync(System.Func<Yubico.YubiKit.Core.Abstractions.IYubiKey!, bool>? predicate, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Abstractions.IYubiKey?>!
 static Yubico.YubiKit.Core.Native.Linux.Libc.LibcHelpers.GetErrnoString() -> string!
 static Yubico.YubiKit.Core.Native.SdkPlatformInfo.CharSize.get -> int
 static Yubico.YubiKit.Core.Native.SdkPlatformInfo.DwordSize.get -> int

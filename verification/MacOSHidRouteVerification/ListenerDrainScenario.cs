@@ -149,7 +149,6 @@ internal static class ListenerDrainScenario
         {
             native.ReleaseCallback.Set();
             CleanupRemovalListener(listener, native);
-            await YubiKeyManager.ShutdownAsync();
         }
     }
 

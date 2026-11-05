@@ -6,7 +6,7 @@ public class PublicSyncBoundaryRegistryTests
     public void Supported_synchronous_entries_resolve_to_public_contracts_and_scoped_owners()
     {
         var rows = PublicSyncBoundaryRegistry.Rows;
-        Assert.Equal(16, rows.Length);
+        Assert.Equal(15, rows.Length);
         Assert.Empty(PublicSyncBoundaryRegistry.Validate(rows));
     }
 

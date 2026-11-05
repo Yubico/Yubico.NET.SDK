@@ -29,7 +29,7 @@ Review code that assumes:
 
 ### HID Listener Callbacks
 
-V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived` and `Removed` events (`EventHandler<HidDeviceEventArgs>`) carrying the affected `IHidDevice`. V1 YubiKey-level monitoring used `YubiKeyDeviceListener.Arrived`/`Removed` and the `YubiKeyDevice.FindAll()` cache. In v2, the low-level `Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent` callback is `Action<HidDeviceRescanHint>?`: a diagnostic rescan hint with `HidDeviceChangeKind` plus optional platform identifier/path. It is not authoritative physical-device state. Applications that need real YubiKey arrivals and removals should use `YubiKeyManager.WatchAsync`, which emits after the device repository rescans and diffs the discovered device set.
+V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived` and `Removed` events (`EventHandler<HidDeviceEventArgs>`) carrying the affected `IHidDevice`. V1 YubiKey-level monitoring used `YubiKeyDeviceListener.Arrived`/`Removed` and the `YubiKeyDevice.FindAll()` cache. In v2, the low-level `Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent` callback is `Action<HidDeviceRescanHint>?`: a diagnostic rescan hint with `HidDeviceChangeKind` plus optional platform identifier/path. It is not authoritative physical-device state. Applications that need real YubiKey arrivals and removals should await `YubiKeyManager.CreateMonitorAsync` and consume the owned monitor's `WatchAsync`: atomic initial Added replay followed by repository-diffed changes. Dispose that monitor with `await using`.
 
 Earlier v2 alphas also exposed these events as an `IObservable<DeviceEvent>` (`YubiKeyManager.DeviceChanges`), briefly with Rx-style `Subscribe(Action<T>)` and query operators appearing transitively. That property has been removed outright, with no shim: `WatchAsync` is the only device-change stream. Filtering that used `Where` becomes an `if` inside the `await foreach`, and each `await foreach` is an independent watcher, so several parts of an application can consume the stream concurrently.
 
@@ -243,7 +243,6 @@ using Yubico.YubiKit.Core.Devices;
 
 var devices = await YubiKeyManager.FindAllAsync(
     ConnectionType.All,
-    forceRescan: true,
     cancellationToken: cancellationToken);
 var device = devices.First();
 ```
@@ -251,9 +250,36 @@ var device = devices.First();
 Migration notes:
 
 - Replace synchronous enumeration assumptions with async flow and cancellation support.
+- Every Find uses fresh per-call evidence, without global cache or monitoring. `interfaces` restricts
+  enumeration/probes, not just results; discover All and filter locally to preserve composite slots.
+- Earlier v2 prerelease users: replace `ScanAsync` with `FindAllAsync(interfaces: ...)`, remove `forceRescan`,
+  and replace static monitoring/shutdown with `await using var monitor = await YubiKeyManager.CreateMonitorAsync(ct)`.
+  Use `monitor.CurrentDevices` for cached membership and `monitor.WatchAsync(ct)` for initial replay plus changes.
 - V2 models one physical YubiKey with one or more available connections. Avoid assuming that the discovered object is a single transport handle.
 - If v1 code filtered by `Transport.HidFido`, `Transport.UsbSmartCard`, or NFC-specific behavior, review the v2 `ConnectionType` choice rather than applying a mechanical enum rename.
 - For the common "just get one matching device" case, prefer `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` (throws `InvalidOperationException` when none match) or `FindFirstOrDefaultAsync(...)` (returns `null`) over `FindAllAsync(...).First()`. See `core-find-first-discovery-helpers` in `v1-to-v2-map.yml` and `docs/usage/device-discovery.md`.
+
+#### Earlier v2 prerelease ownership migration
+
+| Earlier call / intent | Current use |
+|---|---|
+| `FindAllAsync()` for retained cached devices | `monitor.CurrentDevices` for no-I/O membership; `FindAllAsync()` for fresh discovery |
+| `FindAllAsync(forceRescan: true)` / `ScanAsync(scope, ct)` | `FindAllAsync(interfaces: scope, cancellationToken: ct)` for independent observation |
+| Static `StartMonitoring` / `WatchAsync` | Await `CreateMonitorAsync`, then `monitor.WatchAsync(ct)` |
+| Static stop/shutdown / `IsMonitoring` checks | Own and dispose a monitor; no process-global lifecycle remains |
+| `type` used as a full-key result filter | Discover All, then filter locally if later operations need all composite slots |
+
+`interfaces: SmartCard | HidFido` chooses either family to search, not a requirement that each result
+expose both. Use a predicate testing both `SupportsConnection` calls to require both. Find methods do not
+wait for insertion or use stable ordering. Creating a monitor awaits initial publication (including valid
+empty success), but best-effort partial discovery/metadata can remain incomplete. The creation token
+does not stop a monitor after return; watch cancellation affects only that subscription.
+
+Use the replaying stream to initialize a UI without a snapshot/subscription gap. On overflow, discard the
+consumer's projection and re-enumerate the same monitor, not an unrelated Find/event pair. Disposal lets
+already-published history drain; cached access thereafter throws and new watchers complete empty. It does
+not dispose caller-owned connections/sessions. Previously obtained lists are historical membership, not
+deep immutable device metadata. Use Management for live configuration reads.
 
 ### Device Info
 
@@ -267,7 +293,8 @@ Console.WriteLine(device.SerialNumber);
 Console.WriteLine(device.FirmwareVersion);
 ```
 
-V2 exposes detailed device information through the Management package:
+V2 exposes optional last-known metadata through Core's `IYubiKey.CachedDeviceInfo` without I/O.
+For live device information, use the Management package:
 
 ```csharp
 using Yubico.YubiKit.Core.Devices;
@@ -284,7 +311,9 @@ Console.WriteLine(info.VersionName);
 
 Migration notes:
 
-- Use a Management session when you need rich device metadata, capability flags, form factor, FIPS state, or configuration state.
+- Use nullable `CachedDeviceInfo` when last-known metadata is sufficient; it can remain historical after
+  disconnect/configuration changes. Use a Management session when current capability/configuration state
+  matters. A live read does not promise to update discovery metadata.
 - Some v1 metadata properties moved into richer v2 fields. For example, v1 `FirmwareVersion` often corresponds to `DeviceInfo.FirmwareVersion` for comparisons and `DeviceInfo.VersionName` for display.
 - Reuse one session for multiple Management operations instead of creating repeated one-shot sessions.
 - Configuration changes are persistent and may reboot the device; keep read-only device-info migrations separate from configuration migrations.

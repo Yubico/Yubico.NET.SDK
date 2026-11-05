@@ -60,10 +60,6 @@ internal static class ExpertIoScenario
             Console.Error.WriteLine($"FAIL mode=expert-io serial={serial}: {ex}");
             return 1;
         }
-        finally
-        {
-            await YubiKeyManager.ShutdownAsync();
-        }
     }
 
     private static async Task AssertGetInfoAsync(RawCtapHidSession raw)

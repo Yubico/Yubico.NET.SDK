@@ -52,6 +52,10 @@ present; `FindAllAsync` returns every connected key, and `FindFirstOrDefaultAsyn
 `device.Create<Application>SessionAsync()`; each package README opens with that step and a first read-only
 call, then covers the common operations. For applet specifics and features, see that documentation.
 
+For continuous presence tracking, await `YubiKeyManager.CreateMonitorAsync()` and own the returned
+`YubiKeyMonitor` with `await using`. It has one initialize-run-dispose lifetime, no manual refresh or
+restart mode; see [Core monitoring](src/Core/README.md#own-continuous-tracking) for snapshots and events.
+
 ## Packages
 
 | Package | YubiKey application |

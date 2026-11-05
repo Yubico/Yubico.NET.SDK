@@ -48,31 +48,47 @@ public class FindPcscDevicesTests
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
-    public async Task RescanAsync_SaturatedPcscAdmission_PreservesSnapshotWithoutRemovalEvent()
+    public async Task ListenerScan_SaturatedPcscAdmission_PreservesSnapshotWithoutRemovalEvent()
     {
-        using var repository = new YubiKeyDeviceRepository();
-        var existingDevice = new FakeYubiKey("pcsc:existing", ConnectionType.SmartCard);
-        repository.UpdateCache([existingDevice]);
-
-        await using var watcher = await DeviceEventWatcher.StartAsync(
-            repository,
-            TestContext.Current.CancellationToken);
+        var repository = new YubiKeyDeviceRepository();
+        var rig = new FindYubiKeysScopeTests.ScopeRig();
         var api = new StatusBlockingSCardApi("Yubico YubiKey OTP+FIDO+CCID");
         var finder = new FindYubiKeys(
             new FindPcscDevices(NullLogger<FindPcscDevices>.Instance, api),
             new EmptyHidFinder(),
-            UnexpectedSlotCreation);
-        await using var monitor = new YubiKeyDeviceMonitorService(repository, finder);
-        using var saturation = await DiscoveryWorkerAdmissionCollection.SaturateAsync(
-            TestContext.Current.CancellationToken);
+            device => new MetadataSlot(rig, device.ReaderName), topologyResolver: rig);
+        var hid = new OwnedMonitorFixture.FakeHidListener();
+        var smartCard = new OwnedMonitorFixture.FakeSmartCardListener();
+        var worker = new YubiKeyMonitorWorker(repository, finder, () => hid, () => smartCard);
+        var completedScans = 0;
+        worker.MonitoringWaitReachedForTest = () => Interlocked.Increment(ref completedScans);
+        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
+            TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
+        var existingDevice = Assert.Single(monitor.CurrentDevices);
+        Assert.Equal(111, existingDevice.SerialNumber);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
+        var nativeCalls = api.EstablishContextCalls;
+        Assert.True(nativeCalls > 0);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            monitor.RescanAsync(TestContext.Current.CancellationToken));
+        using (await DiscoveryWorkerAdmissionCollection.SaturateAsync(TestContext.Current.CancellationToken))
+        {
+            smartCard.Raise();
+            await AsyncWait.WaitUntilAsync(() => Volatile.Read(ref completedScans) >= 2,
+                "The actual loop did not finish its saturated PC/SC scan", cancellationToken: TestContext.Current.CancellationToken);
+            Assert.Same(existingDevice, Assert.Single(monitor.CurrentDevices));
+            Assert.Equal(nativeCalls, api.EstablishContextCalls);
+        }
 
-        Assert.Equal(SaturatedMessage, exception.Message);
-        Assert.Same(existingDevice, Assert.Single(repository.GetAll()));
-        Assert.Empty(await watcher.DrainAsync(repository, TestContext.Current.CancellationToken));
-        Assert.Equal(0, api.EstablishContextCalls);
+        // The next real hint retries successfully once capacity returns, retaining the published object.
+        smartCard.Raise();
+        await AsyncWait.WaitUntilAsync(() => Volatile.Read(ref completedScans) >= 3,
+            "PC/SC monitoring did not recover after saturation", cancellationToken: TestContext.Current.CancellationToken);
+        Assert.True(api.EstablishContextCalls > nativeCalls);
+        Assert.Same(existingDevice, Assert.Single(monitor.CurrentDevices));
+        await monitor.DisposeAsync();
+        await watcher.Completion.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        Assert.True(watcher.EndedNormally);
+        Assert.Empty(watcher.Events);
     }
 
     [Fact]
@@ -177,6 +193,14 @@ public class FindPcscDevicesTests
             Task.FromResult<IReadOnlyList<IHidInterface>>([]);
     }
 
-    private static IYubiKeyConnectionSlot UnexpectedSlotCreation(IDevice device) =>
-        throw new InvalidOperationException("No slot should be created when PC/SC admission is saturated.");
+    private sealed class MetadataSlot(FindYubiKeysScopeTests.ScopeRig rig, string name)
+        : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
+    {
+        public string InterfaceId => rig.InterfaceId(name);
+        public ConnectionType ConnectionType => ConnectionType.SmartCard;
+        public Task<IConnection> OpenRawConnectionAsync(ConnectionType connectionType, CancellationToken cancellationToken) =>
+            Task.FromResult<IConnection>(rig.CreateIdentityConnection(111));
+        public Task<IConnection> ConnectForDiscoveryAsync(ConnectionType connectionType, CancellationToken cancellationToken) =>
+            OpenRawConnectionAsync(connectionType, cancellationToken);
+    }
 }

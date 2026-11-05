@@ -38,21 +38,27 @@ public class FindYubiKeysPidMergeTests
             factory.Create);
 
         IReadOnlyList<IYubiKey> result;
+        int connectsAtScanEnd;
         var stopwatch = Stopwatch.StartNew();
         try
         {
             result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+            connectsAtScanEnd = factory.TotalConnectCalls;
             stopwatch.Stop();
         }
         finally
         {
+            find.RetireReadScope();
             factory.FailAllReads();
+            // Retire queued siblings, then drain the admitted fake even if the runner has canceled.
+            await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(CancellationToken.None);
         }
         Assert.True(
             stopwatch.Elapsed < TimeSpan.FromSeconds(3),
             $"The scan waited beyond its single bounded identity pass: {stopwatch.Elapsed}.");
         Assert.Equal(2, result.Count);
-        Assert.Equal(2, factory.TotalConnectCalls);
+        Assert.Equal(1, connectsAtScanEnd); // Potential siblings share admission through native completion.
+        Assert.Equal(1, factory.TotalConnectCalls); // Retirement prevents the queued sibling from opening later.
         Assert.All(result, device => Assert.Equal(ConnectionType.SmartCard, device.AvailableConnections));
     }
 

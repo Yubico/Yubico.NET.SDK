@@ -286,25 +286,29 @@ usable YubiKey object." Entry point is the **static** `YubiKeyManager` — no DI
 
 ```mermaid
 flowchart TD
-    Start(["YubiKeyManager.FindAllAsync(type=All)"])
-    Mgr["YubiKeyDeviceManager<br/><i>composition root (lazy)</i>"]
-    Repo["YubiKeyDeviceRepository<br/><i>cache</i>"]
-    Mon["YubiKeyDeviceMonitorService<br/><i>hot-plug events</i>"]
-    Find["FindYubiKeys.FindAllAsync"]
+    Start(["YubiKeyManager.Find…Async(interfaces=All)"])
+    Create(["await YubiKeyManager.CreateMonitorAsync()"])
+    Owner["YubiKeyMonitor<br/><i>composition + initialize-run-dispose owner</i>"]
+    Repo["YubiKeyDeviceRepository<br/>membership + identity retention<br/>atomic commit / replay / failure / disposal"]
+    Mon["YubiKeyMonitorWorker<br/><i>listeners + one sequential<br/>scan / publication loop</i>"]
+    Hub["DeviceEventHub<br/><i>isolated bounded watcher buffers</i>"]
+    Views(["monitor.CurrentDevices: no-I/O snapshot<br/>monitor.WatchAsync: initial replay + ordered deltas"])
+    Find["FindYubiKeys<br/><i>independent per-call or per-monitor evidence</i>"]
 
     FPcsc["IFindPcscDevices<br/>(PC/SC readers)"]
     FHid["IFindHidInterfaces<br/>(FIDO + OTP HID)"]
-    Merge{"Merge interfaces of<br/>same physical key<br/>(by USB Product ID)"}
+    Merge{"Conservatively merge interfaces<br/>using topology, serial and PID evidence"}
 
     Slot["PcscConnectionSlot / HidConnectionSlot<br/><i>raw live interface candidate</i>"]
     Flat["YubiKeyDevice<br/>optional SmartCard · FIDO · OTP slots"]
 
     Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous"])
 
-    Start --> Mgr
-    Mgr --> Repo
-    Mgr --> Mon
-    Mgr -->|cache miss / forceRescan| Find
+    Start -->|fresh scoped call| Find
+    Create -->|await initial publication| Owner
+    Owner -->|owns teardown| Repo
+    Owner -->|initialize once / drain loop| Mon
+    Mon -->|All| Find
     Find --> FPcsc
     Find --> FHid
     FPcsc --> Slot
@@ -312,7 +316,19 @@ flowchart TD
     Slot --> Merge
     Merge --> Flat
     Flat --> Result
+    Mon -->|await full publication| Repo
+    Repo -->|ordered delta enqueue| Hub
+    Repo -->|atomic snapshot + tail| Views
+    Hub -->|asynchronous deltas| Views
 ```
+
+One-shot Find retires its read scope on exit. The worker borrows the repository; only the public owner
+tears it down. There is no manual rescan, restart mode, or monitor generation. The ingress lock orders
+listener invalidation against final finder
+retirement; the repository's short state boundary rejects late membership/event commits after disposal.
+The one ten-second loop-drain budget is not a native listener or total disposal timeout. Finder evidence
+epochs/read scopes and actual native admission/lease retention remain separate from the removed monitor
+generations. See [worker concurrency and shutdown](event-driven-device-discovery.md#single-lifetime-worker-and-shutdown).
 
 ### Then: connecting (transport selection)
 
@@ -374,8 +390,9 @@ flowchart TD
   the caller's connection; only convenience entry points own the hidden connection they create.
 - **Transport selection is single-shot:** each applet selects one supported transport from its default order
   or explicit override. Held and platform errors propagate without trying another interface.
-- **Monitoring:** `StartMonitoring()` exposes hot-plug events through one stream — `await foreach`
-  over `YubiKeyManager.WatchAsync(ct)`. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type.
+- **Monitoring:** `await CreateMonitorAsync(ct)` returns an initialized owned monitor. Consume
+  `monitor.WatchAsync(ct)` for initial Added replay plus changes, or read `CurrentDevices` without I/O.
+  Dispose the monitor explicitly. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type.
   Good "advanced" slide if time allows.
 
 ---
@@ -412,14 +429,13 @@ Pre-rendered for slides and offline viewing (regenerate with the command below):
 Regenerate after editing the diagrams:
 
 ```bash
-# SVG (vector — best for slides)
-mmdc -i docs/architecture/sdk-architecture-diagrams.md -o docs/architecture/images/sdk.svg -t neutral -b transparent
-# PNG (3× raster)
-mmdc -i docs/architecture/sdk-architecture-diagrams.md -o docs/architecture/images/png/sdk.png -t neutral -b white -s 3
-# then rename sdk-1..7 → L0..L4 per the table above
+npm ci  # installs the pinned Mermaid CLI from package-lock.json
+scripts/architecture/render-architecture.sh
 ```
 
-Requires `@mermaid-js/mermaid-cli` (`npm i -g @mermaid-js/mermaid-cli`).
+The script checks the pinned CLI version, renders SVG and 3× PNG files with deterministic names, and
+records source/image hashes in `images/image-manifest.txt`. Retain each changed diagram and its matching
+manifest row together; avoid unrelated rendered churn.
 
 ---
 

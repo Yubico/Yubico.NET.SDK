@@ -83,7 +83,7 @@ await using (var session = await device.CreateManagementSessionAsync())
 
 // The key disconnects and re-enumerates. The session above is disposed; rescan before using the device again.
 await Task.Delay(TimeSpan.FromSeconds(3));
-var rebooted = await YubiKeyManager.FindAllAsync(forceRescan: true);
+var rebooted = await YubiKeyManager.FindAllAsync(); // Every Find performs fresh discovery.
 ```
 
 `DeviceConfig` is a record whose properties mirror `DeviceInfo`: `UsbEnabled`, `NfcEnabled`, `AutoEjectTimeout`,
@@ -186,6 +186,16 @@ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.cspro
 ```
 
 ## Related
+
+For read-only discovery and metadata validation without configuration changes, run only
+`ScopedDiscoveryReadOnlyTests` and `OwnedMonitorReadOnlyTests` as described in the
+[discovery hardware checks](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+It compares public `IYubiKey.CachedDeviceInfo` snapshots with sequential live Management reads across the
+supported scopes on every attached authorized serial-bearing USB key. The owned-monitor cases require at
+least two attached authorized keys and verify initialized snapshots, initial replay, cancellation,
+disposal/recreate, and convenience selection. Live comparisons occur only after monitor disposal.
+Other Management integration tests
+can mutate configuration; a broad project run is not equivalent to this read-only filter.
 
 - [../Core/README.md](../Core/README.md) - device discovery, connections, and the `Core.Devices` metadata types.
 - [../Piv/README.md](../Piv/README.md), [../Oath/README.md](../Oath/README.md), [../Ctap2/README.md](../Ctap2/README.md) - applications this module toggles.

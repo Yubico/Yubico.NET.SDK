@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Diagnostics;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
@@ -24,6 +25,124 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 public class YubiKeyDeviceRepositoryTests
 {
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(30);
+
+    [Fact]
+    public async Task UpdateCache_FailedDiff_DoesNotPublishPartialDeltasOrChangeTheNextDiffBase()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var removed = new BlockingIdentityKey();
+        var added = new FakeYubiKey("added");
+        repository.UpdateCache([removed]);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
+        var failure = new IOException("device getter failed during diff");
+        removed.OnIdRead = () => throw failure;
+
+        Assert.Same(failure, Assert.Throws<IOException>(() => repository.UpdateCache([added])));
+        Assert.Same(removed, Assert.Single(repository.GetAll()));
+        removed.OnIdRead = null;
+        Assert.Empty(await watcher.DrainAsync(repository, TestContext.Current.CancellationToken));
+
+        repository.UpdateCache([added]);
+        repository.Dispose();
+        await watcher.Completion.WaitAsync(Bound, TestContext.Current.CancellationToken);
+        Assert.Single(watcher.Events, change => change.Action == DeviceAction.Removed && ReferenceEquals(change.Device, removed));
+        Assert.Single(watcher.Events, change => change.Action == DeviceAction.Added && ReferenceEquals(change.Device, added));
+    }
+
+    [Fact]
+    public async Task GetAll_DuringPartialDiff_ReturnsOnlyTheLastCompletedMembership()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        using var release = new ManualResetEventSlim();
+        var removed = new BlockingIdentityKey();
+        var retained = new FakeYubiKey("retained");
+        var added = new FakeYubiKey("added");
+        repository.UpdateCache([removed, retained]);
+        var removalReached = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        removed.OnIdRead = () =>
+        {
+            removalReached.TrySetResult();
+            Assert.True(release.Wait(Bound, TestContext.Current.CancellationToken));
+        };
+
+        // Park while staging a removal, before additions. Cached reads must neither wait on this
+        // diff nor expose uncommitted membership. No monitor/subscription boundary is involved here.
+        var publication = Task.Run(() => repository.UpdateCache([retained, added]), TestContext.Current.CancellationToken);
+        try
+        {
+            await removalReached.Task.WaitAsync(Bound, TestContext.Current.CancellationToken);
+            var snapshot = repository.GetAll();
+            Assert.Equal(2, snapshot.Count);
+            Assert.Contains(removed, snapshot);
+            Assert.Contains(retained, snapshot);
+            Assert.DoesNotContain(added, snapshot);
+        }
+        finally
+        {
+            release.Set();
+            // Drain the worker before disposing its gate, even if the test runner canceled the test.
+            await publication.WaitAsync(Bound, CancellationToken.None);
+        }
+
+        Assert.Equal(2, repository.GetAll().Count);
+        Assert.Contains(added, repository.GetAll());
+        Assert.DoesNotContain(removed, repository.GetAll());
+    }
+
+    [Fact]
+    public async Task Dispose_DoesNotWaitForAParkedDiff_AndRejectsItsLateSnapshot()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        using var release = new ManualResetEventSlim();
+        var removed = new BlockingIdentityKey();
+        repository.UpdateCache([removed]);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
+        var removalReached = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        removed.OnIdRead = () =>
+        {
+            removalReached.TrySetResult();
+            Assert.True(release.Wait(Bound, TestContext.Current.CancellationToken));
+        };
+        var publication = Task.Run(() => repository.UpdateCache([new FakeYubiKey("late")]), TestContext.Current.CancellationToken);
+        Task? disposal = null;
+        try
+        {
+            await removalReached.Task.WaitAsync(Bound, TestContext.Current.CancellationToken);
+            disposal = Task.Run(repository.Dispose, TestContext.Current.CancellationToken);
+            await disposal.WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+            await watcher.Completion.WaitAsync(Bound, TestContext.Current.CancellationToken);
+            Assert.Empty(watcher.Events); // A partially staged diff is not published history to drain.
+            release.Set();
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => publication.WaitAsync(Bound, TestContext.Current.CancellationToken));
+            Assert.False(repository.HasData);
+            Assert.Throws<ObjectDisposedException>(() => repository.GetAll());
+        }
+        finally
+        {
+            release.Set();
+            // Both workers can still hold this fake; drain them before disposing its release gate.
+            try { await publication.WaitAsync(Bound, CancellationToken.None); }
+            catch (ObjectDisposedException) { }
+            if (disposal is not null)
+                await disposal.WaitAsync(Bound, CancellationToken.None);
+        }
+    }
+
+    private sealed class BlockingIdentityKey : IYubiKey
+    {
+        public Action? OnIdRead { get; set; }
+        public string DeviceId
+        {
+            get
+            {
+                OnIdRead?.Invoke();
+                return "removed";
+            }
+        }
+        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection => throw new NotSupportedException();
+    }
 
     [Fact]
     public async Task UpdateCache_EmptyToDevices_EmitsAddedEvents()
@@ -255,7 +374,7 @@ public class YubiKeyDeviceRepositoryTests
 
         stall.Release();
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => overflowing);
-        Assert.Contains("FindAllAsync", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("same monitor", ex.Message, StringComparison.Ordinal);
 
         // The watcher that kept up lost nothing to its neighbour's fault and is still enumerating.
         const int published = 1 + (2 * (cycles - 1));
@@ -595,7 +714,7 @@ public class YubiKeyDeviceRepositoryTests
     /// <summary>
     /// Disposal discards the cache, so the "a scan has populated this cache" flag has to go with it.
     /// Leaving it set makes a disposed repository report a valid cache it no longer holds, which is the
-    /// signal <see cref="YubiKeyDeviceManager.FindAllAsync"/> reads to decide whether a scan is needed.
+    /// signal that distinguishes a successful empty publication from an uninitialized repository.
     /// </summary>
     [Fact]
     public void HasData_FalseAfterDispose()

@@ -76,7 +76,7 @@ public static class DeviceSelector
         while (!cancellationToken.IsCancellationRequested)
         {
             var allDevices = await YubiKeyManager.FindAllAsync(
-                ConnectionType.SmartCard, cancellationToken: cancellationToken);
+                ConnectionType.All, cancellationToken: cancellationToken);
 
             var devices = allDevices
                 .Where(d => d.SupportsConnection(ConnectionType.SmartCard))

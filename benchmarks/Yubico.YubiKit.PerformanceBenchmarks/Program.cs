@@ -82,12 +82,9 @@ public abstract class YubiKeyHardwareBenchmarkBase
         Device = FindDevice(requiredConnection).GetAwaiter().GetResult();
     }
 
-    [GlobalCleanup]
-    public void Cleanup() => YubiKeyManager.Shutdown();
-
     private static async Task<IYubiKey> FindDevice(ConnectionType requiredConnection)
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true)
+        var devices = await YubiKeyManager.FindAllAsync()
             .ConfigureAwait(false);
 
         return devices.FirstOrDefault(device => device.SupportsConnection(requiredConnection))
@@ -101,40 +98,34 @@ public abstract class YubiKeyHardwareBenchmarkBase
 [ExceptionDiagnoser]
 public class YubiKeyDiscoveryBenchmarks
 {
-    [GlobalSetup]
-    public void Setup()
-    {
-        _ = YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true)
-            .GetAwaiter()
-            .GetResult();
-    }
+    private YubiKeyMonitor? _monitor;
 
-    [GlobalCleanup]
-    public void Cleanup() => YubiKeyManager.Shutdown();
+    [GlobalSetup(Target = nameof(CurrentDevices))]
+    public async Task Setup() => _monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+
+    [GlobalCleanup(Target = nameof(CurrentDevices))]
+    public async Task Cleanup()
+    {
+        if (_monitor is not null) await _monitor.DisposeAsync().ConfigureAwait(false);
+    }
 
     [Benchmark(Baseline = true)]
-    public async Task<int> CachedFindAll()
+    public int CurrentDevices() => (_monitor ?? throw new InvalidOperationException("Monitor not initialized")).CurrentDevices.Count;
+
+    [Benchmark]
+    public static async Task<int> OneShotFindAll()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: false)
+        var devices = await YubiKeyManager.FindAllAsync()
             .ConfigureAwait(false);
         return devices.Count;
     }
 
     [Benchmark]
-    public async Task<int> ForcedRescanFindAll()
+    public static async Task<int> CreateInitializedMonitor()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true)
-            .ConfigureAwait(false);
-        return devices.Count;
-    }
-
-    [Benchmark]
-    public async Task<int> ColdFindAll()
-    {
-        await YubiKeyManager.ShutdownAsync().ConfigureAwait(false);
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: false)
-            .ConfigureAwait(false);
-        return devices.Count;
+        var monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+        await using var monitorLifetime = monitor.ConfigureAwait(false);
+        return monitor.CurrentDevices.Count;
     }
 }
 

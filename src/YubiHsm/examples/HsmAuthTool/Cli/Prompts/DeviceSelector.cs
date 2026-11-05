@@ -76,11 +76,12 @@ public static class DeviceSelector
         while (!cancellationToken.IsCancellationRequested)
         {
             var allDevices = await YubiKeyManager.FindAllAsync(
-                ConnectionType.SmartCard, cancellationToken: cancellationToken);
+                ConnectionType.All, cancellationToken: cancellationToken);
+            var devices = allDevices.Where(device => device.SupportsConnection(ConnectionType.SmartCard)).ToList();
 
-            if (allDevices.Count > 0)
+            if (devices.Count > 0)
             {
-                return allDevices;
+                return devices;
             }
 
             AnsiConsole.MarkupLine("[red]No YubiKey detected. Please insert a YubiKey and try again.[/]");

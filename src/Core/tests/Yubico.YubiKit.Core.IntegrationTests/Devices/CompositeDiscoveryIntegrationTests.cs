@@ -18,7 +18,6 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
-using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
@@ -52,7 +51,7 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         return Task.CompletedTask;
     }
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
@@ -65,7 +64,7 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         Assert.NotEmpty(raw);
 
         var devices = await TransientScanRetry.ScanAsync(
-            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
+            () => YubiKeyManager.FindAllAsync());
 
         foreach (var type in ConcreteTypes)
         {
@@ -75,14 +74,6 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
                 enumerated == exposed,
                 $"Conservation violated for {type}: {enumerated} interface(s) enumerated at the USB layer " +
                 $"but {exposed} returned device(s) expose the type. Devices: {Describe(devices)}");
-        }
-        // Per-connection filters must return exactly the devices from the same snapshot exposing the type.
-        foreach (var type in ConcreteTypes)
-        {
-            var filtered = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync(type));
-            Assert.Equal(
-                devices.Where(d => Supports(d, type)).Select(d => d.DeviceId).Order(StringComparer.Ordinal),
-                filtered.Select(d => d.DeviceId).Order(StringComparer.Ordinal));
         }
     }
 
@@ -98,7 +89,7 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         var expectedKeyCount = KeyCountPerPid(raw).Values.Sum();
 
         var devices = await TransientScanRetry.ScanAsync(
-            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
+            () => YubiKeyManager.FindAllAsync());
 
         Assert.True(
             devices.Count == expectedKeyCount,
@@ -121,7 +112,7 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
             .ToList();
 
         var devices = await TransientScanRetry.ScanAsync(
-            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
+            () => YubiKeyManager.FindAllAsync());
         var actualShapes = devices.Select(d => d.AvailableConnections).OrderBy(c => (int)c).ToList();
 
         Assert.True(
@@ -133,14 +124,14 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
-    public async Task FindAllAsync_TwoConsecutiveScansOnOneManager_ReturnStableGrouping()
+    public async Task FindAllAsync_TwoIndependentScans_ReturnStableGroupingWhenIdle()
     {
-        // Stability: two consecutive scans on one manager (identity cache shared) must produce the same
+        // Stability: two independent observations on an idle serial-bearing rig must produce the same
         // grouping — same device count, same interface-set multiset, same device identities.
         var scan1 = await TransientScanRetry.ScanAsync(
-            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
+            () => YubiKeyManager.FindAllAsync());
         var scan2 = await TransientScanRetry.ScanAsync(
-            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
+            () => YubiKeyManager.FindAllAsync());
 
         Assert.True(
             scan1.Count == scan2.Count,
@@ -156,21 +147,49 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
-    public async Task FindAllAsync_RepeatedScans_EventuallyPopulateMetadataOnEveryRetainedDevice()
+    [Trait(TestCategories.Category, TestCategories.Slow)]
+    public async Task Monitor_EventuallyPopulatesMetadata_AndRetainsUnchangedGroups()
     {
-        // Best-effort metadata reads use four process-wide worker slots. A rig with more keys can leave a
-        // first-scan object without metadata, but later scans must retry and propagate successful metadata
-        // onto the object retained by the repository without requiring a hot-plug.
-        IReadOnlyList<IYubiKey> devices = [];
+        // Later identity reads may regroup standalone interfaces. Only unchanged groups must retain
+        // their published objects, so observe one owned monitor rather than independent Find views.
+        await using var monitor = await YubiKeyManager.CreateMonitorAsync();
+        var initial = monitor.CurrentDevices;
+        IReadOnlyList<IYubiKey> devices = initial;
         for (var attempt = 0; attempt < 3; attempt++)
         {
-            devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+            devices = monitor.CurrentDevices;
             if (devices.All(device => Assert.IsType<YubiKeyDevice>(device).DeviceInfo is not null))
                 break;
+            await Task.Delay(TimeSpan.FromSeconds(6));
         }
 
+        AssertMetadataReadyAndStableGroupsRetained(initial, devices);
+    }
+
+    internal static void AssertMetadataReadyAndStableGroupsRetained(
+        IReadOnlyList<IYubiKey> initial, IReadOnlyList<IYubiKey> devices)
+    {
         Assert.NotEmpty(devices);
         Assert.All(devices, device => Assert.NotNull(Assert.IsType<YubiKeyDevice>(device).DeviceInfo));
+        // Compare the full member multiset, not device counts: regrouping must not lose or duplicate
+        // an interface, even when several initial objects become one composite object.
+        Assert.Equal(
+            initial.SelectMany(device => Assert.IsType<YubiKeyDevice>(device).InterfaceIds).Order(StringComparer.Ordinal),
+            devices.SelectMany(device => Assert.IsType<YubiKeyDevice>(device).InterfaceIds).Order(StringComparer.Ordinal));
+        var currentByIdentity = devices.ToDictionary(YubiKeyDevice.PhysicalIdentityKeyFor, StringComparer.Ordinal);
+        foreach (var previous in initial)
+        {
+            if (!currentByIdentity.TryGetValue(YubiKeyDevice.PhysicalIdentityKeyFor(previous), out var current) ||
+                previous.AvailableConnections != current.AvailableConnections)
+                continue;
+
+            // Different known serials prove substitution even on identical member/connection sets.
+            // Learning a formerly unknown serial (or a later serial-less read) does not.
+            var serialContradiction = previous.SerialNumber is { } previousSerial &&
+                current.SerialNumber is { } currentSerial && previousSerial != currentSerial;
+            if (!serialContradiction)
+                Assert.Same(previous, current);
+        }
     }
 
     [Fact]
@@ -234,7 +253,7 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         IReadOnlyList<IYubiKey> devices = [];
         for (var attempt = 0; attempt < 3; attempt++)
         {
-            devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+            devices = await YubiKeyManager.FindAllAsync();
             if (devices.Count > 0 && ready(devices))
                 break;
         }
@@ -264,7 +283,7 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         // Every returned device must honor its advertised interface set with a working typed connect
         // (no touch required for opening and closing a connection).
         var devices = await TransientScanRetry.ScanAsync(
-            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
+            () => YubiKeyManager.FindAllAsync());
         Assert.NotEmpty(devices);
 
         foreach (var device in devices)

@@ -321,7 +321,7 @@ internal static class AsyncBoundaryBaseline
             {
                 serial = int.Parse(serialText);
                 // Discovery can itself open connections for metadata; the process watchdog bounds this phase too.
-                var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido, forceRescan: true);
+                var devices = await YubiKeyManager.FindAllAsync();
                 var matches = devices.Where(d => d.SerialNumber == serial && d.SupportsConnection(ConnectionType.HidFido)).ToArray();
                 if (matches.Length != 1) return 4; // Unknown/ambiguous identity is not a fixture match.
                 var device = matches[0];
@@ -400,10 +400,6 @@ internal static class AsyncBoundaryBaseline
             // No exception message or device bytes in the dataset; exit code denotes failure.
             Console.Error.WriteLine(exception.GetType().Name);
             return 6;
-        }
-        finally
-        {
-            if (!scenario.StartsWith("synthetic-", StringComparison.Ordinal)) await YubiKeyManager.ShutdownAsync();
         }
     }
 

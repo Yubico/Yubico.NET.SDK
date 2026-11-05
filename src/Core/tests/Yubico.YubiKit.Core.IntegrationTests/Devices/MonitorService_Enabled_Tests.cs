@@ -21,25 +21,27 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 /// </summary>
 public class MonitorService_Enabled_Tests : IAsyncLifetime
 {
-    public Task InitializeAsync()
+    private YubiKeyMonitor? _monitor;
+
+    public async Task InitializeAsync() => _monitor = await YubiKeyManager.CreateMonitorAsync();
+
+    public async Task DisposeAsync()
     {
-        YubiKeyManager.StartMonitoring();
-        return Task.CompletedTask;
+        if (_monitor is not null) await _monitor.DisposeAsync();
     }
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
-
     [Fact]
-    public async Task WhenMonitoringEnabled_FindsDevices()
+    public void WhenMonitoringEnabled_FindsDevices()
     {
-        var devices = await TransientScanRetry.ScanAsync(
-            () => YubiKeyManager.FindAllAsync(ConnectionType.All));
+        var monitor = Assert.IsType<YubiKeyMonitor>(_monitor);
+        var devices = monitor.CurrentDevices;
         Assert.NotEmpty(devices);
     }
 
     [Fact]
-    public void WhenMonitoringEnabled_IsMonitoringReturnsTrue()
+    public void WhenMonitoringEnabled_CurrentDevicesIsReady()
     {
-        Assert.True(YubiKeyManager.IsMonitoring);
+        var monitor = Assert.IsType<YubiKeyMonitor>(_monitor);
+        Assert.NotNull(monitor.CurrentDevices);
     }
 }

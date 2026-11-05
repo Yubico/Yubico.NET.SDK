@@ -15,7 +15,6 @@
 using System.Diagnostics;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
@@ -37,9 +36,9 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
     private readonly EventLog _log = new();
 
-    public async Task InitializeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
@@ -52,10 +51,10 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
         using var watching = new CancellationTokenSource();
 
-        // WatchAsync subscribes on the first MoveNextAsync, and that call runs the iterator up to its
-        // first suspension point before returning. Subscribing here rather than inside the pump task
-        // is what stops the initial scan racing ahead of the watcher.
-        var enumerator = YubiKeyManager.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
+        await using var monitor = await YubiKeyManager.CreateMonitorAsync(watching.Token);
+        // Capture the checkpoint before the pump can record initial replay.
+        var initialCheckpoint = _log.CreateCheckpoint();
+        var enumerator = monitor.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
         var firstMove = enumerator.MoveNextAsync();
         var pump = Task.Run(
             async () =>
@@ -75,9 +74,6 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
                 }
             },
             CancellationToken.None);
-
-        var initialCheckpoint = _log.CreateCheckpoint();
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
 
         Prompt($"Leave your YubiKey plugged in. {Cycles} remove/insert cycles will be requested.");
 
@@ -103,17 +99,11 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
         output.WriteLine(_log.ToString());
 
-        await watching.CancelAsync();
-
-        // Cancellation is the intended way this pump ends, but it is not the only way a session this
-        // long can end: an overflowed buffer faults it, and hub completion ends it normally. Every
-        // assertion that matters has already run, so record the terminal outcome instead of asserting
-        // one, rather than attributing an unrelated ending to a failure of the hot-plug behaviour.
-        var terminal = await Record.ExceptionAsync(() => pump);
-        output.WriteLine(
-            terminal is null
-                ? "watcher pump ended normally"
-                : $"watcher pump ended with {terminal.GetType().Name}: {terminal.Message}");
+        // Owned disposal must complete healthy streams normally. Overflow or another pump fault is
+        // a real lifetime failure, not an outcome to swallow after the hotplug assertions passed.
+        await monitor.DisposeAsync();
+        await pump.WaitAsync(TimeSpan.FromSeconds(10));
+        output.WriteLine("watcher pump completed normally after owned monitor disposal");
     }
 
     private async Task<DeviceEvent> ExpectAsync(int checkpoint, DeviceAction action, string what)

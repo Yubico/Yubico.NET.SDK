@@ -29,7 +29,7 @@ namespace Yubico.YubiKit.Piv.Authentication;
 /// </summary>
 internal static class PinOnlyProtocol
 {
-    private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Authentication.PinOnlyProtocol");
+    private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(PinOnlyProtocol));
 
     private const int PinProtectedTag = 0x88;
     private const int ManagementKeyTag = 0x89;

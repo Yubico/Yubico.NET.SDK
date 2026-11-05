@@ -55,7 +55,7 @@ internal static class KeyProtocol
     private const byte TagRsaExponent = 0x82;
     private static ReadOnlySpan<byte> RsaPublicExponent => [0x01, 0x00, 0x01];
 
-    private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Keys.KeyProtocol");
+    private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(KeyProtocol));
 
     /// <summary>
     /// Generates a new key pair in the specified slot.

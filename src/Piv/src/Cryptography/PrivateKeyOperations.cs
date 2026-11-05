@@ -35,7 +35,7 @@ internal static class PrivateKeyOperations
     private const byte TagChallenge = 0x81;
     private const byte TagExponentiation = 0x85;
 
-    private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Cryptography.PrivateKeyOperations");
+    private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(PrivateKeyOperations));
 
     /// <summary>
     /// Signs or decrypts data using the private key in the specified slot.

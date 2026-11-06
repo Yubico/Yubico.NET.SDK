@@ -166,6 +166,49 @@ Keep using `device.SerialNumber` for durable physical identity. Its independent 
 unchanged: once known, it remains known on that object even if the latest cached metadata omits the serial.
 Do not substitute `device.CachedDeviceInfo?.SerialNumber` for it.
 
+## Selection in the CLI examples
+
+The seven applet tools and unified `yk` commands use one
+[shared selector](../../src/Cli.Shared/src/Device/DeviceSelector.cs). Each endpoint supplies ordered
+concrete transports and an explicit policy for multiple devices without an interactive terminal:
+
+| Endpoint | Eligible transports, in preference order | Multiple devices, noninteractive |
+|---|---|---|
+| OathTool, OpenPgpTool, HsmAuthTool | SmartCard | First eligible device |
+| FidoTool | HID FIDO, SmartCard | Prefer a device exposing HID FIDO, otherwise first eligible |
+| OtpTool | SmartCard, HID OTP | Prefer a device exposing SmartCard, otherwise first eligible |
+| PivTool menus | SmartCard | No selection; an explicit choice is required |
+| ManagementTool | SmartCard | No selection; an explicit choice is required |
+| Unified `yk` | Command's `AppletTransports`, restricted by `--transport` when supplied | Prefer a device exposing the first effective transport, otherwise first eligible |
+
+The standalone ManagementTool deliberately retains SmartCard-only eligibility, including its reset menu.
+That is a tool policy, not an SDK limitation: unified `yk management` supports SmartCard, HID FIDO, and
+HID OTP. FIDO transport presence alone does not establish applet/firmware support; session creation enforces it.
+
+Selection always discovers **All** interfaces once per attempt, then applies one transport eligibility
+filter without reconstructing or trimming devices. Unified `yk --transport` also reaches command session
+options; it does not narrow backend discovery. `--serial` uses the independently latched `device.SerialNumber`
+first, rejecting a known nonmatch without a live read. If identity is unknown, selection can use available
+metadata; a successful serial-less snapshot is not treated as a promise that another read will reveal a serial.
+
+A single eligible device is selected automatically. An interactive multi-device picker sorts labels and maps
+choices by index, so identical labels remain separate choices; Cancel returns no selection. When no eligible
+device is found, only an interactive caller is offered a retry. Discovery order is not stable, so scripts
+requiring a particular physical device should use `--serial` where supported. PivTool's argument-driven CLI
+always disables prompts, even on a terminal, and requires `--serial` when more than one device remains eligible.
+
+Labels and returned `DeviceSelection.Info` reuse `CachedDeviceInfo`. Missing metadata gets at most one
+best-effort live fallback per device reference per selection invocation, including retries. Reads are sequential
+to avoid overlapping access through ambiguous sibling views. Neither successful nor failed fallback results
+are retained by selector singletons across invocations, and cancellation propagates rather than becoming a
+missing device. These bounds describe selection enrichment, not discovery's own metadata probes.
+
+Unified `YkCommandBase` carries this metadata into the context and banner without opening Management again.
+PIV info uses it only for firmware/identity display. Management info and config explicitly request live
+information; Management reset also requires a successful live prerequisite read before its existing firmware
+and confirmation checks. A failed live read never falls back to the selection snapshot. These live reads and
+subsequent command sessions honor the requested transport.
+
 ## Device Monitoring
 
 For continuous tracking, explicitly own and share a monitor. The factory registers listeners before the

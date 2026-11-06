@@ -30,6 +30,16 @@ The Management module is the **primary interface for YubiKey device configuratio
 
 Read-only device metadata types returned by `GetDeviceInfoAsync` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, `VersionQualifier`) live in `Core/src/Devices` under `Yubico.YubiKit.Core.Devices`.
 
+### CLI selection and freshness
+
+The active standalone `examples/ManagementTool/Cli/Prompts/DeviceSelector.cs` is a thin adapter to the
+concrete selector in `Cli.Shared`, configured with SmartCard and `RequireChoice`. Do not widen it to HID
+because the SDK supports HID: this preserves the actual tool's eligibility, including its reset menu.
+Full All discovery already groups composite views; the old three-entries-per-key rationale is obsolete.
+Unified `YkCommandBase` reuses selection metadata for its context/banner, while Management info/config/reset
+explicitly call `ReadLiveInfoAsync`, carrying `SessionOptions` and never substituting stale context info on failure.
+See [CLI selection policies](../../docs/usage/device-discovery.md#selection-in-the-cli-examples).
+
 ## Test Infrastructure - Advanced Device Filtering
 
 ### The `[WithYubiKey]` Attribute System

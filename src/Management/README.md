@@ -185,6 +185,12 @@ The interactive ManagementTool sample lives at src/Management/examples/Managemen
 dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj
 ```
 
+This standalone tool accepts SmartCard devices only, including for its reset menu. It uses the
+[shared CLI selection flow](../../docs/usage/device-discovery.md#selection-in-the-cli-examples);
+multiple devices require an interactive choice, so a noninteractive invocation returns no selection.
+The SDK and unified `yk management` also support HID FIDO and HID OTP. Selection labels are last-known
+metadata; info/config output and reset prerequisites still use explicit live Management reads.
+
 ## Related
 
 For read-only discovery and metadata validation without configuration changes, run only

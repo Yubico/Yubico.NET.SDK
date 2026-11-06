@@ -12,6 +12,13 @@ When working on this module:
 
 ## Module Context
 
+PivTool's menu selector and argument-driven `Cli/Commands/DeviceHelper.GetDeviceAsync` both delegate to
+`Cli.Shared.Device.DeviceSelector` with SmartCard eligibility and `RequireChoice`. The CLI additionally
+disables interaction and routes diagnostics to stderr; it must not regain its own discovery/serial-probing loop.
+The tiny menu result adapter retains PIV's transport-free banner. Unified `PivInfoCommand` uses selection
+metadata only for firmware/identity display, taking serial from the selection's latched-identity-first value.
+See [CLI selection policies](../../docs/usage/device-discovery.md#selection-in-the-cli-examples).
+
 The PIV module implements YubiKey PIV smart-card operations through a single public `PivSession` facade and the `IPivSession` contract.
 
 Current structure:

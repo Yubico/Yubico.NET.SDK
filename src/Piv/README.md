@@ -158,6 +158,10 @@ The interactive PivTool sample lives at `src/Piv/examples/PivTool/`.
 dotnet run --project src/Piv/examples/PivTool/PivTool.csproj
 ```
 
+Its menus and argument-driven CLI use the [shared selection flow](../../docs/usage/device-discovery.md#selection-in-the-cli-examples)
+with SmartCard-only eligibility. The argument-driven CLI never prompts, even on a terminal; use `--serial`
+when multiple devices are connected. Picker labels reuse discovery metadata, not authoritative live configuration.
+
 ## Related
 
 - [Core](../Core/README.md) - device discovery, SmartCard protocol, TLV, and cryptography primitives.

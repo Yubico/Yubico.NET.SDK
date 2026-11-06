@@ -43,12 +43,6 @@ public abstract class DeviceSelectorBase
     protected abstract string SupportedTransportsDescription { get; }
 
     /// <summary>
-    /// Gets the local result filter applied after full-interface discovery, retaining composite slots.
-    /// Defaults to <see cref="ConnectionType.All"/>. This does not restrict backend enumeration.
-    /// </summary>
-    protected virtual ConnectionType FindAllConnectionTypeFilter => ConnectionType.All;
-
-    /// <summary>
     /// Gets the target serial number, when the caller requested a specific YubiKey.
     /// </summary>
     protected virtual int? TargetSerialNumber => null;
@@ -173,17 +167,8 @@ public abstract class DeviceSelectorBase
     /// <summary>
     /// Finds all connected devices. Overridable so selector behavior can be tested without hardware.
     /// </summary>
-    protected virtual async Task<IReadOnlyList<IYubiKey>> FindAllDevicesAsync(CancellationToken cancellationToken)
-    {
-        var devices = await YubiKeyManager.FindAllAsync(cancellationToken);
-        var filter = FindAllConnectionTypeFilter;
-        var concreteFilter = filter | ((filter & ConnectionType.Hid) != 0
-            ? ConnectionType.HidFido | ConnectionType.HidOtp : ConnectionType.Unknown);
-        return filter == ConnectionType.All
-            ? devices
-            : devices.Where(device => (device.AvailableConnections & concreteFilter &
-                (ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp)) != 0).ToList();
-    }
+    protected virtual Task<IReadOnlyList<IYubiKey>> FindAllDevicesAsync(CancellationToken cancellationToken) =>
+        YubiKeyManager.FindAllAsync(cancellationToken);
 
     private async Task<IReadOnlyList<IYubiKey>> FilterDevicesAsync(
         IReadOnlyList<IYubiKey> allDevices,

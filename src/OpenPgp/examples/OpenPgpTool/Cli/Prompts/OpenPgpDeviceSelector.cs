@@ -42,9 +42,6 @@ public sealed class OpenPgpDeviceSelector : DeviceSelectorBase
     protected override string SupportedTransportsDescription => "SmartCard (CCID)";
 
     /// <inheritdoc />
-    protected override ConnectionType FindAllConnectionTypeFilter => ConnectionType.SmartCard;
-
-    /// <inheritdoc />
     protected override IYubiKey? AutoSelectDevice(IReadOnlyList<IYubiKey> devices) =>
         devices[0];
 

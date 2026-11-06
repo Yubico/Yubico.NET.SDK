@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Spectre.Console;
 using System.Text;
+using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
 
@@ -33,46 +32,11 @@ internal static class DeviceHelper
     /// </summary>
     internal static async Task<IYubiKey?> GetDeviceAsync(int? serial, CancellationToken ct = default)
     {
-        var all = await YubiKeyManager.FindAllAsync(ConnectionType.All, cancellationToken: ct);
-        var smartCard = all.Where(d => d.SupportsConnection(ConnectionType.SmartCard)).ToList();
-
-        if (smartCard.Count == 0)
-        {
-            Console.Error.WriteLine("Error: No YubiKey with SmartCard interface detected.");
-            return null;
-        }
-
-        if (serial is null)
-        {
-            if (smartCard.Count > 1)
-            {
-                Console.Error.WriteLine(
-                    $"Error: {smartCard.Count} YubiKeys detected. Use --serial <number> to select one.");
-                return null;
-            }
-
-            return smartCard[0];
-        }
-
-        // Resolve serial number by querying each device
-        foreach (var device in smartCard)
-        {
-            try
-            {
-                var info = await device.GetDeviceInfoAsync(cancellationToken: ct);
-                if (info.SerialNumber == serial)
-                {
-                    return device;
-                }
-            }
-            catch
-            {
-                // Skip devices that fail to respond
-            }
-        }
-
-        Console.Error.WriteLine($"Error: No YubiKey found with serial number {serial}.");
-        return null;
+        var selector = new DeviceSelector([ConnectionType.SmartCard], NonInteractiveSelection.RequireChoice,
+            serialNumber: serial,
+            console: AnsiConsole.Create(new AnsiConsoleSettings { Out = new AnsiConsoleOutput(Console.Error) }));
+        var selection = await selector.SelectDeviceAsync(ct, allowInteraction: false);
+        return selection?.Device;
     }
 
     /// <summary>

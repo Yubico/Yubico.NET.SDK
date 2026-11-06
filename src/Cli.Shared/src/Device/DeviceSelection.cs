@@ -34,6 +34,12 @@ public record DeviceSelection(
     ConnectionType ConnectionType)
 {
     /// <summary>
+    /// Last-known discovery metadata or this invocation's best-effort fallback result.
+    /// Commands requiring current configuration must explicitly read live Management information.
+    /// </summary>
+    public DeviceInfo? Info { get; init; }
+
+    /// <summary>
     /// Gets a display string for this device (e.g., "YubiKey 5C - S/N: 12345678 (SmartCard)").
     /// </summary>
     public string DisplayName =>

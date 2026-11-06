@@ -33,7 +33,7 @@ public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettin
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, ManagementResetSettings settings, YkDeviceContext deviceContext)
     {
-        var info = deviceContext.Info;
+        var info = await deviceContext.ReadLiveInfoAsync();
         if (info is null)
         {
             OutputHelpers.WriteError("Could not retrieve device information.");

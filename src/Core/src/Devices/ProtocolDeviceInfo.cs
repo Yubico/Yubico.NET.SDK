@@ -508,6 +508,9 @@ internal static class ProtocolDeviceInfo
             // registration before native open. Resolve the selected member when the provider is the published
             // composite device so metadata reads follow the same route as direct slot reads.
             var pcscSlot = ResolvePcscSlot(provider, key.Connection);
+            // Only built-in macOS HID owns its registry claim through native teardown. Windows and Linux
+            // HID use the provider fallback below until their owned lifetimes land (slices S1 and S3 in
+            // docs/plans/yubikit-async-boundaries/00-status.md; design in 02-architecture.md).
             var hidSlot = ResolveMacHidSlot(provider, key.Connection);
             registrationTransferred = pcscSlot is not null || hidSlot is not null;
             var conn = pcscSlot is not null

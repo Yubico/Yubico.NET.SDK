@@ -147,7 +147,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         public override byte[] Authenticate(ReadOnlyMemory<byte> keyData, ReadOnlyMemory<byte> message)
         {
             Guard.IsNotNull(keyData, nameof(keyData));
-            Guard.HasSizeEqualTo(keyData, KeyLength, nameof(keyData));
+            //V1 protocol auth key can be 16 or 32 bytes
+            if (keyData.Length != 16 && keyData.Length != KeyLength)
+            {
+                throw new ArgumentException(
+                    $"Key must be 16 or {KeyLength} bytes.",
+                    nameof(keyData));
+            }
             byte[] keyBytes = keyData.ToArray();
             byte[] messageBytes = message.ToArray();
             

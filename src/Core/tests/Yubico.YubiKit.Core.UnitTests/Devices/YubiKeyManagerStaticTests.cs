@@ -26,8 +26,11 @@ public class YubiKeyManagerStaticTests
     [Fact]
     public void DiscoveryFacade_HasNoGlobalLifetimeOrCache()
     {
-        Assert.Empty(typeof(YubiKeyManager).GetFields(BindingFlags.Static | BindingFlags.NonPublic));
-        var oldNames = new[] { "ScanAsync", "StartMonitoring", "StopMonitoring", "WatchAsync", "IsMonitoring", "Shutdown", "ShutdownAsync", "DeviceChanges" };
+        var discovery = Assert.Single(typeof(YubiKeyManager).GetFields(BindingFlags.Static | BindingFlags.NonPublic));
+        Assert.Equal(typeof(YubiKeyDiscovery), discovery.FieldType);
+        Assert.True(discovery.IsInitOnly);
+        Assert.Equal(5, typeof(YubiKeyManager).GetMethods(BindingFlags.Public | BindingFlags.Static).Length);
+        var oldNames = new[] { "ScanAsync", "StartMonitoring", "StopMonitoring", "IsMonitoring", "Shutdown", "ShutdownAsync", "DeviceChanges" };
         Assert.DoesNotContain(typeof(YubiKeyManager).GetMembers(BindingFlags.Public | BindingFlags.Static),
             member => oldNames.Contains(member.Name));
         Assert.DoesNotContain(typeof(YubiKeyManager).GetMethods(BindingFlags.Public | BindingFlags.Static),
@@ -39,11 +42,12 @@ public class YubiKeyManagerStaticTests
     public async Task FindAllAsync_SubsequentCall_ObservesChangedDevices()
     {
         var rig = new FindYubiKeysScopeTests.ScopeRig();
-        var first = Assert.Single(await YubiKeyManager.FindAllAsync(
-            ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder));
+        var discovery = new YubiKeyDiscovery(rig.CreateFinder);
+        var first = Assert.Single(await discovery.FindAllAsync(
+            ConnectionType.SmartCard, TestContext.Current.CancellationToken));
         rig.Serial = 333;
-        var second = Assert.Single(await YubiKeyManager.FindAllAsync(
-            ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder));
+        var second = Assert.Single(await discovery.FindAllAsync(
+            ConnectionType.SmartCard, TestContext.Current.CancellationToken));
         Assert.NotSame(first, second);
         Assert.Equal(111, first.SerialNumber);
         Assert.Equal(333, second.SerialNumber);
@@ -65,9 +69,10 @@ public class YubiKeyManagerStaticTests
             return finder;
         }
 
-        Assert.Empty(await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken, CreateFinder));
+        var discovery = new YubiKeyDiscovery(CreateFinder);
+        Assert.Empty(await discovery.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken));
         empty = false;
-        Assert.Single(await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken, CreateFinder));
+        Assert.Single(await discovery.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken));
         Assert.Equal(2, factories);
         Assert.Equal(2, rig.Pcsc.Calls);
     }
@@ -75,8 +80,14 @@ public class YubiKeyManagerStaticTests
     [Fact]
     public async Task FindAllAsync_EmptyInterfaces_PerformsNoBackendInitialization()
     {
-        Assert.Empty(await YubiKeyManager.FindAllAsync(ConnectionType.Unknown, TestContext.Current.CancellationToken));
-        Assert.Empty(await YubiKeyManager.FindAllAsync((ConnectionType)0x80, TestContext.Current.CancellationToken));
+        var rig = new FindYubiKeysScopeTests.ScopeRig();
+        var discovery = new YubiKeyDiscovery(rig.CreateFinder);
+        Assert.Empty(await discovery.FindAllAsync(ConnectionType.Unknown, TestContext.Current.CancellationToken));
+        Assert.Empty(await discovery.FindAllAsync((ConnectionType)0x80, TestContext.Current.CancellationToken));
+        Assert.Equal(0, rig.Pcsc.Calls);
+        Assert.Equal(0, rig.Hid.Calls);
+        Assert.Empty(rig.CreatedSlots);
+        Assert.Empty(rig.OpenCalls);
     }
 
     [Theory]
@@ -95,16 +106,17 @@ public class YubiKeyManagerStaticTests
             return rig.CreateFinder(scope);
         }
 
-        var optional = await YubiKeyManager.FindFirstOrDefaultAsync(key =>
+        var discovery = new YubiKeyDiscovery(CreateFinder);
+        var optional = await discovery.FindFirstOrDefaultAsync(key =>
         {
             predicateCalls++;
             return true;
-        }, interfaces, TestContext.Current.CancellationToken, CreateFinder);
+        }, interfaces, TestContext.Current.CancellationToken);
         Assert.NotNull(optional);
         Assert.Equal(1, predicateCalls);
         Assert.Equal(1, calls);
-        var required = await YubiKeyManager.FindFirstAsync(key => key.SerialNumber == 222,
-            interfaces, TestContext.Current.CancellationToken, CreateFinder);
+        var required = await discovery.FindFirstAsync(key => key.SerialNumber == 222,
+            interfaces, TestContext.Current.CancellationToken);
         Assert.Equal(222, required.SerialNumber);
         Assert.Equal(2, calls);
         Assert.Equal(ConnectionType.Unknown, required.AvailableConnections & ~interfaces.ToConcreteScope());
@@ -114,18 +126,19 @@ public class YubiKeyManagerStaticTests
     public async Task FindFirstMethods_NullPredicateAndNoMatch_PreserveSelectionSemantics()
     {
         var rig = new FindYubiKeysScopeTests.ScopeRig();
-        Assert.NotNull(await YubiKeyManager.FindFirstOrDefaultAsync(null, ConnectionType.SmartCard,
-            TestContext.Current.CancellationToken, rig.CreateFinder));
-        Assert.Equal(111, (await YubiKeyManager.FindFirstAsync(null, ConnectionType.SmartCard,
-            TestContext.Current.CancellationToken, rig.CreateFinder)).SerialNumber);
-        Assert.Null(await YubiKeyManager.FindFirstOrDefaultAsync(_ => false, ConnectionType.SmartCard,
-            TestContext.Current.CancellationToken, rig.CreateFinder));
-        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => YubiKeyManager.FindFirstAsync(
-            _ => false, ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder));
+        var discovery = new YubiKeyDiscovery(rig.CreateFinder);
+        Assert.NotNull(await discovery.FindFirstOrDefaultAsync(null, ConnectionType.SmartCard,
+            TestContext.Current.CancellationToken));
+        Assert.Equal(111, (await discovery.FindFirstAsync(null, ConnectionType.SmartCard,
+            TestContext.Current.CancellationToken)).SerialNumber);
+        Assert.Null(await discovery.FindFirstOrDefaultAsync(_ => false, ConnectionType.SmartCard,
+            TestContext.Current.CancellationToken));
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => discovery.FindFirstAsync(
+            _ => false, ConnectionType.SmartCard, TestContext.Current.CancellationToken));
         Assert.Equal("No matching YubiKey was found.", error.Message);
-        Assert.Null(await YubiKeyManager.FindFirstOrDefaultAsync(null, ConnectionType.Unknown, TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => YubiKeyManager.FindFirstAsync(
-            interfaces: ConnectionType.Unknown, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Null(await discovery.FindFirstOrDefaultAsync(null, ConnectionType.Unknown, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => discovery.FindFirstAsync(
+            null, ConnectionType.Unknown, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -133,18 +146,21 @@ public class YubiKeyManagerStaticTests
     {
         var rig = new FindYubiKeysScopeTests.ScopeRig();
         var expected = new InvalidDataException("Scripted failure");
-        Assert.Same(expected, await Assert.ThrowsAsync<InvalidDataException>(() => YubiKeyManager.FindFirstOrDefaultAsync(
-            _ => throw expected, ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder)));
-        Assert.Same(expected, await Assert.ThrowsAsync<InvalidDataException>(() => YubiKeyManager.FindFirstAsync(
-            null, ConnectionType.All, TestContext.Current.CancellationToken, _ => throw expected)));
+        var discovery = new YubiKeyDiscovery(rig.CreateFinder);
+        Assert.Same(expected, await Assert.ThrowsAsync<InvalidDataException>(() => discovery.FindFirstOrDefaultAsync(
+            _ => throw expected, ConnectionType.SmartCard, TestContext.Current.CancellationToken)));
+        var failingDiscovery = new YubiKeyDiscovery(_ => throw expected);
+        Assert.Same(expected, await Assert.ThrowsAsync<InvalidDataException>(() => failingDiscovery.FindFirstAsync(
+            null, ConnectionType.All, TestContext.Current.CancellationToken)));
     }
 
     [Fact]
     public async Task FindAllAsync_DoesNotPublishPartialViewsOrChangeAnOwnedMonitor()
     {
         var rig = new FindYubiKeysScopeTests.ScopeRig();
-        var retained = Assert.Single(await YubiKeyManager.FindAllAsync(ConnectionType.All,
-            TestContext.Current.CancellationToken, rig.CreateFinder));
+        var discovery = new YubiKeyDiscovery(rig.CreateFinder);
+        var retained = Assert.Single(await discovery.FindAllAsync(ConnectionType.All,
+            TestContext.Current.CancellationToken));
         await using var monitor = await YubiKeyMonitor.CreateAsync(new FixedFinder(retained),
             [(ConnectionType.Hid, () => new OwnedMonitorFixture.FakeDeviceChangeListener()),
                 (ConnectionType.SmartCard, () => new OwnedMonitorFixture.FakeDeviceChangeListener())],
@@ -159,8 +175,8 @@ public class YubiKeyManagerStaticTests
         try
         {
             rig.Serial = 333;
-            var scoped = Assert.Single(await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard,
-                TestContext.Current.CancellationToken, rig.CreateFinder));
+            var scoped = Assert.Single(await discovery.FindAllAsync(ConnectionType.SmartCard,
+                TestContext.Current.CancellationToken));
             Assert.Equal(333, scoped.SerialNumber);
             Assert.Equal(ConnectionType.SmartCard, scoped.AvailableConnections);
             Assert.Same(retained, Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken)));
@@ -177,25 +193,22 @@ public class YubiKeyManagerStaticTests
     }
 
     [Fact]
-    public async Task PublicOverloads_AreUnambiguousAndObserveCancellationBeforeInitialization()
+    public async Task PublicMethods_ObserveCancellationBeforeInitialization()
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         await cancellation.CancelAsync();
         var ct = cancellation.Token;
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(ct));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(cancellationToken: ct));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(interfaces: ConnectionType.All, cancellationToken: ct));
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(null, ct));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(cancellationToken: ct));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(predicate: null, cancellationToken: ct));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(null, ConnectionType.All, ct));
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(null, ct));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(cancellationToken: ct));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(predicate: null, cancellationToken: ct));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(null, ConnectionType.All, ct));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.CreateMonitorAsync(ct));
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(ConnectionType.All, ct,
-            _ => throw new InvalidOperationException("Finder must not be constructed")));
+        var discovery = new YubiKeyDiscovery(_ => throw new InvalidOperationException("Finder must not be constructed"));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => discovery.FindAllAsync(ConnectionType.All, ct));
     }
 
     private sealed class FixedFinder(IYubiKey device) : IFindYubiKeys, IMonitoredDiscovery

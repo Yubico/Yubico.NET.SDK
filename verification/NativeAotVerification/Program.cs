@@ -43,7 +43,7 @@ foreach (Type type in linkedModuleEntryTypes)
 
 // Real device discovery through Core's PC/SC + platform interop path — safe with zero attached
 // YubiKeys (returns an empty list rather than throwing).
-IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(CancellationToken.None);
+IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(cancellationToken: CancellationToken.None);
 Console.WriteLine($"Found {devices.Count} YubiKey(s).");
 foreach (IYubiKey device in devices)
 {
@@ -110,12 +110,12 @@ internal static class MonitorVerification
         var baselineB = sinkB.Snapshot().Count;
 
         Step(2, "Insert USB key A. A composite key (CCID + HID FIDO + HID OTP) must appear ONCE.",
-            sinkA, expected: 1, failures, DeviceAction.Added);
+            sinkA, expected: 1, failures, "Added");
 
         Step(3, "Insert a second USB key (key B).",
-            sinkA, expected: 1, failures, DeviceAction.Added);
+            sinkA, expected: 1, failures, "Added");
 
-        Step(4, "Remove key A.", sinkA, expected: 1, failures, DeviceAction.Removed);
+        Step(4, "Remove key A.", sinkA, expected: 1, failures, "Removed");
 
         Step(5, "Tap/hold the NFC key on the reader (SmartCard-only; contrast with composite USB). "
               + "Skip with Enter if unavailable.", sinkA, expected: -1, failures);
@@ -124,8 +124,8 @@ internal static class MonitorVerification
         Step(6, "Remove key B and wait for Removed output, then reinsert it and wait for Added "
               + "output. Repeat three times.", sinkA, expected: -1, failures);
         var rapidActivity = sinkA.Snapshot().Skip(rapidActivityStart).ToList();
-        if (!rapidActivity.Any(e => e.StartsWith($"{DeviceAction.Added}|", StringComparison.Ordinal))
-            || !rapidActivity.Any(e => e.StartsWith($"{DeviceAction.Removed}|", StringComparison.Ordinal)))
+        if (!rapidActivity.Any(e => e.StartsWith("Added|", StringComparison.Ordinal))
+            || !rapidActivity.Any(e => e.StartsWith("Removed|", StringComparison.Ordinal)))
         {
             failures.Add("step 6: rapid activity did not produce both Added and Removed events");
             Console.WriteLine("  FAIL  step 6: expected both Added and Removed events");
@@ -209,7 +209,13 @@ internal static class MonitorVerification
         Prompt(9, "Press Enter to create a new initialized monitor after disposal.");
         var replacement = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
         await using var replacementLifetime = replacement.ConfigureAwait(false);
-        Console.WriteLine($"  ok    new monitor initialized with {replacement.CurrentDevices.Count} device(s)");
+        var count = 0;
+        await foreach (var change in replacement.WatchAsync().ConfigureAwait(false))
+        {
+            if (change is SnapshotComplete) break;
+            if (change is DeviceAdded) count++;
+        }
+        Console.WriteLine($"  ok    new monitor initialized with {count} device(s)");
 
         Console.WriteLine();
         Console.WriteLine("=== Result ===");
@@ -240,7 +246,7 @@ internal static class MonitorVerification
         Sink reference,
         int expected,
         List<string> failures,
-        DeviceAction? expectedAction = null)
+        string? expectedAction = null)
     {
         var before = reference.Snapshot().Count;
         Prompt(number, instruction);
@@ -408,11 +414,19 @@ internal static class MonitorVerification
             _cts.Dispose();
         }
 
-        private void Record(DeviceEvent value)
+        private void Record(DeviceChange value)
         {
+            var (action, device) = value switch
+            {
+                DeviceAdded added => ("Added", added.Device),
+                DeviceRemoved removed => ("Removed", removed.Device),
+                DeviceUpdated updated => ("Updated", updated.Device),
+                _ => (null, null)
+            };
+            if (device is null) return; // SnapshotComplete marks replay, not device activity.
             var entry = string.Create(
                 CultureInfo.InvariantCulture,
-                $"{value.Action}|{value.Device.DeviceId}");
+                $"{action}|{device.DeviceId}");
 
             lock (_gate)
             {

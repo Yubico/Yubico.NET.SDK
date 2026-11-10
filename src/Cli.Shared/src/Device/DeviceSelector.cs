@@ -37,7 +37,7 @@ public sealed class DeviceSelector
         ConnectionType? requestedTransport = null,
         IAnsiConsole? console = null)
         : this(supportedTransports, nonInteractiveSelection, console ?? AnsiConsole.Console,
-            YubiKeyManager.FindAllAsync,
+            token => YubiKeyManager.FindAllAsync(cancellationToken: token),
             async (device, token) => await device.GetDeviceInfoAsync(
                 new SessionCreationOptions { PreferredConnectionType = requestedTransport }, token),
             serialNumber, requestedTransport)

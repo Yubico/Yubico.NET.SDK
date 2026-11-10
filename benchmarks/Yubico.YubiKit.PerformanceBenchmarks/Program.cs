@@ -10,6 +10,7 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Validators;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
@@ -100,17 +101,17 @@ public class YubiKeyDiscoveryBenchmarks
 {
     private YubiKeyMonitor? _monitor;
 
-    [GlobalSetup(Target = nameof(CurrentDevices))]
+    [GlobalSetup(Target = nameof(WatchReplay))]
     public async Task Setup() => _monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
 
-    [GlobalCleanup(Target = nameof(CurrentDevices))]
+    [GlobalCleanup(Target = nameof(WatchReplay))]
     public async Task Cleanup()
     {
         if (_monitor is not null) await _monitor.DisposeAsync().ConfigureAwait(false);
     }
 
     [Benchmark(Baseline = true)]
-    public int CurrentDevices() => (_monitor ?? throw new InvalidOperationException("Monitor not initialized")).CurrentDevices.Count;
+    public Task<int> WatchReplay() => CountReplayAsync(_monitor ?? throw new InvalidOperationException("Monitor not initialized"));
 
     [Benchmark]
     public static async Task<int> OneShotFindAll()
@@ -125,7 +126,18 @@ public class YubiKeyDiscoveryBenchmarks
     {
         var monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
         await using var monitorLifetime = monitor.ConfigureAwait(false);
-        return monitor.CurrentDevices.Count;
+        return await CountReplayAsync(monitor).ConfigureAwait(false);
+    }
+
+    private static async Task<int> CountReplayAsync(YubiKeyMonitor monitor)
+    {
+        var count = 0;
+        await foreach (var change in monitor.WatchAsync().ConfigureAwait(false))
+        {
+            if (change is SnapshotComplete) break;
+            if (change is DeviceAdded) count++;
+        }
+        return count;
     }
 }
 

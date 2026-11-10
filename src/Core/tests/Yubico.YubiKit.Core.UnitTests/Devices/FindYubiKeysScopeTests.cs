@@ -122,12 +122,13 @@ public class FindYubiKeysScopeTests
     public async Task FindAllAsync_RepeatScansRereadMetadataAndIdentityRatherThanSharingEvidence(bool multipleKeys)
     {
         var rig = new ScopeRig { IncludeSecondKey = multipleKeys };
-        var firstScan = await YubiKeyManager.FindAllAsync(
-            ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder);
+        var discovery = new YubiKeyDiscovery(rig.CreateFinder);
+        var firstScan = await discovery.FindAllAsync(
+            ConnectionType.SmartCard, TestContext.Current.CancellationToken);
         var first = Assert.Single(firstScan, key => key.SerialNumber == 111);
         rig.Serial = 333;
-        var secondScan = await YubiKeyManager.FindAllAsync(
-            ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder);
+        var secondScan = await discovery.FindAllAsync(
+            ConnectionType.SmartCard, TestContext.Current.CancellationToken);
         var second = Assert.Single(secondScan, key => key.SerialNumber == 333);
 
         Assert.NotSame(first, second);
@@ -142,9 +143,10 @@ public class FindYubiKeysScopeTests
     public async Task FindAllAsync_ChangingScopeNeverImportsSiblingSlotsFromPriorScan()
     {
         var rig = new ScopeRig();
-        var all = await YubiKeyManager.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken, rig.CreateFinder);
-        var hid = await YubiKeyManager.FindAllAsync(ConnectionType.Hid, TestContext.Current.CancellationToken, rig.CreateFinder);
-        var ccid = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder);
+        var discovery = new YubiKeyDiscovery(rig.CreateFinder);
+        var all = await discovery.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+        var hid = await discovery.FindAllAsync(ConnectionType.Hid, TestContext.Current.CancellationToken);
+        var ccid = await discovery.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken);
 
         Assert.Equal(ConnectionTypeExtensions.ConcreteConnections, Assert.Single(all).AvailableConnections);
         Assert.All(hid, key => Assert.Equal(ConnectionType.Unknown, key.AvailableConnections & ConnectionType.SmartCard));
@@ -158,7 +160,7 @@ public class FindYubiKeysScopeTests
     public async Task FindAllAsync_ReturnedViewCanConnectSequentiallyAfterDiscoveryScopeRetires(ConnectionType scope)
     {
         var rig = new ScopeRig();
-        var device = Assert.Single(await YubiKeyManager.FindAllAsync(scope, TestContext.Current.CancellationToken, rig.CreateFinder));
+        var device = Assert.Single(await new YubiKeyDiscovery(rig.CreateFinder).FindAllAsync(scope, TestContext.Current.CancellationToken));
         var snapshot = device.CachedDeviceInfo;
         Assert.NotNull(snapshot);
         var discoveryOpens = rig.OpenCalls.Values.Sum();
@@ -180,13 +182,14 @@ public class FindYubiKeysScopeTests
     public async Task FindAllAsync_ConcurrentCallsHaveIndependentReadScopesButShareInterfaceOwnership()
     {
         var rig = new ScopeRig { PendingOpen = new(TaskCreationOptions.RunContinuationsAsynchronously) };
-        var first = YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder);
+        var discovery = new YubiKeyDiscovery(rig.CreateFinder);
+        var first = discovery.FindAllAsync(ConnectionType.SmartCard, TestContext.Current.CancellationToken);
         try
         {
             await rig.OpenEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
             // A second fresh finder must skip the leased interface, not join the first finder's blocked read.
-            var second = Assert.Single(await YubiKeyManager.FindAllAsync(
-                ConnectionType.SmartCard, TestContext.Current.CancellationToken, rig.CreateFinder)
+            var second = Assert.Single(await discovery.FindAllAsync(
+                ConnectionType.SmartCard, TestContext.Current.CancellationToken)
                 .WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken));
             Assert.Null(second.CachedDeviceInfo);
             Assert.Equal(1, rig.OpenCalls.Values.Sum());
@@ -267,7 +270,7 @@ public class FindYubiKeysScopeTests
         var enumeration = new TaskCompletionSource<IReadOnlyList<IPcscDevice>>(TaskCreationOptions.RunContinuationsAsynchronously);
         rig.Pcsc.PendingEnumeration = enumeration.Task;
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        var scan = YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, cancellation.Token, rig.CreateFinder);
+        var scan = new YubiKeyDiscovery(rig.CreateFinder).FindAllAsync(ConnectionType.SmartCard, cancellation.Token);
         try
         {
             Assert.Equal(1, rig.Pcsc.Calls); // Enumeration has entered and is held behind the gate.
@@ -300,7 +303,7 @@ public class FindYubiKeysScopeTests
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
         var rig = new ScopeRig { PendingOpen = new(TaskCreationOptions.RunContinuationsAsynchronously) };
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        var scan = YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, cancellation.Token, rig.CreateFinder);
+        var scan = new YubiKeyDiscovery(rig.CreateFinder).FindAllAsync(ConnectionType.SmartCard, cancellation.Token);
         try
         {
             await rig.OpenEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
@@ -344,7 +347,8 @@ public class FindYubiKeysScopeTests
             }
 
             FindYubiKeys? oneShot = null;
-            var scan = YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, cancellation.Token, scope => oneShot = rig.CreateFinder(scope));
+            var discovery = new YubiKeyDiscovery(scope => oneShot = rig.CreateFinder(scope));
+            var scan = discovery.FindAllAsync(ConnectionType.SmartCard, cancellation.Token);
             Assert.Equal(2, rig.CreatedSlots.Count);
             if (cancel)
             {

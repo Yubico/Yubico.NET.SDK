@@ -79,14 +79,14 @@ an owned monitor's `WatchAsync` when the application needs to wait for device ch
 All Find methods use independent evidence, without a shared cache or monitoring lifecycle:
 
 ```csharp
-// Enumerate and probe only SmartCard interfaces; never enumerate HID.
-var smartCardViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
+// Every YubiKey reachable as a smart card (CCID); HID is never enumerated.
+var smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
 
-// Enumerate HID descriptors, but create slots and probe metadata only for FIDO interfaces.
-var fidoViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
+// Every YubiKey reachable over FIDO HID. HID descriptors are enumerated, but only FIDO interfaces are probed.
+var fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
 
-// Fresh evidence across all interfaces, still without publishing into a monitor feed.
-var allViews = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+// Every YubiKey on every interface, still without publishing into a monitor feed.
+var allYubiKeys = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
 
 // Either family can discover the selected physical key. No OTP slots/protocol probes are admitted.
 var selected = await YubiKeyManager.FindFirstAsync(
@@ -95,8 +95,13 @@ var selected = await YubiKeyManager.FindFirstAsync(
     cancellationToken: cancellationToken);
 ```
 
-Each call creates a new finder with independent identity/metadata evidence. It does **not** initialize
-tracking, return cached objects, update a feed, emit changes, or start monitoring.
+Each returned `IYubiKey` is a device view: one physical YubiKey as seen through the requested interfaces.
+A SmartCard-only call returns YubiKeys that expose only their smart card connection, even when the same
+keys also have FIDO or OTP interfaces.
+
+Each call discovers from scratch: identity and metadata are read again rather than reused from an earlier
+call. It does **not** initialize tracking, return cached objects, update a feed, emit changes, or start
+monitoring.
 A monitor already running is neither stopped nor restricted by the interfaces scope.
 
 `interfaces` supports concrete combinations of `SmartCard`, `HidFido`, and `HidOtp`. `Hid` expands to
@@ -111,21 +116,21 @@ than narrowing discovery and accidentally discarding sibling connection slots.
   constructed.
 - OTP and FIDO share OS HID descriptor enumeration. The OS may therefore expose excluded descriptors,
   but they receive no connection slots, topology queries, or identity/metadata protocol probes.
-- Returned `AvailableConnections` contains only observed in-scope interfaces. A scoped view does not gain
-  sibling slots from an earlier scan or a monitor. PID completeness still means the PID's **full**
+- Returned `AvailableConnections` contains only observed in-scope interfaces. A YubiKey from a scoped call
+  does not gain sibling slots from an earlier scan or a monitor. PID completeness still means the PID's **full**
   expected interface set, not the requested subset. Ambiguous partial observations can split one key
   into several results.
 - Metadata is best-effort, and each returned object can retain historical `CachedDeviceInfo`. Separate
   scans need not produce equal `DeviceId` values or the same grouping. Use known serials for durable
   identity, not scan objects or their identifiers.
 
-**Ownership bound:** repeat scans and views sharing any known member interface ID exclude overlapping
-connections in-process. Disjoint scoped views, such as SmartCard-only and FIDO-only, do not share claims,
-even when their serials match. Coordinate them explicitly; do not treat them as safe parallel access to
+**Ownership bound:** YubiKeys from repeat scans that share any known member interface ID exclude
+overlapping connections in-process. YubiKeys from disjoint scopes, such as a SmartCard-only and a
+FIDO-only call, do not share claims, even when their serials match. Coordinate them explicitly; do not treat them as safe parallel access to
 one key. A scan can also probe unclaimed sibling interfaces while a scoped connection is live. See
 [connection ownership](../architecture/connection-ownership-and-contention.md#grouping-bound).
 
-Cancellation is checked before constructing the finder. Enumeration waits run concurrently with a provisional
+Cancellation is checked before discovery starts. Enumeration waits run concurrently with a provisional
 five-second budget per transport; for one-shot `Find…Async` a timeout logs a warning and omits that transport
 for this call, using the other transport's results. Cancellation abandons the enumeration wait, not already-dispatched native work.
 Identity reads have a two-second budget per attempt (up to three attempts); metadata reads have a three-second
@@ -201,7 +206,7 @@ always disables prompts, even on a terminal, and requires `--serial` when more t
 
 Labels and returned `DeviceSelection.Info` reuse `CachedDeviceInfo`. Missing metadata gets at most one
 best-effort live fallback per device reference per selection invocation, including retries. Reads are sequential
-to avoid overlapping access through ambiguous sibling views. Neither successful nor failed fallback results
+because two listed YubiKeys may be the same physical key seen through different interfaces. Neither successful nor failed fallback results
 are retained by selector singletons across invocations, and cancellation propagates rather than becoming a
 missing device. These bounds describe selection enrichment, not discovery's own metadata probes.
 
@@ -387,7 +392,7 @@ Configure the existing `YubiKeyTests:AllowedSerialNumbers` allow list before run
 hard-code a key count or serial in the source.
 
 The eight scoped cases cover SmartCard, FIDO, OTP, HID, SmartCard+OTP, SmartCard+FIDO, explicit All, and the default scope. They check
-in-scope connection sets, serial-based `SameDeviceAs` correlation across independent views, retained snapshots,
+in-scope connection sets, serial-based `SameDeviceAs` correlation across YubiKeys from independent scoped calls, retained snapshots,
 and cached/live serial, firmware, form factor, and USB/NFC capability agreement. Each exposed concrete
 connection is opened, read, and asynchronously disposed before the next connection. The tests never reset,
 write configuration or credentials, request touch, or require unplugging. Do **not** substitute a broad
@@ -408,7 +413,7 @@ contention before treating a failure as an SDK bug.
 For detailed firmware/count/retry output, temporarily enable xUnit's `showLiveOutput` in that project's runner
 configuration. Do not commit machine-specific serials or hardware logs.
 
-Connections through disjoint scoped views are **never** opened simultaneously in hardware tests. Overlapping
+Connections to YubiKeys from disjoint scopes are **never** opened simultaneously in hardware tests. Overlapping
 and disjoint ownership bounds, cancellation, and queued-read retirement are tested with fakes in
 `FindYubiKeysScopeTests`; successful read-only hardware checks do not imply universal physical-key locking.
 
@@ -422,7 +427,7 @@ not machine serials. Snapshot metadata is compared with sequential live reads on
 monitor**. Incomplete initial metadata/interfaces remain failures, not successful two-key observations.
 
 `ScopedDiscoveryReadinessTests` also pins that a complete serial-less bystander does not prevent readiness,
-whereas any view lacking metadata exhausts the bounded retries. Run that hardware-free regression explicitly
+whereas any YubiKey lacking metadata exhausts the bounded retries. Run that hardware-free regression explicitly
 with `--integration --project Management.IntegrationTests --filter "FullyQualifiedName~ScopedDiscoveryReadinessTests"`.
 
 **Attended acceptance remains a separate required pass gate for this lifecycle migration.** With a human

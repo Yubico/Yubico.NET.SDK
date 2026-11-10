@@ -35,16 +35,18 @@ public static class YubiKeyManager
     /// includes FIDO and OTP; <see cref="ConnectionType.Unknown"/> scans nothing. Undefined bits are ignored.
     /// </param>
     /// <param name="cancellationToken">Cancels discovery waits, not already-dispatched native work.</param>
-    /// <returns>New device views containing only observed in-scope interfaces, or an empty list.</returns>
+    /// <returns>
+    /// The YubiKeys found, each a device view exposing only its observed in-scope interfaces, or an empty list.
+    /// </returns>
     /// <exception cref="OperationCanceledException">The cancellation token is canceled.</exception>
     /// <exception cref="PlatformInteropException">A requested platform API fails.</exception>
     /// <remarks>
     /// Each call uses fresh identity and metadata evidence without changing running monitors. Ordering is
     /// unspecified. Grouping is conservative: ambiguous evidence can split one physical key into several
     /// results. Metadata is best-effort last-known data. For full composite keys, discover All and filter
-    /// locally with <see cref="IYubiKey.SupportsConnection"/>. Coordinate disjoint scoped views before opening
-    /// connections: physical-key exclusion relies on overlapping known interface IDs. Cancellation bounds
-    /// waits, not dispatched native work; returned views remain usable after discovery ends.
+    /// locally with <see cref="IYubiKey.SupportsConnection"/>. Coordinate YubiKeys from disjoint scopes before
+    /// opening connections: physical-key exclusion relies on overlapping known interface IDs. Cancellation
+    /// bounds waits, not dispatched native work; returned YubiKeys remain usable after discovery ends.
     /// </remarks>
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType interfaces = ConnectionType.All,

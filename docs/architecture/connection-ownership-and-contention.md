@@ -56,8 +56,8 @@ that standalone records belong to one key, it does not guess. Each record then h
 scope, so protection degrades conservatively to per-interface exclusion. See
 [Device Discovery Guarantees](device-discovery-guarantees.md).
 
-The same bound applies to `YubiKeyManager.Find…Async(interfaces: ...)`: a scoped view deliberately knows only in-scope
-members. Repeated scans and all/scoped views with any shared member ID exclude each other's connections
+The same bound applies to `YubiKeyManager.Find…Async(interfaces: ...)`: each returned `IYubiKey` is a scoped
+device view that deliberately knows only in-scope members. Repeated scans and all/scoped views with any shared member ID exclude each other's connections
 in either acquisition order. Two disjoint views, such as SmartCard-only and FIDO-only, have **no shared
 claim**, even if they report the same serial or topology key. The registry does not register global
 serial/topology aliases or import membership from earlier scans. A prior all-interface observation does

@@ -119,8 +119,8 @@ descriptor enumeration, but excluded interfaces are filtered before slots, topol
 `ScopedFinder_OnlyEnumeratesRequestedFamiliesAndBuildsRequestedSlots` pins the call boundaries.
 
 A partial scope is not a complete physical-interface census: PID-only merging still requires the PID's
-full expected interface set. No sibling slots or evidence are imported from earlier scans. Partial views
-can therefore fragment more than full scans, and do not accumulate identity evidence between calls.
+full expected interface set. No sibling slots or evidence are imported from earlier scans. Partial device
+views (YubiKeys from a narrowed scope) can therefore fragment more than full scans, and do not accumulate identity evidence between calls.
 Pinned by `ScopedFinder_PartialTriplePidWithoutIdentity_DoesNotTreatScopeAsPidCompleteness`, the two
 `ScopedFinder_TwoSamePidKeys*` vectors, `FindAllAsync_ChangingScopeNeverImportsSiblingSlotsFromPriorScan`, and
 `FindAllAsync_RepeatScansRereadMetadataAndIdentityRatherThanSharingEvidence` in `FindYubiKeysScopeTests`.
@@ -139,7 +139,7 @@ not provide physical-key exclusion, even with matching serials; see the
 
 The public one-shot result remains connectable after its discovery scope retires
 (`FindAllAsync_ReturnedViewCanConnectSequentiallyAfterDiscoveryScopeRetires`). Hardware coverage lives in
-Management's `ScopedDiscoveryReadOnlyTests`: scoped/full views are correlated by serial, cached metadata is
+Management's `ScopedDiscoveryReadOnlyTests`: YubiKeys from scoped and full calls are correlated by serial, cached metadata is
 compared with sequential live reads on every exposed concrete connection, and default/explicit All use
 independent objects. It accepts conservative fragmentation rather than equating view count with key count.
 These idle-fixture checks do not prove exclusion of native calls or safety of disjoint simultaneous access;

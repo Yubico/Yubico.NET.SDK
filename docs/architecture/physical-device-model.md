@@ -73,8 +73,8 @@ foreach (var device in devices)
 // Keep full composite slots, then select physical keys capable of FIDO.
 var fidoCapable = devices.Where(key => key.SupportsConnection(ConnectionType.HidFido));
 
-// Or intentionally discover only FIDO interfaces; these views have no CCID/OTP slots.
-var fidoViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido);
+// Or intentionally discover only FIDO interfaces; these YubiKeys have no CCID/OTP slots.
+var fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido);
 ```
 
 In the common case, discovery merges the interfaces of a single physical key by USB Product ID parsed from
@@ -119,8 +119,8 @@ SmartCard-only skips HID, HID-only skips PC/SC, and OTP/FIDO share descriptor en
 interface probes. A view contains only observed in-scope interfaces; partial scope does not relax the
 PID-completeness rule. Existing monitors run unchanged. See
 [independent scoped scans](../usage/device-discovery.md#independent-scoped-scans) for examples and lifetime
-bounds. Connections exclude other views only through overlapping known member interface IDs: disjoint
-scoped views cannot promise physical-key exclusion even with matching serials. Coordinate them explicitly.
+bounds. Connections exclude other device views only through overlapping known member interface IDs:
+YubiKeys from disjoint scopes cannot promise physical-key exclusion even with matching serials. Coordinate them explicitly.
 Monitor disposal releases its tracking resources, not caller-owned sessions/connections or returned
 descriptors. Build membership from stream replay, or call `FindAllAsync` for a one-off; new subscriptions
 after disposal end empty. Disposal sequentially stops listeners, cancels/awaits the loop, retires discovery,

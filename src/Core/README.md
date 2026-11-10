@@ -116,18 +116,19 @@ not be called concurrently with itself. See the
 ### Discover selected interfaces once
 
 ```csharp
-var smartCardViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
-var fidoViews = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
+var smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
+var fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
 ```
 
-Every Find call uses fresh discovery evidence without a shared repository or background tracking.
+Each returned `IYubiKey` is a device view of one physical YubiKey through the requested interfaces.
+Every Find call discovers from scratch without a shared repository or background tracking.
 `interfaces` limits enumeration/probes and returned connection slots; it is not a full-device result filter.
 To retain composite slots, discover All and filter locally. HID-only skips PC/SC; SmartCard-only skips HID. OTP/FIDO share HID descriptor
 enumeration, but excluded interfaces are not probed. Existing monitors run unchanged.
 
-Partial views can split one physical key. Connection exclusion covers overlapping known interface IDs,
-not disjoint scoped views, even if serials match; coordinate those views rather than opening them in
-parallel. Transport enumeration waits run concurrently and are bounded to five seconds each (provisional
+A scoped call can split one physical key into several YubiKeys. Connection exclusion covers overlapping
+known interface IDs, not YubiKeys from disjoint scopes, even if serials match; coordinate those rather than
+opening them in parallel. Transport enumeration waits run concurrently and are bounded to five seconds each (provisional
 pending pcscd restart latency measurement). A timeout logs a warning and omits only that transport's
 interfaces for this scan. Cancellation interrupts the wait, not native work; abandoned work completes
 and cleans up independently, with late completion/failure observed in Debug logs. Identity read budgets

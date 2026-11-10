@@ -50,7 +50,6 @@ public class FindPcscDevicesTests
     [Trait("Category", "RuntimeResilience")]
     public async Task ListenerScan_SaturatedPcscAdmission_PreservesSnapshotWithoutRemovalEvent()
     {
-        var repository = new DeviceChangeFeed();
         var rig = new FindYubiKeysScopeTests.ScopeRig();
         var api = new StatusBlockingSCardApi("Yubico YubiKey OTP+FIDO+CCID");
         var finder = new FindYubiKeys(
@@ -59,37 +58,42 @@ public class FindPcscDevicesTests
             device => new MetadataSlot(rig, device.ReaderName), topologyResolver: rig);
         var hid = new OwnedMonitorFixture.FakeDeviceChangeListener();
         var smartCard = new OwnedMonitorFixture.FakeDeviceChangeListener();
-        var worker = new YubiKeyMonitorWorker(repository, finder,
-            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)]);
-        var completedScans = 0;
-        worker.MonitoringWaitReachedForTest = () => Interlocked.Increment(ref completedScans);
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
-            TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
+        var clock = new ObservedTimeProvider();
+        var interval = TimeSpan.FromHours(1);
+        await using var monitor = await YubiKeyMonitor.CreateAsync(finder,
+            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)],
+            interval, clock, TestContext.Current.CancellationToken);
         var existingDevice = Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken));
         Assert.Equal(111, existingDevice.SerialNumber);
-        await using var watcher = await DeviceChangeWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
+        await using var watcher = await DeviceChangeWatcher.StartAsync(monitor.WatchAsync, TestContext.Current.CancellationToken);
+        await watcher.WaitForCountAsync(1, "Initial replay missing", TestContext.Current.CancellationToken);
         var nativeCalls = api.EstablishContextCalls;
         Assert.True(nativeCalls > 0);
 
         using (await DiscoveryWorkerAdmissionCollection.SaturateAsync(TestContext.Current.CancellationToken))
         {
             smartCard.Raise();
-            await AsyncWait.WaitUntilAsync(() => Volatile.Read(ref completedScans) >= 2,
-                "The actual loop did not finish its saturated PC/SC scan", cancellationToken: TestContext.Current.CancellationToken);
+            await clock.WaitForTimerAsync(interval);
+            await clock.WaitForTimerAsync(RescanScheduler.QuietPeriod);
+            clock.Advance(RescanScheduler.QuietPeriod);
+            // Failed scans do not publish a revision. The next interval timer proves the attempt ended.
+            await clock.WaitForTimerAsync(interval);
+            await OwnedMonitorFixture.WaitForRevisionAsync(monitor, 1, TestContext.Current.CancellationToken);
             Assert.Same(existingDevice, Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken)));
             Assert.Equal(nativeCalls, api.EstablishContextCalls);
         }
 
         // The next real hint retries successfully once capacity returns, retaining the published object.
         smartCard.Raise();
-        await AsyncWait.WaitUntilAsync(() => Volatile.Read(ref completedScans) >= 3,
-            "PC/SC monitoring did not recover after saturation", cancellationToken: TestContext.Current.CancellationToken);
+        await clock.WaitForTimerAsync(RescanScheduler.QuietPeriod);
+        clock.Advance(RescanScheduler.QuietPeriod);
+        await OwnedMonitorFixture.WaitForRevisionAsync(monitor, 2, TestContext.Current.CancellationToken);
         Assert.True(api.EstablishContextCalls > nativeCalls);
         Assert.Same(existingDevice, Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken)));
         await monitor.DisposeAsync();
         await watcher.Completion.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
         Assert.True(watcher.EndedNormally);
-        Assert.All(watcher.Events, change =>
+        Assert.All(watcher.Events.Skip(1), change =>
             Assert.Same(existingDevice, Assert.IsType<DeviceUpdated>(change).Device));
     }
 

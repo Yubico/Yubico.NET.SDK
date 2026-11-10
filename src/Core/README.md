@@ -72,24 +72,21 @@ Discovery needs no PIN, touch, or open session. Later snippets assume these dire
 
 ### Own continuous tracking
 
-`YubiKeyMonitor` introduces an explicitly owned monitoring lifetime with `CurrentDevices`, `WatchAsync`,
-and `IAsyncDisposable`. `CurrentDevices` reads the last completed, read-only membership snapshot without
-hardware I/O. Previously obtained lists keep their membership; the contained device objects can still
-receive last-known metadata updates. Disposal does not dispose application-owned sessions/connections.
-Accessing `CurrentDevices` after disposal throws; enumerating `WatchAsync` after disposal completes empty.
-Unexpected terminal monitoring failure faults subscriptions and rejects cached access rather than leaving
-an apparently live, frozen cache.
+`YubiKeyMonitor` owns one continuous tracking lifetime: `WatchAsync` replays `DeviceAdded`, emits
+`SnapshotComplete` (including empty discovery), then streams `DeviceAdded`, `DeviceRemoved`, and
+`DeviceUpdated` changes. Maintain a consumer projection for cached membership; disposal ends tracking
+without disposing application-owned sessions/connections, and later enumerations complete empty.
 
 Create it with `await YubiKeyManager.CreateMonitorAsync(cancellationToken)` and dispose with `await using`.
 Initialization registers listeners before the loop's single initial scan and waits for publication,
 including successful empty discovery. Startup failure/cancellation cleans up the partial lifetime; the
-creation token does not control the monitor after successful creation. One internal worker performs all
+creation token does not control the monitor after successful creation. The monitor performs all
 initial, listener-triggered, and five-second fallback scans sequentially. There is no manual refresh or
 stop/restart mode: dispose the monitor and create a new one to recover from terminal failure. There is no
 process-global monitoring lifetime or device cache.
 
 Transport listeners share `IDeviceChangeListener`: replace the former smart-card-specific interface with that
-contract and replace either listener's `DeviceEvent` callback with payload-less `Changed`. Set the
+contract and use its payload-less `Changed` callback. Set the
 callback before `Start()`; do not call `Stop()` or `Dispose()` inside it. A callback is only a rescan
 hint, not device truth. HID hint details are internal Trace diagnostics. The monitor's internal
 `HotplugSignals` starts listeners independently, tolerates partial failure, and coalesces transport
@@ -102,7 +99,7 @@ Share one host-owned monitor between long-lived components rather than letting e
 tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a
 monitor for selection, but must explicitly read Management for current configuration.
 
-`YubiKeyMonitor.WatchAsync` now supplies initial `Added` events followed by ordered changes. On each
+`YubiKeyMonitor.WatchAsync` supplies initial `DeviceAdded` records, `SnapshotComplete`, then ordered changes. On each
 enumeration's first `MoveNextAsync`, it captures membership and subscribes at the same boundary as a
 completed publication, so there is no snapshot/subscription gap. Initial replay does not occupy the
 independent 256-event delta buffer; changes arriving while replay is consumed can still overflow it.
@@ -110,15 +107,10 @@ Overflow faults only that watcher: **clear its device projection and re-enumerat
 `WatchAsync`** to rebuild it safely. Canceling a watcher does not stop monitoring. Disposal allows already
 captured replay and published deltas to drain, but new enumerations complete empty.
 
-Do not combine a separate `CurrentDevices` read with a subscription and assume that it is race-free.
-Use the replaying stream to initialize a UI projection; use `CurrentDevices` for point-in-time lookups.
-
-Disposal closes public access, retires discovery ingress, and waits once for the worker loop with a
-ten-second drain budget before disposing the repository. This is **not** a total disposal timeout or a
-deadline for native listener cleanup. Already-open discovery reads retain their native admission and
-lease until actual teardown; a late result cannot restore disposed membership or emit new events.
-Already-committed replay/deltas may still drain. See the [monitor architecture](../../docs/architecture/event-driven-device-discovery.md#single-lifetime-worker-and-shutdown)
-for the ownership and concurrency boundaries.
+Use the replaying stream to initialize a UI projection, or independent `FindAllAsync` for a one-shot lookup.
+Disposal sequentially stops listeners, cancels and awaits the loop with no drain timeout, retires discovery,
+and completes `DeviceChangeFeed`; native discovery budgets bound waits, while already-open native work
+retains its leases until actual teardown. Already-published replay and changes may still drain.
 
 ### Discover selected interfaces once
 
@@ -276,7 +268,7 @@ await foreach (DeviceChange change in monitor.WatchAsync())
 not raw operating-system notifications. Subscription starts on first enumeration, atomically replaying current
 membership followed by `SnapshotComplete` (even for an empty snapshot), then ordered changes. `Revision`
 increments once per scan; changes sharing a revision belong to that scan. Metadata updates retain the
-originally published device object. There is no `CurrentDevices` property: maintain a projection from the
+originally published device object. Maintain a membership projection from the
 stream, or use `FindAllAsync` for independent fresh discovery.
 
 **v2 prerelease migration:** replace `ScanAsync` with `FindAllAsync(interfaces: ...)`; remove `forceRescan`.

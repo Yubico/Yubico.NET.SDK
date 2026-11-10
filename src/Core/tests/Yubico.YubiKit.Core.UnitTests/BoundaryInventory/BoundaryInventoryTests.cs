@@ -236,7 +236,8 @@ public class BoundaryInventoryTests
         Assert.Equal(1, manifest.Version);
         Assert.All(manifest.Families, family => Assert.Contains("outstanding", family.Status));
         Assert.All(manifest.Families, family => Assert.DoesNotContain("verified", family.Status));
-        Assert.Empty(BoundaryManifest.Validate(sites, manifest));
+        var errors = BoundaryManifest.Validate(sites, manifest);
+        Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
         Assert.Equal(sites.Count, manifest.Families.Sum(family => family.Entries.Length));
     }
 

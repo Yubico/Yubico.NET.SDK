@@ -18,47 +18,72 @@ using Yubico.YubiKit.Core.Transports;
 
 namespace Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
-/// <summary>Owns one monitor, including factory-failure cleanup and the actual loop's final drain.</summary>
+/// <summary>Owns a monitor and its scripted discovery, listeners, and clock.</summary>
 internal sealed class OwnedMonitorFixture : IAsyncDisposable
 {
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(10);
     private Task<YubiKeyMonitor>? _creation;
-    private int _completedScans;
-
-    public DeviceChangeFeed Repository { get; } = new();
     public ScriptedFinder Finder { get; } = new();
     public FakeDeviceChangeListener Hid { get; } = new();
     public FakeDeviceChangeListener SmartCard { get; } = new();
-    public YubiKeyMonitorWorker Worker { get; }
-    public Task Loop => Worker.MonitoringCompletionForTest;
-    public Action? WaitReached { get; set; }
-
-    public OwnedMonitorFixture()
-    {
-        Worker = new(Repository, Finder,
-            [(ConnectionType.Hid, () => Hid), (ConnectionType.SmartCard, () => SmartCard)], TimeSpan.FromMilliseconds(50));
-        Worker.MonitoringWaitReachedForTest = () =>
-        {
-            Volatile.Write(ref _completedScans, Finder.ScanCount);
-            WaitReached?.Invoke();
-        };
-    }
+    public ObservedTimeProvider Clock { get; } = new();
+    public TimeSpan Interval { get; init; } = TimeSpan.FromHours(1);
 
     public Task<YubiKeyMonitor> CreateAsync(CancellationToken cancellationToken) =>
-        _creation = YubiKeyMonitor.CreateAsync(Repository, Worker, cancellationToken, TimeSpan.FromHours(1));
+        _creation = YubiKeyMonitor.CreateAsync(Finder,
+            [(ConnectionType.Hid, () => Hid), (ConnectionType.SmartCard, () => SmartCard)], Interval, Clock, cancellationToken);
 
-    public Task WaitForScanAsync(int count, CancellationToken cancellationToken) => AsyncWait.WaitUntilAsync(
-        () => Volatile.Read(ref _completedScans) >= count,
-        $"The loop did not finish scan/publication {count}", Bound, cancellationToken);
+    public async Task WaitForScanAsync(int count, CancellationToken cancellationToken)
+    {
+        var monitor = await (_creation ?? throw new InvalidOperationException("Create the monitor first."));
+        await WaitForRevisionAsync(monitor, count, cancellationToken);
+    }
+
+    internal static async Task WaitForRevisionAsync(YubiKeyMonitor monitor, int count, CancellationToken cancellationToken)
+    {
+        long revision = 0;
+        Task read = Task.CompletedTask;
+        await AsyncWait.WaitUntilAsync(() =>
+        {
+            if (read.IsFaulted || read.IsCanceled)
+                return true; // Await below to preserve the stream's causal failure.
+            if (read.IsCompletedSuccessfully)
+                read = ReadRevisionAsync();
+            return Volatile.Read(ref revision) >= count;
+        }, $"The monitor did not publish scan {count}", Bound, cancellationToken);
+        await read;
+
+        async Task ReadRevisionAsync()
+        {
+            await foreach (var change in monitor.WatchAsync(cancellationToken))
+            {
+                if (change is SnapshotComplete snapshot)
+                {
+                    Volatile.Write(ref revision, snapshot.Revision);
+                    return;
+                }
+            }
+        }
+    }
+
+    public async Task TriggerAsync(CancellationToken cancellationToken)
+    {
+        var next = Finder.ScanCount + 1;
+        SmartCard.Raise();
+        await AdvanceHotplugAsync();
+        await WaitForScanAsync(next, cancellationToken);
+    }
+
+    public async Task AdvanceHotplugAsync()
+    {
+        await Clock.WaitForTimerAsync(Interval);
+        await Clock.WaitForTimerAsync(RescanScheduler.QuietPeriod);
+        Clock.Advance(RescanScheduler.QuietPeriod);
+    }
 
     public async ValueTask DisposeAsync()
     {
-        if (_creation is null)
-        {
-            await Worker.DisposeAsync();
-            Repository.Complete();
-        }
-        else
+        if (_creation is not null)
         {
             YubiKeyMonitor? monitor = null;
             // Factory cleanup may still be in flight after an assertion or runner cancellation.
@@ -70,9 +95,6 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
             if (monitor is not null)
                 await monitor.DisposeAsync();
         }
-
-        // Released test gates may still be owned by an abandoned loop after runner cancellation.
-        await Loop.WaitAsync(Bound, CancellationToken.None);
     }
 
     internal sealed class ScriptedFinder : IMonitoredDiscovery
@@ -80,7 +102,11 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
         private int _scanCount;
         private int _activityCount;
         public Func<CancellationToken, Task<IReadOnlyList<IYubiKey>>> Scan { get; set; } =
-            _ => Task.FromResult<IReadOnlyList<IYubiKey>>([]);
+            ct =>
+            {
+                ct.ThrowIfCancellationRequested();
+                return Task.FromResult<IReadOnlyList<IYubiKey>>([]);
+            };
         public Action<ConnectionType>? OnActivity { get; set; }
         public Action? OnRetire { get; set; }
         public int ScanCount => Volatile.Read(ref _scanCount);

@@ -212,7 +212,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         {
             await ScanAndPublishAsync(cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            _initialScan.TrySetResult(null);
+            _ = _initialScan.TrySetResult(null);
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -239,7 +239,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            _initialScan.TrySetCanceled(cancellationToken);
+            _ = _initialScan.TrySetCanceled(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -251,7 +251,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     {
         // A result rather than a faulted TCS avoids an unobserved exception if initialization's
         // wait was canceled while a native scan continued. The factory rethrows the original error.
-        _initialScan.TrySetResult(error);
+        _ = _initialScan.TrySetResult(error);
         if (_disposed == 1)
             return;
 

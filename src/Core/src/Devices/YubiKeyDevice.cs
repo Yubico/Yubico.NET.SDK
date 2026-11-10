@@ -72,6 +72,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     }
     public string DeviceId { get; }
 
+    /// <inheritdoc />
     public ConnectionType AvailableConnections { get; }
 
     internal IReadOnlyList<string> InterfaceIds { get; }
@@ -302,7 +303,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     {
         var builder = new StringBuilder();
         foreach (var id in sortedInterfaceIds)
-            builder.Append(id.Length).Append(':').Append(id);
+            _ = builder.Append(id.Length).Append(':').Append(id);
         return builder.ToString();
     }
 

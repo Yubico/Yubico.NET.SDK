@@ -20,7 +20,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 internal static class DiscoveryBudgets
 {
-    // Provisional pending pcscd restart latency measurement.
+    // Measured on Linux (pcsc-lite 2.5.3): steady scans 75–83 ms, scans overlapping a pcscd restart or
+    // socket activation under 300 ms. Five seconds leaves an order of magnitude of headroom.
     internal static readonly TimeSpan Enumeration = TimeSpan.FromSeconds(5);
     internal static readonly TimeSpan IdentityRead = TimeSpan.FromSeconds(2);
     internal static readonly TimeSpan MetadataRead = TimeSpan.FromSeconds(3);

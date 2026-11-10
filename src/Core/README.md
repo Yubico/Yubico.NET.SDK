@@ -128,8 +128,7 @@ enumeration, but excluded interfaces are not probed. Existing monitors run uncha
 
 A scoped call can split one physical key into several YubiKeys. Connection exclusion covers overlapping
 known interface IDs, not YubiKeys from disjoint scopes, even if serials match; coordinate those rather than
-opening them in parallel. Transport enumeration waits run concurrently and are bounded to five seconds each (provisional
-pending pcscd restart latency measurement). A timeout logs a warning and omits only that transport's
+opening them in parallel. Transport enumeration waits run concurrently and are bounded to five seconds each. A timeout logs a warning and omits only that transport's
 interfaces for this scan. Cancellation interrupts the wait, not native work; abandoned work completes
 and cleans up independently, with late completion/failure observed in Debug logs. Identity read budgets
 remain per attempt, and cancellation does not prove native work drained. See

@@ -130,7 +130,7 @@ FIDO-only call, do not share claims, even when their serials match. Coordinate t
 one key. A scan can also probe unclaimed sibling interfaces while a scoped connection is live. See
 [connection ownership](../architecture/connection-ownership-and-contention.md#grouping-bound).
 
-Cancellation is checked before discovery starts. Enumeration waits run concurrently with a provisional
+Cancellation is checked before discovery starts. Enumeration waits run concurrently with a
 five-second budget per transport; for one-shot `Find…Async` a timeout logs a warning and omits that transport
 for this call, using the other transport's results. Cancellation abandons the enumeration wait, not already-dispatched native work.
 Identity reads have a two-second budget per attempt (up to three attempts); metadata reads have a three-second

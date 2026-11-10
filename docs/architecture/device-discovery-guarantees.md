@@ -175,7 +175,7 @@ publication, whole-diff enqueue, atomic capture/registration, and termination; `
 
 Disposal stops listeners, cancels and awaits the actual loop, retires discovery, then completes the feed.
 There is no managed-loop abandonment or disposal timeout. Discovery waits are bounded by `DiscoveryBudgets`:
-enumeration provisionally five seconds per transport, identity two seconds per attempt (up to three),
+enumeration five seconds per transport, identity two seconds per attempt (up to three),
 metadata three seconds. Finder scan-lock queueing and retries mean their sum is not a hard wall-clock bound.
 An enumeration timeout is handled per path. One-shot `Find…Async` logs a warning and returns the other
 transport's results for that call. The monitor's discovery (`IMonitoredDiscovery.FindAllAsync`) throws

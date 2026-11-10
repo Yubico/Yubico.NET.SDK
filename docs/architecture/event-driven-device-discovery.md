@@ -47,7 +47,8 @@ only signal; they do not invalidate evidence themselves. The monitor has no lock
 
 ## Discovery budgets and partial results
 
-`DiscoveryBudgets` centralizes the enumeration budget (provisionally five seconds), identity-read
+`DiscoveryBudgets` centralizes the enumeration budget (five seconds; Linux scans that overlap a `pcscd`
+restart measured under 300 ms), identity-read
 budget (two seconds per attempt), and metadata-read budget (three seconds). Identity reads can retry
 up to three attempts; concurrent finder callers can queue on the scan lock. `ScanUpperBound` is a sum
 of stage budgets, **not a hard end-to-end wall-clock guarantee**.

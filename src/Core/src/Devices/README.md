@@ -6,7 +6,7 @@ manager watch creates a producer; monitor watch subscribes to an existing one.
 
 - Listeners see interfaces, not physical keys. Hints coalesce or drop; `SnapshotDiff` decides membership
   from observed interface-path sets, connection flags, and contradictory known serials, never hint payloads.
-- `DiscoveryBudgets` is the single source of discovery wait budgets: enumeration 5 s (provisional),
+- `DiscoveryBudgets` is the single source of discovery wait budgets: enumeration 5 s,
   identity 2 s per attempt, metadata 3 s. There is no separate managed-loop disposal deadline: disposal
   awaits the actual loop before retiring discovery and completing the feed. Budgets bound waits, not
   native work; identity retries and finder scan-lock queueing preclude a hard total wall-clock bound.

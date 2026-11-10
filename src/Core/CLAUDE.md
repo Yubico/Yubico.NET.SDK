@@ -420,7 +420,7 @@ One-shot exit terminally retires its read scope in `finally`, including cancella
 This cancels queued identity admission and prevents later opens; already-open native work keeps its
 worker and registry lease until teardown. Do not dispose admission/lease owners at the wait boundary.
 Transport enumeration waits run concurrently with the shared `DiscoveryBudgets.Enumeration` budget
-(provisionally five seconds). For one-shot discovery a timeout logs a warning and omits that transport for
+(five seconds). For one-shot discovery a timeout logs a warning and omits that transport for
 this call; for the monitor's `IMonitoredDiscovery.FindAllAsync` it throws so a partial scan is never
 published. Caller cancellation abandons the wait immediately. Abandoned enumeration completes independently and its result
 or failure is observed at Debug level. The absence of post-cancellation slots/probes is pinned by
@@ -518,7 +518,7 @@ transports are scanned. This is best-effort partial discovery, not proof that al
 accessible. If PC/SC enumeration itself throws (worker saturation or `SCardGetStatusChange` error), the
 scan fails rather than committing false-empty removals. In-scope PC/SC and HID enumeration waits start
 together; an enumeration timeout instead logs and omits just that transport for one scan, using the other's
-results. The provisional enumeration budget is five seconds. During initial creation
+results. The enumeration budget is five seconds. During initial creation
 this failure propagates and tears down the partial monitor; later scans retain the last publication and
 the next trigger retries. Timeout-induced partial results can produce removals/re-additions.
 

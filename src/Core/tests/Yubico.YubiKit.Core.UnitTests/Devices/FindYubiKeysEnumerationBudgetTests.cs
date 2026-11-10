@@ -81,6 +81,40 @@ public class FindYubiKeysEnumerationBudgetTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public async Task MonitoredFindAllAsync_HungTransport_ThrowsInsteadOfReturningPartialScan(bool hangPcsc)
+    {
+        var pcsc = new PcscEnumerator();
+        var hid = new HidEnumerator();
+        var pending = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        if (hangPcsc)
+            pcsc.Pending = pending.Task.ContinueWith(_ => (IReadOnlyList<IPcscDevice>)[], TaskScheduler.Default);
+        else
+            hid.Pending = pending.Task.ContinueWith(_ => (IReadOnlyList<IHidInterface>)[], TaskScheduler.Default);
+
+        var finder = new FindYubiKeys(pcsc, hid, CreateSlot, enumerationBudget: TimeSpan.Zero);
+        IMonitoredDiscovery monitored = finder;
+        try
+        {
+            // A monitor diffs against its previous snapshot, so a partial scan would read as removals.
+            await Assert.ThrowsAsync<TimeoutException>(() => monitored.FindAllAsync(TestContext.Current.CancellationToken)
+                .WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken));
+
+            pending.SetResult();
+            pcsc.Pending = null;
+            hid.Pending = null;
+            var recovered = await monitored.FindAllAsync(TestContext.Current.CancellationToken);
+            Assert.Equal(2, recovered.Count);
+        }
+        finally
+        {
+            pending.TrySetResult();
+            finder.RetireReadScope();
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public async Task FindAllAsync_CancellationDuringHungEnumeration_ThrowsWithoutWaiting(bool hangPcsc)
     {
         var pcsc = new PcscEnumerator();

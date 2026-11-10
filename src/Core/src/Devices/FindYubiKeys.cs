@@ -104,9 +104,17 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     // Serializes discovery so two concurrent scans do not open connections to the same interface at once.
     private readonly SemaphoreSlim _scanLock = new(1, 1);
 
-    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType type = ConnectionType.All,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        FindAllCoreAsync(type, tolerateEnumerationTimeout: true, cancellationToken);
+
+    // One-shot callers prefer a partial answer now over none. A monitor must not publish a partial scan: with a
+    // previous snapshot to diff against, a stalled transport would surface as removals of every key on it.
+    private async Task<IReadOnlyList<IYubiKey>> FindAllCoreAsync(
+        ConnectionType type,
+        bool tolerateEnumerationTimeout,
+        CancellationToken cancellationToken)
     {
         if (type == ConnectionType.Unknown || _scope == ConnectionType.Unknown)
             return [];
@@ -118,7 +126,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
             lock (_evidenceLock)
                 evidence = _evidence;
 
-            var interfaces = await EnumerateInterfacesAsync(cancellationToken).ConfigureAwait(false);
+            var interfaces = await EnumerateInterfacesAsync(tolerateEnumerationTimeout, cancellationToken).ConfigureAwait(false);
             EvictAbsentIdentities(evidence, interfaces);
             foreach (var iface in interfaces.Where(iface => iface.IsUsb))
                 evidence.ReadScope.CoordinateUsbRead(iface.Device.InterfaceId, iface.Pid);
@@ -163,16 +171,18 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
         }
     }
 
-    private async Task<List<InterfaceCandidate>> EnumerateInterfacesAsync(CancellationToken cancellationToken)
+    private async Task<List<InterfaceCandidate>> EnumerateInterfacesAsync(
+        bool tolerateTimeout,
+        CancellationToken cancellationToken)
     {
         // The immutable finder scope bounds enumeration and evidence. The requested result filter still
         // applies only AFTER merging; it never changes this finder's cache/absence interpretation.
         // Both waits start together so the enumeration stage consumes at most one budget, not two.
         var pcscTask = findPcscService is { } pcsc
-            ? EnumerateBoundedAsync(pcsc.FindAllAsync, "PC/SC", cancellationToken)
+            ? EnumerateBoundedAsync(pcsc.FindAllAsync, "PC/SC", tolerateTimeout, cancellationToken)
             : Task.FromResult<IReadOnlyList<IPcscDevice>>([]);
         var hidTask = findHidService is { } hid
-            ? EnumerateBoundedAsync(hid.FindAllAsync, "HID", cancellationToken)
+            ? EnumerateBoundedAsync(hid.FindAllAsync, "HID", tolerateTimeout, cancellationToken)
             : Task.FromResult<IReadOnlyList<IHidInterface>>([]);
         await Task.WhenAll(pcscTask, hidTask).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
@@ -182,6 +192,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     private async Task<IReadOnlyList<T>> EnumerateBoundedAsync<T>(
         Func<CancellationToken, Task<IReadOnlyList<T>>> enumerate,
         string transport,
+        bool tolerateTimeout,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -195,7 +206,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
             _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
             throw;
         }
-        catch (TimeoutException)
+        catch (TimeoutException) when (tolerateTimeout)
         {
             _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
             cancellationToken.ThrowIfCancellationRequested();
@@ -203,6 +214,13 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
                 "{Transport} interface enumeration exceeded its {Budget} budget; continuing without its interfaces this scan.",
                 transport, _enumerationBudget);
             return [];
+        }
+        catch (TimeoutException)
+        {
+            _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
+            cancellationToken.ThrowIfCancellationRequested();
+            throw new TimeoutException(
+                $"{transport} interface enumeration exceeded its {_enumerationBudget} budget; the scan was not published.");
         }
     }
 
@@ -332,7 +350,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     }
 
     Task<IReadOnlyList<IYubiKey>> IMonitoredDiscovery.FindAllAsync(CancellationToken cancellationToken) =>
-        FindAllAsync(ConnectionType.All, cancellationToken);
+        FindAllCoreAsync(ConnectionType.All, tolerateEnumerationTimeout: false, cancellationToken);
 
     void IMonitoredDiscovery.InvalidateEvidence(ConnectionType transport)
     {

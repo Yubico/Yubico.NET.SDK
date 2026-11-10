@@ -23,11 +23,15 @@ internal interface IMonitoredDiscovery
     /// <param name="cancellationToken">Cancels the scan's wait.</param>
     /// <returns>The physical keys observed by the scan.</returns>
     /// <exception cref="OperationCanceledException">The scan was canceled.</exception>
+    /// <exception cref="TimeoutException">
+    /// A transport's interface enumeration exceeded its budget. The result would be partial, so nothing is returned
+    /// for the monitor to publish; the next trigger scans again.
+    /// </exception>
     Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken);
 
     /// <summary>Discards cached evidence and supersedes pending reads after transport activity.</summary>
     /// <param name="transport">The transport reporting activity, not an eviction scope.</param>
-    /// <remarks>May be called from listener threads. Does not reactivate retired discovery.</remarks>
+    /// <remarks>Called by the monitor's scan loop before the scan a hotplug trigger requests. Does not reactivate retired discovery.</remarks>
     void InvalidateEvidence(ConnectionType transport);
 
     /// <summary>Permanently retires discovery reads without releasing already-open native work.</summary>

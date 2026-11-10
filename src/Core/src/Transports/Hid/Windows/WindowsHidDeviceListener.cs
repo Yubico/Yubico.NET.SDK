@@ -23,7 +23,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 /// Windows implementation of HID device listener using CM_Register_Notification.
 /// </summary>
 /// <remarks>
-/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="HidDeviceListener.DeviceEvent"/>
+/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="HidDeviceListener.Changed"/>
 /// callback.
 /// </remarks>
 internal sealed class WindowsHidDeviceListener : HidDeviceListener
@@ -48,7 +48,7 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
 
     /// <summary>
     /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
-    /// after setting up the <see cref="HidDeviceListener.DeviceEvent"/> callback.
+    /// after setting up the <see cref="HidDeviceListener.Changed"/> callback.
     /// </summary>
     public WindowsHidDeviceListener()
     {

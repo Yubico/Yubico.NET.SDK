@@ -287,13 +287,14 @@ usable YubiKey object." Entry point is the **static** `YubiKeyManager` — no DI
 ```mermaid
 flowchart TD
     Start(["YubiKeyManager.Find…Async(interfaces=All)"])
+    Watch(["await foreach YubiKeyManager.WatchAsync()"])
     Create(["await YubiKeyManager.CreateMonitorAsync()"])
-    Owner["YubiKeyMonitor<br/><i>composition + initialize-run-dispose owner</i>"]
-    Repo["YubiKeyDeviceRepository<br/>membership + identity retention<br/>atomic commit / replay / failure / disposal"]
-    Mon["YubiKeyMonitorWorker<br/><i>listeners + one sequential<br/>scan / publication loop</i>"]
-    Hub["DeviceEventHub<br/><i>isolated bounded watcher buffers</i>"]
-    Views(["monitor.CurrentDevices: no-I/O snapshot<br/>monitor.WatchAsync: initial replay + ordered deltas"])
-    Find["FindYubiKeys<br/><i>independent per-call or per-monitor evidence</i>"]
+    Owner["YubiKeyMonitor<br/><i>one lifetime: listeners + one sequential scan loop</i>"]
+    Signals["HotplugSignals<br/><i>IDeviceChangeListener per transport → one rescan hint channel</i>"]
+    Sched["RescanScheduler<br/><i>initial · 200 ms quiet / 1 s cap · 5 s fallback</i>"]
+    Feed["DeviceChangeFeed<br/>snapshot + revision · SnapshotDiff · bounded buffer per subscriber"]
+    Views(["monitor.WatchAsync: DeviceAdded replay · SnapshotComplete · ordered changes"])
+    Find["FindYubiKeys<br/><i>independent per-call or per-monitor evidence, bounded by DiscoveryBudgets</i>"]
 
     FPcsc["IFindPcscDevices<br/>(PC/SC readers)"]
     FHid["IFindHidInterfaces<br/>(FIDO + OTP HID)"]
@@ -305,10 +306,12 @@ flowchart TD
     Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous"])
 
     Start -->|fresh scoped call| Find
-    Create -->|await initial publication| Owner
-    Owner -->|owns teardown| Repo
-    Owner -->|initialize once / drain loop| Mon
-    Mon -->|All| Find
+    Watch -->|private monitor per enumeration| Owner
+    Create -->|await first published scan| Owner
+    Owner --> Signals
+    Signals -->|hint| Sched
+    Sched -->|trigger| Owner
+    Owner -->|invalidate evidence on hotplug, then scan All| Find
     Find --> FPcsc
     Find --> FHid
     FPcsc --> Slot
@@ -316,19 +319,16 @@ flowchart TD
     Slot --> Merge
     Merge --> Flat
     Flat --> Result
-    Mon -->|await full publication| Repo
-    Repo -->|ordered delta enqueue| Hub
-    Repo -->|atomic snapshot + tail| Views
-    Hub -->|asynchronous deltas| Views
+    Owner -->|Apply(scan)| Feed
+    Feed -->|atomic snapshot + tail per subscriber| Views
 ```
 
-One-shot Find retires its read scope on exit. The worker borrows the repository; only the public owner
-tears it down. There is no manual rescan, restart mode, or monitor generation. The ingress lock orders
-listener invalidation against final finder
-retirement; the repository's short state boundary rejects late membership/event commits after disposal.
-The one ten-second loop-drain budget is not a native listener or total disposal timeout. Finder evidence
-epochs/read scopes and actual native admission/lease retention remain separate from the removed monitor
-generations. See [worker concurrency and shutdown](event-driven-device-discovery.md#single-lifetime-worker-and-shutdown).
+One-shot Find retires its read scope on exit. A monitor has one lifetime: create, run, dispose; there is no
+pause, restart or manual rescan. Disposal is sequential (stop listeners, cancel and await the loop, retire
+discovery, complete the feed) and waits for an in-flight scan to finish within its discovery budgets; no
+drain timeout exists. `YubiKeyManager.WatchAsync` owns a private monitor for one enumeration;
+`CreateMonitorAsync` returns one monitor to share across subscribers. See
+[event-driven device discovery](event-driven-device-discovery.md).
 
 ### Then: connecting (transport selection)
 
@@ -390,10 +390,10 @@ flowchart TD
   the caller's connection; only convenience entry points own the hidden connection they create.
 - **Transport selection is single-shot:** each applet selects one supported transport from its default order
   or explicit override. Held and platform errors propagate without trying another interface.
-- **Monitoring:** `await CreateMonitorAsync(ct)` returns an initialized owned monitor. Consume
-  `monitor.WatchAsync(ct)` for initial Added replay plus changes, or read `CurrentDevices` without I/O.
-  Dispose the monitor explicitly. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type.
-  Good "advanced" slide if time allows.
+- **Monitoring:** `await foreach (var change in YubiKeyManager.WatchAsync(ct))` is the one-line path:
+  `DeviceAdded` replay, `SnapshotComplete`, then ordered changes, with a private monitor disposed when the
+  enumeration ends. `await using var monitor = await CreateMonitorAsync(ct)` shares one monitor across
+  subscribers. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type. Good "advanced" slide if time allows.
 
 ---
 

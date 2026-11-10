@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using System.Runtime.ExceptionServices;
-using Yubico.YubiKit.Core.Transports;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -55,7 +54,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
 
     private YubiKeyMonitor(
         IMonitoredDiscovery discovery,
-        IReadOnlyList<(ConnectionType Transport, Func<IDeviceChangeListener> Create)> listeners,
+        IReadOnlyList<ListenerSource> listeners,
         TimeSpan interval,
         TimeProvider timeProvider)
     {
@@ -84,7 +83,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     internal static Task<YubiKeyMonitor> CreateAsync(CancellationToken cancellationToken) =>
         CreateAsync(
             FindYubiKeys.Create(),
-            [(ConnectionType.Hid, HidDeviceListener.Create), (ConnectionType.SmartCard, DesktopSmartCardDeviceListener.Create)],
+            [new(ConnectionType.Hid, HidDeviceListener.Create), new(ConnectionType.SmartCard, DesktopSmartCardDeviceListener.Create)],
             DefaultRescanInterval,
             TimeProvider.System,
             cancellationToken);
@@ -96,7 +95,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     /// </remarks>
     internal static async Task<YubiKeyMonitor> CreateAsync(
         IMonitoredDiscovery discovery,
-        IReadOnlyList<(ConnectionType Transport, Func<IDeviceChangeListener> Create)> listeners,
+        IReadOnlyList<ListenerSource> listeners,
         TimeSpan interval,
         TimeProvider timeProvider,
         CancellationToken cancellationToken)

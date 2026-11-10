@@ -31,7 +31,7 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
 
     public Task<YubiKeyMonitor> CreateAsync(CancellationToken cancellationToken) =>
         _creation = YubiKeyMonitor.CreateAsync(Finder,
-            [(ConnectionType.Hid, () => Hid), (ConnectionType.SmartCard, () => SmartCard)], Interval, Clock, cancellationToken);
+            [new(ConnectionType.Hid, () => Hid), new(ConnectionType.SmartCard, () => SmartCard)], Interval, Clock, cancellationToken);
 
     public async Task WaitForScanAsync(int count, CancellationToken cancellationToken)
     {

@@ -392,7 +392,7 @@ public class YubiKeyMonitorTests
         var finder = new OwnedMonitorFixture.ScriptedFinder();
         var hid = new OwnedMonitorFixture.FakeDeviceChangeListener();
         await using var monitor = await YubiKeyMonitor.CreateAsync(finder,
-            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => throw new IOException("unavailable"))],
+            [new(ConnectionType.Hid, () => hid), new(ConnectionType.SmartCard, () => throw new IOException("unavailable"))],
             TimeSpan.FromHours(1), new ObservedTimeProvider(), TestToken);
         Assert.True(hid.Started);
         Assert.Empty(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestToken));
@@ -660,7 +660,7 @@ public class YubiKeyMonitorTests
         var rig = new FindYubiKeysScopeTests.ScopeRig { PendingOpen = new(TaskCreationOptions.RunContinuationsAsynchronously) };
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestToken);
         var creation = YubiKeyMonitor.CreateAsync(rig.CreateFinder(ConnectionType.SmartCard),
-            [(ConnectionType.Hid, () => new OwnedMonitorFixture.FakeDeviceChangeListener())],
+            [new(ConnectionType.Hid, () => new OwnedMonitorFixture.FakeDeviceChangeListener())],
             TimeSpan.FromHours(1), new ObservedTimeProvider(), cancellation.Token);
         try
         {
@@ -701,7 +701,7 @@ public class YubiKeyMonitorTests
         using (await DiscoveryWorkerAdmissionCollection.SaturateAsync(TestToken))
         {
             await using var monitor = await YubiKeyMonitor.CreateAsync(finder,
-                [(ConnectionType.Hid, () => new OwnedMonitorFixture.FakeDeviceChangeListener())],
+                [new(ConnectionType.Hid, () => new OwnedMonitorFixture.FakeDeviceChangeListener())],
                 TimeSpan.FromHours(1), new ObservedTimeProvider(), TestToken);
             Assert.Equal(2, (await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestToken)).Count);
             await monitor.DisposeAsync();

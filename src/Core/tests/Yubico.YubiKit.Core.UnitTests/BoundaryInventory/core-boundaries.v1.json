@@ -127,7 +127,7 @@
       "path": "Devices/YubiKeyMonitor.cs", "reviewOwner": "Core maintainers", "rationale": "",
       "evidence": ["Devices/YubiKeyMonitor.cs: CreateAsync schedules the sole monitoring loop and awaits its initial publication; DisposeAsync stops listeners, cancels and awaits the loop without a drain timeout, retires discovery, and completes the feed."],
       "status": ["documented", "outstanding"],
-      "entries": ["CreateAsync#026F7F80ED7B#worker#Task.Run starts one sequential monitoring loop independently of the creation token; creation awaits its first publication. Discovery budgets bound native waits; disposal awaits the loop without abandoning it and does not prove native teardown has finished."]
+      "entries": ["CreateAsync#DB1AA1558398#worker#Task.Run starts one sequential monitoring loop independently of the creation token; creation awaits its first publication. Discovery budgets bound native waits; disposal awaits the loop without abandoning it and does not prove native teardown has finished."]
     },
     {
       "path": "Protocols/Fido/Hid/FidoHidConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",

@@ -61,7 +61,7 @@ public class FindPcscDevicesTests
         var clock = new ObservedTimeProvider();
         var interval = TimeSpan.FromHours(1);
         await using var monitor = await YubiKeyMonitor.CreateAsync(finder,
-            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)],
+            [new(ConnectionType.Hid, () => hid), new(ConnectionType.SmartCard, () => smartCard)],
             interval, clock, TestContext.Current.CancellationToken);
         var existingDevice = Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken));
         Assert.Equal(111, existingDevice.SerialNumber);

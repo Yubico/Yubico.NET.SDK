@@ -26,7 +26,7 @@ public class HotplugSignalsTests
         var hid = new Listener("hid", []);
         var smartCard = new Listener("card", []);
         using var signals = new HotplugSignals(
-            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)], NullLogger.Instance);
+            [new(ConnectionType.Hid, () => hid), new(ConnectionType.SmartCard, () => smartCard)], NullLogger.Instance);
 
         hid.Changed?.Invoke();
         Assert.Equal(ConnectionType.Hid, await signals.Signals.ReadAsync(TestContext.Current.CancellationToken));
@@ -39,8 +39,8 @@ public class HotplugSignalsTests
     {
         var listener = new Listener("card", []);
         using var signals = new HotplugSignals(
-            [(ConnectionType.Hid, () => throw new InvalidOperationException("unavailable")),
-                (ConnectionType.SmartCard, () => listener)], NullLogger.Instance);
+            [new(ConnectionType.Hid, () => throw new InvalidOperationException("unavailable")),
+                new(ConnectionType.SmartCard, () => listener)], NullLogger.Instance);
 
         listener.Changed?.Invoke();
         Assert.True(signals.Signals.TryRead(out var transport));
@@ -56,7 +56,7 @@ public class HotplugSignalsTests
         var failed = new Listener("failed", calls) { StartStatus = DeviceListenerStatus.Stopped, ThrowOnStart = throws };
         var healthy = new Listener("healthy", calls);
         using var signals = new HotplugSignals(
-            [(ConnectionType.Hid, () => failed), (ConnectionType.SmartCard, () => healthy)], NullLogger.Instance);
+            [new(ConnectionType.Hid, () => failed), new(ConnectionType.SmartCard, () => healthy)], NullLogger.Instance);
 
         Assert.Equal(["failed.start", "failed.clear", "failed.stop", "failed.dispose", "healthy.start"], calls);
         Assert.Null(failed.Changed);
@@ -69,7 +69,7 @@ public class HotplugSignalsTests
     public void RapidSignals_DropTheSecondWrite()
     {
         var listener = new Listener("hid", []);
-        using var signals = new HotplugSignals([(ConnectionType.Hid, () => listener)], NullLogger.Instance);
+        using var signals = new HotplugSignals([new(ConnectionType.Hid, () => listener)], NullLogger.Instance);
         listener.Changed?.Invoke();
         listener.Changed?.Invoke();
 
@@ -84,7 +84,7 @@ public class HotplugSignalsTests
         var hid = new Listener("hid", calls);
         var card = new Listener("card", calls);
         var signals = new HotplugSignals(
-            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => card)], NullLogger.Instance);
+            [new(ConnectionType.Hid, () => hid), new(ConnectionType.SmartCard, () => card)], NullLogger.Instance);
         var lateCallback = Assert.IsType<Action>(hid.Changed);
         calls.Clear();
 
@@ -105,7 +105,7 @@ public class HotplugSignalsTests
     {
         var calls = new List<string>();
         var listener = new Listener("hid", calls) { ThrowOnCleanup = true };
-        var signals = new HotplugSignals([(ConnectionType.Hid, () => listener)], NullLogger.Instance);
+        var signals = new HotplugSignals([new(ConnectionType.Hid, () => listener)], NullLogger.Instance);
         calls.Clear();
 
         signals.Dispose();

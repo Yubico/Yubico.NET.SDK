@@ -34,7 +34,7 @@ internal sealed class HotplugSignals : IDisposable
 
     /// <summary>Creates and starts each listener, logging failures without preventing other listeners from starting.</summary>
     internal HotplugSignals(
-        IReadOnlyList<(ConnectionType Transport, Func<IDeviceChangeListener> Create)> listeners,
+        IReadOnlyList<ListenerSource> listeners,
         ILogger logger)
     {
         _logger = logger;
@@ -109,3 +109,6 @@ internal sealed class HotplugSignals : IDisposable
         }
     }
 }
+
+/// <summary>Pairs a transport hint with its listener factory.</summary>
+internal readonly record struct ListenerSource(ConnectionType Transport, Func<IDeviceChangeListener> Create);

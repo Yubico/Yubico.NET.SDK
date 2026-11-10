@@ -14,8 +14,7 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Transports;
 
 namespace Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
@@ -28,15 +27,16 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
 
     public YubiKeyDeviceRepository Repository { get; } = new();
     public ScriptedFinder Finder { get; } = new();
-    public FakeHidListener Hid { get; } = new();
-    public FakeSmartCardListener SmartCard { get; } = new();
+    public FakeDeviceChangeListener Hid { get; } = new();
+    public FakeDeviceChangeListener SmartCard { get; } = new();
     public YubiKeyMonitorWorker Worker { get; }
     public Task Loop => Worker.MonitoringCompletionForTest;
     public Action? WaitReached { get; set; }
 
     public OwnedMonitorFixture()
     {
-        Worker = new(Repository, Finder, () => Hid, () => SmartCard, TimeSpan.FromMilliseconds(50));
+        Worker = new(Repository, Finder,
+            [(ConnectionType.Hid, () => Hid), (ConnectionType.SmartCard, () => SmartCard)], TimeSpan.FromMilliseconds(50));
         Worker.MonitoringWaitReachedForTest = () =>
         {
             Volatile.Write(ref _completedScans, Finder.ScanCount);
@@ -98,29 +98,15 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
         public void Retire() => OnRetire?.Invoke();
     }
 
-    internal sealed class FakeHidListener : HidDeviceListener
+    internal sealed class FakeDeviceChangeListener : IDeviceChangeListener
     {
-        public bool Started => Status == DeviceListenerStatus.Started;
-        public bool Disposed { get; private set; }
-        public override void Start() => Status = DeviceListenerStatus.Started;
-        public override void Stop() => Status = DeviceListenerStatus.Stopped;
-        public void Raise(HidDeviceRescanHint hint) => OnDeviceEvent(hint);
-        protected override void Dispose(bool disposing)
-        {
-            Disposed = true;
-            base.Dispose(disposing);
-        }
-    }
-
-    internal sealed class FakeSmartCardListener : ISmartCardDeviceListener
-    {
-        public Action? DeviceEvent { get; set; }
+        public Action? Changed { get; set; }
         public DeviceListenerStatus Status { get; private set; }
         public bool Started => Status == DeviceListenerStatus.Started;
         public bool Disposed { get; private set; }
         public void Start() => Status = DeviceListenerStatus.Started;
         public void Stop() => Status = DeviceListenerStatus.Stopped;
-        public void Raise() => DeviceEvent?.Invoke();
+        public void Raise() => Changed?.Invoke();
         public void Dispose() => Disposed = true;
     }
 }

@@ -14,8 +14,8 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports;
 using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
@@ -37,7 +37,7 @@ public class YubiKeyMonitorWorkerTests
             new FakeYubiKey("device-2", ConnectionType.HidFido)
         ]);
         var worker = new YubiKeyMonitorWorker(repository, findYubiKeys,
-            () => new FakeHidDeviceListener(), () => new FakeSmartCardDeviceListener());
+            [(ConnectionType.Hid, () => new FakeHidDeviceListener()), (ConnectionType.SmartCard, () => new FakeSmartCardDeviceListener())]);
 
         // Act
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
@@ -318,8 +318,8 @@ public class YubiKeyMonitorWorkerTests
         var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
-            () => hid,
-            () => throw new InvalidOperationException("Expected SmartCard factory failure."));
+            [(ConnectionType.Hid, () => hid),
+                (ConnectionType.SmartCard, () => throw new InvalidOperationException("Expected SmartCard factory failure."))]);
 
         // The SmartCard listener is unavailable, but HID starts, so monitoring
         // runs (degraded). Startup must not throw for an unavailable transport.
@@ -327,7 +327,7 @@ public class YubiKeyMonitorWorkerTests
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
         Assert.Equal(1, hid.StartCount);
-        Assert.NotNull(hid.DeviceEvent);
+        Assert.NotNull(hid.Changed);
         Assert.Equal(0, hid.StopCount);
         Assert.Equal(0, hid.DisposeCount);
 
@@ -345,19 +345,18 @@ public class YubiKeyMonitorWorkerTests
         var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
-            () => hid,
-            () => smartCard);
+            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)]);
 
         // HID cannot start, but SmartCard starts, so monitoring runs (degraded).
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
         // The failed HID listener is cleaned up individually.
-        Assert.Null(hid.DeviceEvent);
+        Assert.Null(hid.Changed);
         Assert.Equal(1, hid.StopCount);
         Assert.Equal(1, hid.DisposeCount);
         // SmartCard remains the active listener and is not torn down.
-        Assert.NotNull(smartCard.DeviceEvent);
+        Assert.NotNull(smartCard.Changed);
         Assert.Equal(1, smartCard.StartCount);
         Assert.Equal(0, smartCard.StopCount);
         Assert.Equal(0, smartCard.DisposeCount);
@@ -375,19 +374,18 @@ public class YubiKeyMonitorWorkerTests
         var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
-            () => hid,
-            () => smartCard);
+            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)]);
 
         // HID reports Error (does not throw); it is cleaned up while SmartCard
         // keeps monitoring alive.
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
-        Assert.Null(hid.DeviceEvent);
+        Assert.Null(hid.Changed);
         Assert.Equal(1, hid.StartCount);
         Assert.Equal(1, hid.StopCount);
         Assert.Equal(1, hid.DisposeCount);
-        Assert.NotNull(smartCard.DeviceEvent);
+        Assert.NotNull(smartCard.Changed);
         Assert.Equal(1, smartCard.StartCount);
         Assert.Equal(0, smartCard.StopCount);
         Assert.Equal(0, smartCard.DisposeCount);
@@ -405,19 +403,18 @@ public class YubiKeyMonitorWorkerTests
         var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
-            () => hid,
-            () => smartCard);
+            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)]);
 
         // SmartCard reports Error (the common no-PC/SC case); it is cleaned up
         // while HID keeps monitoring alive.
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
-        Assert.NotNull(hid.DeviceEvent);
+        Assert.NotNull(hid.Changed);
         Assert.Equal(1, hid.StartCount);
         Assert.Equal(0, hid.StopCount);
         Assert.Equal(0, hid.DisposeCount);
-        Assert.Null(smartCard.DeviceEvent);
+        Assert.Null(smartCard.Changed);
         Assert.Equal(1, smartCard.StartCount);
         Assert.Equal(1, smartCard.StopCount);
         Assert.Equal(1, smartCard.DisposeCount);
@@ -436,17 +433,16 @@ public class YubiKeyMonitorWorkerTests
         var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
-            () => hid,
-            () => failedSmartCard);
+            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => failedSmartCard)]);
 
         // SmartCard Start throws; HID starts, so monitoring runs (degraded).
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
         Assert.True(repository.HasData);
-        Assert.NotNull(hid.DeviceEvent);
+        Assert.NotNull(hid.Changed);
         Assert.Equal(1, hid.StartCount);
         // The failed SmartCard listener is cleaned up and detached from its signal.
-        Assert.Null(failedSmartCard.DeviceEvent);
+        Assert.Null(failedSmartCard.Changed);
         Assert.Equal(1, failedSmartCard.StopCount);
         Assert.Equal(1, failedSmartCard.DisposeCount);
 
@@ -473,16 +469,15 @@ public class YubiKeyMonitorWorkerTests
         var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
-            () => hid,
-            () => smartCard);
+            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)]);
 
         // Neither listener can start, but monitoring still runs on the interval
         // rescan alone. Startup must not throw.
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromMilliseconds(200));
         Assert.True(repository.HasData);
-        Assert.Null(hid.DeviceEvent);
-        Assert.Null(smartCard.DeviceEvent);
+        Assert.Null(hid.Changed);
+        Assert.Null(smartCard.Changed);
         Assert.Equal(1, hid.DisposeCount);
         Assert.Equal(1, smartCard.DisposeCount);
 
@@ -579,12 +574,12 @@ public class YubiKeyMonitorWorkerTests
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
 
         hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
+        await findYubiKeys.WaitForCompletedScanAsync(2, TestContext.Current.CancellationToken);
         Assert.Equal([ConnectionType.Hid], findYubiKeys.TransportActivity);
 
         smartCardListener.Raise();
+        await findYubiKeys.WaitForCompletedScanAsync(3, TestContext.Current.CancellationToken);
         Assert.Equal([ConnectionType.Hid, ConnectionType.SmartCard], findYubiKeys.TransportActivity);
-
-        await findYubiKeys.WaitForCompletedScanAsync(2, TestContext.Current.CancellationToken);
         Assert.Equal([ConnectionType.Hid, ConnectionType.SmartCard], findYubiKeys.ActivityAtLastScan);
     }
 
@@ -605,8 +600,7 @@ public class YubiKeyMonitorWorkerTests
         var worker = new YubiKeyMonitorWorker(
             repository,
             findYubiKeys,
-            () => hidListener,
-            () => smartCardListener,
+            [(ConnectionType.Hid, () => hidListener), (ConnectionType.SmartCard, () => smartCardListener)],
             shutdownTimeout);
         findYubiKeys.ObserveLoop(worker);
 
@@ -649,9 +643,9 @@ public class YubiKeyMonitorWorkerTests
         }
     }
 
-    private sealed class FakeSmartCardDeviceListener : ISmartCardDeviceListener
+    private sealed class FakeSmartCardDeviceListener : IDeviceChangeListener
     {
-        public Action? DeviceEvent { get; set; }
+        public Action? Changed { get; set; }
 
         public DeviceListenerStatus Status { get; private set; } = DeviceListenerStatus.Stopped;
 
@@ -680,12 +674,12 @@ public class YubiKeyMonitorWorkerTests
             Status = DeviceListenerStatus.Stopped;
         }
 
-        public void Raise() => DeviceEvent?.Invoke();
+        public void Raise() => Changed?.Invoke();
 
         public void Dispose()
         {
             DisposeCount++;
-            DeviceEvent = null;
+            Changed = null;
         }
     }
 

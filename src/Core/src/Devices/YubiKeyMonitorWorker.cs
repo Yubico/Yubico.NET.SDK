@@ -16,8 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
-using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Transports;
 
 namespace Yubico.YubiKit.Core.Devices;
 
@@ -47,15 +46,14 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     private readonly YubiKeyDeviceRepository _repository;
     private readonly IMonitoredDiscovery _discovery;
     private readonly TimeSpan _shutdownTimeout;
-    private readonly DeviceMonitorSignal _signal = new();
+    private readonly IReadOnlyList<(ConnectionType Transport, Func<IDeviceChangeListener> Create)> _listeners;
     private readonly TaskCompletionSource<Exception?> _initialScan = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     // Not disposed: an abandoned loop may still register with its token. This timer-less source and
     // its registrations remain owned by that work; linked wait sources are disposed by the loop itself.
     private readonly CancellationTokenSource _lifetime = new();
 
-    private HidDeviceListener? _hidListener;
-    private ISmartCardDeviceListener? _smartCardListener;
+    private HotplugSignals? _hotplugSignals;
     private Task? _monitoringTask;
     private volatile int _disposed;
 
@@ -78,18 +76,8 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(interval, TimeSpan.Zero, nameof(interval));
         Debug.Assert(_monitoringTask is null, "Owned construction initializes once, before public exposure.");
 
-        // Listeners are optional latency accelerators; discovery/repository diffs supply device truth.
-        // Store each started listener immediately so the owner can clean partial initialization.
-        _hidListener = TryStartHidListener();
-        _smartCardListener = TryStartSmartCardListener();
+        _hotplugSignals = new HotplugSignals(_listeners, Logger);
         _monitoringTask = Task.Run(() => MonitoringLoopAsync(interval, _lifetime.Token));
-
-        if (_hidListener is null && _smartCardListener is null)
-        {
-            Logger.LogWarning(
-                "No device-change listener could start; monitoring will rely on the {Interval} interval rescan only.",
-                interval);
-        }
 
         Logger.LogInformation("Device monitoring started with interval {Interval}", interval);
 
@@ -104,24 +92,18 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     internal YubiKeyMonitorWorker(
         YubiKeyDeviceRepository repository,
         IMonitoredDiscovery discovery,
-        Func<HidDeviceListener> hidListenerFactory,
-        Func<ISmartCardDeviceListener> smartCardListenerFactory,
+        IReadOnlyList<(ConnectionType Transport, Func<IDeviceChangeListener> Create)> listeners,
         TimeSpan? shutdownTimeout = null)
     {
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(discovery);
-        ArgumentNullException.ThrowIfNull(hidListenerFactory);
-        ArgumentNullException.ThrowIfNull(smartCardListenerFactory);
+        ArgumentNullException.ThrowIfNull(listeners);
 
         _repository = repository;
         _discovery = discovery;
         _shutdownTimeout = shutdownTimeout ?? DefaultShutdownTimeout;
-        HidListenerFactory = hidListenerFactory;
-        SmartCardListenerFactory = smartCardListenerFactory;
+        _listeners = listeners;
     }
-
-    private Func<HidDeviceListener> HidListenerFactory { get; }
-    private Func<ISmartCardDeviceListener> SmartCardListenerFactory { get; }
 
     private async Task ScanAndPublishAsync(CancellationToken cancellationToken)
     {
@@ -151,58 +133,6 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         }
     }
 
-    private HidDeviceListener? TryStartHidListener()
-    {
-        HidDeviceListener? listener = null;
-        try
-        {
-            listener = HidListenerFactory();
-            listener.DeviceEvent = SignalHidEvent;
-            listener.Start();
-            if (listener.Status == DeviceListenerStatus.Started)
-                return listener;
-
-            Logger.LogWarning(
-                "HID device-change listener did not start (status: {Status}); HID changes will be detected on the interval rescan",
-                listener.Status);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(
-                ex,
-                "HID device-change listener failed to start; HID changes will be detected on the interval rescan");
-        }
-
-        CleanupListeners(listener, smartCardListener: null);
-        return null;
-    }
-
-    private ISmartCardDeviceListener? TryStartSmartCardListener()
-    {
-        ISmartCardDeviceListener? listener = null;
-        try
-        {
-            listener = SmartCardListenerFactory();
-            listener.DeviceEvent = () => SignalTransportEvent(ConnectionType.SmartCard);
-            listener.Start();
-            if (listener.Status == DeviceListenerStatus.Started)
-                return listener;
-
-            Logger.LogWarning(
-                "SmartCard device-change listener did not start (status: {Status}); SmartCard changes will be detected on the interval rescan",
-                listener.Status);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(
-                ex,
-                "SmartCard device-change listener failed to start; SmartCard changes will be detected on the interval rescan");
-        }
-
-        CleanupListeners(hidListener: null, listener);
-        return null;
-    }
-
     private async Task MonitoringLoopAsync(TimeSpan interval, CancellationToken cancellationToken)
     {
         try
@@ -224,7 +154,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
                 if (trigger == DeviceMonitorWaitResult.Completed)
                     break;
 
-                _ = _signal.TryConsume();
+                ConsumeSignal();
                 if (!await WaitForDebounceQuietPeriodAsync(cancellationToken).ConfigureAwait(false))
                     break;
 
@@ -305,7 +235,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
             if (trigger == DeviceMonitorWaitResult.Completed)
                 return false;
 
-            _ = _signal.TryConsume();
+            ConsumeSignal();
         }
     }
 
@@ -317,7 +247,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         using var readCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         var timeoutTask = Task.Delay(timeout, timeoutCts.Token);
-        var readTask = _signal.WaitToReadAsync(readCts.Token).AsTask();
+        var readTask = Signals.WaitToReadAsync(readCts.Token).AsTask();
         var completedTask = await Task.WhenAny(timeoutTask, readTask).ConfigureAwait(false);
 
         if (completedTask == timeoutTask)
@@ -347,23 +277,19 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         }
     }
 
-    private void SignalHidEvent(HidDeviceRescanHint hint)
-    {
-        Logger.LogTrace(
-            "Received HID rescan hint: {Kind}, {PlatformDeviceId}, {DevicePath}",
-            hint.ChangeKind,
-            hint.PlatformDeviceId,
-            hint.DevicePath);
-        SignalTransportEvent(ConnectionType.Hid);
-    }
+    private ChannelReader<ConnectionType> Signals =>
+        (_hotplugSignals ?? throw new InvalidOperationException("Monitoring is not initialized.")).Signals;
 
-    private void SignalTransportEvent(ConnectionType transport)
+    private void ConsumeSignal()
     {
+        if (!Signals.TryRead(out var transport))
+            return;
+
         if (_disposed == 1)
             return;
 
+        // Invalidate at signal consumption; slices 5/6 finalize placement with scheduling.
         _discovery.InvalidateEvidence(transport);
-        _ = _signal.TrySignal();
     }
 
     private enum DeviceMonitorWaitResult
@@ -373,56 +299,13 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         Completed
     }
 
-    private void TeardownListeners()
-    {
-        var hidListener = _hidListener;
-        var smartCardListener = _smartCardListener;
-        _hidListener = null;
-        _smartCardListener = null;
-        CleanupListeners(hidListener, smartCardListener);
-        Logger.LogDebug("Device listeners torn down");
-    }
-
-    private static void CleanupListeners(
-        HidDeviceListener? hidListener,
-        ISmartCardDeviceListener? smartCardListener)
-    {
-        if (hidListener is not null)
-            BestEffort(() => hidListener.DeviceEvent = null, "clear HID listener callback");
-        if (smartCardListener is not null)
-            BestEffort(() => smartCardListener.DeviceEvent = null, "clear SmartCard listener callback");
-
-        if (hidListener is not null)
-            BestEffort(hidListener.Stop, "stop HID listener");
-        if (smartCardListener is not null)
-            BestEffort(smartCardListener.Stop, "stop SmartCard listener");
-
-        if (hidListener is not null)
-            BestEffort(hidListener.Dispose, "dispose HID listener");
-        if (smartCardListener is not null)
-            BestEffort(smartCardListener.Dispose, "dispose SmartCard listener");
-    }
-
-    private static void BestEffort(Action cleanup, string operation)
-    {
-        try
-        {
-            cleanup();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Failed to {CleanupOperation} during monitor teardown", operation);
-        }
-    }
-
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) == 1)
             return;
 
         _lifetime.Cancel();
-        _signal.Complete();
-        TeardownListeners();
+        _hotplugSignals?.Dispose();
 
         if (_monitoringTask is { } loop)
         {
@@ -443,27 +326,4 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         Logger.LogDebug("YubiKeyMonitorWorker disposed");
     }
 
-    /// <summary>
-    ///     Capacity-one occurrence signal for monitor wake-ups. Listener payloads are logged at ingress and are
-    ///     intentionally not queued because the consumer only needs to know that at least one rescan is pending.
-    /// </summary>
-    private sealed class DeviceMonitorSignal
-    {
-        private readonly Channel<bool> _channel = Channel.CreateBounded<bool>(
-            new BoundedChannelOptions(1)
-            {
-                SingleReader = true,
-                SingleWriter = false,
-                AllowSynchronousContinuations = false,
-                FullMode = BoundedChannelFullMode.DropWrite
-            });
-        public bool TrySignal() => _channel.Writer.TryWrite(true);
-
-        public ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken) =>
-            _channel.Reader.WaitToReadAsync(cancellationToken);
-
-        public bool TryConsume() => _channel.Reader.TryRead(out _);
-
-        public void Complete() => _channel.Writer.TryComplete();
-    }
 }

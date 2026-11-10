@@ -88,6 +88,14 @@ initial, listener-triggered, and five-second fallback scans sequentially. There 
 stop/restart mode: dispose the monitor and create a new one to recover from terminal failure. There is no
 process-global monitoring lifetime or device cache.
 
+Transport listeners share `IDeviceChangeListener`: replace the former smart-card-specific interface with that
+contract and replace either listener's `DeviceEvent` callback with payload-less `Changed`. Set the
+callback before `Start()`; do not call `Stop()` or `Dispose()` inside it. A callback is only a rescan
+hint, not device truth. HID hint details are internal Trace diagnostics. The monitor's internal
+`HotplugSignals` starts listeners independently, tolerates partial failure, and coalesces transport
+hints in a capacity-one drop-write channel; the scan loop invalidates discovery evidence when it
+consumes a hint.
+
 Share one host-owned monitor between long-lived components rather than letting each component take over
 tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a
 monitor for selection, but must explicitly read Management for current configuration.

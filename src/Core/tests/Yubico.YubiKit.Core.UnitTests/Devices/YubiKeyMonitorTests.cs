@@ -15,7 +15,6 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
@@ -432,7 +431,8 @@ public class YubiKeyMonitorTests
         var repository = new YubiKeyDeviceRepository();
         var worker = new YubiKeyMonitorWorker(
             repository, rig.CreateFinder(ConnectionType.All),
-            () => new OwnedMonitorFixture.FakeHidListener(), () => new OwnedMonitorFixture.FakeSmartCardListener(), TimeSpan.FromMilliseconds(50));
+            [(ConnectionType.Hid, () => new OwnedMonitorFixture.FakeDeviceChangeListener()),
+                (ConnectionType.SmartCard, () => new OwnedMonitorFixture.FakeDeviceChangeListener())], TimeSpan.FromMilliseconds(50));
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker, TestToken, TimeSpan.FromHours(1));
         var snapshot = monitor.CurrentDevices;
         Assert.Equal(2, snapshot.Count);
@@ -777,7 +777,8 @@ public class YubiKeyMonitorTests
         var repository = new YubiKeyDeviceRepository();
         var worker = new YubiKeyMonitorWorker(
             repository, rig.CreateFinder(ConnectionType.SmartCard),
-            () => new OwnedMonitorFixture.FakeHidListener(), () => new OwnedMonitorFixture.FakeSmartCardListener(), TimeSpan.FromMilliseconds(50));
+            [(ConnectionType.Hid, () => new OwnedMonitorFixture.FakeDeviceChangeListener()),
+                (ConnectionType.SmartCard, () => new OwnedMonitorFixture.FakeDeviceChangeListener())], TimeSpan.FromMilliseconds(50));
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestToken);
         var creation = YubiKeyMonitor.CreateAsync(repository, worker, cancellation.Token, TimeSpan.FromHours(1));
         var loop = worker.MonitoringCompletionForTest;
@@ -826,10 +827,10 @@ public class YubiKeyMonitorTests
         var rig = new FindYubiKeysScopeTests.ScopeRig { IncludeSecondKey = true };
         var finder = rig.CreateFinder(ConnectionType.SmartCard);
         var repository = new YubiKeyDeviceRepository();
-        var hid = new OwnedMonitorFixture.FakeHidListener();
-        var smartCard = new OwnedMonitorFixture.FakeSmartCardListener();
+        var hid = new OwnedMonitorFixture.FakeDeviceChangeListener();
+        var smartCard = new OwnedMonitorFixture.FakeDeviceChangeListener();
         var worker = new YubiKeyMonitorWorker(
-            repository, finder, () => hid, () => smartCard, TimeSpan.FromMilliseconds(50));
+            repository, finder, [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)], TimeSpan.FromMilliseconds(50));
         try
         {
             for (var i = 0; i < DiscoveryWorkerAdmission.MaximumConcurrentWorkers; i++)
@@ -840,13 +841,13 @@ public class YubiKeyMonitorTests
 
             await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker, TestToken, TimeSpan.FromHours(1));
             Assert.Equal(2, monitor.CurrentDevices.Count);
-            var hidCallback = hid.DeviceEvent;
-            var pcscCallback = smartCard.DeviceEvent;
+            var hidCallback = hid.Changed;
+            var pcscCallback = smartCard.Changed;
             Assert.NotNull(hidCallback);
             Assert.NotNull(pcscCallback);
             await monitor.DisposeAsync();
             // Captured callbacks must not renew the built-in finder's finally retired read scope.
-            hidCallback(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
+            hidCallback();
             pcscCallback();
 
             // A live scope would join its queued reads and wait the 2s read budget. A retired scope
@@ -1086,14 +1087,14 @@ public class YubiKeyMonitorTests
         await using var fixture = new OwnedMonitorFixture();
         var monitor = await fixture.CreateAsync(TestToken);
         await fixture.WaitForScanAsync(1, TestToken);
-        var hidCallback = fixture.Hid.DeviceEvent;
-        var pcscCallback = fixture.SmartCard.DeviceEvent;
+        var hidCallback = fixture.Hid.Changed;
+        var pcscCallback = fixture.SmartCard.Changed;
         Assert.NotNull(hidCallback);
         Assert.NotNull(pcscCallback);
         void Callback()
         {
             if (hid)
-                hidCallback(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));
+                hidCallback();
             else
                 pcscCallback();
         }
@@ -1138,8 +1139,8 @@ public class YubiKeyMonitorTests
             await callback.WaitAsync(Bound, TestToken);
             await disposal.WaitAsync(Bound, TestToken);
             await fixture.Loop.WaitAsync(Bound, TestToken);
-            Assert.Null(fixture.Hid.DeviceEvent);
-            Assert.Null(fixture.SmartCard.DeviceEvent);
+            Assert.Null(fixture.Hid.Changed);
+            Assert.Null(fixture.SmartCard.Changed);
             var scans = fixture.Finder.ScanCount;
             Assert.Equal(1, fixture.Finder.ActivityCount);
             Callback();

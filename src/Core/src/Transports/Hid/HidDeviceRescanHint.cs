@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid;
 /// <param name="ChangeKind">The platform-reported HID topology change.</param>
 /// <param name="PlatformDeviceId">A platform-specific diagnostic identifier when available.</param>
 /// <param name="DevicePath">A platform-specific path when available.</param>
-public sealed record HidDeviceRescanHint(
+internal sealed record HidDeviceRescanHint(
     HidDeviceChangeKind ChangeKind,
     string? PlatformDeviceId = null,
     string? DevicePath = null)

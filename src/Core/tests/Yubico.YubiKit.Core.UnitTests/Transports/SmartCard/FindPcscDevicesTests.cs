@@ -57,9 +57,10 @@ public class FindPcscDevicesTests
             new FindPcscDevices(NullLogger<FindPcscDevices>.Instance, api),
             new EmptyHidFinder(),
             device => new MetadataSlot(rig, device.ReaderName), topologyResolver: rig);
-        var hid = new OwnedMonitorFixture.FakeHidListener();
-        var smartCard = new OwnedMonitorFixture.FakeSmartCardListener();
-        var worker = new YubiKeyMonitorWorker(repository, finder, () => hid, () => smartCard);
+        var hid = new OwnedMonitorFixture.FakeDeviceChangeListener();
+        var smartCard = new OwnedMonitorFixture.FakeDeviceChangeListener();
+        var worker = new YubiKeyMonitorWorker(repository, finder,
+            [(ConnectionType.Hid, () => hid), (ConnectionType.SmartCard, () => smartCard)]);
         var completedScans = 0;
         worker.MonitoringWaitReachedForTest = () => Interlocked.Increment(ref completedScans);
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,

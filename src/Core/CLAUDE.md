@@ -530,10 +530,14 @@ Contracts worth knowing before editing:
 
 ### Listener Event Semantics
 
-HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diagnostic only and are never public physical-device truth. `YubiKeyMonitor.WatchAsync` must remain repository-diffed output after a rescan. Unknown HID removals still trigger a rescan fallback rather than being suppressed, because the removed interface may be the only native signal for a physical-device diff.
+Transport listeners implement `IDeviceChangeListener` with payload-less `Changed` callbacks. Set the
+callback before `Start()` and never stop or dispose inside it. HID hint details stay internal to the
+listener's Trace logging; callbacks are diagnostic rescan hints, never physical-device truth.
+`YubiKeyMonitor.WatchAsync` remains repository-diffed output after a rescan. Unknown HID removals still
+trigger a rescan rather than being suppressed: they may be the only native signal for a device diff.
 
-`YubiKeyMonitorWorker` logs hint details at ingress and carries only a private capacity-one occurrence
-signal into its single-reader loop; payloads are not queued. Each listener starts independently. A listener
+`HotplugSignals` owns listener creation and teardown and carries transport hints in a capacity-one
+drop-write channel into the worker's single-reader loop. Each listener starts independently. A listener
 that throws or reports a post-`Start()` status other than `Started` is logged, stopped/disposed, and skipped,
 without aborting the other listener or loop. With no listeners the loop relies on its interval fallback.
 These are optional latency accelerators; discovery plus repository diffs supply device truth.
@@ -547,9 +551,10 @@ this failure propagates and tears down the partial monitor; later scans retain t
 
 `InitializeAsync` tolerates listener unavailability but the public factory still requires the first
 successful scan/publication. Hints during initialization remain pending for an ordered follow-up scan.
-Under the worker's only lock, `_ingressLock`, a callback checks retirement, globally invalidates finder
-evidence, then signals work. Final finder read-scope retirement shares that lock: an admitted callback
-finishes before retirement, while a captured late callback cannot install fresh evidence or queue work.
+Under the worker's only lock, `_ingressLock`, consuming a signal checks retirement and globally
+invalidates finder evidence. Final finder read-scope retirement shares that lock: admitted invalidation
+finishes before retirement, while a captured late callback cannot install fresh evidence. Disposing
+`HotplugSignals` clears all callbacks, stops all listeners, disposes all listeners, then completes its channel.
 Lock order is ingress → finder evidence → read-scope gate. Read-scope retirement cancels internal queued
 admission waits; those callbacks do not wait for the worker or re-enter ingress. Worker-token cancellation,
 logging, listener Start/Stop/Dispose, discovery, diffing, and awaits stay outside ingress. Do not describe

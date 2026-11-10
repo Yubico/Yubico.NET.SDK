@@ -608,29 +608,13 @@ Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.UsagePage.get -> ushort
 Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.UsagePage.init -> void
 Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.VendorId.get -> short
 Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.VendorId.init -> void
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind.Added = 1 -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind.Removed = 2 -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind.Unknown = 0 -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
 Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent.get -> System.Action<Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint!>?
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent.set -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Changed.get -> System.Action?
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Changed.set -> void
 Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Dispose() -> void
 Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.HidDeviceListener() -> void
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.OnDeviceEvent(Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint! hint) -> void
 Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Status.get -> Yubico.YubiKit.Core.DeviceListenerStatus
 Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Status.set -> void
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.<Clone>$() -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint!
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.ChangeKind.get -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.ChangeKind.init -> void
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.Deconstruct(out Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind ChangeKind, out string? PlatformDeviceId, out string? DevicePath) -> void
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.DevicePath.get -> string?
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.DevicePath.init -> void
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.Equals(Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? other) -> bool
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.HidDeviceRescanHint(Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind ChangeKind, string? PlatformDeviceId = null, string? DevicePath = null) -> void
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.PlatformDeviceId.get -> string?
-Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.PlatformDeviceId.init -> void
 Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier
 Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
 Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType.Fido = 1 -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
@@ -675,9 +659,15 @@ Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.es_US = 6 -> Yubico.Y
 Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.fr_FR = 4 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
 Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.it_IT = 5 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
 Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.sv_SE = 7 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.IDeviceChangeListener
+Yubico.YubiKit.Core.Transports.IDeviceChangeListener.Changed.get -> System.Action?
+Yubico.YubiKit.Core.Transports.IDeviceChangeListener.Changed.set -> void
+Yubico.YubiKit.Core.Transports.IDeviceChangeListener.Start() -> void
+Yubico.YubiKit.Core.Transports.IDeviceChangeListener.Status.get -> Yubico.YubiKit.Core.DeviceListenerStatus
+Yubico.YubiKit.Core.Transports.IDeviceChangeListener.Stop() -> void
 Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener
-Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.DeviceEvent.get -> System.Action?
-Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.DeviceEvent.set -> void
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Changed.get -> System.Action?
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Changed.set -> void
 Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Dispose() -> void
 Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Start() -> void
 Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Status.get -> Yubico.YubiKit.Core.DeviceListenerStatus
@@ -698,12 +688,6 @@ Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.TransmitAndReceive
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.Transport.get -> Yubico.YubiKit.Core.Transport
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnectionFactory
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnectionFactory.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice! smartCardDevice, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection!>!
-Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener
-Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.DeviceEvent.get -> System.Action?
-Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.DeviceEvent.set -> void
-Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.Start() -> void
-Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.Status.get -> Yubico.YubiKit.Core.DeviceListenerStatus
-Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.Stop() -> void
 Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice
 Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice.Atr.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset?
 Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice.Atr.init -> void
@@ -915,9 +899,6 @@ override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.ToString()
 override Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.Equals(object? obj) -> bool
 override Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.GetHashCode() -> int
 override Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.ToString() -> string!
-override Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.Equals(object? obj) -> bool
-override Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.GetHashCode() -> int
-override Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.ToString() -> string!
 override Yubico.YubiKit.Core.Utilities.Tlv.ToString() -> string!
 override sealed Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? other) -> bool
 override sealed Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? other) -> bool
@@ -1060,9 +1041,6 @@ static Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces.Create(Microsoft.Ext
 static Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.operator !=(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? left, Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? right) -> bool
 static Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.operator ==(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? left, Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? right) -> bool
 static Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Create() -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener!
-static Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.Unknown.get -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint!
-static Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.operator !=(Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? left, Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? right) -> bool
-static Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.operator ==(Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? left, Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? right) -> bool
 static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.Classify(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo! descriptorInfo) -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
 static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.GetReportType(Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType interfaceType) -> Yubico.YubiKit.Core.Transports.Hid.HidReportType
 static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.IsSupported(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo! descriptorInfo) -> bool

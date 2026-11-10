@@ -88,7 +88,7 @@ public class SmartCardDeviceListenerIntegrationTests
 
         try
         {
-            listener.DeviceEvent = () => Interlocked.Increment(ref eventCount);
+            listener.Changed = () => Interlocked.Increment(ref eventCount);
             listener.Start();
 
             if (listener.Status != DeviceListenerStatus.Started)

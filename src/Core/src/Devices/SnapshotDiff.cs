@@ -22,31 +22,34 @@ internal static class SnapshotDiff
     internal static (Dictionary<string, IYubiKey> Next, List<DeviceChange> Changes) Apply(
         Dictionary<string, IYubiKey> current, IEnumerable<IYubiKey> observed, long revision)
     {
-        var next = new Dictionary<string, IYubiKey>();
+        var observedByKey = new Dictionary<string, IYubiKey>();
         foreach (var device in observed)
-            next[YubiKeyDevice.PhysicalIdentityKeyFor(device)] = device;
+            observedByKey[YubiKeyDevice.PhysicalIdentityKeyFor(device)] = device;
 
+        var next = new Dictionary<string, IYubiKey>(observedByKey.Count);
         var removals = new List<DeviceChange>();
         var additions = new List<DeviceChange>();
         var updates = new List<DeviceChange>();
         foreach (var (key, existing) in current)
         {
-            if (!next.ContainsKey(key))
+            if (!observedByKey.ContainsKey(key))
                 removals.Add(new DeviceRemoved(revision, existing));
         }
 
         // DeviceId describes the discovery evidence tier, not physical identity. Retain the published
         // object across tier changes so later removal still correlates with the original arrival.
-        foreach (var (key, updated) in next)
+        foreach (var (key, updated) in observedByKey)
         {
             if (!current.TryGetValue(key, out var existing))
             {
+                next[key] = updated;
                 additions.Add(new DeviceAdded(revision, updated));
                 continue;
             }
 
             if (RequiresReplacement(existing, updated))
             {
+                next[key] = updated;
                 removals.Add(new DeviceRemoved(revision, existing));
                 additions.Add(new DeviceAdded(revision, updated));
                 continue;

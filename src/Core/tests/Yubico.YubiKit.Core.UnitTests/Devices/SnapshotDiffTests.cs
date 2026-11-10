@@ -47,6 +47,22 @@ public class SnapshotDiffTests
         Assert.Same(replaced, current[YubiKeyDevice.PhysicalIdentityKeyFor(replaced)]);
     }
 
+    [Fact]
+    public void Apply_DuplicatePhysicalIdentity_UsesLastObservedObject()
+    {
+        var first = Published("first-tier", "a", default(DeviceInfo) with { SerialNumber = 103 });
+        var last = Published("last-tier", "a", default(DeviceInfo) with { SerialNumber = 125 });
+
+        var (next, changes) = SnapshotDiff.Apply([], [first, last], 1);
+
+        var entry = Assert.Single(next);
+        Assert.Equal(last.PhysicalIdentityKey, entry.Key);
+        Assert.Same(last, entry.Value);
+        var added = Assert.IsType<DeviceAdded>(Assert.Single(changes));
+        Assert.Same(last, added.Device);
+        Assert.Equal(1, added.Revision);
+    }
+
     [Theory]
     [InlineData(null, 103)]
     [InlineData(103, null)]

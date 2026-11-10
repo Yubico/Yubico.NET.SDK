@@ -188,7 +188,8 @@ Queued reads retire; already-open reads keep actual admission/leases until nativ
 `DisposeAsync_RetiresQueuedBuiltInFinderReadsBeforeWorkerCapacityReturns`, and
 `DisposeAsync_WaitsForScanExit_ThenRetiresAndCompletesFeed_AndIsIdempotent` pin these boundaries.
 Previously published history may drain after disposal; later subscriptions end empty. Concurrent watches
-are supported, but disposal must not overlap other members. See [monitor lifecycle](event-driven-device-discovery.md#monitor-lifecycle-and-disposal).
+are supported and disposal may overlap them, ending each normally; disposal must not be called concurrently
+with itself. See [monitor lifecycle](event-driven-device-discovery.md#monitor-lifecycle-and-disposal).
 
 ## Device identity: what `DeviceId` does and does not promise
 

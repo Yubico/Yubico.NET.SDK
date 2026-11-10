@@ -141,8 +141,10 @@ Disposal is idempotent and strictly sequential:
 There is no managed-loop abandonment or disposal timeout. In-flight scan waits are bounded by the
 discovery budgets; listener cleanup and total disposal are not a hard wall-clock promise. No producer
 can publish after feed completion because the loop has already ended. Caller-owned connections and
-sessions are not disposed. Concurrent `WatchAsync` enumerations are supported; `DisposeAsync` must not
-overlap other members. Applications stop/join consumers before disposing their shared monitor.
+sessions are not disposed. Concurrent `WatchAsync` enumerations are supported, and `DisposeAsync` may
+overlap them: it ends each active enumeration normally. `DisposeAsync` must not be called concurrently
+with itself. Applications that want consumers to observe a final state before shutdown do so on their
+own terms; disposal does not wait for consumers.
 
 ### Finder evidence epochs are not monitor generations
 

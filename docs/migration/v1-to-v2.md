@@ -284,8 +284,9 @@ Use the replaying stream to initialize a UI without a snapshot/subscription gap.
 consumer's projection and re-enumerate the same monitor, not an unrelated Find/event pair. Disposal lets
 already-published history drain and new watchers complete empty. It sequentially stops listeners,
 cancels/awaits the loop, retires discovery, and completes the feed, with no disposal timeout. Discovery
-waits are bounded by discovery budgets, not a hard wall-clock limit. Disposal must not overlap other
-monitor members and does not dispose caller-owned connections/sessions. Use Management for live configuration.
+waits are bounded by discovery budgets, not a hard wall-clock limit. Disposal may overlap active
+`WatchAsync` enumerations (it ends them normally) but must not be called concurrently with itself, and it
+does not dispose caller-owned connections/sessions. Use Management for live configuration.
 
 ### Device Info
 

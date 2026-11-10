@@ -96,8 +96,12 @@ public class FindYubiKeysEnumerationBudgetTests
         try
         {
             // A monitor diffs against its previous snapshot, so a partial scan would read as removals.
-            await Assert.ThrowsAsync<TimeoutException>(() => monitored.FindAllAsync(TestContext.Current.CancellationToken)
-                .WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken));
+            // The watchdog sits outside the assertion so only discovery's own budget can satisfy it.
+            var scan = monitored.FindAllAsync(TestContext.Current.CancellationToken);
+            var completed = await Task.WhenAny(scan, Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken));
+            Assert.Same(scan, completed);
+            var timeout = await Assert.ThrowsAsync<TimeoutException>(() => scan);
+            Assert.Contains("not published", timeout.Message, StringComparison.Ordinal);
 
             pending.SetResult();
             pcsc.Pending = null;

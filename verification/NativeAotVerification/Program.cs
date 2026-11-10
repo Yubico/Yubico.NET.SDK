@@ -254,8 +254,11 @@ internal static class MonitorVerification
         // Allow one additional polling interval before inspecting the event snapshot.
         Thread.Sleep(TimeSpan.FromSeconds(6));
 
+        // Updated entries are logged and compared across subscribers, but a late metadata read after an
+        // insertion is not a membership change and must not fail an insertion/removal step.
         var after = reference.Snapshot();
-        var delta = after.Count - before;
+        var membership = after.Skip(before).Where(e => !e.StartsWith("Updated|", StringComparison.Ordinal)).ToList();
+        var delta = membership.Count;
 
         if (expected < 0)
         {
@@ -280,7 +283,7 @@ internal static class MonitorVerification
 
         if (expectedAction is { } action && delta > 0)
         {
-            var last = after[^1];
+            var last = membership[^1];
             if (!last.StartsWith($"{action}|", StringComparison.Ordinal))
             {
                 var message = $"step {number}: expected a {action} event, last was '{last}'";

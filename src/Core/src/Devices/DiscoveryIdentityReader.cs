@@ -22,9 +22,9 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 /// <remarks>
 ///     This opens a short-lived connection over the interface and reads device info via the Core-owned
-///     <see cref="ProtocolDeviceInfo" />, with a hard per-attempt wall-clock budget so a card that is busy
+///     <see cref="DiscoveryDeviceInfoReader" />, with a hard per-attempt wall-clock budget so a card that is busy
 ///     with a long applet operation (e.g. RSA key generation) cannot stall the scan — the attempt is
-///     abandoned, not aborted (see <see cref="ProtocolDeviceInfo.ReadBoundedAsync" />). It retries transient
+///     abandoned, not aborted (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />). It retries transient
 ///     PC/SC failures (e.g. sharing violations) because, unlike the metadata read, a correct serial here is
 ///     required to tell two same-model keys apart; a budget timeout is NOT retried because it indicates a
 ///     busy card, and retrying would only extend the stall. Any failure is swallowed and reported as
@@ -40,7 +40,7 @@ internal static class DiscoveryIdentityReader
         ConnectionType connection,
         ILogger logger,
         CancellationToken cancellationToken,
-        ProtocolDeviceInfo.ReadScope? scope = null)
+        DiscoveryReadScope? scope = null)
     {
         if (DeviceConnectionRegistry.IsInUse(device.InterfaceId))
         {
@@ -55,7 +55,7 @@ internal static class DiscoveryIdentityReader
         {
             try
             {
-                return await ProtocolDeviceInfo
+                return await DiscoveryDeviceInfoReader
                     .ReadSlotBoundedAsync(
                         device,
                         connection,

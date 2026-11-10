@@ -55,7 +55,7 @@ internal static class PcscCleanupFailureProbe
             : new SmartCardConnectionFactory(api);
         var slot = new PcscConnectionSlot(pcscDevice, factory);
         var device = new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
-        var scope = ProtocolDeviceInfo.CreateScope();
+        var scope = new DiscoveryReadScope();
         scope.CoordinateUsbRead(slot.InterfaceId, 0x0407);
 
         if (failure == "delegating-partial-open")
@@ -67,14 +67,14 @@ internal static class PcscCleanupFailureProbe
         else
         {
             var read = failure.StartsWith("published-", StringComparison.Ordinal)
-                ? ProtocolDeviceInfo.ReadBoundedAsync(
+                ? DiscoveryDeviceInfoReader.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
                     failure == "published-late-proof" ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromSeconds(5),
                     NullLogger.Instance,
                     Ct,
                     scope: scope)
-                : ProtocolDeviceInfo.ReadSlotBoundedAsync(
+                : DiscoveryDeviceInfoReader.ReadSlotBoundedAsync(
                     slot,
                     ConnectionType.SmartCard,
                     TimeSpan.FromSeconds(5),

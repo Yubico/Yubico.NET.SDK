@@ -107,7 +107,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     {
         internal ConcurrentDictionary<string, CachedIdentity> IdentityCache { get; } = new();
         internal ConcurrentDictionary<string, MetadataCacheEntry> MetadataCache { get; } = new();
-        internal ProtocolDeviceInfo.ReadScope ReadScope { get; } = ProtocolDeviceInfo.CreateScope();
+        internal DiscoveryReadScope ReadScope { get; } = new DiscoveryReadScope();
     }
 
     // Serializes discovery so two concurrent scans do not open connections to the same interface at once.
@@ -405,7 +405,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
                 return;
 
             var retired = _evidence;
-            ProtocolDeviceInfo.Retire(retired.ReadScope);
+            retired.ReadScope.Retire();
             _evidence = new EvidenceEpoch();
         }
     }
@@ -417,7 +417,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
         // A discarded one-shot finder must not leave identity reads queued behind hung native workers.
         // Retirement prevents new opens; already-open reads keep their admission/lease through teardown.
         lock (_evidenceLock)
-            ProtocolDeviceInfo.Retire(_evidence.ReadScope);
+            _evidence.ReadScope.Retire();
     }
 
     private async Task PopulateMetadataAsync(

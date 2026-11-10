@@ -112,10 +112,16 @@
       "entries": ["Dispose#86E469848610#sync-boundary#Synchronous Dispose waits for the same teardown completion as DisposeAsync; this is not an async-safe caller entry point."]
     },
     {
-      "path": "Devices/ProtocolDeviceInfo.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/ProtocolDeviceInfo.cs:StartWorker uses a long-running task for best-effort discovery; DiscoveryWorkerAdmission.TryAcquire uses a zero-time admission check. StartAdmittedRead preserves worker admission after asynchronous USB PID admission."],
+      "path": "Devices/DiscoveryWorkerAdmission.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Devices/DiscoveryWorkerAdmission.cs:TryAcquire uses a zero-time admission check."],
       "status": ["documented", "outstanding"],
-      "entries": ["TryAcquire#84505AAFFADC#sync-boundary#SemaphoreSlim.Wait(0) is a nonwaiting admission probe; this does not prove that subsequent native discovery cannot block.", "StartWorker#5177330106F9#worker#LongRunning option requests a dedicated discovery worker for connection and read, not a nonblocking native operation.", "StartWorker#FD2EF1C86900#worker#StartNew launches discovery connection/read work off the caller; caller budget bounds waiting but an abandoned native operation may persist.", "StartAdmittedRead#6DDCDDE7E9D2#async-blocked#StartAdmittedRead disposes worker admission synchronously after a scheduling failure before returning a task; the IDisposable target is interface-dispatched and its cost is not proved.", "StartAdmittedRead#97EEC8B5125F#async-blocked#StartAdmittedRead calls a zero-time SemaphoreSlim admission probe before returning a task; bounded poll is observed, not an async wait."]
+      "entries": ["TryAcquire#ABE23A0EB25A#sync-boundary#SemaphoreSlim.Wait(0) is a nonwaiting admission probe; this does not prove that subsequent native discovery cannot block."]
+    },
+    {
+      "path": "Devices/SharedDeviceInfoRead.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Devices/SharedDeviceInfoRead.cs:StartWorker uses a long-running task for best-effort discovery. StartAdmittedRead preserves worker admission after asynchronous USB PID admission through DiscoveryWorkerAdmission.TryAcquire in Devices/DiscoveryWorkerAdmission.cs."],
+      "status": ["documented", "outstanding"],
+      "entries": ["StartWorker#8FAAB298BBD4#worker#LongRunning option requests a dedicated discovery worker for connection and read, not a nonblocking native operation.", "StartWorker#D3E661E1106D#worker#StartNew launches discovery connection/read work off the caller; caller budget bounds waiting but an abandoned native operation may persist.", "StartAdmittedRead#17DAF8E8953E#async-blocked#StartAdmittedRead disposes worker admission synchronously after a scheduling failure before returning a task; the IDisposable target is interface-dispatched and its cost is not proved.", "StartAdmittedRead#EB0665480A95#async-blocked#StartAdmittedRead calls a zero-time SemaphoreSlim admission probe before returning a task; bounded poll is observed, not an async wait."]
     },
     {
       "path": "Devices/RegisteredConnections.cs", "reviewOwner": "Core maintainers", "rationale": "",

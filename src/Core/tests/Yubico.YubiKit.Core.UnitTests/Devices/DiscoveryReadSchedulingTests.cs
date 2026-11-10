@@ -27,7 +27,7 @@ public class DiscoveryReadSchedulingTests
     {
         var gates = DiscoveryReadAdmission.GatesFor(0x0407);
         using var owner = await DiscoveryReadAdmission.AcquireAsync(gates, TestContext.Current.CancellationToken);
-        var scope = ProtocolDeviceInfo.CreateScope();
+        var scope = new DiscoveryReadScope();
         Assert.True(scope.TryCaptureEpoch(out var epoch));
         var ingress = new Lock();
         var queued = DiscoveryReadAdmission.AcquireAsync(gates, epoch.Superseded);
@@ -52,14 +52,14 @@ public class DiscoveryReadSchedulingTests
         try
         {
             lock (ingress)
-                ProtocolDeviceInfo.Retire(scope);
+                scope.Retire();
 
             Assert.False(await completion.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
             Assert.True(queued.IsCanceled);
         }
         finally
         {
-            ProtocolDeviceInfo.Retire(scope);
+            scope.Retire();
             // Retirement must finish the queued read before releasing its admission owner, even
             // after runner cancellation; this never releases an already-open native read early.
             await completion.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);

@@ -54,7 +54,7 @@ public class DeviceConnectionOwnershipTests
         var factory = new DiscoveryFirstFactory();
         var device = CreateDevice(factory);
 
-        var discoveryTask = ProtocolDeviceInfo.ReadBoundedAsync(
+        var discoveryTask = DiscoveryDeviceInfoReader.ReadBoundedAsync(
             device,
             ConnectionType.SmartCard,
             TimeSpan.FromSeconds(5),
@@ -120,7 +120,7 @@ public class DeviceConnectionOwnershipTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             device.ConnectAsync<ISmartCardConnection>(TestContext.Current.CancellationToken));
 
-        var discoveryTask = ProtocolDeviceInfo.ReadBoundedAsync(
+        var discoveryTask = DiscoveryDeviceInfoReader.ReadBoundedAsync(
             device,
             ConnectionType.SmartCard,
             TimeSpan.FromSeconds(1),

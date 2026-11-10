@@ -81,7 +81,7 @@ public class FindYubiKeysFaultInjectionTests
         Assert.NotNull(evidence);
         var scopeProperty = evidence.GetType().GetProperty("ReadScope", BindingFlags.Instance | BindingFlags.NonPublic);
         Assert.NotNull(scopeProperty);
-        var scope = Assert.IsType<ProtocolDeviceInfo.ReadScope>(scopeProperty.GetValue(evidence));
+        var scope = Assert.IsType<DiscoveryReadScope>(scopeProperty.GetValue(evidence));
         Assert.False(scope.TryCaptureEpoch(out _));
 
         _ = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);

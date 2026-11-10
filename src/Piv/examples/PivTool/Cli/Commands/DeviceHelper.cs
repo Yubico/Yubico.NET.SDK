@@ -16,6 +16,7 @@ using Spectre.Console;
 using System.Text;
 using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
@@ -89,9 +90,9 @@ internal static class DeviceHelper
     }
 
     /// <summary>
-    /// Parses a slot string ("9a", "9c", "9d", "9e") into a <see cref="PivSlot"/>.
+    /// Parses a slot string ("9a", "9c", "9d", "9e") into a <see cref="Slot"/>.
     /// </summary>
-    internal static PivSlot? ParseSlot(string? value)
+    internal static Slot? ParseSlot(string? value)
     {
         if (value is null)
         {
@@ -101,10 +102,10 @@ internal static class DeviceHelper
 
         var slot = value.ToUpperInvariant() switch
         {
-            "9A" => (PivSlot?)PivSlot.Authentication,
-            "9C" => PivSlot.Signature,
-            "9D" => PivSlot.KeyManagement,
-            "9E" => PivSlot.CardAuthentication,
+            "9A" => (Slot?)Slot.Authentication,
+            "9C" => Slot.Signature,
+            "9D" => Slot.KeyManagement,
+            "9E" => Slot.CardAuthentication,
             _ => null
         };
 
@@ -117,72 +118,72 @@ internal static class DeviceHelper
     }
 
     /// <summary>
-    /// Parses a key algorithm string into a <see cref="PivAlgorithm"/>.
+    /// Parses a key type string into a <see cref="KeyType"/>.
     /// </summary>
-    internal static PivAlgorithm? ParseKeyAlgorithm(string? value)
+    internal static KeyType? ParseKeyType(string? value)
     {
         if (value is null)
         {
             Console.Error.WriteLine(
-                "Error: --algorithm is required. Valid: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519");
+                "Error: --key-type is required. Valid: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519");
             return null;
         }
 
-        var alg = value.ToLowerInvariant() switch
+        var keyType = value.ToLowerInvariant() switch
         {
-            "rsa2048" => (PivAlgorithm?)PivAlgorithm.Rsa2048,
-            "rsa3072" => PivAlgorithm.Rsa3072,
-            "rsa4096" => PivAlgorithm.Rsa4096,
-            "eccp256" => PivAlgorithm.EccP256,
-            "eccp384" => PivAlgorithm.EccP384,
-            "ed25519" => PivAlgorithm.Ed25519,
-            "x25519" => PivAlgorithm.X25519,
+            "rsa2048" => (KeyType?)KeyType.Rsa2048,
+            "rsa3072" => KeyType.Rsa3072,
+            "rsa4096" => KeyType.Rsa4096,
+            "eccp256" => KeyType.P256,
+            "eccp384" => KeyType.P384,
+            "ed25519" => KeyType.Ed25519,
+            "x25519" => KeyType.X25519,
             _ => null
         };
 
-        if (alg is null)
+        if (keyType is null)
         {
             Console.Error.WriteLine(
-                $"Error: Invalid --algorithm '{value}'. Valid: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519");
+                $"Error: Invalid --key-type '{value}'. Valid: rsa2048, rsa3072, rsa4096, eccp256, eccp384, ed25519, x25519");
         }
 
-        return alg;
+        return keyType;
     }
 
     /// <summary>
     /// Parses a PIN policy string.
     /// </summary>
-    internal static PivPinPolicy ParsePinPolicy(string? value) =>
+    internal static PinPolicy ParsePinPolicy(string? value) =>
         value?.ToLowerInvariant() switch
         {
-            "never" => PivPinPolicy.Never,
-            "once" => PivPinPolicy.Once,
-            "always" => PivPinPolicy.Always,
-            _ => PivPinPolicy.Default
+            "never" => PinPolicy.Never,
+            "once" => PinPolicy.Once,
+            "always" => PinPolicy.Always,
+            _ => PinPolicy.Default
         };
 
     /// <summary>
     /// Parses a touch policy string.
     /// </summary>
-    internal static PivTouchPolicy ParseTouchPolicy(string? value) =>
+    internal static TouchPolicy ParseTouchPolicy(string? value) =>
         value?.ToLowerInvariant() switch
         {
-            "never" => PivTouchPolicy.Never,
-            "always" => PivTouchPolicy.Always,
-            "cached" => PivTouchPolicy.Cached,
-            _ => PivTouchPolicy.Default
+            "never" => TouchPolicy.Never,
+            "always" => TouchPolicy.Always,
+            "cached" => TouchPolicy.Cached,
+            _ => TouchPolicy.Default
         };
 
     /// <summary>
     /// Parses a management key algorithm type string.
     /// </summary>
-    internal static PivManagementKeyType ParseMgmtKeyType(string? value) =>
+    internal static KeyType ParseMgmtKeyType(string? value) =>
         value?.ToLowerInvariant() switch
         {
-            "aes128" => PivManagementKeyType.Aes128,
-            "aes192" => PivManagementKeyType.Aes192,
-            "aes256" => PivManagementKeyType.Aes256,
-            _ => PivManagementKeyType.TripleDes
+            "aes128" => KeyType.Aes128,
+            "aes192" => KeyType.Aes192,
+            "aes256" => KeyType.Aes256,
+            _ => KeyType.TripleDes
         };
 
     /// <summary>

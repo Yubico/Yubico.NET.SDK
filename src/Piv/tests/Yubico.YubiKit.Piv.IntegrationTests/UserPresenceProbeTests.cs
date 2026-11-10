@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
@@ -34,9 +33,9 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
         await using var session = await state.Device.CreatePivSessionAsync(
             new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 
-        PivManagementKeyMetadata managementKey = await session.GetManagementKeyMetadataAsync();
-        PivPinMetadata pin = await session.GetPinMetadataAsync();
-        PivSlotMetadata? retired20 = await session.GetSlotMetadataAsync(PivSlot.Retired20);
+        ManagementKeyMetadata managementKey = await session.GetManagementKeyMetadataAsync();
+        PinMetadata pin = await session.GetPinMetadataAsync();
+        SlotMetadata? retired20 = await session.GetSlotMetadataAsync(Slot.Retired20);
 
         output.WriteLine($"Firmware={state.FirmwareVersion}");
         output.WriteLine(
@@ -63,8 +62,8 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
                 UserPresencePrompt = prompt
             });
 
-        PivManagementKeyMetadata managementKeyMetadata = await session.GetManagementKeyMetadataAsync();
-        PivSlotMetadata? existingSlotMetadata = await session.GetSlotMetadataAsync(PivSlot.Retired20);
+        ManagementKeyMetadata managementKeyMetadata = await session.GetManagementKeyMetadataAsync();
+        SlotMetadata? existingSlotMetadata = await session.GetSlotMetadataAsync(Slot.Retired20);
 
         output.WriteLine(
             $"Prerequisites: Firmware={state.FirmwareVersion}, ManagementKeyIsDefault={managementKeyMetadata.IsDefault}, " +
@@ -76,11 +75,11 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             !managementKeyMetadata.IsDefault,
             "The PIV management key is not the known default; refusing to authenticate or mutate the applet.");
         Skip.If(
-            managementKeyMetadata.TouchPolicy is not PivTouchPolicy.Default and not PivTouchPolicy.Never,
+            managementKeyMetadata.TouchPolicy is not TouchPolicy.Default and not TouchPolicy.Never,
             $"The management key touch policy is {managementKeyMetadata.TouchPolicy}; refusing an unrelated touch " +
             "during prerequisite authentication.");
         Skip.If(
-            managementKeyMetadata.KeyType is not PivManagementKeyType.TripleDes and not PivManagementKeyType.Aes192,
+            managementKeyMetadata.KeyType is not KeyType.TripleDes and not KeyType.Aes192,
             $"The default management key cannot be used with reported key type {managementKeyMetadata.KeyType}.");
         Skip.If(
             session.ManagementKeyType != managementKeyMetadata.KeyType,
@@ -105,16 +104,16 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
 
         var keyCreated = false;
         byte[] digest = SHA256.HashData("PIV user-presence probe"u8);
-        ReadOnlyMemory<byte> signature = default;
+        Memory<byte> signature = default;
         try
         {
             IPublicKey generatedPublicKey = await session.GenerateKeyAsync(
-                PivSlot.Retired20,
-                PivAlgorithm.EccP256,
-                new PivKeyCreationOptions
+                Slot.Retired20,
+                KeyType.P256,
+                new KeyCreationOptions
                 {
-                    PinPolicy = PivPinPolicy.Never,
-                    TouchPolicy = PivTouchPolicy.Always
+                    PinPolicy = PinPolicy.Never,
+                    TouchPolicy = TouchPolicy.Always
                 });
             keyCreated = true;
             ECPublicKey publicKey = Assert.IsType<ECPublicKey>(generatedPublicKey);
@@ -127,8 +126,8 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
 
             using var operationCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             signature = await session.SignOrDecryptAsync(
-                PivSlot.Retired20,
-                PivAlgorithm.EccP256,
+                Slot.Retired20,
+                KeyType.P256,
                 digest,
                 operationCts.Token);
 
@@ -141,7 +140,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             UserPresenceContext requested = Assert.Single(prompt.Requested);
             Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Basis);
             Assert.Equal("PIV", requested.Application);
-            Assert.Equal(PivSlot.Retired20.ToString(), requested.Scope);
+            Assert.Equal(Slot.Retired20.ToString(), requested.Scope);
 
             (UserPresenceContext Context, UserPresenceOutcome Outcome, CancellationToken CancellationToken) resolved =
                 Assert.Single(prompt.Resolved);
@@ -150,13 +149,13 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             Assert.Equal(CancellationToken.None, resolved.CancellationToken);
 
             using var followUpCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            PivSlotMetadata? slotMetadata = await session.GetSlotMetadataAsync(
-                PivSlot.Retired20,
+            SlotMetadata? slotMetadata = await session.GetSlotMetadataAsync(
+                Slot.Retired20,
                 followUpCts.Token);
             Assert.NotNull(slotMetadata);
-            Assert.Equal(PivAlgorithm.EccP256, slotMetadata.Value.Algorithm);
-            Assert.Equal(PivPinPolicy.Never, slotMetadata.Value.PinPolicy);
-            Assert.Equal(PivTouchPolicy.Always, slotMetadata.Value.TouchPolicy);
+            Assert.Equal(KeyType.P256, slotMetadata.Value.KeyType);
+            Assert.Equal(PinPolicy.Never, slotMetadata.Value.PinPolicy);
+            Assert.Equal(TouchPolicy.Always, slotMetadata.Value.TouchPolicy);
             Assert.Equal(state.SerialNumber, await session.GetSerialNumberAsync(followUpCts.Token));
         }
         finally
@@ -164,13 +163,13 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
             CryptographicOperations.ZeroMemory(digest);
             if (!signature.IsEmpty)
             {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(signature).Span);
+                CryptographicOperations.ZeroMemory(signature.Span);
             }
 
             if (keyCreated)
             {
-                await session.DeleteKeyAsync(PivSlot.Retired20);
-                Assert.Null(await session.GetSlotMetadataAsync(PivSlot.Retired20));
+                await session.DeleteKeyAsync(Slot.Retired20);
+                Assert.Null(await session.GetSlotMetadataAsync(Slot.Retired20));
                 output.WriteLine("Cleanup: deleted the test-created key from PIV slot Retired20.");
             }
         }

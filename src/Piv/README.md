@@ -49,8 +49,10 @@ int pinAttempts = await session.GetPinAttemptsAsync();
 Console.WriteLine($"PIN attempts remaining: {pinAttempts}");
 ```
 
-Reading the PIN attempt counter needs no PIN, touch, or management key, and works on every supported
-firmware. Later snippets assume these directives and a `device` obtained the same way.
+Reading the PIN attempt counter needs no PIN, touch, or management key. On firmware without metadata,
+it uses a no-data VERIFY query (which does not consume retries). If the PIN is already verified and
+the device reports success without a count, it throws `InvalidOperationException` rather than guessing.
+Later snippets assume these directives and a `device` obtained the same way.
 
 ## Common operations
 
@@ -68,8 +70,8 @@ finally
 {
     CryptographicOperations.ZeroMemory(managementKey);
 }
-var keyOptions = new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never };
-IPublicKey publicKey = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, keyOptions);
+var keyOptions = new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never };
+IPublicKey publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256, keyOptions);
 ```
 
 `IsManagementKeyAuthenticated` reports PIV authentication, distinct from the inherited `IsAuthenticated` (SCP).
@@ -80,8 +82,8 @@ Storing needs management-key authentication, so continue on the `session` from t
 
 ```csharp
 using var certificate = X509CertificateLoader.LoadCertificateFromFile("authentication.cer");
-await session.StoreCertificateAsync(PivSlot.Authentication, certificate, PivCertificateCompression.Automatic);
-using X509Certificate2? stored = await session.GetCertificateAsync(PivSlot.Authentication);
+await session.StoreCertificateAsync(Slot.Authentication, certificate, CertificateCompression.Automatic);
+using X509Certificate2? stored = await session.GetCertificateAsync(Slot.Authentication);
 ```
 
 ### Verify the PIN and sign
@@ -99,18 +101,18 @@ finally
     CryptographicOperations.ZeroMemory(pin);
 }
 byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
-ReadOnlyMemory<byte> signature = await session.SignOrDecryptAsync(PivSlot.Authentication, digest);
+Memory<byte> signature = await session.SignOrDecryptAsync(Slot.Authentication, digest);
 ```
 
 ECDSA signs the digest you pass, so hash first. This overload reads slot metadata to pick the algorithm and
-needs firmware 5.3.0; older keys need the overload that takes an explicit `PivAlgorithm`.
+needs firmware 5.3.0; older keys need the overload that takes an explicit `KeyType`.
 
 ## User interaction
 
-- Verify the PIN before private-key operations in slots created with `PivPinPolicy.Once` or `Always`.
+- Verify the PIN before private-key operations in slots created with `PinPolicy.Once` or `Always`.
 - Authenticate the management key before key or certificate writes, retry-limit changes, and key move or delete.
   Retry-limit changes (`SetPinAttemptsAsync`) also need a verified PIN.
-- Touch follows the slot's `PivTouchPolicy`. `VerifyUvAsync` does fingerprint verification on biometric keys.
+- Touch follows the slot's `TouchPolicy`. `VerifyUvAsync` does fingerprint verification on biometric keys.
 
 Supply an `IUserPresencePrompt` to learn when an operation needs a touch.
 
@@ -128,11 +130,15 @@ await using var session = await device.CreatePivSessionAsync(options);
 ```
 
 The prompt receives one request immediately before the private-key command and one resolution after the
-response is validated. `PivTouchPolicy.Always` maps to `UserPresenceBasis.PolicyRequires`; `Cached` and
+response is validated. `TouchPolicy.Always` maps to `UserPresenceBasis.PolicyRequires`; `Cached` and
 unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is not observable. `Never`,
 `Default`, and an empty slot are silent. Pass a `CancellationToken` to abandon a wait.
 
 ## Constraints
+
+Core's [cryptographic catalog](../Core/README.md#cryptographic-metadata) exposes immutable `KeyInfo` on
+key objects. Internal `KeyTypeEncoding` owns PIV's independent wire identifiers and strict request subsets;
+never cast from Core `KeyType` or infer PIV support from catalog representation/applicability.
 
 - Requesting a non-SmartCard transport through `SessionCreationOptions { PreferredConnectionType = ... }` throws.
 - One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
@@ -141,9 +147,47 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
   `SetPinAttemptsAsync`, and `SetPinOnlyModeAsync` change persistent state. `ResetAsync` destroys every key.
   `SetPinAttemptsAsync` resets the PIN to `123456` and the PUK to `12345678` every time it runs, even with
   unchanged limits; follow it with `ChangePinAsync` and `ChangePukAsync`.
-- Firmware gates throw `NotSupportedException`; `PivFeatures.SupportsRsaGeneration` screens ROCA-affected 4.2.6-4.3.4.
+- Operations enforce firmware gates themselves and throw `NotSupportedException` before transmitting an
+  unsupported key or policy request. RSA generation is disabled on ROCA-affected 4.2.6–4.3.4; import remains
+  independently available. YubiKey 4 FIPS (4.4.x) rejects RSA1024 and PIN policy `Never`.
+
+## Preview API migration
+
+- `PivSlot` → `Slot` (the numeric key references are unchanged; F9 is Yubico's attestation extension).
+- `PivFeatures` → standalone public `Features`. `session.IsSupported(Features.Metadata)` is optional;
+  operations enforce their own prerequisites. Queries evaluate known firmware compatibility, not authorization
+  or a guarantee that a command will succeed. Compatibility overrides affect these gates, not the physical
+  factory-default management-key algorithm used after reset.
+- `PivAlgorithm` → `Core.Cryptography.KeyType`. `ImportKeyAsync` returns `Task`: the caller already knows
+  `privateKey.KeyType`. Never cast a `KeyType` to a PIV byte. The SDK maps identifiers explicitly.
+- PIV-local model/policy prefixes are removed: for example `PinPolicy`, `TouchPolicy`, `PinMetadata`,
+  `SlotMetadata`, `KeyCreationOptions`, and `DataObjects.AdminData`. Session entrypoints remain `PivSession`
+  and `IPivSession`. CLI key selectors use `--key-type` and key-type result fields are named `KeyType`.
+- Management-key operations also use Core `KeyType` (`TripleDes`, `Aes128`, `Aes192`, `Aes256`) and canonical
+  key sizes. Symmetric management types cannot be generated/imported as asymmetric slot keys. The session's
+  nullable `ManagementKeyType` is null for an unmodeled algorithm; raw management metadata remains inspectable.
+
+PIV reads representation-aware catalog fields: RSA/symmetric stored widths from `KeyInfo.KeySizeBytes`, EC
+coordinates from `Curve.CoordinateLengthBytes`, and scalar/seed widths from `PrivateValueLengthBytes`.
+Shared Core support for secp256k1 or Brainpool does not add PIV generation, import, or agreement support.
+- Slot metadata exposes nullable `KeyType`, `RawAlgorithmId`, and complete `RawData`. Unknown identifiers
+  remain readable, while using an unrecognized key algorithm throws `NotSupportedException`.
+- `EnsureSupports` is protected session implementation machinery, no longer a public interface member.
+  Derived sessions retain it; consumers should call operations directly or use `IsSupported` for UI hints.
+
+The support matrix follows the reviewed [Android PIV source](https://github.com/Yubico/yubikit-android/blob/76b89d35142d9a4937b6b72e5c840e057a280620/piv/src/main/java/com/yubico/yubikit/piv/PivSession.java).
+The reviewed [Python implementation](https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/piv.py)
+agrees on P-384/policies (4.0), cached touch/attestation (4.3), metadata (5.3), AES (5.4), and
+move/delete/Curve25519/large RSA (5.7). Its conservative serial (5.0.3) and ROCA (4.2.0) boundaries differ;
+this SDK retains the existing Android-aligned serial (5.0.0) and ROCA (4.2.6) boundaries. Major-zero
+development firmware retains Core's permissive compatibility handling.
 
 ## Security notes
+
+- Crypto, raw data-object, and temporary-PIN results transfer writable `Memory<byte>` to the caller.
+  Clear owned plaintext, shared secrets, and temporary PINs with `CryptographicOperations.ZeroMemory(result.Span)`
+  after use. This replaces read-only result memory from earlier previews. Internal parsers retain mutable
+  owned buffers until transfer; raw APDU responses are cleared through their owner's `Clear()` method.
 
 - PINs, PUKs, management keys, and temporary PINs cross the API as `ReadOnlyMemory<byte>`. The session never
   zeroes a buffer you passed in; zero it yourself with `CryptographicOperations.ZeroMemory` in a `finally`.
@@ -161,6 +205,13 @@ dotnet run --project src/Piv/examples/PivTool/PivTool.csproj
 Its menus and argument-driven CLI use the [shared selection flow](../../docs/usage/device-discovery.md#selection-in-the-cli-examples)
 with SmartCard-only eligibility. The argument-driven CLI never prompts, even on a terminal; use `--serial`
 when multiple devices are connected. Picker labels reuse discovery metadata, not authoritative live configuration.
+## Maintainer verification
+
+For maintainers, run unit tests with `dotnet toolchain.cs -- test --project Piv`. On an explicitly allowlisted
+dedicated test key, run smoke with `dotnet toolchain.cs -- test --integration --project Piv --smoke`, then full
+unattended coverage with `dotnet toolchain.cs -- test --integration --project Piv --filter "Category!=RequiresUserPresence"`.
+These tests reset and mutate PIV, including a protected-mode enable/reopen/recover/disable round trip. Touch
+and hotplug tests need separate human coordination; multi-key contention tests need two attached keys.
 
 ## Related
 

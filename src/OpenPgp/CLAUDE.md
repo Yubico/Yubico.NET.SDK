@@ -66,6 +66,27 @@ Supports SHA256 (0x08) and SHA512 (0x0A).
 
 ## Model Layer
 
+Core owns the shared `CryptographicDefinitions.Keys/Curves/Algorithms` catalog. `EcAttributes.KeyType`
+and `EcAttributes.Create(KeyRef, KeyType)` use Core concrete identities directly. OpenPGP owns the optional
+immutable `OpenPgpKeyInfo` returned by `KeyInfo.GetOpenPgpInfo()`; Core must not reference OpenPgp. This is
+representation metadata, not device capability or a choice of slot/import format. It includes modeled EC
+representations and only RSA 2048/3072/4096, not Core's RSA 1024.
+
+Internal `OpenPgpCurveOids` caches DER **value octets only**, deriving them from dotted OIDs with AsnWriter.
+Ordinary curve OIDs come from Core; the protocol's legacy X25519 (1.3.6.1.4.1.3029.1.5.1) and Ed25519
+(1.3.6.1.4.1.11591.15.1) overrides stay here. They are not RFC 8410 SPKI algorithm OIDs. Failed Try lookup
+returns `KeyType.None`. Unknown OID parser rejection is unchanged; do not silently select P-256.
+
+Factories choose ECDH/ECDSA/EdDSA from construction and slot, rejecting non-EC families instead of falling
+through to ECDSA. Parsing must preserve the received algorithm byte and import format; never call the factory
+while parsing. Existing supported-algorithm firmware corrections remain protocol-owned. Wire IDs stay
+ECDH 0x12, ECDSA 0x13 and EdDSA 0x16. `PrivateKeyImport` uses the Core key identity directly, while retaining
+the X25519 scalar reversal, private/public consistency checks and owned-buffer clearing.
+
+To admit a new OpenPGP representation, add it to this module's modeled data only after independent OID,
+real provider-validated key/import-template and APDU vectors. The four non-NIST ordinary curves are covered
+by `NamedCurveCatalogVectorsTests` (Core) and `OpenPgpPutKeyWireTests`; hardware support remains separate.
+
 ### Protocol Enums (internal)
 - `Ins` — Instruction bytes
 - `Crt` — Control Reference Templates
@@ -76,7 +97,7 @@ Supports SHA256 (0x08) and SHA512 (0x0A).
 - `Pw` — PIN identifiers (User=0x81, Reset=0x82, Admin=0x83)
 - `Uif` — User Interaction Flag with `IsFixed`/`IsCached`
 - `PinPolicy`, `KeyStatus`, `RsaSize`, `RsaImportFormat`, `EcImportFormat`
-- `CurveOid` — EC curve OID values with OID byte arrays
+- Core `KeyType` — concrete EC key identity in algorithm attributes
 - `ExtendedCapabilityFlags`, `GeneralFeatureManagement` — `[Flags]` enums
 
 ### Data Models (public)
@@ -125,7 +146,7 @@ See `tests/CLAUDE.md` for test runner requirements.
 **Unit tests** focus on model parsing/encoding:
 - AlgorithmAttributes round-trip, ApplicationRelatedData TLV parsing
 - KDF process against test vectors, OpenPgpAid BCD decoding
-- PrivateKeyTemplate TLV encoding, PwStatus parsing, CurveOid mapping
+- PrivateKeyTemplate TLV encoding, PwStatus parsing, exact OpenPGP OID value vectors
 
 **Integration tests** use `[Theory] [WithYubiKey]` with firmware version gating.
 

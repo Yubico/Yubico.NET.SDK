@@ -76,7 +76,7 @@ public class Curve25519PrivateKeyTests
     public void CreateFromValue_IncompatibleKeyType_ThrowsArgumentException()
     {
         var exception = Assert.Throws<ArgumentException>(() =>
-            Curve25519PrivateKey.CreateFromValue(new byte[32], KeyType.ECP256));
+            Curve25519PrivateKey.CreateFromValue(new byte[32], KeyType.P256));
 
         Assert.Equal("keyType", exception.ParamName);
     }

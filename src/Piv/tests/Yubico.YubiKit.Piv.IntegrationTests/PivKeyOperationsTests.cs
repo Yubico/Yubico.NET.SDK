@@ -50,8 +50,8 @@ public class PivKeyOperationsTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256);
+            Slot.Authentication,
+            KeyType.P256);
 
         Assert.NotNull(publicKey);
         Assert.IsType<ECPublicKey>(publicKey);
@@ -66,8 +66,8 @@ public class PivKeyOperationsTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Signature,
-            PivAlgorithm.Ed25519);
+            Slot.Signature,
+            KeyType.Ed25519);
 
         Assert.NotNull(publicKey);
         Assert.IsType<Curve25519PublicKey>(publicKey);
@@ -80,9 +80,9 @@ public class PivKeyOperationsTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
-        var attestation = await session.AttestKeyAsync(PivSlot.Authentication);
+        var attestation = await session.AttestKeyAsync(Slot.Authentication);
 
         Assert.NotNull(attestation);
         // The attestation certificate is issued by the PIV Attestation CA (issuer varies by YubiKey)
@@ -96,12 +96,12 @@ public class PivKeyOperationsTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        var publicKey = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        var publicKey = await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
-        await session.MoveKeyAsync(PivSlot.Authentication, PivSlot.Retired1);
+        await session.MoveKeyAsync(Slot.Authentication, Slot.Retired1);
 
-        var sourceMetadata = await session.GetSlotMetadataAsync(PivSlot.Authentication);
-        var destMetadata = await session.GetSlotMetadataAsync(PivSlot.Retired1);
+        var sourceMetadata = await session.GetSlotMetadataAsync(Slot.Authentication);
+        var destMetadata = await session.GetSlotMetadataAsync(Slot.Retired1);
 
         Assert.Null(sourceMetadata); // Source now empty
         Assert.NotNull(destMetadata); // Dest has key
@@ -110,8 +110,8 @@ public class PivKeyOperationsTests
         await session.VerifyPinAsync(DefaultPin);
         var hash = SHA256.HashData("test data"u8);
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Retired1,
-            PivAlgorithm.EccP256,
+            Slot.Retired1,
+            KeyType.P256,
             hash);
 
         // Verify signature with original public key
@@ -134,19 +134,18 @@ public class PivKeyOperationsTests
         var privateKey = ECPrivateKey.CreateFromPkcs8(pkcs8);
 
         // Import to YubiKey
-        var detectedAlgorithm = await session.ImportKeyAsync(
-            PivSlot.Authentication,
+        await session.ImportKeyAsync(
+            Slot.Authentication,
             privateKey);
 
-        Assert.Equal(PivAlgorithm.EccP256, detectedAlgorithm);
 
         // Sign with YubiKey
         await session.VerifyPinAsync(DefaultPin);
         var dataToSign = "test data"u8.ToArray();
         var hash = SHA256.HashData(dataToSign);
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.P256,
             hash);
 
         // Verify with software public key
@@ -162,17 +161,17 @@ public class PivKeyOperationsTests
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
         // Generate key
-        await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
         // Verify key exists
-        var metadataBefore = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadataBefore = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.NotNull(metadataBefore);
 
         // Delete key
-        await session.DeleteKeyAsync(PivSlot.Authentication);
+        await session.DeleteKeyAsync(Slot.Authentication);
 
         // Verify slot is now empty
-        var metadataAfter = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadataAfter = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.Null(metadataAfter);
     }
 
@@ -190,10 +189,10 @@ public class PivKeyOperationsTests
         try
         {
             // Write data to Printed object
-            await session.PutObjectAsync(PivDataObject.PrintedInformation, testData);
+            await session.PutObjectAsync(DataObject.PrintedInformation, testData);
 
             // Read it back
-            var readData = await session.GetObjectAsync(PivDataObject.PrintedInformation);
+            var readData = await session.GetObjectAsync(DataObject.PrintedInformation);
 
             Assert.False(readData.IsEmpty);
             Assert.Equal(testData, readData.ToArray());
@@ -203,7 +202,7 @@ public class PivKeyOperationsTests
             // Clean up by deleting the object (write null/empty)
             try
             {
-                await session.PutObjectAsync(PivDataObject.PrintedInformation, ReadOnlyMemory<byte>.Empty);
+                await session.PutObjectAsync(DataObject.PrintedInformation, ReadOnlyMemory<byte>.Empty);
             }
             catch
             {

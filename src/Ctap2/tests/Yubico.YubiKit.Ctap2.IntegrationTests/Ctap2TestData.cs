@@ -94,11 +94,11 @@ public static class Ctap2TestData
     /// Gets the standard ES256 credential parameters.
     /// </summary>
     public static IReadOnlyList<PublicKeyCredentialParameters> ES256Params =>
-        [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.ES256)];
+        [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.Es256)];
 
     /// <summary>
     /// Gets EdDSA credential parameters.
     /// </summary>
     public static IReadOnlyList<PublicKeyCredentialParameters> EdDSAParams =>
-        [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.EdDSA)];
+        [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.EdDsa)];
 }

@@ -63,36 +63,36 @@ public class PivSlotOverwriteTests
 
         // Step 1: Generate RSA 2048 key
         var rsaPublicKey = await session.GenerateKeyAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.Rsa2048);
+            Slot.Authentication,
+            KeyType.Rsa2048);
 
         Assert.NotNull(rsaPublicKey);
         Assert.IsType<RSAPublicKey>(rsaPublicKey);
 
         // Verify metadata shows RSA 2048
-        var metadataRsa = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadataRsa = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.NotNull(metadataRsa);
-        Assert.Equal(PivAlgorithm.Rsa2048, metadataRsa.Value.Algorithm);
+        Assert.Equal(KeyType.Rsa2048, metadataRsa.Value.KeyType);
 
         // Step 2: Overwrite with ECC P-256
         var eccPublicKey = await session.GenerateKeyAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256);
+            Slot.Authentication,
+            KeyType.P256);
 
         Assert.NotNull(eccPublicKey);
         Assert.IsType<ECPublicKey>(eccPublicKey);
 
         // Verify metadata now shows ECC P-256
-        var metadataEcc = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadataEcc = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.NotNull(metadataEcc);
-        Assert.Equal(PivAlgorithm.EccP256, metadataEcc.Value.Algorithm);
+        Assert.Equal(KeyType.P256, metadataEcc.Value.KeyType);
 
         // Verify the ECC key is functional
         await session.VerifyPinAsync(DefaultPin);
         var hash = SHA256.HashData("overwrite test"u8);
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256,
+            Slot.Authentication,
+            KeyType.P256,
             hash);
 
         Assert.False(signature.IsEmpty);
@@ -117,29 +117,29 @@ public class PivSlotOverwriteTests
 
         // Step 1: Generate ECC P-256 key
         var eccPublicKey = await session.GenerateKeyAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256);
+            Slot.Authentication,
+            KeyType.P256);
 
         Assert.NotNull(eccPublicKey);
         Assert.IsType<ECPublicKey>(eccPublicKey);
 
         // Verify metadata shows ECC P-256
-        var metadataEcc = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadataEcc = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.NotNull(metadataEcc);
-        Assert.Equal(PivAlgorithm.EccP256, metadataEcc.Value.Algorithm);
+        Assert.Equal(KeyType.P256, metadataEcc.Value.KeyType);
 
         // Step 2: Overwrite with RSA 2048
         var rsaPublicKey = await session.GenerateKeyAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.Rsa2048);
+            Slot.Authentication,
+            KeyType.Rsa2048);
 
         Assert.NotNull(rsaPublicKey);
         Assert.IsType<RSAPublicKey>(rsaPublicKey);
 
         // Verify metadata now shows RSA 2048
-        var metadataRsa = await session.GetSlotMetadataAsync(PivSlot.Authentication);
+        var metadataRsa = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.NotNull(metadataRsa);
-        Assert.Equal(PivAlgorithm.Rsa2048, metadataRsa.Value.Algorithm);
+        Assert.Equal(KeyType.Rsa2048, metadataRsa.Value.KeyType);
 
         // Verify the RSA key is functional
         await session.VerifyPinAsync(DefaultPin);
@@ -156,7 +156,7 @@ public class PivSlotOverwriteTests
         var hash = SHA256.HashData(dataToSign);
 
         // Build PKCS#1 v1.5 padding
-        var padded = new byte[KeyDefinitions.RSA2048.LengthInBytes];
+        var padded = new byte[CryptographicDefinitions.Keys.Rsa2048.KeySizeBytes];
         padded[0] = 0x00;
         padded[1] = 0x01;
         var paddingLength = padded.Length - 3 - sha256DigestInfo.Length - hash.Length;
@@ -169,11 +169,11 @@ public class PivSlotOverwriteTests
         Array.Copy(hash, 0, padded, 3 + paddingLength + sha256DigestInfo.Length, hash.Length);
 
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.Rsa2048,
+            Slot.Authentication,
+            KeyType.Rsa2048,
             padded);
 
-        Assert.Equal(KeyDefinitions.RSA2048.LengthInBytes, signature.Length);
+        Assert.Equal(CryptographicDefinitions.Keys.Rsa2048.KeySizeBytes, signature.Length);
 
         using var rsa = RSA.Create();
         rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)rsaPublicKey).ExportSubjectPublicKeyInfo(), out _);

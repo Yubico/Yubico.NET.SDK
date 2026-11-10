@@ -33,7 +33,7 @@ public class PrivateKeyConsistencyTests
     {
         using var key = RSAPrivateKey.CreateFromParameters(KnownPrivateKeyVectors.Rfc7517Rsa2048());
 
-        Assert.Equal(KeyType.RSA2048, key.KeyType);
+        Assert.Equal(KeyType.Rsa2048, key.KeyType);
     }
 
     /// <summary>
@@ -71,8 +71,8 @@ public class PrivateKeyConsistencyTests
     /// <summary>RFC 6979 Appendix A.2.5 (P-256) and A.2.6 (P-384): x with its (Ux, Uy) must load.</summary>
     [Theory]
     [Trait("Audit", "YESDK-1635")]
-    [InlineData("nistP256", KnownPrivateKeyVectors.Rfc6979P256D, KnownPrivateKeyVectors.Rfc6979P256X, KnownPrivateKeyVectors.Rfc6979P256Y, KeyType.ECP256)]
-    [InlineData("nistP384", KnownPrivateKeyVectors.Rfc6979P384D, KnownPrivateKeyVectors.Rfc6979P384X, KnownPrivateKeyVectors.Rfc6979P384Y, KeyType.ECP384)]
+    [InlineData("nistP256", KnownPrivateKeyVectors.Rfc6979P256D, KnownPrivateKeyVectors.Rfc6979P256X, KnownPrivateKeyVectors.Rfc6979P256Y, KeyType.P256)]
+    [InlineData("nistP384", KnownPrivateKeyVectors.Rfc6979P384D, KnownPrivateKeyVectors.Rfc6979P384X, KnownPrivateKeyVectors.Rfc6979P384Y, KeyType.P384)]
     public void Ec_Rfc6979Vector_Loads(string curve, string d, string x, string y, KeyType expected)
     {
         using var key = ECPrivateKey.CreateFromParameters(EcParameters(curve, d, x, y));
@@ -105,7 +105,7 @@ public class PrivateKeyConsistencyTests
 
         using var key = RSAPrivateKey.CreateFromParameters(parameters);
 
-        Assert.Equal(KeyType.RSA2048, key.KeyType);
+        Assert.Equal(KeyType.Rsa2048, key.KeyType);
     }
 
     [Theory]
@@ -160,8 +160,8 @@ public class PrivateKeyConsistencyTests
         using var withQ = ECPrivateKey.CreateFromParameters(parameters);
         using var withoutQ = ECPrivateKey.CreateFromParameters(new ECParameters { Curve = parameters.Curve, D = parameters.D });
 
-        Assert.Equal(KeyType.ECP256, withQ.KeyType);
-        Assert.Equal(KeyType.ECP256, withoutQ.KeyType);
+        Assert.Equal(KeyType.P256, withQ.KeyType);
+        Assert.Equal(KeyType.P256, withoutQ.KeyType);
     }
 
     [Fact]

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
+
 namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples.Results;
 
 /// <summary>
@@ -27,12 +29,12 @@ public sealed record KeyGenerationResult
     /// <summary>
     /// Gets the slot where the key was generated.
     /// </summary>
-    public PivSlot Slot { get; init; }
+    public Slot Slot { get; init; }
 
     /// <summary>
     /// Gets the algorithm of the generated key.
     /// </summary>
-    public PivAlgorithm Algorithm { get; init; }
+    public KeyType KeyType { get; init; }
 
     /// <summary>
     /// Gets the public key bytes when successful.
@@ -47,8 +49,8 @@ public sealed record KeyGenerationResult
     /// <summary>
     /// Creates a successful key generation result.
     /// </summary>
-    public static KeyGenerationResult Succeeded(PivSlot slot, PivAlgorithm algorithm, ReadOnlyMemory<byte> publicKey) =>
-        new() { Success = true, Slot = slot, Algorithm = algorithm, PublicKey = publicKey };
+    public static KeyGenerationResult Succeeded(Slot slot, KeyType keyType, ReadOnlyMemory<byte> publicKey) =>
+        new() { Success = true, Slot = slot, KeyType = keyType, PublicKey = publicKey };
 
     /// <summary>
     /// Creates a failed key generation result.

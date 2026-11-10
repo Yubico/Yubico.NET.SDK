@@ -53,9 +53,9 @@ public class PivFullWorkflowTests
 
         // 2. Generate key
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
+            Slot.Signature,
+            KeyType.P256,
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once });
 
         Assert.NotNull(publicKey);
         Assert.IsType<ECPublicKey>(publicKey);
@@ -67,8 +67,8 @@ public class PivFullWorkflowTests
         var dataToSign = "important document"u8.ToArray();
         var hash = SHA256.HashData(dataToSign);
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Signature,
-            PivAlgorithm.EccP256,
+            Slot.Signature,
+            KeyType.P256,
             hash);
 
         Assert.NotEmpty(signature.ToArray());
@@ -90,8 +90,8 @@ public class PivFullWorkflowTests
         // 1. Authenticate and generate key
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         var devicePublicKey = await session.GenerateKeyAsync(
-            PivSlot.KeyManagement,
-            PivAlgorithm.EccP256);
+            Slot.KeyManagement,
+            KeyType.P256);
 
         Assert.NotNull(devicePublicKey);
         Assert.IsType<ECPublicKey>(devicePublicKey);
@@ -106,7 +106,7 @@ public class PivFullWorkflowTests
 
         // 4. Calculate shared secret on YubiKey
         var yubiKeySecret = await session.CalculateSecretAsync(
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             peerPublicKey);
 
         Assert.Equal(32, yubiKeySecret.Length); // P-256 x-coordinate is 32 bytes
@@ -136,22 +136,22 @@ public class PivFullWorkflowTests
         // 1. Authenticate and generate key
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.EccP256);
+            Slot.Authentication,
+            KeyType.P256);
 
         // 2. Move key to retired slot
-        await session.MoveKeyAsync(PivSlot.Authentication, PivSlot.Retired1);
+        await session.MoveKeyAsync(Slot.Authentication, Slot.Retired1);
 
         // 3. Verify source is empty and destination has key
-        var sourceCert = await session.GetCertificateAsync(PivSlot.Authentication);
+        var sourceCert = await session.GetCertificateAsync(Slot.Authentication);
         Assert.Null(sourceCert);
 
         // 4. Use the moved key for signing
         await session.VerifyPinAsync(DefaultPin);
         var hash = SHA256.HashData("test"u8);
         var signature = await session.SignOrDecryptAsync(
-            PivSlot.Retired1,
-            PivAlgorithm.EccP256,
+            Slot.Retired1,
+            KeyType.P256,
             hash);
 
         Assert.NotEmpty(signature.ToArray());
@@ -166,10 +166,10 @@ public class PivFullWorkflowTests
 
         // 1. Authenticate and generate key
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256);
+        await session.GenerateKeyAsync(Slot.Authentication, KeyType.P256);
 
         // 2. Attest the generated key
-        var attestation = await session.AttestKeyAsync(PivSlot.Authentication);
+        var attestation = await session.AttestKeyAsync(Slot.Authentication);
 
         Assert.NotNull(attestation);
         // The attestation certificate is issued by the PIV Attestation CA

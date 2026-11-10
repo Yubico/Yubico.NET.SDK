@@ -92,7 +92,6 @@ public sealed class OathHelpersTests
         Assert.True(prompted.WasDisposed);
     }
 
-
     private sealed class FakeOathSession : IOathSession
     {
         private readonly byte[] _derivedKey = [0x01, 0x02, 0x03, 0x04];
@@ -123,7 +122,6 @@ public sealed class OathHelpersTests
         }
 
         public bool IsSupported(Feature feature) => true;
-        public void EnsureSupports(Feature feature) { }
         public Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task PutCredentialAsync(CredentialData credentialData, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task DeleteCredentialAsync(Credential credential, CancellationToken cancellationToken = default) => throw new NotSupportedException();

@@ -43,7 +43,7 @@ public static class Attestation
     /// await using var session = await device.CreatePivSessionAsync(ct);
     /// 
     /// var result = await Attestation.GetAttestationAsync(
-    ///     session, PivSlot.Authentication, ct);
+    ///     session, Slot.Authentication, ct);
     /// 
     /// if (result.Success)
     /// {
@@ -54,7 +54,7 @@ public static class Attestation
     /// </example>
     public static async Task<AttestationResult> GetAttestationAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -102,7 +102,7 @@ public static class Attestation
         try
         {
             // The attestation intermediate is stored in slot F9
-            var intermediateCert = await session.GetCertificateAsync(PivSlot.Attestation, cancellationToken);
+            var intermediateCert = await session.GetCertificateAsync(Slot.Attestation, cancellationToken);
             if (intermediateCert is null)
             {
                 return AttestationResult.Failed("No attestation intermediate certificate found.");

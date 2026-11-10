@@ -33,16 +33,16 @@ public class PivAuditHardwareReproTests
         {
             await setup.ResetAsync();
             await setup.AuthenticateAsync(ManagementKey);
-            publicKey = (ECPublicKey)await setup.GenerateKeyAsync(PivSlot.Authentication,
-                PivAlgorithm.EccP256,
-                new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never });
+            publicKey = (ECPublicKey)await setup.GenerateKeyAsync(Slot.Authentication,
+                KeyType.P256,
+                new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never });
         }
 
         // The 6982 baseline proves the key is not usable without verification after reset.
         await using (var baseline = await state.Device.CreatePivSessionAsync())
         {
             InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                baseline.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest));
+                baseline.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
             Assert.Contains("Security status not satisfied", exception.Message, StringComparison.Ordinal);
         }
 
@@ -58,7 +58,7 @@ public class PivAuditHardwareReproTests
         await using var unverified = await state.Device.CreatePivSessionAsync();
         ReadOnlyMemory<byte> signature = ReadOnlyMemory<byte>.Empty;
         Exception? rejection = await Record.ExceptionAsync(async () =>
-            signature = await unverified.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest));
+            signature = await unverified.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
         if (rejection is null)
         {
             using var ecdsa = ECDsa.Create();
@@ -79,16 +79,16 @@ public class PivAuditHardwareReproTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(ManagementKey);
-        var publicKey = (Curve25519PublicKey)await session.GenerateKeyAsync(PivSlot.Authentication,
-            PivAlgorithm.Ed25519,
-            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never });
+        var publicKey = (Curve25519PublicKey)await session.GenerateKeyAsync(Slot.Authentication,
+            KeyType.Ed25519,
+            new KeyCreationOptions { PinPolicy = PinPolicy.Once, TouchPolicy = TouchPolicy.Never });
         await session.VerifyPinAsync("123456"u8.ToArray());
 
         foreach (int length in new[] { 10, 64 })
         {
             byte[] message = Enumerable.Range(1, length).Select(i => (byte)i).ToArray();
             ReadOnlyMemory<byte> signature = await session.SignOrDecryptAsync(
-                PivSlot.Authentication, PivAlgorithm.Ed25519, message);
+                Slot.Authentication, KeyType.Ed25519, message);
             Assert.Equal(64, signature.Length);
             await AssertOpenSslVerifiesAsync(publicKey.ExportSubjectPublicKeyInfo(), message, signature.ToArray());
         }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -25,7 +26,7 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Piv.Authentication;
-using Yubico.YubiKit.Piv.Backend;
+using Yubico.YubiKit.Piv.Backends;
 using Yubico.YubiKit.Piv.Bio;
 using Yubico.YubiKit.Piv.Certificates;
 using Yubico.YubiKit.Piv.Cryptography;
@@ -40,19 +41,18 @@ namespace Yubico.YubiKit.Piv;
 /// </summary>
 public sealed class PivSession : ApplicationSession, IPivSession
 {
+    private const byte Cla = 0x00;
+    private const byte UnusedParameter = 0x00;
+
     // PIV instruction bytes
-    private const byte InsVerify = 0x20;
     private const byte InsReset = 0xFB;
 
-    // PIV P2 parameter bytes
-    private const byte P2Pin = 0x80;
-    private const byte P2Puk = 0x81;
-
-    private IPivBackend? _backend;
+    private IBackend? _backend;
     private bool _isAuthenticated;
+    private FirmwareVersion _detectedFirmwareVersion = new(0, 0, 0);
 
     /// <inheritdoc />
-    public PivManagementKeyType ManagementKeyType { get; private set; } = PivManagementKeyType.TripleDes;
+    public KeyType? ManagementKeyType { get; private set; } = KeyType.TripleDes;
 
     /// <summary>
     /// Gets the well-known 24-byte factory-default PIV management key value.
@@ -61,7 +61,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// The same bytes are used with Triple-DES and AES-192 defaults. Use
     /// <see cref="ManagementKeyType"/> to determine the active algorithm.
     /// </remarks>
-    public static ReadOnlySpan<byte> DefaultManagementKey => PivAuthenticationProtocol.DefaultManagementKey;
+    public static ReadOnlySpan<byte> DefaultManagementKey => AuthenticationProtocol.DefaultManagementKey;
 
     /// <summary>
     /// Gets whether the session has been authenticated with the management key.
@@ -124,15 +124,15 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
             .ConfigureAwait(false);
-        var backend = new PivBackend(protocol);
+        var backend = new SmartCardBackend(protocol);
 
         try
         {
-            // Note: PIV GET VERSION returns the PIV application version (often 0.0.1),
-            // not the YubiKey firmware version. Feature detection should use metadata
-            // commands rather than version comparisons.
+            // Production applet versions match firmware. Major zero is development firmware;
+            // Core's feature evaluation deliberately treats it as current.
             var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
             var detectedFirmwareVersion = initialization.FirmwareVersion;
+            _detectedFirmwareVersion = detectedFirmwareVersion;
             var effectiveFirmwareVersion = firmwareVersionOverride ?? detectedFirmwareVersion;
             Logger.LogDebug("PIV firmware version: {Version}", detectedFirmwareVersion);
 
@@ -147,35 +147,14 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
             if (!ReferenceEquals(protocol, effectiveProtocol))
             {
-                backend = new PivBackend(effectiveProtocol);
+                backend = new SmartCardBackend(effectiveProtocol);
             }
 
             _backend = backend;
 
             // Detect management key type from device metadata (firmware 5.3+)
             // This is critical for YubiKey 5.7+ which defaults to AES-192 instead of 3DES
-            ManagementKeyType = GetConservativeDefaultManagementKeyType(detectedFirmwareVersion);
-            try
-            {
-                var metadata = await PivMetadataProtocol.GetManagementKeyMetadataAsync(
-                    backend, Logger, cancellationToken).ConfigureAwait(false);
-                ManagementKeyType = metadata.KeyType;
-                Logger.LogDebug("Management key type detected from metadata: {KeyType}", ManagementKeyType);
-            }
-            catch (NotSupportedException)
-            {
-                Logger.LogDebug(
-                    "Management key metadata not supported, using conservative {KeyType} fallback",
-                    ManagementKeyType);
-            }
-            catch (ApduException ex) when (ex.SW == 0x6A88 || ex.SW == 0x6D00)
-            {
-                // 0x6A88 = Referenced data not found, 0x6D00 = Instruction not supported
-                Logger.LogDebug(
-                    "Management key metadata query failed (SW={SW:X4}), using conservative {KeyType} fallback",
-                    ex.SW,
-                    ManagementKeyType);
-            }
+            ManagementKeyType = await ResolveManagementKeyTypeAsync(backend, cancellationToken).ConfigureAwait(false);
 
             Logger.LogInformation("PIV session initialized successfully. Version: {Version}", detectedFirmwareVersion);
         }
@@ -187,46 +166,17 @@ public sealed class PivSession : ApplicationSession, IPivSession
     }
 
     /// <inheritdoc />
-    public async Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
+    public Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        EnsureSupports(PivFeatures.Serial);
-        EnsureBackend();
-
-        Logger.LogDebug("PIV: Getting YubiKey serial number");
-
-        var command = new ApduCommand(0x00, 0xF8, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
-        var response = await _backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
-
-        // 0x6D00 means INS not supported (firmware < 5.0.0)
-        if (response.SW == 0x6D00)
-        {
-            throw new NotSupportedException("Serial number retrieval requires firmware 5.0.0 or later");
-        }
-
-        if (!response.IsOK())
-        {
-            throw ApduException.FromStatusWord(response.SW, "Failed to get serial number");
-        }
-
-        if (response.Data.Length != 4)
-        {
-            throw new ApduException("Invalid serial number response length");
-        }
-
-        // Serial is returned as big-endian 4-byte integer
-        var serialBytes = response.Data.Span;
-        var serial = (serialBytes[0] << 24) | (serialBytes[1] << 16) | (serialBytes[2] << 8) | serialBytes[3];
-
-        Logger.LogDebug("PIV: Retrieved serial number: {Serial}", serial);
-        return serial;
+        EnsureBackend(cancellationToken);
+        EnsureSupports(Features.Serial);
+        return MetadataProtocol.GetSerialNumberAsync(_backend, cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
         Logger.LogDebug("PIV: Resetting PIV application");
 
@@ -240,7 +190,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         await BlockPukAsync(cancellationToken).ConfigureAwait(false);
 
         // Step 3: Send RESET command
-        var resetCommand = new ApduCommand(0x00, InsReset, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var resetCommand = new ApduCommand(Cla, InsReset, UnusedParameter, UnusedParameter, ReadOnlyMemory<byte>.Empty);
         var response = await _backend.SendAsync(resetCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
@@ -254,19 +204,10 @@ public sealed class PivSession : ApplicationSession, IPivSession
         // RESET changed the physical applet even if the metadata refresh below fails. Establish a
         // conservative post-reset type before querying: a >=5.7 version defaults to AES-192, and an
         // alpha/beta version counts as >=5.7 because such a key is at least 5.8.0.
-        ManagementKeyType = GetConservativeDefaultManagementKeyType(FirmwareVersion);
+        ManagementKeyType = GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
 
         // Update management key type from metadata (firmware 5.3+)
-        try
-        {
-            var metadata = await GetManagementKeyMetadataAsync(cancellationToken).ConfigureAwait(false);
-            ManagementKeyType = metadata.KeyType;
-            Logger.LogDebug("PIV: Reset - management key type is {KeyType}", ManagementKeyType);
-        }
-        catch (NotSupportedException)
-        {
-            Logger.LogDebug("PIV: Reset - metadata not supported, using conservative {KeyType} fallback", ManagementKeyType);
-        }
+        ManagementKeyType = await ResolveManagementKeyTypeAsync(_backend, cancellationToken).ConfigureAwait(false);
 
         Logger.LogDebug("PIV: Reset completed successfully");
     }
@@ -279,17 +220,34 @@ public sealed class PivSession : ApplicationSession, IPivSession
     ///     beta version, which is intended: such a key is at least 5.8.0 and therefore defaults to AES-192.
     ///     Excluding it here would assume Triple-DES for a development key that does not use it.
     /// </remarks>
-    private static PivManagementKeyType GetConservativeDefaultManagementKeyType(FirmwareVersion firmwareVersion) =>
+    private static KeyType GetConservativeDefaultManagementKeyType(FirmwareVersion firmwareVersion) =>
         firmwareVersion.IsAtLeast(5, 7, 0)
-            ? PivManagementKeyType.Aes192
-            : PivManagementKeyType.TripleDes;
+            ? KeyType.Aes192
+            : KeyType.TripleDes;
+
+    private async Task<KeyType?> ResolveManagementKeyTypeAsync(IBackend backend, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return (await MetadataProtocol.GetManagementKeyMetadataAsync(backend, cancellationToken)
+                .ConfigureAwait(false)).KeyType;
+        }
+        catch (NotSupportedException)
+        {
+            return GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
+        }
+        catch (ApduException ex) when (ex.SW == SWConstants.DataNotFound)
+        {
+            return GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
+        }
+    }
 
     /// <summary>
     /// Blocks the PIN by repeatedly verifying with an empty PIN until blocked.
     /// </summary>
     private async Task BlockPinAsync(CancellationToken cancellationToken)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
         Logger.LogDebug("PIV: Blocking PIN");
 
         // Get initial retry count
@@ -305,26 +263,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
             retriesRemaining = 15;
         }
 
-        // Empty PIN encodes as 8 bytes of 0xFF
-        byte[] emptyPin = PivPinUtilities.EncodePinBytes(ReadOnlySpan<char>.Empty);
-        try
-        {
-            while (retriesRemaining > 0)
-            {
-                var pinCommand = new ApduCommand(0x00, InsVerify, 0x00, P2Pin, emptyPin);
-                var response = await _backend.SendAsync(pinCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
-
-                retriesRemaining = PivPinUtilities.GetRetriesFromStatusWord(response.SW);
-                if (retriesRemaining < 0)
-                {
-                    throw ApduException.FromStatusWord(response.SW, "Failed to block PIN");
-                }
-            }
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(emptyPin);
-        }
+        await AuthenticationProtocol.BlockPinAsync(_backend, retriesRemaining, cancellationToken).ConfigureAwait(false);
 
         Logger.LogDebug("PIV: PIN blocked");
     }
@@ -334,8 +273,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// </summary>
     private Task BlockPukAsync(CancellationToken cancellationToken)
     {
-        EnsureBackend();
-        return PivMetadataProtocol.BlockPukAsync(_backend, Logger, cancellationToken);
+        EnsureBackend(cancellationToken);
+        return AuthenticationProtocol.BlockPukAsync(_backend, cancellationToken);
     }
 
     /// <summary>
@@ -344,137 +283,170 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>PIN metadata including retry counts and status.</returns>
     /// <exception cref="NotSupportedException">Thrown on firmware older than 5.3.0.</exception>
-    public async Task<PivPinMetadata> GetPinMetadataAsync(CancellationToken cancellationToken = default)
+    public Task<PinMetadata> GetPinMetadataAsync(CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        EnsureSupports(Features.Metadata);
 
-        return await PivMetadataProtocol.GetPinMetadataAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+        return MetadataProtocol.GetPinMetadataAsync(_backend, cancellationToken);
     }
 
     public async Task AuthenticateAsync(ReadOnlyMemory<byte> managementKey, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        // Readiness/disposal admission precedes state mutation; cancellation is an attempted
+        // authentication failure and must not leave a previous success published.
+        EnsureBackend(CancellationToken.None);
 
         SetManagementKeyAuthenticationState(false);
-        await PivAuthenticationProtocol.AuthenticateAsync(_backend, Logger, ManagementKeyType, managementKey, cancellationToken)
+        cancellationToken.ThrowIfCancellationRequested();
+        await AuthenticationProtocol.AuthenticateAsync(_backend, RequireManagementKeyType(), managementKey, cancellationToken)
             .ConfigureAwait(false);
         SetManagementKeyAuthenticationState(true);
     }
 
-    public async Task VerifyPinAsync(ReadOnlyMemory<byte> pinUtf8, CancellationToken cancellationToken = default)
+    public Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivAuthenticationProtocol.VerifyPinAsync(_backend, Logger, pinUtf8, cancellationToken).ConfigureAwait(false);
+        return AuthenticationProtocol.VerifyPinAsync(_backend, pin, cancellationToken);
     }
 
     public async Task<int> GetPinAttemptsAsync(CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        return await PivAuthenticationProtocol.GetPinAttemptsAsync(
-            _backend,
-            Logger,
-            IsSupported(PivFeatures.Metadata),
-            GetPinMetadataAsync,
-            cancellationToken).ConfigureAwait(false);
+        if (IsSupported(Features.Metadata))
+        {
+            // Choose between supported implementations, rather than requiring metadata: older keys
+            // still support the no-data VERIFY retry query. GetPinMetadataAsync itself enforces metadata.
+            try
+            {
+                return (await MetadataProtocol.GetPinMetadataAsync(_backend, cancellationToken)
+                    .ConfigureAwait(false)).RetriesRemaining;
+            }
+            catch (NotSupportedException)
+            {
+                // Only an unsupported metadata instruction permits the no-data VERIFY fallback.
+            }
+        }
+        return await AuthenticationProtocol.GetPinAttemptsAsync(_backend, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task ChangePinAsync(ReadOnlyMemory<byte> currentPinUtf8, ReadOnlyMemory<byte> newPinUtf8, CancellationToken cancellationToken = default)
+    public Task ChangePinAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivAuthenticationProtocol.ChangePinAsync(_backend, Logger, currentPinUtf8, newPinUtf8, cancellationToken).ConfigureAwait(false);
+        return AuthenticationProtocol.ChangePinAsync(_backend, currentPin, newPin, cancellationToken);
     }
 
-    public async Task ChangePukAsync(ReadOnlyMemory<byte> currentPukUtf8, ReadOnlyMemory<byte> newPukUtf8, CancellationToken cancellationToken = default)
+    public Task ChangePukAsync(ReadOnlyMemory<byte> currentPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivMetadataProtocol.ChangePukAsync(_backend, Logger, currentPukUtf8, newPukUtf8, cancellationToken).ConfigureAwait(false);
+        return AuthenticationProtocol.ChangePukAsync(_backend, currentPuk, newPuk, cancellationToken);
     }
 
-    public async Task UnblockPinAsync(ReadOnlyMemory<byte> pukUtf8, ReadOnlyMemory<byte> newPinUtf8, CancellationToken cancellationToken = default)
+    public Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivMetadataProtocol.UnblockPinAsync(_backend, Logger, pukUtf8, newPinUtf8, cancellationToken).ConfigureAwait(false);
+        return AuthenticationProtocol.UnblockPinAsync(_backend, puk, newPin, cancellationToken);
     }
 
-    public async Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default)
+    public Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivMetadataProtocol.SetPinAttemptsAsync(_backend, Logger, _isAuthenticated, pinAttempts, pukAttempts, cancellationToken).ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return AuthenticationProtocol.SetPinAttemptsAsync(_backend, pinAttempts, pukAttempts, cancellationToken);
     }
 
     public async Task<IPublicKey> GenerateKeyAsync(
-        PivSlot slot,
-        PivAlgorithm algorithm,
-        PivKeyCreationOptions? options = null,
+        Slot slot,
+        KeyType keyType,
+        KeyCreationOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
 
-        var pinPolicy = options?.PinPolicy ?? PivPinPolicy.Default;
-        var touchPolicy = options?.TouchPolicy ?? PivTouchPolicy.Default;
+        var pinPolicy = options?.PinPolicy ?? PinPolicy.Default;
+        var touchPolicy = options?.TouchPolicy ?? TouchPolicy.Default;
 
-        return await PivKeyProtocol.GenerateKeyAsync(_backend, Logger, _isAuthenticated, slot, algorithm, pinPolicy, touchPolicy, cancellationToken)
+        EnsureKeyOperationSupported(keyType, pinPolicy, touchPolicy, generate: true);
+        await EnsureBiometricPolicySupportedAsync(pinPolicy, cancellationToken).ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return await KeyProtocol.GenerateKeyAsync(_backend, slot, keyType, pinPolicy, touchPolicy, cancellationToken)
             .ConfigureAwait(false);
     }
 
-    public async Task<PivAlgorithm> ImportKeyAsync(
-        PivSlot slot,
+    public async Task ImportKeyAsync(
+        Slot slot,
         IPrivateKey privateKey,
-        PivKeyCreationOptions? options = null,
+        KeyCreationOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
 
-        var pinPolicy = options?.PinPolicy ?? PivPinPolicy.Default;
-        var touchPolicy = options?.TouchPolicy ?? PivTouchPolicy.Default;
+        var pinPolicy = options?.PinPolicy ?? PinPolicy.Default;
+        var touchPolicy = options?.TouchPolicy ?? TouchPolicy.Default;
 
-        return await PivKeyProtocol.ImportKeyAsync(_backend, Logger, _isAuthenticated, slot, privateKey, pinPolicy, touchPolicy, cancellationToken)
+        ArgumentNullException.ThrowIfNull(privateKey);
+        EnsureKeyOperationSupported(privateKey.KeyType, pinPolicy, touchPolicy, generate: false);
+        await EnsureBiometricPolicySupportedAsync(pinPolicy, cancellationToken).ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        await KeyProtocol.ImportKeyAsync(_backend, slot, privateKey, pinPolicy, touchPolicy, cancellationToken)
             .ConfigureAwait(false);
     }
 
-    public async Task MoveKeyAsync(PivSlot sourceSlot, PivSlot destinationSlot, CancellationToken cancellationToken = default)
+    public Task MoveKeyAsync(Slot sourceSlot, Slot destinationSlot, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(sourceSlot);
+        ValidateSlot(destinationSlot);
+        EnsureSupports(Features.MoveKey);
 
-        await PivKeyProtocol.MoveKeyAsync(_backend, Logger, _isAuthenticated, sourceSlot, destinationSlot, cancellationToken).ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return KeyProtocol.MoveKeyAsync(_backend, sourceSlot, destinationSlot, cancellationToken);
     }
 
-    public async Task DeleteKeyAsync(PivSlot slot, CancellationToken cancellationToken = default)
+    public Task DeleteKeyAsync(Slot slot, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
+        EnsureSupports(Features.MoveKey);
 
-        await PivKeyProtocol.DeleteKeyAsync(_backend, Logger, _isAuthenticated, slot, cancellationToken).ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return KeyProtocol.DeleteKeyAsync(_backend, slot, cancellationToken);
     }
 
-    public async Task<X509Certificate2> AttestKeyAsync(PivSlot slot, CancellationToken cancellationToken = default)
+    public Task<X509Certificate2> AttestKeyAsync(Slot slot, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
+        EnsureSupports(Features.Attestation);
 
-        return await PivKeyProtocol.AttestKeyAsync(_backend, Logger, slot, cancellationToken).ConfigureAwait(false);
+        return KeyProtocol.AttestKeyAsync(_backend, slot, cancellationToken);
     }
 
     // Both overloads are established alpha entry points: one explicit algorithm and one metadata-driven.
 #pragma warning disable RS0026
-    public async Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
-        PivSlot slot,
-        PivAlgorithm algorithm,
+    public async Task<Memory<byte>> SignOrDecryptAsync(
+        Slot slot,
+        KeyType keyType,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
+        EnsureKeyOperationSupported(keyType, PinPolicy.Default, TouchPolicy.Default, generate: false);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(slot, UserPresenceOperations.Piv.SignOrDecrypt, cancellationToken).ConfigureAwait(false));
         return await SignOrDecryptWithUserPresenceAsync(
                 slot,
-                algorithm,
+                keyType,
                 data,
                 userPresenceNotification,
                 cancellationToken)
@@ -484,20 +456,21 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     // Metadata-based algorithm discovery is intentionally a second established alpha overload.
 #pragma warning disable RS0026
-    public async Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
-        PivSlot slot,
+    public async Task<Memory<byte>> SignOrDecryptAsync(
+        Slot slot,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
 
-        Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting algorithm for slot 0x{Slot:X2}", (byte)slot);
+        Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting key type for slot 0x{Slot:X2}", (byte)slot);
 
-        if (!IsSupported(PivFeatures.Metadata))
+        if (!IsSupported(Features.Metadata))
         {
             throw new NotSupportedException(
-                $"Auto-detecting algorithm requires YubiKey firmware 5.3 or later. " +
-                $"Current firmware: {FirmwareVersion}. Use the overload that accepts an explicit algorithm parameter.");
+                $"Auto-detecting key type requires YubiKey firmware 5.3 or later. " +
+                $"Current firmware: {FirmwareVersion}. Use the overload that accepts an explicit keyType parameter.");
         }
 
         var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
@@ -509,13 +482,14 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
 
         var slotMetadata = metadata.Value;
-        Logger.LogDebug("PIV: Auto-detected algorithm {Algorithm} for slot 0x{Slot:X2}", slotMetadata.Algorithm, (byte)slot);
+        var keyType = slotMetadata.RequireKeyType();
+        EnsureKeyOperationSupported(keyType, PinPolicy.Default, TouchPolicy.Default, generate: false);
 
         UserPresenceNotification userPresenceNotification =
             CreateUserPresenceNotification(CreateUserPresenceContext(slot, slotMetadata, UserPresenceOperations.Piv.SignOrDecrypt));
         return await SignOrDecryptWithUserPresenceAsync(
                 slot,
-                slotMetadata.Algorithm,
+                keyType,
                 data,
                 userPresenceNotification,
                 cancellationToken)
@@ -523,23 +497,27 @@ public sealed class PivSession : ApplicationSession, IPivSession
     }
 #pragma warning restore RS0026
 
-    public async Task<ReadOnlyMemory<byte>> DecryptAsync(
-        PivSlot slot,
+    public async Task<Memory<byte>> DecryptAsync(
+        Slot slot,
         ReadOnlyMemory<byte> cipherText,
         RSAEncryptionPadding padding,
         CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
 
         var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
         UserPresenceNotification userPresenceNotification =
             CreateUserPresenceNotification(CreateUserPresenceContext(slot, metadata, UserPresenceOperations.Piv.Decrypt));
 
+        if (metadata is { } slotMetadata)
+            EnsureKeyOperationSupported(slotMetadata.RequireKeyType(), PinPolicy.Default, TouchPolicy.Default, generate: false);
+
         return await RunWithUserPresenceResolutionAsync(
                 userPresenceNotification,
-                token => PivCryptographicOperations.DecryptAsync(
+                token => PrivateKeyOperations.DecryptAsync(
                     _backend,
-                    Logger,
+
                     metadata,
                     slot,
                     cipherText,
@@ -550,20 +528,23 @@ public sealed class PivSession : ApplicationSession, IPivSession
             .ConfigureAwait(false);
     }
 
-    public async Task<ReadOnlyMemory<byte>> CalculateSecretAsync(
-        PivSlot slot,
+    public async Task<Memory<byte>> CalculateSecretAsync(
+        Slot slot,
         IPublicKey peerPublicKey,
         CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
+        ArgumentNullException.ThrowIfNull(peerPublicKey);
+        EnsureKeyOperationSupported(peerPublicKey.KeyType, PinPolicy.Default, TouchPolicy.Default, generate: false);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(slot, UserPresenceOperations.Piv.CalculateSecret, cancellationToken).ConfigureAwait(false));
         return await RunWithUserPresenceResolutionAsync(
                 userPresenceNotification,
-                token => PivCryptographicOperations.CalculateSecretAsync(
+                token => PrivateKeyOperations.CalculateSecretAsync(
                     _backend,
-                    Logger,
+
                     slot,
                     peerPublicKey,
                     userPresenceNotification,
@@ -572,190 +553,218 @@ public sealed class PivSession : ApplicationSession, IPivSession
             .ConfigureAwait(false);
     }
 
-    public async Task<X509Certificate2?> GetCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default)
+    public Task<X509Certificate2?> GetCertificateAsync(Slot slot, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
 
-        return await PivCertificateProtocol.GetCertificateAsync(_backend, Logger, slot, cancellationToken).ConfigureAwait(false);
+        return CertificateProtocol.GetCertificateAsync(_backend, slot, cancellationToken);
     }
 
-    public async Task StoreCertificateAsync(
-        PivSlot slot,
+    public Task StoreCertificateAsync(
+        Slot slot,
         X509Certificate2 certificate,
-        PivCertificateCompression compression = PivCertificateCompression.Automatic,
+        CertificateCompression compression = CertificateCompression.Automatic,
         CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
 
-        await PivCertificateProtocol.StoreCertificateAsync(_backend, Logger, _isAuthenticated, slot, certificate, compression, cancellationToken)
-            .ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return CertificateProtocol.StoreCertificateAsync(_backend, slot, certificate, compression, cancellationToken);
     }
 
-    public async Task DeleteCertificateAsync(PivSlot slot, CancellationToken cancellationToken = default)
+    public Task DeleteCertificateAsync(Slot slot, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
 
-        await PivCertificateProtocol.DeleteCertificateAsync(_backend, Logger, _isAuthenticated, slot, cancellationToken).ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return CertificateProtocol.DeleteCertificateAsync(_backend, slot, cancellationToken);
     }
 
-    public async Task<PivPukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default)
+    public Task<PukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        EnsureSupports(Features.Metadata);
 
-        return await PivMetadataProtocol.GetPukMetadataAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+        return MetadataProtocol.GetPukMetadataAsync(_backend, cancellationToken);
     }
 
-    public async Task<PivManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default)
+    public Task<ManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        EnsureSupports(Features.Metadata);
 
-        return await PivMetadataProtocol.GetManagementKeyMetadataAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+        return MetadataProtocol.GetManagementKeyMetadataAsync(_backend, cancellationToken);
     }
 
-    public async Task<PivSlotMetadata?> GetSlotMetadataAsync(PivSlot slot, CancellationToken cancellationToken = default)
+    public Task<SlotMetadata?> GetSlotMetadataAsync(Slot slot, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        ValidateSlot(slot);
+        EnsureSupports(Features.Metadata);
 
-        return await PivMetadataProtocol.GetSlotMetadataAsync(_backend, Logger, slot, cancellationToken).ConfigureAwait(false);
+        return MetadataProtocol.GetSlotMetadataAsync(_backend, slot, cancellationToken);
     }
 
-    public async Task<PivBioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default)
+    public Task<BioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        return await PivBioProtocol.GetBioMetadataAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+        return BioProtocol.GetBioMetadataAsync(_backend, cancellationToken);
     }
 
-    public async Task<ReadOnlyMemory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default)
+    public async Task<Memory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        return await PivDataObjectProtocol.GetObjectAsync(_backend, objectId, cancellationToken).ConfigureAwait(false);
+        return await DataObjectProtocol.GetObjectAsync(_backend, objectId, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task PutObjectAsync(int objectId, ReadOnlyMemory<byte>? data, CancellationToken cancellationToken = default)
+    public Task PutObjectAsync(int objectId, ReadOnlyMemory<byte>? data, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivDataObjectProtocol.PutObjectAsync(_backend, _isAuthenticated, objectId, data, cancellationToken).ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return DataObjectProtocol.PutObjectAsync(_backend, objectId, data, cancellationToken);
     }
 
-    public async Task<PivCardholderUniqueId> GetCardholderUniqueIdAsync(CancellationToken cancellationToken = default)
+    public Task<CardholderUniqueId> GetCardholderUniqueIdAsync(CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        return await PivTypedDataObjectProtocol.GetCardholderUniqueIdAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+        return TypedDataObjectProtocol.GetCardholderUniqueIdAsync(_backend, cancellationToken);
     }
 
-    public async Task SetCardholderUniqueIdAsync(PivCardholderUniqueId cardholderUniqueId, CancellationToken cancellationToken = default)
+    public Task SetCardholderUniqueIdAsync(CardholderUniqueId cardholderUniqueId, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivTypedDataObjectProtocol.SetCardholderUniqueIdAsync(_backend, Logger, _isAuthenticated, cardholderUniqueId, cancellationToken)
-            .ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return TypedDataObjectProtocol.SetCardholderUniqueIdAsync(_backend, cardholderUniqueId, cancellationToken);
     }
 
-    public async Task<PivCardCapabilityContainer> GetCardCapabilityContainerAsync(CancellationToken cancellationToken = default)
+    public Task<CardCapabilityContainer> GetCardCapabilityContainerAsync(CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        return await PivTypedDataObjectProtocol.GetCardCapabilityContainerAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+        return TypedDataObjectProtocol.GetCardCapabilityContainerAsync(_backend, cancellationToken);
     }
 
-    public async Task SetCardCapabilityContainerAsync(PivCardCapabilityContainer cardCapabilityContainer, CancellationToken cancellationToken = default)
+    public Task SetCardCapabilityContainerAsync(CardCapabilityContainer cardCapabilityContainer, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivTypedDataObjectProtocol.SetCardCapabilityContainerAsync(_backend, Logger, _isAuthenticated, cardCapabilityContainer, cancellationToken)
-            .ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return TypedDataObjectProtocol.SetCardCapabilityContainerAsync(_backend, cardCapabilityContainer, cancellationToken);
     }
 
-    public async Task<PivAdminData> GetAdminDataAsync(CancellationToken cancellationToken = default)
+    public Task<AdminData> GetAdminDataAsync(CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        return await PivTypedDataObjectProtocol.GetAdminDataAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+        return TypedDataObjectProtocol.GetAdminDataAsync(_backend, cancellationToken);
     }
 
-    public async Task SetAdminDataAsync(PivAdminData adminData, CancellationToken cancellationToken = default)
+    public Task SetAdminDataAsync(AdminData adminData, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivTypedDataObjectProtocol.SetAdminDataAsync(_backend, Logger, _isAuthenticated, adminData, cancellationToken).ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return TypedDataObjectProtocol.SetAdminDataAsync(_backend, adminData, cancellationToken);
     }
 
-    public async Task<PivKeyHistory> GetKeyHistoryAsync(CancellationToken cancellationToken = default)
+    public Task<KeyHistory> GetKeyHistoryAsync(CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        return await PivTypedDataObjectProtocol.GetKeyHistoryAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+        return TypedDataObjectProtocol.GetKeyHistoryAsync(_backend, cancellationToken);
     }
 
-    public async Task SetKeyHistoryAsync(PivKeyHistory keyHistory, CancellationToken cancellationToken = default)
+    public Task SetKeyHistoryAsync(KeyHistory keyHistory, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivTypedDataObjectProtocol.SetKeyHistoryAsync(_backend, Logger, _isAuthenticated, keyHistory, cancellationToken).ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        return TypedDataObjectProtocol.SetKeyHistoryAsync(_backend, keyHistory, cancellationToken);
     }
 
-    public async Task<PivPinOnlyMode> GetPinOnlyModeAsync(CancellationToken cancellationToken = default)
+    public Task<PinOnlyMode> GetPinOnlyModeAsync(CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        return await PivPinOnlyProtocol.GetPinOnlyModeAsync(_backend, Logger, cancellationToken).ConfigureAwait(false);
+        return PinOnlyProtocol.GetPinOnlyModeAsync(_backend, cancellationToken);
     }
 
-    public async Task<PivPinOnlyMode> RecoverPinOnlyModeAsync(ReadOnlyMemory<byte> pinUtf8, CancellationToken cancellationToken = default)
+    public Task<PinOnlyMode> RecoverPinOnlyModeAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
-
-        return await PivPinOnlyProtocol.RecoverPinOnlyModeAsync(
-            _backend,
-            Logger,
-            ManagementKeyType,
-            pinUtf8,
-            (key, ct) => AuthenticateAsync(key, ct),
-            (p, ct) => VerifyPinAsync(p, ct),
-            cancellationToken).ConfigureAwait(false);
+        EnsureBackend(cancellationToken);
+        return RecoverPinOnlyModeCoreAsync(pin, cancellationToken);
     }
 
     public async Task SetPinOnlyModeAsync(
-        PivPinOnlyMode pinOnlyMode,
-        ReadOnlyMemory<byte> pinUtf8,
+        PinOnlyMode pinOnlyMode,
+        ReadOnlyMemory<byte> pin,
         ReadOnlyMemory<byte>? managementKey = null,
         CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        EnsureManagementKeyAuthenticated();
 
-        await PivPinOnlyProtocol.SetPinOnlyModeAsync(
-            _backend,
-            Logger,
-            _isAuthenticated,
-            ManagementKeyType,
-            pinOnlyMode,
-            pinUtf8,
-            managementKey,
-            (key, ct) => AuthenticateAsync(key, ct),
-            (p, ct) => VerifyPinAsync(p, ct),
-            (type, key, touch, ct) => SetManagementKeyAsync(type, key, touch, ct),
-            cancellationToken).ConfigureAwait(false);
+        // Only the protected-mode bit may be set; zero disables PIN-only mode. Derived/unavailable
+        // bits describe existing state and are not legal requests for creating a new mode.
+        if ((pinOnlyMode & ~(PinOnlyMode.None | PinOnlyMode.PinProtected)) != 0)
+        {
+            throw new ArgumentException(
+                "Only PinOnlyMode.None (disable) and PinOnlyMode.PinProtected (enable) are " +
+                "supported. PIN-derived management keys are deprecated and cannot be enabled through " +
+                "this API.",
+                nameof(pinOnlyMode));
+        }
+
+        if (pinOnlyMode == PinOnlyMode.PinProtected)
+        {
+            if (pin.Length is < 6 or > 8)
+                throw new ArgumentException("PIN must be 6-8 bytes.", nameof(pin));
+            if (managementKey is not { } keyToProtect)
+            {
+                throw new ArgumentNullException(nameof(managementKey), "A management key is required to enable PIN-protected mode.");
+            }
+
+            int expectedKeyLength = RequireManagementKeyType().GetKeySizeBytes();
+            if (keyToProtect.Length != expectedKeyLength)
+            {
+                throw new ArgumentException(
+                    $"Invalid management key length {keyToProtect.Length} for {ManagementKeyType}. Expected {expectedKeyLength} bytes.",
+                    nameof(managementKey));
+            }
+
+            await EnablePinProtectedModeAsync(pin, keyToProtect, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+        await DisablePinOnlyModeAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task SetManagementKeyAsync(
-        PivManagementKeyType keyType,
+        KeyType keyType,
         ReadOnlyMemory<byte> newKey,
         bool requireTouch = false,
         CancellationToken cancellationToken = default)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
+        _ = KeyTypeEncoding.EncodeManagement(keyType);
+        if (keyType != KeyType.TripleDes)
+            EnsureSupports(Features.AesKey);
+        if (requireTouch)
+            EnsureSupports(Features.UsagePolicy);
 
+        EnsureManagementKeyAuthenticated();
         try
         {
-            ManagementKeyType = await PivMetadataProtocol.SetManagementKeyAsync(
+            ManagementKeyType = await AuthenticationProtocol.SetManagementKeyAsync(
                 _backend,
-                Logger,
-                _isAuthenticated,
+
                 keyType,
                 newKey,
                 requireTouch,
@@ -768,40 +777,39 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
     }
 
-    public async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
-        PivUserVerification userVerification = PivUserVerification.Verify,
+    public async Task<Memory<byte>?> VerifyUvAsync(
+        UserVerification userVerification = UserVerification.Verify,
         CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        return await PivBioProtocol.VerifyUvAsync(_backend, Logger, userVerification, cancellationToken).ConfigureAwait(false);
+        var temporaryPin = await BioProtocol.VerifyUvAsync(_backend, userVerification, cancellationToken).ConfigureAwait(false);
+        return temporaryPin is null ? null : temporaryPin.AsMemory();
     }
 
-    public async Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default)
+    public Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
-        await PivBioProtocol.VerifyTemporaryPinAsync(_backend, Logger, temporaryPin, cancellationToken).ConfigureAwait(false);
+        return BioProtocol.VerifyTemporaryPinAsync(_backend, temporaryPin, cancellationToken);
     }
 
-    private Task<ReadOnlyMemory<byte>> SignOrDecryptWithUserPresenceAsync(
-        PivSlot slot,
-        PivAlgorithm algorithm,
+    private Task<byte[]> SignOrDecryptWithUserPresenceAsync(
+        Slot slot,
+        KeyType keyType,
         ReadOnlyMemory<byte> data,
         UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken)
     {
-        EnsureBackend();
+        EnsureBackend(cancellationToken);
 
         return RunWithUserPresenceResolutionAsync(
             userPresenceNotification,
-            token => PivCryptographicOperations.SignOrDecryptAsync(
+            token => PrivateKeyOperations.SignOrDecryptAsync(
                 _backend,
-                Logger,
+
                 slot,
-                algorithm,
+                keyType,
                 data,
                 userPresenceNotification,
                 token),
@@ -809,14 +817,14 @@ public sealed class PivSession : ApplicationSession, IPivSession
     }
 
     private async Task<UserPresenceContext?> GetUserPresenceContextAsync(
-        PivSlot slot,
+        Slot slot,
         string operation,
         CancellationToken cancellationToken)
     {
         if (!IsUserPresenceNotificationEnabled)
             return null;
 
-        if (!IsSupported(PivFeatures.Metadata))
+        if (!IsSupported(Features.Metadata))
             return CreateUserPresenceContext(slot, UserPresenceBasis.PolicyMayRequire, operation);
 
         try
@@ -832,8 +840,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
     }
 
     private static UserPresenceContext? CreateUserPresenceContext(
-        PivSlot slot,
-        PivSlotMetadata? metadata,
+        Slot slot,
+        SlotMetadata? metadata,
         string operation)
     {
         if (metadata is null)
@@ -841,16 +849,16 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         UserPresenceBasis? basis = metadata.Value.TouchPolicy switch
         {
-            PivTouchPolicy.Always => UserPresenceBasis.PolicyRequires,
-            PivTouchPolicy.Cached => UserPresenceBasis.PolicyMayRequire,
-            PivTouchPolicy.Never or PivTouchPolicy.Default => null,
+            TouchPolicy.Always => UserPresenceBasis.PolicyRequires,
+            TouchPolicy.Cached => UserPresenceBasis.PolicyMayRequire,
+            TouchPolicy.Never or TouchPolicy.Default => null,
             _ => UserPresenceBasis.PolicyMayRequire
         };
 
         return basis is { } value ? CreateUserPresenceContext(slot, value, operation) : null;
     }
 
-    private static UserPresenceContext CreateUserPresenceContext(PivSlot slot, UserPresenceBasis basis, string operation) =>
+    private static UserPresenceContext CreateUserPresenceContext(Slot slot, UserPresenceBasis basis, string operation) =>
         new()
         {
             Basis = basis,
@@ -858,14 +866,6 @@ public sealed class PivSession : ApplicationSession, IPivSession
             Operation = operation,
             Scope = slot.ToString()
         };
-
-    private void EnsureInitialized()
-    {
-        ThrowIfDisposed();
-
-        if (!IsInitialized)
-            throw new InvalidOperationException("Session is not initialized. Use PivSession.CreateAsync() to create a session.");
-    }
 
     protected override void Dispose(bool disposing)
     {
@@ -877,14 +877,214 @@ public sealed class PivSession : ApplicationSession, IPivSession
         Volatile.Write(ref _isAuthenticated, isAuthenticated);
 
     [MemberNotNull(nameof(_backend))]
-    private void EnsureBackend()
+    private void EnsureBackend(CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
+        if (!IsInitialized)
+            throw new InvalidOperationException("Session is not initialized. Use PivSession.CreateAsync() to create a session.");
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (_backend is null)
         {
-            throw new InvalidOperationException("PIV session is not initialized. Call InitializeAsync first.");
+            throw new InvalidOperationException("PIV session backend is unavailable.");
         }
     }
 
+    private void EnsureManagementKeyAuthenticated()
+    {
+        if (!IsManagementKeyAuthenticated)
+            throw new InvalidOperationException("Management key authentication required.");
+    }
+
+    private KeyType RequireManagementKeyType()
+    {
+        var known = ManagementKeyType ?? throw new NotSupportedException("The management-key algorithm is not recognized. Inspect its raw metadata identifier.");
+        _ = KeyTypeEncoding.EncodeManagement(known);
+        return known;
+    }
+
+    private void EnsureKeyOperationSupported(KeyType keyType, PinPolicy pinPolicy, TouchPolicy touchPolicy, bool generate)
+    {
+        _ = KeyTypeEncoding.EncodeAsymmetric(keyType);
+        Feature? feature = keyType switch
+        {
+            KeyType.P384 => Features.P384,
+            KeyType.Ed25519 or KeyType.X25519 => Features.Cv25519,
+            KeyType.Rsa3072 or KeyType.Rsa4096 => Features.Rsa3072Rsa4096,
+            _ => null
+        };
+        if (feature is { } required)
+            EnsureSupports(required);
+        EnsureKeyPoliciesSupported(pinPolicy, touchPolicy);
+        if (generate && keyType.IsRsa() && !Features.SupportsRsaGeneration(FirmwareVersion))
+            throw new NotSupportedException("RSA key generation is disabled on ROCA-affected firmware 4.2.6–4.3.4.");
+        EnsureFipsKeyPolicySupported(keyType, pinPolicy);
+    }
+
+    private void EnsureKeyPoliciesSupported(PinPolicy pinPolicy, TouchPolicy touchPolicy)
+    {
+        if (!Enum.IsDefined(pinPolicy) || !Enum.IsDefined(touchPolicy))
+            throw new ArgumentException("Unknown PIV key policy.");
+        if (pinPolicy != PinPolicy.Default || touchPolicy != TouchPolicy.Default)
+            EnsureSupports(Features.UsagePolicy);
+        if (touchPolicy == TouchPolicy.Cached)
+            EnsureSupports(Features.TouchCached);
+    }
+
+    private async Task EnsureBiometricPolicySupportedAsync(PinPolicy policy, CancellationToken cancellationToken)
+    {
+        // Probe the Bio metadata capability for MATCH policies. A successful response proves support,
+        // not fingerprint enrollment: intentionally do not reject IsConfigured == false (Python parity).
+        if (policy is PinPolicy.MatchOnce or PinPolicy.MatchAlways)
+            _ = await GetBioMetadataAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private void EnsureFipsKeyPolicySupported(KeyType keyType, PinPolicy pinPolicy)
+    {
+        if (!FirmwareVersion.IsAlphaOrBeta && FirmwareVersion.IsAtLeast(4, 4, 0) && !FirmwareVersion.IsAtLeast(4, 5, 0)
+            && (keyType == KeyType.Rsa1024 || pinPolicy == PinPolicy.Never))
+            throw new NotSupportedException("RSA1024 and PIN policy Never are not supported on YubiKey 4 FIPS.");
+    }
+
+    private async Task<PinOnlyMode> RecoverPinOnlyModeCoreAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken)
+    {
+        EnsureBackend(cancellationToken);
+        Logger.LogDebug("PIV: Attempting to recover PIN-only management key authentication");
+
+        var mode = PinOnlyMode.None;
+        var (printedRaw, pinVerified) = await ReadPrintedForRecoveryAsync(pin, cancellationToken).ConfigureAwait(false);
+
+        Memory<byte> storedKey = Memory<byte>.Empty;
+        bool pinProtectedAuthenticated = false;
+        try
+        {
+            if (PinOnlyProtocol.TryDecodePinProtectedManagementKey(printedRaw, out storedKey))
+            {
+                pinProtectedAuthenticated = await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false);
+                if (pinProtectedAuthenticated)
+                    mode |= PinOnlyMode.PinProtected;
+            }
+
+            // Try PIN-derived: derive a candidate management key from the PIN and the ADMIN DATA salt.
+            var adminRaw = await DataObjectProtocol.GetObjectAsync(_backend, DataObject.AdminData, cancellationToken).ConfigureAwait(false);
+
+            if (AdminData.TryDecode(adminRaw, out var adminData) && adminData.Salt is { } salt)
+            {
+                if (!pinVerified)
+                    await VerifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
+                if (await TryAuthenticateDerivedCandidateAsync(pin, salt, cancellationToken).ConfigureAwait(false))
+                    mode |= PinOnlyMode.PinDerived;
+                else if (pinProtectedAuthenticated && !await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false))
+                    mode &= ~PinOnlyMode.PinProtected;
+            }
+
+            return mode;
+        }
+        finally
+        {
+            if (!storedKey.IsEmpty)
+            {
+                CryptographicOperations.ZeroMemory(storedKey.Span);
+            }
+        }
+    }
+
+    private async Task<(byte[] Data, bool PinVerified)> ReadPrintedForRecoveryAsync(
+        ReadOnlyMemory<byte> pin, CancellationToken cancellationToken)
+    {
+        EnsureBackend(cancellationToken);
+        try
+        {
+            return (await DataObjectProtocol.GetObjectAsync(_backend, DataObject.PrintedInformation, cancellationToken)
+                .ConfigureAwait(false), false);
+        }
+        catch (ApduException ex) when (ex.SW == SWConstants.SecurityStatusNotSatisfied)
+        {
+            await VerifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
+            return (await DataObjectProtocol.GetObjectAsync(_backend, DataObject.PrintedInformation, cancellationToken)
+                .ConfigureAwait(false), true);
+        }
+    }
+
+    private async Task<bool> TryAuthenticateCandidateAsync(ReadOnlyMemory<byte> candidate, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        try
+        {
+            await AuthenticateAsync(candidate, cancellationToken).ConfigureAwait(false);
+            return true;
+        }
+        catch (ApduException ex) when (ex.SW == SWConstants.SecurityStatusNotSatisfied)
+        {
+            // A rejected management-key witness/challenge is not a transport or encoding failure.
+            return false;
+        }
+    }
+
+    private async Task<bool> TryAuthenticateDerivedCandidateAsync(ReadOnlyMemory<byte> pin, ReadOnlyMemory<byte> salt, CancellationToken cancellationToken)
+    {
+        int length = RequireManagementKeyType().GetKeySizeBytes();
+        byte[] candidate = ArrayPool<byte>.Shared.Rent(length);
+        try
+        {
+            PinOnlyProtocol.DeriveManagementKey(pin.Span, salt.Span, candidate.AsSpan(0, length));
+            return await TryAuthenticateCandidateAsync(candidate.AsMemory(0, length), cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(candidate.AsSpan(0, length));
+            ArrayPool<byte>.Shared.Return(candidate);
+        }
+    }
+
+    private async Task EnablePinProtectedModeAsync(ReadOnlyMemory<byte> pin, ReadOnlyMemory<byte> keyToProtect, CancellationToken cancellationToken)
+    {
+        EnsureBackend(cancellationToken);
+        Logger.LogDebug("PIV: Enabling PIN-protected management key mode");
+
+        await AuthenticateAsync(keyToProtect, cancellationToken).ConfigureAwait(false);
+        await VerifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
+        await PinOnlyProtocol.StorePinProtectedManagementKeyAsync(_backend, keyToProtect, cancellationToken).ConfigureAwait(false);
+        await AuthenticationProtocol.BlockPukAsync(_backend, cancellationToken).ConfigureAwait(false);
+
+        var currentAdminRaw = await DataObjectProtocol.GetObjectAsync(_backend, DataObject.AdminData, cancellationToken)
+            .ConfigureAwait(false);
+        _ = AdminData.TryDecode(currentAdminRaw, out var currentAdmin);
+        var updatedAdmin = AdminData.Create(pukBlocked: true, pinProtected: true, currentAdmin.Salt, currentAdmin.PinLastUpdated);
+        EnsureManagementKeyAuthenticated();
+        await TypedDataObjectProtocol.SetAdminDataAsync(_backend, updatedAdmin, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task DisablePinOnlyModeAsync(CancellationToken cancellationToken)
+    {
+        EnsureBackend(cancellationToken);
+        // pinOnlyMode == None: disable, but only if a PIN-only mode is actually currently set.
+        var currentMode = await GetPinOnlyModeAsync(cancellationToken).ConfigureAwait(false);
+        if (!currentMode.HasFlag(PinOnlyMode.PinProtected) && !currentMode.HasFlag(PinOnlyMode.PinDerived))
+        {
+            Logger.LogDebug("PIV: PIN-only mode is already disabled; no changes made");
+            return;
+        }
+
+        Logger.LogDebug("PIV: Disabling PIN-only management key mode");
+        var keyType = RequireManagementKeyType();
+        // Borrow the read-only, nonsecret factory pattern. The setter owns/clears its encoded copy,
+        // never this shared default; only the type-appropriate slice is transmitted.
+        await SetManagementKeyAsync(keyType, AuthenticationProtocol.GetDefaultManagementKey(keyType), false, cancellationToken)
+            .ConfigureAwait(false);
+
+        EnsureManagementKeyAuthenticated();
+        await DataObjectProtocol.PutObjectAsync(_backend, DataObject.PrintedInformation, null, cancellationToken)
+            .ConfigureAwait(false);
+        EnsureManagementKeyAuthenticated();
+        await DataObjectProtocol.PutObjectAsync(_backend, DataObject.AdminData, null, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private static void ValidateSlot(Slot slot)
+    {
+        if (!Enum.IsDefined(slot))
+            throw new ArgumentOutOfRangeException(nameof(slot), "Unknown PIV asymmetric key reference.");
+    }
 }

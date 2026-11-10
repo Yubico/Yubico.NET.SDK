@@ -104,7 +104,7 @@ contract; `ResetPinUsingResetCodeAsync` and `ResetPinUsingAdminAuthenticationAsy
 ### Generate a key
 
 Key generation needs admin authentication first. Use `RsaAttributes.Create` for RSA and `EcAttributes.Create` for
-elliptic curves, where `CurveOid.Secp256R1` is P-256.
+elliptic curves, using Core's concrete `KeyType` identities.
 
 ```csharp
 await using var session = await device.CreateOpenPgpSessionAsync();
@@ -113,7 +113,7 @@ try
 {
     await session.VerifyAdminAsync(adminPin);
     await session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa2048));
-    await session.GenerateKeyAsync(KeyRef.Dec, EcAttributes.Create(KeyRef.Dec, CurveOid.Secp256R1));
+    await session.GenerateKeyAsync(KeyRef.Dec, EcAttributes.Create(KeyRef.Dec, KeyType.P256));
 }
 finally
 {
@@ -183,6 +183,26 @@ await using var session = await device.CreateOpenPgpSessionAsync(
 Signing, decryption, internal authentication, and attestation notify before their APDU, with the `KeyRef` name as scope; attestation reports `KeyRef.Att` because the attestation key performs that operation. `Uif.On` and `Uif.Fixed` report `PolicyRequires`, `Uif.Cached` and `Uif.CachedFixed` report `PolicyMayRequire`, and `Uif.Off` is silent, as is firmware that cannot configure UIF at all. A UIF read that fails for any reason other than cancellation degrades to `PolicyMayRequire` rather than failing the operation. Outcomes are `Completed`, `Cancelled`, or `Failed`; no OpenPGP status word is treated as a touch timeout. Cancelling the operation's token does not interrupt a SmartCard exchange already admitted or roll back a command already sent.
 
 ## Constraints
+
+Shared key/curve/operation metadata is available through Core's `CryptographicDefinitions`. Optional OpenPGP
+representation metadata is owned by this package:
+
+```csharp
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.OpenPgp;
+
+KeyInfo keyInfo = CryptographicDefinitions.Keys.Ed25519;
+OpenPgpKeyInfo? openPgpInfo = keyInfo.GetOpenPgpInfo();
+Console.WriteLine(openPgpInfo?.CurveOid); // 1.3.6.1.4.1.11591.15.1 (OpenPGP)
+Console.WriteLine(keyInfo.Asn1?.AlgorithmOid); // 1.3.101.112 (RFC 8410)
+EcAttributes attributes = EcAttributes.Create(KeyRef.Sig, KeyType.Ed25519); // EdDSA, 0x16
+```
+
+This metadata does **not** imply hardware capability or select a slot/import format. RSA metadata includes
+2048/3072/4096 only; `CryptographicDefinitions.Keys.Rsa1024.GetOpenPgpInfo()` returns null, as do AES/Triple DES.
+For ordinary EC keys, the slot determines ECDSA versus ECDH; Ed25519 and X25519 select their constructions.
+Parsed attributes retain their received algorithm byte and import format, even when they differ from factory
+choices. OpenPGP OIDs on the wire contain DER value octets only, not the ASN.1 tag and length.
 
 - SmartCard only. Asking for `ConnectionType.HidFido` or `ConnectionType.HidOtp` through `SessionCreationOptions.PreferredConnectionType` throws `ArgumentException`.
 - A physical YubiKey admits one live connection and one session over it. A session from `CreateOpenPgpSessionAsync` owns the connection it opened; `OpenPgpSession.CreateAsync` borrows yours and you dispose it. Use `await using` for both.

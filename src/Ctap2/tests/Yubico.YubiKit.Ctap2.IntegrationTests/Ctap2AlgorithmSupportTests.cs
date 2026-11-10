@@ -35,19 +35,19 @@ public class Ctap2AlgorithmSupportTests
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_ES256_ReturnsES256Credential(YubiKeyTestState state) =>
-        await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.ES256);
+        await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.Es256);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_EdDSA_ReturnsEdDSACredential(YubiKeyTestState state) =>
-        await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.EdDSA, skipIfUnsupported: true);
+        await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.EdDsa, skipIfUnsupported: true);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task MakeCredential_ES384_ReturnsES384Credential(YubiKeyTestState state) =>
-        await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.ES384, skipIfUnsupported: true);
+        await TestAlgorithmAsync(state, CoseAlgorithmIdentifier.Es384, skipIfUnsupported: true);
 
     private static async Task TestAlgorithmAsync(
         YubiKeyTestState state,

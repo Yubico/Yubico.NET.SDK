@@ -97,7 +97,7 @@ public sealed class OpenPgpPutKeyWireTests
 
         byte[] attributes = Assert.Single(connection.TransmittedCommands, c => c[1] == InsPutData);
         Assert.Equal(algorithmId, attributes[5]);
-        Assert.Equal(EcAttributes.Create(keyRef, CurveOid.Secp256R1).ToBytes(), ApduData(attributes).ToArray());
+        Assert.Equal(EcAttributes.Create(keyRef, KeyType.P256).ToBytes(), ApduData(attributes).ToArray());
 
         var (crt, headers, values) = ParseImport(connection);
         Assert.Equal(ExpectedCrt(keyRef), crt);
@@ -118,7 +118,7 @@ public sealed class OpenPgpPutKeyWireTests
 
         byte[] attributes = Assert.Single(connection.TransmittedCommands, c => c[1] == InsPutData);
         Assert.Equal(0x16, attributes[5]);
-        Assert.Equal(EcAttributes.Create(KeyRef.Sig, CurveOid.Ed25519).ToBytes(), ApduData(attributes).ToArray());
+        Assert.Equal(EcAttributes.Create(KeyRef.Sig, KeyType.Ed25519).ToBytes(), ApduData(attributes).ToArray());
 
         var (crt, headers, values) = ParseImport(connection);
         Assert.Equal(CrtSig, crt);
@@ -140,7 +140,7 @@ public sealed class OpenPgpPutKeyWireTests
 
         byte[] attributes = Assert.Single(connection.TransmittedCommands, c => c[1] == InsPutData);
         Assert.Equal(0x12, attributes[5]);
-        Assert.Equal(EcAttributes.Create(KeyRef.Dec, CurveOid.X25519).ToBytes(), ApduData(attributes).ToArray());
+        Assert.Equal(EcAttributes.Create(KeyRef.Dec, KeyType.X25519).ToBytes(), ApduData(attributes).ToArray());
 
         var (crt, headers, values) = ParseImport(connection);
         Assert.Equal(CrtDec, crt);
@@ -186,6 +186,49 @@ public sealed class OpenPgpPutKeyWireTests
         KeyRef.Dec => CrtDec,
         _ => CrtAut,
     };
+
+    [Theory]
+    [InlineData(KeyType.Secp256k1, 32, "132B8104000A")]
+    [InlineData(KeyType.BrainpoolP256r1, 32, "132B2403030208010107")]
+    [InlineData(KeyType.BrainpoolP384r1, 48, "132B240303020801010B")]
+    [InlineData(KeyType.BrainpoolP512r1, 64, "132B240303020801010D")]
+    public async Task NamedCurve_ImportsRealScalarWithIndependentAttributesAndTemplate(
+        KeyType keyType, int scalarLengthBytes, string expectedAttributesHex)
+    {
+        RequireHostCurve(keyType);
+        var scalar = new byte[scalarLengthBytes];
+        scalar[^1] = 1; // SEC 2 / RFC 5639 generator key, validated by the host in Core's factory.
+        using var key = ECPrivateKey.CreateFromValue(scalar, keyType);
+        var connection = CreateConnection(afterAttributeWrite: true);
+        await using var session = await OpenPgpSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        try
+        {
+            await session.PutKeyAsync(KeyRef.Sig, key, TestContext.Current.CancellationToken);
+            byte[] attributes = Assert.Single(connection.TransmittedCommands, command => command[1] == InsPutData);
+            Assert.Equal(Convert.FromHexString(expectedAttributesHex), ApduData(attributes).ToArray());
+            var (crt, headers, values) = ParseImport(connection);
+            Assert.Equal(CrtSig, crt);
+            Assert.Equal(new byte[] { 0x92, (byte)scalarLengthBytes }, headers);
+            Assert.Equal(scalar, values);
+            using var import = PrivateKeyImport.Create(key, KeyRef.Sig, new(5, 7, 2));
+            using var encoded = new DisposableBufferHandle(import.Template.ToBytes(KeyRef.Sig));
+            // 4D { B600 7F48 { 92 <len> } 5F48 { fixed-width d } }
+            byte[] expected = [0x4D, (byte)(scalarLengthBytes + 10), 0xB6, 0x00, 0x7F, 0x48, 0x02,
+                0x92, (byte)scalarLengthBytes, 0x5F, 0x48, (byte)scalarLengthBytes, .. scalar];
+            Assert.Equal(expected, encoded.Data.ToArray());
+        }
+        finally { CryptographicOperations.ZeroMemory(scalar); }
+    }
+
+    private static void RequireHostCurve(KeyType keyType)
+    {
+        var curveOid = keyType.GetKeyInfo().Curve?.NamedCurveOid
+            ?? throw new InvalidOperationException("The vector requires a named ordinary curve.");
+        try { using var provider = ECDsa.Create(ECCurve.CreateFromValue(curveOid)); }
+        catch (PlatformNotSupportedException) { Assert.Skip($"Host provider does not implement curve {curveOid}."); }
+        catch (CryptographicException) { Assert.Skip($"Host provider cannot generate curve {curveOid}."); }
+    }
 
     /// <summary>
     ///     Returns (CRT bytes, 7F48 header bytes, 5F48 concatenated values) of the PUT DATA ODD, reassembled

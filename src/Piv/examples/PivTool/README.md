@@ -46,7 +46,7 @@ await session.VerifyPinAsync(pin, ct);
 
 var result = await Signing.SignDataAsync(
     session, 
-    PivSlot.Signature, 
+    Slot.Signature,
     dataToSign,
     HashAlgorithmName.SHA256,
     ct);

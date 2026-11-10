@@ -114,7 +114,7 @@ internal static class PrivateKeyConsistency
             throw new CryptographicException("RSA public and private exponents are not inverses.");
     }
 
-    // DER ECDSA signature for P-384 (the largest curve the SDK wraps): 2 × (1 + 1 + 49) + 2 ≈ 104; room to spare.
+    // P1363 uses two order-width integers. P-521 is the largest modeled curve: 2 × 66 = 132 bytes.
     private const int MaxEcdsaSignatureLength = 144;
 
     private static BigInteger ToBigInteger(byte[] value) => new(value, isUnsigned: true, isBigEndian: true);

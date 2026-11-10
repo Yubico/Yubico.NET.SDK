@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Piv.UnitTests;
@@ -19,70 +20,70 @@ namespace Yubico.YubiKit.Piv.UnitTests;
 public class PivTypesTests
 {
     [Theory]
-    [InlineData(PivSlot.Authentication, 0x9A)]
-    [InlineData(PivSlot.Signature, 0x9C)]
-    [InlineData(PivSlot.KeyManagement, 0x9D)]
-    [InlineData(PivSlot.CardAuthentication, 0x9E)]
-    [InlineData(PivSlot.Attestation, 0xF9)]
-    public void PivSlot_HasCorrectValue(PivSlot slot, byte expected)
+    [InlineData(Slot.Authentication, 0x9A)]
+    [InlineData(Slot.Signature, 0x9C)]
+    [InlineData(Slot.KeyManagement, 0x9D)]
+    [InlineData(Slot.CardAuthentication, 0x9E)]
+    [InlineData(Slot.Attestation, 0xF9)]
+    public void PivSlot_HasCorrectValue(Slot slot, byte expected)
     {
         Assert.Equal(expected, (byte)slot);
     }
 
     [Theory]
-    [InlineData(PivAlgorithm.Rsa1024, 0x06)]
-    [InlineData(PivAlgorithm.Rsa2048, 0x07)]
-    [InlineData(PivAlgorithm.EccP256, 0x11)]
-    [InlineData(PivAlgorithm.EccP384, 0x14)]
-    [InlineData(PivAlgorithm.Ed25519, 0xE0)]
-    [InlineData(PivAlgorithm.X25519, 0xE1)]
-    public void PivAlgorithm_HasCorrectValue(PivAlgorithm algo, byte expected)
+    [InlineData(KeyType.Rsa1024, 0x06)]
+    [InlineData(KeyType.Rsa2048, 0x07)]
+    [InlineData(KeyType.P256, 0x11)]
+    [InlineData(KeyType.P384, 0x14)]
+    [InlineData(KeyType.Ed25519, 0xE0)]
+    [InlineData(KeyType.X25519, 0xE1)]
+    public void PivAlgorithmId_HasCorrectValue(KeyType algo, byte expected)
     {
-        Assert.Equal(expected, (byte)algo);
+        Assert.Equal(expected, KeyTypeEncoding.Encode(algo));
     }
 
     [Theory]
-    [InlineData(PivManagementKeyType.TripleDes, 0x03)]
-    [InlineData(PivManagementKeyType.Aes128, 0x08)]
-    [InlineData(PivManagementKeyType.Aes192, 0x0A)]
-    [InlineData(PivManagementKeyType.Aes256, 0x0C)]
-    public void PivManagementKeyType_HasCorrectValue(PivManagementKeyType type, byte expected)
+    [InlineData(KeyType.TripleDes, 0x03)]
+    [InlineData(KeyType.Aes128, 0x08)]
+    [InlineData(KeyType.Aes192, 0x0A)]
+    [InlineData(KeyType.Aes256, 0x0C)]
+    public void PivManagementKeyType_HasCorrectValue(KeyType type, byte expected)
     {
-        Assert.Equal(expected, (byte)type);
+        Assert.Equal(expected, KeyTypeEncoding.Encode(type));
     }
 
     [Fact]
     public void PivFeatures_P384_RequiresVersion4()
     {
-        var feature = PivFeatures.P384;
+        var feature = Features.P384;
         Assert.Equal(new FirmwareVersion(4, 0, 0), feature.Version);
     }
 
     [Fact]
     public void PivFeatures_SupportsRsaGeneration_FalseFor426()
     {
-        Assert.False(PivFeatures.SupportsRsaGeneration(new FirmwareVersion(4, 2, 6)));
-        Assert.False(PivFeatures.SupportsRsaGeneration(new FirmwareVersion(4, 3, 0)));
-        Assert.True(PivFeatures.SupportsRsaGeneration(new FirmwareVersion(4, 3, 5)));
-        Assert.True(PivFeatures.SupportsRsaGeneration(new FirmwareVersion(5, 0, 0)));
+        Assert.False(Features.SupportsRsaGeneration(new FirmwareVersion(4, 2, 6)));
+        Assert.False(Features.SupportsRsaGeneration(new FirmwareVersion(4, 3, 0)));
+        Assert.True(Features.SupportsRsaGeneration(new FirmwareVersion(4, 3, 5)));
+        Assert.True(Features.SupportsRsaGeneration(new FirmwareVersion(5, 0, 0)));
     }
 
     [Theory]
-    [InlineData(PivPinPolicy.Default, 0x00)]
-    [InlineData(PivPinPolicy.Never, 0x01)]
-    [InlineData(PivPinPolicy.Once, 0x02)]
-    [InlineData(PivPinPolicy.Always, 0x03)]
-    public void PivPinPolicy_HasCorrectValue(PivPinPolicy policy, byte expected)
+    [InlineData(PinPolicy.Default, 0x00)]
+    [InlineData(PinPolicy.Never, 0x01)]
+    [InlineData(PinPolicy.Once, 0x02)]
+    [InlineData(PinPolicy.Always, 0x03)]
+    public void PivPinPolicy_HasCorrectValue(PinPolicy policy, byte expected)
     {
         Assert.Equal(expected, (byte)policy);
     }
 
     [Theory]
-    [InlineData(PivTouchPolicy.Default, 0x00)]
-    [InlineData(PivTouchPolicy.Never, 0x01)]
-    [InlineData(PivTouchPolicy.Always, 0x02)]
-    [InlineData(PivTouchPolicy.Cached, 0x03)]
-    public void PivTouchPolicy_HasCorrectValue(PivTouchPolicy policy, byte expected)
+    [InlineData(TouchPolicy.Default, 0x00)]
+    [InlineData(TouchPolicy.Never, 0x01)]
+    [InlineData(TouchPolicy.Always, 0x02)]
+    [InlineData(TouchPolicy.Cached, 0x03)]
+    public void PivTouchPolicy_HasCorrectValue(TouchPolicy policy, byte expected)
     {
         Assert.Equal(expected, (byte)policy);
     }

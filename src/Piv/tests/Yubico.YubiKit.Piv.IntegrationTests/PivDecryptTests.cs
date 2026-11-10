@@ -101,13 +101,13 @@ public class PivDecryptTests
         await ResetAndAuthenticate(session, state.FirmwareVersion);
 
         // Generate an ECC key so the slot has metadata (not empty)
-        await session.GenerateKeyAsync(PivSlot.KeyManagement, PivAlgorithm.EccP256);
+        await session.GenerateKeyAsync(Slot.KeyManagement, KeyType.P256);
 
         var fakeCiphertext = new byte[32]; // wrong size, wrong key type -- error fires on type check
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
             session.DecryptAsync(
-                PivSlot.KeyManagement,
+                Slot.KeyManagement,
                 fakeCiphertext,
                 RSAEncryptionPadding.Pkcs1));
     }
@@ -123,14 +123,14 @@ public class PivDecryptTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await ResetAndAuthenticate(session, state.FirmwareVersion);
 
-        await session.GenerateKeyAsync(PivSlot.KeyManagement, PivAlgorithm.Rsa2048);
+        await session.GenerateKeyAsync(Slot.KeyManagement, KeyType.Rsa2048);
 
         // RSA 2048 expects exactly 256 bytes; pass 100 instead
         var shortCiphertext = new byte[100];
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
             session.DecryptAsync(
-                PivSlot.KeyManagement,
+                Slot.KeyManagement,
                 shortCiphertext,
                 RSAEncryptionPadding.Pkcs1));
     }
@@ -148,8 +148,8 @@ public class PivDecryptTests
         await ResetAndAuthenticate(session, state.FirmwareVersion);
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.KeyManagement,
-            PivAlgorithm.Rsa4096);
+            Slot.KeyManagement,
+            KeyType.Rsa4096);
         await session.VerifyPinAsync(DefaultPin);
 
         var plaintext = "RSA 4096 decrypt test"u8.ToArray();
@@ -159,7 +159,7 @@ public class PivDecryptTests
         byte[] ciphertext = rsa.Encrypt(plaintext, RSAEncryptionPadding.Pkcs1);
 
         var decrypted = await session.DecryptAsync(
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             ciphertext,
             RSAEncryptionPadding.Pkcs1);
 
@@ -189,8 +189,8 @@ public class PivDecryptTests
         await ResetAndAuthenticate(session, firmwareVersion);
 
         var publicKey = await session.GenerateKeyAsync(
-            PivSlot.KeyManagement,
-            PivAlgorithm.Rsa2048);
+            Slot.KeyManagement,
+            KeyType.Rsa2048);
         await session.VerifyPinAsync(DefaultPin);
 
         using var rsa = RSA.Create();
@@ -198,7 +198,7 @@ public class PivDecryptTests
         byte[] ciphertext = rsa.Encrypt(plaintext, padding);
 
         var decrypted = await session.DecryptAsync(
-            PivSlot.KeyManagement,
+            Slot.KeyManagement,
             ciphertext,
             padding);
 

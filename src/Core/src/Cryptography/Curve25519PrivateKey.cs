@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// </summary>
 /// <remarks>
 /// This sealed class encapsulates Curve25519 private key data and supports
-/// both Ed25519 and X25519 cryptographic operations.
+/// both Ed25519 seed and X25519 scalar representations. It does not choose or perform an operation.
 /// It also provides factory methods for creating instances from private key values or DER-encoded data.
 /// Imported private key bytes are copied and preserved unchanged. In particular, X25519 masking occurs
 /// when a cryptographic operation decodes the scalar as specified by RFC 7748, not when key bytes are
@@ -33,15 +33,15 @@ public sealed class Curve25519PrivateKey : PrivateKey
     private readonly Memory<byte> _privateKey;
 
     /// <inheritdoc />
-    public override KeyType KeyType => KeyDefinition.KeyType;
+    public override KeyType KeyType => KeyInfo.KeyType;
 
     /// <summary>
-    /// Gets the key definition associated with this Curve25519 private key.
+    /// Gets the metadata associated with this Curve25519 private key.
     /// </summary>
     /// <value>
-    /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
+    /// A <see cref="KeyInfo"/> object that describes the key's representation.
     /// </value>
-    public KeyDefinition KeyDefinition { get; }
+    public override KeyInfo KeyInfo { get; }
 
     /// <summary>
     /// Gets the raw private key bytes exactly as imported.
@@ -64,12 +64,12 @@ public sealed class Curve25519PrivateKey : PrivateKey
         ReadOnlyMemory<byte> privateKey,
         KeyType keyType)
     {
-        if (keyType is not (KeyType.X25519 or KeyType.Ed25519))
+        if (!keyType.IsCurve25519())
         {
             throw new ArgumentException("Only X25519 and Ed25519 are supported.", nameof(keyType));
         }
 
-        var keyDefinition = keyType.GetKeyDefinition();
+        var keyInfo = keyType.GetKeyInfo();
 
         if (privateKey.Length != 32)
         {
@@ -77,7 +77,7 @@ public sealed class Curve25519PrivateKey : PrivateKey
         }
 
         _privateKey = new byte[privateKey.Length];
-        KeyDefinition = keyDefinition;
+        KeyInfo = keyInfo;
 
         privateKey.CopyTo(_privateKey);
     }

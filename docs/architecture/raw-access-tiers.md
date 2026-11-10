@@ -11,7 +11,7 @@ validate inputs, enforce firmware and feature gates, and manage protocol state.
 ```csharp
 await using PivSession piv = await yubiKey.CreatePivSessionAsync(
     cancellationToken: cancellationToken);
-PivPinMetadata metadata = await piv.GetPinMetadataAsync(cancellationToken);
+PinMetadata metadata = await piv.GetPinMetadataAsync(cancellationToken);
 ```
 
 Use Tier 0 unless the operation is undocumented or intentionally below an applet API.

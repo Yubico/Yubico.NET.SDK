@@ -27,12 +27,12 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 /// </remarks>
 public static class SlotInfoQuery
 {
-    private static readonly (PivSlot Slot, string Name)[] StandardSlots =
+    private static readonly (Slot Slot, string Name)[] StandardSlots =
     [
-        (PivSlot.Authentication, "Authentication (9A)"),
-        (PivSlot.Signature, "Digital Signature (9C)"),
-        (PivSlot.KeyManagement, "Key Management (9D)"),
-        (PivSlot.CardAuthentication, "Card Authentication (9E)")
+        (Slot.Authentication, "Authentication (9A)"),
+        (Slot.Signature, "Digital Signature (9C)"),
+        (Slot.KeyManagement, "Key Management (9D)"),
+        (Slot.CardAuthentication, "Card Authentication (9E)")
     ];
 
     /// <summary>
@@ -88,7 +88,7 @@ public static class SlotInfoQuery
     /// <returns>Result containing slot information or error.</returns>
     public static async Task<SlotInfoResult> GetSlotInfoAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -107,11 +107,11 @@ public static class SlotInfoQuery
 
     private static async Task<SlotInfo> GetSlotInfoAsync(
         IPivSession session,
-        PivSlot slot,
+        Slot slot,
         string name,
         CancellationToken cancellationToken)
     {
-        PivSlotMetadata? metadata = null;
+        SlotMetadata? metadata = null;
         try
         {
             metadata = await session.GetSlotMetadataAsync(slot, cancellationToken);
@@ -132,15 +132,15 @@ public static class SlotInfoQuery
         };
     }
 
-    private static string GetSlotName(PivSlot slot)
+    private static string GetSlotName(Slot slot)
     {
         return slot switch
         {
-            PivSlot.Authentication => "Authentication (9A)",
-            PivSlot.Signature => "Digital Signature (9C)",
-            PivSlot.KeyManagement => "Key Management (9D)",
-            PivSlot.CardAuthentication => "Card Authentication (9E)",
-            PivSlot.Attestation => "Attestation (F9)",
+            Slot.Authentication => "Authentication (9A)",
+            Slot.Signature => "Digital Signature (9C)",
+            Slot.KeyManagement => "Key Management (9D)",
+            Slot.CardAuthentication => "Card Authentication (9E)",
+            Slot.Attestation => "Attestation (F9)",
             _ => $"Slot {slot}"
         };
     }

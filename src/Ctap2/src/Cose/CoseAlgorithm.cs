@@ -26,22 +26,22 @@ namespace Yubico.YubiKit.Ctap2.Cose;
 public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorithm>
 {
     /// <summary>
-    /// ECDSA with SHA-256 (P-256 curve).
+    /// ECDSA with SHA-256; WebAuthn constrains this identifier to P-256.
     /// </summary>
     public static readonly CoseAlgorithm Es256 = new(-7);
 
     /// <summary>
-    /// EdDSA (Ed25519 curve).
+    /// Pure EdDSA; the key curve is separate metadata. CTAP/WebAuthn profiles constrain allowed curves.
     /// </summary>
     public static readonly CoseAlgorithm EdDsa = new(-8);
 
     /// <summary>
-    /// ECDSA with SHA-256 (secp256k1 curve).
+    /// ECDSA with SHA-256 using P-256 (ESP256), not secp256k1 (ES256K, -47).
     /// </summary>
     public static readonly CoseAlgorithm Esp256 = new(-9);
 
     /// <summary>
-    /// ECDSA with SHA-384 (P-384 curve).
+    /// ECDSA with SHA-384; WebAuthn constrains this identifier to P-384.
     /// </summary>
     public static readonly CoseAlgorithm Es384 = new(-35);
 

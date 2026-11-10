@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
@@ -180,11 +181,11 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256));
 
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
                 Assert.IsType<EcAttributes>(attrs);
-                Assert.Equal(CurveOid.Secp256R1, ((EcAttributes)attrs).Oid);
+                Assert.Equal(KeyType.P256, ((EcAttributes)attrs).KeyType);
             });
 
     [SkippableTheory]
@@ -195,7 +196,7 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256));
 
                 var pubKey = await session.GetPublicKeyAsync(KeyRef.Sig);
                 Assert.True(pubKey.Length > 0);
@@ -240,7 +241,7 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256));
 
                 var message = "Hello OpenPGP"u8.ToArray();
 
@@ -297,7 +298,7 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Aut, EcAttributes.Create(KeyRef.Aut, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Aut, EcAttributes.Create(KeyRef.Aut, KeyType.P256));
 
                 var data = "Auth challenge"u8.ToArray();
 
@@ -318,7 +319,7 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256));
 
                 // Create a self-signed certificate for testing
                 using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -355,7 +356,7 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256));
 
                 // Attest uses default PIN verification (extended=false, P2=0x81)
                 // per ykman canonical: verify_pin(pin) before attest_key(key)
@@ -379,7 +380,7 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256));
 
                 using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
                 using var stored = new CertificateRequest("CN=Audit 26j", ecdsa, HashAlgorithmName.SHA256)
@@ -437,7 +438,7 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256));
 
                 var keyInfo = await session.ListKeyInformationAsync();
                 Assert.True(keyInfo.ContainsKey(KeyRef.Sig));
@@ -527,7 +528,7 @@ public class OpenPgpSessionTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256));
 
                 // Key should exist
                 var keyInfo = await session.ListKeyInformationAsync();

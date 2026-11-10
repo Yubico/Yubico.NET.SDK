@@ -63,6 +63,14 @@ See [Raw Access Tiers](../architecture/raw-access-tiers.md) for ownership and re
 
 ## Session Lifecycle
 
+PIV preview vocabulary now uses `Yubico.YubiKit.Piv.Slot`, standalone public `Piv.Features`, and shared
+`Core.Cryptography.KeyType` rather than `PivSlot`, `PivFeatures`, or `PivAlgorithm`. Import returns `Task`;
+the caller already owns `IPrivateKey.KeyType`. Slot and management-key metadata's nullable `KeyType`,
+`RawAlgorithmId`, and complete `RawData` preserve unknown device
+algorithms. Consumers may query `IApplicationSession.IsSupported`; `EnsureSupports` is protected implementation
+machinery, and operations enforce their own gates. See [PIV preview migration](../../src/Piv/README.md#preview-api-migration)
+for retry/error behavior and compatibility-override details.
+
 V2 application sessions are applet-specific and commonly own connection/protocol state. Prefer the v2 session factory or constructor pattern documented by each applet package rather than carrying v1 session setup forward mechanically.
 
 Migration review is required for code that:
@@ -98,9 +106,9 @@ below before diagnosing behavior changes.
 | `GenerateRsaKeyAsync(...)` / `GenerateEcKeyAsync(...)` | `GenerateKeyAsync(KeyRef, AlgorithmAttributes, cancellationToken)` with `RsaAttributes` or `EcAttributes`. |
 | `YubiOtpSession.GetSerialAsync(...)` | `GetSerialNumberAsync(...)`. |
 | `SecurityDomainSession.GetCaIdentifiersAsync(includeKloc, includeKlcc, cancellationToken)` | `GetCaIdentifiersAsync(CaIdentifierType, cancellationToken)`, combining `Kloc` and `Klcc` flags when needed. `None` or unknown bits now throw `ArgumentOutOfRangeException`, replacing `ArgumentException`; this exception-type change is silent at compile time. |
-| `PivSession.StoreCertificateAsync(slot, certificate, compress, cancellationToken)` | Pass `PivCertificateCompression.Automatic` or `PivCertificateCompression.Always`. |
-| `PivSession.VerifyUvAsync(requestTemporaryPin, checkOnly, cancellationToken)` | Pass `PivUserVerification.Verify`, `VerifyAndRequestTemporaryPin`, or `CheckOnly`. The old `(true, true)` input had no distinct meaning: check-only won. |
-| `PivSession.ImportKeyAsync(slot, key, pinPolicy, touchPolicy, cancellationToken)` | Put policies in `PivKeyCreationOptions` and pass it as the third argument. |
+| `PivSession.StoreCertificateAsync(slot, certificate, compress, cancellationToken)` | Pass `CertificateCompression.Automatic` or `CertificateCompression.Always`. |
+| `PivSession.VerifyUvAsync(requestTemporaryPin, checkOnly, cancellationToken)` | Pass `UserVerification.Verify`, `VerifyAndRequestTemporaryPin`, or `CheckOnly`. The old `(true, true)` input had no distinct meaning: check-only won. |
+| `PivSession.ImportKeyAsync(slot, key, pinPolicy, touchPolicy, cancellationToken)` | Put policies in `KeyCreationOptions` and pass it as the third argument; await completion, without a returned enum. |
 | PIV/YubiHSM alpha `TouchNotificationCallback` / `OnTouchRequired` | Set `SessionCreationOptions.UserPresencePrompt` to an `IUserPresencePrompt`. The alpha callbacks were removed outright; there is no compatibility adapter. |
 | `ManagementSession.Transport` | Use inherited `ConnectionType`. |
 | `SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken)` | Pass `new SetDeviceConfigOptions { Reboot = ..., CurrentLockCode = ..., NewLockCode = ... }`. |
@@ -357,6 +365,7 @@ V2 uses async PIV operations and explicit caller-owned sensitive buffers:
 
 ```csharp
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Piv;
 
 await using var piv = await device.CreatePivSessionAsync(
@@ -368,12 +377,12 @@ try
     await piv.AuthenticateAsync(managementKey, cancellationToken);
 
     var publicKey = await piv.GenerateKeyAsync(
-        PivSlot.Authentication,
-        PivAlgorithm.EccP256,
-        new PivKeyCreationOptions
+        Slot.Authentication,
+        KeyType.P256,
+        new KeyCreationOptions
         {
-            PinPolicy = PivPinPolicy.Default,
-            TouchPolicy = PivTouchPolicy.Default
+            PinPolicy = PinPolicy.Default,
+            TouchPolicy = TouchPolicy.Default
         },
         cancellationToken);
 }
@@ -581,7 +590,7 @@ try
 {
     await piv.AuthenticateAsync(managementKey, cancellationToken);
     await piv.SetPinOnlyModeAsync(
-        PivPinOnlyMode.PinProtected,
+        PinOnlyMode.PinProtected,
         pin,
         managementKey,
         cancellationToken);
@@ -595,7 +604,7 @@ finally
 
 Migration notes:
 
-- Only `PivPinOnlyMode.PinProtected` can be newly enabled in v2. V1's `PinDerived` mode is a deprecated, weaker mechanism; v2 can still detect and recover an existing PIN-derived configuration (`GetPinOnlyModeAsync`/`RecoverPinOnlyModeAsync`) but cannot enable a new one.
+- Only `PinOnlyMode.PinProtected` can be newly enabled in v2. V1's `PinDerived` mode is a deprecated, weaker mechanism; v2 can still detect and recover an existing PIN-derived configuration (`GetPinOnlyModeAsync`/`RecoverPinOnlyModeAsync`) but cannot enable a new one.
 - The caller must authenticate the management key explicitly before calling `SetPinOnlyModeAsync`; v1's `KeyCollector` handled this implicitly.
 - Enabling blocks the PUK and is state-mutating; treat this as a human-reviewed migration like other PIV write operations.
 

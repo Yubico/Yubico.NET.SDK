@@ -634,17 +634,17 @@ public sealed class PublicKeyCredentialParameters
     /// <summary>
     /// Creates ES256 credential parameters.
     /// </summary>
-    public static PublicKeyCredentialParameters CreateES256() => new(CoseAlgorithmIdentifier.ES256);
+    public static PublicKeyCredentialParameters CreateES256() => new(CoseAlgorithmIdentifier.Es256);
 
     /// <summary>
     /// Creates RS256 credential parameters.
     /// </summary>
-    public static PublicKeyCredentialParameters CreateRS256() => new(CoseAlgorithmIdentifier.RS256);
+    public static PublicKeyCredentialParameters CreateRS256() => new(CoseAlgorithmIdentifier.Rs256);
 
     /// <summary>
     /// Creates EdDSA credential parameters.
     /// </summary>
-    public static PublicKeyCredentialParameters CreateEdDSA() => new(CoseAlgorithmIdentifier.EdDSA);
+    public static PublicKeyCredentialParameters CreateEdDSA() => new(CoseAlgorithmIdentifier.EdDsa);
 
     /// <summary>
     /// Encodes this parameters object as CBOR.

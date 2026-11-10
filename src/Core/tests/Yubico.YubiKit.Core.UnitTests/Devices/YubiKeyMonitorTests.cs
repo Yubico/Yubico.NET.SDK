@@ -1081,7 +1081,7 @@ public class YubiKeyMonitorTests
     [InlineData(false)]
     [InlineData(true)]
     [Trait("Category", "RuntimeResilience")]
-    public async Task DisposeAsync_OrdersAdmittedListenerActivity_AndIgnoresCapturedLateCallback(bool hid)
+    public async Task DisposeAsync_RetiresAfterListenerTeardownAndLoopDrain_AndIgnoresCapturedLateCallback(bool hid)
     {
         await using var fixture = new OwnedMonitorFixture();
         var monitor = await fixture.CreateAsync(TestToken);
@@ -1100,6 +1100,14 @@ public class YubiKeyMonitorTests
 
         using var release = new ManualResetEventSlim();
         var entered = Signal();
+        var retired = Signal();
+        fixture.Finder.OnRetire = () =>
+        {
+            Assert.True(fixture.Hid.Disposed);
+            Assert.True(fixture.SmartCard.Disposed);
+            Assert.True(fixture.Loop.IsCompleted);
+            retired.TrySetResult();
+        };
         fixture.Finder.OnActivity = _ =>
         {
             entered.TrySetResult();
@@ -1117,13 +1125,15 @@ public class YubiKeyMonitorTests
                 await monitor.DisposeAsync();
             }, TestToken);
             await disposalStarted.Task.WaitAsync(Bound, TestToken);
-            // Closing public access precedes waiting for already-admitted ingress to retire.
+            // Public access closes before listener teardown and discovery retirement.
             await AsyncWait.WaitUntilAsync(() =>
             {
                 try { _ = monitor.CurrentDevices; return false; }
                 catch (ObjectDisposedException) { return true; }
             }, "Disposal did not close public access", Bound, TestToken);
-            Assert.False(disposal.IsCompleted);
+            await disposal.WaitAsync(Bound, TestToken);
+            await retired.Task.WaitAsync(Bound, TestToken);
+            Assert.False(callback.IsCompleted);
             release.Set();
             await callback.WaitAsync(Bound, TestToken);
             await disposal.WaitAsync(Bound, TestToken);
@@ -1139,7 +1149,7 @@ public class YubiKeyMonitorTests
         finally
         {
             release.Set();
-            // Ingress and disposal must leave their gates before fixture teardown, even if canceled.
+            // The captured callback must finish before fixture teardown, even if canceled.
             await callback.WaitAsync(Bound, CancellationToken.None);
             if (disposal is not null)
                 await disposal.WaitAsync(Bound, CancellationToken.None);

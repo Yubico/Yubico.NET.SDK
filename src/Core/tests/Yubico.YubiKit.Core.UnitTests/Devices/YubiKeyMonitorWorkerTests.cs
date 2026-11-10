@@ -571,7 +571,7 @@ public class YubiKeyMonitorWorkerTests
     ///     caches; <c>FindYubiKeysFaultInjectionTests</c> pins that eviction behavior.
     /// </summary>
     [Fact]
-    public async Task ListenerEvents_NotifyTheFinderOfTransportActivity_EvictingEvidenceGlobally()
+    public async Task ListenerEvents_InvalidateEvidenceBeforeSignalingDiscovery()
     {
         var (worker, repository, findYubiKeys, hidListener, smartCardListener) = CreateWorker();
 
@@ -589,7 +589,7 @@ public class YubiKeyMonitorWorkerTests
     }
 
     /// <summary>
-    /// Fake IFindYubiKeys for testing.
+    /// Fake IMonitoredDiscovery for testing.
     /// </summary>
     private static (
         YubiKeyMonitorWorker Worker,
@@ -689,7 +689,7 @@ public class YubiKeyMonitorWorkerTests
         }
     }
 
-    private sealed class FakeFindYubiKeys(IReadOnlyList<IYubiKey> initialDevices) : IFindYubiKeys
+    private sealed class FakeFindYubiKeys(IReadOnlyList<IYubiKey> initialDevices) : IMonitoredDiscovery
     {
         private readonly Lock _syncLock = new();
         private readonly TaskCompletionSource _hangReleased = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -708,7 +708,7 @@ public class YubiKeyMonitorWorkerTests
         public List<ConnectionType> TransportActivity { get; } = [];
         public IReadOnlyList<ConnectionType> ActivityAtLastScan { get; private set; } = [];
 
-        public void NotifyTransportActivity(ConnectionType transport)
+        public void InvalidateEvidence(ConnectionType transport)
         {
             lock (_syncLock)
             {
@@ -717,6 +717,8 @@ public class YubiKeyMonitorWorkerTests
         }
 
         public TimeSpan ScanDelay { get; set; }
+
+        public void Retire() { }
 
         /// <summary>
         /// When set, scans block until <see cref="ReleaseHungScans"/> is called,
@@ -742,8 +744,7 @@ public class YubiKeyMonitorWorkerTests
         public void ReleaseHungScans() => _hangReleased.TrySetResult();
 
         public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(
-            ConnectionType type,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             lock (_syncLock)
                 ActivityAtLastScan = [.. TransportActivity];
@@ -769,9 +770,7 @@ public class YubiKeyMonitorWorkerTests
                     devices = _devices;
                 }
 
-                return type == ConnectionType.All
-                    ? devices
-                    : devices.Where(d => type.Matches(d.AvailableConnections)).ToList();
+                return devices;
             }
             finally
             {

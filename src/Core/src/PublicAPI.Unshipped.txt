@@ -344,7 +344,6 @@ Yubico.YubiKit.Core.Devices.Feature.VersionRevision.get -> int
 Yubico.YubiKit.Core.Devices.Feature.VersionRevision.init -> void
 Yubico.YubiKit.Core.Devices.FindYubiKeys
 Yubico.YubiKit.Core.Devices.FindYubiKeys.FindAllAsync(Yubico.YubiKit.Core.Devices.ConnectionType type = Yubico.YubiKit.Core.Devices.ConnectionType.All, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!>!
-Yubico.YubiKit.Core.Devices.FindYubiKeys.NotifyTransportActivity(Yubico.YubiKit.Core.Devices.ConnectionType transport) -> void
 Yubico.YubiKit.Core.Devices.FirmwareVersion
 Yubico.YubiKit.Core.Devices.FirmwareVersion.CompareTo(Yubico.YubiKit.Core.Devices.FirmwareVersion? other) -> int
 Yubico.YubiKit.Core.Devices.FirmwareVersion.CompareTo(object? obj) -> int
@@ -371,7 +370,6 @@ Yubico.YubiKit.Core.Devices.FormFactor.UsbCLightning = 5 -> Yubico.YubiKit.Core.
 Yubico.YubiKit.Core.Devices.FormFactor.UsbCNano = 4 -> Yubico.YubiKit.Core.Devices.FormFactor
 Yubico.YubiKit.Core.Devices.IFindYubiKeys
 Yubico.YubiKit.Core.Devices.IFindYubiKeys.FindAllAsync(Yubico.YubiKit.Core.Devices.ConnectionType type, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!>!
-Yubico.YubiKit.Core.Devices.IFindYubiKeys.NotifyTransportActivity(Yubico.YubiKit.Core.Devices.ConnectionType transport) -> void
 Yubico.YubiKit.Core.Devices.VersionQualifier
 Yubico.YubiKit.Core.Devices.VersionQualifier.FirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
 Yubico.YubiKit.Core.Devices.VersionQualifier.Iteration.get -> long

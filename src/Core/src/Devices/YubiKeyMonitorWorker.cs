@@ -27,8 +27,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <remarks>
 /// Initialized once before public exposure, then retired by <see cref="YubiKeyMonitor"/>. Initial,
 /// listener-triggered, and fallback scans all await full publication inside the same loop; there is no
-/// manual rescan, restart, or replacement monitor generation. The ingress lock orders evidence
-/// invalidation against final finder read-scope retirement, not scanning or repository commits.
+/// manual rescan, restart, or replacement monitor generation. Listener teardown and the managed-loop
+/// drain precede final discovery retirement; discovery serializes evidence invalidation internally.
 /// The owner disposes the repository after the worker's one bounded managed-loop drain.
 /// </remarks>
 internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
@@ -45,10 +45,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     private static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
 
     private readonly YubiKeyDeviceRepository _repository;
-    private readonly IFindYubiKeys _findYubiKeys;
-    // Callback acceptance/invalidation and final finder retirement share this boundary. Discovery,
-    // repository diffing, logging, worker-token cancellation, and listener cleanup stay outside it.
-    private readonly Lock _ingressLock = new();
+    private readonly IMonitoredDiscovery _discovery;
     private readonly TimeSpan _shutdownTimeout;
     private readonly DeviceMonitorSignal _signal = new();
     private readonly TaskCompletionSource<Exception?> _initialScan = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -106,18 +103,18 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
 
     internal YubiKeyMonitorWorker(
         YubiKeyDeviceRepository repository,
-        IFindYubiKeys findYubiKeys,
+        IMonitoredDiscovery discovery,
         Func<HidDeviceListener> hidListenerFactory,
         Func<ISmartCardDeviceListener> smartCardListenerFactory,
         TimeSpan? shutdownTimeout = null)
     {
         ArgumentNullException.ThrowIfNull(repository);
-        ArgumentNullException.ThrowIfNull(findYubiKeys);
+        ArgumentNullException.ThrowIfNull(discovery);
         ArgumentNullException.ThrowIfNull(hidListenerFactory);
         ArgumentNullException.ThrowIfNull(smartCardListenerFactory);
 
         _repository = repository;
-        _findYubiKeys = findYubiKeys;
+        _discovery = discovery;
         _shutdownTimeout = shutdownTimeout ?? DefaultShutdownTimeout;
         HidListenerFactory = hidListenerFactory;
         SmartCardListenerFactory = smartCardListenerFactory;
@@ -130,7 +127,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     {
         cancellationToken.ThrowIfCancellationRequested();
         Logger.LogDebug("Rescanning devices...");
-        var devices = await _findYubiKeys.FindAllAsync(ConnectionType.All, cancellationToken).ConfigureAwait(false);
+        var devices = await _discovery.FindAllAsync(cancellationToken).ConfigureAwait(false);
 
         // A finder may ignore cancellation. Reject its late result before entering repository diffing.
         if (_disposed == 1)
@@ -255,7 +252,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         if (_disposed == 1)
             return;
 
-        // Failure uses the repository's short state boundary, never the diff or ingress lock.
+        // Failure uses the repository's short state boundary, never the diff lock.
         _repository.Fail(error);
 
         // Publish the causal failure first: diagnostic providers may block or throw.
@@ -362,16 +359,11 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
 
     private void SignalTransportEvent(ConnectionType transport)
     {
-        lock (_ingressLock)
-        {
-            if (_disposed == 1)
-                return;
+        if (_disposed == 1)
+            return;
 
-            // Activity globally invalidates identity/metadata evidence before signaling discovery.
-            // Ordered with final retirement so even a captured late callback cannot renew read scopes.
-            _findYubiKeys.NotifyTransportActivity(transport);
-            _ = _signal.TrySignal();
-        }
+        _discovery.InvalidateEvidence(transport);
+        _ = _signal.TrySignal();
     }
 
     private enum DeviceMonitorWaitResult
@@ -428,16 +420,6 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         if (Interlocked.Exchange(ref _disposed, 1) == 1)
             return;
 
-        lock (_ingressLock)
-        {
-            // Lock order: ingress -> finder evidence -> read-scope gate. Retire releases the scope
-            // gate before cancelling its internal admission waits; those callbacks do not wait for
-            // this loop or re-enter ingress. Already-open reads retain their native admission/lease.
-            if (_findYubiKeys is FindYubiKeys finder)
-                finder.RetireReadScope();
-        }
-
-        // Worker cancellation callbacks and native listener cleanup run outside the ingress lock.
         _lifetime.Cancel();
         _signal.Complete();
         TeardownListeners();
@@ -457,6 +439,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
             }
         }
 
+        _discovery.Retire();
         Logger.LogDebug("YubiKeyMonitorWorker disposed");
     }
 

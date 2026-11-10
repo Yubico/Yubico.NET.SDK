@@ -96,7 +96,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
         cancellationToken.ThrowIfCancellationRequested();
         var repository = new YubiKeyDeviceRepository();
         var worker = new YubiKeyMonitorWorker(
-            repository, FindYubiKeys.Create(),
+            repository, discovery: FindYubiKeys.Create(),
             HidDeviceListener.Create,
             DesktopSmartCardDeviceListener.Create);
         return CreateAsync(repository, worker, cancellationToken, DefaultMonitoringInterval);
@@ -126,8 +126,8 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     /// Stops tracking, closes subscriptions, and releases the repository. Idempotent with shared completion.
     /// </summary>
     /// <remarks>
-    /// Public access closes first, then the worker retires listener ingress and drains its sole loop with
-    /// a ten-second budget. That budget does not bound native listener cleanup or total disposal time.
+    /// Public access closes first, then the worker stops listeners, drains its sole loop with a ten-second
+    /// budget, and retires discovery. The budget does not bound native listener cleanup or total disposal time.
     /// The repository is disposed in a finally block, rejecting late membership/event commits even if the
     /// loop is abandoned. Already-open native reads may outlive this call and retain their admission and
     /// lease until actual teardown. Events committed before repository disposal may still drain.

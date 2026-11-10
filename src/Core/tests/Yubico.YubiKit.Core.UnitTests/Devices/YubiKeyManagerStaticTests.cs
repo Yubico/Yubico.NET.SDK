@@ -198,9 +198,16 @@ public class YubiKeyManagerStaticTests
             _ => throw new InvalidOperationException("Finder must not be constructed")));
     }
 
-    private sealed class FixedFinder(IYubiKey device) : IFindYubiKeys
+    private sealed class FixedFinder(IYubiKey device) : IFindYubiKeys, IMonitoredDiscovery
     {
         public Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<IYubiKey>>([device]);
+
+        public Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken) =>
+            FindAllAsync(ConnectionType.All, cancellationToken);
+
+        public void InvalidateEvidence(ConnectionType transport) { }
+
+        public void Retire() { }
     }
 }

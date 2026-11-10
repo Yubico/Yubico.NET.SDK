@@ -14,6 +14,7 @@
 
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using System.Reflection;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -62,6 +63,31 @@ public class FindYubiKeysFaultInjectionTests
     private const string ReaderARenamed = "Yubico YubiKey OTP+CCID 02";
     private const string OtpA = "hidA-otp";
     private const string OtpB = "hidB-otp";
+
+    [Fact]
+    public async Task InvalidateEvidence_AfterRetire_DoesNotReopenDiscoveryReads()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        var (find, factory, _, _) = CreateTwoDualKeyRig();
+
+        var discovery = (IMonitoredDiscovery)find;
+        discovery.Retire();
+        discovery.InvalidateEvidence(ConnectionType.Hid);
+
+        // Inspect the current scope without adding a production observation hook for this assertion.
+        var evidenceField = typeof(FindYubiKeys).GetField("_evidence", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(evidenceField);
+        var evidence = evidenceField.GetValue(find);
+        Assert.NotNull(evidence);
+        var scopeProperty = evidence.GetType().GetProperty("ReadScope", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(scopeProperty);
+        var scope = Assert.IsType<ProtocolDeviceInfo.ReadScope>(scopeProperty.GetValue(evidence));
+        Assert.False(scope.TryCaptureEpoch(out _));
+
+        _ = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, factory.TotalConnectCalls);
+    }
 
     // Two-key 0x0407 rig (admission-saturation reproduction; 6 concurrent identity reads).
     private const string TripleReaderA = "Yubico YubiKey OTP+FIDO+CCID";
@@ -224,7 +250,7 @@ public class FindYubiKeysFaultInjectionTests
     ///     </para>
     ///     <para>
     ///         Platform removal and arrival notifications are therefore the invalidation signal when they
-    ///         are delivered. <see cref="IFindYubiKeys.NotifyTransportActivity" /> is what the device monitor
+    ///         are delivered. <see cref="IMonitoredDiscovery.InvalidateEvidence" /> is what the device monitor
     ///         calls at event ingress.
     ///     </para>
     /// </remarks>
@@ -245,8 +271,8 @@ public class FindYubiKeysFaultInjectionTests
         var readerBConnectsBeforeScan2 = factory.ConnectCalls(ReaderB);
 
         // The swap is physically impossible without removal+arrival events; the monitor forwards them.
-        find.NotifyTransportActivity(ConnectionType.SmartCard);
-        find.NotifyTransportActivity(ConnectionType.Hid);
+        ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.SmartCard);
+        ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.Hid);
 
         var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
@@ -319,7 +345,7 @@ public class FindYubiKeysFaultInjectionTests
         // Same-model key swapped into the same slot between scans: identical interface id, different
         // hardware. Only the firmware answers differently.
         factory.SucceedReads(fidoPath, serial: 999);
-        find.NotifyTransportActivity(ConnectionType.Hid);
+        ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.Hid);
 
         var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
@@ -342,7 +368,7 @@ public class FindYubiKeysFaultInjectionTests
     ///     evidence. Re-reading budgeted identities on the next scan is the price of never mixing them.
     /// </remarks>
     [Fact]
-    public async Task NotifyTransportActivity_HidOnly_EvictsPcscIdentityEvidenceToo()
+    public async Task InvalidateEvidence_HidOnly_EvictsPcscIdentityEvidenceToo()
     {
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
         var (find, factory, _, _) = CreateTwoDualKeyRig();
@@ -353,7 +379,7 @@ public class FindYubiKeysFaultInjectionTests
         var readerBConnectsAfterScan1 = factory.ConnectCalls(ReaderB);
         var otpAConnectsAfterScan1 = factory.ConnectCalls(OtpA);
 
-        find.NotifyTransportActivity(ConnectionType.Hid);
+        ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.Hid);
 
         var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
@@ -394,7 +420,7 @@ public class FindYubiKeysFaultInjectionTests
                 "The identity read never reached a connect; cannot stage the in-flight interleaving.");
 
             // Hotplug lands while a native identity read is in flight and its siblings await admission.
-            find.NotifyTransportActivity(ConnectionType.SmartCard);
+            ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.SmartCard);
             factory.ReleaseAllGatedReads();
 
             scan1 = await scanTask;
@@ -446,7 +472,7 @@ public class FindYubiKeysFaultInjectionTests
                 await AsyncWait.TryWaitUntilAsync(() => factory.TotalConnectCalls >= 1),
                 "The metadata read never reached a connect; cannot stage the in-flight interleaving.");
 
-            find.NotifyTransportActivity(ConnectionType.Hid);
+            ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.Hid);
             factory.ReleaseAllGatedReads();
 
             _ = await scanTask;

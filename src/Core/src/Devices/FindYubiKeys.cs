@@ -23,38 +23,8 @@ namespace Yubico.YubiKit.Core.Devices;
 public interface IFindYubiKeys
 {
     Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    ///     Signals that hotplug activity was observed on a transport, so cached identity and metadata
-    ///     evidence may describe hardware that is no longer present.
-    /// </summary>
-    /// <param name="transport">
-    ///     The transport family the activity was observed on — <see cref="ConnectionType.SmartCard" /> or
-    ///     <see cref="ConnectionType.Hid" />.
-    /// </param>
-    /// <remarks>
-    ///     <para>
-    ///         Scan-time eviction alone cannot catch a swap that completes <em>between</em> scans: a key
-    ///         unplugged and a same-model key plugged into the same slot can reuse the same per-interface
-    ///         identifier (PC/SC reader names are slot-derived), so the interface is never observed absent
-    ///         and a cached serial from the old key would be attributed to the new one. For an SDK whose
-    ///         consumers bind sessions to serial-derived identity, that is key substitution, not a stale
-    ///         cache entry. Hotplug events are the signal that physical topology changed; implementations
-    ///         discard cached identity and metadata evidence, supersede in-flight reads, and re-read on the
-    ///         next scan. The transport is diagnostic context, not an eviction scope: a composite key's
-    ///         swap can surface its events on one transport first, so evicting only that transport would
-    ///         mix two keys' evidence.
-    ///     </para>
-    ///     <para>
-    ///         Default is a no-op so that test fakes and custom implementations without an identity cache
-    ///         are unaffected. Callers must not rely on any synchronous effect.
-    ///     </para>
-    /// </remarks>
-    void NotifyTransportActivity(ConnectionType transport)
-    {
-    }
 }
-public class FindYubiKeys : IFindYubiKeys
+public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FindYubiKeys>();
 
@@ -104,7 +74,7 @@ public class FindYubiKeys : IFindYubiKeys
     //  - Hardware: scan-time eviction (EvictAbsentIdentities) only catches interfaces observed absent. A
     //    same-slot swap completing BETWEEN scans reuses the slot-derived interface id, so the old key's
     //    serial would be attributed to the new key - key substitution. Hotplug events are the signal that
-    //    hardware changed; NotifyTransportActivity discards all cached evidence.
+    //    hardware changed; InvalidateEvidence discards all cached evidence.
     private EvidenceEpoch _evidence = new();
 
     /// <summary>A successful identity read plus the evidence context that makes it reusable.</summary>
@@ -308,8 +278,10 @@ public class FindYubiKeys : IFindYubiKeys
         return info;
     }
 
-    /// <inheritdoc />
-    public void NotifyTransportActivity(ConnectionType transport)
+    Task<IReadOnlyList<IYubiKey>> IMonitoredDiscovery.FindAllAsync(CancellationToken cancellationToken) =>
+        FindAllAsync(ConnectionType.All, cancellationToken);
+
+    void IMonitoredDiscovery.InvalidateEvidence(ConnectionType transport)
     {
         // Full eviction, deliberately - the events carry no reliable per-interface identity (the PC/SC
         // listener is payload-less; HID hints are diagnostic-only), and per-transport scoping is unsound
@@ -323,11 +295,17 @@ public class FindYubiKeys : IFindYubiKeys
         // join reads started against the departed topology.
         lock (_evidenceLock)
         {
+            // Retirement is terminal, including callbacks already in flight during listener teardown.
+            if (!_evidence.ReadScope.TryCaptureEpoch(out _))
+                return;
+
             var retired = _evidence;
             ProtocolDeviceInfo.Retire(retired.ReadScope);
             _evidence = new EvidenceEpoch();
         }
     }
+
+    void IMonitoredDiscovery.Retire() => RetireReadScope();
 
     internal void RetireReadScope()
     {

@@ -75,25 +75,27 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
         await Loop.WaitAsync(Bound, CancellationToken.None);
     }
 
-    internal sealed class ScriptedFinder : IFindYubiKeys
+    internal sealed class ScriptedFinder : IMonitoredDiscovery
     {
         private int _scanCount;
         private int _activityCount;
         public Func<CancellationToken, Task<IReadOnlyList<IYubiKey>>> Scan { get; set; } =
             _ => Task.FromResult<IReadOnlyList<IYubiKey>>([]);
         public Action<ConnectionType>? OnActivity { get; set; }
+        public Action? OnRetire { get; set; }
         public int ScanCount => Volatile.Read(ref _scanCount);
         public int ActivityCount => Volatile.Read(ref _activityCount);
-        public Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default)
+        public Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken)
         {
             Interlocked.Increment(ref _scanCount);
             return Scan(cancellationToken);
         }
-        public void NotifyTransportActivity(ConnectionType transport)
+        public void InvalidateEvidence(ConnectionType transport)
         {
             Interlocked.Increment(ref _activityCount);
             OnActivity?.Invoke(transport);
         }
+        public void Retire() => OnRetire?.Invoke();
     }
 
     internal sealed class FakeHidListener : HidDeviceListener

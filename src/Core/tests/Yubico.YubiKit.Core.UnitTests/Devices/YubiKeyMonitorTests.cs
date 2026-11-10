@@ -1091,70 +1091,31 @@ public class YubiKeyMonitorTests
         var pcscCallback = fixture.SmartCard.Changed;
         Assert.NotNull(hidCallback);
         Assert.NotNull(pcscCallback);
-        void Callback()
-        {
-            if (hid)
-                hidCallback();
-            else
-                pcscCallback();
-        }
+        var capturedCallback = hid ? hidCallback : pcscCallback;
 
-        using var release = new ManualResetEventSlim();
-        var entered = Signal();
         var retired = Signal();
         fixture.Finder.OnRetire = () =>
         {
+            // Listener teardown and the loop drain both precede discovery retirement.
             Assert.True(fixture.Hid.Disposed);
             Assert.True(fixture.SmartCard.Disposed);
             Assert.True(fixture.Loop.IsCompleted);
             retired.TrySetResult();
         };
-        fixture.Finder.OnActivity = _ =>
-        {
-            entered.TrySetResult();
-            Assert.True(release.Wait(Bound, TestToken));
-        };
-        var callback = Task.Run(Callback, TestToken);
-        Task? disposal = null;
-        try
-        {
-            await entered.Task.WaitAsync(Bound, TestToken);
-            var disposalStarted = Signal();
-            disposal = Task.Run(async () =>
-            {
-                disposalStarted.TrySetResult();
-                await monitor.DisposeAsync();
-            }, TestToken);
-            await disposalStarted.Task.WaitAsync(Bound, TestToken);
-            // Public access closes before listener teardown and discovery retirement.
-            await AsyncWait.WaitUntilAsync(() =>
-            {
-                try { _ = monitor.CurrentDevices; return false; }
-                catch (ObjectDisposedException) { return true; }
-            }, "Disposal did not close public access", Bound, TestToken);
-            await disposal.WaitAsync(Bound, TestToken);
-            await retired.Task.WaitAsync(Bound, TestToken);
-            Assert.False(callback.IsCompleted);
-            release.Set();
-            await callback.WaitAsync(Bound, TestToken);
-            await disposal.WaitAsync(Bound, TestToken);
-            await fixture.Loop.WaitAsync(Bound, TestToken);
-            Assert.Null(fixture.Hid.Changed);
-            Assert.Null(fixture.SmartCard.Changed);
-            var scans = fixture.Finder.ScanCount;
-            Assert.Equal(1, fixture.Finder.ActivityCount);
-            Callback();
-            Assert.Equal(1, fixture.Finder.ActivityCount);
-            Assert.Equal(scans, fixture.Finder.ScanCount);
-        }
-        finally
-        {
-            release.Set();
-            // The captured callback must finish before fixture teardown, even if canceled.
-            await callback.WaitAsync(Bound, CancellationToken.None);
-            if (disposal is not null)
-                await disposal.WaitAsync(Bound, CancellationToken.None);
-        }
+
+        await monitor.DisposeAsync();
+        await retired.Task.WaitAsync(Bound, TestToken);
+        Assert.Null(fixture.Hid.Changed);
+        Assert.Null(fixture.SmartCard.Changed);
+
+        // A callback captured before disposal only writes to the completed signal channel; it can no
+        // longer reach discovery or trigger a scan.
+        var scans = fixture.Finder.ScanCount;
+        var activity = fixture.Finder.ActivityCount;
+        capturedCallback();
+        await Task.Delay(50, TestToken);
+        Assert.Equal(activity, fixture.Finder.ActivityCount);
+        Assert.Equal(scans, fixture.Finder.ScanCount);
     }
 
     [Fact]

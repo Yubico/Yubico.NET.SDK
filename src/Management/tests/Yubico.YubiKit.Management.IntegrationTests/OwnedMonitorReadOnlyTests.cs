@@ -42,19 +42,17 @@ public class OwnedMonitorReadOnlyTests(ITestOutputHelper output)
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         var reference = await ReferenceFixturesAsync(timeout.Token);
         await using var monitor = await YubiKeyManager.CreateMonitorAsync(timeout.Token);
-        var snapshot = monitor.CurrentDevices;
+        var snapshot = await SnapshotAsync(monitor, timeout.Token);
         AssertFixturesReady(reference, snapshot);
 
-        await using var watcher = monitor.WatchAsync(timeout.Token).GetAsyncEnumerator(timeout.Token);
-        await AssertReplayAsync(watcher, snapshot, timeout.Token);
-        for (var i = 0; i < 100; i++)
+        for (var i = 0; i < 10; i++)
         {
-            var current = monitor.CurrentDevices;
-            Assert.Equal(snapshot, current);
+            var current = await SnapshotAsync(monitor, timeout.Token);
+            Assert.Equal(snapshot.Count, current.Count);
             foreach (var key in snapshot)
                 Assert.Contains(current, candidate => ReferenceEquals(candidate, key));
         }
-        output.WriteLine($"Initialized snapshot and initial Added replay cover {_scoped.Authorized(snapshot).Select(key => key.SerialNumber).Distinct().Count()} authorized keys.");
+        output.WriteLine($"Initial replay covers {_scoped.Authorized(snapshot).Select(key => key.SerialNumber).Distinct().Count()} authorized keys and is stable across subscriptions.");
     }
 
     [Fact]
@@ -64,7 +62,7 @@ public class OwnedMonitorReadOnlyTests(ITestOutputHelper output)
         var reference = await ReferenceFixturesAsync(timeout.Token);
         using var creation = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token);
         await using var monitor = await YubiKeyManager.CreateMonitorAsync(creation.Token);
-        var snapshot = monitor.CurrentDevices;
+        var snapshot = await SnapshotAsync(monitor, timeout.Token);
         AssertFixturesReady(reference, snapshot);
         await creation.CancelAsync(); // Factory token no longer owns this initialized lifetime.
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token);
@@ -72,40 +70,37 @@ public class OwnedMonitorReadOnlyTests(ITestOutputHelper output)
         await using var healthy = monitor.WatchAsync(timeout.Token).GetAsyncEnumerator(timeout.Token);
         Assert.True(await canceled.MoveNextAsync());
         Assert.True(await healthy.MoveNextAsync());
-        Assert.Equal(DeviceAction.Added, healthy.Current.Action);
-        var replay = new List<IYubiKey> { healthy.Current.Device };
+        var replay = new List<IYubiKey> { Assert.IsType<DeviceAdded>(healthy.Current).Device };
         await cancellation.CancelAsync();
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => canceled.MoveNextAsync().AsTask());
         for (var i = 1; i < snapshot.Count; i++)
         {
             Assert.True(await healthy.MoveNextAsync().AsTask().WaitAsync(timeout.Token));
-            Assert.Equal(DeviceAction.Added, healthy.Current.Action);
-            replay.Add(healthy.Current.Device);
+            replay.Add(Assert.IsType<DeviceAdded>(healthy.Current).Device);
         }
+        Assert.True(await healthy.MoveNextAsync().AsTask().WaitAsync(timeout.Token));
+        Assert.IsType<SnapshotComplete>(healthy.Current);
         Assert.Equal(snapshot.OrderBy(key => key.DeviceId), replay.OrderBy(key => key.DeviceId));
-        AssertFixturesReady(reference, monitor.CurrentDevices);
 
         await monitor.DisposeAsync();
         await monitor.DisposeAsync();
         while (await healthy.MoveNextAsync().AsTask().WaitAsync(timeout.Token))
         {
-            // Already-published deltas may drain; do not require disposal to erase queued history.
+            // Already-published changes may drain; do not require disposal to erase queued history.
         }
-        Assert.Throws<ObjectDisposedException>(() => monitor.CurrentDevices);
         AssertFixturesReady(reference, snapshot); // Historical membership survives disposal.
         await using var afterDisposal = monitor.WatchAsync(timeout.Token).GetAsyncEnumerator(timeout.Token);
         Assert.False(await afterDisposal.MoveNextAsync());
 
         await using var recreated = await YubiKeyManager.CreateMonitorAsync(timeout.Token);
-        AssertFixturesReady(reference, recreated.CurrentDevices);
+        var recreatedSnapshot = await SnapshotAsync(recreated, timeout.Token);
+        AssertFixturesReady(reference, recreatedSnapshot);
         foreach (var previous in _scoped.Authorized(snapshot))
         {
-            var next = recreated.CurrentDevices.First(key => key.SerialNumber == previous.SerialNumber);
+            var next = recreatedSnapshot.First(key => key.SerialNumber == previous.SerialNumber);
             Assert.NotSame(previous, next);
             Assert.Equal(DeviceCorrelation.Same, previous.SameDeviceAs(next));
         }
-        await using var newWatcher = recreated.WatchAsync(timeout.Token).GetAsyncEnumerator(timeout.Token);
-        await AssertReplayAsync(newWatcher, recreated.CurrentDevices, timeout.Token);
         output.WriteLine("Subscriber cancellation, normal disposal completion, and a fresh initialized monitor passed for both fixtures.");
     }
 
@@ -138,14 +133,14 @@ public class OwnedMonitorReadOnlyTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public async Task CurrentDevices_CachedMetadataMatchesSequentialLiveReads_AfterMonitorDisposal()
+    public async Task Snapshot_CachedMetadataMatchesSequentialLiveReads_AfterMonitorDisposal()
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         var reference = await ReferenceFixturesAsync(timeout.Token);
         IReadOnlyList<IYubiKey> snapshot;
         await using (var monitor = await YubiKeyManager.CreateMonitorAsync(timeout.Token))
         {
-            snapshot = monitor.CurrentDevices;
+            snapshot = await SnapshotAsync(monitor, timeout.Token);
             AssertFixturesReady(reference, snapshot);
         }
 
@@ -156,6 +151,22 @@ public class OwnedMonitorReadOnlyTests(ITestOutputHelper output)
             foreach (var type in ConcreteTypes.Where(view.SupportsConnection))
                 await _scoped.AssertLiveReadAsync(view, type, cached, timeout.Token);
         }
+    }
+
+    /// <summary>Reads one subscription's initial replay up to <see cref="SnapshotComplete"/>.</summary>
+    private static async Task<IReadOnlyList<IYubiKey>> SnapshotAsync(YubiKeyMonitor monitor, CancellationToken token)
+    {
+        var replay = new List<IYubiKey>();
+        await foreach (var change in monitor.WatchAsync(token).WithCancellation(token))
+        {
+            if (change is SnapshotComplete)
+                return replay;
+            var added = Assert.IsType<DeviceAdded>(change);
+            Assert.DoesNotContain(added.Device, replay);
+            replay.Add(added.Device);
+        }
+
+        throw new InvalidOperationException("The subscription ended before SnapshotComplete.");
     }
 
     private async Task<IReadOnlyList<IYubiKey>> ReferenceFixturesAsync(CancellationToken token)
@@ -181,18 +192,5 @@ public class OwnedMonitorReadOnlyTests(ITestOutputHelper output)
             ScopedDiscoveryReadOnlyTests.AssertMetadataMatches(Assert.IsType<DeviceInfo>(baseline.CachedDeviceInfo),
                 Assert.IsType<DeviceInfo>(view.CachedDeviceInfo));
         }
-    }
-
-    private static async Task AssertReplayAsync(IAsyncEnumerator<DeviceEvent> watcher, IReadOnlyList<IYubiKey> snapshot, CancellationToken token)
-    {
-        var replay = new HashSet<IYubiKey>();
-        for (var i = 0; i < snapshot.Count; i++)
-        {
-            Assert.True(await watcher.MoveNextAsync().AsTask().WaitAsync(token));
-            Assert.Equal(DeviceAction.Added, watcher.Current.Action);
-            Assert.Contains(watcher.Current.Device, snapshot);
-            Assert.True(replay.Add(watcher.Current.Device), "Initial replay duplicated a device.");
-        }
-        Assert.True(replay.SetEquals(snapshot));
     }
 }

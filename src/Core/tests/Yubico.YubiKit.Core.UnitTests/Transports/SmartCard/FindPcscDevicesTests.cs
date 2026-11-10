@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
@@ -118,6 +119,22 @@ public class FindPcscDevicesTests
     }
 
     [Fact]
+    public async Task FindAllAsync_DuplicatedReaderName_PublishesOneDeviceAndWarns()
+    {
+        var api = new StatusBlockingSCardApi(
+            "Yubico YubiKey OTP+FIDO+CCID 00 00",
+            "Yubico YubiKey OTP+FIDO+CCID 00 00");
+        var logger = new RecordingLogger();
+        var finder = new FindPcscDevices(logger, api);
+
+        var devices = await finder.FindAllAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal("Yubico YubiKey OTP+FIDO+CCID 00 00", Assert.Single(devices).ReaderName);
+        var warning = Assert.Single(logger.Entries, entry => entry.Level == LogLevel.Warning);
+        Assert.Contains("1 duplicate reader name", warning.Message);
+    }
+
+    [Fact]
     public async Task FindAllAsync_UnrecognizedReader_StillQueriesCardStatus()
     {
         var api = new StatusBlockingSCardApi("Generic NFC Reader");
@@ -191,6 +208,19 @@ public class FindPcscDevicesTests
         }
 
         public uint SCardCancel(SCardContext context) => ErrorCode.SCARD_S_SUCCESS;
+    }
+
+    private sealed class RecordingLogger : ILogger<FindPcscDevices>
+    {
+        public List<(LogLevel Level, string Message)> Entries { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
+            Exception? exception, Func<TState, Exception?, string> formatter) =>
+            Entries.Add((logLevel, formatter(state, exception)));
     }
 
     private sealed class EmptyHidFinder : IFindHidInterfaces

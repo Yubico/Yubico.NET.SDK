@@ -419,10 +419,12 @@ Do not reinterpret partial scope as PID completeness or import sibling slots fro
 One-shot exit terminally retires its read scope in `finally`, including cancellation and budget expiry.
 This cancels queued identity admission and prevents later opens; already-open native work keeps its
 worker and registry lease until teardown. Do not dispose admission/lease owners at the wait boundary.
-Dispatched native enumeration is still awaited after cancellation, so the public task can remain pending
-until enumeration returns; only identity/metadata waits are bounded. This boundary and the absence of
-post-enumeration slots/probes are pinned by
-`FindAllAsync_CancellationDuringEnumeration_WaitsForEnumerationThenSkipsSlotsAndProbes`.
+Transport enumeration waits run concurrently with the shared `DiscoveryBudgets.Enumeration` budget
+(provisionally five seconds). A timeout logs a warning and omits that transport for this scan; caller
+cancellation abandons the wait immediately. Abandoned enumeration completes independently and its result
+or failure is observed at Debug level. The absence of post-cancellation slots/probes is pinned by
+`FindAllAsync_CancellationDuringEnumeration_AbandonsEnumerationAndSkipsSlotsAndProbes`;
+`FindYubiKeysEnumerationBudgetTests` pins timeout isolation and late completion for both transports.
 No global registry identity aliases are added: all/scoped views exclude connections only when their
 known member-ID sets overlap; disjoint CCID/FIDO views remain uncoordinated even with matching serials.
 `FindYubiKeysScopeTests` pins filtering, partial same-PID grouping, evidence isolation, retirement, and

@@ -261,7 +261,7 @@ public class FindYubiKeysScopeTests
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
-    public async Task FindAllAsync_CancellationDuringEnumeration_WaitsForEnumerationThenSkipsSlotsAndProbes()
+    public async Task FindAllAsync_CancellationDuringEnumeration_AbandonsEnumerationAndSkipsSlotsAndProbes()
     {
         var rig = new ScopeRig();
         var enumeration = new TaskCompletionSource<IReadOnlyList<IPcscDevice>>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -274,10 +274,9 @@ public class FindYubiKeysScopeTests
             Assert.NotEmpty(rig.Pcsc.Devices);
             await cancellation.CancelAsync();
 
-            // Dispatched enumeration does not observe cancellation. Its caller still awaits it, rather
-            // than abandoning this wait as identity/metadata reads do. Keep the gate closed throughout.
-            await Assert.ThrowsAsync<TimeoutException>(() =>
-                scan.WaitAsync(TimeSpan.FromMilliseconds(100), TestContext.Current.CancellationToken));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                scan.WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken));
+            Assert.False(enumeration.Task.IsCompleted);
         }
         finally
         {

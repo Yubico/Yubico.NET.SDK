@@ -24,6 +24,11 @@ public interface IFindYubiKeys
 {
     Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
 }
+/// <summary>
+///     Discovers physical YubiKeys with bounded native enumeration and read waits. Await scans and pass a
+///     cancellation token to cancel their waits. Enumeration timeouts omit only the affected transport;
+///     caller cancellation throws <see cref="OperationCanceledException" />, and other enumeration failures propagate.
+/// </summary>
 public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FindYubiKeys>();
@@ -32,20 +37,31 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     private readonly IFindHidInterfaces? findHidService;
     private readonly Func<IDevice, IYubiKeyConnectionSlot> createSlot;
     private readonly ConnectionType _scope;
+    private readonly TimeSpan _enumerationBudget;
     private readonly Lock _evidenceLock = new();
 
     // Tier-1 evidence source. Optional by contract: the no-topology resolver on macOS/Linux, and on Windows
     // any per-interface read failure simply yields no key for that interface.
     private readonly IDeviceTopologyResolver _topologyResolver;
 
+    /// <summary>Creates a scoped finder. Callers must retire its read scope when discovery ends.</summary>
+    /// <param name="findPcscService">Enumerator required when the scope includes smart cards.</param>
+    /// <param name="findHidService">Enumerator required when the scope includes HID.</param>
+    /// <param name="createSlot">Creates a connection slot for each included interface.</param>
+    /// <param name="scope">Interfaces to enumerate.</param>
+    /// <param name="topologyResolver">Optional platform topology resolver.</param>
+    /// <param name="enumerationBudget">Maximum wait per transport; defaults to the discovery enumeration budget.</param>
+    /// <exception cref="ArgumentNullException">An enumerator required by the scope is missing.</exception>
     internal FindYubiKeys(
         IFindPcscDevices? findPcscService,
         IFindHidInterfaces? findHidService,
         Func<IDevice, IYubiKeyConnectionSlot> createSlot,
         ConnectionType scope = ConnectionType.All,
-        IDeviceTopologyResolver? topologyResolver = null)
+        IDeviceTopologyResolver? topologyResolver = null,
+        TimeSpan? enumerationBudget = null)
     {
         _scope = scope.ToConcreteScope();
+        _enumerationBudget = enumerationBudget ?? DiscoveryBudgets.Enumeration;
         this.findPcscService = _scope.SupportsConnection(ConnectionType.SmartCard)
             ? findPcscService ?? throw new ArgumentNullException(nameof(findPcscService))
             : null;
@@ -55,11 +71,6 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
         this.createSlot = createSlot;
         _topologyResolver = topologyResolver ?? DeviceTopologyResolver.Create();
     }
-
-    // Hard total wall-clock budget for one best-effort metadata read (shared across that device's
-    // transports). Bounded so a busy/locked CCID cannot stall discovery; reads run concurrently across
-    // keys so total added scan latency is at most ~one budget.
-    private static readonly TimeSpan MetadataReadBudget = TimeSpan.FromSeconds(3);
 
     // Serial-disambiguation identity cache (PID-count>1 / force-serial path), keyed by per-interface DeviceId.
     // Only successful reads are cached, so presence means the interface's identity was read successfully;
@@ -156,14 +167,56 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     {
         // The immutable finder scope bounds enumeration and evidence. The requested result filter still
         // applies only AFTER merging; it never changes this finder's cache/absence interpretation.
-        IReadOnlyList<IPcscDevice> pcscDevices = findPcscService is { } pcsc
-            ? await pcsc.FindAllAsync(cancellationToken).ConfigureAwait(false)
-            : [];
-        IReadOnlyList<IHidInterface> hidInterfaces = findHidService is { } hid
-            ? await hid.FindAllAsync(cancellationToken).ConfigureAwait(false)
-            : [];
+        // Both waits start together so the enumeration stage consumes at most one budget, not two.
+        var pcscTask = findPcscService is { } pcsc
+            ? EnumerateBoundedAsync(pcsc.FindAllAsync, "PC/SC", cancellationToken)
+            : Task.FromResult<IReadOnlyList<IPcscDevice>>([]);
+        var hidTask = findHidService is { } hid
+            ? EnumerateBoundedAsync(hid.FindAllAsync, "HID", cancellationToken)
+            : Task.FromResult<IReadOnlyList<IHidInterface>>([]);
+        await Task.WhenAll(pcscTask, hidTask).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        return BuildInterfaces(pcscDevices, hidInterfaces);
+        return BuildInterfaces(await pcscTask.ConfigureAwait(false), await hidTask.ConfigureAwait(false));
+    }
+
+    private async Task<IReadOnlyList<T>> EnumerateBoundedAsync<T>(
+        Func<CancellationToken, Task<IReadOnlyList<T>>> enumerate,
+        string transport,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var enumeration = enumerate(cancellationToken);
+        try
+        {
+            return await enumeration.WaitAsync(_enumerationBudget, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
+            throw;
+        }
+        catch (TimeoutException)
+        {
+            _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
+            cancellationToken.ThrowIfCancellationRequested();
+            Logger.LogWarning(
+                "{Transport} interface enumeration exceeded its {Budget} budget; continuing without its interfaces this scan.",
+                transport, _enumerationBudget);
+            return [];
+        }
+    }
+
+    private static async Task ObserveAbandonedEnumerationAsync(Task enumeration, string transport)
+    {
+        try
+        {
+            await enumeration.ConfigureAwait(false);
+            Logger.LogDebug("Abandoned {Transport} interface enumeration completed.", transport);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogDebug(exception, "Abandoned {Transport} interface enumeration failed.", transport);
+        }
     }
 
     private List<InterfaceCandidate> BuildInterfaces(
@@ -348,7 +401,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
                 return;
 
             var info = await CompositeMetadataReader
-                .TryReadAsync(device, MetadataReadBudget, Logger, cancellationToken, evidence.ReadScope)
+                .TryReadAsync(device, DiscoveryBudgets.MetadataRead, Logger, cancellationToken, evidence.ReadScope)
                 .ConfigureAwait(false);
 
             if (info is { } metadata)

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Core.Devices;
 
@@ -35,10 +34,6 @@ namespace Yubico.YubiKit.Core.Devices;
 internal static class DiscoveryIdentityReader
 {
     private const int MaxAttempts = 3;
-
-    // Hard wall-clock budget for one connect+read attempt. Generous: an idle key answers a device-info
-    // read in well under a second; only a card blocked by a long applet operation exceeds this.
-    private static readonly TimeSpan PerAttemptBudget = TimeSpan.FromSeconds(2);
 
     public static async Task<DeviceInfo?> TryReadAsync(
         IYubiKeyConnectionSlot device,
@@ -64,7 +59,7 @@ internal static class DiscoveryIdentityReader
                     .ReadSlotBoundedAsync(
                         device,
                         connection,
-                        PerAttemptBudget,
+                        DiscoveryBudgets.IdentityRead,
                         logger,
                         cancellationToken,
                         waitForWorkerSlot: true,
@@ -94,7 +89,7 @@ internal static class DiscoveryIdentityReader
                     "Discovery identity read for {DeviceId} over {Connection} exceeded its {Budget} budget (device busy?); treating serial as unknown.",
                     device.InterfaceId,
                     connection,
-                    PerAttemptBudget);
+                    DiscoveryBudgets.IdentityRead);
                 return null;
             }
             catch (Exception e)

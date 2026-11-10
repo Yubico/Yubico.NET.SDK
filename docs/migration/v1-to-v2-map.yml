@@ -97,7 +97,7 @@ mappings:
       - yubikit:src/Core/src/Devices/HotplugSignals.cs
       - yubikit:src/Core/src/Devices/DeviceChangeFeed.cs
       - yubikit:src/Core/src/Devices/YubiKeyManager.cs
-      - yubikit:src/Core/src/DeviceChange.cs
+      - yubikit:src/Core/src/Devices/DeviceChange.cs
       - yubikit:src/Core/src/Devices/YubiKeyMonitor.cs
     notes: "V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> with per-interface payloads; device-level consumers used YubiKeyDeviceListener and the FindAll cache. V2 Changed callbacks are hints, not physical-device truth. manager watch creates a producer; monitor watch subscribes to an existing one. Both return IAsyncEnumerable<DeviceChange> with DeviceAdded replay, SnapshotComplete even when empty, then live DeviceAdded/DeviceRemoved/DeviceUpdated records carrying a scan Revision. Capture and registration are atomic on first enumeration. Each subscriber has an independent 256-change buffer; overflow faults only it. Clear its projection and re-enumerate the same monitor to recover. Dispose shared monitors with await using; monitor-watch cancellation ends only its subscription. Rx Where becomes an if inside await foreach. The SDK has no reactive or hosting dependency."
     last_reviewed_commit: e97b10d1602289f04615e6ce74b049f823acf6c2

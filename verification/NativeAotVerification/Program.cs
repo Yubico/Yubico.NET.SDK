@@ -3,7 +3,6 @@
 // not part of the recurring workflow. See docs/NATIVE-AOT.md for the evidence boundaries.
 
 using System.Globalization;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Ctap2;

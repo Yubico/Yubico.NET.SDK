@@ -224,7 +224,6 @@ The SDK has no reactive or hosting dependency.
 ### One consumer: an enumeration-owned monitor
 
 ```csharp
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 
 using var stop = new CancellationTokenSource();
@@ -252,7 +251,6 @@ Build a projection from replay, rather than prepending a separate snapshot or Fi
 a subscription gap). This example uses reference identity because removals carry the published object:
 
 ```csharp
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 

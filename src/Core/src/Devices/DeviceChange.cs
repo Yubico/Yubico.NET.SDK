@@ -14,7 +14,7 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 
-namespace Yubico.YubiKit.Core;
+namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>A notification from a device monitoring subscription.</summary>
 /// <remarks>The set of derived records is closed: <see cref="DeviceAdded"/>, <see cref="DeviceRemoved"/>,

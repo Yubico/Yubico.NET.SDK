@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Xunit.Abstractions;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;

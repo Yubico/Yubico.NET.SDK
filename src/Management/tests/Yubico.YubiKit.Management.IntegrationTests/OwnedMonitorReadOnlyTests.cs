@@ -30,6 +30,7 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 ///     backend counts are covered by Core's deterministic tests, not inferred from hardware timing.
 /// </remarks>
 [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+[Trait(TestCategories.Category, TestCategories.Discovery)]
 public class OwnedMonitorReadOnlyTests(ITestOutputHelper output)
 {
     private readonly ScopedDiscoveryReadOnlyTests _scoped = new(output);

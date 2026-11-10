@@ -11,7 +11,8 @@ manager watch creates a producer; monitor watch subscribes to an existing one.
   awaits the actual loop before retiring discovery and completing the feed. Budgets bound waits, not
   native work; identity retries and finder scan-lock queueing preclude a hard total wall-clock bound.
 - The lifetime is one-way. Dispose and create another monitor; no pause/restart generations, abandoned
-  managed loops, or late-publication guards are needed. Disposal must not overlap other members.
+  managed loops, or late-publication guards are needed. Disposal may overlap active enumerations (they end
+normally, which the hosted-singleton pattern relies on) but not another disposal.
 - `CurrentDevices` was removed. Replay plus `SnapshotComplete` distinguishes
   loading from loaded-empty without a snapshot/subscription gap. Build a projection; use `FindAllAsync`
   for independent one-off discovery. Retained metadata is last-known data, not live configuration.

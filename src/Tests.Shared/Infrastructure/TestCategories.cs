@@ -88,4 +88,11 @@ public static class TestCategories
     /// Examples: increasing minPinLength, enabling enterprise attestation.
     /// </summary>
     public const string PermanentDeviceState = "PermanentDeviceState";
+
+    /// <summary>
+    /// Test exercises device discovery or monitoring (<c>YubiKeyManager.Find*</c>, <c>WatchAsync</c>,
+    /// <c>YubiKeyMonitor</c>) against real hardware. Combine with <see cref="RequiresUserPresence"/> to
+    /// select the attended hotplug ceremonies, or exclude it to select the unattended discovery checks.
+    /// </summary>
+    public const string Discovery = "Discovery";
 }

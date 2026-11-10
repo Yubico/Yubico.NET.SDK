@@ -34,6 +34,7 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 ///     not by Core, solely for independent live-read comparisons.
 /// </remarks>
 [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+[Trait(TestCategories.Category, TestCategories.Discovery)]
 public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
 {
     private const int MaxAttempts = 3;

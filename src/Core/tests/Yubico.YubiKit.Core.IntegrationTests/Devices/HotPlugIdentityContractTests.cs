@@ -42,7 +42,9 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Discovery)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task RemoveAndReinsert_RemovalRetainsSerial_ReinsertionPublishesNewCorrelatedObject()
     {

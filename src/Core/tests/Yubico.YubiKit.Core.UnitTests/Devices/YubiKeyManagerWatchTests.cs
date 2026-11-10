@@ -99,4 +99,30 @@ public class YubiKeyManagerWatchTests
         fixture.Clock.Advance(fixture.Interval * 2);
         Assert.Equal(1, fixture.Finder.ScanCount);
     }
+
+    [Fact]
+    public async Task WatchAsync_ConsumerBodyThrows_DisposesPrivateMonitor()
+    {
+        await using var fixture = new OwnedMonitorFixture();
+        var retired = false;
+        fixture.Finder.OnRetire = () => retired = true;
+        var failure = new InvalidOperationException("consumer failed");
+
+        var thrown = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await foreach (var change in YubiKeyManager.WatchAsync(fixture.CreateAsync, TestToken))
+            {
+                Assert.IsType<SnapshotComplete>(change);
+                throw failure;
+            }
+        });
+
+        Assert.Same(failure, thrown);
+        Assert.True(fixture.Hid.Disposed && fixture.SmartCard.Disposed);
+        Assert.True(retired);
+        var scans = fixture.Finder.ScanCount;
+        fixture.SmartCard.Raise();
+        fixture.Clock.Advance(fixture.Interval * 2);
+        Assert.Equal(scans, fixture.Finder.ScanCount);
+    }
 }

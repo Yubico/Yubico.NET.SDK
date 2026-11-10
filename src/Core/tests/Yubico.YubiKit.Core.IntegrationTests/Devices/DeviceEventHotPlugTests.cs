@@ -41,7 +41,9 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Discovery)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task WatchAsync_AcrossRepeatedHotPlugCycles_EmitsRemovalAndArrivalAfterEachPrompt()
     {
@@ -95,6 +97,19 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
             output.WriteLine(
                 $"[cycle {cycle}] removed as '{removed.Device.DeviceId}', returned as '{added.Device.DeviceId}'");
+
+            // The hotplug invalidated every key's cached metadata, so the keys that stayed attached were
+            // re-read on this scan. Equal metadata decoded from a fresh buffer must not publish an update.
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            var sinceRemoval = _log.Since(removalCheckpoint);
+            var spuriousUpdates = sinceRemoval.OfType<DeviceUpdated>()
+                .Where(update => !ReferenceEquals(update.Device, added.Device) && !ReferenceEquals(update.Device, removed.Device))
+                .ToList();
+            Assert.True(spuriousUpdates.Count == 0,
+                $"cycle {cycle}: {spuriousUpdates.Count} DeviceUpdated for keys that did not change:{Environment.NewLine}{_log}");
+            var churn = sinceRemoval.Count(change => change is DeviceRemoved or DeviceAdded);
+            Assert.True(churn == 2,
+                $"cycle {cycle}: expected exactly one Removed and one Added, observed {churn} membership changes:{Environment.NewLine}{_log}");
         }
 
         output.WriteLine(_log.ToString());
@@ -228,6 +243,15 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             lock (_gate)
             {
                 return _entries.Count;
+            }
+        }
+
+        /// <summary>Every change recorded at or after <paramref name="checkpoint"/>.</summary>
+        public IReadOnlyList<DeviceChange> Since(int checkpoint)
+        {
+            lock (_gate)
+            {
+                return [.. _entries.Skip(checkpoint).Select(entry => entry.Event)];
             }
         }
 

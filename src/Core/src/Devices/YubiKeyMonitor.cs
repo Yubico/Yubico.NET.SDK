@@ -30,8 +30,9 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <para>A monitor has one lifetime: it runs from creation until <see cref="DisposeAsync"/> and cannot be
 /// paused or restarted. To resume tracking after disposal, create a new monitor. Disposal does not dispose
 /// caller-owned sessions or connections.</para>
-/// <para>Concurrent <see cref="WatchAsync"/> enumerations are safe while the monitor runs. <see cref="DisposeAsync"/>
-/// must not overlap other members.</para>
+/// <para>Concurrent <see cref="WatchAsync"/> enumerations are safe, and <see cref="DisposeAsync"/> may run while
+/// enumerations are active: they end normally. Do not call <see cref="DisposeAsync"/> concurrently with
+/// itself.</para>
 /// </remarks>
 public sealed class YubiKeyMonitor : IAsyncDisposable
 {
@@ -183,7 +184,8 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// Returns after the scan loop has stopped, which waits for an in-flight scan to finish within its
-    /// discovery budgets. Not safe to call concurrently with other members.
+    /// discovery budgets. Active <see cref="WatchAsync"/> enumerations end normally. Not safe to call concurrently
+    /// with itself.
     /// </remarks>
     public ValueTask DisposeAsync() => new(_disposal ??= DisposeCoreAsync());
 

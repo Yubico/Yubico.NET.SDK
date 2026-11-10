@@ -109,7 +109,8 @@ Use the replaying stream to initialize a UI projection, or independent `FindAllA
 Disposal sequentially stops listeners, cancels and awaits the loop with no drain timeout, retires discovery,
 and completes `DeviceChangeFeed`; native discovery budgets bound waits, while already-open native work
 retains its leases until actual teardown. Already-published replay and changes may still drain.
-Concurrent watch enumerations are safe; disposal must not overlap other members. See the
+Concurrent watch enumerations are safe, and disposal may overlap them: they end normally. Disposal must
+not be called concurrently with itself. See the
 [usage guide](../../docs/usage/device-discovery.md#device-monitoring) for picker and generic-host samples.
 
 ### Discover selected interfaces once

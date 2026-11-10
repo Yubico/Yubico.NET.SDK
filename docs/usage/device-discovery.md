@@ -281,8 +281,9 @@ locally. Monitoring scans all interfaces; there is no public interval or force-r
 
 Applications using `Microsoft.Extensions.Hosting` can register one initialized monitor. The SDK itself
 does not depend on hosting. The three-line adapter below stops monitoring at graceful host shutdown;
-`await using` also cleans up if host startup or execution fails. Register consumers after this adapter
-and stop/join their watch loops before its `StopAsync` runs; disposal must not overlap other members.
+`await using` also cleans up if host startup or execution fails. Register consumers after this adapter.
+Their watch loops may still be enumerating when `StopAsync` disposes the monitor; those enumerations end
+normally, so consumers need no extra coordination beyond handling the end of the stream.
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
@@ -505,5 +506,6 @@ Key changes:
 - `Find*` operations are fully thread-safe and use fresh evidence per call.
 - Concurrent `WatchAsync` enumerations are safe; manager enumerations own independent producers,
   monitor enumerations share one producer with independent buffers.
-- `DisposeAsync` must not overlap other monitor members. Stop and join consumer loops before disposal.
+- `DisposeAsync` may overlap active `WatchAsync` enumerations; they end normally. It must not be called
+  concurrently with itself, and a monitor is not reusable after it.
 - Changes may be consumed on any thread; marshal application state changes as needed.

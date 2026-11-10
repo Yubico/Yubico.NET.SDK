@@ -348,18 +348,25 @@ public class YubiKeyMonitorTests
         Assert.Equal(2, fixture.Finder.ScanCount);
     }
 
+    public enum LaterScanFailure { ScanThrows, PublicationThrows, EnumerationTimeout }
+
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    [InlineData(LaterScanFailure.ScanThrows)]
+    [InlineData(LaterScanFailure.PublicationThrows)]
+    [InlineData(LaterScanFailure.EnumerationTimeout)]
     [Trait("Category", "RuntimeResilience")]
-    public async Task BackgroundScanOrPublicationFailure_RetainsPublishedMembership_AndNextHintRetries(bool publicationFailure)
+    public async Task BackgroundScanOrPublicationFailure_RetainsPublishedMembership_AndNextHintRetries(LaterScanFailure kind)
     {
         await using var fixture = new OwnedMonitorFixture();
         var first = new FakeYubiKey("first");
         fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([first]);
         var monitor = await fixture.CreateAsync(TestToken);
-        var failure = new IOException("transient scan or publication failure");
-        fixture.Finder.Scan = publicationFailure
+        // EnumerationTimeout is what IMonitoredDiscovery raises instead of publishing a partial scan; the
+        // loop must treat it exactly like any other later scan failure: keep the snapshot, log, retry.
+        Exception failure = kind == LaterScanFailure.EnumerationTimeout
+            ? new TimeoutException("HID interface enumeration exceeded its budget; the scan was not published.")
+            : new IOException("transient scan or publication failure");
+        fixture.Finder.Scan = kind == LaterScanFailure.PublicationThrows
             ? _ => Task.FromResult<IReadOnlyList<IYubiKey>>([new ThrowingIdentityKey(failure)])
             : _ => throw failure;
         fixture.SmartCard.Raise();
@@ -551,6 +558,36 @@ public class YubiKeyMonitorTests
             Assert.True(canceled.Task.IsCompletedSuccessfully);
             Assert.Equal(2, fixture.Finder.ScanCount);
         }
+    }
+
+    [Fact]
+    public async Task DisposeAsync_WhileSubscribersAreMidEnumeration_EndsThemNormally()
+    {
+        await using var fixture = new OwnedMonitorFixture();
+        fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([new FakeYubiKey("first")]);
+        var monitor = await fixture.CreateAsync(TestToken);
+
+        // Two live subscribers parked in MoveNextAsync after their replay, as hosted consumers would be.
+        await using var a = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        await using var b = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        foreach (var e in new[] { a, b })
+        {
+            Assert.True(await e.MoveNextAsync());
+            Assert.IsType<DeviceAdded>(e.Current);
+            Assert.True(await e.MoveNextAsync());
+            Assert.IsType<SnapshotComplete>(e.Current);
+        }
+        var pendingA = a.MoveNextAsync().AsTask();
+        var pendingB = b.MoveNextAsync().AsTask();
+        Assert.False(pendingA.IsCompleted || pendingB.IsCompleted);
+
+        // Disposal overlapping active enumerations is the documented, supported overlap.
+        await monitor.DisposeAsync().AsTask().WaitAsync(Bound, TestToken);
+
+        Assert.False(await pendingA.WaitAsync(Bound, TestToken));
+        Assert.False(await pendingB.WaitAsync(Bound, TestToken));
+        await using var late = monitor.WatchAsync(TestToken).GetAsyncEnumerator(TestToken);
+        Assert.False(await late.MoveNextAsync());
     }
 
     [Fact]

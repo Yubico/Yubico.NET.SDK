@@ -35,6 +35,7 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 ///     fresh-process single-scan conditions until Phase 2 lands; conservation (interface count) is expected
 ///     to hold today.
 /// </remarks>
+[Trait(TestCategories.Category, TestCategories.Discovery)]
 public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
 {
     private static readonly ConnectionType[] ConcreteTypes =

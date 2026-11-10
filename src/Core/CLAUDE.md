@@ -408,7 +408,7 @@ they do not wait for insertion, and callers must not treat discovery order as st
 `cancellationToken:` argument; there are no token-only forwarding overloads.
 
 `YubiKeyManager.FindAllAsync(interfaces, cancellationToken)` is always one-shot, not a monitor rescan.
-It constructs `FindYubiKeys.CreateForScope` per call with an immutable concrete scope; no manager/cache,
+It constructs `FindYubiKeys.CreateForInterfaces` per call with an immutable concrete scope; no manager/cache,
 feed publication, watcher events, or monitor lifecycle participates. Keep `FindYubiKeys.Create()`
 all-interface and `IFindYubiKeys.FindAllAsync(type, ...)` a post-merge result filter. Never reuse a finder
 across different scopes: its cache eviction treats unobserved members as absent. Excluded backend

@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.Core.Devices;
 internal sealed class DiscoveryReadAdmission : IDisposable
 {
     private static readonly Lock AdmissionLock = new();
-    private static readonly Dictionary<ushort, SemaphoreSlim[]> PidGates = ReaderNamePidParser.KnownProductIds
+    private static readonly Dictionary<ushort, SemaphoreSlim[]> PidGates = ReaderNamePidParser.KnownPids
         .ToDictionary(pid => pid, _ => (SemaphoreSlim[])[new(1, 1)]);
     private static readonly SemaphoreSlim[] AllUsbGates = [.. PidGates.Values.SelectMany(gates => gates)];
     private static TaskCompletionSource _availabilityChanged = new(TaskCreationOptions.RunContinuationsAsynchronously);

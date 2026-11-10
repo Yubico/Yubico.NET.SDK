@@ -20,8 +20,17 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
+/// <summary>Discovers connected YubiKeys. Implemented by <see cref="FindYubiKeys"/>; fake it to test code that discovers keys.</summary>
 public interface IFindYubiKeys
 {
+    /// <summary>Runs one discovery scan and returns the YubiKeys that expose any of the requested connections.</summary>
+    /// <param name="type">
+    ///     Result filter applied after interfaces are grouped into YubiKeys; <see cref="ConnectionType.Hid"/>
+    ///     matches FIDO or OTP and <see cref="ConnectionType.Unknown"/> returns nothing.
+    /// </param>
+    /// <param name="cancellationToken">Cancels discovery waits, not already-dispatched native work.</param>
+    /// <returns>The matching YubiKeys, in unspecified order, or an empty list.</returns>
+    /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
     Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
 }
 /// <summary>
@@ -36,7 +45,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     private readonly IFindPcscDevices? findPcscService;
     private readonly IFindHidInterfaces? findHidService;
     private readonly Func<IDevice, IYubiKeyConnectionSlot> createSlot;
-    private readonly ConnectionType _scope;
+    private readonly ConnectionType _interfaces;
     private readonly TimeSpan _enumerationBudget;
     private readonly Lock _evidenceLock = new();
 
@@ -44,28 +53,28 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     // any per-interface read failure simply yields no key for that interface.
     private readonly IDeviceTopologyResolver _topologyResolver;
 
-    /// <summary>Creates a scoped finder. Callers must retire its read scope when discovery ends.</summary>
-    /// <param name="findPcscService">Enumerator required when the scope includes smart cards.</param>
-    /// <param name="findHidService">Enumerator required when the scope includes HID.</param>
+    /// <summary>Creates a finder limited to <paramref name="interfaces"/>. Callers must retire its read scope when discovery ends.</summary>
+    /// <param name="findPcscService">Enumerator required when <paramref name="interfaces"/> includes smart cards.</param>
+    /// <param name="findHidService">Enumerator required when <paramref name="interfaces"/> includes HID.</param>
     /// <param name="createSlot">Creates a connection slot for each included interface.</param>
-    /// <param name="scope">Interfaces to enumerate.</param>
+    /// <param name="interfaces">Interfaces to enumerate and probe; <see cref="ConnectionType.Hid"/> expands to FIDO and OTP.</param>
     /// <param name="topologyResolver">Optional platform topology resolver.</param>
     /// <param name="enumerationBudget">Maximum wait per transport; defaults to the discovery enumeration budget.</param>
-    /// <exception cref="ArgumentNullException">An enumerator required by the scope is missing.</exception>
+    /// <exception cref="ArgumentNullException">An enumerator required by <paramref name="interfaces"/> is missing.</exception>
     internal FindYubiKeys(
         IFindPcscDevices? findPcscService,
         IFindHidInterfaces? findHidService,
         Func<IDevice, IYubiKeyConnectionSlot> createSlot,
-        ConnectionType scope = ConnectionType.All,
+        ConnectionType interfaces = ConnectionType.All,
         IDeviceTopologyResolver? topologyResolver = null,
         TimeSpan? enumerationBudget = null)
     {
-        _scope = scope.ToConcreteScope();
+        _interfaces = interfaces.ToConcreteScope();
         _enumerationBudget = enumerationBudget ?? DiscoveryBudgets.Enumeration;
-        this.findPcscService = _scope.SupportsConnection(ConnectionType.SmartCard)
+        this.findPcscService = _interfaces.SupportsConnection(ConnectionType.SmartCard)
             ? findPcscService ?? throw new ArgumentNullException(nameof(findPcscService))
             : null;
-        this.findHidService = _scope.IncludesHidScan()
+        this.findHidService = _interfaces.IncludesHidScan()
             ? findHidService ?? throw new ArgumentNullException(nameof(findHidService))
             : null;
         this.createSlot = createSlot;
@@ -115,6 +124,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
         internal Task<IReadOnlyList<T>>? Task;
     }
 
+    /// <inheritdoc />
     public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default) =>
@@ -127,7 +137,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
         bool tolerateEnumerationTimeout,
         CancellationToken cancellationToken)
     {
-        if (type == ConnectionType.Unknown || _scope == ConnectionType.Unknown)
+        if (type == ConnectionType.Unknown || _interfaces == ConnectionType.Unknown)
             return [];
 
         await _scanLock.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -186,7 +196,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
         bool tolerateTimeout,
         CancellationToken cancellationToken)
     {
-        // The immutable finder scope bounds enumeration and evidence. The requested result filter still
+        // The immutable interface set bounds enumeration and evidence. The requested result filter still
         // applies only AFTER merging; it never changes this finder's cache/absence interpretation.
         // Both waits start together so the enumeration stage consumes at most one budget, not two.
         var pcscTask = findPcscService is { } pcsc
@@ -292,7 +302,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
 
             // OTP and FIDO share descriptor enumeration. Excluded interfaces never become slots, resolve
             // topology, contribute grouping evidence, or open a connection for identity/metadata reads.
-            if (!_scope.SupportsConnection(connection))
+            if (!_interfaces.SupportsConnection(connection))
                 continue;
 
             var device = createSlot(hidInterface);
@@ -474,19 +484,25 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
         }
     }
 
-    public static FindYubiKeys Create() => CreateForScope(ConnectionType.All);
+    /// <summary>
+    ///     Creates a finder over every interface (smart card, FIDO HID, OTP HID) using this platform's PC/SC and
+    ///     HID backends. Prefer <see cref="YubiKeyManager.FindAllAsync"/> unless code needs an injectable
+    ///     <see cref="IFindYubiKeys"/>.
+    /// </summary>
+    public static FindYubiKeys Create() => CreateForInterfaces(ConnectionType.All);
 
-    internal static FindYubiKeys CreateForScope(ConnectionType scope)
+    /// <summary>Creates a finder that never constructs the backend of an excluded transport.</summary>
+    internal static FindYubiKeys CreateForInterfaces(ConnectionType interfaces)
     {
-        scope = scope.ToConcreteScope();
+        interfaces = interfaces.ToConcreteScope();
         // Do not even construct excluded transport backends. In particular a HID-only scan must not bind
         // the PC/SC native API or snapshot its connection policy.
-        var smartCardConnectionFactory = scope.SupportsConnection(ConnectionType.SmartCard)
+        var smartCardConnectionFactory = interfaces.SupportsConnection(ConnectionType.SmartCard)
             ? SmartCardConnectionFactory.CreateDefault()
             : null;
         return new(
-            scope.SupportsConnection(ConnectionType.SmartCard) ? FindPcscDevices.Create() : null,
-            scope.IncludesHidScan() ? FindHidInterfaces.Create() : null,
+            interfaces.SupportsConnection(ConnectionType.SmartCard) ? FindPcscDevices.Create() : null,
+            interfaces.IncludesHidScan() ? FindHidInterfaces.Create() : null,
             device => device switch
             {
                 IPcscDevice pcscDevice when smartCardConnectionFactory is not null =>
@@ -495,7 +511,7 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
                 _ => throw new NotSupportedException(
                     $"Device type {device.GetType().Name} is not supported as a connection slot.")
             },
-            scope);
+            interfaces);
     }
 
     private readonly record struct InterfaceCandidate(

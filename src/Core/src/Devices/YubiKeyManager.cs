@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </example>
 public static class YubiKeyManager
 {
-    private static readonly YubiKeyDiscovery Discovery = new(FindYubiKeys.CreateForScope);
+    private static readonly YubiKeyDiscovery Discovery = new(FindYubiKeys.CreateForInterfaces);
 
     /// <summary>
     /// Performs fresh one-shot discovery using only the requested interfaces.

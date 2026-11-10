@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Frozen;
+
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
@@ -36,17 +38,15 @@ internal static class ReaderNamePidParser
     public const ushort SkyPid = 0x0120;
 
     /// <summary>All USB Product IDs this parser can produce, plus SKY. Used to gate mergeability.</summary>
-    private static readonly HashSet<ushort> KnownPids =
-    [
+    internal static readonly FrozenSet<ushort> KnownPids = new ushort[]
+    {
         // YubiKey NEO
         0x0110, 0x0111, 0x0112, 0x0113, 0x0114, 0x0115, 0x0116,
         // Security Key
         SkyPid,
         // YubiKey 4/5 and later
         0x0401, 0x0402, 0x0403, 0x0404, 0x0405, 0x0406, 0x0407
-    ];
-
-    internal static IEnumerable<ushort> KnownProductIds => KnownPids;
+    }.ToFrozenSet();
 
     /// <summary>Whether <paramref name="pid"/> is a known Yubico USB Product ID usable as a merge key.</summary>
     public static bool IsKnownPid(ushort pid) => KnownPids.Contains(pid);

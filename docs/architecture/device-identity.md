@@ -77,16 +77,16 @@ session and without a Management package dependency. It is a default interface m
   `DeviceInfo` churn: a later successful read whose metadata carries no serial cannot regress it.
 - A monitor-retained object's known serial does not change to another known value. A fresh scan reporting
   a different known serial for the same interface set proves substitution and republishes a new object.
-- It may transition `null` → non-`null` after publication, without any device event
-  (`UpdateCache_LateSerialArrival_PopulatesRetainedObjectWithoutEvents`).
+- It may transition `null` → non-`null` after publication when retained metadata changes; monitoring emits
+  `DeviceUpdated` for that metadata change (`SnapshotDiffTests.Apply_ChangedMetadata_UpdatesRetainedObjectAndEmitsUpdate`).
 - A republished object never inherits identity from its predecessor object. It exposes only what discovery
   established for that fresh object, which may already include a serial when the addition is published
-  (`UpdateCache_ConnectionSetChangeRepublication_NewObjectDoesNotInheritSerial`).
+  (`SnapshotDiffTests.Apply_ConnectionSetChangedWithSameInterfaceSet_RepublishesOnce`).
 - The object delivered with a removal event retains its last-known value
-  (`UpdateCache_RemovalEvent_ObjectRetainsLastKnownSerial`).
+  (the removal carries the originally published object).
 
 The clauses are pinned by `DeviceIdentityContractTests` and
-`YubiKeyDeviceRepositoryCompositeTests`.
+`SnapshotDiffTests`.
 
 Detailed read-only metadata is now public through optional `IYubiKey.CachedDeviceInfo` in Core. This is
 explicitly nullable, last-known data, not live configuration or a second identity source. Access performs
@@ -101,25 +101,28 @@ Within one owned monitor, an attached physical key whose interface and connectio
 and whose known serial is not contradicted is represented by exactly one retained `IYubiKey` object across
 scans (stage D', R1). Reference-keyed collections — `Dictionary<IYubiKey, T>`, `HashSet<IYubiKey>` — are
 therefore a supported in-process pattern
-(`UpdateCache_UnchangedInterfaceSet_ReferenceKeyedDictionaryRemainsValidAcrossScans`).
+(`SnapshotDiffTests.Apply_UncontradictedSerialAndSameInterfaces_RetainsOriginallyPublishedObject`).
 
 A device is instead republished as `Removed` + `Added` — delivering a **new object** that inherits
 nothing from its predecessor — in exactly four cases, each pinned in
-`YubiKeyDeviceRepositoryCompositeTests`:
+`SnapshotDiffTests`:
 
 1. **Interface-set change** — an interface appears or disappears, including merger rule G6 partial
-   enumeration (`UpdateCache_InterfaceSetChanged_RepublishesAsNewObject`).
+   enumeration (`Apply_SameDeviceIdDifferentInterfaceSet_Republishes`).
 2. **Connection-set change** over an unchanged interface set (ISC-17;
-   `UpdateCache_ConnectionSetChangedSameInterfaceSet_RepublishesOnce`).
+   `Apply_ConnectionSetChangedWithSameInterfaceSet_RepublishesOnce`).
 3. **Reinsertion** observed across scans
-   (`UpdateCache_ReinsertionObservedAcrossScans_PublishesNewObject`).
+   (`Apply_ReinsertionAfterObservedAbsence_PublishesNewObject`).
 4. **Known-serial substitution** — unchanged interface and connection sets, but a fresh scan reports a
    different known serial
-   (`UpdateCache_DifferentKnownSerials_RepublishesDifferentDevice`).
+   (`Apply_DifferentKnownSerials_RepublishesWithoutMutatingPredecessor`).
 
 The guarantee is scoped to one monitor instance and one uninterrupted physical presence. It does not
-survive monitor disposal/recreation, process restart, or independent one-shot Find calls. `CurrentDevices`
-returns read-only membership without I/O; `WatchAsync` includes atomic initial Added replay and changes.
+survive monitor disposal/recreation, process restart, or independent one-shot Find calls. `WatchAsync`
+atomically captures membership and subscribes, emitting `DeviceAdded` replay, `SnapshotComplete`, then
+live `DeviceChange` records. Build a projection or use `FindAllAsync` for a one-off.
+
+manager watch creates a producer; monitor watch subscribes to an existing one.
 
 **Correlation across those boundaries — the durable-correlation recipe.** Use
 `IYubiKey.SameDeviceAs(other)` (stage D', R3), which answers the question "do these references
@@ -164,7 +167,7 @@ observation, not a way to force-refresh or resynchronize a monitor's event strea
 
 Value equality on published device objects is **rejected**, not deferred:
 
-- The serial arrives after publication (D2 allows `null` → non-`null` with no event), so any
+- The serial can arrive after publication (D2 allows `null` → non-`null` on a retained object), so any
   serial-derived hash is mutable while the object may already key a collection — the one corruption a
   hash contract must never allow.
 - Any fallback for the serial-less case (paths, PID, timing) makes equality mixed-evidence and

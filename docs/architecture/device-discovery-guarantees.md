@@ -51,8 +51,8 @@ A cached identity is evidence about specific hardware in a specific configuratio
 either. **Hardware**: scan-time eviction only catches interfaces observed absent, and a same-slot swap
 completing between scans reuses the slot-derived interface identifier — the old key's serial would be
 attributed to its same-model successor (key substitution). When a platform listener reports removal or
-arrival, the device monitor forwards that activity to `IFindYubiKeys.NotifyTransportActivity` at ingress
-before the rescan the event triggers. Activity on any transport globally discards both identity and
+arrival, the monitor calls internal `IMonitoredDiscovery.InvalidateEvidence` after coalescing,
+immediately before the hotplug scan. Activity on any transport globally discards both identity and
 metadata caches; the reported transport is diagnostic context, not an eviction scope. A fresh different
 serial then makes the repository republish the successor rather than mutate the retained predecessor. A
 composite swap's events can arrive on one transport before another, so per-transport retention could
@@ -60,9 +60,9 @@ combine evidence from the departed and replacement keys. **Configuration**: each
 observed at read time, and a hit under a different PID is a miss. Pinned by
 `FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial`,
 `FindAllAsync_SameSlotSwapWithTransportActivity_DoesNotServeStaleMetadata`,
-`NotifyTransportActivity_HidOnly_EvictsPcscIdentityEvidenceToo`, and
-`FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit`; the monitor wiring by
-`YubiKeyMonitorWorkerTests.ListenerEvents_NotifyTheFinderOfTransportActivity_EvictingEvidenceGlobally`.
+the global-invalidation vectors in `FindYubiKeysFaultInjectionTests`, and
+`FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit`; monitor wiring is covered by
+`YubiKeyMonitorTests.HidHint_WithoutDiff_RescansAndInvalidatesButEmitsNoChange`.
 
 Documented monitor bound: if no listener event reports the change, staleness detection degrades to
 scan-observed absence. An interval scan after replugging need not invalidate same-interface evidence.
@@ -75,7 +75,7 @@ identities with monitoring running. A hand-timed swap necessarily spans scan int
 absence also fires; the between-scan timing that only the event-driven eviction catches is covered
 deterministically by the fault-injection vectors above, and repository republication on fresh contradictory
 serial evidence is pinned by
-`UpdateCache_DifferentKnownSerials_RepublishesDifferentDevice`.
+`SnapshotDiffTests.Apply_DifferentKnownSerials_RepublishesWithoutMutatingPredecessor`.
 
 ## Independent scoped observations
 
@@ -146,49 +146,46 @@ These idle-fixture checks do not prove exclusion of native calls or safety of di
 those scope and ownership boundaries remain pinned by deterministic tests above. See the
 [targeted read-only command and fixture requirements](../usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 
-### Owned monitoring and cached membership
+### Owned monitoring and replayed membership
+
+manager watch creates a producer; monitor watch subscribes to an existing one.
 
 `CreateMonitorAsync` returns a new owned `YubiKeyMonitor` only after the loop's first successful publication,
 including empty success. It starts listeners before discovery, cleans partial initialization on failure,
 and does not link the initialized monitor lifetime to its factory token. Pinned by `YubiKeyMonitorTests`
 (`CreateAsync_WaitsForFirstLoopPublication_WithoutDuplicateInitialScan`,
-`CreateAsync_EmptyScan_IsReadyAndCachedReadsPerformNoDiscovery`, initial scan/publication failure tests,
+`CreateAsync_EmptyScan_IsReadyAndReplayPerformsNoDiscovery`, initial scan/publication failure tests,
 `CreateAsync_CreationTokenCanceledAfterReturn_DoesNotStopMonitoring`, and
 `CreateAsync_HintDuringInitialScan_IsInvalidatedAndReconciled`).
 
-`CurrentDevices` is coherent, read-only membership without enumeration, probes, or native opens
-(`CurrentDevices_PopulatedSnapshot_PerformsNoBackendEnumerationProbesOrOpens`). Lists retain historical
-membership; contained objects can receive later last-known metadata (`CurrentDevices_IsReadOnlyHistoricalMembership_NotTheFindersList`).
 Each `WatchAsync` enumeration atomically captures the snapshot and registers for ordered deltas at first
-`MoveNextAsync`; replay runs outside publication locks and outside delta capacity. Gated parked-diff,
-large-replay, overflow/resubscription, cancellation, disposal, and terminal-failure tests in
-`YubiKeyMonitorTests` pin those boundaries. Dispose/recreate starts a new identity-retention lifetime.
+`MoveNextAsync`; replay runs outside the feed lock and outside delta capacity. `DeviceAdded` replay ends
+with `SnapshotComplete`, even when empty. Build a projection from that boundary, or call `FindAllAsync`
+for a one-off. Retained objects can receive `DeviceUpdated` metadata changes. Replay, overflow/recovery,
+cancellation, disposal, and terminal-failure tests in `DeviceChangeFeedTests` and `YubiKeyMonitorTests`
+pin those boundaries. Dispose/recreate starts a new identity-retention lifetime.
 `OwnedMonitorReadOnlyTests` adds two-fixture public-factory/replay/lifetime checks and sequential live
 metadata comparisons after disposal. These unattended checks do not replace attended hotplug acceptance.
 
-The public owner composes one internal `YubiKeyMonitorWorker` and repository. Initial, listener-driven,
-and fallback discovery/publication are awaited by the same sequential loop, without a manual-rescan API,
-restart mode, or monitor generations. `ConcurrentListenerEvents_DoNotRunConcurrentRescans` and
-`EventStorm_DuringBlockedScan_ProducesExactlyOneFollowUpScan` in `YubiKeyMonitorWorkerTests`, plus
-`YubiKeyMonitorTests.ListenerScans_WaitForPublication_AndPublishOrderedDeltas`, pin the single producer.
+`YubiKeyMonitor` composes `HotplugSignals`, `RescanScheduler`, `IMonitoredDiscovery`, and `DeviceChangeFeed`.
+Initial, listener-driven, and fallback discovery/publication run in one sequential loop, without a
+manual-rescan API, restart mode, or monitor generations. `EventStorm_DuringBlockedScan_ProducesExactlyOneSequentialFollowUpScan`
+in `YubiKeyMonitorTests` pins that ordering. The feed's single lock coordinates membership/revision
+publication, whole-diff enqueue, atomic capture/registration, and termination; `SnapshotDiff` runs outside it.
 
-The worker's sole ingress lock orders evidence invalidation/signaling against final finder read-scope
-retirement (`DisposeAsync_OrdersAdmittedListenerActivity_AndIgnoresCapturedLateCallback`). Finder evidence
-epochs/read scopes are retained native-read safety, **not** replacement monitor generations. Queued reads
-retire; already-open reads keep actual admission/leases until native teardown, including after the one
-ten-second managed-loop drain expires. That budget is not a native listener or total disposal timeout.
-`CreateAsync_CancellationRetainsAdmittedReadLeaseUntilNativeTeardown` and
-`DisposeAsync_RetiresQueuedBuiltInFinderReadsBeforeWorkerCapacityReturns` pin those ownership boundaries.
+Disposal stops listeners, cancels and awaits the actual loop, retires discovery, then completes the feed.
+There is no managed-loop abandonment or disposal timeout. Discovery waits are bounded by `DiscoveryBudgets`:
+enumeration provisionally five seconds per transport, identity two seconds per attempt (up to three),
+metadata three seconds. Finder scan-lock queueing and retries mean their sum is not a hard wall-clock bound.
+Enumeration timeouts log and omit that transport for one scan, using the other transport's results; this
+partial membership can cause removals/re-additions. `FindYubiKeysEnumerationBudgetTests` pins isolation.
 
-The owner closes public access first and disposes the repository in `finally` after worker teardown.
-Repository diff serialization is separate from its short state boundary for final membership/event
-commits, atomic snapshot/replay registration, failure, and disposal. A diff already in progress may overlap
-teardown, but its final disposed/failed check rejects a late commit; previously committed history may
-drain. `DisposeAsync_LoopParkedInsideRepositoryDiff_RejectsLateCommit`, both `YubiKeyMonitorLifecycleTests`
-cases, and `YubiKeyDeviceRepositoryTests` pin that distinction. Concurrent disposal completion and causal
-failure publication before a blocked/throwing logger are pinned by
-`DisposeAsync_ConcurrentCallsShareCompletion_UntilRepositoryTeardownFinishes` and
-`TerminalLoopFailure_ThrowingLogger_CannotPreventFailurePublicationOrDisposal` in `YubiKeyMonitorTests`.
+Queued reads retire; already-open reads keep actual admission/leases until native teardown.
+`CreateAsync_CancellationRetainsAdmittedReadLeaseUntilNativeTeardown`,
+`DisposeAsync_RetiresQueuedBuiltInFinderReadsBeforeWorkerCapacityReturns`, and
+`DisposeAsync_WaitsForScanExit_ThenRetiresAndCompletesFeed_AndIsIdempotent` pin these boundaries.
+Previously published history may drain after disposal; later subscriptions end empty. Concurrent watches
+are supported, but disposal must not overlap other members. See [monitor lifecycle](event-driven-device-discovery.md#monitor-lifecycle-and-disposal).
 
 ## Device identity: what `DeviceId` does and does not promise
 

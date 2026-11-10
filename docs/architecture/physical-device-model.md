@@ -98,19 +98,20 @@ For tracking, explicitly own a ready monitor:
 
 ```csharp
 await using var monitor = await YubiKeyManager.CreateMonitorAsync(cancellationToken);
-var current = monitor.CurrentDevices; // Initial publication is complete; no I/O on this read.
 await foreach (var change in monitor.WatchAsync(cancellationToken))
 {
-    // Initial Added replay, then ordered changes. Do not separately prepend 'current'.
+    // DeviceAdded replay, SnapshotComplete (even if empty), then live DeviceChange records.
     Apply(change);
 }
 ```
 
+manager watch creates a producer; monitor watch subscribes to an existing one.
+
 The monitor's finder retains successful identity/metadata evidence until observed interface absence,
 PID change, or listener activity invalidates it. When a later scan obtains metadata for an unchanged
-physical device, the repository updates its retained object without emitting `Added` or `Removed`.
+physical device, the diff updates its retained object and emits `DeviceUpdated` if metadata changed.
 This is last-known data, not continuously refreshed configuration. Request live Management data when
-current configuration matters. `WatchAsync` changes come from full repository diffs, not native hints.
+current configuration matters. `WatchAsync` changes come from snapshot diffs, not native hints.
 These APIs inherit [Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
 
 One-shot `interfaces` limits enumeration/probes and returned connection slots, not just result selection.
@@ -121,7 +122,9 @@ PID-completeness rule. Existing monitors run unchanged. See
 bounds. Connections exclude other views only through overlapping known member interface IDs: disjoint
 scoped views cannot promise physical-key exclusion even with matching serials. Coordinate them explicitly.
 Monitor disposal releases its tracking resources, not caller-owned sessions/connections or returned
-descriptors. Earlier membership lists remain historical; reading `CurrentDevices` after disposal throws.
+descriptors. Build membership from stream replay, or call `FindAllAsync` for a one-off; new subscriptions
+after disposal end empty. Disposal sequentially stops listeners, cancels/awaits the loop, retires discovery,
+and completes the feed, without a separate timeout. Discovery waits are bounded by the discovery budgets.
 
 ### Platform Support For HID Discovery
 

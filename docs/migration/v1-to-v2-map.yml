@@ -79,27 +79,27 @@ mappings:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDevice.Static.cs
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/IYubiKeyDevice.cs
       - yubikit:src/Core/
-    notes: "Review discovery, transport selection, and ownership at call sites. Every YubiKeyManager.Find…Async now performs fresh independent one-shot discovery; interfaces restricts enumeration/probes, not just results. Preserve All plus local filtering where later operations need composite slots. For tracking, await CreateMonitorAsync and own/dispose the returned YubiKeyMonitor: CurrentDevices is no-I/O membership and WatchAsync supplies atomic initial Added replay plus ordered changes. No process-global cache or static monitoring lifecycle remains. CachedDeviceInfo is optional last-known metadata; Management remains the live-read API."
+    notes: "Review discovery, transport selection, and ownership at call sites. Every YubiKeyManager.Find…Async performs fresh independent one-shot discovery; interfaces restricts enumeration/probes, not just results. Preserve All plus local filtering where later operations need composite slots. YubiKeyManager.WatchAsync owns a private monitor per enumeration; CreateMonitorAsync returns an initialized shared monitor to dispose with await using. Build membership from DeviceAdded replay through SnapshotComplete, then live DeviceChange records, or use FindAllAsync for a one-off. No process-global cache remains. CachedDeviceInfo is last-known metadata; Management remains the live-read API."
     last_reviewed_commit: 7c534e8b7b8ad8cf53b964f972cd9a45e9ebd857
   - id: hid-listener-rescan-hints
     status: manual
     confidence: high
     migration_kind: behavior
     v1: Yubico.Core.Devices.Hid.HidDeviceListener Arrived/Removed events (EventHandler<HidDeviceEventArgs>) carrying IHidDevice payloads
-    v2: Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent callback (Action<HidDeviceRescanHint>?) carrying diagnostic rescan hints
+    v2: Yubico.YubiKit.Core.Transports.IDeviceChangeListener.Changed callback (Action?) carrying payload-less rescan hints
     evidence:
       - develop:Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs
       - develop:Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceEventArgs.cs
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDeviceListener.cs
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDevice.Static.cs
       - yubikit:src/Core/src/Transports/Hid/HidDeviceListener.cs
-      - yubikit:src/Core/src/Transports/Hid/HidDeviceRescanHint.cs
-      - yubikit:src/Core/src/Devices/YubiKeyMonitorWorker.cs
-      - yubikit:src/Core/src/Devices/YubiKeyDeviceRepository.cs
+      - yubikit:src/Core/src/Transports/IDeviceChangeListener.cs
+      - yubikit:src/Core/src/Devices/HotplugSignals.cs
+      - yubikit:src/Core/src/Devices/DeviceChangeFeed.cs
       - yubikit:src/Core/src/Devices/YubiKeyManager.cs
-      - yubikit:src/Core/src/Devices/DeviceEventHub.cs
+      - yubikit:src/Core/src/DeviceChange.cs
       - yubikit:src/Core/src/Devices/YubiKeyMonitor.cs
-    notes: V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> events with per-HID-device payloads, while v1 device-level consumers used YubiKeyDeviceListener.Arrived/Removed and YubiKeyDevice.FindAll() over the listener cache. V2 low-level HID DeviceEvent is only a diagnostic rescan hint (HidDeviceChangeKind plus optional platform id/path), not public physical-device truth. Await YubiKeyManager.CreateMonitorAsync, then consume the owned YubiKeyMonitor.WatchAsync(cancellationToken) (IAsyncEnumerable<DeviceEvent>) for initial Added replay plus repository-diffed changes. Snapshot capture and subscription are atomic on first enumeration. WatchAsync is the only device-change stream; the earlier IObservable DeviceChanges and System.Reactive dependency were removed without a shim. Each watcher has an independent bounded delta buffer; overflow faults only that watcher. Clear its projection and re-enumerate the same monitor to recover. Dispose the monitor with await using; cancellation affects only a subscription. Rx Where becomes an if inside await foreach.
+    notes: "V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> with per-interface payloads; device-level consumers used YubiKeyDeviceListener and the FindAll cache. V2 Changed callbacks are hints, not physical-device truth. manager watch creates a producer; monitor watch subscribes to an existing one. Both return IAsyncEnumerable<DeviceChange> with DeviceAdded replay, SnapshotComplete even when empty, then live DeviceAdded/DeviceRemoved/DeviceUpdated records carrying a scan Revision. Capture and registration are atomic on first enumeration. Each subscriber has an independent 256-change buffer; overflow faults only it. Clear its projection and re-enumerate the same monitor to recover. Dispose shared monitors with await using; monitor-watch cancellation ends only its subscription. Rx Where becomes an if inside await foreach. The SDK has no reactive or hosting dependency."
     last_reviewed_commit: e97b10d1602289f04615e6ce74b049f823acf6c2
   - id: hid-usage-page-to-interface-type
     status: assisted
@@ -604,7 +604,7 @@ mappings:
       - yubikit:src/Core/src/Devices/FindYubiKeys.cs
       - yubikit:src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs
       - yubikit:docs/usage/device-discovery.md
-    notes: "FindFirstAsync returns the first matching IYubiKey or throws InvalidOperationException; FindFirstOrDefaultAsync returns null for no match. Both perform exactly one independent fresh FindAllAsync operation with the same interfaces scope, cancellation, and exception propagation; they never wait for insertion or use stable ordering. Predicates are optional and execute outside publication locks. Required-token forwarding overloads retain established call forms, not another discovery mode. This supersedes the devices.First() idiom for single-device callers. Remove forceRescan and ScanAsync from earlier v2 prerelease code; use FindAllAsync for fresh enumeration and an owned monitor's CurrentDevices for cached membership."
+    notes: "FindFirstAsync returns the first matching IYubiKey or throws InvalidOperationException; FindFirstOrDefaultAsync returns null for no match. Both perform one independent fresh FindAllAsync operation with the same interfaces scope, cancellation, and exception propagation; they never wait for insertion or use stable ordering. Predicates are optional. Token-only forwarding overloads were removed; use cancellationToken: named arguments. This supersedes devices.First() for single-device callers. Remove forceRescan and ScanAsync; use FindAllAsync for fresh discovery or build a projection from monitor replay through SnapshotComplete and the live tail."
     last_reviewed_commit: 7c534e8b7b8ad8cf53b964f972cd9a45e9ebd857
   - id: security-domain-openpgp-key-info-rename
     status: automatic
@@ -670,7 +670,7 @@ mappings:
     notes: Coordinated pre-release rename, not a reinterpretation of earlier historical commits. Update package references, namespaces, factories, and named arguments such as ctap2Session wherever the public signature was renamed. CtapCommand, CtapStatus, and CtapException are directly in Yubico.YubiKit.Ctap2, without a nested Ctap namespace. Replace ApplicationIds.Fido2 with ApplicationIds.Fido for the shared FIDO smart-card AID; FidoU2f is its explicit alias, not a separate or CTAP2-specific AID. UserPresenceOperations.Ctap2 emits Ctap2.Method strings; UserPresenceApplications.Fido2 remains FIDO2. DeviceCapabilities.Fido2 and FIDO HID transport identifiers remain unchanged. Internal ICtap2Backend, Ctap2SessionRequestEncoding, and Ctap2TransportOrder follow the CTAP2 module name; IFidoHidProtocol.SendCommandAsync describes shared CTAPHID command dispatch, not only vendor commands. No protocol bytes, control flow, or connection ownership change. Historical v1 names, stable mapping IDs, python-fido2/libfido2 package names, and commit subjects retain their original spelling.
 manual_review:
   - device discovery call sites
-  - low-level HID listener DeviceEvent callback signatures
+  - low-level transport listener Changed callback signatures
   - transport selection assumptions
   - session construction and disposal
   - authentication, PIN, PUK, password, and key material handling

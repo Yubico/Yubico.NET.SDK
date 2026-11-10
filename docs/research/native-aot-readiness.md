@@ -1,3 +1,5 @@
+*Historical: `YubiKeyMonitorWorker`, `YubiKeyDeviceRepository`, `DeviceEvent` and `CurrentDevices` were replaced by `YubiKeyMonitor`, `DeviceChangeFeed` and `DeviceChange` records; see docs/usage/device-discovery.md.*
+
 # Native AOT Readiness Assessment — Yubico.NET.SDK
 
 **Status:** Historical assessment with follow-up verification. The resulting support contract lives

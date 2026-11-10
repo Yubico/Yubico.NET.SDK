@@ -52,18 +52,21 @@ away without it.
 
 ## Device events without reactive dependencies
 
-`await YubiKeyManager.CreateMonitorAsync(ct)` returns an explicitly owned,
-initialized `YubiKeyMonitor`. Its `WatchAsync` exposes initial Added replay and
-subsequent arrivals/removals as an `IAsyncEnumerable`, without a Reactive
-Extensions dependency. Each enumeration atomically captures current membership
-and subscribes on its first move. Dispose the monitor with `await using`.
+`YubiKeyManager.WatchAsync(ct)` owns a private monitor per enumeration.
+`await YubiKeyManager.CreateMonitorAsync(ct)` instead returns an initialized `YubiKeyMonitor` to share
+and dispose with `await using`. Both streams expose `DeviceAdded` replay, `SnapshotComplete` (even
+when empty), then live `DeviceAdded`, `DeviceRemoved`, and `DeviceUpdated` records with scan revisions,
+as `IAsyncEnumerable<DeviceChange>` without a Reactive Extensions dependency. Each subscription
+atomically captures membership and registers on its first move.
+
+manager watch creates a producer; monitor watch subscribes to an existing one.
 
 Each watcher has its own bounded buffer, so consumers do not block or
 interfere with one another. If a consumer falls too far behind, its stream
 faults instead of silently dropping device state; clear its projection and
-re-enumerate the same monitor to resynchronize. `CurrentDevices` supplies no-I/O
-membership lookups, while every `Find…Async` performs independent fresh
-discovery. Neither cached membership nor last-known metadata is live configuration.
+re-enumerate the same monitor to resynchronize. Build membership from replay, or use `FindAllAsync`
+for a one-off. Every `Find…Async` performs independent fresh discovery. A monitor has one lifetime;
+dispose and create a new one instead of restarting. Last-known metadata is not live configuration.
 
 ## One physical key, safely owned
 

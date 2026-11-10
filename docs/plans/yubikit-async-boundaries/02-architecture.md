@@ -1,3 +1,5 @@
+*Historical: `YubiKeyMonitorWorker`, `YubiKeyDeviceRepository`, `DeviceEvent` and `CurrentDevices` were replaced by `YubiKeyMonitor`, `DeviceChangeFeed` and `DeviceChange` records; see docs/usage/device-discovery.md.*
+
 # Architecture: one key's asynchronous lifecycle
 
 Status: revised single-key Gate 2 approved by the user on 2026-09-22; independent design review passed.

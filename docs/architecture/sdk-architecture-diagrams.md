@@ -330,6 +330,8 @@ drain timeout exists. `YubiKeyManager.WatchAsync` owns a private monitor for one
 `CreateMonitorAsync` returns one monitor to share across subscribers. See
 [event-driven device discovery](event-driven-device-discovery.md).
 
+manager watch creates a producer; monitor watch subscribes to an existing one.
+
 ### Then: connecting (transport selection)
 
 ```mermaid

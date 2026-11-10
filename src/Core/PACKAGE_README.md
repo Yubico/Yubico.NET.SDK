@@ -17,6 +17,16 @@ dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json
 dotnet add package Yubico.YubiKit.Core --prerelease
 ```
 
+## Discovery and monitoring
+
+Use `await YubiKeyManager.FindFirstAsync(cancellationToken: ct)` for one-off selection.
+Use `await foreach (var change in YubiKeyManager.WatchAsync(ct))` for continuous changes, or share an
+initialized monitor from `await YubiKeyManager.CreateMonitorAsync(ct)` and dispose it with `await using`.
+Both streams emit `DeviceAdded` replay, `SnapshotComplete` (even when empty), then live `DeviceChange`
+records. Build a membership projection from replay; use Management for live configuration.
+
+manager watch creates a producer; monitor watch subscribes to an existing one.
+
 ## Documentation
 
 - [Core module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Core/README.md): device discovery, connections and sessions, access tiers, SCP, and security considerations.

@@ -404,8 +404,8 @@ serial independence) and `SnapshotDiffTests` (retention and replacement isolatio
 
 Use `YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken)` when absence is exceptional and
 `FindFirstOrDefaultAsync` when it is not. They select after one independent fresh `FindAllAsync` operation;
-they do not wait for insertion, and callers must not treat discovery order as stable. Token-only forwarding
-overloads retain the same operation, not a separate mode or lifetime.
+they do not wait for insertion, and callers must not treat discovery order as stable. Use the named
+`cancellationToken:` argument; there are no token-only forwarding overloads.
 
 `YubiKeyManager.FindAllAsync(interfaces, cancellationToken)` is always one-shot, not a monitor rescan.
 It constructs `FindYubiKeys.CreateForScope` per call with an immutable concrete scope; no manager/cache,
@@ -450,11 +450,15 @@ one-to-one mapping between operating-system interfaces and physical USB interfac
 
 `ConnectionType` is a `[Flags]` enum with explicit values. `HidFido`, `HidOtp`, and `SmartCard` represent concrete discovered device interfaces. `Hid` is a group filter that includes both HID FIDO and HID OTP interfaces when used with discovery/cache filtering APIs. `Unknown` matches no devices.
 
-### Device Event Delivery
+### Device change delivery
+
+manager watch creates a producer; monitor watch subscribes to an existing one.
+
+`YubiKeyManager.WatchAsync(ct)` lazily creates a private monitor per enumeration and disposes it on exit.
 
 `YubiKeyManager.CreateMonitorAsync(ct)` creates a new initialized `YubiKeyMonitor`, the sole
 composition/teardown owner of its change feed, listeners, and sequential scan loop. There is no global manager/cache,
-static Start/Stop/Watch/Shutdown, `ScanAsync`, or `forceRescan` alias. Short commands and most applet tests
+static Start/Stop/Shutdown, `ScanAsync`, or `forceRescan` alias. Short commands and most applet tests
 use one-shot discovery; tracking consumers explicitly own/share a monitor. Old result filters must be
 applied locally after All discovery where callers need full composite slots. The factory starts listeners
 first and awaits the loop's own initial scan-and-publication signal, not a separate manual rescan.
@@ -511,9 +515,11 @@ These are optional latency accelerators; discovery plus snapshot diffs supply de
 A simply unavailable transport service (no PC/SC service/library/readers) can enumerate empty while other
 transports are scanned. This is best-effort partial discovery, not proof that all OS interfaces were
 accessible. If PC/SC enumeration itself throws (worker saturation or `SCardGetStatusChange` error), the
-finder aborts before HID enumeration instead of committing false-empty removals. During initial creation
+scan fails rather than committing false-empty removals. In-scope PC/SC and HID enumeration waits start
+together; an enumeration timeout instead logs and omits just that transport for one scan, using the other's
+results. The provisional enumeration budget is five seconds. During initial creation
 this failure propagates and tears down the partial monitor; later scans retain the last publication and
-the next trigger retries. Per-transport scan isolation without false removals remains separate work.
+the next trigger retries. Timeout-induced partial results can produce removals/re-additions.
 
 Creation tolerates listener unavailability but the public factory still requires the first
 successful scan/publication. Hints during initialization remain pending for an ordered follow-up scan.
@@ -608,14 +614,13 @@ Assert.Single(fakeConnection.SentCommands);
 
 ### Discovery hardware contracts
 
-Management's `OwnedMonitorReadOnlyTests` uses Core's public factory, snapshot, and stream with at least two
-attached allow-listed serial-bearing USB fixtures. It requires the initial snapshot immediately after
-return, without polling away partial discovery, then checks initial replay, object retention, subscriber
+Management's `OwnedMonitorReadOnlyTests` uses Core's public factory and stream with at least two
+attached allow-listed serial-bearing USB fixtures. It reads initial replay through `SnapshotComplete`
+after return, without polling away partial discovery, then checks object retention, subscriber
 cancellation, disposal/recreate, convenience selection/no-match, and sequential live metadata comparisons
 only after monitor disposal. `ScopedDiscoveryReadOnlyTests` covers concrete/combined scopes independently;
 its complete serial-less-bystander readiness behavior must remain intact. No prompts, UV/UP, hotplug,
-resets, or writes are in this unattended filter. The Management monitor tests still require migration to
-the change-feed records and replay-completion marker. Required attended removal/reinsertion/event-lifetime acceptance remains separate and pending until
+resets, or writes are in this unattended filter. Required attended removal/reinsertion/event-lifetime acceptance remains separate and pending until
 the user is present. See the [explicit test filters](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 
 ### Integration Test Base

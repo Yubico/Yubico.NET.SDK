@@ -72,6 +72,8 @@ Discovery needs no PIN, touch, or open session. Later snippets assume these dire
 
 ### Own continuous tracking
 
+manager watch creates a producer; monitor watch subscribes to an existing one.
+
 `YubiKeyMonitor` owns one continuous tracking lifetime: `WatchAsync` replays `DeviceAdded`, emits
 `SnapshotComplete` (including empty discovery), then streams `DeviceAdded`, `DeviceRemoved`, and
 `DeviceUpdated` changes. Maintain a consumer projection for cached membership; disposal ends tracking
@@ -85,15 +87,9 @@ initial, listener-triggered, and five-second fallback scans sequentially. There 
 stop/restart mode: dispose the monitor and create a new one to recover from terminal failure. There is no
 process-global monitoring lifetime or device cache.
 
-Transport listeners share `IDeviceChangeListener`: replace the former smart-card-specific interface with that
-contract and use its payload-less `Changed` callback. Set the
-callback before `Start()`; do not call `Stop()` or `Dispose()` inside it. A callback is only a rescan
-hint, not device truth. HID hint details are internal Trace diagnostics. The monitor's internal
-`HotplugSignals` starts listeners independently, tolerates partial failure, and coalesces transport
-hints in a capacity-one drop-write channel; the scan loop invalidates discovery evidence when it
-runs a coalesced hotplug scan. `RescanScheduler` owns the timing policy on `TimeProvider`: an immediate
-initial trigger, interval fallback, and a 200 ms hotplug quiet window capped at one second. Its timing
-tests use `FakeTimeProvider` rather than wall-clock waits.
+Transport listeners share payload-less `IDeviceChangeListener.Changed` hints, not physical-device truth.
+The monitor reconciles scans; listener failure falls back to interval discovery. Enumeration timeout
+logs a warning and omits that transport for one scan, using the other transport's results.
 
 Share one host-owned monitor between long-lived components rather than letting each component take over
 tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a
@@ -102,7 +98,7 @@ monitor for selection, but must explicitly read Management for current configura
 `YubiKeyMonitor.WatchAsync` supplies initial `DeviceAdded` records, `SnapshotComplete`, then ordered changes. On each
 enumeration's first `MoveNextAsync`, it captures membership and subscribes at the same boundary as a
 completed publication, so there is no snapshot/subscription gap. Initial replay does not occupy the
-independent 256-event delta buffer; changes arriving while replay is consumed can still overflow it.
+independent 256-change delta buffer; changes arriving while replay is consumed can still overflow it.
 Overflow faults only that watcher: **clear its device projection and re-enumerate the same monitor's
 `WatchAsync`** to rebuild it safely. Canceling a watcher does not stop monitoring. Disposal allows already
 captured replay and published deltas to drain, but new enumerations complete empty.
@@ -111,6 +107,8 @@ Use the replaying stream to initialize a UI projection, or independent `FindAllA
 Disposal sequentially stops listeners, cancels and awaits the loop with no drain timeout, retires discovery,
 and completes `DeviceChangeFeed`; native discovery budgets bound waits, while already-open native work
 retains its leases until actual teardown. Already-published replay and changes may still drain.
+Concurrent watch enumerations are safe; disposal must not overlap other members. See the
+[usage guide](../../docs/usage/device-discovery.md#device-monitoring) for picker and generic-host samples.
 
 ### Discover selected interfaces once
 
@@ -249,9 +247,7 @@ key to be inserted, and "first" is not a stable ordering.
 ### Watch for devices being added and removed
 
 ```csharp
-await using var monitor = await YubiKeyManager.CreateMonitorAsync();
-
-await foreach (DeviceChange change in monitor.WatchAsync())
+await foreach (DeviceChange change in YubiKeyManager.WatchAsync())
 {
     Console.WriteLine(change switch
     {
@@ -264,12 +260,13 @@ await foreach (DeviceChange change in monitor.WatchAsync())
 }
 ```
 
-`WatchAsync` yields `DeviceAdded`, `DeviceRemoved`, and `DeviceUpdated` records computed from complete scans,
+`WatchAsync` yields `DeviceAdded`, `DeviceRemoved`, and `DeviceUpdated` records computed from observed scans,
 not raw operating-system notifications. Subscription starts on first enumeration, atomically replaying current
 membership followed by `SnapshotComplete` (even for an empty snapshot), then ordered changes. `Revision`
 increments once per scan; changes sharing a revision belong to that scan. Metadata updates retain the
 originally published device object. Maintain a membership projection from the
-stream, or use `FindAllAsync` for independent fresh discovery.
+stream, or use `FindAllAsync` for independent fresh discovery. This enumeration owns its private monitor;
+share `CreateMonitorAsync` when several consumers need one producer.
 
 **v2 prerelease migration:** replace `ScanAsync` with `FindAllAsync(interfaces: ...)`; remove `forceRescan`.
 Replace static Start/Stop/Watch/Shutdown calls with an owned monitor and `DisposeAsync`. Old `type` filters

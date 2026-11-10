@@ -52,11 +52,10 @@ present; `FindAllAsync` returns every connected key, and `FindFirstOrDefaultAsyn
 `device.Create<Application>SessionAsync()`; each package README opens with that step and a first read-only
 call, then covers the common operations. For applet specifics and features, see that documentation.
 
-For continuous presence tracking, `await foreach (var change in YubiKeyManager.WatchAsync(ct))` replays the
-connected keys as `DeviceAdded`, emits `SnapshotComplete`, then streams `DeviceAdded`, `DeviceRemoved` and
-`DeviceUpdated` until you stop enumerating. To share one monitor across several consumers, `await using var
-monitor = await YubiKeyManager.CreateMonitorAsync()` and call `monitor.WatchAsync(ct)` from each; see
-[Core monitoring](src/Core/README.md#own-continuous-tracking).
+For continuous presence tracking, use `YubiKeyManager.WatchAsync(ct)`, or share a `YubiKeyMonitor` from
+`CreateMonitorAsync` and dispose it with `await using`. Both emit `DeviceAdded` replay, `SnapshotComplete`,
+then live `DeviceChange` records. The ownership rule is: manager watch creates a producer; monitor watch subscribes to an existing one.
+There is no pause/restart; see [Core monitoring](src/Core/README.md#own-continuous-tracking).
 
 ## Packages
 

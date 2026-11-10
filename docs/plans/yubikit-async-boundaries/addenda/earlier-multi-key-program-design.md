@@ -1,3 +1,5 @@
+*Historical: `YubiKeyMonitorWorker`, `YubiKeyDeviceRepository`, `DeviceEvent` and `CurrentDevices` were replaced by `YubiKeyMonitor`, `DeviceChangeFeed` and `DeviceChange` records; see docs/usage/device-discovery.md.*
+
 # Earlier program design: multi-key execution and capacity
 
 Status: preserved earlier multi-key program-design proposal, superseded for active

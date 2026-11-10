@@ -890,7 +890,7 @@ public class YubiKeyMonitorTests
             await admitted.Task.WaitAsync(Bound, TestToken);
             fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([third]);
             fixture.SmartCard.Raise();
-            await Task.Delay(YubiKeyMonitorWorker.ThrottleInterval * 2, TestToken);
+            await Task.Delay(RescanScheduler.QuietPeriod * 2, TestToken);
             Assert.Equal(2, fixture.Finder.ScanCount);
             Assert.Same(first, Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestToken)));
             release.TrySetResult();

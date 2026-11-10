@@ -465,7 +465,8 @@ Each worker is initialized once, runs once, and is disposed once by its public o
 rescans, stop/start modes, interval replacement, restarts, or monitor generations. Initial, listener-driven,
 and fallback scans all await full feed publication inside one sequential loop. No scan semaphore or
 worker publication gate is needed because no second producer exists. The production fallback interval
-remains five seconds; test timing stays internal.
+remains five seconds. Internal `RescanScheduler` owns initial, interval, and coalesced hotplug triggers
+on `TimeProvider`; its 200 ms quiet window and one-second cap are tested with `FakeTimeProvider`.
 
 `DeviceChangeFeed` holds one snapshot dictionary, a scan revision, and copy-on-write subscriptions.
 Only the sequential producer calls `Apply`. `SnapshotDiff` computes a successor map outside the feed's
@@ -515,15 +516,12 @@ this failure propagates and tears down the partial monitor; later scans retain t
 
 `InitializeAsync` tolerates listener unavailability but the public factory still requires the first
 successful scan/publication. Hints during initialization remain pending for an ordered follow-up scan.
-Under the worker's only lock, `_ingressLock`, consuming a signal checks retirement and globally
-invalidates finder evidence. Final finder read-scope retirement shares that lock: admitted invalidation
-finishes before retirement, while a captured late callback cannot install fresh evidence. Disposing
-`HotplugSignals` clears all callbacks, stops all listeners, disposes all listeners, then completes its channel.
-Lock order is ingress → finder evidence → read-scope gate. Read-scope retirement cancels internal queued
-admission waits; those callbacks do not wait for the worker or re-enter ingress. Worker-token cancellation,
-logging, listener Start/Stop/Dispose, discovery, diffing, and awaits stay outside ingress. Do not describe
-retirement as callback-free or release native leases early. The loop consumes one occurrence per wake-up
-before checking debounce/max-coalesce time; refilled signals cannot starve that check.
+`RescanScheduler` consumes transport hints and combines them until the quiet window or coalesce cap.
+The worker globally invalidates finder evidence once, with the combined transport flags, immediately
+before each hotplug-triggered scan. Discovery serializes evidence invalidation and retirement internally.
+Disposing `HotplugSignals` clears all callbacks, stops all listeners, disposes all listeners, then completes
+its channel. Read-scope retirement cancels internal queued admission waits without releasing native leases
+early. The scheduler checks elapsed time after each occurrence so refilled signals cannot starve the cap.
 
 ## Session Base Class
 

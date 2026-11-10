@@ -194,35 +194,41 @@ public class YubiKeyMonitorWorkerTests
     [Trait("Category", "RuntimeResilience")]
     public async Task HintBurst_CoalescesIntoBoundedRescans()
     {
-        // Arrange
-        var (worker, repository, findYubiKeys, hidListener, _) = CreateWorker();
-        await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
+        var clock = new ObservedTimeProvider();
+        var (worker, repository, findYubiKeys, hidListener, _) = CreateWorker(timeProvider: clock);
+        findYubiKeys.HangIgnoringCancellation = true;
+        var creation = YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
-        await findYubiKeys.WaitForCompletedScanAsync(1, TestContext.Current.CancellationToken);
-
-        // Act - a rapid burst must coalesce into few rescans, not one rescan per hint.
-        for (var i = 0; i < 32; i++)
+        try
         {
-            hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added, $"hid-{i}"));
+            await AsyncWait.WaitUntilAsync(() => findYubiKeys.ActiveScans == 1, "Initial scan did not start",
+                cancellationToken: TestContext.Current.CancellationToken);
+            // Hold the scan so the capacity-one signal channel receives the complete burst first.
+            for (var i = 0; i < 32; i++)
+                hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added, $"hid-{i}"));
+            findYubiKeys.ReleaseHungScans();
+            await using var monitor = await creation.WaitAsync(Bound, TestContext.Current.CancellationToken);
+            await clock.WaitForTimerAsync(TimeSpan.FromHours(1));
+            await clock.WaitForTimerAsync(RescanScheduler.QuietPeriod);
+            clock.Advance(RescanScheduler.QuietPeriod);
+            await clock.WaitForTimerAsync(TimeSpan.FromHours(1));
+            clock.Advance(RescanScheduler.MaxCoalesce + RescanScheduler.QuietPeriod);
+            Assert.Equal(2, findYubiKeys.ScanCount);
         }
-
-        await findYubiKeys.WaitForCompletedScanAsync(2, TestContext.Current.CancellationToken);
-
-        // Allow any (incorrect) trailing per-hint rescans to surface before asserting the bound.
-        await Task.Delay(YubiKeyMonitorWorker.MaxCoalesceInterval + YubiKeyMonitorWorker.ThrottleInterval,
-            TestContext.Current.CancellationToken);
-
-        // Assert - the whole burst lands within the debounce window: at most the coalesced
-        // rescan plus one straggler, never anything approaching one rescan per hint.
-        await monitor.DisposeAsync();
-        Assert.InRange(findYubiKeys.ScanCount, 2, 3);
+        finally
+        {
+            findYubiKeys.ReleaseHungScans();
+            var monitor = await creation.WaitAsync(Bound, CancellationToken.None);
+            await monitor.DisposeAsync().AsTask().WaitAsync(Bound, CancellationToken.None);
+        }
     }
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
     public async Task EventStorm_DuringBlockedScan_ProducesExactlyOneFollowUpScan()
     {
-        var (worker, repository, findYubiKeys, hidListener, smartCardListener) = CreateWorker();
+        var clock = new ObservedTimeProvider();
+        var (worker, repository, findYubiKeys, hidListener, smartCardListener) = CreateWorker(timeProvider: clock);
         findYubiKeys.HangIgnoringCancellation = true;
         var creation = YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
@@ -241,9 +247,11 @@ public class YubiKeyMonitorWorkerTests
             }
             findYubiKeys.ReleaseHungScans();
             var monitor = await creation.WaitAsync(Bound, TestContext.Current.CancellationToken);
-            await findYubiKeys.WaitForCompletedScanAsync(2, TestContext.Current.CancellationToken);
-            await Task.Delay(YubiKeyMonitorWorker.ThrottleInterval + TimeSpan.FromMilliseconds(100),
-                TestContext.Current.CancellationToken);
+            await clock.WaitForTimerAsync(TimeSpan.FromHours(1));
+            await clock.WaitForTimerAsync(RescanScheduler.QuietPeriod);
+            clock.Advance(RescanScheduler.QuietPeriod);
+            await clock.WaitForTimerAsync(TimeSpan.FromHours(1));
+            clock.Advance(RescanScheduler.QuietPeriod + TimeSpan.FromMilliseconds(100));
             await monitor.DisposeAsync();
             Assert.Equal(2, findYubiKeys.ScanCount);
             Assert.Equal(1, findYubiKeys.MaxConcurrentScans);
@@ -260,50 +268,25 @@ public class YubiKeyMonitorWorkerTests
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
-    public async Task SustainedHintStorm_RescanRunsWithinMaxCoalesceInterval()
+    public async Task SustainedHintStorm_RescanRunsAtCoalesceCap()
     {
-        // Arrange
-        var (worker, repository, findYubiKeys, hidListener, _) = CreateWorker();
+        var clock = new ObservedTimeProvider();
+        var (worker, repository, findYubiKeys, hidListener, _) = CreateWorker(timeProvider: clock);
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
-        await findYubiKeys.WaitForCompletedScanAsync(1, TestContext.Current.CancellationToken);
-
-        // Act - hints arriving faster than the quiet period re-arm the debounce forever;
-        // the max coalesce cap must force a rescan while the storm is still running.
-        using var stormDone = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        var storm = Task.Run(async () =>
+        await clock.WaitForTimerAsync(TimeSpan.FromHours(1));
+        hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added));
+        await clock.WaitForTimerAsync(RescanScheduler.QuietPeriod);
+        for (var elapsed = 100; elapsed < 1000; elapsed += 100)
         {
-            var i = 0;
-            while (!stormDone.IsCancellationRequested)
-            {
-                for (var burst = 0; burst < 64; burst++)
-                {
-                    hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added, $"storm-{i++}"));
-                }
-
-                await Task.Yield();
-            }
-        }, TestContext.Current.CancellationToken);
-
-        try
-        {
-            // Assert - without the cap this deadline is unreachable: the quiet period re-arms
-            // on every 20 ms hint until the storm ends.
-            var deadline = DateTimeOffset.UtcNow + YubiKeyMonitorWorker.MaxCoalesceInterval + TimeSpan.FromSeconds(2);
-            while (findYubiKeys.CompletedScans < 2)
-            {
-                Assert.True(
-                    DateTimeOffset.UtcNow < deadline,
-                    "Sustained hint storm starved the rescan beyond the max coalesce interval");
-                await Task.Delay(TimeSpan.FromMilliseconds(20), TestContext.Current.CancellationToken);
-            }
+            clock.Advance(TimeSpan.FromMilliseconds(100));
+            Assert.Equal(1, findYubiKeys.ScanCount);
+            hidListener.Raise(new HidDeviceRescanHint(HidDeviceChangeKind.Added));
+            await clock.WaitForTimerAsync(TimeSpan.FromMilliseconds(Math.Min(200, 1000 - elapsed)));
         }
-        finally
-        {
-            stormDone.Cancel();
-            // The producer still owns the listener after runner cancellation.
-            await storm.WaitAsync(Bound, CancellationToken.None);
-        }
+        clock.Advance(TimeSpan.FromMilliseconds(100));
+        await clock.WaitForTimerAsync(TimeSpan.FromHours(1));
+        Assert.Equal(2, findYubiKeys.ScanCount);
     }
 
     [Fact]
@@ -443,7 +426,7 @@ public class YubiKeyMonitorWorkerTests
         // A callback from the detached, failed listener can no longer trigger a rescan.
         failedSmartCard.Raise();
         await Task.Delay(
-            YubiKeyMonitorWorker.ThrottleInterval + TimeSpan.FromMilliseconds(100),
+            RescanScheduler.QuietPeriod + TimeSpan.FromMilliseconds(100),
             TestContext.Current.CancellationToken);
         Assert.Equal(scanCountBeforeStaleCallback, findYubiKeys.ScanCount);
 
@@ -578,7 +561,7 @@ public class YubiKeyMonitorWorkerTests
         DeviceChangeFeed Repository,
         FakeFindYubiKeys FindYubiKeys,
         FakeHidDeviceListener HidListener,
-        FakeSmartCardDeviceListener SmartCardListener) CreateWorker(TimeSpan? shutdownTimeout = null)
+        FakeSmartCardDeviceListener SmartCardListener) CreateWorker(TimeSpan? shutdownTimeout = null, TimeProvider? timeProvider = null)
     {
         var repository = new DeviceChangeFeed();
         var findYubiKeys = new FakeFindYubiKeys([]);
@@ -588,7 +571,8 @@ public class YubiKeyMonitorWorkerTests
             repository,
             findYubiKeys,
             [(ConnectionType.Hid, () => hidListener), (ConnectionType.SmartCard, () => smartCardListener)],
-            shutdownTimeout);
+            shutdownTimeout,
+            timeProvider);
         findYubiKeys.ObserveLoop(worker);
 
         return (worker, repository, findYubiKeys, hidListener, smartCardListener);

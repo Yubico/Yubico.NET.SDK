@@ -94,7 +94,9 @@ callback before `Start()`; do not call `Stop()` or `Dispose()` inside it. A call
 hint, not device truth. HID hint details are internal Trace diagnostics. The monitor's internal
 `HotplugSignals` starts listeners independently, tolerates partial failure, and coalesces transport
 hints in a capacity-one drop-write channel; the scan loop invalidates discovery evidence when it
-consumes a hint.
+runs a coalesced hotplug scan. `RescanScheduler` owns the timing policy on `TimeProvider`: an immediate
+initial trigger, interval fallback, and a 200 ms hotplug quiet window capped at one second. Its timing
+tests use `FakeTimeProvider` rather than wall-clock waits.
 
 Share one host-owned monitor between long-lived components rather than letting each component take over
 tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a

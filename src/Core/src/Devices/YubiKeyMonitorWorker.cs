@@ -15,7 +15,6 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
-using System.Threading.Channels;
 using Yubico.YubiKit.Core.Transports;
 
 namespace Yubico.YubiKit.Core.Devices;
@@ -34,18 +33,13 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyMonitorWorker>();
 
-    /// <summary>Quiet period after the last listener hint before a coalesced rescan runs.</summary>
-    internal static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(200);
-
-    /// <summary>Maximum time listener hints may be coalesced before forcing a rescan.</summary>
-    internal static readonly TimeSpan MaxCoalesceInterval = 5 * ThrottleInterval;
-
     /// <summary>Bounds the managed loop drain, not native listener teardown or total disposal time.</summary>
     private static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
 
     private readonly DeviceChangeFeed _feed;
     private readonly IMonitoredDiscovery _discovery;
     private readonly TimeSpan _shutdownTimeout;
+    private readonly TimeProvider _timeProvider;
     private readonly IReadOnlyList<(ConnectionType Transport, Func<IDeviceChangeListener> Create)> _listeners;
     private readonly TaskCompletionSource<Exception?> _initialScan = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -77,7 +71,8 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         Debug.Assert(_monitoringTask is null, "Owned construction initializes once, before public exposure.");
 
         _hotplugSignals = new HotplugSignals(_listeners, Logger);
-        _monitoringTask = Task.Run(() => MonitoringLoopAsync(interval, _lifetime.Token));
+        var scheduler = new RescanScheduler(_hotplugSignals.Signals, interval, _timeProvider);
+        _monitoringTask = Task.Run(() => MonitoringLoopAsync(scheduler, _lifetime.Token));
 
         Logger.LogInformation("Device monitoring started with interval {Interval}", interval);
 
@@ -93,7 +88,8 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         DeviceChangeFeed feed,
         IMonitoredDiscovery discovery,
         IReadOnlyList<(ConnectionType Transport, Func<IDeviceChangeListener> Create)> listeners,
-        TimeSpan? shutdownTimeout = null)
+        TimeSpan? shutdownTimeout = null,
+        TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(feed);
         ArgumentNullException.ThrowIfNull(discovery);
@@ -102,6 +98,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         _feed = feed;
         _discovery = discovery;
         _shutdownTimeout = shutdownTimeout ?? DefaultShutdownTimeout;
+        _timeProvider = timeProvider ?? TimeProvider.System;
         _listeners = listeners;
     }
 
@@ -133,32 +130,26 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         }
     }
 
-    private async Task MonitoringLoopAsync(TimeSpan interval, CancellationToken cancellationToken)
+    private async Task MonitoringLoopAsync(RescanScheduler scheduler, CancellationToken cancellationToken)
     {
         try
         {
-            await ScanAndPublishAsync(cancellationToken).ConfigureAwait(false);
-            cancellationToken.ThrowIfCancellationRequested();
-            _ = _initialScan.TrySetResult(null);
-
-            while (!cancellationToken.IsCancellationRequested)
+            await foreach (var trigger in scheduler.RunAsync(cancellationToken).ConfigureAwait(false))
             {
-                MonitoringWaitReachedForTest?.Invoke();
-                var trigger = await WaitForTriggerAsync(interval, cancellationToken).ConfigureAwait(false);
-                if (trigger == DeviceMonitorWaitResult.Timeout)
+                if (trigger.Reason == RescanReason.Hotplug)
+                    _discovery.InvalidateEvidence(trigger.Transports);
+
+                if (trigger.Reason == RescanReason.Initial)
                 {
-                    await RescanSafelyAsync("interval fallback", cancellationToken).ConfigureAwait(false);
-                    continue;
+                    // Unlike later scan failures, initial failure must reach the creation caller.
+                    await ScanAndPublishAsync(cancellationToken).ConfigureAwait(false);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    _ = _initialScan.TrySetResult(null);
                 }
-
-                if (trigger == DeviceMonitorWaitResult.Completed)
-                    break;
-
-                ConsumeSignal();
-                if (!await WaitForDebounceQuietPeriodAsync(cancellationToken).ConfigureAwait(false))
-                    break;
-
-                await RescanSafelyAsync("listener event", cancellationToken).ConfigureAwait(false);
+                else
+                    await RescanSafelyAsync(trigger.Reason == RescanReason.Hotplug ? "listener event" : "interval fallback",
+                        cancellationToken).ConfigureAwait(false);
+                MonitoringWaitReachedForTest?.Invoke();
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -214,89 +205,6 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         {
             Logger.LogWarning(ex, "Background device scan after {Reason} failed, continuing monitoring", reason);
         }
-    }
-
-    private async Task<bool> WaitForDebounceQuietPeriodAsync(CancellationToken cancellationToken)
-    {
-        var coalesceStarted = Stopwatch.GetTimestamp();
-        while (true)
-        {
-            var elapsed = Stopwatch.GetElapsedTime(coalesceStarted);
-            if (elapsed >= MaxCoalesceInterval)
-                return true;
-
-            var remainingCoalesce = MaxCoalesceInterval - elapsed;
-            var waitInterval = remainingCoalesce < ThrottleInterval
-                ? remainingCoalesce
-                : ThrottleInterval;
-            var trigger = await WaitForTriggerAsync(waitInterval, cancellationToken).ConfigureAwait(false);
-            if (trigger == DeviceMonitorWaitResult.Timeout)
-                return true;
-            if (trigger == DeviceMonitorWaitResult.Completed)
-                return false;
-
-            ConsumeSignal();
-        }
-    }
-
-    private async Task<DeviceMonitorWaitResult> WaitForTriggerAsync(
-        TimeSpan timeout,
-        CancellationToken cancellationToken)
-    {
-        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        using var readCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-        var timeoutTask = Task.Delay(timeout, timeoutCts.Token);
-        var readTask = Signals.WaitToReadAsync(readCts.Token).AsTask();
-        var completedTask = await Task.WhenAny(timeoutTask, readTask).ConfigureAwait(false);
-
-        if (completedTask == timeoutTask)
-        {
-            readCts.Cancel();
-            await ObserveCancellationAsync(readTask).ConfigureAwait(false);
-            await timeoutTask.ConfigureAwait(false);
-            return DeviceMonitorWaitResult.Timeout;
-        }
-
-        timeoutCts.Cancel();
-        await ObserveCancellationAsync(timeoutTask).ConfigureAwait(false);
-        return await readTask.ConfigureAwait(false)
-            ? DeviceMonitorWaitResult.Signal
-            : DeviceMonitorWaitResult.Completed;
-    }
-
-    private static async Task ObserveCancellationAsync(Task task)
-    {
-        try
-        {
-            await task.ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected for the loser of a timeout/channel-read race.
-        }
-    }
-
-    private ChannelReader<ConnectionType> Signals =>
-        (_hotplugSignals ?? throw new InvalidOperationException("Monitoring is not initialized.")).Signals;
-
-    private void ConsumeSignal()
-    {
-        if (!Signals.TryRead(out var transport))
-            return;
-
-        if (_disposed == 1)
-            return;
-
-        // Invalidate at signal consumption; slices 5/6 finalize placement with scheduling.
-        _discovery.InvalidateEvidence(transport);
-    }
-
-    private enum DeviceMonitorWaitResult
-    {
-        Signal,
-        Timeout,
-        Completed
     }
 
     public async ValueTask DisposeAsync()

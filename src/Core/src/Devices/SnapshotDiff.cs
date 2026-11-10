@@ -53,7 +53,7 @@ internal static class SnapshotDiff
             }
 
             next[key] = existing;
-            if (UpdateMetadata(existing, updated))
+            if (UpdateDeviceInfo(existing, updated))
                 updates.Add(new DeviceUpdated(revision, existing));
         }
 
@@ -64,12 +64,12 @@ internal static class SnapshotDiff
         existing.AvailableConnections != updated.AvailableConnections ||
         (existing.SerialNumber is { } oldSerial && updated.SerialNumber is { } newSerial && oldSerial != newSerial);
 
-    private static bool UpdateMetadata(IYubiKey existing, IYubiKey updated)
+    private static bool UpdateDeviceInfo(IYubiKey existing, IYubiKey updated)
     {
         if (existing is YubiKeyDevice retained && updated is YubiKeyDevice latest &&
-            latest.DeviceInfo is { } metadata && retained.DeviceInfo != metadata)
+            latest.DeviceInfo is { } latestDeviceInfo && retained.DeviceInfo != latestDeviceInfo)
         {
-            retained.DeviceInfo = metadata;
+            retained.DeviceInfo = latestDeviceInfo;
             return true;
         }
         return false;

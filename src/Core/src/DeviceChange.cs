@@ -17,8 +17,15 @@ using Yubico.YubiKit.Core.Abstractions;
 namespace Yubico.YubiKit.Core;
 
 /// <summary>A notification from a device monitoring subscription.</summary>
-/// <param name="Revision">Increments by one per applied scan; changes sharing a revision were produced by one scan.</param>
-public abstract record DeviceChange(long Revision);
+/// <remarks>The set of derived records is closed: <see cref="DeviceAdded"/>, <see cref="DeviceRemoved"/>,
+/// <see cref="DeviceUpdated"/> and <see cref="SnapshotComplete"/>. A switch over those four is exhaustive.</remarks>
+public abstract record DeviceChange
+{
+    private protected DeviceChange(long revision) => Revision = revision;
+
+    /// <summary>Increments by one per applied scan; changes sharing a revision were produced by one scan.</summary>
+    public long Revision { get; init; }
+}
 
 /// <summary>A physical device joined the snapshot, or is replayed to a new subscription.</summary>
 /// <param name="Revision">The scan revision that produced the change or the replay snapshot.</param>
@@ -36,6 +43,7 @@ public sealed record DeviceRemoved(long Revision, IYubiKey Device) : DeviceChang
 public sealed record DeviceUpdated(long Revision, IYubiKey Device) : DeviceChange(Revision);
 
 /// <summary>Marks the end of the initial snapshot replay.</summary>
-/// <remarks>Emitted once per subscription after the initial replay, including when the replay is empty.</remarks>
+/// <remarks>Emitted once per subscription that starts while the monitor is running, after the initial replay and
+/// including when the replay is empty. A subscription started after disposal ends without any notification.</remarks>
 /// <param name="Revision">The revision of the replayed snapshot.</param>
 public sealed record SnapshotComplete(long Revision) : DeviceChange(Revision);

@@ -6,9 +6,7 @@ Yubico.YubiKit.Core.DeviceAdded.Device.init -> void
 Yubico.YubiKit.Core.DeviceAdded.DeviceAdded(long Revision, Yubico.YubiKit.Core.Abstractions.IYubiKey! Device) -> void
 Yubico.YubiKit.Core.DeviceAdded.Equals(Yubico.YubiKit.Core.DeviceAdded? other) -> bool
 Yubico.YubiKit.Core.DeviceChange
-Yubico.YubiKit.Core.DeviceChange.Deconstruct(out long Revision) -> void
 Yubico.YubiKit.Core.DeviceChange.DeviceChange(Yubico.YubiKit.Core.DeviceChange! original) -> void
-Yubico.YubiKit.Core.DeviceChange.DeviceChange(long Revision) -> void
 Yubico.YubiKit.Core.DeviceChange.Revision.get -> long
 Yubico.YubiKit.Core.DeviceChange.Revision.init -> void
 Yubico.YubiKit.Core.DeviceRemoved

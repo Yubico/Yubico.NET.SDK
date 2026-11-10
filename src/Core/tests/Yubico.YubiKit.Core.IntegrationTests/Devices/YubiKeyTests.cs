@@ -39,10 +39,9 @@ public class YubiKeyTests : IAsyncLifetime
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task WatchAsync_DetectsAddedDevice()
     {
-        var deviceEvent = await WaitForActionAsync(DeviceAction.Added);
+        var deviceEvent = await WaitForChangeAsync<DeviceAdded>();
 
         Assert.NotNull(deviceEvent.Device);
-        Assert.Equal(DeviceAction.Added, deviceEvent.Action);
     }
 
     [Fact]
@@ -51,17 +50,16 @@ public class YubiKeyTests : IAsyncLifetime
     public async Task WatchAsync_DetectsRemovedDevice()
     {
         // Device is populated for removals too, so the caller can correlate against the Added event.
-        var deviceEvent = await WaitForActionAsync(DeviceAction.Removed);
+        var deviceEvent = await WaitForChangeAsync<DeviceRemoved>();
 
         Assert.NotNull(deviceEvent.Device);
-        Assert.Equal(DeviceAction.Removed, deviceEvent.Action);
     }
 
     /// <summary>
     /// Waits for the next device event of a given kind. This is the canonical "insert your YubiKey"
     /// pattern: begin the enumeration first, then prompt the user, and let the token bound the wait.
     /// </summary>
-    private static async Task<DeviceEvent> WaitForActionAsync(DeviceAction action)
+    private static async Task<TChange> WaitForChangeAsync<TChange>() where TChange : DeviceChange
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
@@ -74,15 +72,15 @@ public class YubiKeyTests : IAsyncLifetime
 
             while (await pending)
             {
-                if (events.Current.Action == action)
+                if (events.Current is TChange change)
                 {
-                    return events.Current;
+                    return change;
                 }
 
                 pending = events.MoveNextAsync();
             }
         }
 
-        throw new InvalidOperationException($"Device event stream ended before a {action} event arrived.");
+        throw new InvalidOperationException($"Device change stream ended before a {typeof(TChange).Name} arrived.");
     }
 }

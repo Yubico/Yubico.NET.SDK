@@ -21,14 +21,14 @@ using Yubico.YubiKit.Core.Transports;
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-/// Owns listeners and one sequential discovery/publication loop, borrowing the owner's repository.
+/// Owns listeners and one sequential discovery/publication loop, borrowing the owner's change feed.
 /// </summary>
 /// <remarks>
 /// Initialized once before public exposure, then retired by <see cref="YubiKeyMonitor"/>. Initial,
 /// listener-triggered, and fallback scans all await full publication inside the same loop; there is no
 /// manual rescan, restart, or replacement monitor generation. Listener teardown and the managed-loop
 /// drain precede final discovery retirement; discovery serializes evidence invalidation internally.
-/// The owner disposes the repository after the worker's one bounded managed-loop drain.
+/// The owner completes the feed after the worker's one bounded managed-loop drain.
 /// </remarks>
 internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
 {
@@ -43,7 +43,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     /// <summary>Bounds the managed loop drain, not native listener teardown or total disposal time.</summary>
     private static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
 
-    private readonly YubiKeyDeviceRepository _repository;
+    private readonly DeviceChangeFeed _feed;
     private readonly IMonitoredDiscovery _discovery;
     private readonly TimeSpan _shutdownTimeout;
     private readonly IReadOnlyList<(ConnectionType Transport, Func<IDeviceChangeListener> Create)> _listeners;
@@ -57,7 +57,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     private Task? _monitoringTask;
     private volatile int _disposed;
 
-    /// <summary>Test-only pause after the lifetime precheck and before repository publication.</summary>
+    /// <summary>Test-only pause after the lifetime precheck and before feed publication.</summary>
     internal Func<Task>? PublishAdmittedForTest;
 
     /// <summary>Test-only observation/fault injection at the loop's wait boundary.</summary>
@@ -69,7 +69,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     /// <summary>Read-only observation of the one loop task, retained through disposal.</summary>
     internal Task MonitoringCompletionForTest => _monitoringTask ?? Task.CompletedTask;
 
-    /// <summary>Starts the sole lifetime and awaits its first successful repository publication.</summary>
+    /// <summary>Starts the sole lifetime and awaits its first successful feed publication.</summary>
     internal async Task InitializeAsync(TimeSpan interval, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -90,16 +90,16 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
     }
 
     internal YubiKeyMonitorWorker(
-        YubiKeyDeviceRepository repository,
+        DeviceChangeFeed feed,
         IMonitoredDiscovery discovery,
         IReadOnlyList<(ConnectionType Transport, Func<IDeviceChangeListener> Create)> listeners,
         TimeSpan? shutdownTimeout = null)
     {
-        ArgumentNullException.ThrowIfNull(repository);
+        ArgumentNullException.ThrowIfNull(feed);
         ArgumentNullException.ThrowIfNull(discovery);
         ArgumentNullException.ThrowIfNull(listeners);
 
-        _repository = repository;
+        _feed = feed;
         _discovery = discovery;
         _shutdownTimeout = shutdownTimeout ?? DefaultShutdownTimeout;
         _listeners = listeners;
@@ -111,7 +111,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         Logger.LogDebug("Rescanning devices...");
         var devices = await _discovery.FindAllAsync(cancellationToken).ConfigureAwait(false);
 
-        // A finder may ignore cancellation. Reject its late result before entering repository diffing.
+        // A finder may ignore cancellation. Reject its late result before entering snapshot diffing.
         if (_disposed == 1)
             return;
         cancellationToken.ThrowIfCancellationRequested();
@@ -124,12 +124,12 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         {
             // Only the loop calls this helper and awaits the complete publication before scanning again.
             // Do not lock across the diff: getters/loggers can block. If this outlives the bounded drain,
-            // the owner's repository disposal and its final state-lock check reject the late commit.
-            _repository.UpdateCache(devices);
+            // the owner's feed completion and its final gate check reject the late commit.
+            _feed.Apply(devices);
         }
         catch (ObjectDisposedException) when (_disposed == 1)
         {
-            // Expected only during retirement. A disposed repository in a live worker must surface.
+            // Existing collaborators or hooks may throw during retirement; live failures must surface.
         }
     }
 
@@ -182,8 +182,8 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         if (_disposed == 1)
             return;
 
-        // Failure uses the repository's short state boundary, never the diff lock.
-        _repository.Fail(error);
+        // Failure uses the feed's short publication boundary, never the diff lock.
+        _feed.Fault(error);
 
         // Publish the causal failure first: diagnostic providers may block or throw.
         try
@@ -195,7 +195,7 @@ internal sealed class YubiKeyMonitorWorker : IAsyncDisposable
         }
         catch (Exception)
         {
-            // Reporting is best-effort; the original failure is already observable in the repository.
+            // Reporting is best-effort; the original failure is already observable in the feed.
         }
     }
 

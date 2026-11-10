@@ -32,7 +32,7 @@ public class YubiKeyManagerStaticTests
             member => oldNames.Contains(member.Name));
         Assert.DoesNotContain(typeof(YubiKeyManager).GetMethods(BindingFlags.Public | BindingFlags.Static),
             method => method.GetParameters().Any(parameter => parameter.Name is "forceRescan" or "type" or "scope"));
-        Assert.False(Enum.IsDefined(typeof(DeviceAction), "Updated"));
+        Assert.True(typeof(DeviceChange).IsAbstract);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class YubiKeyManagerStaticTests
         var rig = new FindYubiKeysScopeTests.ScopeRig();
         var retained = Assert.Single(await YubiKeyManager.FindAllAsync(ConnectionType.All,
             TestContext.Current.CancellationToken, rig.CreateFinder));
-        var repository = new YubiKeyDeviceRepository();
+        var repository = new DeviceChangeFeed();
         var worker = new YubiKeyMonitorWorker(repository, new FixedFinder(retained),
             [(ConnectionType.Hid, () => new OwnedMonitorFixture.FakeDeviceChangeListener()),
                 (ConnectionType.SmartCard, () => new OwnedMonitorFixture.FakeDeviceChangeListener())]);
@@ -154,7 +154,9 @@ public class YubiKeyManagerStaticTests
         await using var watcher = monitor.WatchAsync(TestContext.Current.CancellationToken)
             .GetAsyncEnumerator(TestContext.Current.CancellationToken);
         Assert.True(await watcher.MoveNextAsync());
-        Assert.Same(retained, watcher.Current.Device);
+        Assert.Same(retained, Assert.IsType<DeviceAdded>(watcher.Current).Device);
+        Assert.True(await watcher.MoveNextAsync());
+        Assert.IsType<SnapshotComplete>(watcher.Current);
         var pending = watcher.MoveNextAsync().AsTask();
         try
         {
@@ -163,7 +165,7 @@ public class YubiKeyManagerStaticTests
                 TestContext.Current.CancellationToken, rig.CreateFinder));
             Assert.Equal(333, scoped.SerialNumber);
             Assert.Equal(ConnectionType.SmartCard, scoped.AvailableConnections);
-            Assert.Same(retained, Assert.Single(monitor.CurrentDevices));
+            Assert.Same(retained, Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken)));
             Assert.Equal(111, retained.SerialNumber);
             Assert.Equal(ConnectionTypeExtensions.ConcreteConnections, retained.AvailableConnections);
             Assert.False(pending.IsCompleted);

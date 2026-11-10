@@ -50,7 +50,7 @@ public class FindPcscDevicesTests
     [Trait("Category", "RuntimeResilience")]
     public async Task ListenerScan_SaturatedPcscAdmission_PreservesSnapshotWithoutRemovalEvent()
     {
-        var repository = new YubiKeyDeviceRepository();
+        var repository = new DeviceChangeFeed();
         var rig = new FindYubiKeysScopeTests.ScopeRig();
         var api = new StatusBlockingSCardApi("Yubico YubiKey OTP+FIDO+CCID");
         var finder = new FindYubiKeys(
@@ -65,9 +65,9 @@ public class FindPcscDevicesTests
         worker.MonitoringWaitReachedForTest = () => Interlocked.Increment(ref completedScans);
         await using var monitor = await YubiKeyMonitor.CreateAsync(repository, worker,
             TestContext.Current.CancellationToken, TimeSpan.FromHours(1));
-        var existingDevice = Assert.Single(monitor.CurrentDevices);
+        var existingDevice = Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken));
         Assert.Equal(111, existingDevice.SerialNumber);
-        await using var watcher = await DeviceEventWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
+        await using var watcher = await DeviceChangeWatcher.StartAsync(repository, TestContext.Current.CancellationToken);
         var nativeCalls = api.EstablishContextCalls;
         Assert.True(nativeCalls > 0);
 
@@ -76,7 +76,7 @@ public class FindPcscDevicesTests
             smartCard.Raise();
             await AsyncWait.WaitUntilAsync(() => Volatile.Read(ref completedScans) >= 2,
                 "The actual loop did not finish its saturated PC/SC scan", cancellationToken: TestContext.Current.CancellationToken);
-            Assert.Same(existingDevice, Assert.Single(monitor.CurrentDevices));
+            Assert.Same(existingDevice, Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken)));
             Assert.Equal(nativeCalls, api.EstablishContextCalls);
         }
 
@@ -85,11 +85,12 @@ public class FindPcscDevicesTests
         await AsyncWait.WaitUntilAsync(() => Volatile.Read(ref completedScans) >= 3,
             "PC/SC monitoring did not recover after saturation", cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(api.EstablishContextCalls > nativeCalls);
-        Assert.Same(existingDevice, Assert.Single(monitor.CurrentDevices));
+        Assert.Same(existingDevice, Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken)));
         await monitor.DisposeAsync();
         await watcher.Completion.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
         Assert.True(watcher.EndedNormally);
-        Assert.Empty(watcher.Events);
+        Assert.All(watcher.Events, change =>
+            Assert.Same(existingDevice, Assert.IsType<DeviceUpdated>(change).Device));
     }
 
     [Fact]

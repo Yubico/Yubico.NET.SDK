@@ -25,7 +25,7 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
     private Task<YubiKeyMonitor>? _creation;
     private int _completedScans;
 
-    public YubiKeyDeviceRepository Repository { get; } = new();
+    public DeviceChangeFeed Repository { get; } = new();
     public ScriptedFinder Finder { get; } = new();
     public FakeDeviceChangeListener Hid { get; } = new();
     public FakeDeviceChangeListener SmartCard { get; } = new();
@@ -56,7 +56,7 @@ internal sealed class OwnedMonitorFixture : IAsyncDisposable
         if (_creation is null)
         {
             await Worker.DisposeAsync();
-            Repository.Dispose();
+            Repository.Complete();
         }
         else
         {

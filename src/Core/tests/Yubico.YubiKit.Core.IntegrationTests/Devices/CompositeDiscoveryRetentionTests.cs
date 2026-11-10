@@ -23,10 +23,9 @@ public class CompositeDiscoveryRetentionTests
     [Fact]
     public void MetadataExpectation_LaterSerialEvidenceRegroupsStandaloneMembers_RetainsOnlyUnchangedGroups()
     {
-        using var repository = new YubiKeyDeviceRepository();
         var stable = Published("stable", "hid:stable", ConnectionType.HidFido, 303);
-        repository.UpdateCache([.. CompositeDeviceMerger.Merge([.. KeyInterfaces("a", null), .. KeyInterfaces("b", null)]), stable]);
-        var initial = repository.GetAll();
+        var first = SnapshotDiff.Apply([], [.. CompositeDeviceMerger.Merge([.. KeyInterfaces("a", null), .. KeyInterfaces("b", null)]), stable], 1).Next;
+        var initial = first.Values.ToList();
         Assert.Equal(7, initial.Count);
         Assert.All(initial.Where(device => !ReferenceEquals(device, stable)), device =>
         {
@@ -34,9 +33,9 @@ public class CompositeDiscoveryRetentionTests
             Assert.Null(device.CachedDeviceInfo);
         });
 
-        repository.UpdateCache([.. CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]),
-            Published("stable-new-evidence", "hid:stable", ConnectionType.HidFido, 303)]);
-        var current = repository.GetAll();
+        var next = SnapshotDiff.Apply(first, [.. CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]),
+            Published("stable-new-evidence", "hid:stable", ConnectionType.HidFido, 303)], 2).Next;
+        var current = next.Values.ToList();
         Assert.Equal(3, current.Count);
         Assert.All(current.Where(device => !ReferenceEquals(device, stable)), device =>
         {
@@ -55,13 +54,11 @@ public class CompositeDiscoveryRetentionTests
     [InlineData(103, 103)]
     public void MetadataExpectation_UnchangedMembersAndConnections_RejectsWrongReplacement(int? initialSerial, int? updatedSerial)
     {
-        using var repository = new YubiKeyDeviceRepository();
         var previous = Published("old-evidence", "hid:a", ConnectionType.HidFido, initialSerial);
         var scan = Published("new-evidence", "hid:a", ConnectionType.HidFido, updatedSerial);
-        repository.UpdateCache([previous]);
-        var initial = repository.GetAll();
-        repository.UpdateCache([scan]);
-        var retained = repository.GetAll();
+        var first = SnapshotDiff.Apply([], [previous], 1).Next;
+        var initial = first.Values.ToList();
+        var retained = SnapshotDiff.Apply(first, [scan], 2).Next.Values.ToList();
 
         Assert.NotEqual(previous.DeviceId, scan.DeviceId);
         Assert.Equal(YubiKeyDevice.PhysicalIdentityKeyFor(previous), YubiKeyDevice.PhysicalIdentityKeyFor(scan));
@@ -76,13 +73,11 @@ public class CompositeDiscoveryRetentionTests
     [Fact]
     public void MetadataExpectation_SameMembersWithChangedConnections_AllowsRepositoryReplacement()
     {
-        using var repository = new YubiKeyDeviceRepository();
         var previous = Published("old", "hid:a", ConnectionType.HidFido, 103);
         var successor = Published("new", "hid:a", ConnectionType.HidOtp, 103);
-        repository.UpdateCache([previous]);
-        var initial = repository.GetAll();
-        repository.UpdateCache([successor]);
-        var current = repository.GetAll();
+        var first = SnapshotDiff.Apply([], [previous], 1).Next;
+        var initial = first.Values.ToList();
+        var current = SnapshotDiff.Apply(first, [successor], 2).Next.Values.ToList();
 
         Assert.Equal(YubiKeyDevice.PhysicalIdentityKeyFor(previous), YubiKeyDevice.PhysicalIdentityKeyFor(successor));
         Assert.NotEqual(previous.AvailableConnections, successor.AvailableConnections);
@@ -93,13 +88,11 @@ public class CompositeDiscoveryRetentionTests
     [Fact]
     public void MetadataExpectation_DifferentKnownSerialOnStableSets_AllowsRepositoryReplacement()
     {
-        using var repository = new YubiKeyDeviceRepository();
         var previous = Published("old", "hid:a", ConnectionType.HidFido, 103);
         var successor = Published("new", "hid:a", ConnectionType.HidFido, 125);
-        repository.UpdateCache([previous]);
-        var initial = repository.GetAll();
-        repository.UpdateCache([successor]);
-        var current = repository.GetAll();
+        var first = SnapshotDiff.Apply([], [previous], 1).Next;
+        var initial = first.Values.ToList();
+        var current = SnapshotDiff.Apply(first, [successor], 2).Next.Values.ToList();
 
         Assert.Equal(YubiKeyDevice.PhysicalIdentityKeyFor(previous), YubiKeyDevice.PhysicalIdentityKeyFor(successor));
         Assert.Equal(previous.AvailableConnections, successor.AvailableConnections);
@@ -111,27 +104,25 @@ public class CompositeDiscoveryRetentionTests
     [Fact]
     public void MetadataExpectation_DifferentMembersWithSameCounts_RejectsInterfaceLoss()
     {
-        using var repository = new YubiKeyDeviceRepository();
-        repository.UpdateCache([Published("old", "hid:a", ConnectionType.HidFido, 103)]);
-        var initial = repository.GetAll();
-        repository.UpdateCache([Published("new", "hid:b", ConnectionType.HidFido, 103)]);
+        var first = SnapshotDiff.Apply([], [Published("old", "hid:a", ConnectionType.HidFido, 103)], 1).Next;
+        var initial = first.Values.ToList();
+        var current = SnapshotDiff.Apply(first, [Published("new", "hid:b", ConnectionType.HidFido, 103)], 2).Next.Values.ToList();
 
         Assert.ThrowsAny<XunitException>(() =>
-            CompositeDiscoveryIntegrationTests.AssertMetadataReadyAndStableGroupsRetained(initial, repository.GetAll()));
+            CompositeDiscoveryIntegrationTests.AssertMetadataReadyAndStableGroupsRetained(initial, current));
     }
 
     [Fact]
     public void MetadataExpectation_UnchangedGroupWithoutMetadata_StillFailsReadiness()
     {
-        using var repository = new YubiKeyDeviceRepository();
         var unknown = new YubiKeyDevice("unknown", smartCard: null,
             new Slot("hid:a", ConnectionType.HidFido), hidOtp: null, deviceInfo: null);
-        repository.UpdateCache([unknown]);
-        var initial = repository.GetAll();
-        repository.UpdateCache([unknown]);
+        var first = SnapshotDiff.Apply([], [unknown], 1).Next;
+        var initial = first.Values.ToList();
+        var current = SnapshotDiff.Apply(first, [unknown], 2).Next.Values.ToList();
 
         Assert.Throws<AllException>(() =>
-            CompositeDiscoveryIntegrationTests.AssertMetadataReadyAndStableGroupsRetained(initial, repository.GetAll()));
+            CompositeDiscoveryIntegrationTests.AssertMetadataReadyAndStableGroupsRetained(initial, current));
     }
 
     private static DeviceInterfaceDescriptor[] KeyInterfaces(string tag, int? serial) =>

@@ -1,8 +1,72 @@
 #nullable enable
+Yubico.YubiKit.Core.DeviceAdded
+Yubico.YubiKit.Core.DeviceAdded.Deconstruct(out long Revision, out Yubico.YubiKit.Core.Abstractions.IYubiKey! Device) -> void
+Yubico.YubiKit.Core.DeviceAdded.Device.get -> Yubico.YubiKit.Core.Abstractions.IYubiKey!
+Yubico.YubiKit.Core.DeviceAdded.Device.init -> void
+Yubico.YubiKit.Core.DeviceAdded.DeviceAdded(long Revision, Yubico.YubiKit.Core.Abstractions.IYubiKey! Device) -> void
+Yubico.YubiKit.Core.DeviceAdded.Equals(Yubico.YubiKit.Core.DeviceAdded? other) -> bool
+Yubico.YubiKit.Core.DeviceChange
+Yubico.YubiKit.Core.DeviceChange.Deconstruct(out long Revision) -> void
+Yubico.YubiKit.Core.DeviceChange.DeviceChange(Yubico.YubiKit.Core.DeviceChange! original) -> void
+Yubico.YubiKit.Core.DeviceChange.DeviceChange(long Revision) -> void
+Yubico.YubiKit.Core.DeviceChange.Revision.get -> long
+Yubico.YubiKit.Core.DeviceChange.Revision.init -> void
+Yubico.YubiKit.Core.DeviceRemoved
+Yubico.YubiKit.Core.DeviceRemoved.Deconstruct(out long Revision, out Yubico.YubiKit.Core.Abstractions.IYubiKey! Device) -> void
+Yubico.YubiKit.Core.DeviceRemoved.Device.get -> Yubico.YubiKit.Core.Abstractions.IYubiKey!
+Yubico.YubiKit.Core.DeviceRemoved.Device.init -> void
+Yubico.YubiKit.Core.DeviceRemoved.DeviceRemoved(long Revision, Yubico.YubiKit.Core.Abstractions.IYubiKey! Device) -> void
+Yubico.YubiKit.Core.DeviceRemoved.Equals(Yubico.YubiKit.Core.DeviceRemoved? other) -> bool
+Yubico.YubiKit.Core.DeviceUpdated
+Yubico.YubiKit.Core.DeviceUpdated.Deconstruct(out long Revision, out Yubico.YubiKit.Core.Abstractions.IYubiKey! Device) -> void
+Yubico.YubiKit.Core.DeviceUpdated.Device.get -> Yubico.YubiKit.Core.Abstractions.IYubiKey!
+Yubico.YubiKit.Core.DeviceUpdated.Device.init -> void
+Yubico.YubiKit.Core.DeviceUpdated.DeviceUpdated(long Revision, Yubico.YubiKit.Core.Abstractions.IYubiKey! Device) -> void
+Yubico.YubiKit.Core.DeviceUpdated.Equals(Yubico.YubiKit.Core.DeviceUpdated? other) -> bool
+Yubico.YubiKit.Core.SnapshotComplete
+Yubico.YubiKit.Core.SnapshotComplete.Deconstruct(out long Revision) -> void
+Yubico.YubiKit.Core.SnapshotComplete.Equals(Yubico.YubiKit.Core.SnapshotComplete? other) -> bool
+Yubico.YubiKit.Core.SnapshotComplete.SnapshotComplete(long Revision) -> void
+abstract Yubico.YubiKit.Core.DeviceChange.<Clone>$() -> Yubico.YubiKit.Core.DeviceChange!
+override Yubico.YubiKit.Core.DeviceAdded.<Clone>$() -> Yubico.YubiKit.Core.DeviceAdded!
+override Yubico.YubiKit.Core.DeviceAdded.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.DeviceAdded.GetHashCode() -> int
+override Yubico.YubiKit.Core.DeviceAdded.ToString() -> string!
+override Yubico.YubiKit.Core.DeviceChange.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.DeviceChange.GetHashCode() -> int
+override Yubico.YubiKit.Core.DeviceChange.ToString() -> string!
+override Yubico.YubiKit.Core.DeviceRemoved.<Clone>$() -> Yubico.YubiKit.Core.DeviceRemoved!
+override Yubico.YubiKit.Core.DeviceRemoved.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.DeviceRemoved.GetHashCode() -> int
+override Yubico.YubiKit.Core.DeviceRemoved.ToString() -> string!
+override Yubico.YubiKit.Core.DeviceUpdated.<Clone>$() -> Yubico.YubiKit.Core.DeviceUpdated!
+override Yubico.YubiKit.Core.DeviceUpdated.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.DeviceUpdated.GetHashCode() -> int
+override Yubico.YubiKit.Core.DeviceUpdated.ToString() -> string!
+override Yubico.YubiKit.Core.SnapshotComplete.<Clone>$() -> Yubico.YubiKit.Core.SnapshotComplete!
+override Yubico.YubiKit.Core.SnapshotComplete.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.SnapshotComplete.GetHashCode() -> int
+override Yubico.YubiKit.Core.SnapshotComplete.ToString() -> string!
+override sealed Yubico.YubiKit.Core.DeviceAdded.Equals(Yubico.YubiKit.Core.DeviceChange? other) -> bool
+override sealed Yubico.YubiKit.Core.DeviceRemoved.Equals(Yubico.YubiKit.Core.DeviceChange? other) -> bool
+override sealed Yubico.YubiKit.Core.DeviceUpdated.Equals(Yubico.YubiKit.Core.DeviceChange? other) -> bool
+override sealed Yubico.YubiKit.Core.SnapshotComplete.Equals(Yubico.YubiKit.Core.DeviceChange? other) -> bool
+static Yubico.YubiKit.Core.DeviceAdded.operator !=(Yubico.YubiKit.Core.DeviceAdded? left, Yubico.YubiKit.Core.DeviceAdded? right) -> bool
+static Yubico.YubiKit.Core.DeviceAdded.operator ==(Yubico.YubiKit.Core.DeviceAdded? left, Yubico.YubiKit.Core.DeviceAdded? right) -> bool
+static Yubico.YubiKit.Core.DeviceChange.operator !=(Yubico.YubiKit.Core.DeviceChange? left, Yubico.YubiKit.Core.DeviceChange? right) -> bool
+static Yubico.YubiKit.Core.DeviceChange.operator ==(Yubico.YubiKit.Core.DeviceChange? left, Yubico.YubiKit.Core.DeviceChange? right) -> bool
+static Yubico.YubiKit.Core.DeviceRemoved.operator !=(Yubico.YubiKit.Core.DeviceRemoved? left, Yubico.YubiKit.Core.DeviceRemoved? right) -> bool
+static Yubico.YubiKit.Core.DeviceRemoved.operator ==(Yubico.YubiKit.Core.DeviceRemoved? left, Yubico.YubiKit.Core.DeviceRemoved? right) -> bool
+static Yubico.YubiKit.Core.DeviceUpdated.operator !=(Yubico.YubiKit.Core.DeviceUpdated? left, Yubico.YubiKit.Core.DeviceUpdated? right) -> bool
+static Yubico.YubiKit.Core.DeviceUpdated.operator ==(Yubico.YubiKit.Core.DeviceUpdated? left, Yubico.YubiKit.Core.DeviceUpdated? right) -> bool
+static Yubico.YubiKit.Core.SnapshotComplete.operator !=(Yubico.YubiKit.Core.SnapshotComplete? left, Yubico.YubiKit.Core.SnapshotComplete? right) -> bool
+static Yubico.YubiKit.Core.SnapshotComplete.operator ==(Yubico.YubiKit.Core.SnapshotComplete? left, Yubico.YubiKit.Core.SnapshotComplete? right) -> bool
+virtual Yubico.YubiKit.Core.DeviceChange.EqualityContract.get -> System.Type!
+virtual Yubico.YubiKit.Core.DeviceChange.Equals(Yubico.YubiKit.Core.DeviceChange? other) -> bool
+virtual Yubico.YubiKit.Core.DeviceChange.PrintMembers(System.Text.StringBuilder! builder) -> bool
 Yubico.YubiKit.Core.Devices.YubiKeyMonitor
-Yubico.YubiKit.Core.Devices.YubiKeyMonitor.CurrentDevices.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!
 Yubico.YubiKit.Core.Devices.YubiKeyMonitor.DisposeAsync() -> System.Threading.Tasks.ValueTask
-Yubico.YubiKit.Core.Devices.YubiKeyMonitor.WatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.Core.DeviceEvent!>!
+Yubico.YubiKit.Core.Devices.YubiKeyMonitor.WatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.Core.DeviceChange!>!
 
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Clear() -> void
 
@@ -240,14 +304,6 @@ Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.Parameters.get -> System.Security
 Yubico.YubiKit.Core.Cryptography.RSAPublicKey
 override Yubico.YubiKit.Core.Cryptography.RSAPublicKey.KeyInfo.get -> Yubico.YubiKit.Core.Cryptography.KeyInfo!
 Yubico.YubiKit.Core.Cryptography.RSAPublicKey.Parameters.get -> System.Security.Cryptography.RSAParameters
-Yubico.YubiKit.Core.DeviceAction
-Yubico.YubiKit.Core.DeviceAction.Added = 0 -> Yubico.YubiKit.Core.DeviceAction
-Yubico.YubiKit.Core.DeviceAction.Removed = 1 -> Yubico.YubiKit.Core.DeviceAction
-Yubico.YubiKit.Core.DeviceEvent
-Yubico.YubiKit.Core.DeviceEvent.Action.get -> Yubico.YubiKit.Core.DeviceAction
-Yubico.YubiKit.Core.DeviceEvent.Device.get -> Yubico.YubiKit.Core.Abstractions.IYubiKey!
-Yubico.YubiKit.Core.DeviceEvent.DeviceEvent(Yubico.YubiKit.Core.DeviceAction action, Yubico.YubiKit.Core.Abstractions.IYubiKey! device) -> void
-Yubico.YubiKit.Core.DeviceEvent.Timestamp.get -> System.DateTime
 Yubico.YubiKit.Core.DeviceListenerStatus
 Yubico.YubiKit.Core.DeviceListenerStatus.Error = 2 -> Yubico.YubiKit.Core.DeviceListenerStatus
 Yubico.YubiKit.Core.DeviceListenerStatus.Started = 1 -> Yubico.YubiKit.Core.DeviceListenerStatus

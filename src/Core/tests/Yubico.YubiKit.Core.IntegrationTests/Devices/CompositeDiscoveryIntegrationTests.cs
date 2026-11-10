@@ -153,11 +153,11 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         // Later identity reads may regroup standalone interfaces. Only unchanged groups must retain
         // their published objects, so observe one owned monitor rather than independent Find views.
         await using var monitor = await YubiKeyManager.CreateMonitorAsync();
-        var initial = monitor.CurrentDevices;
+        var initial = await MonitorSnapshot.ReadAsync(monitor, CancellationToken.None);
         IReadOnlyList<IYubiKey> devices = initial;
         for (var attempt = 0; attempt < 3; attempt++)
         {
-            devices = monitor.CurrentDevices;
+            devices = await MonitorSnapshot.ReadAsync(monitor, CancellationToken.None);
             if (devices.All(device => Assert.IsType<YubiKeyDevice>(device).DeviceInfo is not null))
                 break;
             await Task.Delay(TimeSpan.FromSeconds(6));

@@ -89,12 +89,11 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
                     while (await move)
                     {
                         var evt = enumerator.Current;
-                        Note($"EVENT {evt.Action,-7} {evt.Device.DeviceId} connections={evt.Device.AvailableConnections} " +
-                             $"serialAtEvent={evt.Device.SerialNumber?.ToString() ?? "null"} ref={evt.Device.GetHashCode():x8}");
-                        if (evt.Action == DeviceAction.Removed)
-                            removedTcs.TrySetResult(evt.Device);
-                        else if (evt.Action == DeviceAction.Added)
-                            Arrival(evt.Device).TrySetResult();
+                        Note($"CHANGE {evt}");
+                        if (evt is DeviceRemoved removed)
+                            removedTcs.TrySetResult(removed.Device);
+                        else if (evt is DeviceAdded added)
+                            Arrival(added.Device).TrySetResult();
 
                         move = enumerator.MoveNextAsync();
                     }
@@ -112,7 +111,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         IYubiKey? original = null;
         while (clock.Elapsed < TimeSpan.FromSeconds(20))
         {
-            var devices = monitor.CurrentDevices;
+            var devices = await MonitorSnapshot.ReadAsync(monitor, watching.Token);
             if (devices is [{ SerialNumber: not null } sole])
             {
                 original = sole;
@@ -139,7 +138,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         var phase2Deadline = clock.Elapsed + TimeSpan.FromSeconds(120);
         while (clock.Elapsed < phase2Deadline && !removedTcs.Task.IsCompleted)
         {
-            var snapshot = monitor.CurrentDevices;
+            var snapshot = await MonitorSnapshot.ReadAsync(monitor, watching.Token);
             if (snapshot.Count == 0 && !snapshotEmptied)
             {
                 snapshotEmptied = true;
@@ -167,7 +166,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         var phase3Deadline = clock.Elapsed + TimeSpan.FromSeconds(120);
         while (clock.Elapsed < phase3Deadline)
         {
-            var devices = monitor.CurrentDevices;
+            var devices = await MonitorSnapshot.ReadAsync(monitor, watching.Token);
             if (devices is [{ SerialNumber: not null } sole])
             {
                 reinserted = sole;

@@ -31,17 +31,11 @@ public class MonitorService_Enabled_Tests : IAsyncLifetime
     }
 
     [Fact]
-    public void WhenMonitoringEnabled_FindsDevices()
+    public async Task WhenMonitoringEnabled_FindsDevices()
     {
         var monitor = Assert.IsType<YubiKeyMonitor>(_monitor);
-        var devices = monitor.CurrentDevices;
+        var devices = await MonitorSnapshot.ReadAsync(monitor, CancellationToken.None);
         Assert.NotEmpty(devices);
     }
 
-    [Fact]
-    public void WhenMonitoringEnabled_CurrentDevicesIsReady()
-    {
-        var monitor = Assert.IsType<YubiKeyMonitor>(_monitor);
-        Assert.NotNull(monitor.CurrentDevices);
-    }
 }

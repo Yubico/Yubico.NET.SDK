@@ -77,7 +77,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
         Prompt($"Leave your YubiKey plugged in. {Cycles} remove/insert cycles will be requested.");
 
-        _ = await ExpectAsync(initialCheckpoint, DeviceAction.Added, "initial discovery");
+        _ = await ExpectAsync<DeviceAdded>(initialCheckpoint, "initial discovery");
 
         for (var cycle = 1; cycle <= Cycles; cycle++)
         {
@@ -85,13 +85,13 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             _ = Console.ReadLine();
             var removalCheckpoint = _log.CreateCheckpoint();
             Prompt($"[cycle {cycle}/{Cycles}] REMOVE a YubiKey now.");
-            var removed = await ExpectAsync(removalCheckpoint, DeviceAction.Removed, $"cycle {cycle} removal");
+            var removed = await ExpectAsync<DeviceRemoved>(removalCheckpoint, $"cycle {cycle} removal");
 
             Prompt($"[cycle {cycle}/{Cycles}] Press Enter when ready to re-insert the YubiKey.");
             _ = Console.ReadLine();
             var insertionCheckpoint = _log.CreateCheckpoint();
             Prompt($"[cycle {cycle}/{Cycles}] RE-INSERT the same YubiKey now.");
-            var added = await ExpectAsync(insertionCheckpoint, DeviceAction.Added, $"cycle {cycle} insertion");
+            var added = await ExpectAsync<DeviceAdded>(insertionCheckpoint, $"cycle {cycle} insertion");
 
             output.WriteLine(
                 $"[cycle {cycle}] removed as '{removed.Device.DeviceId}', returned as '{added.Device.DeviceId}'");
@@ -106,11 +106,11 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         output.WriteLine("watcher pump completed normally after owned monitor disposal");
     }
 
-    private async Task<DeviceEvent> ExpectAsync(int checkpoint, DeviceAction action, string what)
+    private async Task<TChange> ExpectAsync<TChange>(int checkpoint, string what) where TChange : DeviceChange
     {
         var deviceEvent = await _log.WaitForAsync(
             checkpoint,
-            deviceEvent => deviceEvent.Action == action,
+            deviceEvent => deviceEvent is TChange,
             HumanActionTimeout);
 
         Assert.True(
@@ -118,9 +118,9 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             $"Timed out after {HumanActionTimeout.TotalSeconds:0}s waiting for " +
             $"{what}.{Environment.NewLine}{_log}");
 
-        output.WriteLine($"  observed {deviceEvent!.Action}: {deviceEvent.Device.DeviceId}");
+        output.WriteLine($"  observed {deviceEvent}");
 
-        return deviceEvent;
+        return Assert.IsType<TChange>(deviceEvent);
     }
 
     private void Prompt(string message)
@@ -140,15 +140,15 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     private sealed class EventLog
     {
         private readonly Lock _gate = new();
-        private readonly List<(TimeSpan At, DeviceEvent Event)> _entries = [];
+        private readonly List<(TimeSpan At, DeviceChange Event)> _entries = [];
         private readonly Stopwatch _clock = Stopwatch.StartNew();
 
-        private Func<DeviceEvent, bool>? _awaited;
-        private TaskCompletionSource<DeviceEvent>? _pending;
+        private Func<DeviceChange, bool>? _awaited;
+        private TaskCompletionSource<DeviceChange>? _pending;
 
-        public void Record(DeviceEvent value)
+        public void Record(DeviceChange value)
         {
-            TaskCompletionSource<DeviceEvent>? toComplete = null;
+            TaskCompletionSource<DeviceChange>? toComplete = null;
 
             lock (_gate)
             {
@@ -169,12 +169,12 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         /// Returns the first event at or after <paramref name="checkpoint"/> that matches
         /// <paramref name="match"/>, waiting for one if necessary; null on timeout.
         /// </summary>
-        public async Task<DeviceEvent?> WaitForAsync(
+        public async Task<DeviceChange?> WaitForAsync(
             int checkpoint,
-            Func<DeviceEvent, bool> match,
+            Func<DeviceChange, bool> match,
             TimeSpan timeout)
         {
-            TaskCompletionSource<DeviceEvent> tcs;
+            TaskCompletionSource<DeviceChange> tcs;
 
             lock (_gate)
             {
@@ -186,7 +186,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
                     }
                 }
 
-                tcs = new TaskCompletionSource<DeviceEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
+                tcs = new TaskCompletionSource<DeviceChange>(TaskCreationOptions.RunContinuationsAsynchronously);
                 _awaited = match;
                 _pending = tcs;
             }
@@ -237,7 +237,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             lock (_gate)
             {
                 var lines = _entries.Select(e =>
-                    $"  {e.At.TotalSeconds,7:0.000}s  {e.Event.Action,-7}  {e.Event.Device.DeviceId}");
+                    $"  {e.At.TotalSeconds,7:0.000}s  {e.Event}");
 
                 return $"Device event timeline ({_entries.Count} events):{Environment.NewLine}" +
                        string.Join(Environment.NewLine, lines);

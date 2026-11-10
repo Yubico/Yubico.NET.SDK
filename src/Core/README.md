@@ -257,14 +257,25 @@ key to be inserted, and "first" is not a stable ordering.
 ```csharp
 await using var monitor = await YubiKeyManager.CreateMonitorAsync();
 
-await foreach (DeviceEvent change in monitor.WatchAsync())
+await foreach (DeviceChange change in monitor.WatchAsync())
 {
-    Console.WriteLine($"{change.Action}: serial {change.Device.SerialNumber}");
+    Console.WriteLine(change switch
+    {
+        DeviceAdded added => $"Added: serial {added.Device.SerialNumber}",
+        DeviceRemoved removed => $"Removed: serial {removed.Device.SerialNumber}",
+        DeviceUpdated updated => $"Updated: serial {updated.Device.SerialNumber}",
+        SnapshotComplete => "Initial snapshot complete",
+        _ => "Unknown change"
+    });
 }
 ```
 
-`WatchAsync` yields `Added` and `Removed` events computed from a repository diff, not raw OS notifications.
-Subscription starts on first enumeration, atomically replaying current membership before ordered changes.
+`WatchAsync` yields `DeviceAdded`, `DeviceRemoved`, and `DeviceUpdated` records computed from complete scans,
+not raw operating-system notifications. Subscription starts on first enumeration, atomically replaying current
+membership followed by `SnapshotComplete` (even for an empty snapshot), then ordered changes. `Revision`
+increments once per scan; changes sharing a revision belong to that scan. Metadata updates retain the
+originally published device object. There is no `CurrentDevices` property: maintain a projection from the
+stream, or use `FindAllAsync` for independent fresh discovery.
 
 **v2 prerelease migration:** replace `ScanAsync` with `FindAllAsync(interfaces: ...)`; remove `forceRescan`.
 Replace static Start/Stop/Watch/Shutdown calls with an owned monitor and `DisposeAsync`. Old `type` filters

@@ -32,7 +32,7 @@ public class YubiKeyMonitorLifecycleTests
         fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([device]);
         var monitor = await fixture.CreateAsync(TestToken);
         // Change-only observation isolates deltas from the monitor's initial replay.
-        await using var watcher = await DeviceEventWatcher.StartAsync(fixture.Repository, TestToken);
+        await using var watcher = await DeviceChangeWatcher.StartAsync(fixture.Repository, TestToken);
         var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         fixture.Worker.PublishAdmittedForTest = () =>
@@ -72,7 +72,7 @@ public class YubiKeyMonitorLifecycleTests
         var monitor = await fixture.CreateAsync(TestToken);
         var device = new FakeYubiKey("device-1", ConnectionType.SmartCard);
         fixture.Finder.Scan = _ => Task.FromResult<IReadOnlyList<IYubiKey>>([device]);
-        await using var watcher = await DeviceEventWatcher.StartAsync(fixture.Repository, TestToken);
+        await using var watcher = await DeviceChangeWatcher.StartAsync(fixture.Repository, TestToken);
         var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         fixture.Worker.PublishAdmittedForTest = () =>
@@ -90,9 +90,6 @@ public class YubiKeyMonitorLifecycleTests
             await watcher.Completion.WaitAsync(Bound, TestToken);
             Assert.True(watcher.EndedNormally);
             Assert.Empty(watcher.Events);
-            Assert.False(fixture.Repository.HasData);
-            Assert.Throws<ObjectDisposedException>(() => fixture.Repository.GetAll());
-            Assert.Throws<ObjectDisposedException>(() => monitor.CurrentDevices);
         }
         finally
         {

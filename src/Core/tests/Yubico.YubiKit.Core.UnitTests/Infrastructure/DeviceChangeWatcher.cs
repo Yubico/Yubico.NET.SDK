@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.UnitTests.Infrastructure;
@@ -28,20 +29,22 @@ namespace Yubico.YubiKit.Core.UnitTests.Infrastructure;
 /// </para>
 /// <para>
 /// Use <see cref="DrainAsync"/> rather than a sleep when asserting that <em>no</em> event was
-/// published: it pushes a sentinel through the repository and waits for it, and per-watcher delivery
+/// published: it pushes a sentinel through the feed and waits for it, and per-watcher delivery
 /// is ordered, so the sentinel's arrival proves everything published earlier has already landed.
 /// </para>
 /// </remarks>
-internal sealed class DeviceEventWatcher : IAsyncDisposable
+internal sealed class DeviceChangeWatcher : IAsyncDisposable
 {
     private readonly Lock _gate = new();
-    private readonly List<DeviceEvent> _received = [];
+    private readonly List<DeviceChange> _received = [];
+    private readonly TaskCompletionSource _ready = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly CancellationTokenSource _cts;
     private readonly Task _pump;
 
-    private DeviceEventWatcher(
-        Func<CancellationToken, IAsyncEnumerable<DeviceEvent>> watch,
-        CancellationToken cancellationToken)
+    private DeviceChangeWatcher(
+        Func<CancellationToken, IAsyncEnumerable<DeviceChange>> watch,
+        CancellationToken cancellationToken,
+        bool includeReplay)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
@@ -49,11 +52,20 @@ internal sealed class DeviceEventWatcher : IAsyncDisposable
         _pump = Task.Run(
             async () =>
             {
-                await foreach (var deviceEvent in watch(token).ConfigureAwait(false))
+                var replaying = true;
+                await foreach (var change in watch(token).ConfigureAwait(false))
                 {
+                    if (change is SnapshotComplete)
+                    {
+                        replaying = false;
+                        _ready.TrySetResult();
+                        continue;
+                    }
+                    if (replaying && !includeReplay)
+                        continue;
                     lock (_gate)
                     {
-                        _received.Add(deviceEvent);
+                        _received.Add(change);
                     }
                 }
             },
@@ -61,7 +73,7 @@ internal sealed class DeviceEventWatcher : IAsyncDisposable
     }
 
     /// <summary>Snapshot of everything received so far, in delivery order.</summary>
-    public IReadOnlyList<DeviceEvent> Events
+    public IReadOnlyList<DeviceChange> Events
     {
         get
         {
@@ -93,38 +105,25 @@ internal sealed class DeviceEventWatcher : IAsyncDisposable
     /// <summary>Whether the enumeration ended normally (source completed).</summary>
     public bool EndedNormally => _pump.IsCompletedSuccessfully;
 
-    /// <summary>Starts a watcher over <paramref name="repository"/> and waits for it to subscribe.</summary>
-    public static Task<DeviceEventWatcher> StartAsync(
-        YubiKeyDeviceRepository repository,
+    /// <summary>Starts a delta watcher over <paramref name="feed"/> and waits for its replay to complete.</summary>
+    public static Task<DeviceChangeWatcher> StartAsync(
+        DeviceChangeFeed feed,
         CancellationToken cancellationToken) =>
-        StartAsync(repository.WatchAsync, () => repository.WatcherCount, cancellationToken);
-
-    /// <summary>Starts a watcher over <paramref name="hub"/> and waits for it to subscribe.</summary>
-    public static Task<DeviceEventWatcher> StartAsync(
-        DeviceEventHub hub,
-        CancellationToken cancellationToken) =>
-        StartAsync(hub.WatchAsync, () => hub.WatcherCount, cancellationToken);
+        StartAsync(feed.Subscribe, cancellationToken, includeReplay: false);
 
     /// <summary>
-    /// Starts a watcher and does not return until <paramref name="liveWatcherCount"/> shows the
-    /// subscription is live, because <c>WatchAsync</c> subscribes on first enumeration and publishing
-    /// before that point would race it.
+    /// Starts a watcher and waits for SnapshotComplete, proving subscription registration completed.
     /// </summary>
-    public static async Task<DeviceEventWatcher> StartAsync(
-        Func<CancellationToken, IAsyncEnumerable<DeviceEvent>> watch,
-        Func<int> liveWatcherCount,
-        CancellationToken cancellationToken)
+    public static async Task<DeviceChangeWatcher> StartAsync(
+        Func<CancellationToken, IAsyncEnumerable<DeviceChange>> watch,
+        CancellationToken cancellationToken,
+        bool includeReplay = true)
     {
-        var before = liveWatcherCount();
-        var watcher = new DeviceEventWatcher(watch, cancellationToken);
+        var watcher = new DeviceChangeWatcher(watch, cancellationToken, includeReplay);
 
         try
         {
-            await AsyncWait.WaitUntilAsync(
-                () => liveWatcherCount() > before,
-                "watcher did not subscribe",
-                TimeSpan.FromSeconds(10),
-                cancellationToken);
+            await watcher._ready.Task.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
         }
         catch
         {
@@ -147,7 +146,7 @@ internal sealed class DeviceEventWatcher : IAsyncDisposable
     /// Waits for the first event matching <paramref name="match"/> and returns its delivery index.
     /// </summary>
     public async Task<int> WaitForAsync(
-        Func<DeviceEvent, bool> match,
+        Func<DeviceChange, bool> match,
         string because,
         CancellationToken cancellationToken,
         TimeSpan? timeout = null)
@@ -175,22 +174,36 @@ internal sealed class DeviceEventWatcher : IAsyncDisposable
     /// deterministic way to assert "nothing else was published" without a timing guess.
     /// </summary>
     /// <remarks>
-    /// The sentinel is appended to the repository's current contents so the diff emits exactly one
-    /// <see cref="DeviceAction.Added"/> and disturbs no other cache entry.
+    /// The sentinel is appended to the feed's current contents so the diff emits exactly one
+    /// <see cref="DeviceAdded"/> and disturbs no other snapshot entry.
     /// </remarks>
-    public async Task<IReadOnlyList<DeviceEvent>> DrainAsync(
-        YubiKeyDeviceRepository repository,
+    public async Task<IReadOnlyList<DeviceChange>> DrainAsync(
+        DeviceChangeFeed feed,
         CancellationToken cancellationToken)
     {
         var sentinel = new FakeYubiKey($"sentinel:{Guid.NewGuid():N}");
-        repository.UpdateCache([.. repository.GetAll(), sentinel]);
+        feed.Apply([.. await ReadSnapshotAsync(feed.Subscribe, cancellationToken), sentinel]);
 
         var index = await WaitForAsync(
-            e => ReferenceEquals(e.Device, sentinel),
+            e => e is DeviceAdded added && ReferenceEquals(added.Device, sentinel),
             "the drain sentinel never reached the watcher",
             cancellationToken);
 
         return [.. Events.Take(index)];
+    }
+
+    public static async Task<IReadOnlyList<IYubiKey>> ReadSnapshotAsync(
+        Func<CancellationToken, IAsyncEnumerable<DeviceChange>> watch,
+        CancellationToken cancellationToken)
+    {
+        var devices = new List<IYubiKey>();
+        await foreach (var change in watch(cancellationToken))
+        {
+            if (change is SnapshotComplete)
+                break;
+            devices.Add(Assert.IsType<DeviceAdded>(change).Device);
+        }
+        return devices;
     }
 
     public async ValueTask DisposeAsync()

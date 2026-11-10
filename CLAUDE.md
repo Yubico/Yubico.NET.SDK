@@ -25,7 +25,6 @@ Guidance for AI agents working in this repository. Yubico.NET.SDK (YubiKit) is a
 | `PublicApi/` | Test-only cross-module public API conventions; no shipping assembly |
 | `Cli.Shared/` | Shared CLI infra for example tools |
 | `Tests.Shared/` | Multi-transport test harness |
-| `Tests.TestProject/` | xUnit v3 test project layout |
 
 **Platform interop** lives in `src/Core/src/Native/{Windows,MacOS,Linux,Desktop}/` with the P/Invoke declarations; the managed transport implementations that call them are in `src/Core/src/Transports/`. `UnmanagedDynamicLibrary` + `SafeLibraryHandle` manage native loading; `SdkPlatformInfo` detects runtime platform.
 

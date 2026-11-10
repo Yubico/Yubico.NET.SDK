@@ -56,10 +56,7 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
     /// after setting up the <see cref="DeviceEvent"/> callback.
     /// </summary>
-    public DesktopSmartCardDeviceListener() : this(NativeSCardApi.Instance, Thread.Sleep)
-    {
-        // Lazy start - do nothing in constructor
-    }
+    public static DesktopSmartCardDeviceListener Create() => new(NativeSCardApi.Instance, Thread.Sleep);
 
     internal DesktopSmartCardDeviceListener(ISCardApi sCardApi, Action<TimeSpan> sleep)
     {

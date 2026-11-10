@@ -95,8 +95,10 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     {
         cancellationToken.ThrowIfCancellationRequested();
         var repository = new YubiKeyDeviceRepository();
-        var worker = new YubiKeyMonitorWorker(repository, FindYubiKeys.Create(),
-            HidDeviceListener.Create, () => new DesktopSmartCardDeviceListener());
+        var worker = new YubiKeyMonitorWorker(
+            repository, FindYubiKeys.Create(),
+            HidDeviceListener.Create,
+            DesktopSmartCardDeviceListener.Create);
         return CreateAsync(repository, worker, cancellationToken, DefaultMonitoringInterval);
     }
 

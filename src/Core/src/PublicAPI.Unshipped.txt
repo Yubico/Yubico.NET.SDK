@@ -678,7 +678,6 @@ Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.fr_FR = 4 -> Yubico.Y
 Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.it_IT = 5 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
 Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.sv_SE = 7 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
 Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener
-Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.DesktopSmartCardDeviceListener() -> void
 Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.DeviceEvent.get -> System.Action?
 Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.DeviceEvent.set -> void
 Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Dispose() -> void
@@ -1070,6 +1069,7 @@ static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.Classify(Yubico
 static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.GetReportType(Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType interfaceType) -> Yubico.YubiKit.Core.Transports.Hid.HidReportType
 static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.IsSupported(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo! descriptorInfo) -> bool
 static Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetInstance(Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout layout) -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator!
+static Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Create() -> Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener!
 static Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices.Create(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices!>? logger = null) -> Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices!
 static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.CreateDefault() -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory!
 static Yubico.YubiKit.Core.Utilities.BerLength.EncodingSize(int length) -> int

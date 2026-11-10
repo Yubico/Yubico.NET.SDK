@@ -23,8 +23,10 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 /// insertion cycles.
 /// </summary>
 /// <remarks>
-/// This test requires an operator to remove and insert a YubiKey when prompted. It asserts event
-/// sequence liveness after each prompt and does not attempt to correlate event identity.
+/// This test requires an operator to remove and insert a YubiKey when prompted. Prompts are spoken through
+/// <see cref="OperatorCue" /> and printed; no console input is needed, so it runs from any harness. It
+/// asserts event-sequence liveness and the absence of spurious changes after each prompt; identity
+/// correlation lives in <see cref="HotPlugIdentityContractTests" />.
 /// </remarks>
 public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 {
@@ -33,6 +35,12 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
     /// <summary>How long to wait for the requested operator action.</summary>
     private static readonly TimeSpan HumanActionTimeout = TimeSpan.FromSeconds(30);
+
+    /// <summary>Time for the operator to get a hand on the key before the first instruction.</summary>
+    private static readonly TimeSpan LeadIn = TimeSpan.FromSeconds(10);
+
+    /// <summary>Settling time after an arrival so post-hotplug metadata re-reads of other keys can land.</summary>
+    private static readonly TimeSpan SettleAfterArrival = TimeSpan.FromSeconds(6);
 
     private readonly EventLog _log = new();
 
@@ -47,10 +55,6 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task WatchAsync_AcrossRepeatedHotPlugCycles_EmitsRemovalAndArrivalAfterEachPrompt()
     {
-        Assert.False(
-            Console.IsInputRedirected,
-            "This test requires interactive console input for each remove and insert checkpoint.");
-
         using var watching = new CancellationTokenSource();
 
         await using var monitor = await YubiKeyManager.CreateMonitorAsync(watching.Token);
@@ -77,39 +81,45 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             },
             CancellationToken.None);
 
-        Prompt($"Leave your YubiKey plugged in. {Cycles} remove/insert cycles will be requested.");
+        Prompt($"Hotplug protocol. {Cycles} remove and insert cycles. Keep a test key within reach.");
 
         _ = await ExpectAsync<DeviceAdded>(initialCheckpoint, "initial discovery");
+        await Task.Delay(LeadIn);
 
         for (var cycle = 1; cycle <= Cycles; cycle++)
         {
-            Prompt($"[cycle {cycle}/{Cycles}] Press Enter when ready to remove a YubiKey.");
-            _ = Console.ReadLine();
             var removalCheckpoint = _log.CreateCheckpoint();
-            Prompt($"[cycle {cycle}/{Cycles}] REMOVE a YubiKey now.");
+            Prompt($"Cycle {cycle} of {Cycles}. Remove one YubiKey now.");
             var removed = await ExpectAsync<DeviceRemoved>(removalCheckpoint, $"cycle {cycle} removal");
 
-            Prompt($"[cycle {cycle}/{Cycles}] Press Enter when ready to re-insert the YubiKey.");
-            _ = Console.ReadLine();
+            await Task.Delay(TimeSpan.FromSeconds(2));
             var insertionCheckpoint = _log.CreateCheckpoint();
-            Prompt($"[cycle {cycle}/{Cycles}] RE-INSERT the same YubiKey now.");
+            Prompt("Reinsert the same YubiKey now.");
             var added = await ExpectAsync<DeviceAdded>(insertionCheckpoint, $"cycle {cycle} insertion");
 
             output.WriteLine(
                 $"[cycle {cycle}] removed as '{removed.Device.DeviceId}', returned as '{added.Device.DeviceId}'");
 
-            // The hotplug invalidated every key's cached metadata, so the keys that stayed attached were
-            // re-read on this scan. Equal metadata decoded from a fresh buffer must not publish an update.
-            await Task.Delay(TimeSpan.FromSeconds(2));
-            var sinceRemoval = _log.Since(removalCheckpoint);
-            var spuriousUpdates = sinceRemoval.OfType<DeviceUpdated>()
-                .Where(update => !ReferenceEquals(update.Device, added.Device) && !ReferenceEquals(update.Device, removed.Device))
+            // The hotplug invalidated every key's cached metadata, so keys that stayed attached were re-read
+            // on this scan. Equal metadata decoded from a fresh buffer must not publish an update.
+            await Task.Delay(SettleAfterArrival);
+            var window = _log.Since(removalCheckpoint);
+            var removedDevices = window.OfType<DeviceRemoved>().Select(r => r.Device).ToList();
+            var addedDevices = window.OfType<DeviceAdded>().Select(a => a.Device).ToList();
+            var spuriousUpdates = window.OfType<DeviceUpdated>()
+                .Where(update => !removedDevices.Contains(update.Device) && !addedDevices.Contains(update.Device))
                 .ToList();
             Assert.True(spuriousUpdates.Count == 0,
                 $"cycle {cycle}: {spuriousUpdates.Count} DeviceUpdated for keys that did not change:{Environment.NewLine}{_log}");
-            var churn = sinceRemoval.Count(change => change is DeviceRemoved or DeviceAdded);
-            Assert.True(churn == 2,
-                $"cycle {cycle}: expected exactly one Removed and one Added, observed {churn} membership changes:{Environment.NewLine}{_log}");
+
+            // One physical key may be published as several devices when an interface cannot be opened on
+            // this host (for example, OTP without macOS Input Monitoring), so compare removals with arrivals
+            // rather than assuming a fixed count: whatever left must have come back, and nothing else moved.
+            Assert.True(removedDevices.Count >= 1 && removedDevices.Count == addedDevices.Count,
+                $"cycle {cycle}: {removedDevices.Count} removed vs {addedDevices.Count} added; expected a matched pair per device:{Environment.NewLine}{_log}");
+            Assert.All(removedDevices, device => Assert.DoesNotContain(device, addedDevices));
+            foreach (var reinserted in addedDevices.Where(a => a.SerialNumber is not null))
+                Assert.Contains(removedDevices, r => r.SerialNumber == reinserted.SerialNumber);
         }
 
         output.WriteLine(_log.ToString());
@@ -138,11 +148,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         return Assert.IsType<TChange>(deviceEvent);
     }
 
-    private void Prompt(string message)
-    {
-        Console.WriteLine($">>> {message}");
-        output.WriteLine($">>> {message}");
-    }
+    private void Prompt(string message) => OperatorCue.Announce(message, output.WriteLine);
 
     /// <summary>
     /// Records every event and lets the test await the next one of a given kind.

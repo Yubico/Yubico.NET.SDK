@@ -120,7 +120,12 @@ internal static class ListenerDrainScenario
             native.RemovalTarget = entryId;
             listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(4));
             var delivered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            listener.Changed = () => delivered.TrySetResult();
+            // The hint is payload-less, so gate on the native wrapper's selected entry: it records the ID
+            // immediately before forwarding the selected removal. Hints from unrelated keys do not count.
+            listener.Changed = () =>
+            {
+                if (native.EntryId == entryId) delivered.TrySetResult();
+            };
             listener.Start();
             if (listener.Status != DeviceListenerStatus.Started)
                 throw new InvalidOperationException($"Listener did not start: {listener.Status}");

@@ -177,8 +177,11 @@ Disposal stops listeners, cancels and awaits the actual loop, retires discovery,
 There is no managed-loop abandonment or disposal timeout. Discovery waits are bounded by `DiscoveryBudgets`:
 enumeration provisionally five seconds per transport, identity two seconds per attempt (up to three),
 metadata three seconds. Finder scan-lock queueing and retries mean their sum is not a hard wall-clock bound.
-Enumeration timeouts log and omit that transport for one scan, using the other transport's results; this
-partial membership can cause removals/re-additions. `FindYubiKeysEnumerationBudgetTests` pins isolation.
+An enumeration timeout is handled per path. One-shot `Find…Async` logs a warning and returns the other
+transport's results for that call. The monitor's discovery (`IMonitoredDiscovery.FindAllAsync`) throws
+`TimeoutException` instead, so a partial scan is never diffed against the previous snapshot: during creation
+the failure propagates; afterwards the scan is logged and the previous snapshot stands until a later scan
+succeeds. `FindYubiKeysEnumerationBudgetTests` pins both behaviours.
 
 Queued reads retire; already-open reads keep actual admission/leases until native teardown.
 `CreateAsync_CancellationRetainsAdmittedReadLeaseUntilNativeTeardown`,

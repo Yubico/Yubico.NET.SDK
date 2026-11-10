@@ -53,11 +53,12 @@ up to three attempts; concurrent finder callers can queue on the scan lock. `Sca
 of stage budgets, **not a hard end-to-end wall-clock guarantee**.
 
 `EnumerateInterfacesAsync` starts both in-scope transport waits together. If enumeration exceeds its
-budget, the finder logs a warning, omits that transport for this scan, and uses the other transport's
-results. Caller cancellation abandons the wait. Late enumeration completion/failure is observed and
-logged at Debug level; it does not add interfaces to an already published scan. A partial scan can
-produce removals or changed grouping, followed by additions when the transport recovers. Other scan
-exceptions propagate rather than being converted to empty membership.
+budget, the behaviour depends on the caller. One-shot `Find…Async` logs a warning, omits that transport for
+this call and returns the other transport's results. The monitor's path (`IMonitoredDiscovery.FindAllAsync`)
+throws `TimeoutException` instead, because a partial scan diffed against the previous snapshot would read
+as removals of every key on the stalled transport; the loop logs and retries on the next trigger, and the
+previous snapshot stands. Caller cancellation abandons the wait. Late enumeration completion/failure is
+observed and logged at Debug level; it does not add interfaces to an already published scan.
 
 Budgets bound callers' waits, not native execution or ownership. Already-dispatched work completes
 and cleans up independently. A returned initialized monitor is not proof that every transport or

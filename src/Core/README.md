@@ -88,8 +88,10 @@ stop/restart mode: dispose the monitor and create a new one to recover from term
 process-global monitoring lifetime or device cache.
 
 Transport listeners share payload-less `IDeviceChangeListener.Changed` hints, not physical-device truth.
-The monitor reconciles scans; listener failure falls back to interval discovery. Enumeration timeout
-logs a warning and omits that transport for one scan, using the other transport's results.
+The monitor reconciles scans; listener failure falls back to interval discovery. An enumeration timeout is
+handled per path: one-shot `Find…Async` logs a warning and returns the other transport's results for that
+call; a monitor never publishes a partial scan, so the timeout fails `CreateMonitorAsync` on the first scan
+and, after initialization, keeps the previous snapshot until a later scan succeeds.
 
 Share one host-owned monitor between long-lived components rather than letting each component take over
 tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a

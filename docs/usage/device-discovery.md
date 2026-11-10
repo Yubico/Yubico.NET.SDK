@@ -126,8 +126,8 @@ one key. A scan can also probe unclaimed sibling interfaces while a scoped conne
 [connection ownership](../architecture/connection-ownership-and-contention.md#grouping-bound).
 
 Cancellation is checked before constructing the finder. Enumeration waits run concurrently with a provisional
-five-second budget per transport; a timeout logs a warning and omits that transport for this scan, using the
-other transport's results. Cancellation abandons the enumeration wait, not already-dispatched native work.
+five-second budget per transport; for one-shot `Find…Async` a timeout logs a warning and omits that transport
+for this call, using the other transport's results. Cancellation abandons the enumeration wait, not already-dispatched native work.
 Identity reads have a two-second budget per attempt (up to three attempts); metadata reads have a three-second
 budget. These are discovery budgets, not a hard end-to-end wall-clock bound. On scan exit, queued identity reads are retired so they cannot open later; already-open reads keep
 their registry claim and worker admission until background teardown. Cancellation is not proof of native drain.
@@ -324,9 +324,10 @@ end empty. Disposal is idempotent and does not dispose caller-owned sessions or 
 - Logger category: `Yubico.YubiKit.Core.Devices.YubiKeyMonitor`; see [logging setup](../LOGGING.md).
 - Listener startup failure is logged and cleaned up independently. The other listener and five-second
   interval fallback continue; listeners are hints, not physical-device truth.
-- Enumeration timeout omits that transport for one scan and logs a warning; the other transport's results
-  are used. This partial snapshot can cause removals/re-additions. Successful initialization does not prove
-  that every interface or metadata field was accessible.
+- A monitor never publishes a partial scan. If a transport's enumeration exceeds its budget during creation,
+  `CreateMonitorAsync` fails with `TimeoutException`; after initialization the scan is logged and the previous
+  snapshot stands until a later scan succeeds. Successful initialization does not prove that every interface
+  or metadata field was accessible.
 - First-scan exceptions fail creation. Later scan exceptions retain the previous publication, log, and retry
   on the next trigger. Unexpected terminal loop failure faults subscriptions; dispose and create a new monitor.
 - Hotplug triggers globally invalidate identity/metadata evidence immediately before scanning, after

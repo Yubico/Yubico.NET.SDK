@@ -132,6 +132,15 @@ internal static class DeviceConnectionRegistry
     public static IDisposable? TryAcquireDiscovery(string deviceId, IDisposable? nativeAdmission = null) =>
         GetOwnership(deviceId).TryAcquireDiscovery(nativeAdmission);
 
+    /// <summary>
+    ///     Nonblocking precheck for <see cref="TryAcquireDiscovery" />: whether discovery could take the
+    ///     interface right now, meaning no discovery lease, live connection, or waiting connection holds it.
+    ///     An interface this process has never registered is available. The answer can change before the
+    ///     caller acts on it; only <see cref="TryAcquireDiscovery" /> claims the interface atomically.
+    /// </summary>
+    /// <exception cref="UnrecoveredConnectionException">
+    ///     An earlier native owner of the interface has not proven release.
+    /// </exception>
     internal static bool IsDiscoveryAvailable(string deviceId) =>
         !Interfaces.TryGetValue(deviceId, out var ownership) || ownership.IsDiscoveryAvailable;
 
@@ -157,6 +166,7 @@ internal static class DeviceConnectionRegistry
         private Exception? _unrecoveredFailure;
         private TaskCompletionSource? _recoveryCompletion;
 
+        /// <summary>At least one live connection lease is held.</summary>
         public bool HasConnections
         {
             get
@@ -166,6 +176,8 @@ internal static class DeviceConnectionRegistry
             }
         }
 
+        /// <summary>No discovery lease, live connection, or waiting connection holds this interface.</summary>
+        /// <exception cref="UnrecoveredConnectionException">An earlier native owner has not proven release.</exception>
         public bool IsDiscoveryAvailable
         {
             get
@@ -233,6 +245,12 @@ internal static class DeviceConnectionRegistry
             return new Registration(this, LeaseKind.Connection);
         }
 
+        /// <summary>
+        ///     Records that native work on this interface has not proven release. Later acquisitions throw
+        ///     <see cref="UnrecoveredConnectionException" />. If a discovery lease is held, the state clears when
+        ///     that lease is released (its native teardown finished late) and a connection already waiting for
+        ///     the lease fails now; otherwise it lasts for the process. The first failure is kept.
+        /// </summary>
         public void MarkUnrecovered(Exception failure)
         {
             TaskCompletionSource? releaseSignal;
@@ -251,12 +269,15 @@ internal static class DeviceConnectionRegistry
                 releaseSignal.TrySetException(waitingFailure!);
         }
 
+        /// <summary>Completes when a discovery-lease release clears an unrecovered state; already complete if none.</summary>
         public Task WaitForRecovery()
         {
             lock (_sync)
                 return _recoveryCompletion?.Task ?? Task.CompletedTask;
         }
 
+        /// <summary>Takes the discovery lease without waiting, or returns <c>null</c> while anything else holds or awaits the interface.</summary>
+        /// <exception cref="UnrecoveredConnectionException">An earlier native owner has not proven release.</exception>
         public IDisposable? TryAcquireDiscovery(IDisposable? nativeAdmission)
         {
             lock (_sync)
@@ -282,6 +303,11 @@ internal static class DeviceConnectionRegistry
                 $"A previous native operation for interface '{deviceId}' was not proven released.",
                 _unrecoveredFailure ?? throw new InvalidOperationException("No unrecovered failure was recorded."));
 
+        /// <summary>
+        ///     Returns one lease. Releasing the discovery lease also clears an unrecovered state and wakes
+        ///     waiting connections.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">No matching lease is held.</exception>
         public void Release(LeaseKind kind)
         {
             TaskCompletionSource? releaseSignal = null;
@@ -371,9 +397,12 @@ internal static class DeviceConnectionRegistry
         }
     }
 
+    /// <summary>Marks the interfaces behind a registration from this registry as unrecovered.</summary>
+    /// <exception cref="InvalidCastException"><paramref name="registration" /> did not come from this registry.</exception>
     internal static void MarkUnrecovered(IDisposable registration, Exception failure) =>
         ((IUnrecoveredRegistration)registration).MarkUnrecovered(failure);
 
+    /// <summary>Like <see cref="MarkUnrecovered" />, but ignores registrations from elsewhere.</summary>
     internal static void TryMarkUnrecovered(IDisposable registration, Exception failure)
     {
         if (registration is IUnrecoveredRegistration tracked)

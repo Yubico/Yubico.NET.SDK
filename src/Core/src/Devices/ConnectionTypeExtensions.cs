@@ -27,6 +27,13 @@ internal static class ConnectionTypeExtensions
     public static bool IncludesHidScan(this ConnectionType filter) => (filter & HidGroup) != 0;
 
     /// <summary>Expands the HID group and ignores undefined bits, like discovery result filtering.</summary>
+    /// <example>
+    /// <code>
+    /// ConnectionType.Hid.ToConcreteScope();                             // HidFido | HidOtp
+    /// (ConnectionType.SmartCard | ConnectionType.Hid).ToConcreteScope(); // SmartCard | HidFido | HidOtp
+    /// ((ConnectionType)0x40).ToConcreteScope();                         // Unknown: undefined bits are dropped
+    /// </code>
+    /// </example>
     public static ConnectionType ToConcreteScope(this ConnectionType scope) =>
         (scope & ConcreteConnections) |
         ((scope & ConnectionType.Hid) != 0 ? ConnectionType.HidFido | ConnectionType.HidOtp : ConnectionType.Unknown);
@@ -55,6 +62,13 @@ internal static class ConnectionTypeExtensions
     ///     connect bit; <see cref="ConnectionType.Hid"/> in the filter expands to <c>HidFido|HidOtp</c> and
     ///     <see cref="ConnectionType.All"/> matches any non-empty capability set.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// ConnectionType.Hid.Matches(ConnectionType.HidFido | ConnectionType.SmartCard); // true: FIDO is shared
+    /// ConnectionType.HidOtp.Matches(ConnectionType.SmartCard);                       // false: nothing shared
+    /// ConnectionType.All.Matches(ConnectionType.Unknown);                            // false: empty set
+    /// </code>
+    /// </example>
     public static bool Matches(this ConnectionType filter, ConnectionType available) =>
         (filter.ToConcreteScope() & available & ConcreteConnections) != 0;
 

@@ -85,11 +85,12 @@ public class FindYubiKeysEnumerationBudgetTests
     {
         var pcsc = new PcscEnumerator();
         var hid = new HidEnumerator();
-        var pending = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var pendingPcsc = new TaskCompletionSource<IReadOnlyList<IPcscDevice>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var pendingHid = new TaskCompletionSource<IReadOnlyList<IHidInterface>>(TaskCreationOptions.RunContinuationsAsynchronously);
         if (hangPcsc)
-            pcsc.Pending = pending.Task.ContinueWith(_ => (IReadOnlyList<IPcscDevice>)[], TaskScheduler.Default);
+            pcsc.Pending = pendingPcsc.Task;
         else
-            hid.Pending = pending.Task.ContinueWith(_ => (IReadOnlyList<IHidInterface>)[], TaskScheduler.Default);
+            hid.Pending = pendingHid.Task;
 
         var finder = new FindYubiKeys(pcsc, hid, CreateSlot, enumerationBudget: TimeSpan.Zero);
         IMonitoredDiscovery monitored = finder;
@@ -103,7 +104,8 @@ public class FindYubiKeysEnumerationBudgetTests
             var timeout = await Assert.ThrowsAsync<TimeoutException>(() => scan);
             Assert.Contains("not published", timeout.Message, StringComparison.Ordinal);
 
-            pending.SetResult();
+            pendingPcsc.SetResult([new PcscDevice()]);
+            pendingHid.SetResult([new HidInterface()]);
             pcsc.Pending = null;
             hid.Pending = null;
             var recovered = await monitored.FindAllAsync(TestContext.Current.CancellationToken);
@@ -111,7 +113,8 @@ public class FindYubiKeysEnumerationBudgetTests
         }
         finally
         {
-            pending.TrySetResult();
+            pendingPcsc.TrySetResult([]);
+            pendingHid.TrySetResult([]);
             finder.RetireReadScope();
         }
     }
@@ -148,6 +151,39 @@ public class FindYubiKeysEnumerationBudgetTests
         }
     }
 
+    [Fact]
+    public async Task FindAllAsync_RepeatedTimeouts_ReuseTheOutstandingEnumerationInsteadOfDispatchingAnother()
+    {
+        var pcsc = new PcscEnumerator();
+        var hid = new HidEnumerator();
+        var pending = new TaskCompletionSource<IReadOnlyList<IHidInterface>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        hid.Pending = pending.Task;
+        var finder = new FindYubiKeys(pcsc, hid, CreateSlot, enumerationBudget: TimeSpan.Zero);
+        try
+        {
+            // Three scans time out against the same hung enumeration: one native dispatch, not three.
+            for (var i = 0; i < 3; i++)
+            {
+                var partial = await finder.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken)
+                    .WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+                Assert.Equal(ConnectionType.SmartCard, Assert.Single(partial).AvailableConnections);
+            }
+            Assert.Equal(1, hid.Calls);
+
+            // Once the outstanding enumeration exits, the next scan dispatches afresh.
+            pending.SetResult([new HidInterface()]);
+            hid.Pending = null;
+            var recovered = await finder.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
+            Assert.Equal(2, recovered.Count);
+            Assert.Equal(2, hid.Calls);
+        }
+        finally
+        {
+            pending.TrySetResult([]);
+            finder.RetireReadScope();
+        }
+    }
+
     private static IYubiKeyConnectionSlot CreateSlot(IDevice device) =>
         new UnavailableSlot($"enumeration-budget:{Guid.NewGuid():N}",
             device is IPcscDevice ? ConnectionType.SmartCard : ConnectionType.HidOtp);
@@ -169,9 +205,14 @@ public class FindYubiKeysEnumerationBudgetTests
 
     private sealed class HidEnumerator : IFindHidInterfaces
     {
+        private int _calls;
         internal Task<IReadOnlyList<IHidInterface>>? Pending { get; set; }
-        public Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
-            Pending ?? Task.FromResult<IReadOnlyList<IHidInterface>>([new HidInterface()]);
+        internal int Calls => Volatile.Read(ref _calls);
+        public Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default)
+        {
+            Interlocked.Increment(ref _calls);
+            return Pending ?? Task.FromResult<IReadOnlyList<IHidInterface>>([new HidInterface()]);
+        }
     }
 
     private sealed class PcscDevice : IPcscDevice

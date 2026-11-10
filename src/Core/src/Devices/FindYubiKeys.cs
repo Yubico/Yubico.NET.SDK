@@ -104,6 +104,17 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     // Serializes discovery so two concurrent scans do not open connections to the same interface at once.
     private readonly SemaphoreSlim _scanLock = new(1, 1);
 
+    // One outstanding native enumeration per transport, guarded by _scanLock. A scan that times out leaves
+    // its enumeration here so the next scan waits on the same work instead of dispatching another native
+    // call behind a hung one; repeated timeouts must not accumulate blocked workers.
+    private readonly OutstandingEnumeration<IPcscDevice> _pcscEnumeration = new();
+    private readonly OutstandingEnumeration<IHidInterface> _hidEnumeration = new();
+
+    private sealed class OutstandingEnumeration<T>
+    {
+        internal Task<IReadOnlyList<T>>? Task;
+    }
+
     public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType type = ConnectionType.All,
         CancellationToken cancellationToken = default) =>
@@ -179,10 +190,10 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
         // applies only AFTER merging; it never changes this finder's cache/absence interpretation.
         // Both waits start together so the enumeration stage consumes at most one budget, not two.
         var pcscTask = findPcscService is { } pcsc
-            ? EnumerateBoundedAsync(pcsc.FindAllAsync, "PC/SC", tolerateTimeout, cancellationToken)
+            ? EnumerateBoundedAsync(_pcscEnumeration, pcsc.FindAllAsync, "PC/SC", tolerateTimeout, cancellationToken)
             : Task.FromResult<IReadOnlyList<IPcscDevice>>([]);
         var hidTask = findHidService is { } hid
-            ? EnumerateBoundedAsync(hid.FindAllAsync, "HID", tolerateTimeout, cancellationToken)
+            ? EnumerateBoundedAsync(_hidEnumeration, hid.FindAllAsync, "HID", tolerateTimeout, cancellationToken)
             : Task.FromResult<IReadOnlyList<IHidInterface>>([]);
         await Task.WhenAll(pcscTask, hidTask).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
@@ -190,37 +201,50 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     }
 
     private async Task<IReadOnlyList<T>> EnumerateBoundedAsync<T>(
+        OutstandingEnumeration<T> outstanding,
         Func<CancellationToken, Task<IReadOnlyList<T>>> enumerate,
         string transport,
         bool tolerateTimeout,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var enumeration = enumerate(cancellationToken);
+        var reused = outstanding.Task is { IsCompleted: false };
+        var enumeration = reused ? outstanding.Task! : enumerate(cancellationToken);
+        outstanding.Task = enumeration;
         try
         {
-            return await enumeration.WaitAsync(_enumerationBudget, cancellationToken).ConfigureAwait(false);
+            var result = await enumeration.WaitAsync(_enumerationBudget, cancellationToken).ConfigureAwait(false);
+            outstanding.Task = null;
+            return result;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
+            if (!reused)
+                _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
             throw;
         }
-        catch (TimeoutException) when (tolerateTimeout)
+        catch (OperationCanceledException) when (reused)
         {
-            _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
+            // The reused enumeration honoured an earlier caller's cancellation; nothing is outstanding now.
+            outstanding.Task = null;
+            return await EnumerateBoundedAsync(outstanding, enumerate, transport, tolerateTimeout, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            if (!reused)
+                _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
             cancellationToken.ThrowIfCancellationRequested();
+            if (!tolerateTimeout)
+            {
+                throw new TimeoutException(
+                    $"{transport} interface enumeration exceeded its {_enumerationBudget} budget; the scan was not published.");
+            }
+
             Logger.LogWarning(
                 "{Transport} interface enumeration exceeded its {Budget} budget; continuing without its interfaces this scan.",
                 transport, _enumerationBudget);
             return [];
-        }
-        catch (TimeoutException)
-        {
-            _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
-            cancellationToken.ThrowIfCancellationRequested();
-            throw new TimeoutException(
-                $"{transport} interface enumeration exceeded its {_enumerationBudget} budget; the scan was not published.");
         }
     }
 

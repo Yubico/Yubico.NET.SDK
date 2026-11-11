@@ -125,7 +125,7 @@ limitations under the License. -->
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.2" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.403">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="11.0.100">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

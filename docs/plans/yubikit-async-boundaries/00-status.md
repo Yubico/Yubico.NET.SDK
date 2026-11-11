@@ -1,6 +1,173 @@
 # Status: YubiKit async boundaries
 
-## Current checkpoint — 2026-09-27
+## Current checkpoint — Linux execution resumed 2026-11-11
+
+The user approved the Linux implementation sequence and pseudocode, with one
+orchestrator and fresh GPT-6.1 Sol implementation contexts per slice. The isolated
+branch is `yubikit-linux-async`, based on freshly fetched `origin/yubikit` at
+`3de42bb54c5e8c986364f0f04398d4e85a66a596`. Production acceptance remains **19/72**;
+authorizing and starting Linux work does not establish any new criterion.
+
+| Slice | Scope | State |
+|---|---|---|
+| L0 | Untouched-source baseline and responsiveness sensitivity probes | Implemented; specification and quality reviews passed; 65 focused tests |
+| L1 | Exact libc ABI, descriptor ownership, report seam and checked close | Implemented; both reviews passed after restoring direct caller-length compatibility; 63 slice tests |
+| L2 | Nonblocking input, poll/eventfd registration and deregistration acknowledgment | Implemented; both reviews passed after explicit two-phase registration cleanup; 239 combined Linux/inventory and 130 resilience tests |
+| L3 | Linux FIDO native lifetime and synchronous IO facade | Implemented; both reviews passed after worker-failure cleanup correction; 45 owner and 363 combined tests |
+| L4 | Linux OTP native lifetime and synchronous feature facade | Implemented; both reviews passed; 36 OTP and 375 combined tests |
+| L5 | Built-in factory and discovery ownership transfer before native open | Implemented; both reviews passed; 36 routing and 839 regression tests |
+| L6a | Managed public journeys, PC/SC release gaps and required registries | Implemented; both reviews passed after strengthening synchronous-disposal sensitivity; 43 adapter rows/76 profiles, 24 public-sync entries |
+| L6b | Linux native/AOT execution, selected-key routes and measurement | Implemented and reviewed; 38 native + 43 physical checks per runtime passed on serial 103; operator scenarios and full metrics/budgets remain pending |
+
+### Selected-key read-only hardware checkpoint — 2026-11-11
+
+After the user released HID from VM passthrough, capture `20261111T115147Z`
+completed with **exit 0**, using the existing source-bound JIT/AOT artifacts without
+source changes, republish, hardware retries or host remediation. An independent
+fresh-context evidence review accepted this bounded read-only checkpoint after
+checking raw result contracts, source/package/artifact binding and evidence hashes.
+
+Both runtimes independently selected the same unique key, **serial 103**, exposing
+FIDO HID, OTP HID and SmartCard. Per runtime, **43 physical named checks** passed:
+typed FIDO 12, typed OTP 9, public raw CTAP 3, direct I/O 9, direct feature 9 and
+PC/SC 1 aggregate check. The PC/SC aggregate covers three full
+open/begin/select/read/end/dispose cycles and two reopens. Typed FIDO and direct
+I/O include pending-read disposal/wake and successful reopen. Management reports
+firmware **5.8.0**; FIDO reports **0.0.1** on this development fixture. These
+observations remain distinct rather than normalized.
+
+The capture also reran **38 native checks per runtime**, two enumeration checks
+and all four exact intended negative controls: **20 child runs / 164 positive
+named checks**, no watchdog expiry. The **16** provenance/gate tests passed.
+SOURCEHASH and the published artifacts remain unchanged from the earlier native
+checkpoint. Detailed counts, timings, descriptor-query results and hashes are in
+[native acceptance](../../research/linux-native-acceptance.md) and its tracked
+derived JSON. No device configuration, credentials or PINs were changed.
+
+The earlier `usbfs` blockage below is historical, not the current hardware status.
+Touch, active cancellation and physical removal/replug still require separate
+operator coordination. Hosted CI, isolated device-native telemetry, pre-change
+hardware comparison and approved budgets remain unestablished. This selected-key
+checkpoint does not advance global ISC checkmarks or claim full Linux/epic closure.
+
+### PR preparation — 2026-11-11
+
+The branch is prepared locally as runtime/test commit `f32848f62`, public/native
+verification commit `adf3a9115`, and the following documentation/evidence increment.
+The target remains `yubikit`; no push or PR creation has been performed.
+
+Final-code capture `20261111T123927Z` passed after publishing recorded HEAD
+`adf3a911582c3664f3c02c13a3eb668706b9471b`: **38 native + 43 physical checks per
+runtime**, **164 positive named checks / 20 child runs**, four exact intended
+negative outcomes and no watchdog expiry. Serial 103 again passed all six
+read-only physical modes under JIT/AOT. All 16 evidence/provenance tests passed;
+an independent review rechecked the 1,447 source inputs, 223 published artifacts,
+17 package trees and 44 raw-file hash entries. SOURCEHASH is
+`d5bb1304912aff955f41c759cfa10447c910296698174ad44522dfb896eaa4dc`.
+This supersedes earlier captures for final-code PR preparation without relabeling
+them. The following documentation-only commit changes HEAD but not these captured
+source bytes; this recorded capture does not attest that future HEAD. See the
+[current PR-preparation evidence](../../research/linux-native-acceptance.md).
+
+A fresh all-edited-file format check corrected the managed libc wrapper names to
+PascalCase and applied scoped configured styles, without changing native export
+names. Independent semantics review caught a formatter-generated underscore
+parameter/discard collision in the standalone verifier; its three assignment
+prefixes were removed and registered JIT/AOT publish was verified red-to-green.
+The solution build alone does not compile that standalone host. Default-severity
+scoped format verification passes for all 46 solution and nine host C# documents;
+unsupported info-level suggestions were not suppressed or promoted to passing.
+
+An independent whole-change review approved software integration. The fresh
+repository gate passed: **4,078 executed, 0 failed, 5 skipped, zero warnings**,
+with full-solution build, docs QA, Native AOT contract QA and all **183** assessed
+shipping methods within complexity thresholds. Command:
+`dotnet toolchain.cs build test docs-qa native-aot-contract-qa complexity`;
+run `20261111-133305-894-build+test+docs-qa+native-aot-contract-qa+complexity`.
+The whole-branch complexity gate against `3de42bb54` also passed
+(`20261111-133901-172-complexity`). The earlier gate assessed 172 methods before
+the final scoped style changes; it remains historical evidence, not the current
+method count.
+
+An earlier full-unit run executed **4,078 tests, with 2 failures and 5 skips**, zero
+warnings (`20261111-045245-028-test`). Both later passed without retained fixes;
+passing again is not a claim that either intermittent failure was repaired.
+The Core PC/SC finalizer test reproduced alone: its isolated child exceeded the
+30-second watchdog. Its production PC/SC path and finalizer probe are unchanged
+from `3de42bb54`; an untouched-baseline runtime reproduction and conclusive root
+cause were not established. Temporary diagnostics were removed. The PIV
+`RecoverPinOnlyModeAsync_UnexpectedDerivedAuthenticationFailure_PropagatesWithoutRestoration`
+case reproduced on the untouched `3de42bb54` baseline: its assertion reads a
+pooled authentication-command buffer after production cleared and returned it,
+so legal pool reuse can invalidate that delayed observation. A controlled
+same-array re-rental demonstrated the test's use-after-return; no production PIV
+zeroing defect or Linux-induced PIV regression was established. Baseline diagnostic
+edits were removed. This initial failed suite is not reported as passing.
+
+The bound L6b evidence and its remaining gaps are recorded in
+[native acceptance](../../research/linux-native-acceptance.md) and its tracked
+derived JSON. The CI gate checks actual runtime identity and named native checks;
+capture rejects changed inputs or artifacts against the publish-time manifest
+before starting discovery/device execution. The earlier unbound capture was
+superseded. The earlier capture found zero keys with YubiKey interfaces on
+`usbfs`; the selected-key checkpoint above supersedes that hardware status.
+Source-bound synthetic native evidence alone does not satisfy physical hidraw,
+touch/removal, device-native measurement, hosted-CI or global-budget acceptance.
+
+The native verifier was republished after the final repository gate because the
+full-solution restore changed the evaluated dependency closure. The provenance
+gate correctly rejected that drift; it was not weakened. Final bound capture
+`20261111T040627Z` again passed **38 JIT + 38 AOT** checks and all four intended
+negative controls; **16** evidence/provenance tests passed. Source hash remains
+`36b75d0310e6ae896975189f8be0138ba8ae48a52127474029de22d577d278aa`.
+That earlier capture exited **2** solely for unavailable hardware; the later
+selected-key capture exited **0** as recorded above. PR preparation includes a
+fresh publish/capture of the final runtime source; older capture hashes continue
+to identify their original source, not a relabeled post-format build. No hosted
+green, unexecuted operator acceptance or global ISC advancement is claimed.
+
+Each slice has a separate specification review followed by a code-quality/lifetime
+review. The orchestrator resolves shared contracts and owns master acceptance;
+implementers return exact changed files, nonzero test counts, warnings, native/AOT/
+hardware evidence and unresolved findings. Reviewers inspect source rather than
+promoting implementation summaries into acceptance. Fixes return to the slice's
+implementer before the next fresh implementation context begins.
+
+The native ABI review established that libc file descriptors require native `int`
+signatures, with managed SafeHandle lifetime wrappers; the default pointer-sized
+SafeHandle return marshaller is not the ABI of `open` or `eventfd`. Descriptor zero
+is valid. Read/write lengths and returns require `size_t`/`ssize_t`, and poll's count
+requires `nfds_t`. Linux close diagnostics must remain separate from release proof:
+never retry a close against a descriptor that Linux may already have reused.
+Readiness is not output completion: hidraw reports writable readiness while output
+can enter blocking driver operations. Input registration retains its handle until
+acknowledgment; output, feature ioctls and checked close use the connection worker.
+
+The accepted L2 handoff separates registration `Activation`, actual nonfaulting
+`Quiescence`, removal/wake error reporting, and synchronous owner-worker
+`ReleaseReference`. Every published admission returns its token. A failed wake
+cannot masquerade as drain; late real quiescence remains observable. No
+per-registration or per-run thread-pool cleanup job remains. Private eventfd
+retirement is source-classified local cleanup; device close remains on the
+connection worker. Detailed bounded evidence is in the [L0 baseline](../../research/linux-async-boundaries-baseline.md),
+[L1 native seam](../../research/linux-native-report-access.md), and
+[L2 reactor](../../research/linux-read-reactor.md). These uncommitted implementation
+checkpoints each passed a full-solution zero-warning build; they add no global ISC
+checkmark or hardware/AOT acceptance claim.
+
+The initial host observation was Linux x64 with libc, libudev and libpcsclite
+present, but YubiKey interfaces bound to `usbfs` and no Yubico hidraw nodes.
+L0 subsequently observed `usbhid` and Yubico hidraw nodes again. Access and selected
+device identity must be rechecked before hardware execution. No driver rebinding,
+process termination or device mutation was performed by these slices.
+
+The September records below are historical. The current branch pins NativeShims
+**1.18.1**, has a three-platform Native AOT publish/startup workflow, and names the
+CTAP module **Ctap2**. These changes do not establish Linux report-path acceptance.
+Linux execution is now authorized; the earlier Linux user-deferral is superseded.
+The accepted local macOS milestone remains the reference lifecycle evidence.
+
+## Historical checkpoint — 2026-09-27
 
 ### Authorized delivery — 2026-09-27
 

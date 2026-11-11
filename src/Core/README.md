@@ -220,7 +220,7 @@ even if a new session could otherwise borrow it. See [raw access tiers](../../do
 Direct connection calls are an expert escape hatch. They bypass session and protocol exchange guards;
 do not interleave them with a session or retry on the same connection after an interrupted exchange.
 Keep caller-owned input unchanged until the returned task finishes, then clear sensitive buffers.
-Built-in macOS HID sends copy reports before native dispatch; custom connections need not. Async method
+Built-in macOS/Linux HID sends copy reports before native dispatch; custom connections need not. Async method
 names do not guarantee caller-thread responsiveness or an immediate native cancellation.
 
 ```csharp
@@ -284,9 +284,111 @@ The built-in macOS FIDO connection opens asynchronously, initializes its channel
 awaited operation, and receives input through a persistent native owner. Blocking output
 and checked shutdown run on connection-owned execution; an unconfirmed native close retains
 the physical claim. This does not make the public lower-level `IHidConnection` interface
-asynchronous or establish the same execution and drain behavior on Windows or Linux. See
+asynchronous or establish the same execution and drain behavior on Windows/custom HID. Linux uses
+its separate owners described below. See
 [retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
 before using direct report access.
+
+Public direct Linux HID access remains synchronous: reads and feature ioctls can block their caller.
+The internal report-access boundary preserves caller-length IO and feature SET payloads within
+native bounds; IO metadata/read capacity follows supported bounded unnumbered descriptors.
+The separate internal FIDO and OTP owners enforce typed64 and typed8 at Send/Receive respectively.
+Feature GET retains its 8-byte payload.
+Native report-ID framing is hidden, and short output/feature
+transfers fail instead of returning padded data or retrying a suffix. The report seam itself is
+synchronous; migrated internal FIDO and OTP lifetimes supply separate asynchronous ownership.
+No-hardware Linux ABI/framing tests can be run with:
+
+```bash
+dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~Linux"
+```
+
+Fake-backed contract tests run on every host; libc-specific cases run only on Linux and exercise
+glibc (`libc.so.6`), not physical YubiKeys. See [source evidence and limits](../../docs/research/linux-native-report-access.md).
+
+An independent internal read reactor now supplies generation-aware readiness tokens with separate
+activation outcome and actual quiescence. The existing native owner worker explicitly releases
+the retained reference after quiescence; no cleanup jobs are scheduled. Private eventfd retirement
+stays serialized on the poller, including admissions arriving during cleanup. The direct Linux IO
+facade now uses this reactor and one dedicated native owner worker. Its public constructor/Get/Set
+still wait synchronously; input waits indefinitely until data or terminal failure, with EOF now
+reported as terminal rather than an empty successful report. Descriptor sizes and arbitrary supported
+SET lengths remain available. Prefer asynchronous disposal, which awaits native output, real reactor
+drain and checked close without a per-disposal Task.Run.
+Its no-hardware tests are included by the Linux filter; see [L2 contract and limitations](../../docs/research/linux-read-reactor.md).
+
+The internal `LinuxFidoHidConnection` supplies the built-in typed Linux FIDO path, providing
+asynchronous open/send/receive/disposal against native/report and reactor seams. Public
+`ConnectAsync<IFidoHidConnection>` and discovery now select it directly, not the synchronous report adapter.
+The owner retains any supplied physical claim until native release is proven, and failed release
+retains/quarantines that original claim. Pending read cancellation keeps native input running;
+output cancellation after dispatch does not complete before the native call returns. See the
+[L3 handoff](../../docs/research/linux-fido-async-lifetime.md) for precise lifetime bounds and tests.
+An unexpected FIDO owner-worker failure terminalizes pending operations and stops new admissions;
+the original worker still attempts safe checked cleanup. Disposal preserves the initial failure
+even when native release succeeds, and unproven release still retains/quarantines ownership.
+
+The internal `LinuxOtpHidConnection` now supplies asynchronous open/send/receive/disposal over the
+feature-report seam, without using the read reactor or FIDO owner. Its one native worker drains an
+admitted GET/SET before close; cancellation after submission cannot detach the call, impose a timeout,
+or promise native abort. Output is copied and cleared before task completion; failed input is cleared.
+The synchronous `LinuxHidFeatureReportConnection` facade uses this same owner, preserving GET8,
+metadata8 and arbitrary supported direct SET lengths. Checked-close claim handling, worker-failure
+cleanup and nonblocking finalization have the same release-proof discipline as FIDO, not shared code.
+Public `ConnectAsync<IOtpHidConnection>` and discovery now select this owner directly too.
+For no-hardware owner and protocol recovery tests, run:
+
+```bash
+dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~LinuxOtp"
+```
+
+See [L4 lifetime and L5 handoff](../../docs/research/linux-otp-async-lifetime.md) for precise guarantees
+and remaining hardware/native limits. These internal seams are not new public creation APIs.
+
+Both typed Linux paths claim all known interfaces of the physical key **before** native open.
+Discovery transfers its selected interface lease into the same native owner, including through a
+published composite. A discovery timeout ends only the caller's wait: public reconnect is refused
+until actual native cleanup proves release. Disposal can report a Linux EINTR/EIO close diagnostic
+after safely releasing the claim; unknown release instead retains/quarantines it and subsequent opens
+throw `UnrecoveredConnectionException`. A pending open/close can remain pending indefinitely if native
+work does not return. No timeout or transport fallback manufactures release.
+
+Use the existing typed API and dispose connections explicitly; raw sessions borrow and may be reused
+sequentially on the same connection:
+
+```csharp
+await using var fido = await device.ConnectAsync<IFidoHidConnection>(cancellationToken);
+await using (var raw = await RawCtapHidSession.CreateAsync(fido, cancellationToken))
+{
+    // CTAP HID initialization is lazy, on the first raw exchange.
+}
+await using var next = await RawCtapHidSession.CreateAsync(fido, cancellationToken);
+```
+
+Run the public factory/discovery/raw-session seam tests with:
+
+```bash
+dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~LinuxHidRoutingTests"
+```
+
+These are fake-native tests, not hardware, native-AOT, or Ctap2/applet acceptance.
+See [L5 routing contract and L6 handoff](../../docs/research/linux-hid-routing.md).
+
+L6a adds bounded **managed** acceptance: actual Linux slots/owners under fake native seams support public
+CTAP2 creation/GetInfo, keepalive cancellation/reuse, owned-session terminal drain/claim retention, and
+YubiOTP creation/status/serial, touch cancellation/recovery and CRC-owned presence outcomes. Direct Linux
+synchronous facades are now included in the independent public reachability and adapter-link registries.
+Run the applet journeys without hardware:
+
+```bash
+dotnet toolchain.cs -- test --project Ctap2 --filter "FullyQualifiedName~Ctap2SessionLinuxCrossLayerTests"
+dotnet toolchain.cs -- test --project YubiOtp --filter "FullyQualifiedName~YubiOtpSessionLinuxCrossLayerTests"
+```
+
+PC/SC portable managed tests additionally hold disconnect and context release before allowing the public
+claim to reopen, and check live release failures remain quarantined. No production PC/SC code changed.
+These tests do not attest Linux drivers, native AOT, hardware timing or whole-platform readiness; see
+[L6a evidence and limits](../../docs/research/linux-managed-acceptance.md).
 
 ### Use a secure channel
 
@@ -400,7 +502,7 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
   does not immediately abort the native device protocol. Built-in macOS OTP calls already active at cancellation
   may finish successfully. Do not assume cancellation releases native resources early; await the operation and
   connection disposal. Other HID implementations may have different cancellation behavior.
-- Built-in SmartCard and macOS HID owners retain their physical-interface claim if native release cannot
+- Built-in SmartCard and macOS/Linux HID owners retain their physical-interface claim if native release cannot
   be proven; a later managed open throws `UnrecoveredConnectionException` rather than treating the key
   as ordinarily busy. Custom connections do not inherit those native-release guarantees.
 - `ProtocolFactory` and the `IProtocol` family are internal. Use `Raw*Session.CreateAsync(connection)`.

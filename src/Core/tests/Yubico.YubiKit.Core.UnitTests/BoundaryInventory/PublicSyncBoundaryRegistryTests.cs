@@ -6,8 +6,25 @@ public class PublicSyncBoundaryRegistryTests
     public void Supported_synchronous_entries_resolve_to_public_contracts_and_scoped_owners()
     {
         var rows = PublicSyncBoundaryRegistry.Rows;
-        Assert.Equal(16, rows.Length);
+        Assert.Equal(24, rows.Length);
         Assert.Empty(PublicSyncBoundaryRegistry.Validate(rows));
+    }
+
+    [Theory]
+    [InlineData("linux input open")]
+    [InlineData("linux input get")]
+    [InlineData("linux input set")]
+    [InlineData("linux input dispose")]
+    [InlineData("linux feature open")]
+    [InlineData("linux feature get")]
+    [InlineData("linux feature set")]
+    [InlineData("linux feature dispose")]
+    public void Removing_Linux_public_reachability_fails_closed(string entry)
+    {
+        var rows = PublicSyncBoundaryRegistry.Rows;
+        Assert.Single(rows, row => row.Entry == entry);
+        Assert.Contains($"missing entry: {entry} (found 0)",
+            PublicSyncBoundaryRegistry.Validate(rows.Where(row => row.Entry != entry)));
     }
 
     [Fact]

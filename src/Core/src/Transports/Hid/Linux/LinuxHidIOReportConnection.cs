@@ -12,13 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Native;
-using Yubico.YubiKit.Core.Native.Linux.Libc;
-using Yubico.YubiKit.Core.Transports.Hid;
-using LibcNativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 
@@ -28,217 +23,56 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 [SupportedOSPlatform("linux")]
 internal sealed class LinuxHidIOReportConnection : IHidConnection
 {
-    private const int FidoReportSize = 64;
+    private readonly LinuxFidoHidNativeOwner _owner;
 
-    private readonly string _devNode;
-    private readonly LinuxFileSafeHandle _handle;
-    private bool _disposed;
-
-    public LinuxHidIOReportConnection(string devNode)
+    public LinuxHidIOReportConnection(string devNode) : this(devNode, LinuxHidReportApi.Instance)
     {
-        _devNode = devNode;
-
-        _handle = LibcNativeMethods.open(devNode, LibcNativeMethods.OpenFlags.O_RDWR);
-        if (_handle.IsInvalid)
-        {
-            int errorCode = Marshal.GetLastPInvokeError();
-            throw new PlatformApiException(
-                nameof(LibcNativeMethods.open),
-                errorCode,
-                $"Failed to open HID device: {devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
-        }
-
-        // Get the report sizes from the HID descriptor
-        (InputReportSize, OutputReportSize) = GetReportSizes();
     }
 
-    public int InputReportSize { get; }
-    public int OutputReportSize { get; }
+    internal LinuxHidIOReportConnection(string devNode, ILinuxHidReportApi api)
+        : this(devNode, api, LinuxHidReadReactor.Shared)
+    {
+    }
+
+    internal LinuxHidIOReportConnection(string devNode, ILinuxHidReportApi api, ILinuxHidReadReactor reactor) =>
+        _owner = LinuxFidoHidNativeOwner.OpenAsync(devNode, api, reactor, CancellationToken.None).GetAwaiter().GetResult();
+
+    public int InputReportSize => _owner.InputReportSize;
+    public int OutputReportSize => _owner.OutputReportSize;
 
     public byte[] GetReport()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        var buffer = new byte[InputReportSize];
-        int bytesRead = LibcNativeMethods.read(_handle, buffer, buffer.Length);
-
-        if (bytesRead < 0)
-        {
-            int errorCode = Marshal.GetLastPInvokeError();
-            throw new PlatformApiException(
-                nameof(LibcNativeMethods.read),
-                errorCode,
-                $"Failed to read from HID device: {_devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
-        }
-
-        // Return only the bytes actually read
-        if (bytesRead < buffer.Length)
-        {
-            var result = new byte[bytesRead];
-            Array.Copy(buffer, result, bytesRead);
-            return result;
-        }
-
-        return buffer;
+        // Deliberately indefinite, as the original Linux blocking hidraw read. No macOS timeout.
+        // Raw descriptor-sized reports are not restricted to typed FIDO64.
+        var report = _owner.ReceiveAsync(false, CancellationToken.None).GetAwaiter().GetResult();
+        // Native owner returns an owned exact-length array; transfer it without another copy.
+        return System.Runtime.InteropServices.MemoryMarshal.TryGetArray(report, out var segment) && segment.Array is { } array
+            ? array
+            : throw new InvalidOperationException("Linux HID owner did not return an owned report.");
     }
 
     public void SetReport(byte[] report)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(report);
-
-        // On Linux hidraw, we need to prepend the report ID (0x00) before writing
-        // See: https://www.kernel.org/doc/Documentation/hid/hidraw.txt
-        var reportWithId = new byte[report.Length + 1];
-        reportWithId[0] = 0x00; // Report ID
-        report.AsSpan().CopyTo(reportWithId.AsSpan(1));
-
-        int bytesWritten = LibcNativeMethods.write(_handle, reportWithId, reportWithId.Length);
-
-        if (bytesWritten < 0)
-        {
-            int errorCode = Marshal.GetLastPInvokeError();
-            throw new PlatformApiException(
-                nameof(LibcNativeMethods.write),
-                errorCode,
-                $"Failed to write to HID device: {_devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
-        }
-
-        if (bytesWritten != reportWithId.Length)
-        {
-            throw new PlatformApiException(
-                nameof(LibcNativeMethods.write),
-                0,
-                $"Incomplete write to HID device: {_devNode}. Expected {reportWithId.Length} bytes, wrote {bytesWritten}.");
-        }
+        _owner.SendAsync(report, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     public void Dispose()
     {
-        Dispose(true);
+        _owner.Dispose();
         GC.SuppressFinalize(this);
     }
 
-    public ValueTask DisposeAsync() =>
-        _disposed
-            ? ValueTask.CompletedTask
-            : new ValueTask(Task.Run(Dispose));
+    public async ValueTask DisposeAsync()
+    {
+        await _owner.ShutdownAsync().ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
 
     public ConnectionType Type { get; } = ConnectionType.Hid;
 
-    private (int InputSize, int OutputSize) GetReportSizes()
-    {
-        // Try to get report sizes from HID descriptor
-        var descSizePtr = Marshal.AllocHGlobal(LibcNativeMethods.DescriptorSizeSize);
-        try
-        {
-            int result = LibcNativeMethods.ioctl(_handle, LibcNativeMethods.HIDIOCGRDESCSIZE, descSizePtr);
-            if (result < 0)
-            {
-                // Fall back to FIDO standard size
-                return (FidoReportSize, FidoReportSize);
-            }
+    internal static (int InputSize, int OutputSize) ParseReportSizes(ReadOnlySpan<byte> descriptor) =>
+        LinuxHidReportSizes.Parse(descriptor);
 
-            int descSize = Marshal.ReadInt32(descSizePtr);
-            if (descSize <= 0 || descSize > LibcNativeMethods.DescriptorSize - LibcNativeMethods.OffsetDescValue)
-            {
-                return (FidoReportSize, FidoReportSize);
-            }
-
-            var descPtr = Marshal.AllocHGlobal(LibcNativeMethods.DescriptorSize);
-            try
-            {
-                Marshal.WriteInt32(descPtr, descSize);
-                result = LibcNativeMethods.ioctl(_handle, LibcNativeMethods.HIDIOCGRDESC, descPtr);
-                if (result < 0)
-                {
-                    return (FidoReportSize, FidoReportSize);
-                }
-
-                var descriptor = new byte[descSize];
-                Marshal.Copy(descPtr + LibcNativeMethods.OffsetDescValue, descriptor, 0, descSize);
-
-                return ParseReportSizes(descriptor);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(descPtr);
-            }
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(descSizePtr);
-        }
-    }
-
-    internal static (int InputSize, int OutputSize) ParseReportSizes(ReadOnlySpan<byte> descriptor)
-    {
-        // Parse HID descriptor for report sizes
-        // Looking for Input and Output main items with their associated Report Size and Report Count
-
-        int inputSize = FidoReportSize;
-        int outputSize = FidoReportSize;
-        int currentReportSize = 0;
-        int currentReportCount = 0;
-
-        int position = 0;
-        while (HidReportDescriptorReader.TryReadItem(descriptor, ref position, out HidReportItem item))
-        {
-            // Global items
-            if (item.Type == HidReportDescriptorReader.TypeGlobal)
-            {
-                switch (item.Tag)
-                {
-                    case 7: // Report Size
-                        currentReportSize = (int)item.Value;
-                        break;
-                    case 9: // Report Count
-                        currentReportCount = (int)item.Value;
-                        break;
-                }
-            }
-            // Main items
-            else if (item.Type == HidReportDescriptorReader.TypeMain)
-            {
-                int reportBytes = (currentReportSize * currentReportCount + 7) / 8;
-                switch (item.Tag)
-                {
-                    case 8: // Input
-                        if (reportBytes > 0)
-                        {
-                            inputSize = reportBytes;
-                        }
-                        break;
-                    case 9: // Output
-                        if (reportBytes > 0)
-                        {
-                            outputSize = reportBytes;
-                        }
-                        break;
-                }
-            }
-        }
-
-        return (inputSize, outputSize);
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        if (disposing)
-        {
-            _handle.Dispose();
-        }
-
-        _disposed = true;
-    }
-
-    ~LinuxHidIOReportConnection()
-    {
-        Dispose(false);
-    }
+    ~LinuxHidIOReportConnection() => _owner?.RequestShutdown();
 }

@@ -1,4 +1,47 @@
 [
+  { "route": "Linux HID FIDO", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "symbol": "OpenAsync", "profiles": [
+    { "role": "pending", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.Open_ReturnsInvocationWhileNativeIsHeld" },
+    { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.MetadataFailure_PreservesOriginalAndCloseFailure" },
+    { "role": "cancel before", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.PreCancelledOpenAndSend_EnterNoNativeMutation" }
+  ] },
+  { "route": "Linux HID FIDO", "operation": "send", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "symbol": "SendAsync", "profiles": [
+    { "role": "native drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.HeldWrite_CancellationAndDisposalDoNotReleaseOrBorrowAfterCompletion" },
+    { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.FailedWrite_IsNotReplayedAndCanBeSafelyDrained" }
+  ] },
+  { "route": "Linux HID FIDO", "operation": "receive", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "symbol": "ReceiveAsync", "profiles": [
+    { "role": "terminal", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.Disposal_PublicReadTaskIsTerminalBeforeSyncOrAsyncReturn" },
+    { "role": "cancel detach", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.CancelledReader_DetachesOnlyItselfAndLateInputReachesSuccessor" }
+  ] },
+  { "route": "Linux HID FIDO", "operation": "dispose", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "symbol": "DisposeAsync", "profiles": [
+    { "role": "claim drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.HeldCheckedClose_DisposeInvocationReturnsAndClaimWaitsForNativeResult" },
+    { "role": "quiescence", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.Quiescence_NotWakeOutcome_GovernsExactClaimRelease" },
+    { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.CloseEvidence_ReleasesDespiteDiagnosticButNotUnknownOwnership" }
+  ] },
+  { "route": "Linux HID OTP", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxOtpHidConnection", "symbol": "OpenAsync", "profiles": [
+    { "role": "cancel before", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.PreCanceledOpen_AcquiresNoDescriptorAndReleasesClaim" },
+    { "role": "pending", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.HeldNativeCall_ReturnsPendingTaskAndDrainsBeforeRelease" },
+    { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.FailedOpenWithoutDescriptor_ReleasesClaimWithoutNativeClose" }
+  ] },
+  { "route": "Linux HID OTP", "operation": "send", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxOtpHidConnection", "symbol": "SendAsync", "profiles": [
+    { "role": "owned output", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.OwnedSend_IsolatedFromCallerAndClearedBeforeSuccessOrFailure" },
+    { "role": "submitted cancellation", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.SubmittedCancellation_DoesNotDetachOrPermitOverlapAndDisposalWaits" }
+  ] },
+  { "route": "Linux HID OTP", "operation": "receive", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxOtpHidConnection", "symbol": "ReceiveAsync", "profiles": [
+    { "role": "failure cleanup", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.FailedGet_ClearsPartialOwnedReportBeforeTaskFaults" },
+    { "role": "cancel before", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.CancelBeforeDispatch_SubmitsNoFeatureCall" }
+  ] },
+  { "route": "Linux HID OTP", "operation": "dispose", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxOtpHidConnection", "symbol": "DisposeAsync", "profiles": [
+    { "role": "claim drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.HeldCheckedClose_ReturnsPendingDisposalTaskAndRetainsClaim" },
+    { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.CheckedClose_SharesOutcomeAndReleasesOnlyWithProof" }
+  ] },
+  { "route": "Linux direct input (sync)", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "symbol": ".ctor", "profiles": [ { "role": "partial open failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxDirectFacadeAcceptanceTests.InputOpen_MetadataFailureClosesPartialOwner" } ] },
+  { "route": "Linux direct input (sync)", "operation": "get", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "symbol": "GetReport", "profiles": [ { "role": "descriptor sized input", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.DirectFacade_DescriptorSizesAndArbitraryOutputLengthSurviveSharedOwner" } ] },
+  { "route": "Linux direct input (sync)", "operation": "set", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "symbol": "SetReport", "profiles": [ { "role": "native drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxDirectFacadeAcceptanceTests.InputSet_HeldWriteBlocksSyncCallerAndDrainsBeforeClose" } ] },
+  { "route": "Linux direct input (sync)", "operation": "dispose", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "symbol": "Dispose", "profiles": [ { "role": "quiescence drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxDirectFacadeAcceptanceTests.InputDispose_HeldQuiescenceBlocksSyncDisposeAndSharesCheckedClose" } ] },
+  { "route": "Linux direct feature (sync)", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "symbol": ".ctor", "profiles": [ { "role": "open failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxDirectFacadeAcceptanceTests.FeatureOpen_FailurePreservesOriginalWithoutClosingUnacquiredDescriptor" } ] },
+  { "route": "Linux direct feature (sync)", "operation": "get", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "symbol": "GetReport", "profiles": [ { "role": "fixed input metadata", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxOtpHidConnectionTests.DirectFeatureFacade_PreservesNonEightSetLengthAndFixedGetMetadata" } ] },
+  { "route": "Linux direct feature (sync)", "operation": "set", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "symbol": "SetReport", "profiles": [ { "role": "native drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxDirectFacadeAcceptanceTests.FeatureSet_HeldIoctlBlocksSyncCallerAndPreservesExpertLength" } ] },
+  { "route": "Linux direct feature (sync)", "operation": "dispose", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "symbol": "Dispose", "profiles": [ { "role": "shared close", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxDirectFacadeAcceptanceTests.FeatureDispose_HeldCloseBlocksSyncDisposeAndSharesOutcome" } ] },
   { "route": "macOS FIDO", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSFidoHidConnection", "symbol": "OpenAsync", "profiles": [ { "role": "pending", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.MacOSHidFidoRouteLifetimeTests.OpenDoesNotBlockCallerAndReceivesReportsWithoutPumping" }, { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.MacOSHidFidoRouteLifetimeTests.FailedOpenBeforeNativeOwnershipReleasesDeviceAndClaim" }, { "role": "cancel before", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.MacOSHidFidoRouteLifetimeTests.CancelledBeforeWorkerDispatchMakesNoNativeCall" } ] },
   { "route": "macOS FIDO", "operation": "send", "owner": "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSFidoHidConnection", "symbol": "SendAsync", "profiles": [ { "role": "overlap", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.MacOSHidFidoRouteLifetimeTests.ReceiveAndSendOverlapIsRefusedWithoutASecondSubmission" }, { "role": "drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.MacOSHidFidoRouteLifetimeTests.HeldOutputDelaysSynchronousDisposalAndRetainsBorrowUntilNativeReturn" } ] },
   { "route": "macOS FIDO", "operation": "receive", "owner": "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSFidoHidConnection", "symbol": "ReceiveAsync", "profiles": [ { "role": "terminal", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.MacOSHidFidoRouteLifetimeTests.NativeTerminalWakesPendingReceiveAndLateOldReportCannotCrossOwners" } ] },

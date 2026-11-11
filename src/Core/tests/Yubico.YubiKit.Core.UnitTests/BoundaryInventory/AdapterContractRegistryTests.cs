@@ -14,8 +14,8 @@ public class AdapterContractRegistryTests
     public void Migrated_routes_have_resolved_nonempty_contract_profiles()
     {
         var rows = Load();
-        Assert.Equal(27, rows.Length);
-        Assert.Equal(49, rows.Sum(row => row.Profiles.Length));
+        Assert.Equal(43, rows.Length);
+        Assert.Equal(76, rows.Sum(row => row.Profiles.Length));
         Assert.Empty(AdapterContractRegistry.Validate(rows));
         Assert.Equal(4, rows.Count(row => row.Route == "macOS FIDO"));
         Assert.Equal(4, rows.Count(row => row.Route == "macOS OTP"));
@@ -24,6 +24,42 @@ public class AdapterContractRegistryTests
         Assert.Equal(4, rows.Count(row => row.Route == "macOS direct feature (sync)"));
         Assert.Equal(2, rows.Count(row => row.Route == "macOS listener (sync)"));
         Assert.Equal(4, rows.Count(row => row.Route == "portable PCSC (sync)"));
+    }
+
+    [Theory]
+    [InlineData("Linux HID FIDO", "open")]
+    [InlineData("Linux HID FIDO", "send")]
+    [InlineData("Linux HID FIDO", "receive")]
+    [InlineData("Linux HID FIDO", "dispose")]
+    [InlineData("Linux HID OTP", "open")]
+    [InlineData("Linux HID OTP", "send")]
+    [InlineData("Linux HID OTP", "receive")]
+    [InlineData("Linux HID OTP", "dispose")]
+    [InlineData("Linux direct input (sync)", "open")]
+    [InlineData("Linux direct input (sync)", "get")]
+    [InlineData("Linux direct input (sync)", "set")]
+    [InlineData("Linux direct input (sync)", "dispose")]
+    [InlineData("Linux direct feature (sync)", "open")]
+    [InlineData("Linux direct feature (sync)", "get")]
+    [InlineData("Linux direct feature (sync)", "set")]
+    [InlineData("Linux direct feature (sync)", "dispose")]
+    public void Removing_any_Linux_boundary_or_required_role_fails_closed(string route, string operation)
+    {
+        var rows = Load();
+        var row = Assert.Single(rows, row => row.Route == route && row.Operation == operation);
+        Assert.Contains($"missing required operation: {route}/{operation}",
+            AdapterContractRegistry.Validate(rows.Where(candidate => candidate != row)));
+        Assert.Contains($"empty profile: {route}/{operation}",
+            AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row ? candidate with { Profiles = [] } : candidate)));
+        foreach (var profile in row.Profiles)
+        {
+            var withoutRole = row with { Profiles = [.. row.Profiles.Where(candidate => candidate != profile)] };
+            Assert.Contains(withoutRole.Profiles.Length == 0 ? $"empty profile: {route}/{operation}" : $"missing role: {route}/{operation}/{profile.Role}",
+                AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row ? withoutRole : candidate)));
+            Assert.Contains($"missing role: {route}/{operation}/{profile.Role}",
+                AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row
+                    ? candidate with { Profiles = [profile with { Role = "wrong role" }] } : candidate)));
+        }
     }
 
     [Theory]
@@ -40,7 +76,7 @@ public class AdapterContractRegistryTests
             AdapterContractRegistry.Validate(rows.Where(candidate => candidate != row)));
         Assert.Contains($"empty profile: {route}/{operation}",
             AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row
-                ? candidate with { Profiles = candidate.Profiles.Where(profile => profile.Role != role).ToArray() }
+                ? candidate with { Profiles = [.. candidate.Profiles.Where(profile => profile.Role != role)] }
                 : candidate)));
         Assert.Contains($"missing role: {route}/{operation}/{role}",
             AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row
@@ -73,7 +109,8 @@ public class AdapterContractRegistryTests
     [Fact]
     public void Missing_duplicate_and_stale_rows_or_profiles_fail_closed()
     {
-        var rows = Load();
+        // Keep the existing macOS multi-role mutation fixture independent of JSON row ordering.
+        var rows = Load().OrderBy(row => row.Route.StartsWith("Linux", StringComparison.Ordinal)).ToArray();
         Assert.Contains($"missing required operation: {rows[0].Route}/{rows[0].Operation}", AdapterContractRegistry.Validate(rows.Skip(1)));
         Assert.Contains(AdapterContractRegistry.Validate([.. rows, rows[0]]), error => error.Contains("duplicate", StringComparison.Ordinal));
         Assert.Contains(AdapterContractRegistry.Validate(rows.Select((row, i) => i == 0 ? row with { Owner = "Missing.Owner" } : row)),

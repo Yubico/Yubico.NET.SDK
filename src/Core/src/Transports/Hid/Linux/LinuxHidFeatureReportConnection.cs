@@ -1,162 +1,53 @@
-// Copyright 2025 Yubico AB
-//
+// Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
-// You may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Native;
-using Yubico.YubiKit.Core.Native.Linux.Libc;
-using LibcNativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 
-/// <summary>
-///     Linux implementation of the keyboard feature report connection using hidraw ioctl.
-/// </summary>
+/// <summary>Synchronous expert feature-report facade over the Linux OTP native lifetime.</summary>
 [SupportedOSPlatform("linux")]
 internal sealed class LinuxHidFeatureReportConnection : IHidConnection
 {
-    private const int FeatureReportSize = 8;
+    private readonly LinuxOtpHidNativeOwner _owner;
 
-    private readonly string _devNode;
-    private readonly LinuxFileSafeHandle _handle;
-    private bool _disposed;
+    public LinuxHidFeatureReportConnection(string devNode) : this(devNode, LinuxHidReportApi.Instance) { }
 
-    public LinuxHidFeatureReportConnection(string devNode)
-    {
-        _devNode = devNode;
+    internal LinuxHidFeatureReportConnection(string devNode, ILinuxHidReportApi api) =>
+        _owner = LinuxOtpHidNativeOwner.OpenAsync(devNode, api, CancellationToken.None).GetAwaiter().GetResult();
 
-        _handle = LibcNativeMethods.open(devNode, LibcNativeMethods.OpenFlags.O_RDWR);
-        if (_handle.IsInvalid)
-        {
-            int errorCode = Marshal.GetLastPInvokeError();
-            throw new PlatformApiException(
-                nameof(LibcNativeMethods.open),
-                errorCode,
-                $"Failed to open HID device: {devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
-        }
-
-        // Feature reports typically use a fixed size for YubiKey OTP
-        InputReportSize = FeatureReportSize;
-        OutputReportSize = FeatureReportSize;
-    }
-
-    public int InputReportSize { get; }
-    public int OutputReportSize { get; }
+    public int InputReportSize => 8;
+    public int OutputReportSize => 8;
+    public ConnectionType Type => ConnectionType.Hid;
 
     public byte[] GetReport()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        // Allocate buffer: first byte is the report ID, followed by data
-        var buffer = new byte[FeatureReportSize + 1];
-        buffer[0] = 0; // Report ID 0
-
-        var bufferPtr = Marshal.AllocHGlobal(buffer.Length);
-        try
-        {
-            Marshal.Copy(buffer, 0, bufferPtr, buffer.Length);
-
-            // Build the ioctl request with buffer size
-            long request = LibcNativeMethods.HIDIOCGFEATURE | ((long)buffer.Length << 16);
-            int result = LibcNativeMethods.ioctl(_handle, request, bufferPtr);
-
-            if (result < 0)
-            {
-                int errorCode = Marshal.GetLastPInvokeError();
-                throw new PlatformApiException(
-                    "ioctl(HIDIOCGFEATURE)",
-                    errorCode,
-                    $"Failed to get feature report from HID device: {_devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
-            }
-
-            // Copy the result back, excluding the report ID byte
-            var output = new byte[FeatureReportSize];
-            Marshal.Copy(bufferPtr + 1, output, 0, FeatureReportSize);
-
-            return output;
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(bufferPtr);
-        }
+        var report = _owner.ReceiveAsync(CancellationToken.None).GetAwaiter().GetResult();
+        // The owner returns an exact, exclusively owned array; transfer without a second copy.
+        return MemoryMarshal.TryGetArray(report, out var segment) && segment.Array is { } array && segment.Offset == 0 && segment.Count == array.Length
+            ? array
+            : throw new InvalidOperationException("Linux OTP owner returned non-array storage.");
     }
 
     public void SetReport(byte[] report)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(report);
-
-        // Allocate buffer: first byte is the report ID, followed by data
-        var buffer = new byte[report.Length + 1];
-        buffer[0] = 0; // Report ID 0
-        Array.Copy(report, 0, buffer, 1, report.Length);
-
-        var bufferPtr = Marshal.AllocHGlobal(buffer.Length);
-        try
-        {
-            Marshal.Copy(buffer, 0, bufferPtr, buffer.Length);
-
-            // Build the ioctl request with buffer size
-            long request = LibcNativeMethods.HIDIOCSFEATURE | ((long)buffer.Length << 16);
-            int result = LibcNativeMethods.ioctl(_handle, request, bufferPtr);
-
-            if (result < 0)
-            {
-                int errorCode = Marshal.GetLastPInvokeError();
-                throw new PlatformApiException(
-                    "ioctl(HIDIOCSFEATURE)",
-                    errorCode,
-                    $"Failed to set feature report on HID device: {_devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
-            }
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(bufferPtr);
-        }
+        _owner.SendAsync(report, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     public void Dispose()
     {
-        Dispose(true);
+        _owner.Dispose();
         GC.SuppressFinalize(this);
     }
 
-    public ValueTask DisposeAsync() =>
-        _disposed
-            ? ValueTask.CompletedTask
-            : new ValueTask(Task.Run(Dispose));
-
-    public ConnectionType Type => ConnectionType.Hid;
-
-    private void Dispose(bool disposing)
+    public async ValueTask DisposeAsync()
     {
-        if (_disposed)
-        {
-            return;
-        }
-
-        if (disposing)
-        {
-            _handle.Dispose();
-        }
-
-        _disposed = true;
+        await _owner.ShutdownAsync().ConfigureAwait(false);
+        GC.SuppressFinalize(this);
     }
 
-    ~LinuxHidFeatureReportConnection()
-    {
-        Dispose(false);
-    }
+    ~LinuxHidFeatureReportConnection() => _owner?.RequestShutdown();
 }

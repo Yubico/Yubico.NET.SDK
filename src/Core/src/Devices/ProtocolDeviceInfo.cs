@@ -275,7 +275,7 @@ internal static class ProtocolDeviceInfo
 
         public void RecordAbandonment()
         {
-            Interlocked.Increment(ref _abandonedWaiterCount);
+            _ = Interlocked.Increment(ref _abandonedWaiterCount);
             _leaseTracker.MarkAbandoned(_key.InterfaceId);
         }
 
@@ -444,9 +444,7 @@ internal static class ProtocolDeviceInfo
         if (provider is null)
             throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.NoDiscoveryProvider);
 
-        var discoveryLease = DeviceConnectionRegistry.TryAcquireDiscovery(interfaceId);
-        if (discoveryLease is null)
-            throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.InterfaceLeaseHeld);
+        var discoveryLease = DeviceConnectionRegistry.TryAcquireDiscovery(interfaceId) ?? throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.InterfaceLeaseHeld);
         leaseTracker.Register(discoveryLease);
         var registrationTransferred = false;
         try
@@ -455,11 +453,12 @@ internal static class ProtocolDeviceInfo
             // START a new open against hardware its evidence no longer names.
             ThrowIfSuperseded(scope, key, epoch);
 
-            // Discovery creates this connection, so discovery disposes it. A PC/SC slot takes the discovery
-            // registration before native open. Resolve the selected member when the provider is the published
-            // composite device so metadata reads follow the same route as direct slot reads.
+            // Discovery creates and disposes this connection. Built-in PC/SC and macOS/Linux HID owners
+            // take the exact discovery registration before native open, including failed/late opens.
+            // Resolve the published composite's selected member just as for a direct slot read. Set transfer
+            // before invoking the owner: a throw or disposal diagnostic is not permission to release twice.
             var pcscSlot = ResolvePcscSlot(provider, key.Connection);
-            var hidSlot = ResolveMacHidSlot(provider, key.Connection);
+            var hidSlot = ResolveOwnedHidSlot(provider, key.Connection);
             registrationTransferred = pcscSlot is not null || hidSlot is not null;
             var conn = pcscSlot is not null
                 ? await pcscSlot.OpenRegisteredConnectionAsync(discoveryLease, cancellationToken).ConfigureAwait(false)
@@ -476,16 +475,16 @@ internal static class ProtocolDeviceInfo
         }
     }
 
-    private static HidConnectionSlot? ResolveMacHidSlot(IDiscoveryConnectionProvider provider, ConnectionType connection)
+    private static HidConnectionSlot? ResolveOwnedHidSlot(IDiscoveryConnectionProvider provider, ConnectionType connection)
     {
         if (connection is not (ConnectionType.HidFido or ConnectionType.HidOtp)) return null;
-        if (provider is YubiKeyDevice published)
-            return published.TryResolveSlot(connection, out var selected) ? AsBuiltInMacHidSlot(selected) : null;
-        return AsBuiltInMacHidSlot(provider);
+        return provider is YubiKeyDevice published
+            ? published.TryResolveSlot(connection, out var selected) ? AsOwnedHidSlot(selected, connection) : null
+            : AsOwnedHidSlot(provider, connection);
     }
 
-    private static HidConnectionSlot? AsBuiltInMacHidSlot(object candidate) =>
-        candidate is HidConnectionSlot hid && (hid.IsBuiltInMacFido || hid.IsBuiltInMacOtp) ? hid : null;
+    private static HidConnectionSlot? AsOwnedHidSlot(object candidate, ConnectionType connection) =>
+        candidate is HidConnectionSlot { OwnsNativeLifetime: true } hid && hid.ConnectionType == connection ? hid : null;
 
     private static PcscConnectionSlot? ResolvePcscSlot(
         IDiscoveryConnectionProvider provider,
@@ -493,9 +492,9 @@ internal static class ProtocolDeviceInfo
     {
         if (connection != ConnectionType.SmartCard)
             return null;
-        if (provider is PcscConnectionSlot pcscSlot)
-            return pcscSlot;
-        return provider is YubiKeyDevice published &&
+        return provider is PcscConnectionSlot pcscSlot
+            ? pcscSlot
+            : provider is YubiKeyDevice published &&
                published.TryResolveSlot(connection, out var slot) &&
                slot is PcscConnectionSlot selectedPcscSlot
             ? selectedPcscSlot
@@ -549,7 +548,7 @@ internal static class ProtocolDeviceInfo
         {
             if (protocol is ISmartCardProtocol smartCard)
             {
-                await smartCard.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
+                _ = await smartCard.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
             }
             else if (protocol is IFidoHidProtocol fidoHid)
             {
@@ -604,7 +603,7 @@ internal static class DiscoveryWorkerAdmission
         public void Dispose()
         {
             if (Interlocked.Exchange(ref _disposed, 1) == 0)
-                Slots.Release();
+                _ = Slots.Release();
         }
     }
 }

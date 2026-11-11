@@ -1,5 +1,6 @@
 using Xunit.Sdk;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.Hid.MacOS;
@@ -11,8 +12,8 @@ public class ResponsivenessProbeTests
     [Fact]
     public async Task SynchronousExpertMacOpen_BlocksOnlyItsCallerWhileWorkerOpens()
     {
-        using var probe = new Probe();
-        var native = new BlockingOtpLifetime(probe) { HoldOpen = true };
+        using var probe = new WithheldNativeProbe();
+        using var native = new BlockingOtpLifetime(probe) { HoldOpen = true };
         // The direct report constructor is synchronous by contract; native open belongs to the worker.
         probe.Start(() => Task.FromResult(new MacOSHidFeatureReportConnection(42, native)));
         try
@@ -21,23 +22,27 @@ public class ResponsivenessProbeTests
             Assert.NotEqual(probe.CallerThread, native.OpenThread);
             Assert.False(probe.Returned.IsSet);
         }
-        finally { probe.Release.Set(); }
-        var opening = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        using var connection = await ((Task<MacOSHidFeatureReportConnection>)opening).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        finally
+        {
+            probe.Release.Set();
+            // Drain and dispose a late-opened connection even when the assertion fails.
+            var opening = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            using var connection = await ((Task<MacOSHidFeatureReportConnection>)opening)
+                .WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+        }
     }
 
     [Fact]
     public async Task DirectNativeOpenUnderTaskReturningEntry_FailsResponsivenessGate()
     {
-        using var probe = new Probe();
+        using var probe = new WithheldNativeProbe();
         probe.Start(() => { probe.EnterNative(); return Task.CompletedTask; });
         try
         {
             Assert.Throws<NotEqualException>(probe.AssertResponsive);
             Assert.False(probe.Returned.IsSet);
         }
-        finally { probe.Release.Set(); }
-        _ = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        finally { await probe.ReleaseAndDrainAsync(); }
     }
 
     [Theory]
@@ -45,9 +50,11 @@ public class ResponsivenessProbeTests
     [InlineData(true)]
     public async Task LegacySynchronousOtpReport_IsRejectedByTheResponsivenessGate(bool send)
     {
-        using var probe = new Probe();
+        using var probe = new WithheldNativeProbe();
         using var connection = new OtpHidConnection(new BlockingHidConnection(probe));
-        probe.Start(() => send ? connection.SendAsync(new byte[8]) : connection.ReceiveAsync());
+        probe.Start(() => send
+            ? connection.SendAsync(new byte[8], TestContext.Current.CancellationToken)
+            : connection.ReceiveAsync(TestContext.Current.CancellationToken));
 
         // The real legacy task-returning adapter calls GetReport/SetReport before returning a Task.
         try
@@ -55,114 +62,157 @@ public class ResponsivenessProbeTests
             Assert.Throws<NotEqualException>(probe.AssertResponsive);
             Assert.False(probe.Returned.IsSet);
         }
-        finally { probe.Release.Set(); }
-        await (await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        finally { await probe.ReleaseAndDrainAsync(); }
+        TestContext.Current.TestOutputHelper?.WriteLine($"legacy-otp send={send}: {probe.DescribeDurations()}");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task LegacySynchronousFidoReport_IsRejectedByTheResponsivenessGate(bool send)
+    {
+        using var probe = new WithheldNativeProbe();
+        using var connection = new FidoHidConnection(new BlockingHidConnection(probe, 64));
+        probe.Start(() => send
+            ? connection.SendAsync(new byte[64], TestContext.Current.CancellationToken)
+            : connection.ReceiveAsync(TestContext.Current.CancellationToken));
+        try
+        {
+            Assert.Throws<NotEqualException>(probe.AssertResponsive);
+            Assert.False(probe.Returned.IsSet);
+        }
+        finally
+        {
+            await probe.ReleaseAndDrainAsync();
+        }
+        TestContext.Current.TestOutputHelper?.WriteLine($"legacy-fido send={send}: {probe.DescribeDurations()}");
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task OffCallerReportControl_ReturnsTaskButDoesNotCompleteWhileHeld(bool fido, bool send)
+    {
+        using var probe = new WithheldNativeProbe();
+        using var report = new BlockingHidConnection(probe, fido ? 64 : 8);
+        using var fidoConnection = new FidoHidConnection(report);
+        using var otpConnection = new OtpHidConnection(report);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        Task InvokeAdapter() => (fido, send) switch
+        {
+            (true, true) => fidoConnection.SendAsync(new byte[64], cancellationToken),
+            (true, false) => fidoConnection.ReceiveAsync(cancellationToken),
+            (false, true) => otpConnection.SendAsync(new byte[8], cancellationToken),
+            (false, false) => otpConnection.ReceiveAsync(cancellationToken)
+        };
+
+        // Test-only control, not a proposed production scheduler or Linux owner.
+        probe.Start(() => Task.Run(InvokeAdapter, cancellationToken));
+        try
+        {
+            probe.AssertResponsive();
+            var operation = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), cancellationToken);
+            Assert.False(operation.IsCompleted);
+        }
+        finally
+        {
+            await probe.ReleaseAndDrainAsync();
+        }
+        TestContext.Current.TestOutputHelper?.WriteLine($"off-caller-control fido={fido} send={send}: {probe.DescribeDurations()}");
+    }
+
+    [Fact]
+    public async Task CompletedTaskWhileReportIsHeld_IsRejectedByTheResponsivenessGate()
+    {
+        using var probe = new WithheldNativeProbe();
+        using var connection = new OtpHidConnection(new BlockingHidConnection(probe));
+        Task? report = null;
+        probe.Start(() =>
+        {
+            // Deliberately broken: dispatch the real adapter but discard its completion.
+            report = Task.Run(() => connection.ReceiveAsync(TestContext.Current.CancellationToken),
+                TestContext.Current.CancellationToken);
+            return Task.CompletedTask;
+        });
+        try
+        {
+            Assert.Throws<FalseException>(probe.AssertResponsive);
+        }
+        finally
+        {
+            probe.Release.Set();
+            // Drain even after a failed assertion; cancellation must not abandon the held fake.
+            await (await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None))
+                .WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            Assert.NotNull(report);
+            await report.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+        }
     }
 
     [Fact]
     public async Task BuiltInMacFidoOpen_ReturnsWhileNativeOpenIsWithheld()
     {
-        using var probe = new Probe();
+        using var probe = new WithheldNativeProbe();
         var bridge = new BlockingFidoBridge(probe);
-        probe.Start(() => MacOSFidoHidConnection.OpenAsync(42, bridge, CancellationToken.None));
+        probe.Start(() => MacOSFidoHidConnection.OpenAsync(42, bridge, TestContext.Current.CancellationToken));
 
         try { probe.AssertResponsive(); }
-        finally { probe.Release.Set(); }
-        var opening = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        await using var connection = await ((Task<MacOSFidoHidConnection>)opening).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        finally
+        {
+            probe.Release.Set();
+            // Drain and dispose a late-opened connection even when the assertion fails.
+            var opening = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            await using var connection = await ((Task<MacOSFidoHidConnection>)opening)
+                .WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+        }
     }
 
     [Fact]
     public async Task BuiltInMacOtpOpen_ReturnsWhileNativeOpenIsWithheld()
     {
-        using var probe = new Probe();
-        var native = new BlockingOtpLifetime(probe) { HoldOpen = true };
-        probe.Start(() => MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None));
+        using var probe = new WithheldNativeProbe();
+        using var native = new BlockingOtpLifetime(probe) { HoldOpen = true };
+        probe.Start(() => MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken));
 
         try { probe.AssertResponsive(); }
-        finally { probe.Release.Set(); }
-        var opening = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        await using var connection = await ((Task<MacOSOtpHidConnection>)opening).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        finally
+        {
+            probe.Release.Set();
+            // Drain and dispose a late-opened connection even when the assertion fails.
+            var opening = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            await using var connection = await ((Task<MacOSOtpHidConnection>)opening)
+                .WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+        }
     }
 
     [Fact]
     public async Task BuiltInMacOtpReceive_ReturnsWhileNativeGetIsWithheld()
     {
-        using var probe = new Probe();
-        var native = new BlockingOtpLifetime(probe) { HoldGet = true };
-        await using var connection = await MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None);
-        probe.Start(() => connection.ReceiveAsync());
+        using var probe = new WithheldNativeProbe();
+        using var native = new BlockingOtpLifetime(probe) { HoldGet = true };
+        await using var connection = await MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken);
+        probe.Start(() => connection.ReceiveAsync(TestContext.Current.CancellationToken));
 
         try { probe.AssertResponsive(); }
-        finally { probe.Release.Set(); }
+        finally { await probe.ReleaseAndDrainAsync(); }
         var receiving = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
         Assert.Equal(8, (await ((Task<ReadOnlyMemory<byte>>)receiving).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Length);
     }
 
-    private sealed class Probe : IDisposable
-    {
-        private readonly ManualResetEventSlim _entered = new();
-        private Thread? _caller;
-        private int _nativeThread;
-        private int _callerThread;
-        internal ManualResetEventSlim Release { get; } = new();
-        internal ManualResetEventSlim Returned { get; } = new();
-        internal TaskCompletionSource<Task> Invocation { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        internal int CallerThread => Volatile.Read(ref _callerThread);
-
-        internal void Start(Func<Task> invoke)
-        {
-            _caller = new Thread(() =>
-            {
-                SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-                _callerThread = Environment.CurrentManagedThreadId;
-                try { Invocation.TrySetResult(invoke()); }
-                catch (Exception ex) { Invocation.TrySetException(ex); }
-                finally { Returned.Set(); }
-            })
-            { IsBackground = true };
-            _caller.Start();
-        }
-
-        internal void EnterNative()
-        {
-            Volatile.Write(ref _nativeThread, Environment.CurrentManagedThreadId);
-            _entered.Set();
-            Release.Wait();
-        }
-
-        internal void AssertResponsive()
-        {
-            Assert.True(_entered.Wait(TimeSpan.FromSeconds(5)), "native operation was never entered");
-            Assert.NotEqual(_callerThread, Volatile.Read(ref _nativeThread));
-            Assert.True(Returned.Wait(TimeSpan.FromSeconds(5)), "invocation did not return before native release");
-            Assert.False(Release.IsSet);
-        }
-
-        public void Dispose()
-        {
-            Release.Set();
-            if (_caller?.Join(TimeSpan.FromSeconds(5)) != false)
-            {
-                _entered.Dispose();
-                Release.Dispose();
-                Returned.Dispose();
-            }
-        }
-    }
-
-    private sealed class BlockingHidConnection(Probe probe) : IHidConnection
+    private sealed class BlockingHidConnection(WithheldNativeProbe probe, int reportSize = 8) : IHidConnection
     {
         public ConnectionType Type => ConnectionType.Hid;
-        public int InputReportSize => 8;
-        public int OutputReportSize => 8;
-        public byte[] GetReport() { probe.EnterNative(); return new byte[8]; }
+        public int InputReportSize => reportSize;
+        public int OutputReportSize => reportSize;
+        public byte[] GetReport() { probe.EnterNative(); return new byte[reportSize]; }
         public void SetReport(byte[] report) => probe.EnterNative();
         public void Dispose() { }
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
-    private sealed class BlockingOtpLifetime(Probe probe) : IIOKitDeviceLifetime
+    private sealed class BlockingOtpLifetime(WithheldNativeProbe probe) : IIOKitDeviceLifetime, IDisposable
     {
         public bool HoldGet { get; init; }
         public bool HoldOpen { get; init; }
@@ -187,9 +237,10 @@ public class ResponsivenessProbeTests
         public int GetIntProperty(nint device, string name) => 8;
         public void RegisterInputReportCallback(nint device, byte[] buffer, int length, nint callback, nint context) { }
         public void RegisterRemovalCallback(nint device, nint callback, nint context) { }
+        public void Dispose() => OpenEntered.Dispose();
     }
 
-    private sealed class BlockingFidoBridge(Probe probe) : IHidInputBridge
+    private sealed class BlockingFidoBridge(WithheldNativeProbe probe) : IHidInputBridge
     {
         public nint CreateDevice(long id) => 1;
         public void OpenDevice(nint device) => probe.EnterNative();

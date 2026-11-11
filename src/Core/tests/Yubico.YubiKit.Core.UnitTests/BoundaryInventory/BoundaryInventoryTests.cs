@@ -219,11 +219,11 @@ public class BoundaryInventoryTests
     {
         var root = BoundaryScanner.CoreSourceRoot();
         var sites = BoundaryScanner.ScanDirectory(root);
-        Assert.Equal(206, sites.Count);
+        Assert.Equal(219, sites.Count);
         Assert.Equal(sites.Count, sites.Select(site => site.Id).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(134, sites.Count(site => site.Kind == "native-import"));
-        Assert.Equal(25, sites.Count(site => site.Kind == "blocking-wait"));
-        Assert.Equal(15, sites.Count(site => site.Kind == "scheduling"));
+        Assert.Equal(132, sites.Count(site => site.Kind == "native-import"));
+        Assert.Equal(37, sites.Count(site => site.Kind == "blocking-wait"));
+        Assert.Equal(18, sites.Count(site => site.Kind == "scheduling"));
         Assert.Equal(21, sites.Count(site => site.Kind == "dispatch-gap"));
         Assert.Equal(6, sites.Count(site => site.Kind == "callback-registration"));
         Assert.Equal(0, sites.Count(site => site.Kind == "callback-conversion"));

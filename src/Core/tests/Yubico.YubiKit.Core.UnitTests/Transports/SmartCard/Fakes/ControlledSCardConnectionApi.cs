@@ -43,6 +43,12 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
     public TaskCompletionSource BeginEntered { get; } =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
     public ManualResetEventSlim ReleaseBegin { get; } = new();
+    public bool HoldDisconnect { get; set; }
+    public bool HoldReleaseContext { get; set; }
+    public TaskCompletionSource DisconnectEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public TaskCompletionSource ReleaseContextEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public ManualResetEventSlim ReleaseDisconnect { get; } = new();
+    public ManualResetEventSlim ReleaseContextReturn { get; } = new();
 
     public int TransmitCalls => Volatile.Read(ref _transmitCalls);
     public int ConnectCalls => Volatile.Read(ref _connectCalls);
@@ -168,6 +174,8 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
         Record("disconnect");
         DisconnectDispositions.Add(disposition);
         _ = Interlocked.Increment(ref _disconnectCalls);
+        DisconnectEntered.TrySetResult();
+        if (HoldDisconnect) ReleaseDisconnect.Wait(TestContext.Current.CancellationToken);
         return DisconnectResult;
     }
 
@@ -176,6 +184,8 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
         Volatile.Write(ref _releasedContextHandle, context.DangerousGetHandle());
         Record("release-context");
         _ = Interlocked.Increment(ref _releaseContextCalls);
+        ReleaseContextEntered.TrySetResult();
+        if (HoldReleaseContext) ReleaseContextReturn.Wait(TestContext.Current.CancellationToken);
         ContextReleased.TrySetResult();
         return ReleaseContextResult;
     }

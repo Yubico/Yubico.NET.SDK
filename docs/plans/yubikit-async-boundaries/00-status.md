@@ -1,5 +1,49 @@
 # Status: YubiKit async boundaries
 
+## PR 770 hotplug closeout — 2026-11-11
+
+[PR 770](https://github.com/Yubico/Yubico.NET.SDK/pull/770) was merged at
+`5746e72ed9a848d08b5782ddde025aa4a4b522ef`. Its tree matches the tested Linux
+head `820c323a815b8f7395a6222da9ef3b5c29bd7333`.
+
+The attended hotplug investigation is complete for serial **103**:
+
+- Source-bound JIT and AOT pending-read removal/reopen checks each passed **six**
+  checks, including observed absence, fresh discovery, reopen and read-only GetInfo.
+- The existing single-cycle identity test passed in `20261111-181735-690-test`.
+- The existing three-cycle event test passed all **three cycles**, including healthy
+  monitor/pump disposal, in `20261111-184923-728-test`: **1 executed, 0 failed,
+  0 skipped, 0 warnings**. Prompts used the operator-confirmed offline Piper voice.
+
+The last result uses a **test-only follow-up**, not an unmodified PR-head test.
+Diagnostic-only run `20261111-184627-562-test` retained the original assertion and
+captured the decisive sequence: remove original `ref=1`, add SmartCard-only
+placeholder `ref=2`, remove `ref=2`, add fresh serial-103 composite `ref=3`.
+The placeholder was added **before** removal; no retired-object resurrection
+occurred in that trace. The unordered added/removed-set intersection assertion
+incorrectly rejected this documented transient-view lifetime.
+
+`DeviceEventHotPlugTests` now checks chronological retirement by reference identity
+across the entire subscription history. It also captures ordered reference IDs,
+revisions and metadata-at-recording for failure diagnostics. Existing cycle count,
+timeouts, count/serial checks and spurious-update checks are retained. Three
+hardware-free `DeviceEventLifecycleTests` reproduce the old failure and verify that
+actual resurrection remains rejected: **3 executed / 2 failed** before the fix,
+then **3 executed / 0 failed**, zero warnings. The existing snapshot/feed suite also
+passed **24** tests. A fresh independent review found no blocking issues.
+
+Raw failures, the passing run, tested-source snapshots, regression results and
+post-merge CI logs are preserved locally under
+`artifacts/linux-hid-verification/operator-evidence/20261111-hotplug-closeout/`.
+Earlier failures remain failures; they have not been relabeled.
+
+Post-merge CI was inspected separately: Build/Test, Linux AOT and alpha-feed
+publication failed during Ubuntu archive DNS resolution; migration documentation
+automation failed because the organization disabled Claude subscription access.
+These are not hosted green results. Touch/active-cancellation ceremonies, full
+telemetry/performance budgets and ownership-aware sensitive-report cleanup remain
+separate follow-ups; this hotplug closeout does not establish global epic acceptance.
+
 ## Upstream integration — 2026-11-11
 
 The user requested merging the latest `yubikit` base before any buffer-ownership

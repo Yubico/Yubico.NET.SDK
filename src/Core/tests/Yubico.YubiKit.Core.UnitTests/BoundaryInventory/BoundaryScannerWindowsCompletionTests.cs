@@ -1,3 +1,6 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
 namespace Yubico.YubiKit.Core.UnitTests.BoundaryInventory;
 
 public class BoundaryScannerWindowsCompletionTests
@@ -66,6 +69,64 @@ public class BoundaryScannerWindowsCompletionTests
             }
             """;
         Assert.Empty(BoundaryScanner.Scan([("Lookalike.cs", source)]));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Scan_MetadataTypeUsingBclFullName_DoesNotImpersonateRuntimeBoundary(bool spoofCallback)
+    {
+        const string source = """
+            namespace System.Threading {
+                public unsafe class ThreadPoolBoundHandle {
+                    public static void BindHandle(object handle) { }
+                    public static void AllocateNativeOverlapped(IOCompletionCallback callback, object state, object pinData) { }
+                    public static void UnsafeAllocateNativeOverlapped(IOCompletionCallback callback, object state, object pinData) { }
+                    public static void FreeNativeOverlapped(object overlapped) { }
+                }
+            }
+            """;
+        string metadataSource = source + (spoofCallback
+            ? "namespace System.Threading { public delegate void IOCompletionCallback(); }" : "");
+        var compilation = CSharpCompilation.Create("CompletionLookalike", [CSharpSyntaxTree.ParseText(metadataSource, cancellationToken: TestContext.Current.CancellationToken)],
+            [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+        using var image = new MemoryStream();
+        var emitted = compilation.Emit(image, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.True(emitted.Success, string.Join("; ", emitted.Diagnostics));
+        var reference = MetadataReference.CreateFromImage(image.ToArray(),
+            new MetadataReferenceProperties(aliases: ["lookalike"]));
+        const string caller = """
+            extern alias lookalike;
+            using Bound = lookalike::System.Threading.ThreadPoolBoundHandle;
+            class Caller {
+                static void Setup(System.Threading.IOCompletionCallback callback) {
+                    Bound.BindHandle(null);
+                    Bound.AllocateNativeOverlapped(callback, null, null);
+                    Bound.UnsafeAllocateNativeOverlapped(callback, null, null);
+                    Bound.FreeNativeOverlapped(null);
+                }
+                static void Forward(System.Threading.IOCompletionCallback callback) => Setup(callback);
+            }
+            """;
+        string callerSource = spoofCallback
+            ? caller.Replace("System.Threading.IOCompletionCallback", "lookalike::System.Threading.IOCompletionCallback", StringComparison.Ordinal)
+            : caller;
+        Assert.Empty(BoundaryScanner.Scan([("LookalikeCaller.cs", callerSource)], [reference]));
+        Assert.Equal(BoundaryScanner.Scan([("Completion.cs", Fixture)]),
+            BoundaryScanner.Scan([("Completion.cs", Fixture), ("LookalikeCaller.cs", callerSource)], [reference]));
+    }
+
+    [Fact]
+    public void Validate_AddedRealInvocationAgainstRetainedManifest_FailsExactSiteGate()
+    {
+        var sites = BoundaryScanner.Scan([("Completion.cs", Fixture)]);
+        var rows = sites.Select(site => BoundaryManifest.Review(site, "Core maintainers", "Fixture source inspection", "Compilation only", "outstanding")).ToArray();
+        var changed = BoundaryScanner.Scan([("Completion.cs", Fixture),
+            ("Added.cs", "class Added { static void Bind(System.Runtime.InteropServices.SafeHandle handle) => System.Threading.ThreadPoolBoundHandle.BindHandle(handle); }")]);
+        var added = Assert.Single(changed.Except(sites));
+        Assert.Equal(["unclassified: " + added.Id], BoundaryManifest.Validate(changed, rows));
+        Assert.Contains(BoundaryManifest.Validate(BoundaryScanner.Scan([]), rows), error => error.StartsWith("stale:", StringComparison.Ordinal));
     }
 
     [Fact]

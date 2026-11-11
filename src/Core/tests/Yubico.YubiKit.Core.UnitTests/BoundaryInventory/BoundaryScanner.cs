@@ -37,7 +37,7 @@ internal static class BoundaryScanner
             .Where(path => !path.Split(Path.DirectorySeparatorChar).Any(part => part is "obj" or "bin"))
             .Select(path => (Path.GetRelativePath(root, path).Replace('\\', '/'), File.ReadAllText(path))));
 
-    internal static IReadOnlyList<BoundarySite> Scan(IEnumerable<(string Path, string Source)> sources)
+    internal static IReadOnlyList<BoundarySite> Scan(IEnumerable<(string Path, string Source)> sources, IEnumerable<MetadataReference>? additionalReferences = null)
     {
         var input = sources.ToArray();
         foreach (var source in input)
@@ -67,7 +67,7 @@ internal static class BoundaryScanner
             .Split(Path.PathSeparator).Concat(Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll"))
             .Where(path => !Path.GetFileName(path).StartsWith("Yubico.YubiKit.Core", StringComparison.Ordinal))
             .Distinct(StringComparer.Ordinal).Select(path => MetadataReference.CreateFromFile(path)).ToArray();
-        var compilation = CSharpCompilation.Create("BoundaryAudit", [.. trees, usings], refs,
+        var compilation = CSharpCompilation.Create("BoundaryAudit", [.. trees, usings], [.. refs, .. additionalReferences ?? []],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
         // RuntimeEnvironment returns <dotnet-root>/shared/Microsoft.NETCore.App/<version>/.
         var dotnetRoot = Directory.GetParent(RuntimeEnvironment.GetRuntimeDirectory())?.Parent?.Parent?.Parent;
@@ -94,6 +94,7 @@ internal static class BoundaryScanner
         var blockingOwners = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
         var nativeOwners = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
         var callbackForwarders = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
+        var completionSymbols = new CompletionSymbols(compilation, refs);
         foreach (var tree in trees)
         {
             var model = compilation.GetSemanticModel(tree);
@@ -113,7 +114,7 @@ internal static class BoundaryScanner
             foreach (var node in tree.GetRoot().DescendantNodes().OfType<InvocationExpressionSyntax>())
             {
                 if (model.GetOperation(node) is IInvocationOperation registration &&
-                    (nativeOwners.Contains(registration.TargetMethod.OriginalDefinition) || IsCompletionAllocation(registration.TargetMethod)) &&
+                    (nativeOwners.Contains(registration.TargetMethod.OriginalDefinition) || completionSymbols.Allocations.Contains(registration.TargetMethod.OriginalDefinition)) &&
                     registration.Arguments.Any(argument => argument.Parameter?.Type.TypeKind is TypeKind.Delegate or TypeKind.FunctionPointer &&
                         !argument.Value.ConstantValue.HasValue) && EnclosingMethod(model, node) is IMethodSymbol enclosing)
                 {
@@ -169,7 +170,7 @@ internal static class BoundaryScanner
                             ? target.Name == "Wait" ? "blocking-wait" : "scheduling"
                             : IsBlocking(target) ? "blocking-wait"
                             : type == "System.Threading.Thread" && target.Name == "Start" ? "scheduling"
-                            : IsThreadPoolBoundHandle(target) && target.Name is ("BindHandle" or "FreeNativeOverlapped") ? "runtime-native-call" : null;
+                             : completionSymbols.RuntimeCalls.Contains(target) ? "runtime-native-call" : null;
                     if (kind is not null)
                     {
                         found.Add((tree.FilePath, Owner(model, node), kind, target.ToDisplayString(Format), node.SpanStart,
@@ -186,7 +187,7 @@ internal static class BoundaryScanner
                     {
                         found.Add((tree.FilePath, Owner(model, node), "callback-conversion", target.ToDisplayString(Format), node.SpanStart, false));
                     }
-                    if ((nativeOwners.Contains(target) || IsCompletionAllocation(target)) && call.Arguments.Any(argument =>
+                    if ((nativeOwners.Contains(target) || completionSymbols.Allocations.Contains(target)) && call.Arguments.Any(argument =>
                         argument.Parameter?.Type.TypeKind is (TypeKind.Delegate or TypeKind.FunctionPointer) &&
                         argument.Value.ConstantValue.HasValue is false))
                     {
@@ -278,14 +279,37 @@ internal static class BoundaryScanner
     private static bool IsBlockingResult(IPropertySymbol property) => property.Name == "Result" &&
         property.ContainingType.OriginalDefinition.ToDisplayString() == "System.Threading.Tasks.Task<TResult>";
 
-    // Only resolved runtime members qualify; a source-defined lookalike is not a BCL boundary.
-    private static bool IsThreadPoolBoundHandle(IMethodSymbol method) =>
-        method.ContainingType.ToDisplayString() == "System.Threading.ThreadPoolBoundHandle" &&
-        method.ContainingType.Locations.All(location => location.IsInMetadata);
+    private sealed class CompletionSymbols
+    {
+        internal HashSet<IMethodSymbol> RuntimeCalls { get; } = new(SymbolEqualityComparer.Default);
+        internal HashSet<IMethodSymbol> Allocations { get; } = new(SymbolEqualityComparer.Default);
 
-    private static bool IsCompletionAllocation(IMethodSymbol method) =>
-        IsThreadPoolBoundHandle(method) && method.Name is ("AllocateNativeOverlapped" or "UnsafeAllocateNativeOverlapped") &&
-        method.Parameters.Any(parameter => parameter.Type.ToDisplayString() == "System.Threading.IOCompletionCallback");
+        internal CompletionSymbols(CSharpCompilation compilation, PortableExecutableReference[] references)
+        {
+            var boundHandle = ResolveRuntimeType(typeof(ThreadPoolBoundHandle), compilation, references);
+            var callback = ResolveRuntimeType(typeof(IOCompletionCallback), compilation, references);
+            foreach (var method in boundHandle.GetMembers().OfType<IMethodSymbol>())
+            {
+                if (method.Name is "BindHandle" or "FreeNativeOverlapped")
+                    RuntimeCalls.Add(method.OriginalDefinition);
+                if (method.Name is ("AllocateNativeOverlapped" or "UnsafeAllocateNativeOverlapped") &&
+                    method.Parameters.Any(parameter => SymbolEqualityComparer.Default.Equals(parameter.Type, callback)))
+                    Allocations.Add(method.OriginalDefinition);
+            }
+        }
+
+        private static INamedTypeSymbol ResolveRuntimeType(Type runtimeType, CSharpCompilation compilation,
+            PortableExecutableReference[] references)
+        {
+            // Anchor to the exact host BCL file already supplied as a reference, not compilation-wide
+            // name lookup (source precedence), an arbitrary metadata assembly, or a type forwarder.
+            var reference = references.Single(reference => reference.FilePath == runtimeType.Assembly.Location);
+            var assembly = compilation.GetAssemblyOrModuleSymbol(reference) as IAssemblySymbol
+                ?? throw new InvalidOperationException("Missing BCL assembly symbol");
+            return assembly.GetTypeByMetadataName(runtimeType.FullName ?? throw new InvalidOperationException("Missing BCL type name"))
+                ?? throw new InvalidOperationException($"Missing BCL type {runtimeType.FullName}");
+        }
+    }
 
     private sealed class NativeAnalyzerLoader : IAnalyzerAssemblyLoader
     {

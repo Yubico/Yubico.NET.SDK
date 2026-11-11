@@ -36,6 +36,32 @@ public class PublicSyncBoundaryRegistryTests
             PublicSyncBoundaryRegistry.Validate(rows.Where(row => row.Entry != entry)));
     }
 
+    [Theory]
+    [InlineData("windows input open")]
+    [InlineData("windows input get")]
+    [InlineData("windows input set")]
+    [InlineData("windows input dispose")]
+    [InlineData("windows feature open")]
+    [InlineData("windows feature get")]
+    [InlineData("windows feature set")]
+    [InlineData("windows feature dispose")]
+    public void Windows_documented_gap_cannot_replace_behavioral_evidence(string entry)
+    {
+        var rows = PublicSyncBoundaryRegistry.Rows;
+        Assert.Single(rows, row => row.Entry == entry);
+        Assert.Contains($"stale evidence: {entry}", PublicSyncBoundaryRegistry.Validate(
+            rows.Select(row => row.Entry == entry ? row with { Evidence = "No held-native Windows dispose" } : row)));
+    }
+
+    [Fact]
+    public void Non_Windows_documented_gap_remains_allowed()
+    {
+        var rows = PublicSyncBoundaryRegistry.Rows;
+        Assert.Single(rows, row => row.Entry == "listener stop");
+        Assert.Empty(PublicSyncBoundaryRegistry.Validate(rows.Select(row => row.Entry == "listener stop"
+            ? row with { Evidence = "No held-native listener stop evidence" } : row)));
+    }
+
     [Fact]
     public void Missing_public_entry_or_wrong_public_symbol_fails_closed()
     {

@@ -107,7 +107,8 @@ internal static class PublicSyncBoundaryRegistry
                 errors.Add($"missing internal owner symbol: {row.Entry}");
             if (publicType is not null && ownerType is not null && !publicType.IsAssignableFrom(ownerType))
                 errors.Add($"owner does not implement public contract: {row.Entry}");
-            if (!HasEvidence(row.Evidence))
+            // Use the canonical requirement, not caller-editable row metadata, for Windows' no-gap policy.
+            if (!HasEvidence(row.Evidence, Owner.StartsWith("Yubico.YubiKit.Core.Transports.Hid.Windows.", StringComparison.Ordinal)))
                 errors.Add($"stale evidence: {row.Entry}");
         }
         foreach (var row in rows.Where(row => !Required.Any(item => item.Entry == row.Entry)))
@@ -119,10 +120,10 @@ internal static class PublicSyncBoundaryRegistry
         type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
             .Any(candidate => candidate.Name == method);
 
-    private static bool HasEvidence(string evidence)
+    private static bool HasEvidence(string evidence, bool requiresBehavioralEvidence)
     {
         if (evidence.StartsWith("No held-native ", StringComparison.Ordinal))
-            return true;
+            return !requiresBehavioralEvidence;
 
         var separator = evidence.LastIndexOf('.');
         if (separator <= 0 || separator == evidence.Length - 1)

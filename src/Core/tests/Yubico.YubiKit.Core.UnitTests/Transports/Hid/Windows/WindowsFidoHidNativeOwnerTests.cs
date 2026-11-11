@@ -13,12 +13,62 @@ public sealed class WindowsFidoHidNativeOwnerTests
 {
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task TestCleanup_EarlyExitWithAdmittedWork_DrainsBeforeDisposingGates(bool holdSubmit)
+    {
+        var api = new ReportApi { HoldSubmit = holdSubmit, HoldClose = true };
+        var claim = new Claim();
+        Task<ReadOnlyMemory<byte>>? receive = null;
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await using (api)
+            {
+                var owner = await OpenOwnerAsync("fake", api, Token, claim);
+                receive = owner.ReceiveAsync(false, Token);
+                await api.Submitted.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+                throw new InvalidOperationException("Injected exit before the assertion/close region.");
+            }
+        });
+        Assert.False(Assert.IsType<Thread>(api.Worker).IsAlive);
+        Assert.NotNull(receive);
+        Assert.Equal(4, (await receive).Length);
+        Assert.Equal(1, api.RetireCount);
+        Assert.Equal(1, claim.Releases);
+    }
+
+    [Fact]
+    public async Task Open_CanceledAfterSuccessPublicationBeforeFactoryContinuation_RemainsUsable()
+    {
+        await using var api = new ReportApi { CompleteInSubmit = true };
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(Token);
+        var claim = new Claim();
+        var owner = await OpenOwnerAsync("fake", api, cancellation.Token, claim,
+            async opened =>
+            {
+                await opened.WaitAsync(TimeSpan.FromSeconds(5), Token);
+                cancellation.Cancel();
+            });
+        try
+        {
+            Assert.Equal(4, (await owner.ReceiveAsync(false, Token).WaitAsync(TimeSpan.FromSeconds(5), Token)).Length);
+            Assert.Equal(0, claim.Releases);
+        }
+        finally
+        {
+            // Drain even if the runner cancels; the fake gates must outlive their worker.
+            await owner.ShutdownAsync().WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+        }
+        Assert.Equal(1, claim.Releases);
+    }
+
     [Fact]
     public async Task Send_CanceledAfterAdmissionBeforeDispatch_SubmitsNothing()
     {
-        using var api = new ReportApi();
+        await using var api = new ReportApi();
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(Token);
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token);
+        var owner = await OpenOwnerAsync("fake", api, Token);
         var admission = Assert.IsType<Lock>(typeof(WindowsFidoHidNativeOwner)
             .GetField("_sync", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(owner));
         Task send;
@@ -37,11 +87,11 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [Fact]
     public async Task Worker_OpenAndReports_DoNotInheritCallerExecutionContext()
     {
-        using var api = new ReportApi { CompleteInSubmit = true };
+        await using var api = new ReportApi { CompleteInSubmit = true };
         Ambient.Value = "caller";
         try
         {
-            var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token);
+            var owner = await OpenOwnerAsync("fake", api, Token);
             await owner.ReceiveAsync(false, Token);
             await owner.ShutdownAsync().WaitAsync(TimeSpan.FromSeconds(5), Token);
             Assert.Null(api.AmbientAtOpen);
@@ -55,8 +105,8 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [Fact]
     public async Task Receive_Removal_StopsAdmissionAndDrainsBeforeClose()
     {
-        using var api = new ReportApi { HoldClose = true };
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token);
+        await using var api = new ReportApi { HoldClose = true };
+        var owner = await OpenOwnerAsync("fake", api, Token);
         var receive = owner.ReceiveAsync(false, Token);
         await api.Submitted.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
         api.Complete(1167);
@@ -74,10 +124,10 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [Fact]
     public async Task Cancel_Failure_StopsAdmissionButRetainsNativeWorkUntilSuccess()
     {
-        using var api = new ReportApi { CancelError = 5, HoldClose = true };
+        await using var api = new ReportApi { CancelError = 5, HoldClose = true };
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(Token);
         var claim = new Claim();
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token, claim);
+        var owner = await OpenOwnerAsync("fake", api, Token, claim);
         var receive = owner.ReceiveAsync(false, cancellation.Token);
         await api.Submitted.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
         cancellation.Cancel();
@@ -101,9 +151,9 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [Fact]
     public async Task Worker_InterruptedWithAcceptedRead_DrainsOnOriginalWorker()
     {
-        using var api = new ReportApi();
+        await using var api = new ReportApi();
         var claim = new Claim();
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token, claim);
+        var owner = await OpenOwnerAsync("fake", api, Token, claim);
         var receive = owner.ReceiveAsync(false, Token);
         await api.Submitted.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
         Assert.IsType<Thread>(api.Worker).Interrupt();
@@ -122,9 +172,9 @@ public sealed class WindowsFidoHidNativeOwnerTests
         PcscIsolatedProbe.RunAsync("windows-fido-unknown-dispatch", typeof(WindowsFidoHidNativeOwnerTests),
             nameof(Submit_UnknownDispatchFailure_QuarantinesWithoutFreeOrClose), async () =>
             {
-                using var api = new ReportApi { ThrowSubmit = true };
+                await using var api = new ReportApi { ThrowSubmit = true };
                 var claim = new Claim();
-                var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token, claim);
+                var owner = await OpenOwnerAsync("fake", api, Token, claim);
                 var send = owner.SendAsync(new byte[] { 1, 2, 3, 4 }, Token);
                 await api.Submitted.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
                 Assert.True(Assert.IsType<Thread>(api.Worker).Join(TimeSpan.FromSeconds(5)));
@@ -141,7 +191,7 @@ public sealed class WindowsFidoHidNativeOwnerTests
         PcscIsolatedProbe.RunAsync("windows-fido-finalizer", typeof(WindowsFidoHidNativeOwnerTests),
             nameof(Finalizer_UnknownClose_RetainsOwnerButNotFacade), async () =>
             {
-                using var api = new ReportApi { ReleaseProven = false, HoldClose = true };
+                await using var api = new ReportApi { ReleaseProven = false, HoldClose = true };
                 var claim = new Claim();
                 var (facade, owner) = await AbandonAsync(api, claim);
                 await Task.Yield();
@@ -171,7 +221,11 @@ public sealed class WindowsFidoHidNativeOwnerTests
     {
         var connection = await WindowsFidoHidConnection.OpenAsync("fake", api, Token, claim);
         var owner = typeof(WindowsFidoHidConnection).GetField("_owner", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(connection);
-        return (new WeakReference(connection), new WeakReference(Assert.IsType<WindowsFidoHidNativeOwner>(owner)));
+        var nativeOwner = Assert.IsType<WindowsFidoHidNativeOwner>(owner);
+        var weakOwner = new WeakReference(nativeOwner);
+        api.Drain = () => weakOwner.Target is WindowsFidoHidNativeOwner retained
+            ? retained.ShutdownAsync() : Task.CompletedTask;
+        return (new WeakReference(connection), weakOwner);
     }
 
     [Theory]
@@ -179,10 +233,10 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [InlineData(true)]
     public async Task Open_HeldNativeAcquisition_RetainsClaimThroughCanceledOrFailedCleanup(bool fail)
     {
-        using var api = new ReportApi { HoldOpen = true, HoldClose = true, FailOpen = fail };
+        await using var api = new ReportApi { HoldOpen = true, HoldClose = true, FailOpen = fail };
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(Token);
         var claim = new Claim();
-        var opening = WindowsFidoHidNativeOwner.OpenAsync("fake", api, cancellation.Token, claim);
+        var opening = OpenOwnerAsync("fake", api, cancellation.Token, claim);
         try
         {
             await api.Opening.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
@@ -198,16 +252,17 @@ public sealed class WindowsFidoHidNativeOwnerTests
             Assert.Equal(0, claim.Releases);
         }
         finally { api.CloseGate.Set(); }
-        await Assert.ThrowsAnyAsync<Exception>(() => opening.WaitAsync(TimeSpan.FromSeconds(5), Token));
+        if (fail) await Assert.ThrowsAsync<IOException>(() => opening.WaitAsync(TimeSpan.FromSeconds(5), Token));
+        else await Assert.ThrowsAnyAsync<OperationCanceledException>(() => opening.WaitAsync(TimeSpan.FromSeconds(5), Token));
         Assert.Equal(1, claim.Releases);
     }
 
     [Fact]
     public async Task Receive_PreCanceled_SubmitsNothingAndLeavesSlotReusable()
     {
-        using var api = new ReportApi { CompleteInSubmit = true };
+        await using var api = new ReportApi { CompleteInSubmit = true };
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(Token);
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token);
+        var owner = await OpenOwnerAsync("fake", api, Token);
         cancellation.Cancel();
         Assert.Throws<OperationCanceledException>(() => { _ = owner.ReceiveAsync(false, cancellation.Token); });
         Assert.Null(api.Operation);
@@ -222,8 +277,8 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [InlineData(0u, 5u, 1)]
     public async Task Receive_RejectionOrInvalidNativeReport_RetiresOnceAndClears(uint rejection, uint count, byte reportId)
     {
-        using var api = new ReportApi { Rejection = rejection, CompleteInSubmit = rejection == 0, Count = count, ReportId = reportId };
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token);
+        await using var api = new ReportApi { Rejection = rejection, CompleteInSubmit = rejection == 0, Count = count, ReportId = reportId };
+        var owner = await OpenOwnerAsync("fake", api, Token);
         await Assert.ThrowsAsync<IOException>(() => owner.ReceiveAsync(false, Token).WaitAsync(TimeSpan.FromSeconds(5), Token));
         await owner.ShutdownAsync().WaitAsync(TimeSpan.FromSeconds(5), Token);
         Assert.Equal(1, api.RetireCount);
@@ -233,9 +288,9 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [Fact]
     public async Task Send_CanceledDuringHeldSubmit_CancelRunsOnlyAfterAcceptedReturn()
     {
-        using var api = new ReportApi { HoldSubmit = true };
+        await using var api = new ReportApi { HoldSubmit = true };
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(Token);
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token);
+        var owner = await OpenOwnerAsync("fake", api, Token);
         var send = owner.SendAsync(new byte[4], cancellation.Token);
         try
         {
@@ -255,8 +310,8 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [Fact]
     public async Task TypedFacade_DescriptorSizedDirectReportsRemainAvailable_TypedBoundariesReject()
     {
-        using var api = new ReportApi();
-        await using var connection = await WindowsFidoHidConnection.OpenAsync("fake", api, Token);
+        await using var api = new ReportApi();
+        await using var connection = await OpenConnectionAsync("fake", api, Token);
         Assert.Throws<ArgumentException>(() => { _ = connection.SendAsync(new byte[4], Token); });
         Assert.Throws<IOException>(() => { _ = connection.ReceiveAsync(Token); });
         Assert.Null(api.Operation);
@@ -265,8 +320,8 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [Fact]
     public async Task TypedFacade_HeldClose_ActualReceiveTaskIsTerminalBeforeDisposal()
     {
-        using var api = new ReportApi { Length = 65, HoldClose = true };
-        var connection = await WindowsFidoHidConnection.OpenAsync("fake", api, Token);
+        await using var api = new ReportApi { Length = 65, HoldClose = true };
+        var connection = await OpenConnectionAsync("fake", api, Token);
         var receive = connection.ReceiveAsync(Token);
         await api.Submitted.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
         var disposal = connection.DisposeAsync().AsTask();
@@ -288,8 +343,8 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [Fact]
     public async Task Send_CallbackBeforeSubmitReturn_RetainsStorageAndPublicTask()
     {
-        using var api = new ReportApi { HoldSubmit = true, CompleteInSubmit = true };
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token);
+        await using var api = new ReportApi { HoldSubmit = true, CompleteInSubmit = true };
+        var owner = await OpenOwnerAsync("fake", api, Token);
         byte[] source = [1, 2, 3, 4];
         var send = owner.SendAsync(source, Token);
         try
@@ -315,9 +370,9 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [InlineData(0u, false)]
     public async Task Receive_CancellationWaitsForCompletion_ValidSuccessWins(uint cancelError, bool success)
     {
-        using var api = new ReportApi { CancelError = cancelError };
+        await using var api = new ReportApi { CancelError = cancelError };
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(Token);
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token);
+        var owner = await OpenOwnerAsync("fake", api, Token);
         var receive = owner.ReceiveAsync(false, cancellation.Token);
         await api.Submitted.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
         cancellation.Cancel();
@@ -338,9 +393,9 @@ public sealed class WindowsFidoHidNativeOwnerTests
     [Fact]
     public async Task Shutdown_PendingReceiveAndHeldClose_SettlesActualTaskBeforeRelease()
     {
-        using var api = new ReportApi { HoldClose = true };
+        await using var api = new ReportApi { HoldClose = true };
         var claim = new Claim();
-        var owner = await WindowsFidoHidNativeOwner.OpenAsync("fake", api, Token, claim);
+        var owner = await OpenOwnerAsync("fake", api, Token, claim);
         var receive = owner.ReceiveAsync(false, Token);
         await api.Submitted.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
         var shutdown = owner.ShutdownAsync();
@@ -366,8 +421,27 @@ public sealed class WindowsFidoHidNativeOwnerTests
         public void Dispose() => Interlocked.Increment(ref Releases);
     }
 
-    private sealed class ReportApi : IWindowsHidReportApi, IDisposable
+    private static Task<WindowsFidoHidNativeOwner> OpenOwnerAsync(string path, ReportApi api,
+        CancellationToken cancellationToken, IDisposable? claim = null, Func<Task, Task>? beforeOpenContinuation = null)
     {
+        var opening = WindowsFidoHidNativeOwner.OpenAsync(path, api, cancellationToken, claim, beforeOpenContinuation);
+        api.Drain = async () => await (await opening).ShutdownAsync();
+        return opening;
+    }
+
+    private static Task<WindowsFidoHidConnection> OpenConnectionAsync(string path, ReportApi api,
+        CancellationToken cancellationToken)
+    {
+        var opening = WindowsFidoHidConnection.OpenAsync(path, api, cancellationToken);
+        api.Drain = async () => await (await opening).DisposeAsync();
+        return opening;
+    }
+
+    private sealed class ReportApi : IWindowsHidReportApi, IAsyncDisposable
+    {
+        private readonly Lock _completionSync = new();
+        private bool _cleanup, _completed;
+        internal Func<Task>? Drain;
         internal readonly ManualResetEventSlim SubmitGate = new(false);
         internal readonly ManualResetEventSlim OpenGate = new(false);
         internal readonly ManualResetEventSlim CloseGate = new(false);
@@ -403,8 +477,12 @@ public sealed class WindowsFidoHidNativeOwnerTests
         public WindowsHidSubmission Submit(WindowsHidOverlappedOperation operation)
         {
             Threads.Add(Environment.CurrentManagedThreadId);
-            Operation = operation;
-            if (CompleteInSubmit) Complete(0);
+            lock (_completionSync)
+            {
+                Operation = operation;
+                _completed = false;
+                if (CompleteInSubmit || _cleanup) Complete(0);
+            }
             Submitted.SetResult();
             // These gates model held native calls; test finally blocks release before disposing them.
             if (HoldSubmit) SubmitGate.Wait();
@@ -413,10 +491,15 @@ public sealed class WindowsFidoHidNativeOwnerTests
         }
         internal void Complete(uint error)
         {
-            var operation = Operation ?? throw new InvalidOperationException();
-            if (operation.Direction == WindowsHidReportDirection.Input) operation.NativeReport.AsSpan(1).Fill(7);
-            operation.NativeReport[0] = ReportId;
-            operation.Complete(new(error, Count ?? (uint)operation.NativeReport.Length));
+            lock (_completionSync)
+            {
+                var operation = Operation ?? throw new InvalidOperationException();
+                if (_completed) return;
+                _completed = true;
+                if (operation.Direction == WindowsHidReportDirection.Input) operation.NativeReport.AsSpan(1).Fill(7);
+                operation.NativeReport[0] = ReportId;
+                operation.Complete(new(error, Count ?? (uint)operation.NativeReport.Length));
+            }
         }
         public uint Cancel(WindowsHidOverlappedOperation operation)
         {
@@ -428,6 +511,7 @@ public sealed class WindowsFidoHidNativeOwnerTests
         public void Retire(WindowsHidOverlappedOperation operation)
         {
             Threads.Add(Environment.CurrentManagedThreadId);
+            lock (_completionSync) _completed = true;
             Interlocked.Increment(ref RetireCount);
         }
         public WindowsHidRelease CloseOnce()
@@ -437,6 +521,31 @@ public sealed class WindowsFidoHidNativeOwnerTests
             if (HoldClose) CloseGate.Wait();
             return new(ReleaseProven, ReleaseProven ? 0u : 5u);
         }
-        public void Dispose() { SubmitGate.Dispose(); CloseGate.Dispose(); OpenGate.Dispose(); }
+        public async ValueTask DisposeAsync()
+        {
+            // The await-using scope starts before acquisition/admission. Release every fake hold,
+            // including a submission racing cleanup, before bounded uncancelable worker drain.
+            OpenGate.Set();
+            SubmitGate.Set();
+            CloseGate.Set();
+            lock (_completionSync)
+            {
+                _cleanup = true;
+                if (Operation is not null && !ThrowSubmit) Complete(0);
+            }
+            if (Drain is not null && !ThrowSubmit)
+            {
+                try { await Drain().WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None); }
+                catch (Exception error) when (error is not TimeoutException)
+                {
+                    // Tests assert expected open/close diagnostics; joining below proves fake last use.
+                }
+            }
+            // On timeout retain the gates with the worker rather than dispose resources it may use.
+            if (Worker is not null) Assert.True(Worker.Join(TimeSpan.FromSeconds(5)));
+            SubmitGate.Dispose();
+            CloseGate.Dispose();
+            OpenGate.Dispose();
+        }
     }
 }

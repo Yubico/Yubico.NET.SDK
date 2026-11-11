@@ -39,7 +39,8 @@ internal sealed class WindowsFidoHidNativeOwner
 
     /// <summary>Transfers the claim before worker acquisition; failed opens await checked cleanup.</summary>
     internal static async Task<WindowsFidoHidNativeOwner> OpenAsync(string path, IWindowsHidReportApi reportApi,
-        CancellationToken cancellationToken, IDisposable? physicalClaim = null)
+        CancellationToken cancellationToken, IDisposable? physicalClaim = null,
+        Func<Task, Task>? beforeOpenContinuation = null)
     {
         WindowsFidoHidNativeOwner owner;
         try { owner = new WindowsFidoHidNativeOwner(reportApi, physicalClaim); }
@@ -52,8 +53,11 @@ internal sealed class WindowsFidoHidNativeOwner
         try
         {
             using var registration = cancellationToken.UnsafeRegister(static state =>
-                ((WindowsFidoHidNativeOwner?)state)?.RequestShutdown(), owner);
+                ((WindowsFidoHidNativeOwner?)state)?.CancelOpen(), owner);
             owner.Start(path, cancellationToken);
+            // Per-call test seam: hold the factory while the worker publishes its open result.
+            if (beforeOpenContinuation is not null)
+                await beforeOpenContinuation(owner._opened.Task).ConfigureAwait(false);
             await owner._opened.Task.ConfigureAwait(false);
             return owner;
         }
@@ -62,6 +66,17 @@ internal sealed class WindowsFidoHidNativeOwner
             try { await owner.ShutdownAsync().ConfigureAwait(false); }
             catch (Exception releaseError) { throw new AggregateException(openError, releaseError); }
             throw;
+        }
+    }
+
+    private void CancelOpen()
+    {
+        lock (_sync)
+        {
+            // Success publication ends opening-token ownership, even before the factory resumes.
+            if (_opened.Task.IsCompleted) return;
+            _stopping = true;
+            if (!_signalRetired) _signal.Set();
         }
     }
 
@@ -90,11 +105,11 @@ internal sealed class WindowsFidoHidNativeOwner
         {
             cancellationToken.ThrowIfCancellationRequested();
             Metadata = _reportApi.Open(path);
-            cancellationToken.ThrowIfCancellationRequested();
             if (Metadata.InputReportByteLength < 2 || Metadata.OutputReportByteLength < 2)
                 throw new IOException("Windows HID descriptor has no report payload.");
             lock (_sync)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 ObjectDisposedException.ThrowIf(_stopping, this);
                 _opened.TrySetResult();
             }

@@ -49,6 +49,7 @@ runs:
   using: composite
   steps:
     - name: Find packages
+      id: packages
       shell: bash
       env:
         DIRECTORY: ${{ inputs.packages-directory }}
@@ -56,11 +57,13 @@ runs:
         set -euo pipefail
         shopt -s globstar nullglob
         packages=("$DIRECTORY"/**/*.nupkg)
+        symbols=("$DIRECTORY"/**/*.snupkg)
         if [ ${#packages[@]} -eq 0 ]; then
           echo "::error::No packages found in $DIRECTORY"
           exit 1
         fi
-        printf '%s\n' "$DIRECTORY"/**/*.nupkg "$DIRECTORY"/**/*.snupkg
+        printf '%s\n' "${packages[@]}" "${symbols[@]}"
+        echo "has-symbols=$([ ${#symbols[@]} -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
     - name: Tag the release
       shell: bash
@@ -86,13 +89,15 @@ runs:
           echo "Created tag $TAG on $GITHUB_SHA."
         fi
 
-    # The temporary API key is valid for one hour, so log in only once publishing starts.
+    # Temporary API keys are valid for one hour, so log in right before each push.
     - name: Log in to NuGet.org
       id: nuget-login
       uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841  # v1.2.0
       with:
         user: ${{ inputs.nuget-user }}
 
+    # --skip-duplicate makes re-runs safe; the release preflight already failed the run if a
+    # version existed on NuGet.org before this run started.
     - name: Push packages to NuGet.org
       shell: bash
       env:
@@ -101,39 +106,66 @@ runs:
       run: |
         set -euo pipefail
         shopt -s globstar nullglob
-        source=https://api.nuget.org/v3/index.json
-
-        # --skip-duplicate makes re-runs safe; the release preflight already failed the run if a
-        # version existed on NuGet.org before this run started.
         for package in "$DIRECTORY"/**/*.nupkg; do
-          dotnet nuget push "$package" --source "$source" --api-key "$NUGET_API_KEY" --no-symbols --skip-duplicate
+          dotnet nuget push "$package" --source https://api.nuget.org/v3/index.json \
+            --api-key "$NUGET_API_KEY" --no-symbols --skip-duplicate
         done
 
-        # Symbol packages are only accepted once their package has been indexed.
+    # Symbol packages are only accepted once their package has been indexed.
+    - name: Wait for NuGet.org to index the packages
+      if: ${{ steps.packages.outputs.has-symbols == 'true' }}
+      shell: bash
+      env:
+        DIRECTORY: ${{ inputs.packages-directory }}
+      run: |
+        set -euo pipefail
+        shopt -s globstar nullglob
+        urls=()
         for package in "$DIRECTORY"/**/*.nupkg; do
           read -r id version < <(python3 - "$package" <<'PY'
         import sys, zipfile, xml.etree.ElementTree as ET
         with zipfile.ZipFile(sys.argv[1]) as package:
             nuspec = next(name for name in package.namelist() if name.endswith(".nuspec") and "/" not in name)
             metadata = ET.fromstring(package.read(nuspec)).find("{*}metadata")
-            print(metadata.findtext("{*}id"), metadata.findtext("{*}version"))
+            print(metadata.findtext("{*}id").lower(), metadata.findtext("{*}version").lower())
         PY
           )
-          url="https://api.nuget.org/v3-flatcontainer/${id,,}/${version,,}/${id,,}.${version,,}.nupkg"
-          echo "Waiting for $id $version to be indexed..."
-          for _ in $(seq 1 90); do
-            if curl --silent --fail --head --output /dev/null "$url"; then
-              echo "$id $version is available."
-              continue 2
-            fi
-            sleep 30
-          done
-          echo "::error::$id $version was not indexed within 45 minutes."
-          exit 1
+          urls+=("https://api.nuget.org/v3-flatcontainer/$id/$version/$id.$version.nupkg")
         done
+        for _ in $(seq 1 80); do
+          pending=()
+          for url in "${urls[@]}"; do
+            curl --silent --fail --head --output /dev/null "$url" || pending+=("$url")
+          done
+          if [ ${#pending[@]} -eq 0 ]; then
+            echo "All packages are indexed."
+            exit 0
+          fi
+          echo "Waiting for ${#pending[@]} package(s) to be indexed..."
+          sleep 30
+        done
+        echo "::error::Packages were not indexed within 40 minutes: ${pending[*]}"
+        exit 1
 
+    - name: Log in to NuGet.org for symbol packages
+      id: nuget-login-symbols
+      if: ${{ steps.packages.outputs.has-symbols == 'true' }}
+      uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841  # v1.2.0
+      with:
+        user: ${{ inputs.nuget-user }}
+
+    - name: Push symbol packages to NuGet.org
+      if: ${{ steps.packages.outputs.has-symbols == 'true' }}
+      shell: bash
+      env:
+        DIRECTORY: ${{ inputs.packages-directory }}
+        NUGET_API_KEY: ${{ steps.nuget-login-symbols.outputs.NUGET_API_KEY }}
+      run: |
+        set -euo pipefail
+        shopt -s globstar nullglob
         for package in "$DIRECTORY"/**/*.snupkg; do
-          dotnet nuget push "$package" --source "$source" --api-key "$NUGET_API_KEY" --skip-duplicate
+          dotnet nuget push "$package" --source https://api.nuget.org/v3/index.json \
+            --api-key "$NUGET_API_KEY" --skip-duplicate
         done
 
     - name: Create the GitHub release

@@ -31,6 +31,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+Add-Type -AssemblyName System.Security.Cryptography.Pkcs
+
+$timestampTokenOid = '1.2.840.113549.1.9.16.2.14'
 
 $fingerprint = $CertificateFingerprint.Replace(':', '').ToUpperInvariant()
 if ($fingerprint -notmatch '^[0-9A-F]{64}$') {
@@ -56,6 +59,29 @@ function Get-EntryHashes([string] $package) {
     return $hashes
 }
 
+# dotnet nuget verify accepts an untimestamped signature with a warning, so check the primary signature itself.
+function Assert-TimestampedSignature([string] $package) {
+    $archive = [IO.Compression.ZipFile]::OpenRead($package)
+    try {
+        $entry = $archive.GetEntry('.signature.p7s')
+        if ($null -eq $entry) { throw "Package is not signed: $package" }
+        $buffer = [IO.MemoryStream]::new()
+        $stream = $entry.Open()
+        try { $stream.CopyTo($buffer) } finally { $stream.Dispose() }
+    } finally {
+        $archive.Dispose()
+    }
+    $cms = [Security.Cryptography.Pkcs.SignedCms]::new()
+    $cms.Decode($buffer.ToArray())
+    $signer = $cms.SignerInfos[0]
+    if ($signer.Certificate.GetCertHashString([Security.Cryptography.HashAlgorithmName]::SHA256) -ne $fingerprint) {
+        throw "Unexpected NuGet signer for ${package}: $($signer.Certificate.Subject)"
+    }
+    if (-not ($signer.UnsignedAttributes | Where-Object { $_.Oid.Value -eq $timestampTokenOid })) {
+        throw "NuGet signature is not timestamped: $package"
+    }
+}
+
 $signed = @(Get-ChildItem -LiteralPath $SignedPath -Recurse -File | Where-Object { $_.Extension -in '.nupkg', '.snupkg' })
 $unsigned = @{}
 Get-ChildItem -LiteralPath $UnsignedPath -Recurse -File | Where-Object { $_.Extension -in '.nupkg', '.snupkg' } |
@@ -70,6 +96,7 @@ foreach ($package in $signed) {
 
     & dotnet nuget verify $package.FullName --all --certificate-fingerprint $fingerprint --verbosity normal
     if ($LASTEXITCODE -ne 0) { throw "NuGet signature verification failed: $($package.Name)" }
+    Assert-TimestampedSignature $package.FullName
 
     if (-not $unsigned.ContainsKey($package.Name)) { throw "No unsigned package to compare with: $($package.Name)" }
     $before = Get-EntryHashes $unsigned[$package.Name]

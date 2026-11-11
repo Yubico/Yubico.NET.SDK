@@ -219,14 +219,15 @@ public class BoundaryInventoryTests
     {
         var root = BoundaryScanner.CoreSourceRoot();
         var sites = BoundaryScanner.ScanDirectory(root);
-        // Retain the 218-site merged baseline plus 18 Windows native-owner/API sites.
-        Assert.Equal(236, sites.Count);
+        // Retain the 236-site baseline plus three resolved Windows runtime completion sites.
+        Assert.Equal(239, sites.Count);
         Assert.Equal(sites.Count, sites.Select(site => site.Id).Distinct(StringComparer.Ordinal).Count());
         Assert.Equal(141, sites.Count(site => site.Kind == "native-import"));
         Assert.Equal(40, sites.Count(site => site.Kind == "blocking-wait"));
         Assert.Equal(22, sites.Count(site => site.Kind == "scheduling"));
         Assert.Equal(22, sites.Count(site => site.Kind == "dispatch-gap"));
-        Assert.Equal(6, sites.Count(site => site.Kind == "callback-registration"));
+        Assert.Equal(7, sites.Count(site => site.Kind == "callback-registration"));
+        Assert.Equal(2, sites.Count(site => site.Kind == "runtime-native-call"));
         Assert.Equal(0, sites.Count(site => site.Kind == "callback-conversion"));
         Assert.Equal(2, sites.Count(site => site.Kind == "callback-address"));
         var manifestPath = Path.Combine(Directory.GetParent(root)?.FullName ?? throw new InvalidOperationException("Core root missing"),

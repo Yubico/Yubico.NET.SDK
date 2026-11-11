@@ -376,6 +376,12 @@
       "entries": ["SelectAsync#7C5F60065E32#async-blocked#Raw smart-card select dispatches to the protocol interface before returning; external implementations may do synchronous setup.", "TransmitAndReceiveAsync#D7F0B8100F07#async-blocked#Raw smart-card transmission dispatches to an interface before task return; task signature alone does not prove call-entry nonblocking."]
     },
     {
+      "path": "Transports/Hid/Windows/WindowsHidReportApi.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Transports/Hid/Windows/WindowsHidReportApi.cs Open binds the overlapped handle; Submit supplies OnCompleted and pins request storage; Retire frees only after the owner's submit-return/callback-last-use join. Managed owner/API implementation is present; real Windows JIT/AOT completion and driver evidence remain pending."],
+      "status": ["documented", "implemented", "outstanding"],
+      "entries": ["Open#748B86D2B2FE#worker#BindHandle associates the acquired HID handle with runtime completion tracking on the FIDO owner worker; bind failure does not prove native release.", "Retire#352A09311CAC#worker#FreeNativeOverlapped releases runtime-owned request storage on the worker after submit return plus rejection or callback resource last use; unexpected free failure retains uncertain state without retry.", "Submit#49720AA967E1#callback#UnsafeAllocateNativeOverlapped registers OnCompleted with request state and pinned report storage on the owner worker; accepted immediate and pending I/O both require completion observation before retirement. Preparation failure proves no dispatch but not BCL resource release."]
+    },
+    {
       "path": "Transports/Hid/Windows/WindowsHidDeviceListener.cs", "reviewOwner": "Core maintainers", "rationale": "",
       "evidence": ["Transports/Hid/Windows/WindowsHidDeviceListener.cs:93-117 retains _callbackDelegate and registers it with CM_Register_Notification."],
       "status": ["documented", "outstanding"],

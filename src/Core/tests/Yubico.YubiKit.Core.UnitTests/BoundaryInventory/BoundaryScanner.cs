@@ -112,7 +112,8 @@ internal static class BoundaryScanner
             var model = compilation.GetSemanticModel(tree);
             foreach (var node in tree.GetRoot().DescendantNodes().OfType<InvocationExpressionSyntax>())
             {
-                if (model.GetOperation(node) is IInvocationOperation registration && nativeOwners.Contains(registration.TargetMethod.OriginalDefinition) &&
+                if (model.GetOperation(node) is IInvocationOperation registration &&
+                    (nativeOwners.Contains(registration.TargetMethod.OriginalDefinition) || IsCompletionAllocation(registration.TargetMethod)) &&
                     registration.Arguments.Any(argument => argument.Parameter?.Type.TypeKind is TypeKind.Delegate or TypeKind.FunctionPointer &&
                         !argument.Value.ConstantValue.HasValue) && EnclosingMethod(model, node) is IMethodSymbol enclosing)
                 {
@@ -167,7 +168,8 @@ internal static class BoundaryScanner
                             "System.Threading.Tasks.TaskFactory" or "System.Threading.Tasks.TaskFactory<TResult>") && target.Name is ("Wait" or "Run" or "StartNew")
                             ? target.Name == "Wait" ? "blocking-wait" : "scheduling"
                             : IsBlocking(target) ? "blocking-wait"
-                            : type == "System.Threading.Thread" && target.Name == "Start" ? "scheduling" : null;
+                            : type == "System.Threading.Thread" && target.Name == "Start" ? "scheduling"
+                            : IsThreadPoolBoundHandle(target) && target.Name is ("BindHandle" or "FreeNativeOverlapped") ? "runtime-native-call" : null;
                     if (kind is not null)
                     {
                         found.Add((tree.FilePath, Owner(model, node), kind, target.ToDisplayString(Format), node.SpanStart,
@@ -184,7 +186,7 @@ internal static class BoundaryScanner
                     {
                         found.Add((tree.FilePath, Owner(model, node), "callback-conversion", target.ToDisplayString(Format), node.SpanStart, false));
                     }
-                    if (nativeOwners.Contains(target) && call.Arguments.Any(argument =>
+                    if ((nativeOwners.Contains(target) || IsCompletionAllocation(target)) && call.Arguments.Any(argument =>
                         argument.Parameter?.Type.TypeKind is (TypeKind.Delegate or TypeKind.FunctionPointer) &&
                         argument.Value.ConstantValue.HasValue is false))
                     {
@@ -275,6 +277,15 @@ internal static class BoundaryScanner
 
     private static bool IsBlockingResult(IPropertySymbol property) => property.Name == "Result" &&
         property.ContainingType.OriginalDefinition.ToDisplayString() == "System.Threading.Tasks.Task<TResult>";
+
+    // Only resolved runtime members qualify; a source-defined lookalike is not a BCL boundary.
+    private static bool IsThreadPoolBoundHandle(IMethodSymbol method) =>
+        method.ContainingType.ToDisplayString() == "System.Threading.ThreadPoolBoundHandle" &&
+        method.ContainingType.Locations.All(location => location.IsInMetadata);
+
+    private static bool IsCompletionAllocation(IMethodSymbol method) =>
+        IsThreadPoolBoundHandle(method) && method.Name is ("AllocateNativeOverlapped" or "UnsafeAllocateNativeOverlapped") &&
+        method.Parameters.Any(parameter => parameter.Type.ToDisplayString() == "System.Threading.IOCompletionCallback");
 
     private sealed class NativeAnalyzerLoader : IAnalyzerAssemblyLoader
     {

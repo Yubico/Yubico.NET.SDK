@@ -13,6 +13,18 @@ updated: 2026-11-11
 
 # YubiKit async boundaries — PRD / ideal state artifact
 
+**Windows software gate (2026-11-11):** the integrated Windows owners, routing,
+synchronous facades and public CTAP2/YubiOTP managed journeys passed a full build
+and **4,306 unit tests, zero failures, five skips, zero warnings**. Forty portable
+verifier evidence-gate cases passed. The registries now classify **245 source sites,
+59 operations / 104 runnable profile links and 31 public-sync entries**; classification
+does not establish native verification. Actual Windows AOT publication failed with
+**Platform linker not found** before any native scenario executed. The user explicitly
+paused native/AOT and hardware acceptance; cross-platform C1/C2 reshaping remains
+gated. Draft PR/code-review progress does not close those obligations. Retain the
+authoritative **19/72** acceptance count; see [status](docs/plans/yubikit-async-boundaries/00-status.md)
+for source-bound results and remaining work.
+
 **Windows implementation checkpoint (2026-11-11, `a0b133f97`):** separate FIDO/OTP native
 owners, typed public routing, direct synchronous facades and pre-open connection/discovery claim
 transfer are implemented and reviewed. FIDO uses `ThreadPoolBoundHandle` overlapped completion;

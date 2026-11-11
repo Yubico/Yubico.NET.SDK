@@ -21,6 +21,7 @@ Portable compilation, through the registered repository target:
 
 ```text
 dotnet toolchain.cs windows-hid-verification-build
+dotnet toolchain.cs windows-hid-verification-evidence-test
 ```
 
 On the parent-owned Windows runner, invoke **one target** through the existing
@@ -55,10 +56,16 @@ fails (JIT requires dynamic code supported; AOT requires it disabled).
 
 Each scenario runs in its own child process, with a 45-second parent watchdog.
 Expiry kills that process and fails the case: it is **not** drain/release evidence.
-All scenarios are attempted even if another child fails. Each runtime's summary
-requires zero child exit codes and nonempty successful check results.
-The current successful run emits 44 scenario checks and 21 coordinator checks
+All scenarios are attempted even if another child fails. `RequiredNativeChecks`
+independently specifies every scenario and its exact check names, separately from
+the execution list. Missing, unexpected, duplicate, empty or false checks fail;
+scenario identity, successful status and dynamic-code runtime identity must match.
+The writer and process exit status reject incomplete children and summaries,
+including a summary with only the runtime check and zero native cases.
+The required successful run emits 44 scenario checks and 21 coordinator checks
 per runtime (10 child processes, including the 100-iteration stress case).
+Coordinator names are `requested-runtime-kind` and each required scenario's
+`-exit` and `-required-checks` pair. Counts alone cannot satisfy this contract.
 
 | Scenario | Required evidence |
 |---|---|
@@ -81,9 +88,26 @@ check, not mathematical proof that an arbitrarily late callback cannot occur.
 
 `artifacts/windows-hid-verification/evidence/publish.json` records source commit,
 dirty status, SDK identity, source and resolved-assets SHA-256 hashes, resolved
-package identities and both complete published-file manifests. Inputs must be
-stable across publish. The combined target checks each publish tree remains
-unchanged across execution. Toolchain logs capture commands and compiler output.
+package identities (only assets entries of type `package`) and both complete
+published-file manifests. Before either restore, publishing deletes only this
+verifier's `build/jit` and `build/aot` trees so newer intermediate timestamps cannot
+reuse compilation from older source. Final output trees are also recreated.
+Inputs must be stable across publish. Before each execution, the combined target
+loads the sealed `publish.json` and compares its complete input/artifact maps with
+current files, plus source commit and dirty status. After each execution it compares
+the summary's `PublishedFileSha256` map against the sealed output map, normalizing
+slashes and relative versus output-prefixed names. Membership must be complete and
+unique; runtime identity and the exact coordinator contract must match too.
+Source, output and manifest stability are checked again after execution.
+Toolchain logs capture commands and compiler output.
+
+This is local content binding, not a signed build attestation. The input map covers
+Git-listed tracked/unignored files that exist and both restored assets closures;
+it does not hash arbitrary ignored external imports, SDK installations or package
+cache contents. Resolved package names are identity records, not proof of package
+origin/authenticity. Published package/native bytes are covered by the complete
+output maps. Snapshot comparisons do not detect a transient mutation restored
+between checks; exclusive source/build workspace ownership remains required.
 
 Each runtime has `summary.json`, ten scenario JSON files and separate child
 stdout/stderr logs. JSON records runtime/OS/architecture, machine/executable,
@@ -111,6 +135,21 @@ unwind. The frozen preparation-retention decision and existing managed tests
 remain the evidence for that policy. Watchdogs never replace native barriers.
 
 ## Implementation validation status
+
+The portable `windows-hid-verification-evidence-test` target compiles this host and
+runs **21 child/coordinator gate cases and 19 publication gate cases** without
+invoking native APIs. It uses real temporary source/output/manifest files under
+`artifacts/w1-reviewfix/`, including timestamp-preserved source mutation, missing
+and extra outputs, stale manifest identity, runtime digest/identity disagreement,
+and newer stale intermediate fixtures. The reset test checks the exact cleanup
+helper used before restore; it does not claim a Windows MSBuild/AOT execution.
+Only the explicit `--evidence-self-test` mode precedes the Windows-only gate.
+
+Review-fix evidence is retained under `artifacts/w1-reviewfix/`: the original child
+predicate produced six failures in nine cases; a reverted publication negative
+control (fresh hashes trusted against themselves and intermediate cleanup omitted)
+produced five failures in eighteen publication cases. These are portable gate
+red/green results, not native-runtime passes.
 
 The host was authored before the metadata seam and its initial registered
 compile failed on the missing constructor. That is compile-contract evidence,

@@ -22,13 +22,14 @@ internal sealed class Evidence(string scenario)
 
     internal void Observe(string name, string value) => _observations.Add(name, value);
 
-    internal void Write(string path, Exception? failure)
+    internal bool Write(string path, Exception? failure)
     {
+        bool passed = failure is null && RequiredNativeChecks.Complete(scenario, _checks);
         using FileStream stream = File.Create(path);
         using var json = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true });
         json.WriteStartObject();
         json.WriteString("Scenario", scenario);
-        json.WriteString("Status", failure is null && _checks.Count > 0 ? "PASSED" : "FAILED");
+        json.WriteString("Status", passed ? "PASSED" : "FAILED");
         json.WriteString("Failure", failure?.ToString());
         json.WriteBoolean("DynamicCode", RuntimeFeature.IsDynamicCodeSupported);
         json.WriteString("Runtime", RuntimeInformation.FrameworkDescription);
@@ -45,7 +46,7 @@ internal sealed class Evidence(string scenario)
         json.WriteString("EvidenceScope", "Real Windows kernel/BCL overlapped byte-mode pipe; synthetic metadata; NOT HID-driver or hardware evidence.");
         json.WriteString("MissingCoverage", "Raw immediate versus ERROR_IO_PENDING return is normalized by production InterpretSubmission; empty-peer pending and data-ready candidate are observed, raw immediate success is not attested. No BCL allocator-failure injection. No arbitrary hung-native recovery claim.");
         json.WriteStartObject("Checks");
-        foreach ((string name, bool passed) in _checks) json.WriteBoolean(name, passed);
+        foreach ((string name, bool checkPassed) in _checks) json.WriteBoolean(name, checkPassed);
         json.WriteEndObject();
         json.WriteStartObject("Observations");
         foreach ((string name, string value) in _observations) json.WriteString(name, value);
@@ -58,5 +59,6 @@ internal sealed class Evidence(string scenario)
         }
         json.WriteEndObject();
         json.WriteEndObject();
+        return passed;
     }
 }

@@ -11,6 +11,12 @@ internal static class Program
 {
     private static async Task<int> Main(string[] args)
     {
+        if (args is ["--evidence-self-test"])
+        {
+            int childResult = EvidenceGateTests.Run();
+            int publicationResult = PublicationSealTests.Run();
+            return childResult == 0 && publicationResult == 0 ? 0 : 1;
+        }
         if (!OperatingSystem.IsWindows())
         {
             Console.Error.WriteLine("Windows native verification requires Windows; no native checks executed.");
@@ -31,8 +37,7 @@ internal static class Program
         Exception? failure = null;
         try { await NativeScenarios.RunAsync(scenario, evidence); }
         catch (Exception exception) { failure = exception; Console.Error.WriteLine(exception); }
-        evidence.Write(Path.Combine(directory, scenario + ".json"), failure);
-        return failure is null ? 0 : 1;
+        return evidence.Write(Path.Combine(directory, scenario + ".json"), failure) ? 0 : 1;
     }
 
     private static async Task<int> RunAsync(string kind, string directory)
@@ -42,6 +47,8 @@ internal static class Program
         Exception? failure = null;
         try
         {
+            if (!RequiredNativeChecks.ValidateScenarios(NativeScenarios.Names))
+                throw new InvalidOperationException("Native scenario list differs from the independent required contract.");
             evidence.Check("requested-runtime-kind", kind is "jit" or "aot" && RuntimeFeature.IsDynamicCodeSupported == (kind == "jit"));
             foreach (string scenario in NativeScenarios.Names)
             {
@@ -55,8 +62,7 @@ internal static class Program
             }
         }
         catch (Exception exception) { failure = exception; Console.Error.WriteLine(exception); }
-        evidence.Write(Path.Combine(directory, "summary.json"), failure);
-        return failure is null ? 0 : 1;
+        return evidence.Write(Path.Combine(directory, "summary.json"), failure) ? 0 : 1;
     }
 
     private static async Task RunChildAsync(string scenario, string directory, Evidence evidence)
@@ -87,8 +93,7 @@ internal static class Program
         await SaveLogsAsync();
         evidence.Check(scenario + "-exit", process.ExitCode == 0);
         using JsonDocument result = JsonDocument.Parse(await File.ReadAllTextAsync(resultPath));
-        evidence.Check(scenario + "-nonempty-checks", result.RootElement.GetProperty("Status").GetString() == "PASSED" &&
-            result.RootElement.GetProperty("Checks").EnumerateObject().Any());
+        evidence.Check(scenario + "-required-checks", RequiredNativeChecks.Validate(result.RootElement, scenario, RuntimeFeature.IsDynamicCodeSupported));
 
         async Task SaveLogsAsync()
         {

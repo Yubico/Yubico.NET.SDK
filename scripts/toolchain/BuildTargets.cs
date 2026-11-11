@@ -1,8 +1,11 @@
+#:include ../../verification/WindowsHidRouteVerification/RequiredNativeChecks.cs
+#:include ../../verification/WindowsHidRouteVerification/PublicationSeal.cs
+
 // Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md.
 
-using System.Security.Cryptography;
 using System.Text.Json;
 using System.Xml.Linq;
+using WindowsHidRouteVerification;
 using static Output;
 
 static class BuildTargets
@@ -17,6 +20,7 @@ static class BuildTargets
 
         Directory.CreateDirectory($"{WindowsVerifierRoot}/evidence");
         File.Delete($"{WindowsVerifierRoot}/evidence/publish.json");
+        PublicationSeal.ResetBuild(WindowsVerifierRoot);
         foreach (var (kind, aot) in new[] { ("jit", "false"), ("aot", "true") })
         {
             Directory.CreateDirectory($"{WindowsVerifierRoot}/evidence/{kind}");
@@ -39,7 +43,7 @@ static class BuildTargets
 
         File.WriteAllText($"{WindowsVerifierRoot}/evidence/publish.json", JsonSerializer.Serialize(new
         {
-            SourceCommit = commit, SourceStatus = status, Sdk = sdk, Inputs = inputs,
+            Version = 1, SourceCommit = commit, SourceStatus = status, Sdk = sdk, Inputs = inputs,
             Jit = HashWindowsVerifierFiles(Directory.EnumerateFiles($"{WindowsVerifierRoot}/jit", "*", SearchOption.AllDirectories)),
             Aot = HashWindowsVerifierFiles(Directory.EnumerateFiles($"{WindowsVerifierRoot}/aot", "*", SearchOption.AllDirectories)),
             Packages = WindowsVerifierPackages()
@@ -57,15 +61,7 @@ static class BuildTargets
     }
 
     private static SortedDictionary<string, string> HashWindowsVerifierFiles(IEnumerable<string> files)
-    {
-        var hashes = new SortedDictionary<string, string>(StringComparer.Ordinal);
-        foreach (string file in files)
-        {
-            using FileStream stream = File.OpenRead(file);
-            hashes[file.Replace('\\', '/')] = Convert.ToHexString(SHA256.HashData(stream));
-        }
-        return hashes;
-    }
+        => PublicationSeal.HashFiles(files);
 
     private static SortedSet<string> WindowsVerifierPackages()
     {
@@ -74,7 +70,7 @@ static class BuildTargets
         {
             using JsonDocument document = JsonDocument.Parse(File.ReadAllText(assets));
             foreach (JsonProperty library in document.RootElement.GetProperty("libraries").EnumerateObject())
-                packages.Add(library.Name);
+                if (library.Value.GetProperty("type").ValueEquals("package")) packages.Add(library.Name);
         }
         return packages;
     }
@@ -82,18 +78,38 @@ static class BuildTargets
     private static void RunWindowsHidVerifier()
     {
         if (!OperatingSystem.IsWindows()) throw new ToolchainException("Windows native checks require Windows.");
+        string publicationJson = File.ReadAllText($"{WindowsVerifierRoot}/evidence/publish.json");
+        using JsonDocument publication = JsonDocument.Parse(publicationJson);
+        JsonElement seal = publication.RootElement;
+        ValidateWindowsVerifierPublication(seal, publicationJson);
         var failures = new List<string>();
         foreach (string kind in new[] { "jit", "aot" })
         {
             string output = $"{WindowsVerifierRoot}/{kind}";
-            var before = HashWindowsVerifierFiles(Directory.EnumerateFiles(output, "*", SearchOption.AllDirectories));
+            ValidateWindowsVerifierPublication(seal, publicationJson);
+            string summaryPath = $"{WindowsVerifierRoot}/evidence/{kind}/summary.json";
+            File.Delete(summaryPath);
             var result = Exec.Run($"{output}/WindowsHidRouteVerification.exe", $"--native {kind} {WindowsVerifierRoot}/evidence/{kind}", Exec.Display.Stream, $"windows-hid-{kind}-native");
             if (result.ExitCode != 0) failures.Add($"{kind} exited {result.ExitCode}; {result.LogPath}");
-            if (!before.SequenceEqual(HashWindowsVerifierFiles(Directory.EnumerateFiles(output, "*", SearchOption.AllDirectories))))
-                throw new ToolchainException($"Windows verifier {kind} published files changed during execution.");
+            using JsonDocument summary = JsonDocument.Parse(File.ReadAllText(summaryPath));
+            if (!PublicationSeal.ValidateRuntime(summary.RootElement, seal.GetProperty(kind == "jit" ? "Jit" : "Aot"), kind, output))
+                failures.Add($"{kind} summary does not match sealed artifacts/runtime/required checks.");
+            ValidateWindowsVerifierPublication(seal, publicationJson);
         }
         if (failures.Count > 0) throw new ToolchainException(string.Join(Environment.NewLine, failures));
         PrintInfo($"Windows no-hardware JIT/AOT evidence: {WindowsVerifierRoot}/evidence");
+    }
+
+    private static void ValidateWindowsVerifierPublication(JsonElement seal, string publicationJson)
+    {
+        if (File.ReadAllText($"{WindowsVerifierRoot}/evidence/publish.json") != publicationJson)
+            throw new ToolchainException("Windows verifier publish.json changed during execution.");
+        string commit = Exec.RunOrFail("git", "rev-parse HEAD", Exec.Display.ErrorsOnly, "windows-hid-current-source").Output.Trim();
+        string status = Exec.RunOrFail("git", "status --porcelain", Exec.Display.ErrorsOnly, "windows-hid-current-status").Output.Trim();
+        if (!PublicationSeal.Validate(seal, WindowsVerifierInputs(),
+                HashWindowsVerifierFiles(Directory.EnumerateFiles($"{WindowsVerifierRoot}/jit", "*", SearchOption.AllDirectories)),
+                HashWindowsVerifierFiles(Directory.EnumerateFiles($"{WindowsVerifierRoot}/aot", "*", SearchOption.AllDirectories)), commit, status))
+            throw new ToolchainException("Windows verifier inputs or published files differ from publish.json.");
     }
 
     public static void Register(ToolchainContext ctx)
@@ -102,6 +118,8 @@ static class BuildTargets
             Dotnet.Run("build verification/WindowsHidRouteVerification/WindowsHidRouteVerification.csproj -c Release -p:PublishAot=false", "windows-hid-verification-build"));
 
         TargetRegistry.Define("windows-hid-verification-publish", "Windows-only win-x64 JIT/AOT native fixture publish with source/package/artifact hashes", PublishWindowsHidVerifier);
+        TargetRegistry.Define("windows-hid-verification-evidence-test", "Portable Windows verifier evidence gate self-tests; no native APIs", ["windows-hid-verification-build"], () =>
+            Dotnet.Run("verification/WindowsHidRouteVerification/bin/Release/net10.0/WindowsHidRouteVerification.dll --evidence-self-test", "windows-hid-evidence-test"));
         // One target invocation publishes AND executes both runtimes. Runner clients must not
         // concatenate separate target names with '+'. Hardware acceptance is a separate phase.
         TargetRegistry.Define("windows-hid-verification-nohardware", "Windows-only publish and run isolated native pipe checks under JIT and AOT", ["windows-hid-verification-publish"], RunWindowsHidVerifier);

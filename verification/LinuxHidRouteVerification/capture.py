@@ -58,12 +58,36 @@ def hardware_snapshot():
                                          for path in sorted(Path("/dev").glob("hidraw*"))]}
 
 
+def native_shims_provenance(dependencies):
+    # The verified publish transaction owns the restore/package truth. Never consult
+    # historical default obj files or infer a global-cache location from a version pin.
+    identities = set()
+    for kind in ("jit", "aot"):
+        closure = dependencies["resolvedClosure"][kind]["src/Core/src/Yubico.YubiKit.Core.csproj"]
+        resolved = {name for name in closure if name.startswith("Yubico.NativeShims/")}
+        if not resolved:
+            raise ValueError(f"missing bound NativeShims identity for {kind}")
+        identities.update(resolved)
+    artifacts = {}
+    for identity in sorted(identities):
+        files = dependencies["packageFiles"].get(identity)
+        if not files:
+            raise ValueError(f"missing bound NativeShims package content: {identity}")
+        for name, value in sorted(files.items()):
+            suffix = Path(name).suffix
+            if (suffix == ".nupkg" or ("linux-x64/native/" in name and suffix == ".so") or
+                    ("static/linux-x64/" in name and suffix == ".a")):
+                artifacts[f"packages/{identity}/{name}"] = value
+    return {"resolvedNativeShims": sorted(identities), "artifacts": artifacts}
+
+
 def main():
     if sys.argv[1:] not in ([], ["--native-only"]):
         raise ValueError("Usage: capture.py [--native-only]")
     native_only = sys.argv[1:] == ["--native-only"]
     # Fail before any binary, SDK enumeration or device operation is started.
     stamp = verify_publish()
+    package = native_shims_provenance(stamp["inputs"]["dependencies"])
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     destination = ROOT / "artifacts/linux-hid-verification/evidence" / now
     destination.mkdir(parents=True, exist_ok=False)
@@ -73,21 +97,13 @@ def main():
     provenance = {"utc": now, "sourceHash": manifest["sourceHash"], "baseline": BASELINE,
                   "environment": [command(["dotnet", "--info"]), command(["uname", "-a"]),
                                   command(["pacman", "-Q", "linux-omarchy", "glibc", "systemd", "pcsclite", "openssl"])],
-                  "hardware": hardware_snapshot(), "artifacts": {},
+                   "hardware": hardware_snapshot(), **package,
                   "publishManifestSha256": sha(destination / STAMP), "publishInputHash": stamp["inputHash"],
                   "sourceLabel": "Environment SourceHash is a label only; publish binding was independently verified before execution"}
     pins = ET.parse(ROOT / "Directory.Packages.props").getroot()
-    provenance["sdkPackageVersion"] = pins.findtext(".//YubiKitVersion")
+    provenance["sdkPackageVersion"] = stamp["inputs"]["dependencies"]["sdkPackageVersion"]
     provenance["nativeShimsPin"] = next(item.attrib["Version"] for item in pins.iter("PackageVersion")
                                        if item.attrib.get("Include") == "Yubico.NativeShims")
-    assets = json.loads((ROOT / "src/Core/src/obj/project.assets.json").read_text())
-    provenance["resolvedNativeShims"] = [name for name in assets["libraries"] if name.startswith("Yubico.NativeShims/")]
-    package = Path.home() / ".nuget/packages/yubico.nativeshims/1.18.1"
-    for path in sorted(package.rglob("*")):
-        if path.is_file() and (path.suffix == ".nupkg" or
-                               ("linux-x64/native" in str(path) and path.suffix == ".so") or
-                               ("static/linux-x64" in str(path) and path.suffix == ".a")):
-            provenance["artifacts"][str(path.relative_to(package))] = sha(path)
     for kind in ("jit", "aot"):
         binary = ROOT / "artifacts/linux-hid-verification" / kind / "LinuxHidRouteVerification"
         provenance["artifacts"][f"{kind}/LinuxHidRouteVerification"] = sha(binary)

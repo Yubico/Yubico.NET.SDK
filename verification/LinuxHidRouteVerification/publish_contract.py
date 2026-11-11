@@ -15,7 +15,8 @@ PUBLISH = ROOT / "artifacts/linux-hid-verification"
 BASELINE = "3de42bb54c5e8c986364f0f04398d4e85a66a596"
 PROJECT = "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj"
 STAMP = "publish-manifest.json"
-COMMANDS = [f"publish {PROJECT} -c Release -r linux-x64 --self-contained -p:PublishAot={aot} -o artifacts/linux-hid-verification/{kind}"
+BUILD = "artifacts/linux-hid-verification/build"
+COMMANDS = [f"publish {PROJECT} -c Release -r linux-x64 --self-contained --no-restore -p:PublishAot={aot} --artifacts-path {BUILD}/{kind} -o artifacts/linux-hid-verification/{kind}"
             for kind, aot in (("jit", "false"), ("aot", "true"))]
 # Explicit build knobs only; never dump environment, NuGet credentials or configuration contents.
 BUILD_ENV = ("DOTNET_ROLL_FORWARD", "DOTNET_MULTILEVEL_LOOKUP",
@@ -48,26 +49,40 @@ def source_manifest():
             "sourceHash": hashlib.sha256(encoded).hexdigest(), "files": files}
 
 
+def consumed_projects():
+    # Complete current graph: host -> Core/Ctap2/Management, Ctap2/Management -> Core.
+    # These are single-target net10.0 projects with no per-reference property overrides.
+    return (PROJECT, *(f"src/{name}/src/Yubico.YubiKit.{name}.csproj" for name in ("Core", "Ctap2", "Management")))
+
+
 def package_inputs():
     # Restore occurs before begin. Hash resolved closure, package contents (including build targets,
     # native archives and managed compiler dependencies), not only the NativeShims version label.
     packages = {}
-    projects = [ROOT / PROJECT] + [ROOT / f"src/{name}/src/Yubico.YubiKit.{name}.csproj" for name in ("Core", "Ctap2", "Management")]
-    closure = {}
-    for project in projects:
-        assets = json.loads((project.parent / "obj/project.assets.json").read_text())
-        closure[str(project.relative_to(ROOT))] = sorted(assets["libraries"])
-        for identity, library in assets["libraries"].items():
-            if library["type"] != "package":
-                continue
-            relative = library["path"]
-            folder = next((Path(base) / relative for base in assets["packageFolders"] if (Path(base) / relative).is_dir()), None)
-            if folder is None:
-                raise ValueError(f"resolved package unavailable: {identity}")
-            if identity not in packages:
-                packages[identity] = {str(path.relative_to(folder)): sha(path) for path in sorted(folder.rglob("*")) if path.is_file()}
+    projects = [ROOT / project for project in consumed_projects()]
+    closure, asset_hashes = {}, {}
+    for kind in ("jit", "aot"):
+        closure[kind], asset_hashes[kind] = {}, {}
+        for project in projects:
+            path = ROOT / BUILD / kind / "obj" / project.stem / "project.assets.json"
+            assets = json.loads(path.read_text())
+            name = str(project.relative_to(ROOT))
+            closure[kind][name] = sorted(assets["libraries"])
+            asset_hashes[kind][name] = sha(path)
+            for identity, library in assets["libraries"].items():
+                if library["type"] != "package":
+                    continue
+                relative = library["path"]
+                folder = next((Path(base) / relative for base in assets["packageFolders"] if (Path(base) / relative).is_dir()), None)
+                if folder is None:
+                    raise ValueError(f"resolved package unavailable: {identity}")
+                files = {str(path.relative_to(folder)): sha(path) for path in sorted(folder.rglob("*")) if path.is_file()}
+                if identity in packages and packages[identity] != files:
+                    raise ValueError(f"inconsistent resolved package contents: {identity}")
+                packages[identity] = files
     pins = ET.parse(ROOT / "Directory.Packages.props").getroot()
-    return {"sdkPackageVersion": pins.findtext(".//YubiKitVersion"), "resolvedClosure": closure, "packageFiles": packages}
+    return {"sdkPackageVersion": pins.findtext(".//YubiKitVersion"), "resolvedClosure": closure,
+            "projectAssets": asset_hashes, "packageFiles": packages}
 
 
 def current_inputs():
@@ -82,15 +97,28 @@ def effective_build_inputs():
     properties = ("TargetFramework,LangVersion,Configuration,RuntimeIdentifier,SelfContained,PublishAot,PublishTrimmed,"
                   "TrimMode,InvariantGlobalization,DefineConstants,Optimize,DebugType,ContinuousIntegrationBuild,"
                   "Deterministic,TreatWarningsAsErrors,IlcOptimizationPreference,StripSymbols,UseSystemResourceKeys,"
-                  "IlcGenerateStackTraceData,IlcDisableReflection,IlcInstructionSet,MSBuildSDKsPath,NETCoreSdkVersion,MSBuildAllProjects")
+                  "IlcGenerateStackTraceData,IlcDisableReflection,IlcInstructionSet,MSBuildSDKsPath,NETCoreSdkVersion,ArtifactsPath,UseArtifactsOutput")
     result = {}
     for kind, aot in (("jit", "false"), ("aot", "true")):
-        value = json.loads(subprocess.check_output(["dotnet", "msbuild", PROJECT, "-nologo", "-p:Configuration=Release",
-                          "-p:RuntimeIdentifier=linux-x64", "-p:SelfContained=true", f"-p:PublishAot={aot}",
-                          f"-getProperty:{properties}"], cwd=ROOT, text=True))
-        imported = value["Properties"].pop("MSBuildAllProjects").split(";")
-        value["importedFileHashes"] = {name: sha(Path(name)) for name in sorted(set(imported)) if name and Path(name).is_file()}
-        result[kind] = value
+        result[kind] = {}
+        for project in consumed_projects():
+            args = ["dotnet", "msbuild", project, "-nologo", "-p:Configuration=Release", f"-p:PublishAot={aot}",
+                    "-p:UseArtifactsOutput=true", f"-p:ArtifactsPath={ROOT / BUILD / kind}",
+                    "-p:MSBuildProvideImportedProjects=true", "-getItem:MSBuildImportedProject", f"-getProperty:{properties}"]
+            # Match this graph's SDK ProjectReference routing, confirmed with PrepareProjectReferences:
+            # UndefineProperties removes TargetFramework/RuntimeIdentifier/SelfContained for libraries.
+            # Their net10.0 default is used; Configuration/PublishAot/ArtifactsPath remain inherited
+            # from the matching pre-publish restore. Do not evaluate libraries as linux-x64 apps.
+            if project == PROJECT:
+                args.extend(["-p:RuntimeIdentifier=linux-x64", "-p:SelfContained=true"])
+            value = json.loads(subprocess.check_output(args, cwd=ROOT, text=True))
+            # MSBuildAllProjects is a newest-mtime optimization, NOT the import inventory.
+            # Bind every evaluated import's content, excluding volatile item timestamp metadata.
+            imported = value.pop("Items")["MSBuildImportedProject"]
+            if not imported:
+                raise ValueError(f"MSBuild did not provide evaluated imports for {project}; cannot bind publish inputs")
+            value["importedFileHashes"] = {name: sha(Path(name)) for name in sorted({item["Identity"] for item in imported})}
+            result[kind][project] = value
     return result
 
 
@@ -111,10 +139,23 @@ def artifact_manifest(publish):
     return result
 
 
+def input_difference(before, after, path=""):
+    # Paths/categories only: never emit property/environment values or file contents.
+    if isinstance(before, dict) and isinstance(after, dict):
+        for key in sorted(before.keys() | after.keys()):
+            child = f"{path}/{key}" if path else key
+            if key not in before or key not in after:
+                return child
+            if before[key] != after[key]:
+                return input_difference(before[key], after[key], child)
+    return path
+
+
 def seal(publish, before, after):
     (publish / STAMP).unlink(missing_ok=True)
     if before != after:
-        raise ValueError("publish inputs changed during publish; no valid manifest issued")
+        difference = input_difference(before, after).replace("\n", " ").replace("\r", " ")[:240]
+        raise ValueError(f"publish inputs changed during publish; no valid manifest issued; INPUT {difference}")
     stamp = {"schema": 1, "publishedUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
              "binding": "local stable-input publish record, not a signature or environment-label attestation",
              "sourceHash": before["source"]["sourceHash"], "inputHash": digest(before), "inputs": before,

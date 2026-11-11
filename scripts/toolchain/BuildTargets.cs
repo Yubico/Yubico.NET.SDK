@@ -10,10 +10,15 @@ static class BuildTargets
         TargetRegistry.Define("linux-hid-verification-publish", "Publish standalone Linux HID native contract host (JIT and Native AOT)", () =>
         {
             const string project = "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj";
-            Dotnet.Run($"restore {project} -r linux-x64 -p:PublishAot=true", "linux-hid-restore");
+            // Prepare both conditional dependency/import closures before binding inputs. Separate
+            // intermediate trees prevent one runtime's restore from replacing the other's assets.
+            foreach (var (kind, aot) in new[] { ("jit", "false"), ("aot", "true") })
+            {
+                Dotnet.Run($"restore {project} -r linux-x64 -p:Configuration=Release -p:SelfContained=true -p:PublishAot={aot} --artifacts-path artifacts/linux-hid-verification/build/{kind}", $"linux-hid-{kind}-restore");
+            }
             Exec.RunOrFail("python3", "verification/LinuxHidRouteVerification/publish_contract.py begin", Exec.Display.Stream, "linux-hid-publish-inputs");
-            Dotnet.Run($"publish {project} -c Release -r linux-x64 --self-contained -p:PublishAot=false -o artifacts/linux-hid-verification/jit", "linux-hid-jit-publish");
-            Dotnet.Run($"publish {project} -c Release -r linux-x64 --self-contained -p:PublishAot=true -o artifacts/linux-hid-verification/aot", "linux-hid-aot-publish");
+            Dotnet.Run($"publish {project} -c Release -r linux-x64 --self-contained --no-restore -p:PublishAot=false --artifacts-path artifacts/linux-hid-verification/build/jit -o artifacts/linux-hid-verification/jit", "linux-hid-jit-publish");
+            Dotnet.Run($"publish {project} -c Release -r linux-x64 --self-contained --no-restore -p:PublishAot=true --artifacts-path artifacts/linux-hid-verification/build/aot -o artifacts/linux-hid-verification/aot", "linux-hid-aot-publish");
             Exec.RunOrFail("python3", "verification/LinuxHidRouteVerification/publish_contract.py seal", Exec.Display.Stream, "linux-hid-publish-binding");
         });
 

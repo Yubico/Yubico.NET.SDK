@@ -27,10 +27,10 @@ public class MacOSOtpRouteTests
 
         try
         {
-            await Assert.ThrowsAsync<TimeoutException>(() => ProtocolDeviceInfo.ReadSlotBoundedAsync(
+            await Assert.ThrowsAsync<TimeoutException>(() => DiscoveryDeviceInfoReader.ReadSlotBoundedAsync(
                 slot, ConnectionType.HidOtp, TimeSpan.FromMilliseconds(100), NullLogger.Instance,
                 TestContext.Current.CancellationToken, waitForWorkerSlot: true,
-                scope: ProtocolDeviceInfo.CreateScope()));
+                scope: new DiscoveryReadScope()));
 
             Assert.True(native.InGet.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
             var failure = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() =>

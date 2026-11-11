@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging.Abstractions;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -56,6 +55,8 @@ internal static class PcscCleanupFailureProbe
             : new SmartCardConnectionFactory(api);
         var slot = new PcscConnectionSlot(pcscDevice, factory);
         var device = new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+        var scope = new DiscoveryReadScope();
+        scope.CoordinateUsbRead(slot.InterfaceId, 0x0407);
 
         if (failure == "delegating-partial-open")
         {
@@ -66,18 +67,20 @@ internal static class PcscCleanupFailureProbe
         else
         {
             var read = failure.StartsWith("published-", StringComparison.Ordinal)
-                ? ProtocolDeviceInfo.ReadBoundedAsync(
+                ? DiscoveryDeviceInfoReader.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
                     failure == "published-late-proof" ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromSeconds(5),
                     NullLogger.Instance,
-                    Ct)
-                : ProtocolDeviceInfo.ReadSlotBoundedAsync(
+                    Ct,
+                    scope: scope)
+                : DiscoveryDeviceInfoReader.ReadSlotBoundedAsync(
                     slot,
                     ConnectionType.SmartCard,
                     TimeSpan.FromSeconds(5),
                     NullLogger.Instance,
-                    Ct);
+                    Ct,
+                    scope: scope);
             _ = await Assert.ThrowsAnyAsync<Exception>(() => read);
         }
 
@@ -88,6 +91,8 @@ internal static class PcscCleanupFailureProbe
             var recovered = DeviceConnectionRegistry.WaitForRecoveryForTest(slot.InterfaceId);
             api.ReleaseTransmit.Set();
             await recovered.WaitAsync(Ct);
+            using var nextAdmission = await DiscoveryReadAdmission.AcquireAsync(DiscoveryReadAdmission.GatesFor(0x0407), Ct)
+                .WaitAsync(TimeSpan.FromSeconds(5), Ct);
             await using var reopened = await device.ConnectAsync<ISmartCardConnection>(Ct);
             return;
         }
@@ -102,7 +107,12 @@ internal static class PcscCleanupFailureProbe
         GC.Collect();
         Assert.True(api.ContextReference?.IsAlive);
         if (failure != "delegating-partial-open")
+        {
             Assert.True(api.CardReference?.IsAlive);
+            // A completed, failed disposal task is not native release proof. The quarantined registry
+            // lease must retain discovery admission too, so another sibling cannot start native work.
+            Assert.All(DiscoveryReadAdmission.GatesFor(0x0407), gate => Assert.Equal(0, gate.CurrentCount));
+        }
         Assert.Equal(0, RecordingSCardContext.ReleaseHandleCalls);
         Assert.Equal(0, RecordingSCardCardHandle.ReleaseHandleCalls);
     }

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
@@ -25,7 +24,7 @@ public class YubiKeyTests : IAsyncLifetime
 {
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
@@ -40,10 +39,9 @@ public class YubiKeyTests : IAsyncLifetime
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task WatchAsync_DetectsAddedDevice()
     {
-        var deviceEvent = await WaitForActionAsync(DeviceAction.Added);
+        var deviceEvent = await WaitForChangeAsync<DeviceAdded>();
 
         Assert.NotNull(deviceEvent.Device);
-        Assert.Equal(DeviceAction.Added, deviceEvent.Action);
     }
 
     [Fact]
@@ -52,39 +50,37 @@ public class YubiKeyTests : IAsyncLifetime
     public async Task WatchAsync_DetectsRemovedDevice()
     {
         // Device is populated for removals too, so the caller can correlate against the Added event.
-        var deviceEvent = await WaitForActionAsync(DeviceAction.Removed);
+        var deviceEvent = await WaitForChangeAsync<DeviceRemoved>();
 
         Assert.NotNull(deviceEvent.Device);
-        Assert.Equal(DeviceAction.Removed, deviceEvent.Action);
     }
 
     /// <summary>
     /// Waits for the next device event of a given kind. This is the canonical "insert your YubiKey"
     /// pattern: begin the enumeration first, then prompt the user, and let the token bound the wait.
     /// </summary>
-    private static async Task<DeviceEvent> WaitForActionAsync(DeviceAction action)
+    private static async Task<TChange> WaitForChangeAsync<TChange>() where TChange : DeviceChange
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-        // Enumerate first: WatchAsync subscribes on the first MoveNextAsync, so starting the
-        // monitor beforehand could let the initial rescan's events land before anyone is listening.
-        var events = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+        // The owned stream atomically replays current membership, then follows changes.
+        await using var monitor = await YubiKeyManager.CreateMonitorAsync(cts.Token);
+        var events = monitor.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
         await using (events.ConfigureAwait(false))
         {
             var pending = events.MoveNextAsync();
-            YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
 
             while (await pending)
             {
-                if (events.Current.Action == action)
+                if (events.Current is TChange change)
                 {
-                    return events.Current;
+                    return change;
                 }
 
                 pending = events.MoveNextAsync();
             }
         }
 
-        throw new InvalidOperationException($"Device event stream ended before a {action} event arrived.");
+        throw new InvalidOperationException($"Device change stream ended before a {typeof(TChange).Name} arrived.");
     }
 }

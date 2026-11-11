@@ -122,7 +122,7 @@ public class HidDeviceListenerIntegrationTests
 
         try
         {
-            listener.DeviceEvent = _ => Interlocked.Increment(ref eventCount);
+            listener.Changed = () => Interlocked.Increment(ref eventCount);
             listener.Start();
 
             // Act - wait briefly with listener running

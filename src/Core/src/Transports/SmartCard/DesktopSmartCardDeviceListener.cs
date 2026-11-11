@@ -25,11 +25,11 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
 /// Uses a dedicated background thread with 1000ms timeout for responsive cancellation.
 /// On Windows, also watches for PnP notifications via the special <c>\\?\PnP?\Notification</c> reader.
 /// <para>
-/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
+/// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="Changed"/>
 /// callback. The listener establishes baseline during <see cref="Start"/> to avoid duplicate events.
 /// </para>
 /// </remarks>
-public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
+public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
 {
     private const string PnpNotificationReaderName = @"\\?PnP?\Notification";
     private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(1000);
@@ -47,19 +47,16 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     private bool _disposed;
 
     /// <inheritdoc />
-    public Action? DeviceEvent { get; set; }
+    public Action? Changed { get; set; }
 
     /// <inheritdoc />
     public DeviceListenerStatus Status { get; private set; } = DeviceListenerStatus.Stopped;
 
     /// <summary>
     /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
-    /// after setting up the <see cref="DeviceEvent"/> callback.
+    /// after setting up the <see cref="Changed"/> callback.
     /// </summary>
-    public DesktopSmartCardDeviceListener() : this(NativeSCardApi.Instance, Thread.Sleep)
-    {
-        // Lazy start - do nothing in constructor
-    }
+    public static DesktopSmartCardDeviceListener Create() => new(NativeSCardApi.Instance, Thread.Sleep);
 
     internal DesktopSmartCardDeviceListener(ISCardApi sCardApi, Action<TimeSpan> sleep)
     {
@@ -436,17 +433,17 @@ public sealed class DesktopSmartCardDeviceListener : ISmartCardDeviceListener
     {
         try
         {
-            DeviceEvent?.Invoke();
+            Changed?.Invoke();
         }
         catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Exception in DeviceEvent callback");
+            Logger.LogWarning(ex, "Exception in Changed callback");
         }
     }
 
     private void ClearEventHandlers()
     {
-        DeviceEvent = null;
+        Changed = null;
     }
 
     /// <inheritdoc />

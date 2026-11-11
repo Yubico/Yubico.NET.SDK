@@ -70,6 +70,89 @@ Discovery needs no PIN, touch, or open session. Later snippets assume these dire
 
 ## Common operations
 
+### Own continuous tracking
+
+manager watch creates a producer; monitor watch subscribes to an existing one.
+
+`YubiKeyMonitor` owns one continuous tracking lifetime: `WatchAsync` replays `DeviceAdded`, emits
+`SnapshotComplete` (including empty discovery), then streams `DeviceAdded`, `DeviceRemoved`, and
+`DeviceUpdated` changes. Maintain a consumer projection for cached membership; disposal ends tracking
+without disposing application-owned sessions/connections, and later enumerations complete empty.
+
+Create it with `await YubiKeyManager.CreateMonitorAsync(cancellationToken)` and dispose with `await using`.
+Initialization registers listeners before the loop's single initial scan and waits for publication,
+including successful empty discovery. Startup failure/cancellation cleans up the partial lifetime; the
+creation token does not control the monitor after successful creation. The monitor performs all
+initial, listener-triggered, and five-second fallback scans sequentially. There is no manual refresh or
+stop/restart mode: dispose the monitor and create a new one to recover from terminal failure. There is no
+process-global monitoring lifetime or device cache.
+
+Transport listeners share payload-less `IDeviceChangeListener.Changed` hints, not physical-device truth.
+The monitor reconciles scans; listener failure falls back to interval discovery. An enumeration timeout is
+handled per path: one-shot `Find…Async` logs a warning and returns the other transport's results for that
+call; a monitor never publishes a partial scan, so the timeout fails `CreateMonitorAsync` on the first scan
+and, after initialization, keeps the previous snapshot until a later scan succeeds.
+
+Share one host-owned monitor between long-lived components rather than letting each component take over
+tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a
+monitor for selection, but must explicitly read Management for current configuration.
+
+`YubiKeyMonitor.WatchAsync` supplies initial `DeviceAdded` records, `SnapshotComplete`, then ordered changes. On each
+enumeration's first `MoveNextAsync`, it captures membership and subscribes at the same boundary as a
+completed publication, so there is no snapshot/subscription gap. Initial replay does not occupy the
+independent 256-change delta buffer; changes arriving while replay is consumed can still overflow it.
+Overflow faults only that watcher: **clear its device projection and re-enumerate the same monitor's
+`WatchAsync`** to rebuild it safely. Canceling a watcher does not stop monitoring. Disposal allows already
+captured replay and published deltas to drain, but new enumerations complete empty.
+
+Use the replaying stream to initialize a UI projection, or independent `FindAllAsync` for a one-shot lookup.
+Disposal sequentially stops listeners, cancels and awaits the loop with no drain timeout, retires discovery,
+and completes `DeviceChangeFeed`; native discovery budgets bound waits, while already-open native work
+retains its leases until actual teardown. Already-published replay and changes may still drain.
+Concurrent watch enumerations are safe, and disposal may overlap them: they end normally. Disposal must
+not be called concurrently with itself. See the
+[usage guide](../../docs/usage/device-discovery.md#device-monitoring) for picker and generic-host samples.
+
+### Discover selected interfaces once
+
+```csharp
+var smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
+var fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
+```
+
+Each returned `IYubiKey` is a device view of one physical YubiKey through the requested interfaces.
+Every Find call discovers from scratch without a shared repository or background tracking.
+`interfaces` limits enumeration/probes and returned connection slots; it is not a full-device result filter.
+To retain composite slots, discover All and filter locally. HID-only skips PC/SC; SmartCard-only skips HID. OTP/FIDO share HID descriptor
+enumeration, but excluded interfaces are not probed. Existing monitors run unchanged.
+
+A scoped call can split one physical key into several YubiKeys. Connection exclusion covers overlapping
+known interface IDs, not YubiKeys from disjoint scopes, even if serials match; coordinate those rather than
+opening them in parallel. Transport enumeration waits run concurrently and are bounded to five seconds each. A timeout logs a warning and omits only that transport's
+interfaces for this scan. Cancellation interrupts the wait, not native work; abandoned work completes
+and cleans up independently, with late completion/failure observed in Debug logs. Identity read budgets
+remain per attempt, and cancellation does not prove native work drained. See
+[independent scoped scans](../../docs/usage/device-discovery.md#independent-scoped-scans) for scope,
+metadata, identity, and lifetime bounds.
+
+### Read last-known device metadata without I/O
+
+```csharp
+if (device.CachedDeviceInfo is { } info)
+{
+    Console.WriteLine($"Last observed firmware: {info.FirmwareVersion}, form factor: {info.FormFactor}");
+}
+```
+
+`CachedDeviceInfo` is a nullable Core `DeviceInfo` snapshot. Reading it opens no connection or session;
+`null` means metadata is unavailable, including for custom `IYubiKey` implementations that use the default.
+Existing discovery/repository updates may replace the snapshot without a device event, but it is not
+guaranteed current and can remain historical after configuration changes or disconnection. A failed read
+does not clear the last successful snapshot. Use `ManagementSession.GetDeviceInfoAsync` for a live read;
+it does not promise to update discovery metadata. Continue using `device.SerialNumber` for durable
+identity: its independent contract can retain a known serial even when the latest snapshot omits it.
+See [cached device metadata](../../docs/usage/device-discovery.md#cached-device-metadata) for details.
+
 ### PC/SC sharing policy and migration
 
 Built-in PC/SC connections default to strict `SmartCardSharing.Exclusive`. If another smart-card client
@@ -78,26 +161,23 @@ the competing client before retrying, or explicitly accept a coexistence policy.
 `ExclusiveWithSharedFallback` default and can affect applications running alongside gpg-agent, browsers,
 or OS smart-card services.
 
-If discovery ran during contention, a PC/SC-only key may be cached with a `null` `SerialNumber` because
-its metadata could not be read. Closing the competing client does not itself refresh that cache:
-`FindFirstAsync` and `FindFirstOrDefaultAsync` still query cached results. Force a scan before retrying
-a serial predicate:
+If discovery ran during contention, a PC/SC-only key may have a `null` `SerialNumber` because its metadata
+could not be read. After closing the competing client, repeat the Find operation with fresh evidence:
 
 ```csharp
 // After closing the competing client; expectedSerialNumber is the serial you want to find.
-await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken: cancellationToken);
 IYubiKey? matchingDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
     key => key.SerialNumber == expectedSerialNumber, cancellationToken);
 ```
 
-A forced scan retries failed metadata reads; it does not guarantee a serial if the key remains busy,
+A fresh lookup retries metadata reads; it does not guarantee a serial if the key remains busy,
 unavailable, or does not report one. With monitoring active, a later successful scan can also refresh
 the metadata.
 
 Without topology evidence, contention on multiple same-model keys can leave PC/SC interfaces separate
 from serial-bearing HID interfaces. A serial match may then lack SmartCard support; a PIV-opening
 `NotSupportedException` can mean incomplete discovery, not that the hardware lacks PIV. After closing
-the competing clients, force a scan as above and reacquire the device by serial before retrying; check
+the competing clients, repeat discovery as above and reacquire the device by serial before retrying; check
 `SupportsConnection(ConnectionType.SmartCard)`. Previously returned `IYubiKey` objects have immutable
 `AvailableConnections` and do not gain the remerged interfaces.
 
@@ -164,22 +244,41 @@ IYubiKey? smartCard = await YubiKeyManager.FindFirstOrDefaultAsync(
 ```
 
 `FindFirstAsync` throws `InvalidOperationException` when nothing matches; `FindFirstOrDefaultAsync` returns
-`null`. Both are one-shot queries over the same cached discovery as `FindAllAsync`: they do not wait for a
+`null`. Both perform one fresh discovery operation, like `FindAllAsync`: they do not wait for a
 key to be inserted, and "first" is not a stable ordering.
 
 ### Watch for devices being added and removed
 
 ```csharp
-YubiKeyManager.StartMonitoring();
-
-await foreach (DeviceEvent change in YubiKeyManager.WatchAsync())
+await foreach (DeviceChange change in YubiKeyManager.WatchAsync())
 {
-    Console.WriteLine($"{change.Action}: serial {change.Device.SerialNumber}");
+    Console.WriteLine(change switch
+    {
+        DeviceAdded added => $"Added: serial {added.Device.SerialNumber}",
+        DeviceRemoved removed => $"Removed: serial {removed.Device.SerialNumber}",
+        DeviceUpdated updated => $"Updated: serial {updated.Device.SerialNumber}",
+        SnapshotComplete => "Initial snapshot complete",
+        _ => "Unknown change"
+    });
 }
 ```
 
-`WatchAsync` yields `Added` and `Removed` events computed from a repository diff, not raw OS notifications.
-Subscription starts on first enumeration; events raised before that are not replayed.
+`WatchAsync` yields `DeviceAdded`, `DeviceRemoved`, and `DeviceUpdated` records computed from observed scans,
+not raw operating-system notifications. Subscription starts on first enumeration, atomically replaying current
+membership followed by `SnapshotComplete` (even for an empty snapshot), then ordered changes. `Revision`
+increments once per scan; changes sharing a revision belong to that scan. Metadata updates retain the
+originally published device object. Maintain a membership projection from the
+stream, or use `FindAllAsync` for independent fresh discovery. This enumeration owns its private monitor;
+share `CreateMonitorAsync` when several consumers need one producer.
+
+**v2 prerelease migration:** replace `ScanAsync` with `FindAllAsync(interfaces: ...)`; remove `forceRescan`.
+Replace static Start/Stop/Watch/Shutdown calls with an owned monitor and `DisposeAsync`. Old `type` filters
+selected full-device results; the new `interfaces` restricts discovery, so retain All plus local filtering
+where later operations need composite connection slots. No compatibility aliases retain the old cache behavior.
+
+For two-key read-only validation of the public factory, replay, snapshots, lifetime, and metadata, see the
+[targeted discovery hardware checks](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+Those unattended tests do not satisfy the separate attended removal/reinsertion acceptance gate.
 
 ### Send raw APDUs
 
@@ -403,6 +502,12 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
 - Built-in SmartCard and macOS HID owners retain their physical-interface claim if native release cannot
   be proven; a later managed open throws `UnrecoveredConnectionException` rather than treating the key
   as ordinarily busy. Custom connections do not inherit those native-release guarantees.
+- Discovery serializes USB metadata/identity reads that may target sibling interfaces, including native
+  connection disposal. Without reliable physical identity yet, distinct same-PID keys share this admission;
+  known different PIDs remain independent. An admitted unknown USB PID conservatively excludes all USB
+  discovery reads, but a pending unknown-PID request reserves nothing and cannot block an available known
+  PID. Caller timeout/cancellation does not release an active native owner's admission or extend discovery
+  budgets. This is discovery scheduling, not a new public connection or cross-process ownership guarantee.
 - `ProtocolFactory` and the `IProtocol` family are internal. Use `Raw*Session.CreateAsync(connection)`.
 
 ## Security notes
@@ -417,6 +522,12 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
 - `ApduCommand` stores a reference to your data, not a copy. Zero the source after transmission.
 
 ## Related
+
+For repeatable `FindAllAsync`/`CachedDeviceInfo` hardware validation, use the
+[targeted read-only discovery checks](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+They cover every attached authorized serial-bearing USB key, use sequential connections only, and keep the
+live-read Management dependency in its integration project. Scope exclusion and disjoint ownership limits
+are checked deterministically rather than by racing native hardware connections.
 
 - Application modules: [Management](../Management/README.md), [PIV](../Piv/README.md),
   [CTAP2](../Ctap2/README.md), [WebAuthn](../WebAuthn/README.md), [OATH](../Oath/README.md),

@@ -22,11 +22,11 @@ namespace Yubico.YubiKit.Core.Transports.Hid;
 /// Monitors for HID device arrival and removal events using OS-level notifications.
 /// </summary>
 /// <remarks>
-/// Listeners do not auto-start. Call <see cref="Start"/> after setting up <see cref="DeviceEvent"/>
+/// Listeners do not auto-start. Call <see cref="Start"/> after setting up <see cref="Changed"/>
 /// callback. The listener establishes baseline state during <see cref="Start"/> to avoid
 /// duplicate events for devices already present.
 /// </remarks>
-public abstract class HidDeviceListener : IDisposable
+public abstract class HidDeviceListener : IDeviceChangeListener
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<HidDeviceListener>();
 
@@ -37,10 +37,10 @@ public abstract class HidDeviceListener : IDisposable
     /// Callback invoked when a HID listener observes a topology change.
     /// </summary>
     /// <remarks>
-    /// The callback receives a diagnostic rescan hint only. It must not be treated as
-    /// authoritative YubiKey arrival or removal state.
+    /// The callback is a rescan hint only, never authoritative YubiKey arrival or removal state.
+    /// Do not call <see cref="Stop"/> or <see cref="Dispose()"/> from inside the callback.
     /// </remarks>
-    public Action<HidDeviceRescanHint>? DeviceEvent { get; set; }
+    public Action? Changed { get; set; }
 
     /// <summary>
     /// Gets the current status of the listener.
@@ -61,7 +61,7 @@ public abstract class HidDeviceListener : IDisposable
     /// then begins monitoring for changes. Only fires events for subsequent changes.
     /// </summary>
     /// <remarks>
-    /// This method should be called after setting <see cref="DeviceEvent"/> callback.
+    /// This method should be called after setting <see cref="Changed"/> callback.
     /// Calling Start() on an already started listener has no effect.
     /// </remarks>
     public abstract void Start();
@@ -76,7 +76,7 @@ public abstract class HidDeviceListener : IDisposable
     /// </para>
     /// <para>
     /// Do not call <see cref="Stop"/> or <see cref="Dispose()"/> from within the
-    /// <see cref="DeviceEvent"/> callback. Platform implementations wait for their native
+    /// <see cref="Changed"/> callback. Platform implementations wait for their native
     /// registration or listener thread to drain before returning, so stopping from inside the
     /// callback can deadlock or stall for the full disposal timeout.
     /// </para>
@@ -103,18 +103,23 @@ public abstract class HidDeviceListener : IDisposable
     /// <summary>
     /// Signals that a device event has occurred.
     /// </summary>
-    /// <param name="hint">The diagnostic rescan hint to pass to subscribers.</param>
-    protected void OnDeviceEvent(HidDeviceRescanHint hint)
+    /// <param name="hint">The diagnostic rescan hint to log before notifying subscribers.</param>
+    private protected void OnDeviceEvent(HidDeviceRescanHint hint)
     {
         ArgumentNullException.ThrowIfNull(hint);
 
         try
         {
-            DeviceEvent?.Invoke(hint);
+            Logger.LogTrace(
+                "Received HID rescan hint: {Kind}, {PlatformDeviceId}, {DevicePath}",
+                hint.ChangeKind,
+                hint.PlatformDeviceId,
+                hint.DevicePath);
+            Changed?.Invoke();
         }
         catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Exception in DeviceEvent callback");
+            Logger.LogWarning(ex, "Exception in Changed callback");
         }
     }
 
@@ -131,7 +136,7 @@ public abstract class HidDeviceListener : IDisposable
 
         if (disposing)
         {
-            DeviceEvent = null;
+            Changed = null;
             Status = DeviceListenerStatus.Stopped;
         }
 
@@ -140,7 +145,7 @@ public abstract class HidDeviceListener : IDisposable
 
     /// <inheritdoc />
     /// <remarks>
-    /// Do not call from within the <see cref="DeviceEvent"/> callback; see <see cref="Stop"/>.
+    /// Do not call from within the <see cref="Changed"/> callback; see <see cref="Stop"/>.
     /// </remarks>
     public void Dispose()
     {

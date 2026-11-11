@@ -44,6 +44,23 @@ public class CompositeDeviceMergerTests
         Assert.Equal("ykphysical:pid:0407", composite.DeviceId);
         Assert.Equal(["hid:fido", "hid:otp", "pcsc:cc"], InterfaceIdsOf(composite));
     }
+
+    [Fact]
+    public void Merge_DuplicatedCcidInterfaceSameSerial_LeavesEveryInterfaceStandalone()
+    {
+        // Pins why FindPcscDevices collapses repeated reader names before they reach the merger: one
+        // physical key cannot own two CCID interfaces, so the merger cannot attribute the group and every
+        // interface falls out as its own single-interface key.
+        var merged = CompositeDeviceMerger.Merge([
+            Usb("pcsc:cc", ConnectionType.SmartCard, FullKeyPid, serial: 103),
+            Usb("pcsc:cc", ConnectionType.SmartCard, FullKeyPid, serial: 103),
+            Usb("hid:fido", ConnectionType.HidFido, FullKeyPid, serial: 103),
+            Usb("hid:otp", ConnectionType.HidOtp, FullKeyPid, serial: 103)
+        ]);
+
+        Assert.Equal(4, merged.Count);
+        Assert.All(merged, key => Assert.Single(InterfaceIdsOf(key)));
+    }
     [Fact]
     public void Merge_SkySingleFidoInterface_PublishesFlatOneSlotDeviceWithTransportId()
     {

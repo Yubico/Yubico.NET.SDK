@@ -286,25 +286,32 @@ usable YubiKey object." Entry point is the **static** `YubiKeyManager` — no DI
 
 ```mermaid
 flowchart TD
-    Start(["YubiKeyManager.FindAllAsync(type=All)"])
-    Mgr["YubiKeyDeviceManager<br/><i>composition root (lazy)</i>"]
-    Repo["YubiKeyDeviceRepository<br/><i>cache</i>"]
-    Mon["YubiKeyDeviceMonitorService<br/><i>hot-plug events</i>"]
-    Find["FindYubiKeys.FindAllAsync"]
+    Start(["YubiKeyManager.Find…Async(interfaces=All)"])
+    Watch(["await foreach YubiKeyManager.WatchAsync()"])
+    Create(["await YubiKeyManager.CreateMonitorAsync()"])
+    Owner["YubiKeyMonitor<br/><i>one lifetime: listeners + one sequential scan loop</i>"]
+    Signals["HotplugSignals<br/><i>IDeviceChangeListener per transport → one rescan hint channel</i>"]
+    Sched["RescanScheduler<br/><i>initial · 200 ms quiet / 1 s cap · 5 s fallback</i>"]
+    Feed["DeviceChangeFeed<br/>snapshot + revision · SnapshotDiff · bounded buffer per subscriber"]
+    Views(["monitor.WatchAsync: DeviceAdded replay · SnapshotComplete · ordered changes"])
+    Find["FindYubiKeys<br/><i>independent per-call or per-monitor evidence, bounded by DiscoveryBudgets</i>"]
 
     FPcsc["IFindPcscDevices<br/>(PC/SC readers)"]
     FHid["IFindHidInterfaces<br/>(FIDO + OTP HID)"]
-    Merge{"Merge interfaces of<br/>same physical key<br/>(by USB Product ID)"}
+    Merge{"Conservatively merge interfaces<br/>using topology, serial and PID evidence"}
 
     Slot["PcscConnectionSlot / HidConnectionSlot<br/><i>raw live interface candidate</i>"]
     Flat["YubiKeyDevice<br/>optional SmartCard · FIDO · OTP slots"]
 
     Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous"])
 
-    Start --> Mgr
-    Mgr --> Repo
-    Mgr --> Mon
-    Mgr -->|cache miss / forceRescan| Find
+    Start -->|fresh scoped call| Find
+    Watch -->|private monitor per enumeration| Owner
+    Create -->|await first published scan| Owner
+    Owner --> Signals
+    Signals -->|hint| Sched
+    Sched -->|trigger| Owner
+    Owner -->|invalidate evidence on hotplug, then scan All| Find
     Find --> FPcsc
     Find --> FHid
     FPcsc --> Slot
@@ -312,7 +319,18 @@ flowchart TD
     Slot --> Merge
     Merge --> Flat
     Flat --> Result
+    Owner -->|"Apply(scan)"| Feed
+    Feed -->|atomic snapshot + tail per subscriber| Views
 ```
+
+One-shot Find retires its read scope on exit. A monitor has one lifetime: create, run, dispose; there is no
+pause, restart or manual rescan. Disposal is sequential (stop listeners, cancel and await the loop, retire
+discovery, complete the feed) and waits for an in-flight scan to finish within its discovery budgets; no
+drain timeout exists. `YubiKeyManager.WatchAsync` owns a private monitor for one enumeration;
+`CreateMonitorAsync` returns one monitor to share across subscribers. See
+[event-driven device discovery](event-driven-device-discovery.md).
+
+manager watch creates a producer; monitor watch subscribes to an existing one.
 
 ### Then: connecting (transport selection)
 
@@ -374,9 +392,10 @@ flowchart TD
   the caller's connection; only convenience entry points own the hidden connection they create.
 - **Transport selection is single-shot:** each applet selects one supported transport from its default order
   or explicit override. Held and platform errors propagate without trying another interface.
-- **Monitoring:** `StartMonitoring()` exposes hot-plug events through one stream — `await foreach`
-  over `YubiKeyManager.WatchAsync(ct)`. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type.
-  Good "advanced" slide if time allows.
+- **Monitoring:** `await foreach (var change in YubiKeyManager.WatchAsync(ct))` is the one-line path:
+  `DeviceAdded` replay, `SnapshotComplete`, then ordered changes, with a private monitor disposed when the
+  enumeration ends. `await using var monitor = await CreateMonitorAsync(ct)` shares one monitor across
+  subscribers. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type. Good "advanced" slide if time allows.
 
 ---
 
@@ -412,14 +431,13 @@ Pre-rendered for slides and offline viewing (regenerate with the command below):
 Regenerate after editing the diagrams:
 
 ```bash
-# SVG (vector — best for slides)
-mmdc -i docs/architecture/sdk-architecture-diagrams.md -o docs/architecture/images/sdk.svg -t neutral -b transparent
-# PNG (3× raster)
-mmdc -i docs/architecture/sdk-architecture-diagrams.md -o docs/architecture/images/png/sdk.png -t neutral -b white -s 3
-# then rename sdk-1..7 → L0..L4 per the table above
+npm ci  # installs the pinned Mermaid CLI from package-lock.json
+scripts/architecture/render-architecture.sh
 ```
 
-Requires `@mermaid-js/mermaid-cli` (`npm i -g @mermaid-js/mermaid-cli`).
+The script checks the pinned CLI version, renders SVG and 3× PNG files with deterministic names, and
+records source/image hashes in `images/image-manifest.txt`. Retain each changed diagram and its matching
+manifest row together; avoid unrelated rendered churn.
 
 ---
 

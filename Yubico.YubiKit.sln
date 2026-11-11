@@ -85,8 +85,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp.Unit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.OpenPgp.IntegrationTests", "src\OpenPgp\tests\Yubico.YubiKit.OpenPgp.IntegrationTests\Yubico.YubiKit.OpenPgp.IntegrationTests.csproj", "{64153330-5664-4099-A821-B33BD5B51ED5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.TestProject", "src\Tests.TestProject\Yubico.YubiKit.Tests.TestProject.csproj", "{BE618201-B609-462D-B222-14C7A7F9EF45}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementTool", "src\Management\examples\ManagementTool\ManagementTool.csproj", "{2AD12F83-CB52-4995-8499-B9FE03C80DF7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.YubiHsm", "Yubico.YubiKit.YubiHsm", "{32BE4BD5-3E89-AFCD-676E-A69696060D68}"
@@ -545,18 +543,6 @@ Global
 		{64153330-5664-4099-A821-B33BD5B51ED5}.Release|x64.Build.0 = Release|Any CPU
 		{64153330-5664-4099-A821-B33BD5B51ED5}.Release|x86.ActiveCfg = Release|Any CPU
 		{64153330-5664-4099-A821-B33BD5B51ED5}.Release|x86.Build.0 = Release|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|x64.Build.0 = Debug|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Debug|x86.Build.0 = Debug|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|x64.ActiveCfg = Release|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|x64.Build.0 = Release|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|x86.ActiveCfg = Release|Any CPU
-		{BE618201-B609-462D-B222-14C7A7F9EF45}.Release|x86.Build.0 = Release|Any CPU
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AD12F83-CB52-4995-8499-B9FE03C80DF7}.Debug|x64.ActiveCfg = Debug|Any CPU

@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 /// <remarks>
 /// <para>
 /// The listener does not auto-start. Call <see cref="Start"/> after setting up
-/// <see cref="HidDeviceListener.DeviceEvent"/> callback.
+/// <see cref="HidDeviceListener.Changed"/> callback.
 /// </para>
 /// <para>
 /// Each <see cref="Start"/> creates an independent session that owns its native resources
@@ -46,7 +46,7 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
 
     /// <summary>
     /// Creates a new instance. The listener does not start automatically - call <see cref="Start"/>
-    /// after setting up the <see cref="HidDeviceListener.DeviceEvent"/> callback.
+    /// after setting up the <see cref="HidDeviceListener.Changed"/> callback.
     /// </summary>
     public LinuxHidDeviceListener()
         : this(null)

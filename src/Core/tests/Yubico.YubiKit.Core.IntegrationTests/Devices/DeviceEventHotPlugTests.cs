@@ -15,7 +15,6 @@
 using System.Diagnostics;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
@@ -24,8 +23,10 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 /// insertion cycles.
 /// </summary>
 /// <remarks>
-/// This test requires an operator to remove and insert a YubiKey when prompted. It asserts event
-/// sequence liveness after each prompt and does not attempt to correlate event identity.
+/// This test requires an operator to remove and insert a YubiKey when prompted. Prompts are spoken through
+/// <see cref="OperatorCue" /> and printed; no console input is needed, so it runs from any harness. It
+/// asserts event-sequence liveness and the absence of spurious changes after each prompt; identity
+/// correlation lives in <see cref="HotPlugIdentityContractTests" />.
 /// </remarks>
 public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 {
@@ -35,27 +36,31 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     /// <summary>How long to wait for the requested operator action.</summary>
     private static readonly TimeSpan HumanActionTimeout = TimeSpan.FromSeconds(30);
 
+    /// <summary>Time for the operator to get a hand on the key before the first instruction.</summary>
+    private static readonly TimeSpan LeadIn = TimeSpan.FromSeconds(10);
+
+    /// <summary>Settling time after an arrival so post-hotplug metadata re-reads of other keys can land.</summary>
+    private static readonly TimeSpan SettleAfterArrival = TimeSpan.FromSeconds(6);
+
     private readonly EventLog _log = new();
 
-    public async Task InitializeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Discovery)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task WatchAsync_AcrossRepeatedHotPlugCycles_EmitsRemovalAndArrivalAfterEachPrompt()
     {
-        Assert.False(
-            Console.IsInputRedirected,
-            "This test requires interactive console input for each remove and insert checkpoint.");
-
         using var watching = new CancellationTokenSource();
 
-        // WatchAsync subscribes on the first MoveNextAsync, and that call runs the iterator up to its
-        // first suspension point before returning. Subscribing here rather than inside the pump task
-        // is what stops the initial scan racing ahead of the watcher.
-        var enumerator = YubiKeyManager.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
+        await using var monitor = await YubiKeyManager.CreateMonitorAsync(watching.Token);
+        // Capture the checkpoint before the pump can record initial replay.
+        var initialCheckpoint = _log.CreateCheckpoint();
+        var enumerator = monitor.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
         var firstMove = enumerator.MoveNextAsync();
         var pump = Task.Run(
             async () =>
@@ -76,51 +81,61 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             },
             CancellationToken.None);
 
-        var initialCheckpoint = _log.CreateCheckpoint();
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+        Prompt($"Hotplug protocol. {Cycles} remove and insert cycles. Keep a test key within reach.");
 
-        Prompt($"Leave your YubiKey plugged in. {Cycles} remove/insert cycles will be requested.");
-
-        _ = await ExpectAsync(initialCheckpoint, DeviceAction.Added, "initial discovery");
+        _ = await ExpectAsync<DeviceAdded>(initialCheckpoint, "initial discovery");
+        await Task.Delay(LeadIn);
 
         for (var cycle = 1; cycle <= Cycles; cycle++)
         {
-            Prompt($"[cycle {cycle}/{Cycles}] Press Enter when ready to remove a YubiKey.");
-            _ = Console.ReadLine();
             var removalCheckpoint = _log.CreateCheckpoint();
-            Prompt($"[cycle {cycle}/{Cycles}] REMOVE a YubiKey now.");
-            var removed = await ExpectAsync(removalCheckpoint, DeviceAction.Removed, $"cycle {cycle} removal");
+            Prompt($"Cycle {cycle} of {Cycles}. Remove one YubiKey now.");
+            var removed = await ExpectAsync<DeviceRemoved>(removalCheckpoint, $"cycle {cycle} removal");
 
-            Prompt($"[cycle {cycle}/{Cycles}] Press Enter when ready to re-insert the YubiKey.");
-            _ = Console.ReadLine();
+            await Task.Delay(TimeSpan.FromSeconds(2));
             var insertionCheckpoint = _log.CreateCheckpoint();
-            Prompt($"[cycle {cycle}/{Cycles}] RE-INSERT the same YubiKey now.");
-            var added = await ExpectAsync(insertionCheckpoint, DeviceAction.Added, $"cycle {cycle} insertion");
+            Prompt("Reinsert the same YubiKey now.");
+            var added = await ExpectAsync<DeviceAdded>(insertionCheckpoint, $"cycle {cycle} insertion");
 
             output.WriteLine(
                 $"[cycle {cycle}] removed as '{removed.Device.DeviceId}', returned as '{added.Device.DeviceId}'");
+
+            // The hotplug invalidated every key's cached metadata, so keys that stayed attached were re-read
+            // on this scan. Equal metadata decoded from a fresh buffer must not publish an update.
+            await Task.Delay(SettleAfterArrival);
+            var window = _log.Since(removalCheckpoint);
+            var removedDevices = window.OfType<DeviceRemoved>().Select(r => r.Device).ToList();
+            var addedDevices = window.OfType<DeviceAdded>().Select(a => a.Device).ToList();
+            var spuriousUpdates = window.OfType<DeviceUpdated>()
+                .Where(update => !removedDevices.Contains(update.Device) && !addedDevices.Contains(update.Device))
+                .ToList();
+            Assert.True(spuriousUpdates.Count == 0,
+                $"cycle {cycle}: {spuriousUpdates.Count} DeviceUpdated for keys that did not change:{Environment.NewLine}{_log}");
+
+            // One physical key may be published as several devices when an interface cannot be opened on
+            // this host (for example, OTP without macOS Input Monitoring), so compare removals with arrivals
+            // rather than assuming a fixed count: whatever left must have come back, and nothing else moved.
+            Assert.True(removedDevices.Count >= 1 && removedDevices.Count == addedDevices.Count,
+                $"cycle {cycle}: {removedDevices.Count} removed vs {addedDevices.Count} added; expected a matched pair per device:{Environment.NewLine}{_log}");
+            Assert.All(removedDevices, device => Assert.DoesNotContain(device, addedDevices));
+            foreach (var reinserted in addedDevices.Where(a => a.SerialNumber is not null))
+                Assert.Contains(removedDevices, r => r.SerialNumber == reinserted.SerialNumber);
         }
 
         output.WriteLine(_log.ToString());
 
-        await watching.CancelAsync();
-
-        // Cancellation is the intended way this pump ends, but it is not the only way a session this
-        // long can end: an overflowed buffer faults it, and hub completion ends it normally. Every
-        // assertion that matters has already run, so record the terminal outcome instead of asserting
-        // one, rather than attributing an unrelated ending to a failure of the hot-plug behaviour.
-        var terminal = await Record.ExceptionAsync(() => pump);
-        output.WriteLine(
-            terminal is null
-                ? "watcher pump ended normally"
-                : $"watcher pump ended with {terminal.GetType().Name}: {terminal.Message}");
+        // Owned disposal must complete healthy streams normally. Overflow or another pump fault is
+        // a real lifetime failure, not an outcome to swallow after the hotplug assertions passed.
+        await monitor.DisposeAsync();
+        await pump.WaitAsync(TimeSpan.FromSeconds(10));
+        output.WriteLine("watcher pump completed normally after owned monitor disposal");
     }
 
-    private async Task<DeviceEvent> ExpectAsync(int checkpoint, DeviceAction action, string what)
+    private async Task<TChange> ExpectAsync<TChange>(int checkpoint, string what) where TChange : DeviceChange
     {
         var deviceEvent = await _log.WaitForAsync(
             checkpoint,
-            deviceEvent => deviceEvent.Action == action,
+            deviceEvent => deviceEvent is TChange,
             HumanActionTimeout);
 
         Assert.True(
@@ -128,16 +143,12 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             $"Timed out after {HumanActionTimeout.TotalSeconds:0}s waiting for " +
             $"{what}.{Environment.NewLine}{_log}");
 
-        output.WriteLine($"  observed {deviceEvent!.Action}: {deviceEvent.Device.DeviceId}");
+        output.WriteLine($"  observed {deviceEvent}");
 
-        return deviceEvent;
+        return Assert.IsType<TChange>(deviceEvent);
     }
 
-    private void Prompt(string message)
-    {
-        Console.WriteLine($">>> {message}");
-        output.WriteLine($">>> {message}");
-    }
+    private void Prompt(string message) => OperatorCue.Announce(message, output.WriteLine);
 
     /// <summary>
     /// Records every event and lets the test await the next one of a given kind.
@@ -150,15 +161,15 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     private sealed class EventLog
     {
         private readonly Lock _gate = new();
-        private readonly List<(TimeSpan At, DeviceEvent Event)> _entries = [];
+        private readonly List<(TimeSpan At, DeviceChange Event)> _entries = [];
         private readonly Stopwatch _clock = Stopwatch.StartNew();
 
-        private Func<DeviceEvent, bool>? _awaited;
-        private TaskCompletionSource<DeviceEvent>? _pending;
+        private Func<DeviceChange, bool>? _awaited;
+        private TaskCompletionSource<DeviceChange>? _pending;
 
-        public void Record(DeviceEvent value)
+        public void Record(DeviceChange value)
         {
-            TaskCompletionSource<DeviceEvent>? toComplete = null;
+            TaskCompletionSource<DeviceChange>? toComplete = null;
 
             lock (_gate)
             {
@@ -179,12 +190,12 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         /// Returns the first event at or after <paramref name="checkpoint"/> that matches
         /// <paramref name="match"/>, waiting for one if necessary; null on timeout.
         /// </summary>
-        public async Task<DeviceEvent?> WaitForAsync(
+        public async Task<DeviceChange?> WaitForAsync(
             int checkpoint,
-            Func<DeviceEvent, bool> match,
+            Func<DeviceChange, bool> match,
             TimeSpan timeout)
         {
-            TaskCompletionSource<DeviceEvent> tcs;
+            TaskCompletionSource<DeviceChange> tcs;
 
             lock (_gate)
             {
@@ -196,7 +207,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
                     }
                 }
 
-                tcs = new TaskCompletionSource<DeviceEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
+                tcs = new TaskCompletionSource<DeviceChange>(TaskCreationOptions.RunContinuationsAsynchronously);
                 _awaited = match;
                 _pending = tcs;
             }
@@ -241,13 +252,22 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             }
         }
 
+        /// <summary>Every change recorded at or after <paramref name="checkpoint"/>.</summary>
+        public IReadOnlyList<DeviceChange> Since(int checkpoint)
+        {
+            lock (_gate)
+            {
+                return [.. _entries.Skip(checkpoint).Select(entry => entry.Event)];
+            }
+        }
+
         /// <summary>Full timeline, attached to any failure so a manual run leaves a usable trace.</summary>
         public override string ToString()
         {
             lock (_gate)
             {
                 var lines = _entries.Select(e =>
-                    $"  {e.At.TotalSeconds,7:0.000}s  {e.Event.Action,-7}  {e.Event.Device.DeviceId}");
+                    $"  {e.At.TotalSeconds,7:0.000}s  {e.Event}");
 
                 return $"Device event timeline ({_entries.Count} events):{Environment.NewLine}" +
                        string.Join(Environment.NewLine, lines);

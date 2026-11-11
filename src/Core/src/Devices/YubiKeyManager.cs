@@ -1,383 +1,133 @@
-﻿using Microsoft.Extensions.Logging;
+using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-/// Provides a static API for discovering and monitoring YubiKey devices.
+/// Discovers YubiKeys on demand, streams changes, and creates shared monitors for continuous tracking.
 /// </summary>
 /// <remarks>
-/// <para>
-/// <see cref="YubiKeyManager"/> is a static-only API - no dependency injection is required.
-/// Simply call the static methods directly to discover and monitor devices.
-/// </para>
-/// <para><strong>Thread Safety:</strong> All methods are thread-safe and can be called from any thread.</para>
-/// <para><strong>Threading:</strong> Publication never runs consumer code — <see cref="WatchAsync"/>
-/// enqueues into a per-watcher buffer, so nothing in the <c>await foreach</c> body executes on the
-/// device-monitoring path. The thread that resumes each iteration is not guaranteed: an already-buffered
-/// event can complete <c>MoveNextAsync</c> synchronously on the calling thread, while an awaited one
-/// resumes on a thread-pool thread. UI applications must therefore marshal explicitly rather than relying
-/// on either behaviour.</para>
-/// <para><strong>Testing Pattern:</strong> Call <see cref="ShutdownAsync"/> in test cleanup (e.g., xUnit
-/// <c>DisposeAsync</c> or <c>IAsyncLifetime.DisposeAsync</c>) to reset static state between tests.</para>
-/// <para><strong>Caching Behavior:</strong> By default, <see cref="FindAllAsync(CancellationToken)"/>
-/// returns cached results after the first call. Use <c>forceRescan: true</c> to always perform a fresh
-/// device scan, or call <see cref="ShutdownAsync"/> to clear the cache.</para>
+/// Find operations perform independent one-shot discovery. Dispose watch enumerations when finished;
+/// dispose shared monitors with <c>await using</c>. Manager watch creates a producer; monitor watch
+/// subscribes to an existing one. Discovery failures and cancellation propagate to the caller;
+/// watch enumerations also throw on subscriber overflow or terminal monitoring failure.
 /// </remarks>
 /// <example>
-/// <para><strong>Simple Device Discovery:</strong></para>
 /// <code>
-/// using System;
-/// using Yubico.YubiKit.Core;
-/// using Yubico.YubiKit.Core.Devices;
+/// var key = await YubiKeyManager.FindFirstAsync(
+///     predicate: key => key.SerialNumber == serial, cancellationToken: ct);
 ///
-/// var devices = await YubiKeyManager.FindAllAsync();
-/// foreach (var device in devices)
-/// {
-///     Console.WriteLine($"Found: {device.DeviceId} ({device.AvailableConnections})");
-/// }
+/// await using var monitor = await YubiKeyManager.CreateMonitorAsync(ct);
+/// await foreach (var change in monitor.WatchAsync(ct))
+///     Apply(change); // DeviceAdded replay, SnapshotComplete, then live changes.
 /// </code>
-/// <para><strong>Force Fresh Scan:</strong></para>
-/// <code>
-/// var devices = await YubiKeyManager.FindAllAsync(forceRescan: true);
-/// </code>
-/// <para><strong>Device Monitoring:</strong></para>
-/// <code>
-/// YubiKeyManager.StartMonitoring();
-///
-/// await foreach (var e in YubiKeyManager.WatchAsync())
-/// {
-///     Console.WriteLine($"{e.Action}: {e.Device.DeviceId} ({e.Device.AvailableConnections})");
-/// }
-/// </code>
-/// <para>
-/// <see cref="WatchAsync"/> is the only device-change stream. Several watchers can run at once: each
-/// enumeration is independent, with its own buffer, and one watcher's cancellation or overflow does
-/// not disturb another.
-/// </para>
 /// </example>
 public static class YubiKeyManager
 {
-    private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyManager));
-
-    // Single manager that encapsulates all lifecycle state
-    private static YubiKeyDeviceManager? _manager;
-    private static readonly Lock _managerLock = new();
+    private static readonly YubiKeyDiscovery Discovery = new(FindYubiKeys.CreateForInterfaces);
 
     /// <summary>
-    /// Ensures the manager exists, creating it lazily if needed.
+    /// Performs fresh one-shot discovery using only the requested interfaces.
     /// </summary>
-    private static YubiKeyDeviceManager EnsureManager()
-    {
-        var mgr = Volatile.Read(ref _manager);
-        if (mgr is not null)
-        {
-            return mgr;
-        }
-
-        lock (_managerLock)
-        {
-            mgr = _manager;
-            if (mgr is not null)
-            {
-                return mgr;
-            }
-
-            _manager = YubiKeyDeviceManager.Create();
-            return _manager;
-        }
-    }
-
-    /// <summary>
-    /// Starts monitoring for YubiKey device changes using the default interval (5 seconds).
-    /// </summary>
-    /// <remarks>
-    /// <para>This method is idempotent - calling it when monitoring is already active has no effect.</para>
-    /// <para>Device listeners are set up to detect hardware events and trigger immediate scans.</para>
-    /// </remarks>
-    /// <seealso cref="StartMonitoring(TimeSpan)"/>
-    /// <seealso cref="StopMonitoring"/>
-    /// <seealso cref="IsMonitoring"/>
-    /// <seealso cref="WatchAsync"/>
-    public static void StartMonitoring() => StartMonitoring(YubiKeyDeviceManager.DefaultMonitoringInterval);
-
-    /// <summary>
-    /// Starts monitoring for YubiKey device changes using the specified interval.
-    /// </summary>
-    /// <param name="interval">The interval between device scans. Must be positive.</param>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when interval is zero or negative.</exception>
-    /// <remarks>
-    /// <para>This method is idempotent - calling it when monitoring is already active has no effect.</para>
-    /// <para>Device listeners are set up to detect hardware events and trigger immediate scans,
-    /// in addition to the periodic interval-based scans.</para>
-    /// </remarks>
-    /// <seealso cref="StartMonitoring()"/>
-    /// <seealso cref="StopMonitoring"/>
-    /// <seealso cref="IsMonitoring"/>
-    public static void StartMonitoring(TimeSpan interval) => EnsureManager().StartMonitoring(interval);
-
-    /// <summary>
-    /// Stops monitoring for YubiKey device changes.
-    /// </summary>
-    /// <remarks>
-    /// <para>This method is idempotent - calling it when monitoring is not active has no effect.</para>
-    /// <para>Waits up to 10 seconds for the monitoring loop to stop. A scan already dispatched to
-    /// native enumeration may continue after this method returns; the stop timeout does not cancel
-    /// native work or prove it has drained.</para>
-    /// <para>Device listeners are disposed and events will no longer be emitted to <see cref="WatchAsync"/>
-    /// consumers until <see cref="StartMonitoring()"/> is called again.</para>
-    /// </remarks>
-    /// <seealso cref="StartMonitoring()"/>
-    /// <seealso cref="IsMonitoring"/>
-    /// <seealso cref="ShutdownAsync"/>
-    public static void StopMonitoring()
-    {
-        var mgr = Volatile.Read(ref _manager);
-        mgr?.StopMonitoring();
-    }
-
-    /// <summary>
-    /// Gets a value indicating whether device monitoring is currently active.
-    /// </summary>
-    /// <value><see langword="true"/> if monitoring is active; otherwise, <see langword="false"/>.</value>
-    /// <seealso cref="StartMonitoring()"/>
-    /// <seealso cref="StopMonitoring"/>
-    public static bool IsMonitoring
-    {
-        get
-        {
-            var mgr = Volatile.Read(ref _manager);
-            return mgr?.IsMonitoring ?? false;
-        }
-    }
-
-    /// <summary>
-    /// Gets an async sequence of device events (arrivals and removals), consumed with
-    /// <c>await foreach</c>. This is the only device-change stream.
-    /// </summary>
-    /// <param name="cancellationToken">Cancels enumeration.</param>
-    /// <returns>A sequence that ends normally when the SDK shuts down.</returns>
-    /// <exception cref="OperationCanceledException">
-    /// Thrown from enumeration when <paramref name="cancellationToken"/> is canceled.
-    /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown from enumeration when a new event arrives while the consumer's 256-event buffer is
-    /// full. Re-enumerate and resynchronize via <see cref="FindAllAsync(CancellationToken)"/>.
-    /// </exception>
-    /// <remarks>
-    /// <para>Events only flow while monitoring is active (see <see cref="StartMonitoring()"/>).</para>
-    /// <para><strong>Subscription starts on first enumeration, not when this method is called.</strong>
-    /// Begin the <c>await foreach</c> before performing an action expected to produce an event —
-    /// events raised between calling this method and entering the loop are not observed. In practice
-    /// this means iterating directly, as in the example below, rather than storing the sequence and
-    /// enumerating it later.</para>
-    /// <para>Each enumeration gets an independent bounded buffer, so concurrent watchers do not
-    /// interfere and a slow consumer cannot stall device monitoring. Overflow faults only the
-    /// affected enumeration.</para>
-    /// <para><strong>Physical-device semantics:</strong> A composite key normally appears as one event,
-    /// but ambiguous evidence can conservatively publish one physical key as multiple devices. For an
-    /// uninterrupted presence with unchanged interface and connection sets and no contradictory known
-    /// serial, the repository retains the object originally published in <see cref="DeviceAction.Added"/>
-    /// so its <see cref="IYubiKey.DeviceId"/> correlates with the eventual
-    /// <see cref="DeviceAction.Removed"/> event.</para>
-    /// </remarks>
-    /// <example>
-    /// <para><strong>Wait for the next YubiKey to be inserted, with a timeout:</strong></para>
-    /// <code>
-    /// using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-    /// YubiKeyManager.StartMonitoring();
-    ///
-    /// try
-    /// {
-    ///     await foreach (var e in YubiKeyManager.WatchAsync(cts.Token))
-    ///     {
-    ///         if (e.Action == DeviceAction.Added)
-    ///         {
-    ///             Console.WriteLine($"Inserted: {e.Device.DeviceId}");
-    ///             break;
-    ///         }
-    ///     }
-    /// }
-    /// catch (OperationCanceledException) when (cts.IsCancellationRequested)
-    /// {
-    ///     Console.WriteLine("Timed out waiting for a YubiKey.");
-    /// }
-    /// </code>
-    /// </example>
-    /// <seealso cref="StartMonitoring()"/>
-    public static IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
-        EnsureManager().WatchAsync(cancellationToken);
-
-    /// <summary>
-    /// Shuts down all YubiKeyManager resources asynchronously.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token to cancel the shutdown operation.</param>
-    /// <returns>A task representing the async shutdown operation.</returns>
-    /// <exception cref="OperationCanceledException">Thrown when the cancellation token is triggered.</exception>
-    /// <remarks>
-    /// <para>This method stops monitoring if active, clears the internal device cache,
-    /// and disposes managed monitoring resources. It is idempotent. Monitor shutdown waits up to
-    /// 10 seconds; if a scan does not finish within that bound, shutdown can return while the old
-    /// scan is still running. Its late result cannot publish into the disposed manager, but this
-    /// return is not proof that native enumeration has finished.</para>
-    /// <para><strong>Testing Pattern:</strong> Call this in test cleanup to reset static state:</para>
-    /// <code>
-    /// public async ValueTask DisposeAsync()
-    /// {
-    ///     await YubiKeyManager.ShutdownAsync();
-    /// }
-    /// </code>
-    /// <para>After shutdown, <see cref="FindAllAsync(CancellationToken)"/> will perform a fresh scan,
-    /// and <see cref="StartMonitoring()"/> can be called again to resume monitoring.</para>
-    /// </remarks>
-    /// <seealso cref="Shutdown"/>
-    /// <seealso cref="StopMonitoring"/>
-    public static async Task ShutdownAsync(CancellationToken cancellationToken = default)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        YubiKeyDeviceManager? mgr;
-        lock (_managerLock)
-        {
-            mgr = _manager;
-            _manager = null;
-        }
-
-        if (mgr is not null)
-        {
-            await mgr.DisposeAsync().ConfigureAwait(false);
-        }
-
-        Logger.LogInformation("YubiKeyManager shutdown complete");
-    }
-
-    /// <summary>
-    /// Shuts down all YubiKeyManager resources synchronously.
-    /// </summary>
-    /// <remarks>
-    /// <para>This is a convenience wrapper around <see cref="ShutdownAsync(CancellationToken)"/>.</para>
-    /// <para>For async contexts, prefer the async version to avoid blocking. A bounded monitor stop
-    /// may abandon an in-flight native scan; return is not proof that all native work ended.</para>
-    /// </remarks>
-    /// <seealso cref="ShutdownAsync"/>
-    public static void Shutdown() => ShutdownAsync().GetAwaiter().GetResult();
-
-    /// <summary>
-    /// Finds all connected YubiKey devices using the static API (no DI required).
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token to cancel the scan.</param>
-    /// <returns>A read-only list of discovered YubiKey devices, or an empty list if none found.</returns>
-    /// <exception cref="OperationCanceledException">Thrown when the cancellation token is triggered.</exception>
-    /// <exception cref="PlatformInteropException">Thrown when the platform API fails.</exception>
-    /// <remarks>
-    /// <para>This method returns cached results after the first call. Use the overload with
-    /// <c>forceRescan: true</c> to always perform a fresh device scan.</para>
-    /// <para>This method scans both SmartCard (PCSC) and HID transports.</para>
-    /// <para>Results normally contain one <see cref="IYubiKey"/> per physical key, but ambiguous discovery
-    /// evidence can conservatively split one key into multiple results. See the device-discovery guarantees
-    /// documentation for the exact platform bounds.</para>
-    /// <para><strong>Race Condition Note:</strong> Results may be stale if devices connect or
-    /// disconnect during the scan. For real-time tracking, use <see cref="WatchAsync"/>
-    /// with <see cref="StartMonitoring()"/>.</para>
-    /// </remarks>
-    /// <seealso cref="FindAllAsync(ConnectionType, bool, CancellationToken)"/>
-    /// <seealso cref="WatchAsync"/>
-    public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken)
-        => FindAllAsync(ConnectionType.All, forceRescan: false, cancellationToken);
-
-    /// <summary>
-    /// Finds all connected YubiKey devices, with options for connection type and rescan behavior.
-    /// </summary>
-    /// <param name="type">The connection type to filter by. <see cref="ConnectionType.Hid"/> includes both HID FIDO and HID OTP devices. Default is <see cref="ConnectionType.All"/>.</param>
-    /// <param name="forceRescan">
-    /// If <c>true</c>, always performs a fresh device scan.
-    /// If <c>false</c> (default), returns cached results unless cache is empty.
+    /// <param name="interfaces">
+    /// Interfaces to enumerate and probe, not a result filter. Flags select places to look, not a
+    /// requirement that each result expose every selected interface. <see cref="ConnectionType.Hid"/>
+    /// includes FIDO and OTP; <see cref="ConnectionType.Unknown"/> scans nothing. Undefined bits are ignored.
     /// </param>
-    /// <param name="cancellationToken">Cancellation token to cancel the scan.</param>
-    /// <returns>A read-only list of discovered YubiKey devices matching the filter, or an empty list if none found.</returns>
-    /// <exception cref="OperationCanceledException">Thrown when the cancellation token is triggered.</exception>
-    /// <exception cref="PlatformInteropException">Thrown when the platform API fails.</exception>
+    /// <param name="cancellationToken">Cancels discovery waits, not already-dispatched native work.</param>
+    /// <returns>
+    /// The YubiKeys found, each a device view exposing only its observed in-scope interfaces, or an empty list.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">The cancellation token is canceled.</exception>
+    /// <exception cref="PlatformInteropException">A requested platform API fails.</exception>
     /// <remarks>
-    /// <para><strong>Caching:</strong> When <paramref name="forceRescan"/> is <c>false</c>:
-    /// <list type="bullet">
-    ///   <item>First call: Performs a fresh scan and caches results</item>
-    ///   <item>Subsequent calls: Returns cached results</item>
-    ///   <item>While monitoring: Returns cached results (monitoring keeps cache fresh)</item>
-    /// </list>
-    /// </para>
-    /// <para><strong>Identity:</strong> For an uninterrupted presence with unchanged physical interfaces and
-    /// <see cref="IYubiKey.AvailableConnections"/>, the cached object retains the <see cref="IYubiKey.DeviceId"/>
-    /// that was originally published unless a fresh known serial proves that different hardware now occupies
-    /// the same interfaces. A connection-set change or proven substitution is republished as removal followed
-    /// by addition. A newly
-    /// constructed object from a fresh scan can have a different evidence-tier-derived ID before repository
-    /// reconciliation; do not use independently obtained scan objects as durable physical-identity records.</para>
-    /// <para><strong>Physical-device bounds:</strong> One result per physical key is the common case, not an
-    /// unconditional promise. When topology, serial, and PID evidence cannot safely correlate interfaces,
-    /// discovery publishes conservative splits rather than risk merging different keys.</para>
-    /// <para><strong>Race Condition Note:</strong> Results may be stale if devices connect or
-    /// disconnect during the scan. For real-time tracking, use <see cref="WatchAsync"/>
-    /// with <see cref="StartMonitoring()"/>.</para>
+    /// Each call uses fresh identity and metadata evidence without changing running monitors. Ordering is
+    /// unspecified. Grouping is conservative: ambiguous evidence can split one physical key into several
+    /// results. Metadata is best-effort last-known data. For full composite keys, discover All and filter
+    /// locally with <see cref="IYubiKey.SupportsConnection"/>. Coordinate YubiKeys from disjoint scopes before
+    /// opening connections: physical-key exclusion relies on overlapping known interface IDs. Cancellation
+    /// bounds waits, not dispatched native work; returned YubiKeys remain usable after discovery ends.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// // Simple usage - returns cached results
-    /// var devices = await YubiKeyManager.FindAllAsync();
-    ///
-    /// // Force a fresh scan
-    /// var freshDevices = await YubiKeyManager.FindAllAsync(forceRescan: true);
-    ///
-    /// // Filter by connection type
-    /// var smartCardDevices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
-    ///
-    /// // Both options
-    /// var freshSmartCard = await YubiKeyManager.FindAllAsync(
-    ///     ConnectionType.SmartCard,
-    ///     forceRescan: true);
-    /// </code>
-    /// </example>
-    /// <seealso cref="FindAllAsync(CancellationToken)"/>
-    /// <seealso cref="ConnectionType"/>
-    /// <seealso cref="WatchAsync"/>
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
-        ConnectionType type = ConnectionType.All,
-        bool forceRescan = false,
-        CancellationToken cancellationToken = default)
-        => EnsureManager().FindAllAsync(type, forceRescan, cancellationToken);
+        ConnectionType interfaces = ConnectionType.All,
+        CancellationToken cancellationToken = default) =>
+        Discovery.FindAllAsync(interfaces, cancellationToken);
 
-    /// <summary>
-    /// Finds the first connected YubiKey that satisfies an optional predicate.
-    /// </summary>
-    /// <param name="predicate">An optional predicate used to select a device.</param>
-    /// <param name="cancellationToken">Cancellation token to cancel discovery.</param>
-    /// <returns>The first matching YubiKey.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when no matching YubiKey is connected.</exception>
+    /// <summary>Discovers now and selects the first YubiKey satisfying an optional predicate.</summary>
+    /// <param name="predicate">Optional device selection predicate, evaluated after discovery.</param>
+    /// <param name="interfaces">Interfaces to enumerate and probe, as for <see cref="FindAllAsync(ConnectionType, CancellationToken)"/>.</param>
+    /// <param name="cancellationToken">Requests discovery cancellation.</param>
+    /// <returns>The first matching device.</returns>
+    /// <exception cref="InvalidOperationException">No matching YubiKey was found.</exception>
+    /// <exception cref="OperationCanceledException">The cancellation token is canceled.</exception>
+    /// <exception cref="PlatformInteropException">A requested platform API fails.</exception>
     /// <remarks>
-    /// This method is a one-shot query over <see cref="FindAllAsync(CancellationToken)"/>. It does not
-    /// wait for insertion, and discovery ordering is not stable. It inherits the caching and cancellation
-    /// behavior of <c>FindAllAsync</c>: the token is passed to discovery, while a cached result may complete
-    /// without observing cancellation. Discovery and predicate exceptions are propagated unchanged.
+    /// Performs one independent discovery operation; does not wait for insertion. Ordering is unspecified.
+    /// Discovery and predicate exceptions propagate unchanged. No monitor or shared cache is initialized.
     /// </remarks>
     public static Task<IYubiKey> FindFirstAsync(
         Func<IYubiKey, bool>? predicate = null,
+        ConnectionType interfaces = ConnectionType.All,
         CancellationToken cancellationToken = default) =>
-        EnsureManager().FindFirstAsync(predicate, cancellationToken);
+        Discovery.FindFirstAsync(predicate, interfaces, cancellationToken);
 
-    /// <summary>
-    /// Finds the first connected YubiKey that satisfies an optional predicate, or returns
-    /// <see langword="null"/> when none matches.
-    /// </summary>
-    /// <param name="predicate">An optional predicate used to select a device.</param>
-    /// <param name="cancellationToken">Cancellation token to cancel discovery.</param>
-    /// <returns>The first matching YubiKey, or <see langword="null"/> when none matches.</returns>
+    /// <summary>Discovers now and selects the first matching YubiKey, or returns null.</summary>
+    /// <param name="predicate">Optional device selection predicate, evaluated after discovery.</param>
+    /// <param name="interfaces">Interfaces to enumerate and probe, as for <see cref="FindAllAsync(ConnectionType, CancellationToken)"/>.</param>
+    /// <param name="cancellationToken">Requests discovery cancellation.</param>
+    /// <returns>The first matching device, or null when none matches.</returns>
+    /// <exception cref="OperationCanceledException">The cancellation token is canceled.</exception>
+    /// <exception cref="PlatformInteropException">A requested platform API fails.</exception>
     /// <remarks>
-    /// This method is a one-shot query over <see cref="FindAllAsync(CancellationToken)"/>. It does not
-    /// wait for insertion, and discovery ordering is not stable. It inherits the caching and cancellation
-    /// behavior of <c>FindAllAsync</c>: the token is passed to discovery, while a cached result may complete
-    /// without observing cancellation. Discovery and predicate exceptions are propagated unchanged.
+    /// Performs one independent discovery operation; does not wait for insertion. Ordering is unspecified.
+    /// Discovery and predicate exceptions propagate unchanged. No monitor or shared cache is initialized.
     /// </remarks>
     public static Task<IYubiKey?> FindFirstOrDefaultAsync(
         Func<IYubiKey, bool>? predicate = null,
+        ConnectionType interfaces = ConnectionType.All,
         CancellationToken cancellationToken = default) =>
-        EnsureManager().FindFirstOrDefaultAsync(predicate, cancellationToken);
+        Discovery.FindFirstOrDefaultAsync(predicate, interfaces, cancellationToken);
+
+    /// <summary>
+    /// Creates a private monitor for the lifetime of this enumeration; replay as <see cref="DeviceAdded"/>,
+    /// then <see cref="SnapshotComplete"/>, then live changes.
+    /// </summary>
+    /// <param name="cancellationToken">Cancels initialization or ends this enumeration and its private monitor.</param>
+    /// <returns>A lazy stream that creates a monitor on the first <c>MoveNextAsync</c>.</returns>
+    /// <remarks>
+    /// Each enumeration runs its own listeners and scans; to share one monitor across several consumers,
+    /// use <see cref="CreateMonitorAsync"/>. All interfaces are scanned; filter changes locally.
+    /// Dispose the enumeration when finished, for example with <c>await foreach</c>; its monitor is disposed
+    /// on completion, cancellation, an exception, or a consumer break. First-scan discovery exceptions
+    /// propagate unchanged from the first <c>MoveNextAsync</c>.
+    /// </remarks>
+    /// <exception cref="OperationCanceledException">The cancellation token is canceled.</exception>
+    /// <exception cref="InvalidOperationException">The subscriber overflowed, or monitoring failed terminally.</exception>
+    /// <exception cref="PlatformInteropException">A requested platform API fails during the first scan.</exception>
+    public static IAsyncEnumerable<DeviceChange> WatchAsync(CancellationToken cancellationToken = default) =>
+        WatchAsync(YubiKeyMonitor.CreateAsync, cancellationToken);
+
+    // Factory injection preserves per-enumeration ownership without mutable global configuration.
+    internal static async IAsyncEnumerable<DeviceChange> WatchAsync(
+        Func<CancellationToken, Task<YubiKeyMonitor>> createMonitor,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await using var monitor = await createMonitor(cancellationToken).ConfigureAwait(false);
+        await foreach (var change in monitor.WatchAsync(cancellationToken).ConfigureAwait(false))
+            yield return change;
+    }
+
+    /// <summary>Creates an independent, active monitor with its initial membership already published.</summary>
+    /// <param name="cancellationToken">Cancels initialization only; after return the caller owns the monitor lifetime.</param>
+    /// <returns>An initialized monitor, including when its first successful snapshot is empty.</returns>
+    /// <remarks>
+    /// Dispose the returned monitor with <c>await using</c> and share it across consumers to use one set of
+    /// listeners and scans. It scans all interfaces even without watchers. Initialization failure or
+    /// cancellation cleans up partial ownership. First-scan discovery exceptions propagate unchanged;
+    /// successful initialization does not guarantee every interface or metadata field was accessible.
+    /// </remarks>
+    /// <exception cref="OperationCanceledException">Initialization was canceled.</exception>
+    /// <exception cref="PlatformInteropException">A requested platform API fails during the first scan.</exception>
+    public static Task<YubiKeyMonitor> CreateMonitorAsync(CancellationToken cancellationToken = default) =>
+        YubiKeyMonitor.CreateAsync(cancellationToken);
 }

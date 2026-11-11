@@ -161,10 +161,6 @@ static async Task<int> ProbeOtpAsync(int serial)
         Console.Error.WriteLine($"FAIL OTP serial={serial}: {ex}");
         return 1;
     }
-    finally
-    {
-        await YubiKeyManager.ShutdownAsync();
-    }
 }
 
 static async Task<int> DiscoverAsync(int? serial)
@@ -343,10 +339,6 @@ static async Task<int> DiscoverAsync(int? serial)
     {
         Console.Error.WriteLine($"FAIL {ex}");
         return 1;
-    }
-    finally
-    {
-        await YubiKeyManager.ShutdownAsync();
     }
 }
 

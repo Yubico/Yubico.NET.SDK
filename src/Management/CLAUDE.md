@@ -30,6 +30,16 @@ The Management module is the **primary interface for YubiKey device configuratio
 
 Read-only device metadata types returned by `GetDeviceInfoAsync` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, `VersionQualifier`) live in `Core/src/Devices` under `Yubico.YubiKit.Core.Devices`.
 
+### CLI selection and freshness
+
+The active standalone `examples/ManagementTool/Cli/Prompts/DeviceSelector.cs` is a thin adapter to the
+concrete selector in `Cli.Shared`, configured with SmartCard and `RequireChoice`. Do not widen it to HID
+because the SDK supports HID: this preserves the actual tool's eligibility, including its reset menu.
+Full All discovery already groups composite views; the old three-entries-per-key rationale is obsolete.
+Unified `YkCommandBase` reuses selection metadata for its context/banner, while Management info/config/reset
+explicitly call `ReadLiveInfoAsync`, carrying `SessionOptions` and never substituting stale context info on failure.
+See [CLI selection policies](../../docs/usage/device-discovery.md#selection-in-the-cli-examples).
+
 ## Test Infrastructure - Advanced Device Filtering
 
 ### The `[WithYubiKey]` Attribute System
@@ -400,6 +410,24 @@ public async Task MyTest(YubiKeyTestState state) =>
 ## Common Test Patterns
 
 ### 1. Read-Only Device Information Tests
+
+`ScopedDiscoveryReadOnlyTests` exercises Core's public `FindAllAsync` and `CachedDeviceInfo` contracts with
+independent live Management reads. Unlike `[WithYubiKey]`'s first-match binding, it loops over all attached
+allow-listed serial-bearing USB fixtures. It owns no background monitor: monitoring can probe disjoint
+sibling interfaces while a scoped connection is held. The applet test base likewise no longer starts tracking. Finish scans
+before opening any live connection, then asynchronously dispose each borrowed session and connection
+before the next one. Its bounded retries report missing metadata and connection contention without
+swallowing unrelated errors. Excluded native call counts and disjoint ownership limits belong in Core's
+deterministic scope tests, not concurrent hardware experiments. The canonical read-only filter and fixture
+requirements are in [device discovery testing](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
+
+`OwnedMonitorReadOnlyTests` additionally requires at least two attached allowed keys and exercises the public
+initialized factory, immediate snapshot, initial replay, subscriber-local cancellation, factory-token
+independence, disposal/recreate, and combined-interface conveniences/no-match predicates. It reuses the
+scoped suite's readiness/authorization and semantic metadata/live-read helpers, not its background lifetime
+(there is none). Incomplete initial snapshots fail immediately. It disposes every monitor before explicit
+live comparisons; do not introduce monitor/live-read overlap to shorten the tests. Read-only operations
+need neither UP nor UV, and these cases never mutate key state or satisfy attended hotplug acceptance.
 
 ```csharp
 [SkippableTheory]
@@ -859,7 +887,7 @@ using var mgmt = await ManagementSession.CreateAsync(
 
 ```csharp
 // Find all connected YubiKeys
-var devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken);
+var devices = await YubiKeyManager.FindAllAsync(cancellationToken);
 foreach (var device in devices)
 {
     var info = await device.GetDeviceInfoAsync(cancellationToken: cancellationToken);

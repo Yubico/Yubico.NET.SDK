@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Core.Devices;
 
@@ -23,9 +22,9 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 /// <remarks>
 ///     This opens a short-lived connection over the interface and reads device info via the Core-owned
-///     <see cref="ProtocolDeviceInfo" />, with a hard per-attempt wall-clock budget so a card that is busy
+///     <see cref="DiscoveryDeviceInfoReader" />, with a hard per-attempt wall-clock budget so a card that is busy
 ///     with a long applet operation (e.g. RSA key generation) cannot stall the scan — the attempt is
-///     abandoned, not aborted (see <see cref="ProtocolDeviceInfo.ReadBoundedAsync" />). It retries transient
+///     abandoned, not aborted (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />). It retries transient
 ///     PC/SC failures (e.g. sharing violations) because, unlike the metadata read, a correct serial here is
 ///     required to tell two same-model keys apart; a budget timeout is NOT retried because it indicates a
 ///     busy card, and retrying would only extend the stall. Any failure is swallowed and reported as
@@ -36,16 +35,12 @@ internal static class DiscoveryIdentityReader
 {
     private const int MaxAttempts = 3;
 
-    // Hard wall-clock budget for one connect+read attempt. Generous: an idle key answers a device-info
-    // read in well under a second; only a card blocked by a long applet operation exceeds this.
-    private static readonly TimeSpan PerAttemptBudget = TimeSpan.FromSeconds(2);
-
     public static async Task<DeviceInfo?> TryReadAsync(
         IYubiKeyConnectionSlot device,
         ConnectionType connection,
         ILogger logger,
         CancellationToken cancellationToken,
-        ProtocolDeviceInfo.ReadScope? scope = null)
+        DiscoveryReadScope? scope = null)
     {
         if (DeviceConnectionRegistry.IsInUse(device.InterfaceId))
         {
@@ -60,11 +55,11 @@ internal static class DiscoveryIdentityReader
         {
             try
             {
-                return await ProtocolDeviceInfo
+                return await DiscoveryDeviceInfoReader
                     .ReadSlotBoundedAsync(
                         device,
                         connection,
-                        PerAttemptBudget,
+                        DiscoveryBudgets.IdentityRead,
                         logger,
                         cancellationToken,
                         waitForWorkerSlot: true,
@@ -94,7 +89,7 @@ internal static class DiscoveryIdentityReader
                     "Discovery identity read for {DeviceId} over {Connection} exceeded its {Budget} budget (device busy?); treating serial as unknown.",
                     device.InterfaceId,
                     connection,
-                    PerAttemptBudget);
+                    DiscoveryBudgets.IdentityRead);
                 return null;
             }
             catch (Exception e)

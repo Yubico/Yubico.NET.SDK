@@ -3,7 +3,6 @@
 // not part of the recurring workflow. See docs/NATIVE-AOT.md for the evidence boundaries.
 
 using System.Globalization;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Ctap2;
@@ -43,7 +42,7 @@ foreach (Type type in linkedModuleEntryTypes)
 
 // Real device discovery through Core's PC/SC + platform interop path — safe with zero attached
 // YubiKeys (returns an empty list rather than throwing).
-IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(CancellationToken.None);
+IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(cancellationToken: CancellationToken.None);
 Console.WriteLine($"Found {devices.Count} YubiKey(s).");
 foreach (IYubiKey device in devices)
 {
@@ -91,13 +90,12 @@ internal static class MonitorVerification
         Console.WriteLine("Follow each prompt, then press Enter. Ctrl+C aborts.");
         Console.WriteLine();
 
-        // Three concurrent watchers over the one public stream. Each subscribes before monitoring
-        // starts, because WatchAsync subscribes on first enumeration rather than at call time.
-        await using var sinkA = Sink.Start("watcher-A");
-        await using var sinkB = Sink.Start("watcher-B");
-        await using var sinkTransient = Sink.Start("watcher-transient");
-
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
+        // All consumers share one explicitly owned monitor; each gets initial replay plus changes.
+        var monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+        await using var monitorLifetime = monitor.ConfigureAwait(false);
+        await using var sinkA = Sink.Start("watcher-A", monitor);
+        await using var sinkB = Sink.Start("watcher-B", monitor);
+        await using var sinkTransient = Sink.Start("watcher-transient", monitor);
 
         var failures = new List<string>();
 
@@ -111,12 +109,12 @@ internal static class MonitorVerification
         var baselineB = sinkB.Snapshot().Count;
 
         Step(2, "Insert USB key A. A composite key (CCID + HID FIDO + HID OTP) must appear ONCE.",
-            sinkA, expected: 1, failures, DeviceAction.Added);
+            sinkA, expected: 1, failures, "Added");
 
         Step(3, "Insert a second USB key (key B).",
-            sinkA, expected: 1, failures, DeviceAction.Added);
+            sinkA, expected: 1, failures, "Added");
 
-        Step(4, "Remove key A.", sinkA, expected: 1, failures, DeviceAction.Removed);
+        Step(4, "Remove key A.", sinkA, expected: 1, failures, "Removed");
 
         Step(5, "Tap/hold the NFC key on the reader (SmartCard-only; contrast with composite USB). "
               + "Skip with Enter if unavailable.", sinkA, expected: -1, failures);
@@ -125,8 +123,8 @@ internal static class MonitorVerification
         Step(6, "Remove key B and wait for Removed output, then reinsert it and wait for Added "
               + "output. Repeat three times.", sinkA, expected: -1, failures);
         var rapidActivity = sinkA.Snapshot().Skip(rapidActivityStart).ToList();
-        if (!rapidActivity.Any(e => e.StartsWith($"{DeviceAction.Added}|", StringComparison.Ordinal))
-            || !rapidActivity.Any(e => e.StartsWith($"{DeviceAction.Removed}|", StringComparison.Ordinal)))
+        if (!rapidActivity.Any(e => e.StartsWith("Added|", StringComparison.Ordinal))
+            || !rapidActivity.Any(e => e.StartsWith("Removed|", StringComparison.Ordinal)))
         {
             failures.Add("step 6: rapid activity did not produce both Added and Removed events");
             Console.WriteLine("  FAIL  step 6: expected both Added and Removed events");
@@ -184,7 +182,7 @@ internal static class MonitorVerification
         // --- Step 8: shutdown with a key attached ---
         Console.WriteLine();
         Prompt(8, "Leave a key attached. Press Enter to shut down.");
-        await YubiKeyManager.ShutdownAsync();
+        await monitor.DisposeAsync().ConfigureAwait(false);
 
         // Shutdown must end every active watcher normally - not cancelled, not faulted.
         foreach (var sink in new[] { sinkA, sinkB })
@@ -207,16 +205,16 @@ internal static class MonitorVerification
 
         // --- Step 9: restart after shutdown ---
         Console.WriteLine();
-        Prompt(9, "Press Enter to restart monitoring (verifies static state recreates).");
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
-        var restarted = YubiKeyManager.IsMonitoring;
-        Console.WriteLine(restarted ? "  ok    monitoring restarted" : "  FAIL  monitoring did not restart");
-        if (!restarted)
+        Prompt(9, "Press Enter to create a new initialized monitor after disposal.");
+        var replacement = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+        await using var replacementLifetime = replacement.ConfigureAwait(false);
+        var count = 0;
+        await foreach (var change in replacement.WatchAsync().ConfigureAwait(false))
         {
-            failures.Add("monitoring did not restart after shutdown");
+            if (change is SnapshotComplete) break;
+            if (change is DeviceAdded) count++;
         }
-
-        await YubiKeyManager.ShutdownAsync();
+        Console.WriteLine($"  ok    new monitor initialized with {count} device(s)");
 
         Console.WriteLine();
         Console.WriteLine("=== Result ===");
@@ -247,16 +245,19 @@ internal static class MonitorVerification
         Sink reference,
         int expected,
         List<string> failures,
-        DeviceAction? expectedAction = null)
+        string? expectedAction = null)
     {
         var before = reference.Snapshot().Count;
         Prompt(number, instruction);
 
         // Allow one additional polling interval before inspecting the event snapshot.
-        Thread.Sleep(TimeSpan.FromSeconds(2));
+        Thread.Sleep(TimeSpan.FromSeconds(6));
 
+        // Updated entries are logged and compared across subscribers, but a late metadata read after an
+        // insertion is not a membership change and must not fail an insertion/removal step.
         var after = reference.Snapshot();
-        var delta = after.Count - before;
+        var membership = after.Skip(before).Where(e => !e.StartsWith("Updated|", StringComparison.Ordinal)).ToList();
+        var delta = membership.Count;
 
         if (expected < 0)
         {
@@ -281,7 +282,7 @@ internal static class MonitorVerification
 
         if (expectedAction is { } action && delta > 0)
         {
-            var last = after[^1];
+            var last = membership[^1];
             if (!last.StartsWith($"{action}|", StringComparison.Ordinal))
             {
                 var message = $"step {number}: expected a {action} event, last was '{last}'";
@@ -342,14 +343,12 @@ internal static class MonitorVerification
 
         private volatile bool _endedNormally;
 
-        private Sink(string name)
+        private Sink(string name, YubiKeyMonitor monitor)
         {
             Name = name;
 
-            // Subscribe synchronously here: WatchAsync subscribes on the first MoveNextAsync, and
-            // that first call runs the iterator up to its first suspension point before returning.
-            // Deferring it to the pump task would race the initial scan.
-            var enumerator = YubiKeyManager.WatchAsync(_cts.Token).GetAsyncEnumerator(_cts.Token);
+            // Replay captures current membership atomically with registration on the first move.
+            var enumerator = monitor.WatchAsync(_cts.Token).GetAsyncEnumerator(_cts.Token);
             var first = enumerator.MoveNextAsync();
 
             _pump = Task.Run(async () =>
@@ -381,7 +380,7 @@ internal static class MonitorVerification
         /// <summary>True once the enumeration ended because the SDK completed the sequence.</summary>
         public bool EndedNormally => _endedNormally;
 
-        public static Sink Start(string name) => new(name);
+        public static Sink Start(string name, YubiKeyMonitor monitor) => new(name, monitor);
 
         /// <summary>Cancels this watcher only and waits for its pump to unwind.</summary>
         public async Task StopAsync()
@@ -417,11 +416,19 @@ internal static class MonitorVerification
             _cts.Dispose();
         }
 
-        private void Record(DeviceEvent value)
+        private void Record(DeviceChange value)
         {
+            var (action, device) = value switch
+            {
+                DeviceAdded added => ("Added", added.Device),
+                DeviceRemoved removed => ("Removed", removed.Device),
+                DeviceUpdated updated => ("Updated", updated.Device),
+                _ => (null, null)
+            };
+            if (device is null) return; // SnapshotComplete marks replay, not device activity.
             var entry = string.Create(
                 CultureInfo.InvariantCulture,
-                $"{value.Action}|{value.Device.DeviceId}");
+                $"{action}|{device.DeviceId}");
 
             lock (_gate)
             {

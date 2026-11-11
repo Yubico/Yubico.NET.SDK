@@ -3,21 +3,11 @@
 
 using System.Buffers;
 using System.Text;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Oath;
 using Yubico.YubiKit.Oath.Examples.OathTool.Commands;
 
-YubiKeyManager.StartMonitoring();
-
-try
-{
-    return await DispatchAsync(args);
-}
-finally
-{
-    await YubiKeyManager.ShutdownAsync();
-}
+return await DispatchAsync(args);
 
 // --- Command dispatch ---
 

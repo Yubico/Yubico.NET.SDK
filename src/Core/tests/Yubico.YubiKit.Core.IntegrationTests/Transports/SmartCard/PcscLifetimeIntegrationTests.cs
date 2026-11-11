@@ -15,7 +15,6 @@
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.SmartCard;
-using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Transports.SmartCard;
 
@@ -23,7 +22,7 @@ public class PcscLifetimeIntegrationTests(ITestOutputHelper output) : IAsyncLife
 {
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]

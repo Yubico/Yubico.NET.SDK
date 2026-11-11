@@ -26,7 +26,7 @@ public class MacOSHidListenerLifetimeTests
     {
         var native = new RecordingManager { InvokeCallback = true };
         using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromMilliseconds(150));
-        listener.DeviceEvent = _ => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
+        listener.Changed = () => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
         listener.Start();
         Assert.True(native.InCallback.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
 
@@ -63,7 +63,7 @@ public class MacOSHidListenerLifetimeTests
     {
         var native = new RecordingManager { HoldCallback = false };
         using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromMilliseconds(150));
-        listener.DeviceEvent = _ => listener.Stop();
+        listener.Changed = () => listener.Stop();
         native.InvokeCallback = true;
         listener.Start();
         Assert.True(native.Cleaned.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
@@ -90,7 +90,7 @@ public class MacOSHidListenerLifetimeTests
     {
         var native = new RecordingManager { InvokeCallback = true };
         var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(2));
-        listener.DeviceEvent = _ => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
+        listener.Changed = () => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
         listener.Start();
         Assert.True(native.InCallback.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         var first = Task.Run(listener.Stop, TestContext.Current.CancellationToken);
@@ -120,7 +120,7 @@ public class MacOSHidListenerLifetimeTests
         // deadline Stop deliberately skips StopRunLoop. Keep the budget well above scheduling
         // jitter and run the second Stop on a dedicated thread, not the (blocked) thread pool.
         var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(1));
-        listener.DeviceEvent = _ => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
+        listener.Changed = () => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
         listener.Start();
         Assert.True(native.InCallback.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         var first = Task.Run(listener.Stop, TestContext.Current.CancellationToken);
@@ -178,7 +178,7 @@ public class MacOSHidListenerLifetimeTests
     {
         var native = new RecordingManager { OpenResult = unchecked((int)0xE00002C1), InvokeCallback = true };
         using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(2));
-        listener.DeviceEvent = _ => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
+        listener.Changed = () => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
         listener.Start();
         Assert.True(native.InCallback.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Equal(DeviceListenerStatus.Started, listener.Status);

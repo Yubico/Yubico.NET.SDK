@@ -34,6 +34,13 @@ public class PhysicalYubiKeyTests
     [InlineData(ConnectionType.HidOtp, ConnectionType.SmartCard, false)]
     [InlineData(ConnectionType.Unknown, ConnectionType.SmartCard, false)]
     [InlineData(ConnectionType.SmartCard, ConnectionType.Unknown, false)]
+    [InlineData(ConnectionType.Hid | ConnectionType.SmartCard, ConnectionType.HidFido, true)]
+    [InlineData(ConnectionType.Hid | ConnectionType.SmartCard, ConnectionType.SmartCard, true)]
+    [InlineData(ConnectionType.All, ConnectionType.Hid, false)]
+    [InlineData((ConnectionType)0x80, (ConnectionType)0x80, false)]
+    [InlineData(ConnectionType.Hid | (ConnectionType)0x80, ConnectionType.HidOtp, true)]
+    [InlineData(ConnectionType.SmartCard | (ConnectionType)0x80, ConnectionType.HidFido, false)]
+    [InlineData((ConnectionType)(-1), ConnectionType.HidOtp, true)]
     public void Matches_ComparesFilterAgainstCapabilitySet(ConnectionType filter, ConnectionType available, bool expected)
     {
         Assert.Equal(expected, filter.Matches(available));

@@ -95,8 +95,21 @@ public class FindPcscDevices : IFindPcscDevices
             return [];
         }
 
-        var result = _sCardApi.SCardListReaders(context, null, out var readerNames);
-        if (result != ErrorCode.SCARD_S_SUCCESS || readerNames.Length == 0) return [];
+        var result = _sCardApi.SCardListReaders(context, null, out var listedNames);
+        if (result != ErrorCode.SCARD_S_SUCCESS || listedNames.Length == 0) return [];
+
+        // Reader names are unique by construction (the resource manager appends a slot index), so a repeat
+        // is a resource-manager fault, not a second reader. The composite merger cannot attribute two CCID
+        // interfaces to one key and would publish every interface standalone. Collapse the repeat here and
+        // leave a trace; added while investigating an unreproduced Linux duplicate-key observation after a
+        // long-lived pcscd restart, which this guard does not claim to explain.
+        var readerNames = listedNames.Distinct(StringComparer.Ordinal).ToArray();
+        if (readerNames.Length != listedNames.Length)
+        {
+            _logger.LogWarning(
+                "PC/SC listed {Duplicates} duplicate reader name(s) in one enumeration; keeping one entry per name.",
+                listedNames.Length - readerNames.Length);
+        }
 
         SCARD_READER_STATE[] readerStates = [];
         try

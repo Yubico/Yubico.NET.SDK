@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     a single pass over the device's available transports in preference order (CCID → OTP HID → FIDO HID)
 ///     with NO retries and a hard total wall-clock budget shared across all transports, so a busy or slow
 ///     interface cannot stall discovery — a read that exceeds the remaining budget is abandoned, not aborted
-///     (see <see cref="ProtocolDeviceInfo.ReadBoundedAsync" />), and the reader falls through to the next
+///     (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />), and the reader falls through to the next
 ///     transport if budget remains. Total failure returns <c>null</c>; the merge never depends on the result.
 ///     Transport preference is CCID → OTP HID → FIDO HID, matching the Rust reference.
 /// </remarks>
@@ -40,7 +40,7 @@ internal static class CompositeMetadataReader
         TimeSpan totalBudget,
         ILogger logger,
         CancellationToken cancellationToken,
-        ProtocolDeviceInfo.ReadScope? scope = null)
+        DiscoveryReadScope? scope = null)
     {
         var clock = Stopwatch.StartNew();
 
@@ -72,7 +72,7 @@ internal static class CompositeMetadataReader
 
             try
             {
-                return await ProtocolDeviceInfo
+                return await DiscoveryDeviceInfoReader
                     .ReadBoundedAsync(device, connection, remaining, logger, cancellationToken, scope: scope)
                     .ConfigureAwait(false);
             }

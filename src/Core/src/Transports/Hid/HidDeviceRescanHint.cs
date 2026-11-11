@@ -19,13 +19,13 @@ namespace Yubico.YubiKit.Core.Transports.Hid;
 /// </summary>
 /// <remarks>
 /// HID listener hints are not authoritative physical-device state. Consumers that need YubiKey
-/// arrivals and removals should use <c>YubiKeyManager.WatchAsync</c>, which emits only
+/// arrivals and removals should use <c>YubiKeyMonitor.WatchAsync</c>, which emits only
 /// after a repository rescan and diff.
 /// </remarks>
 /// <param name="ChangeKind">The platform-reported HID topology change.</param>
 /// <param name="PlatformDeviceId">A platform-specific diagnostic identifier when available.</param>
 /// <param name="DevicePath">A platform-specific path when available.</param>
-public sealed record HidDeviceRescanHint(
+internal sealed record HidDeviceRescanHint(
     HidDeviceChangeKind ChangeKind,
     string? PlatformDeviceId = null,
     string? DevicePath = null)

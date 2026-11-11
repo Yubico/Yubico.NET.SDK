@@ -1,0 +1,15 @@
+{
+  "scope": "Original non-text source documents retained for Core Pass-1 citation evidence; executable/build artifacts remain external.",
+  "files": [
+    {
+      "path": "investigation/B1/sources/pcsc5-v2.01.01.pdf",
+      "kind": "original-specification-pdf",
+      "bytes": 401060,
+      "sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+      "url": "https://pcscworkgroup.com/Download/Specifications/pcsc5_v2.01.01.pdf",
+      "access_utc": "2026-11-11T22:35:02.208132+00:00",
+      "authority": "investigation/B1/sources/manifest.json",
+      "applicability": "Exact revision, actor and claim applicability are recorded in investigation/B1/sources/register.md; retaining the PDF supplies no general conformance claim."
+    }
+  ]
+}

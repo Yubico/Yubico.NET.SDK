@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>    <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>     <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>     <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<title>Config Reference</title>
+<meta content="" name="description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="/vendor/font-awesome/css/all.min.css" rel="stylesheet"/>
+<link href="/vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="/css/main.css" rel="stylesheet"/>
+<link href="/css/pygments.css" rel="stylesheet"/>
+<link href="/css/pygmentsmaterial.css" rel="stylesheet"/>
+<link href="/css/code-tabs.css" rel="stylesheet"/>
+<link href="/css/asciidoc.css" rel="stylesheet"/>
+<link href="/vendor/vanilla-cookieconsent/dist/cookieconsent.css" rel="stylesheet"/>
+<link href="/css/cookieconsent-yubicostyle.css" rel="stylesheet"/>
+<link href="/vendor/jquery.tablesorter/dist/css/theme.default.min.css" rel="stylesheet"/>
+<link href="/favicon-192x192.png" rel="icon" sizes="192x192"/>
+<!--<script src="/vendor/modernizr/dist/modernizr-build.js"></script>-->
+<!-- Google Tag Manager -->
+<script data-cookiecategory="analytics" type="text/plain">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KRP726L');</script>
+<!-- End Google Tag Manager -->
+<!-- Hotjar Tracking Code for www.yubico.com -->
+<script data-cookiecategory="analytics" type="text/plain">
+      (function(h,o,t,j,a,r){
+          h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+          h._hjSettings={hjid:835276,hjsv:6};
+          a=o.getElementsByTagName('head')[0];
+          r=o.createElement('script');r.async=1;
+          r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+          a.appendChild(r);
+      })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    </script>
+</head>
+<body>
+<!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+<nav class="navbar navbar-expand-lg navbar-top navbar-dark">
+<div class="container">
+<a class="navbar-brand" href="/"><img src="/logo.png"/></a>
+<button aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarToggler" data-bs-toggle="collapse" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="navbar-collapse collapse" id="navbarToggler">
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+<li class="nav-item"><a "="" class="nav-link fw-bold" href="/Passkeys">Passkeys</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/WebAuthn">WebAuthn</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/CTAP">CTAP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/OTP">OTP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/OATH">OATH</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/PGP">PGP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/PIV">PIV</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Secure_Domain">Secure Domain</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/YubiHSM2">YubiHSM2</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Software_Projects">Software Projects</a></li>
+</ul>
+<!-- Google Custom Search Engine -->
+<div class="navbar-form navbar-right" id="search-box">
+<script data-cookiecategory="functional" type="text/plain">
+          (function() {
+            var cx = '4d44ab063517e6a2e';
+            var gcse = document.createElement('script');
+            gcse.type = 'text/javascript';
+            gcse.async = true;
+            gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+            '//www.google.com/cse/cse.js?cx=' + cx;
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(gcse, s);
+          })();
+          </script>
+<gcse:searchbox-only></gcse:searchbox-only>
+</div>
+<!-- End Google Custom Search Engine -->
+</div><!--/.navbar-collapse -->
+</div>
+</nav>
+<div class="container">
+<div class="row bg-light">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="/yubikey-manager">yubikey-manager</a></li>
+<li class="breadcrumb-item active">Config Reference</li>
+</ol>
+</div>
+<div class="row">
+<div class="col-md-4" style="padding-left: 0;">
+<!-- Sidebar -->
+<ul class="nav nav-side card card-body bg-light">
+<li class="active"><a href="/yubikey-manager">yubikey-manager</a><ul class="">
+<li><a href="/yubikey-manager/Releases">Releases</a></li>
+<li><a href="/yubikey-manager/Release_Notes.html">Release Notes</a></li>
+<li><a href="/yubikey-manager/Device_Permissions.html">Device Permissions</a></li>
+<li class="active"><a href="/yubikey-manager/Config_Reference.html">Config Reference</a>
+<li><a href="/yubikey-manager/Scripting.html">Scripting</a></li>
+<li><a href="/yubikey-manager/Library_Usage.html">Library Usage</a></li>
+<li><a href="/yubikey-manager/API_Documentation">API Documentation</a></li>
+</li></ul>
+</li></ul>
+<!-- End sidebar -->
+</div>
+<div class="col-md-8">
+<!-- Main content -->
+<div class="sidelinks">
+<ul>
+<li><a href="https://github.com/Yubico/yubikey-manager" rel="noopener noreferrer" target="_blank"><i class="fa-brands fa-github fa-lg"></i> Github</a></li>
+</ul>
+</div>
+<div id="page-content">
+<div class="sect1">
+<h1 id="_yubikey_5_series_configuration_reference_guide">YubiKey 5 Series Configuration Reference Guide</h1>
+<div class="sectionbody">
+<div class="paragraph"><p>This document describes how the YubiKey Capabilities work and the commands that can be used to set and read the current state. The format described below is only available on YubiKey 5 Series and above, and the Security Key by Yubico.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_concepts">Concepts</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_interfaces">Interfaces</h3>
+<div class="paragraph"><p>The physical interfaces available on a device: USB/Lightning and NFC.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_applications">Applications</h3>
+<div class="paragraph"><p>The individual Applications available on a YubiKey device: OTP, U2F, WebAuthn, OpenPGP, PIV, and OATH.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_capabilities">Capabilities</h3>
+<div class="paragraph"><p>Capabilities<sup>[1]</sup> is the collective name used to describe which Applications are and are not enabled on a specific Interface. There are two types of Capabilities: Supported Capabilities and Enabled Capabilities.</p></div>
+<div class="paragraph"><p>[1] <em>Note: YubiHSM 2 has the concept of a <a href="/YubiHSM2/Concepts/Capability.html">Capability</a> which differs from this definition.</em></p></div>
+<div class="sect3">
+<h4 id="_supported_capabilities">Supported Capabilities</h4>
+<div class="paragraph"><p>Supported Capabilities are set during manufacturing. They determine the functionalities of a device. Supported Capabilities cannot be modified.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_enabled_capabilities">Enabled Capabilities</h4>
+<div class="paragraph"><p>Enabled Capabilities are those that are currently available on the device. They are user-configurable and supersede the concept of mode-switching. Modifying Enabled Capabilities can be prevented by setting a Configuration Lock (described below).</p></div>
+</div>
+<div class="sect3">
+<h4 id="_list_of_capabilities">List of Capabilities</h4>
+<div class="paragraph"><p>Each Application is defined as a single bit and is enabled if the bit is set and disabled if not. The list of Capabilities is the following:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Denomination </th>
+<th class="tableblock halign-left valign-top">Value </th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YK_CAPA_OTP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0001</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Application bit for OTP</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YK_CAPA_U2F</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0002</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Application bit for U2F</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YK_CAPA_CCID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0004</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Application bit for CCID interface (not settable)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YK_CAPA_OPGP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0008</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Application bit for OpenPGP</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YK_CAPA_PIV</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0010</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Application bit for PIV</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YK_CAPA_OATH</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0020</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Application bit for OATH</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UNUSED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0040</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unused bit</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UNUSED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0080</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unused bit</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UNUSED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0100</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unused bit</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">YK_CAPA_CTAP2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0200</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Application bit for CTAP 2</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>The Enabled Capabilities are always masked with the Supported Capabilities. For example, this means that even if a user sets the bit corresponding to NFC, this won’t take effect if NFC is not supported in the device.</p></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuration_lock">Configuration Lock</h3>
+<div class="paragraph"><p>The Configuration Lock is a 16 Byte value that can be set by the user or an administrator/crypto officer. If set, changing any user-configurable device information described in this document will not be allowed. The Configuration Lock has to be supplied when sending the SET DEVICE INFORMATION command. By default, the Configuration Lock is disabled with a default value of 00000000000000000000000000000000 (Byte 00, 16 times).</p></div>
+</div>
+<div class="sect2">
+<h3 id="_form_factor">Form Factor</h3>
+<div class="paragraph"><p>Form factor is set during manufacturing and returned as a one-Byte value.
+Currently defined values for this are:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:25%;"/>
+<col style="width:25%;"/>
+<col style="width:25%;"/>
+<col style="width:25%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Form Factor </th>
+<th class="tableblock halign-left valign-top">Standard YubiKey Value </th>
+<th class="tableblock halign-left valign-top">Security Key Value (FW 5.4+) </th>
+<th class="tableblock halign-left valign-top">FIPS YubiKey Value (FW 5.4+)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UNDEFINED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Keychain with USB-A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x01</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x41</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x81</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Nano with USB-A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x02</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x82</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Keychain with USB-C</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x03</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x43</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x83</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Nano with USB-C</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x04</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x84</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Keychain with Lightning and USB-C</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x05</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x85</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bio (USB-A)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x06</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x06</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bio (USB-C)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x07</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x07</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_auto_eject_timeout">Auto-Eject Timeout</h3>
+<div class="paragraph"><p>Auto-Eject Timeout controls the period of inactivity (in seconds) after which the CCID card should be considered ejected.  This is only meaningful if the Device Flag, MODE_FLAG_EJECT, is set.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_challenge_response_timeout">Challenge-Response Timeout</h3>
+<div class="paragraph"><p>Challenge-Response Timeout controls the period of time (in seconds) after which the OTP module Challenge-Response should timeout. The default is 15 seconds.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_device_flags">Device Flags</h3>
+<div class="paragraph"><p>Device Flags control device-global behavior:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Denomination </th>
+<th class="tableblock halign-left valign-top">Value </th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MODE_FLAG_EJECT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x80</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">In pure CCID mode eject/inject the card with button</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MODE_REMOTE_WAKEUP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x40</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enable remote wakeup</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reading_information">Reading Information</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_device_information">Device Information</h3>
+<div class="paragraph"><p>In order to obtain the current Device Information, a GET DEVICE INFORMATION command can be sent. The way the command is specified depends on the interface:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Interface </th>
+<th class="tableblock halign-left valign-top">Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CCID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sent as instruction 0x1d to the Management applet</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OTP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sent as SLOT 0x13</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FIDO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sent as HID command 0xc2 (2nd vendor command with INIT set)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>The format described above is compatible with the Capabilities interface available in YubiKey 4 and expands upon it.</p></div>
+<div class="paragraph"><p>The data returned by the GET DEVICE INFORMATION command always has the same format, regardless of the interface used to obtain it.</p></div>
+<div class="paragraph"><p>The format is:</p></div>
+<div class="paragraph"><p>TOTAL-LENGTH (1 Byte)
+TAG (1 Byte)
+LENGTH (1 Byte)
+VALUE (LENGTH Bytes)</p></div>
+<div class="paragraph"><p>The triplet TAG-LENGTH-VALUE is repeated several times, once for each TAG in the table below. All fields are always present, with the exception of Serial, which is present only if a serial number is set, and the NFC related Capabilities, which are only present if NFC has been enabled during the manufacturing process.</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">TAG </th>
+<th class="tableblock halign-left valign-top">Name </th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x01</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Supported USB Capabilities</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Supported USB Applications</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x03</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enabled USB Capabilities</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Currently enabled USB Applications</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x02</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Serial</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Only present if serial is set, 4 Bytes big-endian</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x04</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Formfactor</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x05</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Firmware version</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Encoded as three Bytes, major-minor-build</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x06</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auto-eject timeout</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2 Bytes big-endian</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x07</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge-response timeout</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x08</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Device flags</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0d</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Supported NFC Capabilities</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Supported NFC Applications, can be none</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0e</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enabled NFC Capabilities</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Currently enabled NFC Applications</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x0a</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Device is locked</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 if Configuration Lock is set, 0 otherwise</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_writing_information">Writing Information</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>All interfaces support writing information using one of the following commands:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Interface </th>
+<th class="tableblock halign-left valign-top">Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CCID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sent as instruction 0x1c to the Management applet</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OTP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sent as SLOT 0x15</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FIDO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sent as HID command 0xc3 (3rd vendor command with INIT set)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p>The format for providing the data to be written is a one Byte total length followed by a list of TAG-LENGTH-VALUE (TLV) triplets as the payload of the interface-specific command shown in the previous table. Multiple information can be set as part of the same interface command simply by concatenating several TLVs.</p></div>
+<div class="sect2">
+<h3 id="_enabled_usb_capabilities">Enabled USB Capabilities</h3>
+<div class="paragraph"><p>TAG = 0x03</p></div>
+<div class="paragraph"><p>Enabled USB Capabilities are set by supplying the complete list of packed bits. A set bit means that the related Application is enabled, a cleared bit means that the related Application is not available through the interface.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_enabled_nfc_capabilities">Enabled NFC Capabilities</h3>
+<div class="paragraph"><p>TAG = 0x0c</p></div>
+<div class="paragraph"><p>Enabled USB Capabilities are set by supplying the complete list of packed bits. A set bit means that the related Application is enabled, a cleared bit means that the related Application is not available through the interface.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_set_configuration_lock">Set Configuration Lock</h3>
+<div class="paragraph"><p>TAG = 0x0a</p></div>
+<div class="paragraph"><p>This is used to set the Configuration Lock. The payload is a 16 Byte value and, depending on the value, one of the following operations is performed:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+If the payload is the Byte 00 repeated 16 times, the Configuration Lock is disabled
+</p>
+</li>
+<li>
+<p>
+If the payload is anything other than Byte 00 repeated 16 times, the value is stored as the Configuration Lock
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_unlock_configuration_lock">Unlock Configuration Lock</h3>
+<div class="paragraph"><p>TAG = 0x0b</p></div>
+<div class="paragraph"><p>This is used to provide the Configuration Lock and to allow changing user-configurable values. The payload has to be the correct 16 Byte Configuration Lock. If the Configuration Lock is disabled, this TAG-LENGTH-VALUE (TLV) has no effect.
+The Unlock Configuration Lock TLV can be present anywhere in the list of TLVs sent as part of the interface command, but it can not be part of a separate command. All interface commands requiring the Configuration Lock must contain an Unlock Configuration Lock TLV.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_auto_eject_timeout_2">Auto-Eject Timeout</h3>
+<div class="paragraph"><p>TAG = 0x06</p></div>
+<div class="paragraph"><p>Auto-Eject Timeout is set by supplying a 2 Bytes Big-Endian value.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_challenge_response_timeout_2">Challenge-Response Timeout</h3>
+<div class="paragraph"><p>TAG = 0x07</p></div>
+<div class="paragraph"><p>Challenge-Response Timeout is set by supplying a 1 Byte value.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_device_flags_2">Device Flags</h3>
+<div class="paragraph"><p>TAG = 0x08</p></div>
+<div class="paragraph"><p>Device Flags is set by supplying a 1 Byte value.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_reset">Reset</h3>
+<div class="paragraph"><p>TAG = 0x0c</p></div>
+<div class="paragraph"><p>This TLV doesn’t require a payload (its length can be zero). If present as part of a list of TLVs forces the device to reboot if all the other TLVs have been correctly parsed. This is useful when enabling or disabling interface. Reboot is determined by the Configuration Lock (missing/wrong Configuration Lock will produce an error and not reboot).</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_device_configuration_concepts">Device Configuration Concepts</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Yubico provides <a href="/yubikey-manager/">ykman</a> which can be used both as a command line configuration tool, and as a python library to interact with the YubiKey.</p></div>
+<div class="paragraph"><p>Ykman represents a YubiKey as a YubiKey object. The YubiKey class is defined in the <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/device.py" rel="noopener noreferrer" target="_blank">device module</a>. Each instance of a YubiKey object has an associated <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/driver.py" rel="noopener noreferrer" target="_blank">driver</a>. The driver module defines the interface for communication with an Application on the device. It specifies the read_config() and write_config() methods. Under the covers, these methods use the TAG-LENGTH-VALUE format, defined in the Capabilities reference, to build the payload that is sent to the device to read and write configuration.</p></div>
+<div class="paragraph"><p>There is a driver implementation for each Application on the device, e.g. <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/fido.py" rel="noopener noreferrer" target="_blank">FIDO</a>, <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/oath.py" rel="noopener noreferrer" target="_blank">OATH</a>, <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/opgp.py" rel="noopener noreferrer" target="_blank">OpenPGP</a>, <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/otp.py" rel="noopener noreferrer" target="_blank">OTP</a>,  and <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/piv.py" rel="noopener noreferrer" target="_blank">PIV</a>. These drivers can communicate with the device over the various interfaces such as <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/driver_ccid.py" rel="noopener noreferrer" target="_blank">CCID</a>, <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/driver_fido.py" rel="noopener noreferrer" target="_blank">HID</a>, or in the case of <a href="https://github.com/Yubico/yubikey-manager/blob/master/ykman/driver_otp.py" rel="noopener noreferrer" target="_blank">OTP</a>, wrap a native c library for reading and writing.</p></div>
+<div class="paragraph"><p>When creating a custom YubiKey configuration software in the python language, use the ykman source code as a guide for reading and writing configurations. If you’d rather integrate with libraries in other languages:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="https://github.com/Yubico/libfido2" rel="noopener noreferrer" target="_blank">Libfido2</a> C library communicates with the FIDO2/WebAuthn and U2F Applications
+</p>
+</li>
+<li>
+<p>
+<a href="https://github.com/Yubico/yubico-piv-tool/blob/master/lib/ykpiv.h" rel="noopener noreferrer" target="_blank">Ykpiv</a> C library communicates with the PIV Application
+</p>
+</li>
+<li>
+<p>
+<a href="https://github.com/Yubico/yubikey-personalization" rel="noopener noreferrer" target="_blank">Ykpers</a> C library communicates with the OTP Application
+</p>
+</li>
+<li>
+<p>
+<a href="https://github.com/Yubico/yubioath-flutter" rel="noopener noreferrer" target="_blank">Yubico Authenticator for Desktop and Android</a> Flutter app for desktop and Android platforms, communicates with the OATH Application
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+<!-- End main content -->
+</div>
+</div>
+</div>
+<footer class="container">
+<div class="row" style="margin-top:30px;padding-top:20px;border-top:1px solid #eee;">
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%">
+<strong><a href="/" style="color:#000">DEV.YUBICO</a></strong><br/>
+<a href="/Passkeys">Passkeys</a><br/>
+<a href="/WebAuthn">WebAuthn</a><br/>
+<a href="/CTAP">CTAP</a><br/>
+<a href="/OTP">OTP</a><br/>
+<a href="/OATH">OATH</a><br/>
+<a href="/PGP">PGP</a><br/>
+<a href="/PIV">PIV</a><br/>
+<a href="/Secure_Domain">Secure Domain</a><br/>
+<a href="/YubiHSM2">YubiHSM2</a><br/>
+<a href="/Software_Projects">Software Projects</a><br/>
+</p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong>RESOURCES</strong><br/>
+<a href="https://www.yubico.com/store/" rel="noopener noreferrer" target="_blank">Buy YubiKeys</a><br/>
+<a href="https://www.yubico.com/blog/" rel="noopener noreferrer" target="_blank">Blog</a><br/>
+<a href="https://www.yubico.com/email-subscription/" rel="noopener noreferrer" target="_blank">Newsletter</a><br/>
+<a href="https://forum.yubico.com/" rel="noopener noreferrer" target="_blank">Yubico Forum Archive</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong><a href="https://www.yubico.com/" rel="noopener noreferrer" style="color:#000" target="_blank">YUBICO.COM</a></strong><br/>
+<a href="https://www.yubico.com/why-yubico/" rel="noopener noreferrer" target="_blank">Why Yubico</a><br/>
+<a href="https://www.yubico.com/about/about-us/" rel="noopener noreferrer" target="_blank">About Yubico</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/cookie-notice/" rel="noopener noreferrer" target="_blank">Cookie</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/" rel="noopener noreferrer" target="_blank">Legal</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/privacy-notice/" rel="noopener noreferrer" target="_blank">Privacy</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/yubico-website-terms-conditions/" rel="noopener noreferrer" target="_blank">Terms of use</a><br/>
+<a href="https://www.yubico.com/trust/" rel="noopener noreferrer" target="_blank">Trust</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:1em;font-size:90%"> </p>
+<table align="right" cellpadding="0" cellspacing="0" style="color:#9aca3c">
+<tbody>
+<tr>
+<td style="padding:10px"><a href="https://www.yubico.com/feed/" rel="noopener noreferrer" target="_blank" title="Blog RSS"><i class="fa fa-rss"></i></a></td>
+<td style="padding:10px"><a href="https://twitter.com/yubico" rel="noopener noreferrer" target="_blank" title="Twitter"><i class="fa-brands fa-twitter"></i></a></td>
+<td style="padding:10px"><a href="https://www.facebook.com/Yubikey" rel="noopener noreferrer" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a></td>
+<td style="padding:10px"><a href="https://www.youtube.com/c/Yubico" rel="noopener noreferrer" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a></td>
+<td style="padding:10px 0 10px 10px"><a href="https://github.com/Yubico" rel="noopener noreferrer" target="_blank" title="GitHub"><i class="fa-brands fa-github"></i></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</footer>
+<script src="/vendor/jquery/dist/jquery.min.js"></script>
+<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/vendor/jquery.tablesorter/dist/js/jquery.tablesorter.min.js"></script>
+<script src="/js/code-tabs.js"></script>
+<script src="/js/main.js"></script>
+<!-- Cookie Consent -->
+<script defer="" src="/vendor/vanilla-cookieconsent/dist/cookieconsent.js"></script>
+<script defer="" src="/js/cookieconsent-init.js"></script>
+<!-- End Cookie Consent -->
+</body>
+</html>

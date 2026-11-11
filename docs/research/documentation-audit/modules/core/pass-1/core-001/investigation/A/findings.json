@@ -1,0 +1,959 @@
+[
+  {
+    "id": "CORE-A-C001",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Qualifier XML uses signed rather than unsigned upper limit",
+    "classification": [
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/VersionQualifier.cs",
+        "first_line": 35,
+        "last_line": 60
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/VersionQualifier.cs"
+    ],
+    "exact_reopening_trigger": "Iteration numeric range, public parameter representation, or wire iteration interpretation changes.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C002",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Public metadata/default/unit/flag contracts need reference coverage",
+    "classification": [
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 21,
+        "last_line": 69
+      },
+      {
+        "path": "src/Core/src/Devices/ConnectionType.cs",
+        "first_line": 17,
+        "last_line": 26
+      },
+      {
+        "path": "src/Core/src/Transport.cs",
+        "first_line": 17,
+        "last_line": 24
+      },
+      {
+        "path": "src/Core/src/Devices/Feature.cs",
+        "first_line": 17,
+        "last_line": 42
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceCapabilities.cs",
+        "first_line": 57,
+        "last_line": 61
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PhysicalYubiKeyTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/DeviceInfo.cs",
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/usage/device-discovery.md",
+      "src/Management/src/IManagementSession.cs"
+    ],
+    "exact_reopening_trigger": "Any decoded field, absence default, units, flag interpretation, or capability carrier changes.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C003",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "DeviceInfo timeout aliases disposable TLV memory",
+    "classification": [
+      "implementation",
+      "ownership-decision",
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 129,
+        "last_line": 199
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 71,
+        "last_line": 126
+      },
+      {
+        "path": "src/Core/src/Abstractions/IYubiKey.cs",
+        "first_line": 121,
+        "last_line": 125
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/DeviceInfo.cs",
+      "src/Core/src/Devices/DeviceInfoReader.cs",
+      "src/Core/src/Abstractions/IYubiKey.cs",
+      "src/Core/README.md",
+      "docs/usage/device-discovery.md",
+      "docs/architecture/physical-device-model.md"
+    ],
+    "exact_reopening_trigger": "Decoded timeout becomes independently owned/scalar, input disposal behavior changes, or reader TLV cleanup is introduced.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C004",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "FIPS tags use ordinary application mapping",
+    "classification": [
+      "implementation",
+      "source-gap"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 148,
+        "last_line": 154
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 232,
+        "last_line": 240
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 327,
+        "last_line": 360
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+        "first_line": 113,
+        "last_line": 130
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/DeviceInfo.cs",
+      "src/Tests.Shared/YubiKeyTestState.cs",
+      "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+      "src/Management/README.md"
+    ],
+    "exact_reopening_trigger": "Authoritative FIPS tag profile or mapping/width fix plus integrated nonzero tag vectors becomes available.",
+    "inherited_aliases": [
+      "management-001:MGMT-XREF-001",
+      "audit-v2-20261022-20261031:deviceinfo-FIPS-residual"
+    ],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C005",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Flagged form factors differ from base-enum filters",
+    "classification": [
+      "implementation",
+      "representation-decision"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 142,
+        "last_line": 146
+      },
+      {
+        "path": "src/Core/src/Devices/FormFactor.cs",
+        "first_line": 17,
+        "last_line": 58
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/FormFactor.cs",
+      "src/Core/src/Devices/DeviceInfo.cs",
+      "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+      "src/Management/README.md"
+    ],
+    "exact_reopening_trigger": "Normalized/raw form-factor design is decided and flagged/unknown vectors verify it.",
+    "inherited_aliases": [
+      "management-001:MGMT-XREF-002"
+    ],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C006",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Variable-width application bits truncate and signed-extend",
+    "classification": [
+      "implementation",
+      "numeric-width-decision"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 232,
+        "last_line": 240
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 353,
+        "last_line": 360
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs",
+        "first_line": 254,
+        "last_line": 265
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/DeviceInfo.cs",
+      "src/Core/src/Devices/DeviceCapabilities.cs",
+      "src/Tests.Shared/YubiKeyTestState.cs",
+      "src/Management/README.md"
+    ],
+    "exact_reopening_trigger": "Supported unsigned width/raw preservation is decided and nonzero trailing/high-bit tests cover it.",
+    "inherited_aliases": [
+      "audit-v2-20261022-20261031:deviceinfo-wide-app-bits"
+    ],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C007",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "IYubiKey XML retains old no-event/repository wording",
+    "classification": [
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Abstractions/IYubiKey.cs",
+        "first_line": 49,
+        "last_line": 52
+      },
+      {
+        "path": "src/Core/src/Abstractions/IYubiKey.cs",
+        "first_line": 70,
+        "last_line": 74
+      },
+      {
+        "path": "src/Core/src/Abstractions/IYubiKey.cs",
+        "first_line": 90,
+        "last_line": 97
+      },
+      {
+        "path": "src/Core/src/Abstractions/IYubiKey.cs",
+        "first_line": 121,
+        "last_line": 125
+      },
+      {
+        "path": "src/Core/src/Abstractions/IYubiKey.cs",
+        "first_line": 155,
+        "last_line": 158
+      },
+      {
+        "path": "docs/architecture/physical-device-model.md",
+        "first_line": 37,
+        "last_line": 39
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SnapshotDiffTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Abstractions/IYubiKey.cs",
+      "docs/architecture/physical-device-model.md"
+    ],
+    "exact_reopening_trigger": "Monitor retention, serial latch, metadata update notification, or interface-group semantics change.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C008",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Internal read comments overstate budget/retry and old ingress behavior",
+    "classification": [
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/DiscoveryBudgets.cs",
+        "first_line": 29,
+        "last_line": 30
+      },
+      {
+        "path": "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+        "first_line": 23,
+        "last_line": 32
+      },
+      {
+        "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+        "first_line": 145,
+        "last_line": 151
+      },
+      {
+        "path": "src/Core/src/Devices/DiscoveryReadScope.cs",
+        "first_line": 19,
+        "last_line": 22
+      },
+      {
+        "path": "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+        "first_line": 35,
+        "last_line": 38
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+        "first_line": 62,
+        "last_line": 67
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+        "first_line": 252,
+        "last_line": 254
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryReadSchedulingTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/TransientScanRetryTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/DiscoveryBudgets.cs",
+      "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+      "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "src/Core/src/Devices/DiscoveryReadScope.cs",
+      "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+      "docs/architecture/event-driven-device-discovery.md"
+    ],
+    "exact_reopening_trigger": "Admission, retry classification, invalidation ordering, native transfer, or wait budgets change.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C009",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Topology fallback is not a latency or universal OS-impossibility proof",
+    "classification": [
+      "documentation",
+      "qualification"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/FindYubiKeys.cs",
+        "first_line": 318,
+        "last_line": 321
+      },
+      {
+        "path": "src/Core/src/Devices/IDeviceTopologyResolver.cs",
+        "first_line": 24,
+        "last_line": 35
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+        "first_line": 212,
+        "last_line": 221
+      },
+      {
+        "path": "docs/architecture/device-discovery-guarantees.md",
+        "first_line": 398,
+        "last_line": 413
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/IDeviceTopologyResolver.cs",
+      "src/Core/src/Devices/FindYubiKeys.cs",
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "exact_reopening_trigger": "Topology implementation/API support, synchronous execution boundary, RDP behavior, or exact Windows native/hardware evidence changes.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C010",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Merge test prose retains completed TODO and overstates assertions",
+    "classification": [
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+        "first_line": 67,
+        "last_line": 67
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+        "first_line": 25,
+        "last_line": 41
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+        "first_line": 338,
+        "last_line": 347
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+        "first_line": 469,
+        "last_line": 474
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+        "first_line": 522,
+        "last_line": 527
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+        "first_line": 629,
+        "last_line": 632
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+        "first_line": 768,
+        "last_line": 783
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+      "docs/architecture/device-discovery-guarantees.md"
+    ],
+    "exact_reopening_trigger": "Merge tier rules, contestant heuristics, conservation/determinism oracle, or actual topology vector changes.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C011",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Global no-wrong-grouping assurance conflicts with accepted partial bound",
+    "classification": [
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "docs/architecture/device-discovery-guarantees.md",
+        "first_line": 36,
+        "last_line": 37
+      },
+      {
+        "path": "docs/architecture/device-discovery-guarantees.md",
+        "first_line": 372,
+        "last_line": 375
+      },
+      {
+        "path": "docs/architecture/physical-device-model.md",
+        "first_line": 3,
+        "last_line": 8
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs"
+    ],
+    "reopening_paths": [
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/architecture/physical-device-model.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "exact_reopening_trigger": "Grouping, slot-to-serial binding, or post-merge identity-verification policy changes.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C012",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Hardware descriptions exceed integration-test oracles",
+    "classification": [
+      "documentation",
+      "test-adequacy",
+      "qualification"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+        "first_line": 24,
+        "last_line": 37
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+        "first_line": 318,
+        "last_line": 320
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+        "first_line": 21,
+        "last_line": 28
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+        "first_line": 19,
+        "last_line": 22
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+        "first_line": 58,
+        "last_line": 60
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+        "first_line": 27,
+        "last_line": 52
+      },
+      {
+        "path": "docs/architecture/device-discovery-guarantees.md",
+        "first_line": 343,
+        "last_line": 346
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/architecture/device-identity.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "exact_reopening_trigger": "Hardware harness/oracles change or a new exact source/OS/device/firmware/transport execution record is accepted.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C013",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Shared authorization and placeholder prose differ from source",
+    "classification": [
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "first_line": 73,
+        "last_line": 109
+      },
+      {
+        "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+        "first_line": 17,
+        "last_line": 50
+      },
+      {
+        "path": "src/Tests.Shared/YubiKeyTestState.cs",
+        "first_line": 46,
+        "last_line": 54
+      },
+      {
+        "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+        "first_line": 175,
+        "last_line": 308
+      }
+    ],
+    "test_oracle_paths": [],
+    "reopening_paths": [
+      "src/Tests.Shared/CLAUDE.md",
+      "src/Tests.Shared/README.md",
+      "src/Tests.Shared/IYubiKeyFilter.cs",
+      "src/Tests.Shared/YubiKeyTestState.cs"
+    ],
+    "exact_reopening_trigger": "Fixture initialization, authorization order, live-versus-cached metadata, placeholder binding, or no-authorized-device policy changes.",
+    "inherited_aliases": [
+      "management-001:MGMT-XREF-003"
+    ],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C014",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Malformed firmware filters remain ignored pending inherited decision",
+    "classification": [
+      "decision"
+    ],
+    "citations": [
+      {
+        "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+        "first_line": 78,
+        "last_line": 84
+      }
+    ],
+    "test_oracle_paths": [],
+    "reopening_paths": [
+      "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+      "src/Tests.Shared/README.md",
+      "src/Management/tests/CLAUDE.md"
+    ],
+    "exact_reopening_trigger": "Strict malformed-filter policy is accepted or the Management caller's two-component criterion changes.",
+    "inherited_aliases": [
+      "management-001:MGMT-IMP-009"
+    ],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C015",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Development-version compatibility policy is stated as hardware fact",
+    "classification": [
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/FirmwareVersion.cs",
+        "first_line": 46,
+        "last_line": 76
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FeatureTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/FirmwareVersion.cs",
+      "src/Core/src/Devices/Feature.cs",
+      "src/Core/src/Devices/DeviceInfo.cs",
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md"
+    ],
+    "exact_reopening_trigger": "Major-zero optimism, default version semantics, feature checks, or effective qualifier precedence changes.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C016",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Raw/unknown metadata preservation and duplicate-tag error contract need a decision",
+    "classification": [
+      "representation-decision",
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 129,
+        "last_line": 137
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "first_line": 274,
+        "last_line": 289
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/DeviceInfo.cs",
+      "src/Management/src/IManagementSession.cs",
+      "docs/usage/device-discovery.md"
+    ],
+    "exact_reopening_trigger": "A raw-response escape hatch, unknown-field/qualifier policy, duplicate-tag handling, or metadata equality changes.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C017",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Metadata cache lacks identity cache's PID qualification",
+    "classification": [
+      "implementation",
+      "documentation"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/FindYubiKeys.cs",
+        "first_line": 423,
+        "last_line": 467
+      },
+      {
+        "path": "src/Core/src/Devices/FindYubiKeys.cs",
+        "first_line": 476,
+        "last_line": 485
+      },
+      {
+        "path": "src/Core/src/Devices/FindYubiKeys.cs",
+        "first_line": 538,
+        "last_line": 539
+      },
+      {
+        "path": "docs/architecture/physical-device-model.md",
+        "first_line": 110,
+        "last_line": 114
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/FindYubiKeys.cs",
+      "docs/architecture/physical-device-model.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "exact_reopening_trigger": "Metadata PID validity is decided or a stable-ID/PID-change metadata vector is added; retain hotplug/absence controls.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C018",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Toolchain filter comments promise an AND combination absent from the translator",
+    "classification": [
+      "documentation",
+      "implementation-candidate",
+      "version-source-gap"
+    ],
+    "citations": [
+      {
+        "path": "scripts/toolchain/TestTargets.cs",
+        "first_line": 156,
+        "last_line": 257
+      }
+    ],
+    "test_oracle_paths": [],
+    "reopening_paths": [
+      "scripts/toolchain/TestTargets.cs",
+      "TOOLCHAIN.md",
+      "docs/TESTING.md"
+    ],
+    "exact_reopening_trigger": "Installed xUnit 3.0.0 filtering semantics are pinned and a pure translator/runner-list experiment verifies repeated same-kind AND inputs.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C019",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Shared project-discovery and category documentation retain stale scope claims",
+    "classification": [
+      "documentation",
+      "boundary-qualification"
+    ],
+    "citations": [
+      {
+        "path": "TOOLCHAIN.md",
+        "first_line": 246,
+        "last_line": 254
+      },
+      {
+        "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+        "first_line": 83,
+        "last_line": 90
+      }
+    ],
+    "test_oracle_paths": [],
+    "reopening_paths": [
+      "TOOLCHAIN.md",
+      "src/Tests.Shared/Infrastructure/TestCategories.cs"
+    ],
+    "exact_reopening_trigger": "Project discovery layout changes or the owning CTAP boundary establishes the precise applet-reset and power-cycle policy.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C020",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Canonical comparator and historical platform claims need exact provenance",
+    "classification": [
+      "qualification",
+      "source-gap"
+    ],
+    "citations": [
+      {
+        "path": "docs/architecture/device-identity.md",
+        "first_line": 29,
+        "last_line": 58
+      },
+      {
+        "path": "docs/research/native-aot-readiness-data.md",
+        "first_line": 255,
+        "last_line": 297
+      },
+      {
+        "path": "docs/research/native-aot-readiness-data.md",
+        "first_line": 376,
+        "last_line": 443
+      }
+    ],
+    "test_oracle_paths": [],
+    "reopening_paths": [
+      "docs/architecture/device-identity.md",
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/research/native-aot-readiness-data.md",
+      "docs/research/native-aot-readiness.md"
+    ],
+    "exact_reopening_trigger": "Original Rust repository/7d7a7455 identity and passages or exact historical host/OS/device/run artifacts become available; current-source claims change.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  },
+  {
+    "id": "CORE-A-C021",
+    "status": "candidate",
+    "accepted_finding_id": null,
+    "title": "Successful serial-less identities are cached despite retry prose",
+    "classification": [
+      "documentation",
+      "cache-policy-decision"
+    ],
+    "citations": [
+      {
+        "path": "src/Core/src/Devices/FindYubiKeys.cs",
+        "first_line": 84,
+        "last_line": 86
+      },
+      {
+        "path": "src/Core/src/Devices/FindYubiKeys.cs",
+        "first_line": 364,
+        "last_line": 383
+      },
+      {
+        "path": "docs/architecture/device-discovery-guarantees.md",
+        "first_line": 39,
+        "last_line": 48
+      }
+    ],
+    "test_oracle_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Devices/FindYubiKeys.cs",
+      "src/Core/src/Abstractions/IYubiKey.cs",
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "exact_reopening_trigger": "Successful serial-less identity-cache expiry is decided and an omitted-serial success vector with invalidation controls verifies it.",
+    "inherited_aliases": [],
+    "counting": "nonadditive where inherited aliases identify the same question",
+    "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+    "implementation_state": "unchanged; no runtime closure implied",
+    "execution_state": "source/assertion inspection only; no new SDK or physical run",
+    "detail": "investigation-A.md#local-candidates-and-reopening-map"
+  }
+]

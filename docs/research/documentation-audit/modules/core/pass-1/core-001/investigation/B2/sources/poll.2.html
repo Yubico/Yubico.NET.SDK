@@ -1,0 +1,647 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>poll(2) - Linux manual page</title>
+    <link rel="stylesheet" type="text/css" href="../../../style.css" title="style" />
+    <link rel="stylesheet" type="text/css" href="../style.css" title="style" />
+</head>
+
+<body>
+
+<div class="page-top"><a id="top_of_page"></a></div>
+<!--%%%TOP_BAR%%%-->
+    <div class="nav-bar">
+        <table class="nav-table">
+            <tr>
+                <td class="nav-cell">
+                    <p class="nav-text">
+                        <a href="../../../index.html">man7.org</a> &gt; Linux &gt; <a href="../index.html">man-pages</a>
+                    </p>
+                </td>
+                <td class="training-cell">
+                    <p class="training-text"><a class="training-link" href="http://man7.org/training/">Linux/UNIX system programming training</a></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+<hr class="nav-end" />
+
+<!--%%%PAGE_START%%%-->
+<h1>poll(2) &mdash; Linux manual page</h1>
+
+
+<table class="sec-table">
+<tr>
+    <td>
+        <p class="section-dir">
+<a href="#NAME">NAME</a> | <a href="#LIBRARY">LIBRARY</a> | <a href="#SYNOPSIS">SYNOPSIS</a> | <a href="#DESCRIPTION">DESCRIPTION</a> | <a href="#RETURN_VALUE">RETURN&nbsp;VALUE</a> | <a href="#ERRORS">ERRORS</a> | <a href="#VERSIONS">VERSIONS</a> | <a href="#STANDARDS">STANDARDS</a> | <a href="#HISTORY">HISTORY</a> | <a href="#NOTES">NOTES</a> | <a href="#BUGS">BUGS</a> | <a href="#EXAMPLES">EXAMPLES</a> | <a href="#SEE_ALSO">SEE&nbsp;ALSO</a> | <a href="#COLOPHON">COLOPHON</a>
+        </p>
+    </td>
+</tr>
+<tr>
+    <td class="search-box">
+        <div class="man-search-box">
+
+            <form method="get" action="https://www.google.com/search">
+                <fieldset class="man-search">
+                    <input type="text" name="q" size="10" maxlength="255" value="" />
+                    <input type="hidden" name="sitesearch" value="man7.org/linux/man-pages" />
+                    <input type="submit" name="sa" value="Search online pages" />
+                </fieldset>
+            </form>
+
+        </div>
+    </td>
+    <td> </td>
+</tr>
+</table>
+
+<!--%%%TEXT_START%%%-->
+<pre>
+<span class="headline"><i>poll</i>(2)                    System Calls Manual                    <i>poll</i>(2)</span>
+</pre>
+<h2><a id="NAME" href="#NAME"></a>NAME  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       poll, ppoll - wait for some event on a file descriptor
+</pre>
+<h2><a id="LIBRARY" href="#LIBRARY"></a>LIBRARY  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       Standard C library (<i>libc</i>, <i>-lc</i>)
+</pre>
+<h2><a id="SYNOPSIS" href="#SYNOPSIS"></a>SYNOPSIS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>#include &lt;poll.h&gt;</b>
+
+       <b>int poll(struct pollfd *</b><i>fds</i><b>, nfds_t </b><i>nfds</i><b>, int </b><i>timeout</i><b>);</b>
+
+       <b>#define _GNU_SOURCE         </b>/* See feature_test_macros(7) */
+       <b>#include &lt;poll.h&gt;</b>
+
+       <b>int ppoll(struct pollfd *</b><i>fds</i><b>, nfds_t </b><i>nfds</i><b>,</b>
+                 <b>const struct timespec *_Nullable </b><i>tmo_p</i><b>,</b>
+                 <b>const sigset_t *_Nullable </b><i>sigmask</i><b>);</b>
+</pre>
+<h2><a id="DESCRIPTION" href="#DESCRIPTION"></a>DESCRIPTION  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>poll</b>() performs a similar task to <a href="../man2/select.2.html">select(2)</a>: it waits for one of a
+       set of file descriptors to become ready to perform I/O.  The
+       Linux-specific <a href="../man7/epoll.7.html">epoll(7)</a> API performs a similar task, but offers
+       features beyond those found in <b>poll</b>().
+
+       The set of file descriptors to be monitored is specified in the
+       <i>fds</i> argument, which is an array of structures of the following
+       form:
+
+           struct pollfd {
+               int   fd;         /* file descriptor */
+               short events;     /* requested events */
+               short revents;    /* returned events */
+           };
+
+       The caller should specify the number of items in the <i>fds</i> array in
+       <i>nfds</i>.
+
+       The field <i>fd</i> contains a file descriptor for an open file.  If this
+       field is negative, then the corresponding <i>events</i> field is ignored
+       and the <i>revents</i> field returns zero.  (This provides an easy way of
+       ignoring a file descriptor for a single <b>poll</b>() call: simply set
+       the <i>fd</i> field to its bitwise complement.)
+
+       The field <i>events</i> is an input parameter, a bit mask specifying the
+       events the application is interested in for the file descriptor
+       <i>fd</i>.  This field may be specified as zero, in which case the only
+       events that can be returned in <i>revents</i> are <b>POLLHUP</b>, <b>POLLERR</b>, and
+       <b>POLLNVAL </b>(see below).
+
+       The field <i>revents</i> is an output parameter, filled by the kernel
+       with the events that actually occurred.  The bits returned in
+       <i>revents</i> can include any of those specified in <i>events</i>, or one of
+       the values <b>POLLERR</b>, <b>POLLHUP</b>, or <b>POLLNVAL</b>.  (These three bits are
+       meaningless in the <i>events</i> field, and will be set in the <i>revents</i>
+       field whenever the corresponding condition is true.)
+
+       If none of the events requested (and no error) has occurred for
+       any of the file descriptors, then <b>poll</b>() blocks until one of the
+       events occurs.
+
+       The <i>timeout</i> argument specifies the number of milliseconds that
+       <b>poll</b>() should block waiting for a file descriptor to become ready.
+       The call will block until either:
+
+       •  a file descriptor becomes ready;
+
+       •  the call is interrupted by a signal handler; or
+
+       •  the timeout expires.
+
+       Being "ready" means that the requested operation will not block;
+       thus, <b>poll</b>()ing regular files, block devices, and other files with
+       no reasonable polling semantic <i>always</i> returns instantly as ready
+       to read and write.
+
+       Note that the <i>timeout</i> interval will be rounded up to the system
+       clock granularity, and kernel scheduling delays mean that the
+       blocking interval may overrun by a small amount.  Specifying a
+       negative value in <i>timeout</i> means an infinite timeout.  Specifying a
+       <i>timeout</i> of zero causes <b>poll</b>() to return immediately, even if no
+       file descriptors are ready.
+
+       The bits that may be set/returned in <i>events</i> and <i>revents</i> are
+       defined in <i>&lt;poll.h&gt;</i>:
+
+       <b>POLLIN </b>There is data to read.
+
+       <b>POLLPRI</b>
+              There is some exceptional condition on the file descriptor.
+              Possibilities include:
+
+              •  There is out-of-band data on a TCP socket (see <a href="../man7/tcp.7.html">tcp(7)</a>).
+
+              •  A pseudoterminal master in packet mode has seen a state
+                 change on the slave (see <a href="../man2/ioctl_tty.2.html">ioctl_tty(2)</a>).
+
+              •  A <i>cgroup.events</i> file has been modified (see <a href="../man7/cgroups.7.html">cgroups(7)</a>).
+
+       <b>POLLOUT</b>
+              Writing is now possible, though a write larger than the
+              available space in a socket or pipe will still block
+              (unless <b>O_NONBLOCK </b>is set).
+
+       <b>POLLRDHUP </b>(since Linux 2.6.17)
+              Stream socket peer closed connection, or shut down writing
+              half of connection.  The <b>_GNU_SOURCE </b>feature test macro
+              must be defined (before including <i>any</i> header files) in
+              order to obtain this definition.
+
+       <b>POLLERR</b>
+              Error condition (only returned in <i>revents</i>; ignored in
+              <i>events</i>).  This bit is also set for a file descriptor
+              referring to the write end of a pipe when the read end has
+              been closed.
+
+       <b>POLLHUP</b>
+              Hang up (only returned in <i>revents</i>; ignored in <i>events</i>).
+              Note that when reading from a channel such as a pipe or a
+              stream socket, this event merely indicates that the peer
+              closed its end of the channel.  Subsequent reads from the
+              channel will return 0 (end of file) only after all
+              outstanding data in the channel has been consumed.
+
+       <b>POLLNVAL</b>
+              Invalid request: <i>fd</i> not open (only returned in <i>revents</i>;
+              ignored in <i>events</i>).
+
+       When compiling with <b>_XOPEN_SOURCE </b>defined, one also has the
+       following, which convey no further information beyond the bits
+       listed above:
+
+       <b>POLLRDNORM</b>
+              Equivalent to <b>POLLIN</b>.
+
+       <b>POLLRDBAND</b>
+              Priority band data can be read (generally unused on Linux).
+
+       <b>POLLWRNORM</b>
+              Equivalent to <b>POLLOUT</b>.
+
+       <b>POLLWRBAND</b>
+              Priority data may be written.
+
+       Linux also knows about, but does not use <b>POLLMSG</b>.
+
+   <b>ppoll()</b>
+       The relationship between <b>poll</b>() and <b>ppoll</b>() is analogous to the
+       relationship between <a href="../man2/select.2.html">select(2)</a> and <a href="../man2/pselect.2.html">pselect(2)</a>: like <a href="../man2/pselect.2.html">pselect(2)</a>,
+       <b>ppoll</b>() allows an application to safely wait until either a file
+       descriptor becomes ready or until a signal is caught.
+
+       Other than the difference in the precision of the <i>timeout</i>
+       argument, the following <b>ppoll</b>() call:
+
+           ready = ppoll(&amp;fds, nfds, tmo_p, &amp;sigmask);
+
+       is nearly equivalent to <i>atomically</i> executing the following calls:
+
+           sigset_t origmask;
+           int timeout;
+
+           timeout = (tmo_p == NULL) ? -1 :
+                     (tmo_p-&gt;tv_sec * 1000 + tmo_p-&gt;tv_nsec / 1000000);
+           pthread_sigmask(SIG_SETMASK, &amp;sigmask, &amp;origmask);
+           ready = poll(&amp;fds, nfds, timeout);
+           pthread_sigmask(SIG_SETMASK, &amp;origmask, NULL);
+
+       The above code segment is described as <i>nearly</i> equivalent because
+       whereas a negative <i>timeout</i> value for <b>poll</b>() is interpreted as an
+       infinite timeout, a negative value expressed in <i>*tmo_p</i> results in
+       an error from <b>ppoll</b>().
+
+       See the description of <a href="../man2/pselect.2.html">pselect(2)</a> for an explanation of why
+       <b>ppoll</b>() is necessary.
+
+       If the <i>sigmask</i> argument is specified as NULL, then no signal mask
+       manipulation is performed (and thus <b>ppoll</b>() differs from <b>poll</b>()
+       only in the precision of the <i>timeout</i> argument).
+
+       The <i>tmo_p</i> argument specifies an upper limit on the amount of time
+       that <b>ppoll</b>() will block.  This argument is a pointer to a
+       <b>timespec</b>(3) structure.
+
+       If <i>tmo_p</i> is specified as NULL, then <b>ppoll</b>() can block
+       indefinitely.
+</pre>
+<h2><a id="RETURN_VALUE" href="#RETURN_VALUE"></a>RETURN VALUE  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       On success, <b>poll</b>() returns a nonnegative value which is the number
+       of elements in the <i>pollfds</i> whose <i>revents</i> fields have been set to a
+       nonzero value (indicating an event or an error).  A return value
+       of zero indicates that the system call timed out before any file
+       descriptors became ready.
+
+       On error, -1 is returned, and <i><a href="../man3/errno.3.html">errno</a></i> is set to indicate the error.
+</pre>
+<h2><a id="ERRORS" href="#ERRORS"></a>ERRORS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>EFAULT </b><i>fds</i> points outside the process's accessible address space.
+              The array given as argument was not contained in the
+              calling program's address space.
+
+       <b>EINTR  </b>A signal occurred before any requested event; see
+              <a href="../man7/signal.7.html">signal(7)</a>.
+
+       <b>EINVAL </b>The <i>nfds</i> value exceeds the <b>RLIMIT_NOFILE </b>value.
+
+       <b>EINVAL </b>(<b>ppoll</b>()) The timeout value expressed in <i>*tmo_p</i> is invalid
+              (negative).
+
+       <b>ENOMEM </b>Unable to allocate memory for kernel data structures.
+</pre>
+<h2><a id="VERSIONS" href="#VERSIONS"></a>VERSIONS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       On some other UNIX systems, <b>poll</b>() can fail with the error <b>EAGAIN</b>
+       if the system fails to allocate kernel-internal resources, rather
+       than <b>ENOMEM </b>as Linux does.  POSIX permits this behavior.  Portable
+       programs may wish to check for <b>EAGAIN </b>and loop, just as with
+       <b>EINTR</b>.
+
+       Some implementations define the nonstandard constant <b>INFTIM </b>with
+       the value -1 for use as a <i>timeout</i> for <b>poll</b>().  This constant is
+       not provided in glibc.
+
+   <b>C library/kernel differences</b>
+       The Linux <b>ppoll</b>() system call modifies its <i>tmo_p</i> argument.
+       However, the glibc wrapper function hides this behavior by using a
+       local variable for the timeout argument that is passed to the
+       system call.  Thus, the glibc <b>ppoll</b>() function does not modify its
+       <i>tmo_p</i> argument.
+
+       The raw <b>ppoll</b>() system call has a fifth argument, <i>size_t</i>
+       <i>sigsetsize</i>, which specifies the size in bytes of the <i>sigmask</i>
+       argument.  The glibc <b>ppoll</b>() wrapper function specifies this
+       argument as a fixed value (equal to <i>sizeof(kernel_sigset_t)</i>).  See
+       <a href="../man2/sigprocmask.2.html">sigprocmask(2)</a> for a discussion on the differences between the
+       kernel and the libc notion of the sigset.
+</pre>
+<h2><a id="STANDARDS" href="#STANDARDS"></a>STANDARDS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       POSIX.1-2024.
+</pre>
+<h2><a id="HISTORY" href="#HISTORY"></a>HISTORY  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>poll</b>() POSIX.1-2001.  Linux 2.1.23.
+
+              On older kernels that lack this system call, the glibc
+              <b>poll</b>() wrapper function provides emulation using <a href="../man2/select.2.html">select(2)</a>.
+
+       <b>ppoll</b>()
+              POSIX.1-2024.  Linux 2.6.16, glibc 2.4.
+</pre>
+<h2><a id="NOTES" href="#NOTES"></a>NOTES  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       The operation of <b>poll</b>() and <b>ppoll</b>() is not affected by the
+       <b>O_NONBLOCK </b>flag.
+
+       For a discussion of what may happen if a file descriptor being
+       monitored by <b>poll</b>() is closed in another thread, see <a href="../man2/select.2.html">select(2)</a>.
+</pre>
+<h2><a id="BUGS" href="#BUGS"></a>BUGS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       See the discussion of spurious readiness notifications under the
+       BUGS section of <a href="../man2/select.2.html">select(2)</a>.
+</pre>
+<h2><a id="EXAMPLES" href="#EXAMPLES"></a>EXAMPLES  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       The program below opens each of the files named in its command-
+       line arguments and monitors the resulting file descriptors for
+       readiness to read (<b>POLLIN</b>).  The program loops, repeatedly using
+       <b>poll</b>() to monitor the file descriptors, printing the number of
+       ready file descriptors on return.  For each ready file descriptor,
+       the program:
+
+       •  displays the returned <i>revents</i> field in a human-readable form;
+
+       •  if the file descriptor is readable, reads some data from it,
+          and displays that data on standard output; and
+
+       •  if the file descriptor was not readable, but some other event
+          occurred (presumably <b>POLLHUP</b>), closes the file descriptor.
+
+       Suppose we run the program in one terminal, asking it to open a
+       FIFO:
+
+           $ <b>mkfifo myfifo</b>;
+           $ <b>./poll_input myfifo</b>;
+
+       In a second terminal window, we then open the FIFO for writing,
+       write some data to it, and close the FIFO:
+
+           $ <b>echo aaaaabbbbbccccc &gt; myfifo</b>;
+
+       In the terminal where we are running the program, we would then
+       see:
+
+           Opened "myfifo" on fd 3
+           About to poll()
+           Ready: 1
+             fd=3; events: POLLIN POLLHUP
+               read 10 bytes: aaaaabbbbb
+           About to poll()
+           Ready: 1
+             fd=3; events: POLLIN POLLHUP
+               read 6 bytes: ccccc
+
+           About to poll()
+           Ready: 1
+             fd=3; events: POLLHUP
+               closing fd 3
+           All file descriptors closed.  Bye.
+
+       In the above output, we see that <b>poll</b>() returned three times:
+
+       •  On the first return, the bits returned in the <i>revents</i> field
+          were <b>POLLIN</b>, indicating that the file descriptor is readable,
+          and <b>POLLHUP</b>, indicating that the other end of the FIFO has been
+          closed.  The program then consumed some of the available input.
+
+       •  The second return from <b>poll</b>() also indicated <b>POLLIN </b>and
+          <b>POLLHUP</b>; the program then consumed the last of the available
+          input.
+
+       •  On the final return, <b>poll</b>() indicated only <b>POLLHUP </b>on the FIFO,
+          at which point the file descriptor was closed and the program
+          terminated.
+
+   <b>Program source</b>
+
+       /* poll_input.c
+
+          Licensed under GNU General Public License v2 or later.
+       */
+       #include &lt;err.h&gt;
+       #include &lt;fcntl.h&gt;
+       #include &lt;poll.h&gt;
+       #include &lt;stdio.h&gt;
+       #include &lt;stdlib.h&gt;
+       #include &lt;sys/types.h&gt;
+       #include &lt;unistd.h&gt;
+
+       int
+       main(int argc, char *argv[])
+       {
+           int            ready;
+           char           buf[10];
+           nfds_t         num_open_fds, nfds;
+           ssize_t        s;
+           struct pollfd  *pfds;
+
+           if (argc &lt; 2) {
+              fprintf(stderr, "Usage: %s file...\n", argv[0]);
+              exit(EXIT_FAILURE);
+           }
+
+           num_open_fds = nfds = argc - 1;
+           pfds = calloc(nfds, sizeof(struct pollfd));
+           if (pfds == NULL)
+               err(EXIT_FAILURE, "malloc");
+
+           /* Open each file on command line, and add it to 'pfds' array.  */
+
+           for (nfds_t j = 0; j &lt; nfds; j++) {
+               pfds[j].fd = open(argv[j + 1], O_RDONLY);
+               if (pfds[j].fd == -1)
+                   err(EXIT_FAILURE, "open");
+
+               printf("Opened \"%s\" on fd %d\n", argv[j + 1], pfds[j].fd);
+
+               pfds[j].events = POLLIN;
+           }
+
+           /* Keep calling poll() as long as at least one file descriptor is
+              open.  */
+
+           while (num_open_fds &gt; 0) {
+               printf("About to poll()\n");
+               ready = poll(pfds, nfds, -1);
+               if (ready == -1)
+                   err(EXIT_FAILURE, "poll");
+
+               printf("Ready: %d\n", ready);
+
+               /* Deal with array returned by poll().  */
+
+               for (nfds_t j = 0; j &lt; nfds; j++) {
+                   if (pfds[j].revents != 0) {
+                       printf("  fd=%d; events: %s%s%s\n", pfds[j].fd,
+                              (pfds[j].revents &amp; POLLIN)  ? "POLLIN "  : "",
+                              (pfds[j].revents &amp; POLLHUP) ? "POLLHUP " : "",
+                              (pfds[j].revents &amp; POLLERR) ? "POLLERR " : "");
+
+                       if (pfds[j].revents &amp; POLLIN) {
+                           s = read(pfds[j].fd, buf, sizeof(buf));
+                           if (s == -1)
+                               err(EXIT_FAILURE, "read");
+                           printf("    read %zd bytes: %.*s\n",
+                                  s, (int) s, buf);
+                       } else {                /* POLLERR | POLLHUP */
+                           printf("    closing fd %d\n", pfds[j].fd);
+                           if (close(pfds[j].fd) == -1)
+                               err(EXIT_FAILURE, "close");
+                           num_open_fds--;
+                       }
+                   }
+               }
+           }
+
+           printf("All file descriptors closed.  Bye.\n");
+           exit(EXIT_SUCCESS);
+       }
+</pre>
+<h2><a id="SEE_ALSO" href="#SEE_ALSO"></a>SEE ALSO  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <a href="../man2/restart_syscall.2.html">restart_syscall(2)</a>, <a href="../man2/select.2.html">select(2)</a>, <a href="../man2/select_tut.2.html">select_tut(2)</a>, <b>timespec</b>(3),
+       <a href="../man7/epoll.7.html">epoll(7)</a>, <a href="../man7/time.7.html">time(7)</a>
+</pre>
+<h2><a id="COLOPHON" href="#COLOPHON"></a>COLOPHON  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       This page is part of the <i>man-pages</i> (Linux kernel and C library
+       user-space interface documentation) project.  Information about
+       the project can be found at 
+       ⟨<a href="https://www.kernel.org/doc/man-pages/">https://www.kernel.org/doc/man-pages/</a>⟩.  If you have a bug report
+       for this manual page, see
+       ⟨<a href="https://git.kernel.org/pub/scm/docs/man-pages/man-pages.git/tree/CONTRIBUTING">https://git.kernel.org/pub/scm/docs/man-pages/man-pages.git/tree/CONTRIBUTING</a>⟩.
+       This page was obtained from the tarball man-pages-6.19.tar.gz
+       fetched from
+       ⟨<a href="https://mirrors.edge.kernel.org/pub/linux/docs/man-pages/">https://mirrors.edge.kernel.org/pub/linux/docs/man-pages/</a>⟩ on
+       2026-09-09.  If you discover any rendering problems in this HTML
+       version of the page, or you believe there is a better or more up-
+       to-date source for the page, or you have corrections or
+       improvements to the information in this COLOPHON (which is <i>not</i>
+       part of the original manual page), send a mail to
+       man-pages@man7.org
+
+<span class="footline">Linux man-pages 6.19            2026-02-08                        <i>poll</i>(2)</span>
+</pre>
+
+<hr class="end-man-text" />
+<p>Pages that refer to this page:
+    <a href="../man1/less.1.html">less(1)</a>,&nbsp;
+    <a href="../man1/lsfd.1.html">lsfd(1)</a>,&nbsp;
+    <a href="../man2/accept.2.html">accept(2)</a>,&nbsp;
+    <a href="../man2/connect.2.html">connect(2)</a>,&nbsp;
+    <a href="../man2/epoll_ctl.2.html">epoll_ctl(2)</a>,&nbsp;
+    <a href="../man2/epoll_wait.2.html">epoll_wait(2)</a>,&nbsp;
+    <a href="../man2/eventfd.2.html">eventfd(2)</a>,&nbsp;
+    <a href="../man2/F_GETSIG.2const.html">F_GETSIG(2const)</a>,&nbsp;
+    <a href="../man2/FUTEX_FD.2const.html">FUTEX_FD(2const)</a>,&nbsp;
+    <a href="../man2/io_uring_enter2.2.html">io_uring_enter2(2)</a>,&nbsp;
+    <a href="../man2/io_uring_enter.2.html">io_uring_enter(2)</a>,&nbsp;
+    <a href="../man2/open.2.html">open(2)</a>,&nbsp;
+    <a href="../man2/perf_event_open.2.html">perf_event_open(2)</a>,&nbsp;
+    <a href="../man2/perfmonctl.2.html">perfmonctl(2)</a>,&nbsp;
+    <a href="../man2/personality.2.html">personality(2)</a>,&nbsp;
+    <a href="../man2/pidfd_open.2.html">pidfd_open(2)</a>,&nbsp;
+    <a href="../man2/PR_SET_TIMERSLACK.2const.html">PR_SET_TIMERSLACK(2const)</a>,&nbsp;
+    <a href="../man2/ptrace.2.html">ptrace(2)</a>,&nbsp;
+    <a href="../man2/recv.2.html">recv(2)</a>,&nbsp;
+    <a href="../man2/restart_syscall.2.html">restart_syscall(2)</a>,&nbsp;
+    <a href="../man2/seccomp_unotify.2.html">seccomp_unotify(2)</a>,&nbsp;
+    <a href="../man2/select.2.html">select(2)</a>,&nbsp;
+    <a href="../man2/select_tut.2.html">select_tut(2)</a>,&nbsp;
+    <a href="../man2/sigaction.2.html">sigaction(2)</a>,&nbsp;
+    <a href="../man2/signalfd.2.html">signalfd(2)</a>,&nbsp;
+    <a href="../man2/syscalls.2.html">syscalls(2)</a>,&nbsp;
+    <a href="../man2/timerfd_create.2.html">timerfd_create(2)</a>,&nbsp;
+    <a href="../man2/TIOCPKT.2const.html">TIOCPKT(2const)</a>,&nbsp;
+    <a href="../man2/userfaultfd.2.html">userfaultfd(2)</a>,&nbsp;
+    <a href="../man3/curs_inopts.3x.html">curs_inopts(3x)</a>,&nbsp;
+    <a href="../man3/io_uring_prep_poll_add.3.html">io_uring_prep_poll_add(3)</a>,&nbsp;
+    <a href="../man3/io_uring_prep_poll_multishot.3.html">io_uring_prep_poll_multishot(3)</a>,&nbsp;
+    <a href="../man3/ldap_get_option.3.html">ldap_get_option(3)</a>,&nbsp;
+    <a href="../man3/pcap.3pcap.html">pcap(3pcap)</a>,&nbsp;
+    <a href="../man3/pcap_get_required_select_timeout.3pcap.html">pcap_get_required_select_timeout(3pcap)</a>,&nbsp;
+    <a href="../man3/pcap_get_selectable_fd.3pcap.html">pcap_get_selectable_fd(3pcap)</a>,&nbsp;
+    <a href="../man3/rtime.3.html">rtime(3)</a>,&nbsp;
+    <a href="../man3/sctp_connectx.3.html">sctp_connectx(3)</a>,&nbsp;
+    <a href="../man3/sd_bus_get_fd.3.html">sd_bus_get_fd(3)</a>,&nbsp;
+    <a href="../man3/sd_bus_wait.3.html">sd_bus_wait(3)</a>,&nbsp;
+    <a href="../man3/sd_journal_get_fd.3.html">sd_journal_get_fd(3)</a>,&nbsp;
+    <a href="../man3/sd_login_monitor_new.3.html">sd_login_monitor_new(3)</a>,&nbsp;
+    <a href="../man3/sd_notify.3.html">sd_notify(3)</a>,&nbsp;
+    <a href="../man4/random.4.html">random(4)</a>,&nbsp;
+    <a href="../man5/ldap.conf.5.html">ldap.conf(5)</a>,&nbsp;
+    <a href="../man5/proc_pid_mounts.5.html">proc_pid_mounts(5)</a>,&nbsp;
+    <a href="../man5/slapd-asyncmeta.5.html">slapd-asyncmeta(5)</a>,&nbsp;
+    <a href="../man5/slapd-ldap.5.html">slapd-ldap(5)</a>,&nbsp;
+    <a href="../man5/slapd-meta.5.html">slapd-meta(5)</a>,&nbsp;
+    <a href="../man5/systemd.exec.5.html">systemd.exec(5)</a>,&nbsp;
+    <a href="../man7/cgroups.7.html">cgroups(7)</a>,&nbsp;
+    <a href="../man7/epoll.7.html">epoll(7)</a>,&nbsp;
+    <a href="../man7/fanotify.7.html">fanotify(7)</a>,&nbsp;
+    <a href="../man7/inotify.7.html">inotify(7)</a>,&nbsp;
+    <a href="../man7/io_uring_setup_flags.7.html">io_uring_setup_flags(7)</a>,&nbsp;
+    <a href="../man7/mq_overview.7.html">mq_overview(7)</a>,&nbsp;
+    <a href="../man7/pipe.7.html">pipe(7)</a>,&nbsp;
+    <a href="../man7/signal.7.html">signal(7)</a>,&nbsp;
+    <a href="../man7/signal-safety.7.html">signal-safety(7)</a>,&nbsp;
+    <a href="../man7/socket.7.html">socket(7)</a>,&nbsp;
+    <a href="../man7/spufs.7.html">spufs(7)</a>,&nbsp;
+    <a href="../man7/system_data_types.7.html">system_data_types(7)</a>,&nbsp;
+    <a href="../man7/tcp.7.html">tcp(7)</a>,&nbsp;
+    <a href="../man7/udp.7.html">udp(7)</a>,&nbsp;
+    <a href="../man8/setarch.8.html">setarch(8)</a>
+</p>
+<hr/>
+
+ 
+<hr class="start-footer" />
+
+<div class="footer">
+
+<table class="colophon-table">
+    <tr>
+    <td class="pub-info">
+        <p>
+            HTML rendering created 2026-09-09
+            by <a href="https://man7.org/mtk/index.html">Michael Kerrisk</a>,
+            author of
+            <a href="https://man7.org/tlpi/"><em>The Linux Programming Interface</em></a>.
+        </p>
+        <p>
+            For details of in-depth
+            <strong>Linux/UNIX system programming training courses</strong>
+            that I teach, look <a href="https://man7.org/training/">here</a>.
+        </p>
+        <p>
+            Hosting by <a href="https://www.jambit.com/index_en.html">jambit GmbH</a>.
+        </p>
+    </td>
+    <td class="colophon-divider">
+    </td>
+    <td class="tlpi-cover">
+        <a href="https://man7.org/tlpi/"><img src="https://man7.org/tlpi/cover/TLPI-front-cover-vsmall.png" alt="Cover of TLPI" /></a>
+    </td>
+    </tr>
+</table>
+
+</div>
+
+<hr class="end-footer" />
+
+
+
+<!--BEGIN-SITETRACKING-->
+<!-- SITETRACKING.man7.org_linux_man-pages -->
+
+<!-- Default Statcounter code for man7.org/linux/man-pages
+http://www.man7.org/linux/man-pages -->
+<script type="text/javascript">
+var sc_project=7422636;
+var sc_invisible=1;
+var sc_security="9b6714ff";
+</script>
+<script type="text/javascript"
+src="https://www.statcounter.com/counter/counter.js"
+async></script>
+<noscript><div class="statcounter"><a title="Web Analytics
+Made Easy - StatCounter" href="https://statcounter.com/"
+target="_blank"><img class="statcounter"
+src="https://c.statcounter.com/7422636/0/9b6714ff/1/"
+alt="Web Analytics Made Easy -
+StatCounter"></a></div></noscript>
+<!-- End of Statcounter Code -->
+
+
+
+<!-- Start of Google Analytics Code -->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9830363-8']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+<!-- End of Google Analytics Code -->
+
+<!--END-SITETRACKING-->
+
+</body>
+</html>

@@ -111,3 +111,60 @@ retention and receipt failures were captured with quiescent owned processes; ato
 fsync-failure behavior passed. Thirty-eight raw qualification records are retained. Historical parser
 test totals remain historical input, not new SDK executions. Actual SDK-info capture reports
 10.0.404 / runtime 10.0.15. Checker compilation/results still await the R1 source-to-binary binding.
+
+## Investigation progression — November 12
+
+- **A complete for triage:** 91 primary files, all 376 shared IDs and 2,006 unit dispositions;
+  21 local candidate groups, with no accepted finding IDs or product changes.
+- **B1 complete for triage:** 49 primary files, 1,078 primary and 126 shared units; 1,104 clean,
+  99 candidate-associated and one platform-scope exclusion. Twelve local candidate groups and
+  portable ownership states are ready for later B stages.
+- **C continues:** its checkpoint read 95/104 primary files and 66/176 shared units. Astra explicitly
+  returned the nine remaining tests, shared units and source qualifications for completion. Its 20
+  candidate groups are provisional; the checkpoint is not a completed packet.
+- **B2 Linux active:** fresh Sol `ses_e332ea329ffeQpsTbRmUYtc194`, exact B2 packet, 63 primary files.
+- **B3 macOS active:** fresh Sol `ses_e332bf51cffe8m6Pn86rZ56Dq2`, exact B3 packet, 41 primary files.
+
+The inventory owner corrected stale dispatch prose from A/C shared counts 374/174 to **376/176**.
+JSON IDs, source populations and ownership were already correct and remain unchanged. The correction
+and exact added caller units are retained in `inventory/corrections/shared-count.md`.
+
+R1's checker binding passed independent review. Its first actual build then failed in the post-Csc
+capture hook, which reported missing/unsupported command-line arguments. No checker selfcheck/token/
+API result or successful seal is claimed. The preparer is diagnosing the captured invocation shape
+and will preserve the failed attempt before a bounded correction and fresh build. Investigation remains
+independent of that tooling gate; source and product files remain unchanged.
+
+The checker-hook diagnosis established an empty argument file caused by `CallTarget` lookup scope;
+`ProvideCommandLineArgs` and the SDK output-item name were already correct. The bounded correction
+uses `AfterTargets="CoreCompile"`. Independent review accepted the new profile at
+`51b733852da256846483d805fe54be3f9a4b2bc77ff50a95ba3d3dedaaac02e2`; only the hook and its evidence
+description changed. The original failed attempt's 192 records and 19 unsealed job files remain
+preserved. Astra started `checker-bound-build-second`; a successful new seal and checker results
+are still required before this gate is accepted.
+
+## Platform progression and checker follow-up
+
+- **B2 complete for triage:** all 63 files, 1,148 primary plus 71 shared units; 1,187 clean,
+  31 candidate-associated and one historical exclusion. Six local candidate groups; no runtime or
+  device execution.
+- **B3 complete for triage:** all 41 files, 1,139 primary plus five shared units; 1,087 clean and
+  57 candidate-associated. Nine local candidate groups; published NativeShims source was inspected,
+  while installed-binary producer correspondence remains a separate gap.
+- **B4 Windows/support active:** `ses_e331a9380ffer22jAb1m8sXV1Z`, exact 106-file packet, using the
+  pinned source while retaining the user's later concurrency handoff.
+- **B5 session/framing active:** `ses_e3319d55affeT2ngF3HayZiKQJ`, exact 43-file packet, consuming
+  completed portable/platform ownership evidence. C remains the third active investigator.
+
+The inventory owner is reconciling completed A/B1/B2/B3 results into a separate progress view,
+preserving original unread baseline records and separate review/validation statuses.
+
+The second checker build reached the corrected late hook but failed a different membership check:
+an actual Csc file input was absent from the before-capture set. No successful seal or checker
+result was accepted. The preparer is identifying the exact input/origin and retaining this second
+failed attempt before a narrowly scoped correction; actual source investigations continue.
+
+Completed A/B1/B2/B3 records are being checkpointed independently of the still-active investigators
+and validation work. Their original source bytes are protected by a run-local Git attribute rule.
+The retained PC/SC Part 5 original PDF is registered by exact path, size, SHA-256 and source URL in
+`sources/primary-binaries.json`; it is citation evidence, distinct from generated runtime artifacts.

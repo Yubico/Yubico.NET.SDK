@@ -1,0 +1,19 @@
+{
+  "packet_primary_ids_exact": true,
+  "packet_shared_ids_exact": true,
+  "unique_unit_ids": 1219,
+  "all_source_and_range_hashes_match_inventory": true,
+  "all_selected_paths_lf_equal_pin": true,
+  "raw_pin_differences": [
+    "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj"
+  ],
+  "semantic_read_proof": "manual complete reads and file-evidence; identity checks are separate",
+  "new_execution": {
+    "build": 0,
+    "test": 0,
+    "formatter": 0,
+    "native": 0,
+    "device": 0
+  },
+  "tool_scope": "Python/Git static identity serialization and HTTP original-source fetches only"
+}

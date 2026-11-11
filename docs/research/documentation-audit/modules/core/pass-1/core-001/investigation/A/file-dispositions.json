@@ -1,0 +1,741 @@
+{
+  "src/Core/src/Abstractions/DeviceCorrelation.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DeviceCorrelation contracts and implementation read: member-set identity, conservative grouping, metadata/serial retention, typed routing, claim transfer, default implementations, and caller ownership considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Abstractions/IDevice.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full IDevice declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Abstractions/IYubiKey.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C003",
+      "CORE-A-C007",
+      "CORE-A-C021"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full IYubiKey contracts and implementation read: member-set identity, conservative grouping, metadata/serial retention, typed routing, claim transfer, default implementations, and caller ownership considered as applicable. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/DeviceListenerStatus.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DeviceListenerStatus declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/CompositeDeviceMerger.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full CompositeDeviceMerger contracts and implementation read: member-set identity, conservative grouping, metadata/serial retention, typed routing, claim transfer, default implementations, and caller ownership considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/CompositeMetadataReader.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full CompositeMetadataReader source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/ConnectionType.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C002"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full ConnectionType declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/ConnectionTypeExtensions.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full ConnectionTypeExtensions declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/ConnectionTypeMapper.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full ConnectionTypeMapper declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/DeviceCapabilities.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C002",
+      "CORE-A-C006"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DeviceCapabilities declaration/implementation read: field values, defaults, widths, value comparison, effective-version/flag interpretation considered as applicable. Reported candidates are separate from fixed-width source resolution. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/DeviceChange.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DeviceChange lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/DeviceChangeFeed.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DeviceChangeFeed lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/DeviceFlags.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DeviceFlags declaration/implementation read: field values, defaults, widths, value comparison, effective-version/flag interpretation considered as applicable. Reported candidates are separate from fixed-width source resolution. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/DeviceInfo.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C002",
+      "CORE-A-C003",
+      "CORE-A-C004",
+      "CORE-A-C005",
+      "CORE-A-C006",
+      "CORE-A-C015",
+      "CORE-A-C016"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DeviceInfo declaration/implementation read: field values, defaults, widths, value comparison, effective-version/flag interpretation considered as applicable. Reported candidates are separate from fixed-width source resolution. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/DeviceInfoReader.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C003"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DeviceInfoReader declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/DiscoveryBudgets.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DiscoveryBudgets source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DiscoveryDeviceInfoReader source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/DiscoveryIdentityReader.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DiscoveryIdentityReader source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/DiscoveryReadAdmission.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DiscoveryReadAdmission source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/DiscoveryReadScope.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DiscoveryReadScope source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/DiscoveryReadSkippedException.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DiscoveryReadSkippedException source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/DiscoveryWorkerAdmission.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DiscoveryWorkerAdmission source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/Feature.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C002",
+      "CORE-A-C015"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full Feature declaration/implementation read: field values, defaults, widths, value comparison, effective-version/flag interpretation considered as applicable. Reported candidates are separate from fixed-width source resolution. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/FindYubiKeys.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C009",
+      "CORE-A-C017",
+      "CORE-A-C021"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full FindYubiKeys source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/FirmwareVersion.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C015"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full FirmwareVersion declaration/implementation read: field values, defaults, widths, value comparison, effective-version/flag interpretation considered as applicable. Reported candidates are separate from fixed-width source resolution. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/FormFactor.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C005"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full FormFactor declaration/implementation read: field values, defaults, widths, value comparison, effective-version/flag interpretation considered as applicable. Reported candidates are separate from fixed-width source resolution. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/HotplugSignals.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full HotplugSignals lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/IDeviceTopologyResolver.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C009"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full IDeviceTopologyResolver source read against scripted resolver assertions and retained Windows API passages. Optional native fallback is separate from native latency and Windows hardware qualification. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/IDiscoveryConnectionProvider.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full IDiscoveryConnectionProvider source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/IMonitoredDiscovery.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full IMonitoredDiscovery lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/IYubiKeyConnectionSlot.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full IYubiKeyConnectionSlot contracts and implementation read: member-set identity, conservative grouping, metadata/serial retention, typed routing, claim transfer, default implementations, and caller ownership considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/ProtocolDeviceInfo.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full ProtocolDeviceInfo source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/README.md": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full README declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/ReaderNamePidParser.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full ReaderNamePidParser declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/RescanScheduler.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full RescanScheduler lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/SharedDeviceInfoRead.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full SharedDeviceInfoRead source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/SnapshotDiff.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full SnapshotDiff lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/VersionQualifier.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C001"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full VersionQualifier declaration/implementation read: field values, defaults, widths, value comparison, effective-version/flag interpretation considered as applicable. Reported candidates are separate from fixed-width source resolution. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/src/Devices/WindowsDeviceTopologyResolver.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full WindowsDeviceTopologyResolver source read against scripted resolver assertions and retained Windows API passages. Optional native fallback is separate from native latency and Windows hardware qualification. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/WindowsTopologyNativeOps.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full WindowsTopologyNativeOps source read against scripted resolver assertions and retained Windows API passages. Optional native fallback is separate from native latency and Windows hardware qualification. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/YubiKeyDevice.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full YubiKeyDevice contracts and implementation read: member-set identity, conservative grouping, metadata/serial retention, typed routing, claim transfer, default implementations, and caller ownership considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/YubiKeyDiscovery.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full YubiKeyDiscovery source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/YubiKeyManager.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full YubiKeyManager declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Devices/YubiKeyMonitor.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full YubiKeyMonitor lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/ProductAtrs.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full ProductAtrs declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/src/Transport.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C002"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full Transport declaration/content read against current call sites and applicable mapping tests. No additional correction identified outside explicitly cited candidate ranges. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full CompositeDiscoveryIntegrationTests assertions and helper scopes read. Hardware cases were not executed; readiness/count/retention/pump assertions have only their source-defined scope. See C012 and test-adequacy narrative. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryRetentionTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full CompositeDiscoveryRetentionTests assertions and helper scopes read. Hardware cases were not executed; readiness/count/retention/pump assertions have only their source-defined scope. See C012 and test-adequacy narrative. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DeviceEventHotPlugTests assertions and helper scopes read. Hardware cases were not executed; readiness/count/retention/pump assertions have only their source-defined scope. See C012 and test-adequacy narrative. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DiscoveryUnattendedTests assertions and helper scopes read. Hardware cases were not executed; readiness/count/retention/pump assertions have only their source-defined scope. See C012 and test-adequacy narrative. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full HotPlugIdentityContractTests assertions and helper scopes read. Hardware cases were not executed; readiness/count/retention/pump assertions have only their source-defined scope. See C012 and test-adequacy narrative. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/MonitorSnapshot.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full MonitorSnapshot assertions and helper scopes read. Hardware cases were not executed; readiness/count/retention/pump assertions have only their source-defined scope. See C012 and test-adequacy narrative. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full YubiKeyTests assertions and helper scopes read. Hardware cases were not executed; readiness/count/retention/pump assertions have only their source-defined scope. See C012 and test-adequacy narrative. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C004",
+      "CORE-A-C006"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full CapabilityMapperTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C010"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full CompositeDeviceMergerTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C010",
+      "CORE-A-C011"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full CompositeDeviceMergerVectorTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionTypeMapperTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full ConnectionTypeMapperTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionTypeTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full ConnectionTypeTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceChangeFeedTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DeviceChangeFeedTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C007"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DeviceIdentityContractTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C001",
+      "CORE-A-C002",
+      "CORE-A-C006",
+      "CORE-A-C016"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DeviceInfoFieldLengthTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C012",
+      "CORE-A-C015"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DeviceInfoReaderTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C003",
+      "CORE-A-C004",
+      "CORE-A-C005"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DeviceInfoTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DiscoveryIdentityReaderTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryReadSchedulingTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DiscoveryReadSchedulingTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full DiscoverySingleFlightTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryWorkerAdmissionCollection.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DiscoveryWorkerAdmissionCollection unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FeatureTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C015"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full FeatureTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysEnumerationBudgetTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full FindYubiKeysEnumerationBudgetTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008",
+      "CORE-A-C017",
+      "CORE-A-C021"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full FindYubiKeysFaultInjectionTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysPidMergeTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full FindYubiKeysPidMergeTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full FindYubiKeysScopeTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full FindYubiKeysTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FirmwareVersionSelectResponseTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full FirmwareVersionSelectResponseTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HotplugSignalsTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full HotplugSignalsTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PhysicalYubiKeyTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C002"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full PhysicalYubiKeyTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ReaderNamePidParserTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full ReaderNamePidParserTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/RescanSchedulerTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full RescanSchedulerTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SnapshotDiffTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C007"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full SnapshotDiffTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C009"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full WindowsDeviceTopologyResolverTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C003"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full YubiKeyDeviceTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full YubiKeyManagerStaticTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerWatchTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full YubiKeyManagerWatchTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorAcceptanceTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full YubiKeyMonitorAcceptanceTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full YubiKeyMonitorTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/AsyncWait.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full AsyncWait unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/DeviceChangeWatcher.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full DeviceChangeWatcher unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/FakeYubiKey.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full FakeYubiKey unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/ObservedTimeProvider.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full ObservedTimeProvider unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/OwnedMonitorFixture.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [],
+    "disposition": "READ-CLEAN-NO-EDIT-PROPOSED",
+    "reason": "Full OwnedMonitorFixture unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Retain current implementation and explanation unless later boundary evidence reopens it."
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/TransientScanRetryTests.cs": {
+    "read": true,
+    "product_edit": false,
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "UNCHANGED-CANDIDATE-ASSOCIATED",
+    "reason": "Full TransientScanRetryTests unit/test implementation and local helper context read against the production discovery/metadata/feed code. Unchanged assertions remain managed/fake evidence only; no execution, universal schedule, native release, or platform guarantee is inferred. Keep implementation/assertions unchanged in this investigation; fresh editor must explicitly decide each associated unchanged path before final compilation."
+  }
+}

@@ -19,7 +19,7 @@ rather than proof of complexity or correctness.
 | B1 | [B1-portable-lifetimes.json](inventory/packets/B1-portable-lifetimes.json) | 49 / 9,747 | Physical registry/slots and portable PC/SC/native ownership, sharing, admission and checked release |
 | C | [C.json](inventory/packets/C.json) | 104 / 17,050 | Crypto catalog/keys/codecs, credentials/presence contracts, Base32/TLV/buffer utilities, logging and tests |
 
-A also receives 374 shared read units; C receives 174. B's shared units are divided by stage in
+A also receives 376 shared read units; C receives 176. Initial B1 receives 126; B's remaining shared units are divided by stage in
 `shared-sections.json` and the B-stage packets. Shared-document research can cross family mechanisms;
 its primary range owner remains unique. The future **SHARED editor** alone integrates shared-file edits,
 including Core root guides, root/shared guidance and cross-cutting narrative/configuration. It is an

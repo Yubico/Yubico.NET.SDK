@@ -1,0 +1,1236 @@
+{
+  "TOOLCHAIN.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:2f413d848711837a",
+      "core-001:unit:edd2a83606deab9c"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C018",
+      "CORE-A-C019"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/TESTING.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:287e6410db16f0e7",
+      "core-001:unit:9a6a4499ac9c0229",
+      "core-001:unit:e90e615ba927962a"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C018"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/architecture/connection-ownership-and-contention.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:22ce88df9daddd31",
+      "core-001:unit:c4e1042a34fccca7"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/architecture/device-discovery-guarantees.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:0760859b8235bbdc",
+      "core-001:unit:0afe69df26521c3d",
+      "core-001:unit:0fbab0aff06297f7",
+      "core-001:unit:13971cb61434ba4c",
+      "core-001:unit:178a49f3fcbde939",
+      "core-001:unit:1e5aae7e6d900483",
+      "core-001:unit:4170a6821c923af4",
+      "core-001:unit:502d75a5233a8960",
+      "core-001:unit:63558d669e1eb6f4",
+      "core-001:unit:81177c4aa9a8223e",
+      "core-001:unit:830139664bd9f45f",
+      "core-001:unit:92263057eb628b44",
+      "core-001:unit:9330107ef863401f",
+      "core-001:unit:97e7e3374a5bd0a6",
+      "core-001:unit:b7388b9fdb085401",
+      "core-001:unit:ba9e7125b0561a5b",
+      "core-001:unit:e07bef240302cc3d",
+      "core-001:unit:e07c93eeaca0463b",
+      "core-001:unit:fa12f5c6e1208dc9"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C009",
+      "CORE-A-C010",
+      "CORE-A-C011",
+      "CORE-A-C012",
+      "CORE-A-C020",
+      "CORE-A-C021"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/architecture/device-identity.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:1e52660bdcef957d",
+      "core-001:unit:52f6b8db329399fc",
+      "core-001:unit:63268ff8bf3849a8",
+      "core-001:unit:7f87df4f1d4bf15e",
+      "core-001:unit:ce86b6ec26ec572d",
+      "core-001:unit:dcc705cccc212ee2",
+      "core-001:unit:efa9b441d13b2b4d",
+      "core-001:unit:f5c7c8a009ac6ed7",
+      "core-001:unit:fb4286232d582954",
+      "core-001:unit:fd40050ed0e8fb89"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C012",
+      "CORE-A-C020"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/architecture/event-driven-device-discovery.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:0d6f20d8f98638b4",
+      "core-001:unit:2619cd5b2ce25e7a",
+      "core-001:unit:2e5e6060f552e5fa",
+      "core-001:unit:51a609abf9842c6c",
+      "core-001:unit:87c8210a3fc01e6f",
+      "core-001:unit:a1a85c4748b2e90a",
+      "core-001:unit:a84e2cc173ca0753",
+      "core-001:unit:acc509f4dbc1e039",
+      "core-001:unit:cf1e2081af8b8ac4"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/architecture/images/L4-discovery.svg": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:7f8ccb4053458905"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/architecture/images/png/L4-discovery.png": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:06b5ed734efc5b49"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/architecture/physical-device-model.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:012b1757081afa83",
+      "core-001:unit:2fe4d022b7d3b3aa",
+      "core-001:unit:3a5c3c12f2af0a27",
+      "core-001:unit:53f09e22a16aa4a5",
+      "core-001:unit:6acc736a76d43efb",
+      "core-001:unit:a73e18d3343fdb23",
+      "core-001:unit:e6d9027b432c87fb",
+      "core-001:unit:eea6325dac26e880",
+      "core-001:unit:f0a5eb0b545a3879",
+      "core-001:unit:f9fbbc1b6fb89c60"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C003",
+      "CORE-A-C007",
+      "CORE-A-C011",
+      "CORE-A-C017"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/architecture/sdk-architecture-diagrams.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:f3504065f8d80ef8"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/architecture/sdk-architecture-map.yml": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:4353e889f8fe39ad"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/linux-setup.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:1757ca09b5c55ddb",
+      "core-001:unit:c1802ca5afbc8918"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/migration/v1-to-v2-changelog.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:7b5daf3c140bfbc6",
+      "core-001:unit:c08a6dcbafe3f97f",
+      "core-001:unit:c51e230c480272a2",
+      "core-001:unit:d3e8e5c5d4cc1738",
+      "core-001:unit:f24674b7449e617e"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/migration/v1-to-v2-gaps.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:656cd0e7d148cce0"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/migration/v1-to-v2-map.yml": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:47befc3dc2cc5dd5",
+      "core-001:unit:a92c6aa039f27e15",
+      "core-001:unit:b77ef6f0677fffbf",
+      "core-001:unit:beb764a65f8ae3c1",
+      "core-001:unit:cb2232cff0d50f0d"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/migration/v1-to-v2.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:49baf52a177a1b62",
+      "core-001:unit:5a94e4ea03035fd8",
+      "core-001:unit:b0fbee3fac9d107c",
+      "core-001:unit:b97af2e9d8692339"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/plans/yubikit-async-boundaries/02-architecture.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:4b0e065d4e841e51"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/research/linux-hid-routing.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:acdecd9aba709005"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/research/native-aot-readiness-data.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:11fed183b9a82b24",
+      "core-001:unit:54294a105f5d36f3",
+      "core-001:unit:ca906a2b38ebf548"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C020"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/research/native-aot-readiness.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:4c70197db69075e1"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C020"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/usage/device-discovery.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:0b5f8163f489c670",
+      "core-001:unit:12c307129d1da307",
+      "core-001:unit:2472295e26759349",
+      "core-001:unit:44ad6988ded9276e",
+      "core-001:unit:4828aeaec6b7df0f",
+      "core-001:unit:4eaaf497fc38127d",
+      "core-001:unit:5abf34910b913f13",
+      "core-001:unit:5dc6bc70de4ba779",
+      "core-001:unit:689d848fe4e3b5fb",
+      "core-001:unit:756c905de963bce9",
+      "core-001:unit:77c2d5bd8ebbb088",
+      "core-001:unit:78eb23d1438b86dd",
+      "core-001:unit:7d5377d0944da659",
+      "core-001:unit:80b83027e1246fc0",
+      "core-001:unit:911e8f7dfa0e2d04",
+      "core-001:unit:9220def02b369490",
+      "core-001:unit:934cd3f2c6402e38",
+      "core-001:unit:9bed573286ccff0b",
+      "core-001:unit:9cd92508c6a7a826",
+      "core-001:unit:aab8416295947346",
+      "core-001:unit:ab5e5c18c442a659",
+      "core-001:unit:c7ac3ec8651f40bf",
+      "core-001:unit:e832b1aa9c053990"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C002",
+      "CORE-A-C003",
+      "CORE-A-C009",
+      "CORE-A-C011",
+      "CORE-A-C012",
+      "CORE-A-C016",
+      "CORE-A-C017",
+      "CORE-A-C021"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/v1-to-v2-comparison.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:15a60d652dc03e57"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "docs/v2-highlights.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:c44e504f5fb98c47"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "scripts/toolchain/BuildTargets.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:d0048ac2b4474b13",
+      "core-001:unit:e9b7cc2dc815fe2e"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "scripts/toolchain/Context.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:35d41abc6a3393f8",
+      "core-001:unit:dd65041e21bdfbbc"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "scripts/toolchain/Conventions.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:7fb9e15157813181",
+      "core-001:unit:d75a3dbb4ec57c42"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "scripts/toolchain/Discovery.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:0775abf7ae7f9e6f",
+      "core-001:unit:1780289b48616248",
+      "core-001:unit:30d97fb82d03bc36",
+      "core-001:unit:3c31231b51288813",
+      "core-001:unit:58782f112f94c8a1",
+      "core-001:unit:73f8926e516f4351",
+      "core-001:unit:7da6c609064c8cac",
+      "core-001:unit:853985eeed9ec99b",
+      "core-001:unit:8a24130cc762649d",
+      "core-001:unit:8cce046689c1d99d",
+      "core-001:unit:ad16310453b46d29",
+      "core-001:unit:cb78849e53d9a9a6",
+      "core-001:unit:df3667e8c83d1eb5",
+      "core-001:unit:e8471885414d88c9"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "scripts/toolchain/Options.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:4f426c5f327720b6",
+      "core-001:unit:96eb85c428a4f877"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "scripts/toolchain/TestTargets.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:0b52a2509efb7068",
+      "core-001:unit:111497669aaa1053",
+      "core-001:unit:3841562f32788fc5",
+      "core-001:unit:52af7eae6baa9477",
+      "core-001:unit:cec556dd8f62b863",
+      "core-001:unit:d7f277c73e9d67c6",
+      "core-001:unit:e7fd63e54b233a7b",
+      "core-001:unit:f1de9ba9c113de18"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C018"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/Fido/FidoCommands.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:1a24c6a6cf486903",
+      "core-001:unit:1fbae9971163ba6e",
+      "core-001:unit:48f5a883c96c6186",
+      "core-001:unit:4acbeb9376fc9b53",
+      "core-001:unit:51f3cdab43978995",
+      "core-001:unit:58fd4a28d248886f",
+      "core-001:unit:5c3f93271d367018",
+      "core-001:unit:605029aceacaff8b",
+      "core-001:unit:6135b4690a3049aa",
+      "core-001:unit:94abe99ff516c417",
+      "core-001:unit:d34856e0bfa250f9"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/HsmAuth/HsmAuthCommands.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:2b3cc1caf0dfec3f",
+      "core-001:unit:5abef0d57b3bce06",
+      "core-001:unit:d46b1ef7a44e6284"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:af4f28a956820f54"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:11613e2aa3162ecc",
+      "core-001:unit:3f6eed11bf99bc62",
+      "core-001:unit:b3b5cc2a48b10bee",
+      "core-001:unit:c680372cf0dd564e",
+      "core-001:unit:e64766a7906b4119"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/Management/ManagementConfigCommand.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:0389bce1986c0ea9",
+      "core-001:unit:747a46f572100a21",
+      "core-001:unit:bcb85f5464c52178"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/Management/ManagementInfoCommand.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:05c27da3274a61c3",
+      "core-001:unit:10394ec683043e7f"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/Management/ManagementResetCommand.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:fd1018dd5d87afec"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/Oath/OathCommands.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:1028869d8f1615ab",
+      "core-001:unit:27c790cae9c7c7bd",
+      "core-001:unit:2d775717e74d6f32",
+      "core-001:unit:64cd247659771cb0",
+      "core-001:unit:672bdbcc05ca6522",
+      "core-001:unit:9c8ab813d3edc094",
+      "core-001:unit:b95a03d8c5d3193c",
+      "core-001:unit:ece5953080eee6f5",
+      "core-001:unit:f57db38169deba66"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpAccessCommands.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:188032d6bb6b59e3",
+      "core-001:unit:1f706b4b62b9e329",
+      "core-001:unit:3c87e6c3186d59f4",
+      "core-001:unit:3fb51ea489737870",
+      "core-001:unit:f67d0f06876f3779"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpCertificatesCommands.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:3ccf06e816f277d2",
+      "core-001:unit:a70990d1cfd30558",
+      "core-001:unit:e3190eb00fc3608e"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpInfoCommand.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:297e68004991d4a8"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpKeysCommands.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:13e9ecc8276ec0c7",
+      "core-001:unit:3176cf495484741f",
+      "core-001:unit:cf3538431462d4ab",
+      "core-001:unit:d71e18aa60c03bfb"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpResetCommand.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:8e2a377a2f1ecce1"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/Otp/OtpCommands.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:017f71e184d28724",
+      "core-001:unit:2714e96c7415bdcb",
+      "core-001:unit:4089aedab94d4e23",
+      "core-001:unit:45e5e8d8dd024463",
+      "core-001:unit:8d6f074eaa4a23d0",
+      "core-001:unit:bede2c7855cab92f",
+      "core-001:unit:cc57d3d8b00ab41f",
+      "core-001:unit:cc69fbe13b624d4b",
+      "core-001:unit:cf6ba3fc3fe115dc",
+      "core-001:unit:d27f5051f8d21199"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/src/Piv/PivCommands.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:0d9ec2b1a895ecec",
+      "core-001:unit:0df86a12c9f14fea",
+      "core-001:unit:10653b759a2209f8",
+      "core-001:unit:3c0414a85e70027d",
+      "core-001:unit:483d18bcb23cae56",
+      "core-001:unit:71bfe828853242f1",
+      "core-001:unit:7a86d23265da2354",
+      "core-001:unit:8f3e95a15ff6b292",
+      "core-001:unit:ddde9a84dc807aad",
+      "core-001:unit:df760e8868930465",
+      "core-001:unit:f87047a0af5f1d7b"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Infrastructure/CommandMetadataTests.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:107b3cec9f0c6da0",
+      "core-001:unit:28bf0e423b4800c3",
+      "core-001:unit:43fbc184f43bb1fd",
+      "core-001:unit:4abe07d44880460b",
+      "core-001:unit:53e8c1aa1ef7d487",
+      "core-001:unit:60b58c36daf6658f",
+      "core-001:unit:6cfd7f5624f11b9c",
+      "core-001:unit:74349343bc7e64be",
+      "core-001:unit:a46bcda0b9cbf467",
+      "core-001:unit:a685212d524395f9",
+      "core-001:unit:d465c71ebf0fa2b0",
+      "core-001:unit:d67b6c3aebb6e9a4",
+      "core-001:unit:fc202b0f13024e71"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Infrastructure/YkDeviceContextTests.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:076a1da5d2090a55",
+      "core-001:unit:096143834cf6761d",
+      "core-001:unit:77d5f565bdbe1409",
+      "core-001:unit:e3b00f6cf27c6604"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Shared/src/Cli/SessionHelper.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:bb3e0a66a0e8aa87"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Shared/src/Device/ConnectionTypeFormatter.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:816c2fdd798610af"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Shared/src/Device/DeviceSelection.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:5e13f17465bd6d53",
+      "core-001:unit:e233471029bc0c4a"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Shared/src/Device/DeviceSelector.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:083f98b234457bfa",
+      "core-001:unit:34cf0693a537f0df",
+      "core-001:unit:6e9c74a6b5e82dc5",
+      "core-001:unit:90976e105ab3122b",
+      "core-001:unit:b72c026b8f1d500d",
+      "core-001:unit:daefff34c4c1e705",
+      "core-001:unit:f6e31be8f64fcefb"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Shared/src/Device/FormFactorFormatter.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:f297bcff4d83e0d0"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C005"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Device/ConnectionTypeFormatterTests.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:383570a5822daae8",
+      "core-001:unit:4ce4c9a3d5fc3698",
+      "core-001:unit:71beab7fa4af61a8",
+      "core-001:unit:ae6fac7719619268",
+      "core-001:unit:f799935177b672e5"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Device/DeviceSelectorTests.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:028cfaaba0cc21d0",
+      "core-001:unit:0475393822986f84",
+      "core-001:unit:05eb2fd3ab69cbed",
+      "core-001:unit:0c9fc300521f30d1",
+      "core-001:unit:1558a5b088666421",
+      "core-001:unit:2029db38930810a4",
+      "core-001:unit:209439c338dd1830",
+      "core-001:unit:215f7104497b9a75",
+      "core-001:unit:29a2100905adba8b",
+      "core-001:unit:301c4fb352f91519",
+      "core-001:unit:6df30fd404d47ee9",
+      "core-001:unit:825a72a5f7f8d99a",
+      "core-001:unit:8efd0a4664638e29",
+      "core-001:unit:9170831be82b836c",
+      "core-001:unit:91ced9236be6f593",
+      "core-001:unit:9cc9ec10378390ca",
+      "core-001:unit:9d486ffba3f7bb7f",
+      "core-001:unit:b366a5dcc1781004",
+      "core-001:unit:b89d6f536ee31204",
+      "core-001:unit:bb072ef0cf1fc199",
+      "core-001:unit:bdb318b3fe4cebe1",
+      "core-001:unit:bec46706c262d0bd",
+      "core-001:unit:ca78fe905644fb90",
+      "core-001:unit:cc04e1d0f1ec209d",
+      "core-001:unit:d7227d60f8e4144c",
+      "core-001:unit:d91b001c994aa634",
+      "core-001:unit:e452b940ee278d37",
+      "core-001:unit:e7d69a8e68feb479",
+      "core-001:unit:fabbd6ccea7ebc86"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Core/CLAUDE.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:29dfd13b511e2aaf",
+      "core-001:unit:7ec60dc536caa904",
+      "core-001:unit:ac9ba91f0dcba2d5",
+      "core-001:unit:ba9d9d29efb392bc"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C002",
+      "CORE-A-C015"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Core/PACKAGE_README.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:4105cc72bc4374f7"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Core/README.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:3e6c00fceb714377",
+      "core-001:unit:a4681d9ce86e9b9c",
+      "core-001:unit:b1b8f3f0d43abb21",
+      "core-001:unit:e8288feb73fcc087"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C002",
+      "CORE-A-C003",
+      "CORE-A-C015"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AppletSessionShapeTests.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:bbb7471fac4a4c50"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:7af3a9897aa8582e",
+      "core-001:unit:a9f6e0095bcddd84"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/PublicReturnContractScanner.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:39388300bdd22246",
+      "core-001:unit:84427a8954972a1e"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/CLAUDE.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:353ef7aa94348bf2",
+      "core-001:unit:542d5d9815adf2a9",
+      "core-001:unit:86f2506aa7d43d5b",
+      "core-001:unit:a208d0ef2f4384b9"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C013"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/IYubiKeyFilter.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:4f3c7b5aad361aa3",
+      "core-001:unit:a60076fefa595227",
+      "core-001:unit:d3b450f3c6c6e10c",
+      "core-001:unit:e6d085d50fd0c4bf"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C013"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/Infrastructure/AllowList.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:d0757dfa453abbeb"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/Infrastructure/AuthorizedDevices.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:2936c597cdfad528",
+      "core-001:unit:2a15326335e0a798",
+      "core-001:unit:2a47e7cc5a9259e3",
+      "core-001:unit:2f8a3366cd525974",
+      "core-001:unit:3f972c5207254bdd",
+      "core-001:unit:597de7296e2b1cb0",
+      "core-001:unit:5aaed6adffbe2676",
+      "core-001:unit:6963ddbdc200037a",
+      "core-001:unit:75ae851df606d677",
+      "core-001:unit:aab9ce514bda74b2",
+      "core-001:unit:ed00e4d2f1433d38",
+      "core-001:unit:f5003e297fdec874",
+      "core-001:unit:f713ea0c593064bf"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/Infrastructure/FilterCriteria.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:06ddd16f70e71065",
+      "core-001:unit:0f2b4a412a201ec2",
+      "core-001:unit:19715258403263cb",
+      "core-001:unit:20dde91e1aeaf4eb",
+      "core-001:unit:2d3b379253f696b1",
+      "core-001:unit:2e29908dd3f16bfb",
+      "core-001:unit:3005abb6b0cadcdb",
+      "core-001:unit:31ae4d99050f30c9",
+      "core-001:unit:36956745104ff731",
+      "core-001:unit:468327162ca695a7",
+      "core-001:unit:6c0c249c2ee14161",
+      "core-001:unit:8b4b6b0fb6f1ae68",
+      "core-001:unit:c3d6280cddcd2869",
+      "core-001:unit:c51278a9b1efab55",
+      "core-001:unit:ce56c92b749358f2",
+      "core-001:unit:d28709e3276a4138",
+      "core-001:unit:df2c0d2543090fa5",
+      "core-001:unit:f636aa4e464ed673"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/Infrastructure/TestCategories.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:280d07f19a0ec1cf",
+      "core-001:unit:a90ace2dd73cb9ee"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C019"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/Infrastructure/TransientScanRetry.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:993b24b6f228a991"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:0cba1aae450b472c",
+      "core-001:unit:3d71e6d3bd862995",
+      "core-001:unit:814fca8f3e81ab5b",
+      "core-001:unit:939161b425c3e89f",
+      "core-001:unit:a9792ec21b4de25d"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C004",
+      "CORE-A-C014"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/Infrastructure/WithYubiKeyTraitDiscoverer.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:061f23202ef95304",
+      "core-001:unit:47bfef14b4935b69",
+      "core-001:unit:f1df5948d71dcc9d"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:05265b2dc3542299",
+      "core-001:unit:152de45877baf309",
+      "core-001:unit:3b280b8e14f64097",
+      "core-001:unit:52839829f0491d88",
+      "core-001:unit:a581a1ab8be230d2",
+      "core-001:unit:eedf15ab127e280c"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C005",
+      "CORE-A-C013",
+      "CORE-A-C014"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/ModernFirmwareFilter.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:6281c0ded94a73e0",
+      "core-001:unit:6cfc884cef99e6ef",
+      "core-001:unit:8522450e2d84cd47",
+      "core-001:unit:87c169c628d20279"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/README.md": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:1ff7633c7e9b7f4c",
+      "core-001:unit:308eab2351e0a405",
+      "core-001:unit:67aeee6e98d34e5c"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C013",
+      "CORE-A-C014"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  },
+  "src/Tests.Shared/YubiKeyTestState.cs": {
+    "scope": "Only A's exact shared IDs; no whole-file disposition outside them.",
+    "unit_ids": [
+      "core-001:unit:019eae4efe42d6e5",
+      "core-001:unit:06c6b6d7b1ff4787",
+      "core-001:unit:0d89ad61237b1cec",
+      "core-001:unit:0dd5895d696f349b",
+      "core-001:unit:0e7860dbb7372938",
+      "core-001:unit:1c01fba98b6d7842",
+      "core-001:unit:20c9c91498bfd689",
+      "core-001:unit:22b356e1f091c5b2",
+      "core-001:unit:2d7384815a34e691",
+      "core-001:unit:35700b4303b7b14b",
+      "core-001:unit:68ab41fa6e984eb3",
+      "core-001:unit:7573e895ff24c450",
+      "core-001:unit:7c6590306f4cab9f",
+      "core-001:unit:808c3899922ce1b8",
+      "core-001:unit:8e7356e172293835",
+      "core-001:unit:95aea68013140589",
+      "core-001:unit:95dcab3406f1efcd",
+      "core-001:unit:9d07944d088ddac4",
+      "core-001:unit:a3e4dd4400684eaf",
+      "core-001:unit:a5917076ec14443f",
+      "core-001:unit:b043e12974c2ddbf",
+      "core-001:unit:c20e4d6e55c8a0bb",
+      "core-001:unit:d5838c51b4cca87e",
+      "core-001:unit:d73e12e719d3fff0",
+      "core-001:unit:db769e32bcd3af4a",
+      "core-001:unit:dde53994be40f0a0",
+      "core-001:unit:ed8f73687890a2f2",
+      "core-001:unit:f0f63244e5be3c55"
+    ],
+    "unread_unit_ids": [],
+    "status": "ASSIGNED-RANGES-READ",
+    "candidate_ids": [
+      "CORE-A-C004",
+      "CORE-A-C006",
+      "CORE-A-C013"
+    ],
+    "product_edit": false,
+    "future_editor_owner": "SHARED",
+    "unchanged_disposition": "No edit in investigation; fresh shared editor must reconcile candidate-associated ranges before final compilation."
+  }
+}

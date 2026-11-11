@@ -1,0 +1,1354 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>open(2) - Linux manual page</title>
+    <link rel="stylesheet" type="text/css" href="../../../style.css" title="style" />
+    <link rel="stylesheet" type="text/css" href="../style.css" title="style" />
+</head>
+
+<body>
+
+<div class="page-top"><a id="top_of_page"></a></div>
+<!--%%%TOP_BAR%%%-->
+    <div class="nav-bar">
+        <table class="nav-table">
+            <tr>
+                <td class="nav-cell">
+                    <p class="nav-text">
+                        <a href="../../../index.html">man7.org</a> &gt; Linux &gt; <a href="../index.html">man-pages</a>
+                    </p>
+                </td>
+                <td class="training-cell">
+                    <p class="training-text"><a class="training-link" href="http://man7.org/training/">Linux/UNIX system programming training</a></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+<hr class="nav-end" />
+
+<!--%%%PAGE_START%%%-->
+<h1>open(2) &mdash; Linux manual page</h1>
+
+
+<table class="sec-table">
+<tr>
+    <td>
+        <p class="section-dir">
+<a href="#NAME">NAME</a> | <a href="#LIBRARY">LIBRARY</a> | <a href="#SYNOPSIS">SYNOPSIS</a> | <a href="#DESCRIPTION">DESCRIPTION</a> | <a href="#RETURN_VALUE">RETURN&nbsp;VALUE</a> | <a href="#ERRORS">ERRORS</a> | <a href="#VERSIONS">VERSIONS</a> | <a href="#STANDARDS">STANDARDS</a> | <a href="#HISTORY">HISTORY</a> | <a href="#NOTES">NOTES</a> | <a href="#BUGS">BUGS</a> | <a href="#SEE_ALSO">SEE&nbsp;ALSO</a> | <a href="#COLOPHON">COLOPHON</a>
+        </p>
+    </td>
+</tr>
+<tr>
+    <td class="search-box">
+        <div class="man-search-box">
+
+            <form method="get" action="https://www.google.com/search">
+                <fieldset class="man-search">
+                    <input type="text" name="q" size="10" maxlength="255" value="" />
+                    <input type="hidden" name="sitesearch" value="man7.org/linux/man-pages" />
+                    <input type="submit" name="sa" value="Search online pages" />
+                </fieldset>
+            </form>
+
+        </div>
+    </td>
+    <td> </td>
+</tr>
+</table>
+
+<!--%%%TEXT_START%%%-->
+<pre>
+<span class="headline"><i>open</i>(2)                    System Calls Manual                    <i>open</i>(2)</span>
+</pre>
+<h2><a id="NAME" href="#NAME"></a>NAME  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       open, openat, creat - open and possibly create a file
+</pre>
+<h2><a id="LIBRARY" href="#LIBRARY"></a>LIBRARY  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       Standard C library (<i>libc</i>, <i>-lc</i>)
+</pre>
+<h2><a id="SYNOPSIS" href="#SYNOPSIS"></a>SYNOPSIS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>#include &lt;fcntl.h&gt;</b>
+
+       <b>int open(const char *</b><i>path</i><b>, int </b><i>flags</i><b>, ...</b>
+                  /* <b>mode_t </b><i>mode</i> */ <b>);</b>
+
+       <b>int creat(const char *</b><i>path</i><b>, mode_t </b><i>mode</i><b>);</b>
+
+       <b>int openat(int </b><i>dirfd</i><b>, const char *</b><i>path</i><b>, int </b><i>flags</i><b>, ...</b>
+                  /* <b>mode_t </b><i>mode</i> */ <b>);</b>
+
+       /* Documented separately, in <a href="../man2/openat2.2.html">openat2(2)</a>: */
+       <b>int openat2(int </b><i>dirfd</i><b>, const char *</b><i>path</i><b>,</b>
+                  <b>const struct open_how *</b><i>how</i><b>, size_t </b><i>size</i><b>);</b>
+
+   Feature Test Macro Requirements for glibc (see
+   <a href="../man7/feature_test_macros.7.html">feature_test_macros(7)</a>):
+
+       <b>openat</b>():
+           Since glibc 2.10:
+               _POSIX_C_SOURCE &gt;= 200809L
+           Before glibc 2.10:
+               _ATFILE_SOURCE
+</pre>
+<h2><a id="DESCRIPTION" href="#DESCRIPTION"></a>DESCRIPTION  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       The <b>open</b>() system call opens the file specified by <i>path</i>.  If the
+       specified file does not exist, it may optionally (if <b>O_CREAT </b>is
+       specified in <i>flags</i>) be created by <b>open</b>().
+
+       The return value of <b>open</b>() is a file descriptor, a small,
+       nonnegative integer that is an index to an entry in the process's
+       table of open file descriptors.  The file descriptor is used in
+       subsequent system calls (<a href="../man2/read.2.html">read(2)</a>, <a href="../man2/write.2.html">write(2)</a>, <a href="../man2/lseek.2.html">lseek(2)</a>, <a href="../man2/fcntl.2.html">fcntl(2)</a>,
+       etc.)  to refer to the open file.  The file descriptor returned by
+       a successful call will be the lowest-numbered file descriptor not
+       currently open for the process.
+
+       By default, the new file descriptor is set to remain open across
+       an <a href="../man2/execve.2.html">execve(2)</a> (i.e., the <b>FD_CLOEXEC </b>file descriptor flag described
+       in <a href="../man2/fcntl.2.html">fcntl(2)</a> is initially disabled); the <b>O_CLOEXEC </b>flag, described
+       below, can be used to change this default.  The file offset is set
+       to the beginning of the file (see <a href="../man2/lseek.2.html">lseek(2)</a>).
+
+       A call to <b>open</b>() creates a new <i>open file description</i>, an entry in
+       the system-wide table of open files.  The open file description
+       records the file offset and the file status flags (see below).  A
+       file descriptor is a reference to an open file description; this
+       reference is unaffected if <i>path</i> is subsequently removed or
+       modified to refer to a different file.  For further details on
+       open file descriptions, see NOTES.
+
+       The argument <i>flags</i> must include one of the following <i>access modes</i>:
+       <b>O_RDONLY</b>, <b>O_WRONLY</b>, or <b>O_RDWR</b>.  These request opening the file
+       read-only, write-only, or read/write, respectively.
+
+       In addition, zero or more file creation flags and file status
+       flags can be bitwise ORed in <i>flags</i>.  The <i>file creation flags</i> are
+       <b>O_CLOEXEC</b>, <b>O_CREAT</b>, <b>O_DIRECTORY</b>, <b>O_EXCL</b>, <b>O_NOCTTY</b>, <b>O_NOFOLLOW</b>,
+       <b>O_TMPFILE</b>, and <b>O_TRUNC</b>.  The <i>file status flags</i> are all of the
+       remaining flags listed below.  The distinction between these two
+       groups of flags is that the file creation flags affect the
+       semantics of the open operation itself, while the file status
+       flags affect the semantics of subsequent I/O operations.  The file
+       status flags can be retrieved and (in some cases) modified; see
+       <a href="../man2/fcntl.2.html">fcntl(2)</a> for details.
+
+       The full list of file creation flags and file status flags is as
+       follows:
+
+       <b>O_APPEND</b>
+              The file is opened in append mode.  Before each <a href="../man2/write.2.html">write(2)</a>,
+              the file offset is positioned at the end of the file, as if
+              with <a href="../man2/lseek.2.html">lseek(2)</a>.  The modification of the file offset and the
+              write operation are performed as a single atomic step.
+
+              <b>O_APPEND </b>may lead to corrupted files on NFS filesystems if
+              more than one process appends data to a file at once.  This
+              is because NFS does not support appending to a file, so the
+              client kernel has to simulate it, which can't be done
+              without a race condition.
+
+       <b>O_ASYNC</b>
+              Enable signal-driven I/O: generate a signal (<b>SIGIO </b>by
+              default, but this can be changed via <a href="../man2/fcntl.2.html">fcntl(2)</a>) when input
+              or output becomes possible on this file descriptor.  This
+              feature is available only for terminals, pseudoterminals,
+              sockets, and (since Linux 2.6) pipes and FIFOs.  See
+              <a href="../man2/fcntl.2.html">fcntl(2)</a> for further details.  See also BUGS, below.
+
+       <b>O_CLOEXEC </b>(since Linux 2.6.23)
+              Enable the close-on-exec flag for the new file descriptor.
+              Specifying this flag permits a program to avoid additional
+              <a href="../man2/fcntl.2.html">fcntl(2)</a> <b>F_SETFD </b>operations to set the <b>FD_CLOEXEC </b>flag.
+
+              Note that the use of this flag is essential in some
+              multithreaded programs, because using a separate <a href="../man2/fcntl.2.html">fcntl(2)</a>
+              <b>F_SETFD </b>operation to set the <b>FD_CLOEXEC </b>flag does not
+              suffice to avoid race conditions where one thread opens a
+              file descriptor and attempts to set its close-on-exec flag
+              using <a href="../man2/fcntl.2.html">fcntl(2)</a> at the same time as another thread does a
+              <a href="../man2/fork.2.html">fork(2)</a> plus <a href="../man2/execve.2.html">execve(2)</a>.  Depending on the order of
+              execution, the race may lead to the file descriptor
+              returned by <b>open</b>() being unintentionally leaked to the
+              program executed by the child process created by <a href="../man2/fork.2.html">fork(2)</a>.
+              (This kind of race is in principle possible for any system
+              call that creates a file descriptor whose close-on-exec
+              flag should be set, and various other Linux system calls
+              provide an equivalent of the <b>O_CLOEXEC </b>flag to deal with
+              this problem.)
+
+       <b>O_CREAT</b>
+              If <i>path</i> does not exist, create it as a regular file.
+
+              The owner (user ID) of the new file is set to the effective
+              user ID of the process.
+
+              The group ownership (group ID) of the new file is set
+              either to the effective group ID of the process (System V
+              semantics) or to the group ID of the parent directory (BSD
+              semantics).  On Linux, the behavior depends on whether the
+              set-group-ID mode bit is set on the parent directory: if
+              that bit is set, then BSD semantics apply; otherwise,
+              System V semantics apply.  For some filesystems, the
+              behavior also depends on the <i>bsdgroups</i> and <i>sysvgroups</i> mount
+              options described in <a href="../man8/mount.8.html">mount(8)</a>.
+
+              The <i>mode</i> argument specifies the file mode bits to be
+              applied when a new file is created.  If neither <b>O_CREAT </b>nor
+              <b>O_TMPFILE </b>is specified in <i>flags</i>, then <i>mode</i> is ignored (and
+              can thus be specified as 0, or simply omitted).  The <i>mode</i>
+              argument <b>must </b>be supplied if <b>O_CREAT </b>or <b>O_TMPFILE </b>is
+              specified in <i>flags</i>; if it is not supplied, some arbitrary
+              bytes from the stack will be applied as the file mode.
+
+              The effective mode is modified by the process's <i>umask</i> in
+              the usual way: in the absence of a default ACL, the mode of
+              the created file is <i>(mode &amp; ~umask)</i>.
+
+              Note that <i>mode</i> applies only to future accesses of the newly
+              created file; the <b>open</b>() call that creates a read-only file
+              may well return a read/write file descriptor.
+
+              The following symbolic constants are provided for <i>mode</i>:
+
+              <b>S_IRWXU  </b>00700 user (file owner) has read, write, and
+                       execute permission
+
+              <b>S_IRUSR  </b>00400 user has read permission
+
+              <b>S_IWUSR  </b>00200 user has write permission
+
+              <b>S_IXUSR  </b>00100 user has execute permission
+
+              <b>S_IRWXG  </b>00070 group has read, write, and execute
+                       permission
+
+              <b>S_IRGRP  </b>00040 group has read permission
+
+              <b>S_IWGRP  </b>00020 group has write permission
+
+              <b>S_IXGRP  </b>00010 group has execute permission
+
+              <b>S_IRWXO  </b>00007 others have read, write, and execute
+                       permission
+
+              <b>S_IROTH  </b>00004 others have read permission
+
+              <b>S_IWOTH  </b>00002 others have write permission
+
+              <b>S_IXOTH  </b>00001 others have execute permission
+
+              According to POSIX, the effect when other bits are set in
+              <i>mode</i> is unspecified.  On Linux, the following bits are also
+              honored in <i>mode</i>:
+
+              <b>S_ISUID  </b>0004000 set-user-ID bit
+
+              <b>S_ISGID  </b>0002000 set-group-ID bit (see <a href="../man7/inode.7.html">inode(7)</a>).
+
+              <b>S_ISVTX  </b>0001000 sticky bit (see <a href="../man7/inode.7.html">inode(7)</a>).
+
+       <b>O_DIRECT </b>(since Linux 2.4.10)
+              Try to minimize cache effects of the I/O to and from this
+              file.  In general this will degrade performance, but it is
+              useful in special situations, such as when applications do
+              their own caching.  File I/O is done directly to/from user-
+              space buffers.  The <b>O_DIRECT </b>flag on its own makes an
+              effort to transfer data synchronously, but does not give
+              the guarantees of the <b>O_SYNC </b>flag that data and necessary
+              metadata are transferred.  To guarantee synchronous I/O,
+              <b>O_SYNC </b>must be used in addition to <b>O_DIRECT</b>.  See NOTES
+              below for further discussion.
+
+              A semantically similar (but deprecated) interface for block
+              devices is described in <b>raw</b>(8).
+
+       <b>O_DIRECTORY</b>
+              If <i>path</i> is not a directory, cause <b>open</b>() to fail.  This
+              flag was added in Linux 2.1.126, to avoid denial-of-service
+              problems if <a href="../man3/opendir.3.html">opendir(3)</a> is called on a FIFO or tape device.
+
+       <b>O_DSYNC</b>
+              Write operations on the file will complete according to the
+              requirements of synchronized I/O <i>data</i> integrity completion.
+
+              By the time <a href="../man2/write.2.html">write(2)</a> (and similar) return, the output data
+              has been transferred to the underlying hardware, along with
+              any file metadata that would be required to retrieve that
+              data (i.e., as though each <a href="../man2/write.2.html">write(2)</a> was followed by a call
+              to <a href="../man2/fdatasync.2.html">fdatasync(2)</a>).  See VERSIONS.
+
+       <b>O_EXCL </b>Ensure that this call creates the file: if this flag is
+              specified in conjunction with <b>O_CREAT</b>, and <i>path</i> already
+              exists, then <b>open</b>() fails with the error <b>EEXIST</b>.
+
+              When these two flags are specified, symbolic links are not
+              followed: if <i>path</i> is a symbolic link, then <b>open</b>() fails
+              regardless of where the symbolic link points.
+
+              In general, the behavior of <b>O_EXCL </b>is undefined if it is
+              used without <b>O_CREAT</b>.  There is one exception: on Linux 2.6
+              and later, <b>O_EXCL </b>can be used without <b>O_CREAT </b>if <i>path</i>
+              refers to a block device.  If the block device is in use by
+              the system (e.g., mounted), <b>open</b>() fails with the error
+              <b>EBUSY</b>.
+
+              On NFS, <b>O_EXCL </b>is supported only when using NFSv3 or later
+              on kernel 2.6 or later.  In NFS environments where <b>O_EXCL</b>
+              support is not provided, programs that rely on it for
+              performing locking tasks will contain a race condition.
+              Portable programs that want to perform atomic file locking
+              using a lockfile, and need to avoid reliance on NFS support
+              for <b>O_EXCL</b>, can create a unique file on the same filesystem
+              (e.g., incorporating hostname and PID), and use <a href="../man2/link.2.html">link(2)</a> to
+              make a link to the lockfile.  If <a href="../man2/link.2.html">link(2)</a> returns 0, the
+              lock is successful.  Otherwise, use <a href="../man2/stat.2.html">stat(2)</a> on the unique
+              file to check if its link count has increased to 2, in
+              which case the lock is also successful.
+
+       <b>O_LARGEFILE</b>
+              (LFS) Allow files whose sizes cannot be represented in an
+              <i>off_t</i> (but can be represented in an <i>off64_t</i>) to be opened.
+              The <b>_LARGEFILE64_SOURCE </b>macro must be defined (before
+              including <i>any</i> header files) in order to obtain this
+              definition.  Setting the <b>_FILE_OFFSET_BITS </b>feature test
+              macro to 64 (rather than using <b>O_LARGEFILE</b>) is the
+              preferred method of accessing large files on 32-bit systems
+              (see <a href="../man7/feature_test_macros.7.html">feature_test_macros(7)</a>).
+
+       <b>O_NOATIME </b>(since Linux 2.6.8)
+              Do not update the file last access time (<i>st_atime</i> in the
+              inode) when the file is <a href="../man2/read.2.html">read(2)</a>.
+
+              This flag can be employed only if one of the following
+              conditions is true:
+
+              •  The effective UID of the process matches the owner UID
+                 of the file.
+
+              •  The calling process has the <b>CAP_FOWNER </b>capability in its
+                 user namespace and the owner UID of the file has a
+                 mapping in the namespace.
+
+              This flag is intended for use by indexing or backup
+              programs, where its use can significantly reduce the amount
+              of disk activity.  This flag may not be effective on all
+              filesystems.  One example is NFS, where the server
+              maintains the access time.
+
+       <b>O_NOCTTY</b>
+              If <i>path</i> refers to a terminal device—see <a href="../man4/tty.4.html">tty(4)</a>—it will not
+              become the process's controlling terminal even if the
+              process does not have one.
+
+       <b>O_NOFOLLOW</b>
+              If the trailing component (i.e., basename) of <i>path</i> is a
+              symbolic link, then the open fails, with the error <b>ELOOP</b>.
+              Symbolic links in earlier components of the pathname will
+              still be followed.  (Note that the <b>ELOOP </b>error that can
+              occur in this case is indistinguishable from the case where
+              an open fails because there are too many symbolic links
+              found while resolving components in the path prefix of the
+              pathname.)
+
+              This flag is a FreeBSD extension, which was added in Linux
+              2.1.126, and has subsequently been standardized in
+              POSIX.1-2008.
+
+              See also <b>O_PATH </b>below.
+
+       <b>O_NONBLOCK </b>or <b>O_NDELAY</b>
+              When possible, the file is opened in nonblocking mode.
+              Neither the <b>open</b>() nor any subsequent I/O operations on the
+              file descriptor which is returned will cause the calling
+              process to wait.
+
+              Note that the setting of this flag has no effect on the
+              operation of <a href="../man2/poll.2.html">poll(2)</a>, <a href="../man2/select.2.html">select(2)</a>, <a href="../man7/epoll.7.html">epoll(7)</a>, and similar,
+              since those interfaces merely inform the caller about
+              whether a file descriptor is "ready", meaning that an I/O
+              operation performed on the file descriptor with the
+              <b>O_NONBLOCK </b>flag <i>clear</i> would not block.
+
+              Note that this flag has no effect for regular files and
+              block devices; that is, I/O operations will (briefly) block
+              when device activity is required, regardless of whether
+              <b>O_NONBLOCK </b>is set.  Since <b>O_NONBLOCK </b>semantics might
+              eventually be implemented, applications should not depend
+              upon blocking behavior when specifying this flag for
+              regular files and block devices.
+
+              For the handling of FIFOs (named pipes), see also <a href="../man7/fifo.7.html">fifo(7)</a>.
+              For a discussion of the effect of <b>O_NONBLOCK </b>in conjunction
+              with mandatory file locks and with file leases, see
+              <a href="../man2/fcntl.2.html">fcntl(2)</a>.
+
+       <b>O_PATH </b>(since Linux 2.6.39)
+              Obtain a file descriptor that can be used for two purposes:
+              to indicate a location in the filesystem tree and to
+              perform operations that act purely at the file descriptor
+              level.  The file itself is not opened, and other file
+              operations (e.g., <a href="../man2/read.2.html">read(2)</a>, <a href="../man2/write.2.html">write(2)</a>, <a href="../man2/fchmod.2.html">fchmod(2)</a>, <a href="../man2/fchown.2.html">fchown(2)</a>,
+              <a href="../man2/fgetxattr.2.html">fgetxattr(2)</a>, <a href="../man2/ioctl.2.html">ioctl(2)</a>, <a href="../man2/mmap.2.html">mmap(2)</a>) fail with the error <b>EBADF</b>.
+
+              The following operations <i>can</i> be performed on the resulting
+              file descriptor:
+
+              •  <a href="../man2/close.2.html">close(2)</a>.
+
+              •  <a href="../man2/fchdir.2.html">fchdir(2)</a>, if the file descriptor refers to a directory
+                 (since Linux 3.5).
+
+              •  <a href="../man2/fstat.2.html">fstat(2)</a> (since Linux 3.6).
+
+              •  <a href="../man2/fstatfs.2.html">fstatfs(2)</a> (since Linux 3.12).
+
+              •  Duplicating the file descriptor (<a href="../man2/dup.2.html">dup(2)</a>, <a href="../man2/fcntl.2.html">fcntl(2)</a>
+                 <b>F_DUPFD</b>, etc.).
+
+              •  Getting and setting file descriptor flags (<a href="../man2/fcntl.2.html">fcntl(2)</a>
+                 <b>F_GETFD </b>and <b>F_SETFD</b>).
+
+              •  Retrieving open file status flags using the <a href="../man2/fcntl.2.html">fcntl(2)</a>
+                 <b>F_GETFL </b>operation: the returned flags will include the
+                 bit <b>O_PATH</b>.
+
+              •  Passing the file descriptor as the <i>dirfd</i> argument of
+                 <b>openat</b>() and the other "*at()" system calls.  This
+                 includes <a href="../man2/linkat.2.html">linkat(2)</a> with <b>AT_EMPTY_PATH </b>(or via procfs
+                 using <b>AT_SYMLINK_FOLLOW</b>) even if the file is not a
+                 directory.
+
+              •  Passing the file descriptor to another process via a
+                 UNIX domain socket (see <b>SCM_RIGHTS </b>in <a href="../man7/unix.7.html">unix(7)</a>).
+
+              When <b>O_PATH </b>is specified in <i>flags</i>, flag bits other than
+              <b>O_CLOEXEC</b>, <b>O_DIRECTORY</b>, and <b>O_NOFOLLOW </b>are ignored.
+
+              Opening a file or directory with the <b>O_PATH </b>flag requires
+              no permissions on the object itself (but does require
+              execute permission on the directories in the path prefix).
+              Depending on the subsequent operation, a check for suitable
+              file permissions may be performed (e.g., <a href="../man2/fchdir.2.html">fchdir(2)</a> requires
+              execute permission on the directory referred to by its file
+              descriptor argument).  By contrast, obtaining a reference
+              to a filesystem object by opening it with the <b>O_RDONLY </b>flag
+              requires that the caller have read permission on the
+              object, even when the subsequent operation (e.g.,
+              <a href="../man2/fchdir.2.html">fchdir(2)</a>, <a href="../man2/fstat.2.html">fstat(2)</a>) does not require read permission on
+              the object.
+
+              If <i>path</i> is a symbolic link and the <b>O_NOFOLLOW </b>flag is also
+              specified, then the call returns a file descriptor
+              referring to the symbolic link.  This file descriptor can
+              be used as the <i>dirfd</i> argument in calls to <a href="../man2/fchownat.2.html">fchownat(2)</a>,
+              <a href="../man2/fstatat.2.html">fstatat(2)</a>, <a href="../man2/linkat.2.html">linkat(2)</a>, and <a href="../man2/readlinkat.2.html">readlinkat(2)</a> with an empty
+              pathname to have the calls operate on the symbolic link.
+
+              If <i>path</i> refers to an automount point that has not yet been
+              triggered, so no other filesystem is mounted on it, then
+              the call returns a file descriptor referring to the
+              automount directory without triggering a mount.  <a href="../man2/fstatfs.2.html">fstatfs(2)</a>
+              can then be used to determine if it is, in fact, an
+              untriggered automount point (<b>.f_type ==</b>
+              <b>AUTOFS_SUPER_MAGIC</b>).
+
+              One use of <b>O_PATH </b>for regular files is to provide the
+              equivalent of POSIX.1's <b>O_EXEC </b>functionality.  This permits
+              us to open a file for which we have execute permission but
+              not read permission, and then execute that file, with steps
+              something like the following:
+
+                  char buf[PATH_MAX];
+                  fd = open("some_prog", O_PATH);
+                  snprintf(buf, PATH_MAX, "/proc/self/fd/%d", fd);
+                  execl(buf, "some_prog", (char *) NULL);
+
+              An <b>O_PATH </b>file descriptor can also be passed as the
+              argument of <a href="../man3/fexecve.3.html">fexecve(3)</a>.
+
+       <b>O_SYNC </b>Write operations on the file will complete according to the
+              requirements of synchronized I/O <i>file</i> integrity completion
+              (by contrast with the synchronized I/O <i>data</i> integrity
+              completion provided by <b>O_DSYNC</b>.)
+
+              By the time <a href="../man2/write.2.html">write(2)</a> (or similar) returns, the output data
+              and associated file metadata have been transferred to the
+              underlying hardware (i.e., as though each <a href="../man2/write.2.html">write(2)</a> was
+              followed by a call to <a href="../man2/fsync.2.html">fsync(2)</a>).  See VERSIONS.
+
+       <b>O_TMPFILE </b>(since Linux 3.11)
+              Create an unnamed temporary regular file.  The <i>path</i>
+              argument specifies a directory; an unnamed inode will be
+              created in that directory's filesystem.  Anything written
+              to the resulting file will be lost when the last file
+              descriptor is closed, unless the file is given a name.
+
+              <b>O_TMPFILE </b>must be specified with one of <b>O_RDWR </b>or <b>O_WRONLY</b>
+              and, optionally, <b>O_EXCL</b>.  If <b>O_EXCL </b>is not specified, then
+              <a href="../man2/linkat.2.html">linkat(2)</a> can be used to link the temporary file into the
+              filesystem, making it permanent, using code like the
+              following:
+
+                  char path[PATH_MAX];
+                  fd = open("/path/to/dir", O_TMPFILE | O_RDWR,
+                                          S_IRUSR | S_IWUSR);
+
+                  /* File I/O on 'fd'...  */
+
+                  linkat(fd, "", AT_FDCWD, "/path/for/file", AT_EMPTY_PATH);
+
+                  /* If the caller doesn't have the CAP_DAC_READ_SEARCH
+                     capability (needed to use AT_EMPTY_PATH with linkat(2)),
+                     and there is a proc(5) filesystem mounted, then the
+                     linkat(2) call above can be replaced with:
+
+                  snprintf(path, PATH_MAX,  "/proc/self/fd/%d", fd);
+                  linkat(AT_FDCWD, path, AT_FDCWD, "/path/for/file",
+                                          AT_SYMLINK_FOLLOW);
+                  */
+
+              In this case, the <b>open</b>() <i>mode</i> argument determines the file
+              permission mode, as with <b>O_CREAT</b>.
+
+              Specifying <b>O_EXCL </b>in conjunction with <b>O_TMPFILE </b>prevents a
+              temporary file from being linked into the filesystem in the
+              above manner.  (Note that the meaning of <b>O_EXCL </b>in this
+              case is different from the meaning of <b>O_EXCL </b>otherwise.)
+
+              There are two main use cases for <b>O_TMPFILE</b>:
+
+              •  Improved <a href="../man3/tmpfile.3.html">tmpfile(3)</a> functionality: race-free creation of
+                 temporary files that (1) are automatically deleted when
+                 closed; (2) can never be reached via any pathname; (3)
+                 are not subject to symlink attacks; and (4) do not
+                 require the caller to devise unique names.
+
+              •  Creating a file that is initially invisible, which is
+                 then populated with data and adjusted to have
+                 appropriate filesystem attributes (<a href="../man2/fchown.2.html">fchown(2)</a>, <a href="../man2/fchmod.2.html">fchmod(2)</a>,
+                 <a href="../man2/fsetxattr.2.html">fsetxattr(2)</a>, etc.)  before being atomically linked into
+                 the filesystem in a fully formed state (using <a href="../man2/linkat.2.html">linkat(2)</a>
+                 as described above).
+
+              <b>O_TMPFILE </b>requires support by the underlying filesystem;
+              only a subset of Linux filesystems provide that support.
+              In the initial implementation, support was provided in the
+              ext2, ext3, ext4, UDF, Minix, and tmpfs filesystems.
+              Support for other filesystems has subsequently been added
+              as follows: XFS (Linux 3.15); Btrfs (Linux 3.16); F2FS
+              (Linux 3.16); and ubifs (Linux 4.9)
+
+       <b>O_TRUNC</b>
+              If the file already exists and is a regular file and the
+              access mode allows writing (i.e., is <b>O_RDWR </b>or <b>O_WRONLY</b>) it
+              will be truncated to length 0.  If the file is a FIFO or
+              terminal device file, the <b>O_TRUNC </b>flag is ignored.
+              Otherwise, the effect of <b>O_TRUNC </b>is unspecified.
+
+   <b>creat()</b>
+       A call to <b>creat</b>() is equivalent to calling <b>open</b>() with <i>flags</i> equal
+       to <b>O_CREAT|O_WRONLY|O_TRUNC</b>.
+
+   <b>openat()</b>
+       The <b>openat</b>() system call operates in exactly the same way as
+       <b>open</b>(), except for the differences described here.
+
+       The <i>dirfd</i> argument is used in conjunction with the <i>path</i> argument
+       as follows:
+
+       •  If the pathname given in <i>path</i> is absolute, then <i>dirfd</i> is
+          ignored.
+
+       •  If the pathname given in <i>path</i> is relative and <i>dirfd</i> is the
+          special value <b>AT_FDCWD</b>, then <i>path</i> is interpreted relative to
+          the current working directory of the calling process (like
+          <b>open</b>()).
+
+       •  If the pathname given in <i>path</i> is relative, then it is
+          interpreted relative to the directory referred to by the file
+          descriptor <i>dirfd</i> (rather than relative to the current working
+          directory of the calling process, as is done by <b>open</b>() for a
+          relative pathname).  In this case, <i>dirfd</i> must be a directory
+          that was opened for reading (<b>O_RDONLY</b>) or using the <b>O_PATH</b>
+          flag.
+
+       If the pathname given in <i>path</i> is relative, and <i>dirfd</i> is not a
+       valid file descriptor, an error (<b>EBADF</b>) results.  (Specifying an
+       invalid file descriptor number in <i>dirfd</i> can be used as a means to
+       ensure that <i>path</i> is absolute.)
+
+   <b>openat2(2)</b>
+       The <a href="../man2/openat2.2.html">openat2(2)</a> system call is an extension of <b>openat</b>(), and
+       provides a superset of the features of <b>openat</b>().  It is documented
+       separately, in <a href="../man2/openat2.2.html">openat2(2)</a>.
+</pre>
+<h2><a id="RETURN_VALUE" href="#RETURN_VALUE"></a>RETURN VALUE  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       On success, <b>open</b>(), <b>openat</b>(), and <b>creat</b>() return the new file
+       descriptor (a nonnegative integer).  On error, -1 is returned and
+       <i><a href="../man3/errno.3.html">errno</a></i> is set to indicate the error.
+</pre>
+<h2><a id="ERRORS" href="#ERRORS"></a>ERRORS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>open</b>(), <b>openat</b>(), and <b>creat</b>() can fail with the following errors:
+
+       <b>EACCES </b>The requested access to the file is not allowed, or search
+              permission is denied for one of the directories in the path
+              prefix of <i>path</i>, or the file did not exist yet and write
+              access to the parent directory is not allowed.  (See also
+              <a href="../man7/path_resolution.7.html">path_resolution(7)</a>.)
+
+       <b>EACCES </b>Where <b>O_CREAT </b>is specified, the <i>protected_fifos</i> or
+              <i>protected_regular</i> sysctl is enabled, the file already
+              exists and is a FIFO or regular file, the owner of the file
+              is neither the current user nor the owner of the containing
+              directory, and the containing directory is both world- or
+              group-writable and sticky.  For details, see the
+              descriptions of <i>/proc/sys/fs/protected_fifos</i> and
+              <i>/proc/sys/fs/protected_regular</i> in <a href="../man5/proc_sys_fs.5.html">proc_sys_fs(5)</a>.
+
+       <b>EBADF  </b>(<b>openat</b>()) <i>path</i> is relative but <i>dirfd</i> is neither <b>AT_FDCWD</b>
+              nor a valid file descriptor.
+
+       <b>EBUSY  O_EXCL </b>was specified in <i>flags</i> and <i>path</i> refers to a block
+              device that is in use by the system (e.g., it is mounted).
+
+       <b>EDQUOT </b>Where <b>O_CREAT </b>is specified, the file does not exist, and
+              the user's quota of disk blocks or inodes on the filesystem
+              has been exhausted.
+
+       <b>EEXIST </b><i>path</i> already exists and <b>O_CREAT </b>and <b>O_EXCL </b>were used.
+
+       <b>EFAULT </b><i>path</i> points outside your accessible address space.
+
+       <b>EFBIG  </b>See <b>EOVERFLOW</b>.
+
+       <b>EINTR  </b>While blocked waiting to complete an open of a slow device
+              (e.g., a FIFO; see <a href="../man7/fifo.7.html">fifo(7)</a>), the call was interrupted by a
+              signal handler; see <a href="../man7/signal.7.html">signal(7)</a>.
+
+       <b>EINVAL </b>The filesystem does not support the <b>O_DIRECT </b>flag.  See
+              <b>NOTES </b>for more information.
+
+       <b>EINVAL </b>Invalid value in <i>flags</i>.
+
+       <b>EINVAL O_TMPFILE </b>was specified in <i>flags</i>, but neither <b>O_WRONLY </b>nor
+              <b>O_RDWR </b>was specified.
+
+       <b>EINVAL O_CREAT </b>and <b>O_DIRECTORY </b>were both specified in <i>flags ,</i> and
+              the Linux kernel version is 6.4 or later.  (Earlier kernels
+              were inconsistent in this area, and POSIX does not specify
+              the behavior.)
+
+       <b>EINVAL O_CREAT </b>was specified in <i>flags</i> and the final component
+              ("basename") of the new file's <i>path</i> is invalid (e.g., it
+              contains characters not permitted by the underlying
+              filesystem).
+
+       <b>EINVAL </b>The final component ("basename") of <i>path</i> is invalid (e.g.,
+              it contains characters not permitted by the underlying
+              filesystem).
+
+       <b>EISDIR </b><i>path</i> refers to a directory and the access requested
+              involved writing (that is, <b>O_WRONLY </b>or <b>O_RDWR </b>is set).
+
+       <b>EISDIR </b><i>path</i> refers to an existing directory, <b>O_TMPFILE </b>and one of
+              <b>O_WRONLY </b>or <b>O_RDWR </b>were specified in <i>flags</i>, but this kernel
+              version does not provide the <b>O_TMPFILE </b>functionality.
+
+       <b>ELOOP  </b>Too many symbolic links were encountered in resolving <i>path</i>.
+
+       <b>ELOOP  </b><i>path</i> was a symbolic link, and <i>flags</i> specified <b>O_NOFOLLOW</b>
+              but not <b>O_PATH</b>.
+
+       <b>EMFILE </b>The per-process limit on the number of open file
+              descriptors has been reached (see the description of
+              <b>RLIMIT_NOFILE </b>in <a href="../man2/getrlimit.2.html">getrlimit(2)</a>).
+
+       <b>ENAMETOOLONG</b>
+              <i>path</i> was too long.
+
+       <b>ENFILE </b>The system-wide limit on the total number of open files has
+              been reached.
+
+       <b>ENODEV </b><i>path</i> refers to a device special file and no corresponding
+              device exists.  (This is a Linux kernel bug; in this
+              situation <b>ENXIO </b>must be returned.)
+
+       <b>ENOENT O_CREAT </b>is not set and the named file does not exist.
+
+       <b>ENOENT </b>A directory component in <i>path</i> does not exist or is a
+              dangling symbolic link.
+
+       <b>ENOENT </b><i>path</i> refers to a nonexistent directory, <b>O_TMPFILE </b>and one
+              of <b>O_WRONLY </b>or <b>O_RDWR </b>were specified in <i>flags</i>, but this
+              kernel version does not provide the <b>O_TMPFILE</b>
+              functionality.
+
+       <b>ENOMEM </b>The named file is a FIFO, but memory for the FIFO buffer
+              can't be allocated because the per-user hard limit on
+              memory allocation for pipes has been reached and the caller
+              is not privileged; see <a href="../man7/pipe.7.html">pipe(7)</a>.
+
+       <b>ENOMEM </b>Insufficient kernel memory was available.
+
+       <b>ENOSPC </b><i>path</i> was to be created but the device containing <i>path</i> has
+              no room for the new file.
+
+       <b>ENOTDIR</b>
+              A component used as a directory in <i>path</i> is not, in fact, a
+              directory, or <b>O_DIRECTORY </b>was specified and <i>path</i> was not a
+              directory.
+
+       <b>ENOTDIR</b>
+              (<b>openat</b>()) <i>path</i> is a relative pathname and <i>dirfd</i> is a file
+              descriptor referring to a file other than a directory.
+
+       <b>ENXIO  O_NONBLOCK </b>| <b>O_WRONLY </b>is set, the named file is a FIFO, and
+              no process has the FIFO open for reading.
+
+       <b>ENXIO  </b>The file is a device special file and no corresponding
+              device exists.
+
+       <b>ENXIO  </b>The file is a UNIX domain socket.
+
+       <b>EOPNOTSUPP</b>
+              The filesystem containing <i>path</i> does not support <b>O_TMPFILE</b>.
+
+       <b>EOVERFLOW</b>
+              <i>path</i> refers to a regular file that is too large to be
+              opened.  The usual scenario here is that an application
+              compiled on a 32-bit platform without
+              <i>-D_FILE_OFFSET_BITS=64</i> tried to open a file whose size
+              exceeds <i>(1&lt;&lt;31)-1</i> bytes; see also <b>O_LARGEFILE </b>above.  This
+              is the error specified by POSIX.1; before Linux 2.6.24,
+              Linux gave the error <b>EFBIG </b>for this case.
+
+       <b>EPERM  </b>The <b>O_NOATIME </b>flag was specified, but the effective user ID
+              of the caller did not match the owner of the file and the
+              caller was not privileged.
+
+       <b>EPERM  </b>The operation was prevented by a file seal; see <a href="../man2/fcntl.2.html">fcntl(2)</a>.
+
+       <b>EROFS  </b><i>path</i> refers to a file on a read-only filesystem and write
+              access was requested.
+
+       <b>ETXTBSY</b>
+              <i>path</i> refers to an executable image which is currently being
+              executed and write access was requested.
+
+       <b>ETXTBSY</b>
+              <i>path</i> refers to a file that is currently in use as a swap
+              file, and the <b>O_TRUNC </b>flag was specified.
+
+       <b>ETXTBSY</b>
+              <i>path</i> refers to a file that is currently being read by the
+              kernel (e.g., for module/firmware loading), and write
+              access was requested.
+
+       <b>EWOULDBLOCK</b>
+              The <b>O_NONBLOCK </b>flag was specified, and an incompatible
+              lease was held on the file (see <a href="../man2/fcntl.2.html">fcntl(2)</a>).
+</pre>
+<h2><a id="VERSIONS" href="#VERSIONS"></a>VERSIONS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       The (undefined) effect of <b>O_RDONLY | O_TRUNC </b>varies among
+       implementations.  On many systems the file is actually truncated.
+
+   <b>Synchronized I/O</b>
+       The POSIX.1-2008 "synchronized I/O" option specifies different
+       variants of synchronized I/O, and specifies the <b>open</b>() flags
+       <b>O_SYNC</b>, <b>O_DSYNC</b>, and <b>O_RSYNC </b>for controlling the behavior.
+       Regardless of whether an implementation supports this option, it
+       must at least support the use of <b>O_SYNC </b>for regular files.
+
+       Linux implements <b>O_SYNC </b>and <b>O_DSYNC</b>, but not <b>O_RSYNC</b>.  Somewhat
+       incorrectly, glibc defines <b>O_RSYNC </b>to have the same value as
+       <b>O_SYNC</b>.  (<b>O_RSYNC </b>is defined in the Linux header file
+       <i>&lt;asm/fcntl.h&gt;</i> on HP PA-RISC, but it is not used.)
+
+       <b>O_SYNC </b>provides synchronized I/O <i>file</i> integrity completion,
+       meaning write operations will flush data and all associated
+       metadata to the underlying hardware.  <b>O_DSYNC </b>provides
+       synchronized I/O <i>data</i> integrity completion, meaning write
+       operations will flush data to the underlying hardware, but will
+       only flush metadata updates that are required to allow a
+       subsequent read operation to complete successfully.  Data
+       integrity completion can reduce the number of disk operations that
+       are required for applications that don't need the guarantees of
+       file integrity completion.
+
+       To understand the difference between the two types of completion,
+       consider two pieces of file metadata: the file last modification
+       timestamp (<i>st_mtime</i>) and the file length.  All write operations
+       will update the last file modification timestamp, but only writes
+       that add data to the end of the file will change the file length.
+       The last modification timestamp is not needed to ensure that a
+       read completes successfully, but the file length is.  Thus,
+       <b>O_DSYNC </b>would only guarantee to flush updates to the file length
+       metadata (whereas <b>O_SYNC </b>would also always flush the last
+       modification timestamp metadata).
+
+       Before Linux 2.6.33, Linux implemented only the <b>O_SYNC </b>flag for
+       <b>open</b>().  However, when that flag was specified, most filesystems
+       actually provided the equivalent of synchronized I/O <i>data</i>
+       integrity completion (i.e., <b>O_SYNC </b>was actually implemented as the
+       equivalent of <b>O_DSYNC</b>).
+
+       Since Linux 2.6.33, proper <b>O_SYNC </b>support is provided.  However,
+       to ensure backward binary compatibility, <b>O_DSYNC </b>was defined with
+       the same value as the historical <b>O_SYNC</b>, and <b>O_SYNC </b>was defined as
+       a new (two-bit) flag value that includes the <b>O_DSYNC </b>flag value.
+       This ensures that applications compiled against new headers get at
+       least <b>O_DSYNC </b>semantics before Linux 2.6.33.
+
+   <b>C library/kernel differences</b>
+       Since glibc 2.26, the glibc wrapper function for <b>open</b>() employs
+       the <b>openat</b>() system call, rather than the kernel's <b>open</b>() system
+       call.  For certain architectures, this is also true before glibc
+       2.26.
+
+   <b>POSIX</b>
+       POSIX.1-2024 specifies <b>O_CLOFORK</b>, but Linux doesn't support it.
+</pre>
+<h2><a id="STANDARDS" href="#STANDARDS"></a>STANDARDS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>open</b>()
+       <b>creat</b>()
+       <b>openat</b>()
+              POSIX.1-2024.
+
+       <a href="../man2/openat2.2.html">openat2(2)</a>
+              Linux.
+
+       <b>O_DIRECT</b>
+       <b>O_NOATIME</b>
+       <b>O_PATH</b>
+       <b>O_TMPFILE</b>
+              Linux.
+</pre>
+<h2><a id="HISTORY" href="#HISTORY"></a>HISTORY  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>open</b>()
+       <b>creat</b>()
+              SVr4, 4.3BSD, POSIX.1-2001.
+
+       <b>openat</b>()
+              POSIX.1-2008.  Linux 2.6.16, glibc 2.4.
+
+       <b>O_CLOEXEC</b>
+       <b>O_DIRECTORY</b>
+       <b>O_NOFOLLOW</b>
+              POSIX.1-2008.
+</pre>
+<h2><a id="NOTES" href="#NOTES"></a>NOTES  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       Under Linux, the <b>O_NONBLOCK </b>flag is sometimes used in cases where
+       one wants to open but does not necessarily have the intention to
+       read or write.  For example, this may be used to open a device in
+       order to get a file descriptor for use with <a href="../man2/ioctl.2.html">ioctl(2)</a>.
+
+       Note that <b>open</b>() can open device special files, but <b>creat</b>() cannot
+       create them; use <a href="../man2/mknod.2.html">mknod(2)</a> instead.
+
+       If the file is newly created, its <i>st_atime</i>, <i>st_ctime</i>, <i>st_mtime</i>
+       fields (respectively, time of last access, time of last status
+       change, and time of last modification; see <a href="../man2/stat.2.html">stat(2)</a>) are set to the
+       current time, and so are the <i>st_ctime</i> and <i>st_mtime</i> fields of the
+       parent directory.  Otherwise, if the file is modified because of
+       the <b>O_TRUNC </b>flag, its <i>st_ctime</i> and <i>st_mtime</i> fields are set to the
+       current time.
+
+       The files in the <i>/proc/</i>pid<i>/fd</i> directory show the open file
+       descriptors of the process with the PID <i>pid</i>.  The files in the
+       <i>/proc/</i>pid<i>/fdinfo</i> directory show even more information about these
+       file descriptors.  See <a href="../man5/proc.5.html">proc(5)</a> for further details of both of
+       these directories.
+
+       The Linux header file <b>&lt;asm/fcntl.h&gt; </b>doesn't define <b>O_ASYNC</b>; the
+       (BSD-derived) <b>FASYNC </b>synonym is defined instead.
+
+   <b>Open file descriptions</b>
+       The term open file description is the one used by POSIX to refer
+       to the entries in the system-wide table of open files.  In other
+       contexts, this object is variously also called an "open file
+       object", a "file handle", an "open file table entry", or—in
+       kernel-developer parlance—a <i>struct file</i>.
+
+       When a file descriptor is duplicated (using <a href="../man2/dup.2.html">dup(2)</a> or similar),
+       the duplicate refers to the same open file description as the
+       original file descriptor, and the two file descriptors
+       consequently share the file offset and file status flags.  Such
+       sharing can also occur between processes: a child process created
+       via <a href="../man2/fork.2.html">fork(2)</a> inherits duplicates of its parent's file descriptors,
+       and those duplicates refer to the same open file descriptions.
+
+       Each <b>open</b>() of a file creates a new open file description; thus,
+       there may be multiple open file descriptions corresponding to a
+       file inode.
+
+       On Linux, one can use the <a href="../man2/kcmp.2.html">kcmp(2)</a> <b>KCMP_FILE </b>operation to test
+       whether two file descriptors (in the same process or in two
+       different processes) refer to the same open file description.
+
+   <b>NFS</b>
+       There are many infelicities in the protocol underlying NFS,
+       affecting amongst others <b>O_SYNC </b>and <b>O_NDELAY</b>.
+
+       On NFS filesystems with UID mapping enabled, <b>open</b>() may return a
+       file descriptor but, for example, <a href="../man2/read.2.html">read(2)</a> requests are denied with
+       <b>EACCES</b>.  This is because the client performs <b>open</b>() by checking
+       the permissions, but UID mapping is performed by the server upon
+       read and write requests.
+
+   <b>FIFOs</b>
+       Opening the read or write end of a FIFO blocks until the other end
+       is also opened (by another process or thread).  See <a href="../man7/fifo.7.html">fifo(7)</a> for
+       further details.
+
+   <b>File access mode</b>
+       Unlike the other values that can be specified in <i>flags</i>, the <i>access</i>
+       <i>mode</i> values <b>O_RDONLY</b>, <b>O_WRONLY</b>, and <b>O_RDWR </b>do not specify
+       individual bits.  Rather, they define the low order two bits of
+       <i>flags</i>, and are defined respectively as 0, 1, and 2.  In other
+       words, the combination <b>O_RDONLY | O_WRONLY </b>is a logical error, and
+       certainly does not have the same meaning as <b>O_RDWR</b>.
+
+       Linux reserves the special, nonstandard access mode 3 (binary 11)
+       in <i>flags</i> to mean: check for read and write permission on the file
+       and return a file descriptor that can't be used for reading or
+       writing.  This nonstandard access mode is used by some Linux
+       drivers to return a file descriptor that is to be used only for
+       device-specific <a href="../man2/ioctl.2.html">ioctl(2)</a> operations.
+
+   <b>Rationale for openat() and other directory file descriptor APIs</b>
+       <b>openat</b>() and the other system calls and library functions that
+       take a directory file descriptor argument (i.e., <a href="../man2/execveat.2.html">execveat(2)</a>,
+       <a href="../man2/faccessat.2.html">faccessat(2)</a>, <a href="../man2/fanotify_mark.2.html">fanotify_mark(2)</a>, <a href="../man2/fchmodat.2.html">fchmodat(2)</a>, <a href="../man2/fchownat.2.html">fchownat(2)</a>,
+       <a href="../man2/fspick.2.html">fspick(2)</a>, <a href="../man2/fstatat.2.html">fstatat(2)</a>, <a href="../man2/futimesat.2.html">futimesat(2)</a>, <a href="../man2/linkat.2.html">linkat(2)</a>, <a href="../man2/mkdirat.2.html">mkdirat(2)</a>,
+       <a href="../man2/mknodat.2.html">mknodat(2)</a>, <a href="../man2/mount_setattr.2.html">mount_setattr(2)</a>, <a href="../man2/move_mount.2.html">move_mount(2)</a>, <a href="../man2/name_to_handle_at.2.html">name_to_handle_at(2)</a>,
+       <a href="../man2/open_tree.2.html">open_tree(2)</a>, <a href="../man2/openat2.2.html">openat2(2)</a>, <a href="../man2/readlinkat.2.html">readlinkat(2)</a>, <a href="../man2/renameat.2.html">renameat(2)</a>,
+       <a href="../man2/renameat2.2.html">renameat2(2)</a>, <a href="../man2/statx.2.html">statx(2)</a>, <a href="../man2/symlinkat.2.html">symlinkat(2)</a>, <a href="../man2/unlinkat.2.html">unlinkat(2)</a>, <a href="../man2/utimensat.2.html">utimensat(2)</a>,
+       <a href="../man3/mkfifoat.3.html">mkfifoat(3)</a>, and <a href="../man3/scandirat.3.html">scandirat(3)</a>) address two problems with the older
+       interfaces that preceded them.  Here, the explanation is in terms
+       of the <b>openat</b>() call, but the rationale is analogous for the other
+       interfaces.
+
+       First, <b>openat</b>() allows an application to avoid race conditions
+       that could occur when using <b>open</b>() to open files in directories
+       other than the current working directory.  These race conditions
+       result from the fact that some component of the directory prefix
+       given to <b>open</b>() could be changed in parallel with the call to
+       <b>open</b>().  Suppose, for example, that we wish to create the file
+       <i>dir1/dir2/xxx.dep</i> if the file <i>dir1/dir2/xxx</i> exists.  The problem
+       is that between the existence check and the file-creation step,
+       <i>dir1</i> or <i>dir2</i> (which might be symbolic links) could be modified to
+       point to a different location.  Such races can be avoided by
+       opening a file descriptor for the target directory, and then
+       specifying that file descriptor as the <i>dirfd</i> argument of (say)
+       <a href="../man2/fstatat.2.html">fstatat(2)</a> and <b>openat</b>().  The use of the <i>dirfd</i> file descriptor
+       also has other benefits:
+
+       •  the file descriptor is a stable reference to the directory,
+          even if the directory is renamed; and
+
+       •  the open file descriptor prevents the underlying filesystem
+          from being dismounted, just as when a process has a current
+          working directory on a filesystem.
+
+       Second, <b>openat</b>() allows the implementation of a per-thread
+       "current working directory", via file descriptor(s) maintained by
+       the application.  (This functionality can also be obtained by
+       tricks based on the use of <i>/proc/self/fd/</i>dirfd, but less
+       efficiently.)
+
+       The <i>dirfd</i> argument for these APIs can be obtained by using <b>open</b>()
+       or <b>openat</b>() to open a directory (with either the <b>O_RDONLY </b>or the
+       <b>O_PATH </b>flag).  Alternatively, such a file descriptor can be
+       obtained by applying <a href="../man3/dirfd.3.html">dirfd(3)</a> to a directory stream created using
+       <a href="../man3/opendir.3.html">opendir(3)</a>.
+
+       When these APIs are given a <i>dirfd</i> argument of <b>AT_FDCWD </b>or the
+       specified pathname is absolute, then they handle their pathname
+       argument in the same way as the corresponding conventional APIs.
+       However, in this case, several of the APIs have a <i>flags</i> argument
+       that provides access to functionality that is not available with
+       the corresponding conventional APIs.
+
+   <b>O_DIRECT</b>
+       The <b>O_DIRECT </b>flag may impose alignment restrictions on the length
+       and address of user-space buffers and the file offset of I/Os.  In
+       Linux alignment restrictions vary by filesystem and kernel version
+       and might be absent entirely.  The handling of misaligned <b>O_DIRECT</b>
+       I/Os also varies; they can either fail with <b>EINVAL </b>or fall back to
+       buffered I/O.
+
+       Since Linux 6.1, <b>O_DIRECT </b>support and alignment restrictions for a
+       file can be queried using <a href="../man2/statx.2.html">statx(2)</a>, using the <b>STATX_DIOALIGN </b>flag.
+       Support for <b>STATX_DIOALIGN </b>varies by filesystem; see <a href="../man2/statx.2.html">statx(2)</a>.
+
+       Some filesystems provide their own interfaces for querying
+       <b>O_DIRECT </b>alignment restrictions, for example the <b>XFS_IOC_DIOINFO</b>
+       operation in <a href="../man3/xfsctl.3.html">xfsctl(3)</a>.  <b>STATX_DIOALIGN </b>should be used instead
+       when it is available.
+
+       If none of the above is available, then direct I/O support and
+       alignment restrictions can only be assumed from known
+       characteristics of the filesystem, the individual file, the
+       underlying storage device(s), and the kernel version.  In Linux
+       2.4, most filesystems based on block devices require that the file
+       offset and the length and memory address of all I/O segments be
+       multiples of the filesystem block size (typically 4096 bytes).  In
+       Linux 2.6.0, this was relaxed to the logical block size of the
+       block device (typically 512 bytes).  A block device's logical
+       block size can be determined using the <a href="../man2/ioctl.2.html">ioctl(2)</a> <b>BLKSSZGET</b>
+       operation or from the shell using the command:
+
+           blockdev --getss
+
+       <b>O_DIRECT </b>I/Os should never be run concurrently with the <a href="../man2/fork.2.html">fork(2)</a>
+       system call, if the memory buffer is a private mapping (i.e., any
+       mapping created with the <a href="../man2/mmap.2.html">mmap(2)</a> <b>MAP_PRIVATE </b>flag; this includes
+       memory allocated on the heap and statically allocated buffers).
+       Any such I/Os, whether submitted via an asynchronous I/O interface
+       or from another thread in the process, should be completed before
+       <a href="../man2/fork.2.html">fork(2)</a> is called.  Failure to do so can result in data corruption
+       and undefined behavior in parent and child processes.  This
+       restriction does not apply when the memory buffer for the <b>O_DIRECT</b>
+       I/Os was created using <a href="../man2/shmat.2.html">shmat(2)</a> or <a href="../man2/mmap.2.html">mmap(2)</a> with the <b>MAP_SHARED</b>
+       flag.  Nor does this restriction apply when the memory buffer has
+       been advised as <b>MADV_DONTFORK </b>with <a href="../man2/madvise.2.html">madvise(2)</a>, ensuring that it
+       will not be available to the child after <a href="../man2/fork.2.html">fork(2)</a>.
+
+       The <b>O_DIRECT </b>flag was introduced in SGI IRIX, where it has
+       alignment restrictions similar to those of Linux 2.4.  IRIX has
+       also a <a href="../man2/fcntl.2.html">fcntl(2)</a> call to query appropriate alignments, and sizes.
+       FreeBSD 4.x introduced a flag of the same name, but without
+       alignment restrictions.
+
+       <b>O_DIRECT </b>support was added in Linux 2.4.10.  Older Linux kernels
+       simply ignore this flag.  Some filesystems may not implement the
+       flag, in which case <b>open</b>() fails with the error <b>EINVAL </b>if it is
+       used.
+
+       Applications should avoid mixing <b>O_DIRECT </b>and normal I/O to the
+       same file, and especially to overlapping byte regions in the same
+       file.  Even when the filesystem correctly handles the coherency
+       issues in this situation, overall I/O throughput is likely to be
+       slower than using either mode alone.  Likewise, applications
+       should avoid mixing <a href="../man2/mmap.2.html">mmap(2)</a> of files with direct I/O to the same
+       files.
+
+       The behavior of <b>O_DIRECT </b>with NFS will differ from local
+       filesystems.  Older kernels, or kernels configured in certain
+       ways, may not support this combination.  The NFS protocol does not
+       support passing the flag to the server, so <b>O_DIRECT </b>I/O will
+       bypass the page cache only on the client; the server may still
+       cache the I/O.  The client asks the server to make the I/O
+       synchronous to preserve the synchronous semantics of <b>O_DIRECT</b>.
+       Some servers will perform poorly under these circumstances,
+       especially if the I/O size is small.  Some servers may also be
+       configured to lie to clients about the I/O having reached stable
+       storage; this will avoid the performance penalty at some risk to
+       data integrity in the event of server power failure.  The Linux
+       NFS client places no alignment restrictions on <b>O_DIRECT </b>I/O.
+
+       In summary, <b>O_DIRECT </b>is a potentially powerful tool that should be
+       used with caution.  It is recommended that applications treat use
+       of <b>O_DIRECT </b>as a performance option which is disabled by default.
+</pre>
+<h2><a id="BUGS" href="#BUGS"></a>BUGS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       Currently, it is not possible to enable signal-driven I/O by
+       specifying <b>O_ASYNC </b>when calling <b>open</b>(); use <a href="../man2/fcntl.2.html">fcntl(2)</a> to enable
+       this flag.
+
+       One must check for two different error codes, <b>EISDIR </b>and <b>ENOENT</b>,
+       when trying to determine whether the kernel supports <b>O_TMPFILE</b>
+       functionality.
+</pre>
+<h2><a id="SEE_ALSO" href="#SEE_ALSO"></a>SEE ALSO  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <a href="../man2/chmod.2.html">chmod(2)</a>, <a href="../man2/chown.2.html">chown(2)</a>, <a href="../man2/close.2.html">close(2)</a>, <a href="../man2/dup.2.html">dup(2)</a>, <a href="../man2/fcntl.2.html">fcntl(2)</a>, <a href="../man2/link.2.html">link(2)</a>, <a href="../man2/lseek.2.html">lseek(2)</a>,
+       <a href="../man2/mknod.2.html">mknod(2)</a>, <a href="../man2/mmap.2.html">mmap(2)</a>, <a href="../man2/mount.2.html">mount(2)</a>, <a href="../man2/open_by_handle_at.2.html">open_by_handle_at(2)</a>, <a href="../man2/openat2.2.html">openat2(2)</a>,
+       <a href="../man2/read.2.html">read(2)</a>, <a href="../man2/socket.2.html">socket(2)</a>, <a href="../man2/stat.2.html">stat(2)</a>, <a href="../man2/umask.2.html">umask(2)</a>, <a href="../man2/unlink.2.html">unlink(2)</a>, <a href="../man2/write.2.html">write(2)</a>,
+       <a href="../man3/fopen.3.html">fopen(3)</a>, <a href="../man5/acl.5.html">acl(5)</a>, <a href="../man7/fifo.7.html">fifo(7)</a>, <a href="../man7/inode.7.html">inode(7)</a>, <a href="../man7/path_resolution.7.html">path_resolution(7)</a>,
+       <a href="../man7/symlink.7.html">symlink(7)</a>
+</pre>
+<h2><a id="COLOPHON" href="#COLOPHON"></a>COLOPHON  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       This page is part of the <i>man-pages</i> (Linux kernel and C library
+       user-space interface documentation) project.  Information about
+       the project can be found at 
+       ⟨<a href="https://www.kernel.org/doc/man-pages/">https://www.kernel.org/doc/man-pages/</a>⟩.  If you have a bug report
+       for this manual page, see
+       ⟨<a href="https://git.kernel.org/pub/scm/docs/man-pages/man-pages.git/tree/CONTRIBUTING">https://git.kernel.org/pub/scm/docs/man-pages/man-pages.git/tree/CONTRIBUTING</a>⟩.
+       This page was obtained from the tarball man-pages-6.19.tar.gz
+       fetched from
+       ⟨<a href="https://mirrors.edge.kernel.org/pub/linux/docs/man-pages/">https://mirrors.edge.kernel.org/pub/linux/docs/man-pages/</a>⟩ on
+       2026-09-09.  If you discover any rendering problems in this HTML
+       version of the page, or you believe there is a better or more up-
+       to-date source for the page, or you have corrections or
+       improvements to the information in this COLOPHON (which is <i>not</i>
+       part of the original manual page), send a mail to
+       man-pages@man7.org
+
+<span class="footline">Linux man-pages 6.19            2026-02-08                        <i>open</i>(2)</span>
+</pre>
+
+<hr class="end-man-text" />
+<p>Pages that refer to this page:
+    <a href="../man1/pv.1.html">pv(1)</a>,&nbsp;
+    <a href="../man1/strace.1.html">strace(1)</a>,&nbsp;
+    <a href="../man1/systemd-nspawn.1.html">systemd-nspawn(1)</a>,&nbsp;
+    <a href="../man2/accept.2.html">accept(2)</a>,&nbsp;
+    <a href="../man2/access.2.html">access(2)</a>,&nbsp;
+    <a href="../man2/chmod.2.html">chmod(2)</a>,&nbsp;
+    <a href="../man2/chown.2.html">chown(2)</a>,&nbsp;
+    <a href="../man2/chroot.2.html">chroot(2)</a>,&nbsp;
+    <a href="../man2/clone.2.html">clone(2)</a>,&nbsp;
+    <a href="../man2/close.2.html">close(2)</a>,&nbsp;
+    <a href="../man2/copy_file_range.2.html">copy_file_range(2)</a>,&nbsp;
+    <a href="../man2/dup.2.html">dup(2)</a>,&nbsp;
+    <a href="../man2/epoll_create.2.html">epoll_create(2)</a>,&nbsp;
+    <a href="../man2/epoll_ctl.2.html">epoll_ctl(2)</a>,&nbsp;
+    <a href="../man2/eventfd.2.html">eventfd(2)</a>,&nbsp;
+    <a href="../man2/execveat.2.html">execveat(2)</a>,&nbsp;
+    <a href="../man2/fanotify_init.2.html">fanotify_init(2)</a>,&nbsp;
+    <a href="../man2/fanotify_mark.2.html">fanotify_mark(2)</a>,&nbsp;
+    <a href="../man2/FAT_IOCTL_GET_VOLUME_ID.2const.html">FAT_IOCTL_GET_VOLUME_ID(2const)</a>,&nbsp;
+    <a href="../man2/FAT_IOCTL_SET_ATTRIBUTES.2const.html">FAT_IOCTL_SET_ATTRIBUTES(2const)</a>,&nbsp;
+    <a href="../man2/fcntl.2.html">fcntl(2)</a>,&nbsp;
+    <a href="../man2/fcntl_locking.2.html">fcntl_locking(2)</a>,&nbsp;
+    <a href="../man2/F_DUPFD.2const.html">F_DUPFD(2const)</a>,&nbsp;
+    <a href="../man2/F_GETDELEG.2const.html">F_GETDELEG(2const)</a>,&nbsp;
+    <a href="../man2/F_GETFD.2const.html">F_GETFD(2const)</a>,&nbsp;
+    <a href="../man2/F_GETFL.2const.html">F_GETFL(2const)</a>,&nbsp;
+    <a href="../man2/F_GETLEASE.2const.html">F_GETLEASE(2const)</a>,&nbsp;
+    <a href="../man2/F_GET_RW_HINT.2const.html">F_GET_RW_HINT(2const)</a>,&nbsp;
+    <a href="../man2/F_GET_SEALS.2const.html">F_GET_SEALS(2const)</a>,&nbsp;
+    <a href="../man2/flock.2.html">flock(2)</a>,&nbsp;
+    <a href="../man2/F_NOTIFY.2const.html">F_NOTIFY(2const)</a>,&nbsp;
+    <a href="../man2/fork.2.html">fork(2)</a>,&nbsp;
+    <a href="../man2/fsconfig.2.html">fsconfig(2)</a>,&nbsp;
+    <a href="../man2/fsmount.2.html">fsmount(2)</a>,&nbsp;
+    <a href="../man2/fsopen.2.html">fsopen(2)</a>,&nbsp;
+    <a href="../man2/fspick.2.html">fspick(2)</a>,&nbsp;
+    <a href="../man2/fsync.2.html">fsync(2)</a>,&nbsp;
+    <a href="../man2/futimesat.2.html">futimesat(2)</a>,&nbsp;
+    <a href="../man2/getrlimit.2.html">getrlimit(2)</a>,&nbsp;
+    <a href="../man2/getxattr.2.html">getxattr(2)</a>,&nbsp;
+    <a href="../man2/inotify_init.2.html">inotify_init(2)</a>,&nbsp;
+    <a href="../man2/ioctl.2.html">ioctl(2)</a>,&nbsp;
+    <a href="../man2/ioprio_set.2.html">ioprio_set(2)</a>,&nbsp;
+    <a href="../man2/io_submit.2.html">io_submit(2)</a>,&nbsp;
+    <a href="../man2/io_uring_enter2.2.html">io_uring_enter2(2)</a>,&nbsp;
+    <a href="../man2/io_uring_enter.2.html">io_uring_enter(2)</a>,&nbsp;
+    <a href="../man2/kcmp.2.html">kcmp(2)</a>,&nbsp;
+    <a href="../man2/link.2.html">link(2)</a>,&nbsp;
+    <a href="../man2/listxattr.2.html">listxattr(2)</a>,&nbsp;
+    <a href="../man2/_llseek.2.html">_llseek(2)</a>,&nbsp;
+    <a href="../man2/lseek.2.html">lseek(2)</a>,&nbsp;
+    <a href="../man2/memfd_create.2.html">memfd_create(2)</a>,&nbsp;
+    <a href="../man2/memfd_secret.2.html">memfd_secret(2)</a>,&nbsp;
+    <a href="../man2/mkdir.2.html">mkdir(2)</a>,&nbsp;
+    <a href="../man2/mknod.2.html">mknod(2)</a>,&nbsp;
+    <a href="../man2/mount.2.html">mount(2)</a>,&nbsp;
+    <a href="../man2/mount_setattr.2.html">mount_setattr(2)</a>,&nbsp;
+    <a href="../man2/move_mount.2.html">move_mount(2)</a>,&nbsp;
+    <a href="../man2/msgget.2.html">msgget(2)</a>,&nbsp;
+    <a href="../man2/openat2.2.html">openat2(2)</a>,&nbsp;
+    <a href="../man2/open_by_handle_at.2.html">open_by_handle_at(2)</a>,&nbsp;
+    <a href="../man2/open_tree.2.html">open_tree(2)</a>,&nbsp;
+    <a href="../man2/perf_event_open.2.html">perf_event_open(2)</a>,&nbsp;
+    <a href="../man2/personality.2.html">personality(2)</a>,&nbsp;
+    <a href="../man2/pidfd_getfd.2.html">pidfd_getfd(2)</a>,&nbsp;
+    <a href="../man2/pipe.2.html">pipe(2)</a>,&nbsp;
+    <a href="../man2/PR_SET_MM_EXE_FILE.2const.html">PR_SET_MM_EXE_FILE(2const)</a>,&nbsp;
+    <a href="../man2/read.2.html">read(2)</a>,&nbsp;
+    <a href="../man2/readlink.2.html">readlink(2)</a>,&nbsp;
+    <a href="../man2/readv.2.html">readv(2)</a>,&nbsp;
+    <a href="../man2/recv.2.html">recv(2)</a>,&nbsp;
+    <a href="../man2/removexattr.2.html">removexattr(2)</a>,&nbsp;
+    <a href="../man2/rename.2.html">rename(2)</a>,&nbsp;
+    <a href="../man2/seccomp.2.html">seccomp(2)</a>,&nbsp;
+    <a href="../man2/seccomp_unotify.2.html">seccomp_unotify(2)</a>,&nbsp;
+    <a href="../man2/semget.2.html">semget(2)</a>,&nbsp;
+    <a href="../man2/send.2.html">send(2)</a>,&nbsp;
+    <a href="../man2/sendfile.2.html">sendfile(2)</a>,&nbsp;
+    <a href="../man2/setxattr.2.html">setxattr(2)</a>,&nbsp;
+    <a href="../man2/shmget.2.html">shmget(2)</a>,&nbsp;
+    <a href="../man2/signalfd.2.html">signalfd(2)</a>,&nbsp;
+    <a href="../man2/socket.2.html">socket(2)</a>,&nbsp;
+    <a href="../man2/spu_create.2.html">spu_create(2)</a>,&nbsp;
+    <a href="../man2/stat.2.html">stat(2)</a>,&nbsp;
+    <a href="../man2/statfs.2.html">statfs(2)</a>,&nbsp;
+    <a href="../man2/statx.2.html">statx(2)</a>,&nbsp;
+    <a href="../man2/symlink.2.html">symlink(2)</a>,&nbsp;
+    <a href="../man2/syscalls.2.html">syscalls(2)</a>,&nbsp;
+    <a href="../man2/timerfd_create.2.html">timerfd_create(2)</a>,&nbsp;
+    <a href="../man2/TIOCEXCL.2const.html">TIOCEXCL(2const)</a>,&nbsp;
+    <a href="../man2/TIOCPKT.2const.html">TIOCPKT(2const)</a>,&nbsp;
+    <a href="../man2/TIOCSSOFTCAR.2const.html">TIOCSSOFTCAR(2const)</a>,&nbsp;
+    <a href="../man2/truncate.2.html">truncate(2)</a>,&nbsp;
+    <a href="../man2/umask.2.html">umask(2)</a>,&nbsp;
+    <a href="../man2/unlink.2.html">unlink(2)</a>,&nbsp;
+    <a href="../man2/uselib.2.html">uselib(2)</a>,&nbsp;
+    <a href="../man2/userfaultfd.2.html">userfaultfd(2)</a>,&nbsp;
+    <a href="../man2/utimensat.2.html">utimensat(2)</a>,&nbsp;
+    <a href="../man2/VFAT_IOCTL_READDIR_BOTH.2const.html">VFAT_IOCTL_READDIR_BOTH(2const)</a>,&nbsp;
+    <a href="../man2/write.2.html">write(2)</a>,&nbsp;
+    <a href="../man3/catopen.3.html">catopen(3)</a>,&nbsp;
+    <a href="../man3/dbopen.3.html">dbopen(3)</a>,&nbsp;
+    <a href="../man3/dirfd.3.html">dirfd(3)</a>,&nbsp;
+    <a href="../man3/euidaccess.3.html">euidaccess(3)</a>,&nbsp;
+    <a href="../man3/ferror.3.html">ferror(3)</a>,&nbsp;
+    <a href="../man3/fileno.3.html">fileno(3)</a>,&nbsp;
+    <a href="../man3/fopen.3.html">fopen(3)</a>,&nbsp;
+    <a href="../man3/fpathconf.3.html">fpathconf(3)</a>,&nbsp;
+    <a href="../man3/fts.3.html">fts(3)</a>,&nbsp;
+    <a href="../man3/getcwd.3.html">getcwd(3)</a>,&nbsp;
+    <a href="../man3/getdirentries.3.html">getdirentries(3)</a>,&nbsp;
+    <a href="../man3/getdtablesize.3.html">getdtablesize(3)</a>,&nbsp;
+    <a href="../man3/getfilecon.3.html">getfilecon(3)</a>,&nbsp;
+    <a href="../man3/getpt.3.html">getpt(3)</a>,&nbsp;
+    <a href="../man3/getutent.3.html">getutent(3)</a>,&nbsp;
+    <a href="../man3/grantpt.3.html">grantpt(3)</a>,&nbsp;
+    <a href="../man3/handle.3.html">handle(3)</a>,&nbsp;
+    <a href="../man3/io_uring_prep_open.3.html">io_uring_prep_open(3)</a>,&nbsp;
+    <a href="../man3/io_uring_prep_openat.3.html">io_uring_prep_openat(3)</a>,&nbsp;
+    <a href="../man3/io_uring_prep_openat_direct.3.html">io_uring_prep_openat_direct(3)</a>,&nbsp;
+    <a href="../man3/io_uring_prep_open_direct.3.html">io_uring_prep_open_direct(3)</a>,&nbsp;
+    <a href="../man3/mkfifo.3.html">mkfifo(3)</a>,&nbsp;
+    <a href="../man3/mkstemp.3.html">mkstemp(3)</a>,&nbsp;
+    <a href="../man3/mode_t.3type.html">mode_t(3type)</a>,&nbsp;
+    <a href="../man3/mq_open.3.html">mq_open(3)</a>,&nbsp;
+    <a href="../man3/opendir.3.html">opendir(3)</a>,&nbsp;
+    <a href="../man3/popen.3.html">popen(3)</a>,&nbsp;
+    <a href="../man3/posix_openpt.3.html">posix_openpt(3)</a>,&nbsp;
+    <a href="../man3/posix_spawn.3.html">posix_spawn(3)</a>,&nbsp;
+    <a href="../man3/pthread_setname_np.3.html">pthread_setname_np(3)</a>,&nbsp;
+    <a href="../man3/remove.3.html">remove(3)</a>,&nbsp;
+    <a href="../man3/scandir.3.html">scandir(3)</a>,&nbsp;
+    <a href="../man3/selinux_status_open.3.html">selinux_status_open(3)</a>,&nbsp;
+    <a href="../man3/sem_open.3.html">sem_open(3)</a>,&nbsp;
+    <a href="../man3/setfilecon.3.html">setfilecon(3)</a>,&nbsp;
+    <a href="../man3/shm_open.3.html">shm_open(3)</a>,&nbsp;
+    <a href="../man3/statvfs.3.html">statvfs(3)</a>,&nbsp;
+    <a href="../man3/stdin.3.html">stdin(3)</a>,&nbsp;
+    <a href="../man3/stdio.3.html">stdio(3)</a>,&nbsp;
+    <a href="../man3/tempnam.3.html">tempnam(3)</a>,&nbsp;
+    <a href="../man3/tmpnam.3.html">tmpnam(3)</a>,&nbsp;
+    <a href="../man3/tracefs_trace_pipe_stream.3.html">tracefs_trace_pipe_stream(3)</a>,&nbsp;
+    <a href="../man4/lp.4.html">lp(4)</a>,&nbsp;
+    <a href="../man4/random.4.html">random(4)</a>,&nbsp;
+    <a href="../man4/st.4.html">st(4)</a>,&nbsp;
+    <a href="../man5/proc_pid_attr.5.html">proc_pid_attr(5)</a>,&nbsp;
+    <a href="../man5/proc_pid_fdinfo.5.html">proc_pid_fdinfo(5)</a>,&nbsp;
+    <a href="../man5/proc_pid_mem.5.html">proc_pid_mem(5)</a>,&nbsp;
+    <a href="../man5/proc_sys_fs.5.html">proc_sys_fs(5)</a>,&nbsp;
+    <a href="../man7/attributes.7.html">attributes(7)</a>,&nbsp;
+    <a href="../man7/capabilities.7.html">capabilities(7)</a>,&nbsp;
+    <a href="../man7/cpuset.7.html">cpuset(7)</a>,&nbsp;
+    <a href="../man7/credentials.7.html">credentials(7)</a>,&nbsp;
+    <a href="../man7/daemon.7.html">daemon(7)</a>,&nbsp;
+    <a href="../man7/epoll.7.html">epoll(7)</a>,&nbsp;
+    <a href="../man7/feature_test_macros.7.html">feature_test_macros(7)</a>,&nbsp;
+    <a href="../man7/fifo.7.html">fifo(7)</a>,&nbsp;
+    <a href="../man7/inode.7.html">inode(7)</a>,&nbsp;
+    <a href="../man7/inotify.7.html">inotify(7)</a>,&nbsp;
+    <a href="../man7/landlock.7.html">landlock(7)</a>,&nbsp;
+    <a href="../man7/mq_overview.7.html">mq_overview(7)</a>,&nbsp;
+    <a href="../man7/pathname.7.html">pathname(7)</a>,&nbsp;
+    <a href="../man7/path_resolution.7.html">path_resolution(7)</a>,&nbsp;
+    <a href="../man7/pipe.7.html">pipe(7)</a>,&nbsp;
+    <a href="../man7/pty.7.html">pty(7)</a>,&nbsp;
+    <a href="../man7/shm_overview.7.html">shm_overview(7)</a>,&nbsp;
+    <a href="../man7/signal.7.html">signal(7)</a>,&nbsp;
+    <a href="../man7/signal-safety.7.html">signal-safety(7)</a>,&nbsp;
+    <a href="../man7/symlink.7.html">symlink(7)</a>,&nbsp;
+    <a href="../man7/unix.7.html">unix(7)</a>,&nbsp;
+    <a href="../man8/mount.8.html">mount(8)</a>,&nbsp;
+    <a href="../man8/mount.fuse3.8.html">mount.fuse3(8)</a>,&nbsp;
+    <a href="../man8/xfs_io.8.html">xfs_io(8)</a>
+</p>
+<hr/>
+
+ 
+<hr class="start-footer" />
+
+<div class="footer">
+
+<table class="colophon-table">
+    <tr>
+    <td class="pub-info">
+        <p>
+            HTML rendering created 2026-09-09
+            by <a href="https://man7.org/mtk/index.html">Michael Kerrisk</a>,
+            author of
+            <a href="https://man7.org/tlpi/"><em>The Linux Programming Interface</em></a>.
+        </p>
+        <p>
+            For details of in-depth
+            <strong>Linux/UNIX system programming training courses</strong>
+            that I teach, look <a href="https://man7.org/training/">here</a>.
+        </p>
+        <p>
+            Hosting by <a href="https://www.jambit.com/index_en.html">jambit GmbH</a>.
+        </p>
+    </td>
+    <td class="colophon-divider">
+    </td>
+    <td class="tlpi-cover">
+        <a href="https://man7.org/tlpi/"><img src="https://man7.org/tlpi/cover/TLPI-front-cover-vsmall.png" alt="Cover of TLPI" /></a>
+    </td>
+    </tr>
+</table>
+
+</div>
+
+<hr class="end-footer" />
+
+
+
+<!--BEGIN-SITETRACKING-->
+<!-- SITETRACKING.man7.org_linux_man-pages -->
+
+<!-- Default Statcounter code for man7.org/linux/man-pages
+http://www.man7.org/linux/man-pages -->
+<script type="text/javascript">
+var sc_project=7422636;
+var sc_invisible=1;
+var sc_security="9b6714ff";
+</script>
+<script type="text/javascript"
+src="https://www.statcounter.com/counter/counter.js"
+async></script>
+<noscript><div class="statcounter"><a title="Web Analytics
+Made Easy - StatCounter" href="https://statcounter.com/"
+target="_blank"><img class="statcounter"
+src="https://c.statcounter.com/7422636/0/9b6714ff/1/"
+alt="Web Analytics Made Easy -
+StatCounter"></a></div></noscript>
+<!-- End of Statcounter Code -->
+
+
+
+<!-- Start of Google Analytics Code -->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9830363-8']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+<!-- End of Google Analytics Code -->
+
+<!--END-SITETRACKING-->
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+[
+  {
+    "id": "core-001:unit:9fe6da15d252bcd2",
+    "path": "docs/architecture/connection-ownership-and-contention.md",
+    "source_sha256": "0dba03bde9f77cd59de9dc118f1ab621d0712439fb0e9ddd136492f3ffb97a60",
+    "range_sha256": "97a1d9a6cd6f616bb0368a5cb157b08c592501b34d2af6a8ccd5e9165a88b68e",
+    "start_character": 13958,
+    "end_character_exclusive": 14370,
+    "first_line": 212,
+    "last_line": 220,
+    "category": "narrative-section-with-complete-examples",
+    "label": "## Platform notes",
+    "assigned_family": "SHARED",
+    "stage": "SHARED",
+    "status": "UNREAD",
+    "review_status": "UNASSIGNED",
+    "sample_status": "INELIGIBLE-UNTIL-READ",
+    "scope_rationale": "Read complete Core-facing unit and neighboring lifetime/cleanup context.",
+    "features": {
+      "xml": false,
+      "comments": false,
+      "todo": false,
+      "specification": true,
+      "code_only": false,
+      "tests": false
+    },
+    "secondary_disposition": "SECONDARY-READ-CLEAN-MACOS-CLAUSE-ONLY; Windows clauses remain B4",
+    "candidate_ids": [],
+    "primary_count_increment": 0,
+    "future_editor": "SHARED",
+    "central_reconciliation": "PENDING"
+  },
+  {
+    "id": "core-001:unit:7a72c68ab4742b48",
+    "path": "src/Core/CLAUDE.md",
+    "source_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "range_sha256": "94337012d4a5c281825f61ca191cbb1993c74948b6a1b27d92656dc668a68ba7",
+    "start_character": 27526,
+    "end_character_exclusive": 33204,
+    "first_line": 423,
+    "last_line": 499,
+    "category": "narrative-section-with-complete-examples",
+    "label": "#### `LibraryImport`, not `DllImport`",
+    "assigned_family": "SHARED",
+    "stage": "SHARED",
+    "status": "UNREAD",
+    "review_status": "UNASSIGNED",
+    "sample_status": "INELIGIBLE-UNTIL-READ",
+    "scope_rationale": "Complete source/XML/comment/assertion context; declaration ranges include code-only implicit contracts.",
+    "features": {
+      "xml": false,
+      "comments": true,
+      "todo": false,
+      "specification": true,
+      "code_only": false,
+      "tests": false
+    },
+    "secondary_disposition": "SECONDARY-READ-CANDIDATE-CALLBACK-PARAGRAPH",
+    "candidate_ids": [
+      "CORE-B3-C004"
+    ],
+    "primary_count_increment": 0,
+    "future_editor": "SHARED",
+    "central_reconciliation": "PENDING"
+  }
+]

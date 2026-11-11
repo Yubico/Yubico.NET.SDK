@@ -1,0 +1,546 @@
+[
+  {
+    "candidate_id": "CORE-B3-C001",
+    "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C001",
+    "path": "docs/architecture/connection-ownership-and-contention.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C001",
+    "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C001",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C001",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C002",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C002",
+    "path": "src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C002",
+    "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C002",
+    "path": "src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C002",
+    "path": "docs/usage/device-discovery.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C003",
+    "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C003",
+    "path": "src/Core/src/Transports/Hid/MacOS/CoreFoundationString.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C003",
+    "path": "src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C003",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C003",
+    "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C004",
+    "path": "src/Core/CLAUDE.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C004",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C004",
+    "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C004",
+    "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C004",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidListenerLifetimeTests.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C004",
+    "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C004",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C005",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C005",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidListenerLifetimeTests.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C005",
+    "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C005",
+    "path": "src/Core/src/Devices/HotplugSignals.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C005",
+    "path": "src/Core/CLAUDE.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C006",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C006",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C006",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C006",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C006",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C006",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidListenerLifetimeTests.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C006",
+    "path": "docs/usage/user-interaction.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureCompatibilityTests.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureFacadeTests.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/README.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "docs/architecture/raw-access-tiers.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "src/Core/src/Transports/Hid/IHidConnection.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C007",
+    "path": "docs/migration/v1-to-v2.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidBoundaryComparison/CurrentProfile.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidBoundaryComparison/Directory.Build.props",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidBoundaryComparison/RunnerSelfTest.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidInputVerification/MacOSHidInputVerification.csproj",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidInputVerification/Program.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidRouteVerification/AcceptanceScenarios.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidRouteVerification/ExpertFeatureScenario.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidRouteVerification/ExpertIoScenario.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidRouteVerification/Program.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "src/Core/README.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "src/Core/CLAUDE.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "docs/architecture/raw-access-tiers.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "docs/plans/yubikit-async-boundaries/02-architecture.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C008",
+    "path": "docs/NATIVE-AOT.md",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "DEPENDENCY-OWNER-RETAINED"
+  },
+  {
+    "candidate_id": "CORE-B3-C009",
+    "path": "src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C009",
+    "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  },
+  {
+    "candidate_id": "CORE-B3-C009",
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+    "investigator_edit": "UNCHANGED",
+    "future_editor_disposition": "PENDING-EXPLICIT-RETAIN-QUALIFY-OR-EDIT",
+    "future_reviewer_disposition": "PENDING-FULL-UNIT-AND-ORIGINAL-CITATION-REVIEW",
+    "primary_ownership": "B3"
+  }
+]

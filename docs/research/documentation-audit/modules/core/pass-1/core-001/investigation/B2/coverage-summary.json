@@ -1,0 +1,28 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_record_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+  "primary_files": 63,
+  "primary_lines": 11868,
+  "primary_units": 1148,
+  "shared_units": 71,
+  "total_units": 1219,
+  "statuses": {
+    "READ-CLEAN": 1187,
+    "READ-CANDIDATE": 31,
+    "READ-EXCLUSION": 1
+  },
+  "unread": 0,
+  "primary_statuses": {
+    "READ-CLEAN": 1126,
+    "READ-CANDIDATE": 21,
+    "READ-EXCLUSION": 1
+  },
+  "shared_statuses": {
+    "READ-CLEAN": 61,
+    "READ-CANDIDATE": 10
+  },
+  "candidate_groups": 6,
+  "accepted_findings": 0,
+  "sdk_builds_tests_native_device_runs": 0,
+  "meaning": "Manual semantic reads preceded serialization. Identity checks establish preservation, not semantic audit or implementation acceptance."
+}

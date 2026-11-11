@@ -1,0 +1,26 @@
+{
+  "schema": "core-001-A-investigation-checkpoint-v1",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "packet_sha256": "427fd5833a9a57057a01b556277caf71f5a043820adbe63b0c37485f52712a0c",
+  "observed_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+  "state": "INVESTIGATION-READ-COMPLETE; TRIAGE-AND-INDEPENDENT-REVIEW-PENDING",
+  "primary_files": 91,
+  "primary_lines": 16728,
+  "primary_units": 1630,
+  "shared_units": 376,
+  "primary_status_counts": {
+    "READ-CLEAN": 1501,
+    "CANDIDATE": 129
+  },
+  "shared_status_counts": {
+    "READ-CLEAN": 354,
+    "CANDIDATE": 22
+  },
+  "local_candidates": 21,
+  "accepted_findings": 0,
+  "no_sdk_build_test_formatter_native_device_execution": true,
+  "compiler_shape": "VALID-NOT-CHECKED",
+  "independent_review": "PENDING",
+  "central_records_modified": false,
+  "new_subagents": 0
+}

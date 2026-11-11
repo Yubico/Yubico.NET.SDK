@@ -1,0 +1,3 @@
+# Core audit records include hashed original sources and retained diagnostic output.
+# Preserve their exact bytes and original whitespace through Git publication.
+* -text -whitespace

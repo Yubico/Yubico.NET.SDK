@@ -1,0 +1,18 @@
+{
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+  "packet_sha256": "87f2675195fdf101b58055c1353da0d2a8b4e0b57c69293665823a408d7bef2b",
+  "primary_files": 41,
+  "primary_lines": 7636,
+  "primary_units": 1139,
+  "shared_units": 5,
+  "dispositions": {
+    "READ-CANDIDATE": 57,
+    "READ-CLEAN": 1087
+  },
+  "unread": 0,
+  "primary_exclusions": 0,
+  "secondary_handoffs_counted_as_primary": 0,
+  "new_sdk_builds_tests_native_device_formatter_runs": 0,
+  "independent_review": "PENDING"
+}

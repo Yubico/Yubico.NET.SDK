@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YubiKey 5 FIPS Series Features &mdash; YubiKey Technical Manual  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/dist.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/gtm.js"></script>
+        <script src="https://kit.fontawesome.com/ea7c27f2b7.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="Deploying the YubiKey 5 FIPS Series" href="yk5-fips-deploy.html" />
+    <link rel="prev" title="YubiKey 5 FIPS Series Specifics" href="yk5-fips-index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            YubiKey Technical Manual
+              <img src="https://resources.yubico.com/XEG5TAAH/at/8kq7984j7ffgq82qvfgqvbnh/logo.svg?auto=webp&format=svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="yk5-intro.html">Introduction to the YubiKey Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-physical-attributes.html">Physical Attributes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-apps-index.html">Protocols and Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-firmware-index.html">YubiKey Firmware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="yk5-fips-index.html">YubiKey 5 FIPS Series Specifics</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">YubiKey 5 FIPS Series Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nist-version-certification">NIST Version Certification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#supported-cryptographic-module-major-functions">Supported Cryptographic Module Major Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fips-form-factors">FIPS Form Factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#credentials-and-permitted-values">Credentials and Permitted Values</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-deploy.html">Deploying the YubiKey 5 FIPS Series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-5.4.html">YubiKey Firmware 5.4 Changes for FIPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-140-3.html">YubiKey Firmware 5.7.x Changes for FIPS 140-3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-140-compare.html">FIPS Version Changes and Requirements Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fips-140-3-nist-requirement.html">FIPS 140-3 Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-140-2-2.html">FIPS 140-2 Level 2 Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-140-2-1.html">FIPS 140-2 Level 1 Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-fido.html">FIDO Configuration with FIPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-oath.html">OATH Configuration with FIPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-otp.html">OTP Configuration with FIPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-fips-piv.html">PIV Configuration with FIPS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-bio-specifics.html">YubiKey Bio Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-nfc-id-tech-desc.html">NFC ID Calculation Technical Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-tools.html">Tools and Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-cspn-specifics.html">YubiKey 5 CSPN Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acronyms.html">Acronyms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyright</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">YubiKey Technical Manual</a>
+      </nav>
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="yk5-fips-index.html">YubiKey 5 FIPS Series Specifics</a></li>
+      <li class="breadcrumb-item active">YubiKey 5 FIPS Series Features</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/yk5-fips-specifics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="yubikey-5-fips-series-features">
+<span id="fips-specifics-label"></span><h1>YubiKey 5 FIPS Series Features<a class="headerlink" href="#yubikey-5-fips-series-features" title="Permalink to this heading"></a></h1>
+<p>NIST classified the YubiKey 5 Series FIPS as “composite authenticators”. As such, no device in that series can be taken out of the FIPS-approved mode after initialization without zeroizing the function. This means that once the YubiKey is correctly configured, it remains in the correct configuration. As long as the crypto officer ensures that the YubiKey 5 Series FIPS devices are correctly configured at initialization, they remain in FIPS-approved mode. See <a class="reference internal" href="yk5-fips-deploy.html#yk5-fips-deploy-label"><span class="std std-ref">Deploying the YubiKey 5 FIPS Series</span></a>.</p>
+<p>Initialization is a bit different depending on the FIPS version you are using. Each version requires more stringent initialization than the previous level. See <a class="reference internal" href="yk5-fips-140-3.html#yk5-fips-140-3-label"><span class="std std-ref">YubiKey Firmware 5.7.x Changes for FIPS 140-3</span></a>, <a class="reference internal" href="yk5-fips-140-2-2.html#yk5-fips-140-2-2-label"><span class="std std-ref">FIPS 140-2 Level 2 Configuration</span></a>, or <a class="reference internal" href="yk5-fips-140-2-1.html#yk5-fips-140-2-1-label"><span class="std std-ref">FIPS 140-2 Level 1 Configuration</span></a>.</p>
+<div class="section" id="nist-version-certification">
+<span id="fips-nist-certification-label"></span><h2>NIST Version Certification<a class="headerlink" href="#nist-version-certification" title="Permalink to this heading"></a></h2>
+<p>The YubiKey 5 cryptographic module applies across YubiKey firmware versions.</p>
+<ul class="simple">
+<li>YubiKey 5 FIPS Series firmware version 5.7.4 is is certified as an authenticator under FIPS 140-3, Level 2.</li>
+<li>YubiKey 5 FIPS Series hardware with 5.4.3 and 5.4.2 firmware is certified as an authenticator under FIPS 140-2, both Level 1 and Level 2 (Physical Security Level 3).</li>
+</ul>
+<p>The YubiKey 5 FIPS Series meets the highest authenticator assurance Level 3 (AAL3) of NIST SP800-63B guidance.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>Effective May 22 2026, YubiKey 5 FIPS Series firmware 5.7.4 was NIST certified for FIPS 140-3.</li>
+<li>YubiKey 5 FIPS Series 5.4.x FIPS 140-2 certification moved to the Sunset List, May 2026 and will be moved to the Historical List, September 22, 2026.</li>
+</ul>
+</div>
+<p>Per NIST document <a class="reference external" href="https://csrc.nist.gov/projects/fips-140-3-transition-effort" target="_blank">FIPS 140-3 Transition Effort</a>, YubiKey 5 FIPS Series certification is affected as follows:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Existing deployments - No change. Authenticators certified under FIPS 140-2 can continue to be used in existing deployments after sunset.</li>
+<li>New deployments - FIPS 140-2 is being replaced by FIPS 140-3. New submissions must fulfill the FIPS 140-3 requirements. Authenticators deployed in new environments must have a valid certificate that is not expired. Auditors typically recommend that authenticators certified under FIPS 140-2 are not used in new deployments.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="supported-cryptographic-module-major-functions">
+<span id="fips-functions-table"></span><h2>Supported Cryptographic Module Major Functions<a class="headerlink" href="#supported-cryptographic-module-major-functions" title="Permalink to this heading"></a></h2>
+<p>The following table lists the FIPS cryptographic modules and protocols supported for the YubiKey 5 FIPS Series firmware versions.</p>
+<table border="1" class="longtable docutils align-default" id="id1">
+<caption><span class="caption-text"><strong>Cryptographic Functions and NIST Version per Firmware Version</strong></span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<colgroup>
+<col width="64%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head" rowspan="2">Function</th>
+<th class="head" colspan="3">Firmware Versions</th>
+</tr>
+<tr class="row-even"><th class="head">5.7.4</th>
+<th class="head">5.4.3</th>
+<th class="head">5.4.2</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-odd"><td>FIDO Universal 2nd Factor (U2F)</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>FIDO2 WebAuthn</td>
+<td>140-3</td>
+<td>140-2</td>
+<td>140-2</td>
+</tr>
+<tr class="row-odd"><td>OATH OTP authentication</td>
+<td>140-3</td>
+<td>140-2</td>
+<td>140-2</td>
+</tr>
+<tr class="row-even"><td>One Time Password (Yubico OTP)</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>140-2</td>
+<td>140-2</td>
+</tr>
+<tr class="row-odd"><td>OpenPGP (version 3.4)</td>
+<td>140-3</td>
+<td>140-2</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>PIV-compatible smart card</td>
+<td>140-3</td>
+<td>140-2</td>
+<td>140-2</td>
+</tr>
+<tr class="row-odd"><td>SCP03</td>
+<td>140-3</td>
+<td>140-2</td>
+<td>140-2</td>
+</tr>
+<tr class="row-even"><td>SCP11</td>
+<td>140-3</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>YubiHSM Auth</td>
+<td>140-3</td>
+<td>140-2</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic simple">
+<li>Do not use U2F with FIPS. Instead use the FIDO2. U2F is disabled on FIPS 140-3 keys. Be sure to disable U2F on FIPS 140-2 keys. See <a class="reference internal" href="yk5-fips-fido.html#yk5-u2f-fips-label"><span class="std std-ref">U2F with FIPS</span></a>.</li>
+<li>For Yubico OTP, YubiKeys are labeled, enabled, and usable on FIPS 140-3 devices. However, it is not certified as FIPS.</li>
+</ol>
+</div>
+</div>
+<div class="section" id="fips-form-factors">
+<span id="fips-aaguid-forms"></span><h2>FIPS Form Factors<a class="headerlink" href="#fips-form-factors" title="Permalink to this heading"></a></h2>
+<p>Form factor is set during manufacturing and returned as a one-byte value. Currently defined values for this are set out in the <em>Form Factor</em> table below. These FIPS YubiKey values apply since YubiKey firmware 5.4.</p>
+<table border="1" class="longtable docutils align-default" id="id2">
+<caption><span class="caption-text"><strong>FIPS Form Factor Byte Values</strong></span><a class="headerlink" href="#id2" title="Permalink to this table"></a></caption>
+<colgroup>
+<col width="19%" />
+<col width="16%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="12%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">YubiKey</th>
+<th class="head">Undefined</th>
+<th class="head">5 NFC</th>
+<th class="head">5 Nano</th>
+<th class="head">5C NFC</th>
+<th class="head">5C Nano</th>
+<th class="head">5Ci</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line">Connections</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">N/A</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">NFC +</div>
+<div class="line">USB-A</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Nano</div>
+<div class="line">USB-A</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">NFC +</div>
+<div class="line">USB-C</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Nano</div>
+<div class="line">USB-C</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Lightning +</div>
+<div class="line">USB-C</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td>Value</td>
+<td>0x00</td>
+<td>0x01</td>
+<td>0x02</td>
+<td>0x03</td>
+<td>0x04</td>
+<td>0x05</td>
+</tr>
+<tr class="row-even"><td>FIPS Value</td>
+<td>N/A</td>
+<td>0x81</td>
+<td>0x82</td>
+<td>0x83</td>
+<td>0x84</td>
+<td>0x85</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="credentials-and-permitted-values">
+<span id="credential-values-label"></span><h2>Credentials and Permitted Values<a class="headerlink" href="#credentials-and-permitted-values" title="Permalink to this heading"></a></h2>
+<p>For FIPS 140-3 Level 2 and FIPS 140-2 Level 2, the table below lists the credentials required, allowed values, and credential owner for the supported applications.</p>
+<table border="1" class="longtable docutils align-default" id="id3">
+<caption><span class="caption-text"><strong>Credentials Required and Allowed</strong></span><a class="headerlink" href="#id3" title="Permalink to this table"></a></caption>
+<colgroup>
+<col width="22%" />
+<col width="22%" />
+<col width="21%" />
+<col width="17%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head" rowspan="2"><div class="first last line-block">
+<div class="line">Application</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</th>
+<th class="head" rowspan="2"><div class="first last line-block">
+<div class="line">Credential</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</th>
+<th class="head" rowspan="2"><div class="first last line-block">
+<div class="line">Credential</div>
+<div class="line">Owner</div>
+<div class="line"><br /></div>
+</div>
+</th>
+<th class="head" colspan="2">Permitted Values FIPS</th>
+</tr>
+<tr class="row-even"><th class="head"><div class="first last line-block">
+<div class="line">140-3</div>
+</div>
+</th>
+<th class="head"><div class="first last line-block">
+<div class="line">140-2</div>
+</div>
+</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line">OATH</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Authentication</div>
+<div class="line">Key</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Crypto</div>
+<div class="line">Officer</div>
+</div>
+</td>
+<td colspan="2"><div class="first last line-block">
+<div class="line">14-64 byte HMAC SHA1,</div>
+<div class="line">SHA256 key</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line">One Time</div>
+<div class="line">Password (OTP)</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">OTP Slot 1</div>
+<div class="line">OTP Slot 2</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Crypto</div>
+<div class="line">Officer</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">6 byte</div>
+<div class="line">access codes</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td rowspan="2">OpenPGP</td>
+<td><div class="first last line-block">
+<div class="line">User Password</div>
+<div class="line">(PW1)</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Authenticated</div>
+<div class="line">User</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">8-127 byte</div>
+<div class="line">PIN</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">6-127 byte</div>
+<div class="line">PIN</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line">Admin Password</div>
+<div class="line">(PW3)</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Crypto</div>
+<div class="line">Officer</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">8-127 byte</div>
+<div class="line">PIN</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">6-127 byte</div>
+<div class="line">PIN</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td rowspan="3">PIV Smart Card</td>
+<td>Management Key</td>
+<td><div class="first last line-block">
+<div class="line">Crypto</div>
+<div class="line">Officer</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">AES-128,</div>
+<div class="line">AES-192,</div>
+<div class="line">AES-256</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">3-key TDES,</div>
+<div class="line">AES-128,192,</div>
+<div class="line">AES-256 key</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td>PUK</td>
+<td><div class="first last line-block">
+<div class="line">Authenticated</div>
+<div class="line">User</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">8 byte PIN</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">6-8 byte</div>
+<div class="line">PIN</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td>PIN</td>
+<td><div class="first last line-block">
+<div class="line">Authenticated</div>
+<div class="line">User</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">8 byte PIN</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">6-8 byte</div>
+<div class="line">PIN</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td>WebAuthn</td>
+<td>PIN</td>
+<td><div class="first last line-block">
+<div class="line">Authenticated</div>
+<div class="line">User</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">8-63 byte</div>
+<div class="line">PIN</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">6-32 byte</div>
+<div class="line">PIN</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The instructions for the individual applications are provided in the following topics:</p>
+<ul class="simple">
+<li><a class="reference internal" href="yk5-fips-fido.html#yk5-fips-fido-label"><span class="std std-ref">FIDO Configuration with FIPS</span></a> (WebAuthn)</li>
+<li><a class="reference internal" href="yk5-fips-otp.html#yk5-fips-otp-label"><span class="std std-ref">OTP Configuration with FIPS</span></a></li>
+<li><a class="reference internal" href="yk5-fips-oath.html#yk5-fips-oath-label"><span class="std std-ref">OATH Configuration with FIPS</span></a></li>
+<li><a class="reference internal" href="yk5-apps-openpgp.html#apps-openpgp-label"><span class="std std-ref">OpenPGP Specifics</span></a></li>
+<li><a class="reference internal" href="yk5-fips-piv.html#yk5-fips-piv-label"><span class="std std-ref">PIV Configuration with FIPS</span></a></li>
+</ul>
+<p>For more information on secure channel requirements from NIST, see <a class="reference external" href="https://pages.nist.gov/800-63-3/sp800-63c.html" target="_blank">NIST Special Publication 800-63-C</a> and <a class="reference external" href="https://pages.nist.gov/800-63-3/sp800-63b.html" target="_blank">NIST Special Publication 800-63B</a>.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="yk5-fips-index.html" class="btn btn-neutral float-left" title="YubiKey 5 FIPS Series Specifics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="yk5-fips-deploy.html" class="btn btn-neutral float-right" title="Deploying the YubiKey 5 FIPS Series" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="copyright.html">Copyright</a> 2026, Yubico AB.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+<noscript>
+  <iframe
+    title="Blank"
+    aria-hidden="true"
+    src="https://sgtm.yubico.com/ns.html?id=GTM-TCVFSSSJ"
+    height="0"
+    width="0"
+    style="display: none; visibility: hidden"
+  ></iframe>
+</noscript>
+<div>
+  <a
+    href="https://www.yubico.com/support/terms-conditions/cookie-notice/"
+    target="_blank"
+    >Cookies</a
+  >
+  |
+  <a
+    href="https://www.yubico.com/support/terms-conditions/privacy-notice/"
+    target="_blank"
+    >Privacy Policy</a
+  >
+</div>
+
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

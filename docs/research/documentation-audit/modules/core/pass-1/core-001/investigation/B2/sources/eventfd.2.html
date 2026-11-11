@@ -1,0 +1,476 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>eventfd(2) - Linux manual page</title>
+    <link rel="stylesheet" type="text/css" href="../../../style.css" title="style" />
+    <link rel="stylesheet" type="text/css" href="../style.css" title="style" />
+</head>
+
+<body>
+
+<div class="page-top"><a id="top_of_page"></a></div>
+<!--%%%TOP_BAR%%%-->
+    <div class="nav-bar">
+        <table class="nav-table">
+            <tr>
+                <td class="nav-cell">
+                    <p class="nav-text">
+                        <a href="../../../index.html">man7.org</a> &gt; Linux &gt; <a href="../index.html">man-pages</a>
+                    </p>
+                </td>
+                <td class="training-cell">
+                    <p class="training-text"><a class="training-link" href="http://man7.org/training/">Linux/UNIX system programming training</a></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+<hr class="nav-end" />
+
+<!--%%%PAGE_START%%%-->
+<h1>eventfd(2) &mdash; Linux manual page</h1>
+
+
+<table class="sec-table">
+<tr>
+    <td>
+        <p class="section-dir">
+<a href="#NAME">NAME</a> | <a href="#LIBRARY">LIBRARY</a> | <a href="#SYNOPSIS">SYNOPSIS</a> | <a href="#DESCRIPTION">DESCRIPTION</a> | <a href="#RETURN_VALUE">RETURN&nbsp;VALUE</a> | <a href="#ERRORS">ERRORS</a> | <a href="#ATTRIBUTES">ATTRIBUTES</a> | <a href="#VERSIONS">VERSIONS</a> | <a href="#STANDARDS">STANDARDS</a> | <a href="#HISTORY">HISTORY</a> | <a href="#NOTES">NOTES</a> | <a href="#EXAMPLES">EXAMPLES</a> | <a href="#SEE_ALSO">SEE&nbsp;ALSO</a> | <a href="#COLOPHON">COLOPHON</a>
+        </p>
+    </td>
+</tr>
+<tr>
+    <td class="search-box">
+        <div class="man-search-box">
+
+            <form method="get" action="https://www.google.com/search">
+                <fieldset class="man-search">
+                    <input type="text" name="q" size="10" maxlength="255" value="" />
+                    <input type="hidden" name="sitesearch" value="man7.org/linux/man-pages" />
+                    <input type="submit" name="sa" value="Search online pages" />
+                </fieldset>
+            </form>
+
+        </div>
+    </td>
+    <td> </td>
+</tr>
+</table>
+
+<!--%%%TEXT_START%%%-->
+<pre>
+<span class="headline"><i>eventfd</i>(2)                 System Calls Manual                 <i>eventfd</i>(2)</span>
+</pre>
+<h2><a id="NAME" href="#NAME"></a>NAME  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       eventfd - create a file descriptor for event notification
+</pre>
+<h2><a id="LIBRARY" href="#LIBRARY"></a>LIBRARY  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       Standard C library (<i>libc</i>, <i>-lc</i>)
+</pre>
+<h2><a id="SYNOPSIS" href="#SYNOPSIS"></a>SYNOPSIS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>#include &lt;sys/eventfd.h&gt;</b>
+
+       <b>int eventfd(unsigned int </b><i>initval</i><b>, int </b><i>flags</i><b>);</b>
+</pre>
+<h2><a id="DESCRIPTION" href="#DESCRIPTION"></a>DESCRIPTION  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>eventfd</b>() creates an "eventfd object" that can be used as an event
+       wait/notify mechanism by user-space applications, and by the
+       kernel to notify user-space applications of events.  The object
+       contains an unsigned 64-bit integer (<i>uint64_t</i>) counter that is
+       maintained by the kernel.  This counter is initialized with the
+       value specified in the argument <i>initval</i>.
+
+       As its return value, <b>eventfd</b>() returns a new file descriptor that
+       can be used to refer to the eventfd object.
+
+       The following values may be bitwise ORed in <i>flags</i> to change the
+       behavior of <b>eventfd</b>():
+
+       <b>EFD_CLOEXEC </b>(since Linux 2.6.27)
+              Set the close-on-exec (<b>FD_CLOEXEC</b>) flag on the new file
+              descriptor.  See the description of the <b>O_CLOEXEC </b>flag in
+              <a href="../man2/open.2.html">open(2)</a> for reasons why this may be useful.
+
+       <b>EFD_NONBLOCK </b>(since Linux 2.6.27)
+              Set the <b>O_NONBLOCK </b>file status flag on the open file
+              description (see <a href="../man2/open.2.html">open(2)</a>) referred to by the new file
+              descriptor.  Using this flag saves extra calls to <a href="../man2/fcntl.2.html">fcntl(2)</a>
+              to achieve the same result.
+
+       <b>EFD_SEMAPHORE </b>(since Linux 2.6.30)
+              Provide semaphore-like semantics for reads from the new
+              file descriptor.  See below.
+
+       Up to Linux 2.6.26, the <i>flags</i> argument is unused, and must be
+       specified as zero.
+
+       The following operations can be performed on the file descriptor
+       returned by <b>eventfd</b>():
+
+       <a href="../man2/read.2.html">read(2)</a>
+              Each successful <a href="../man2/read.2.html">read(2)</a> returns an 8-byte integer.  A
+              <a href="../man2/read.2.html">read(2)</a> fails with the error <b>EINVAL </b>if the size of the
+              supplied buffer is less than 8 bytes.
+
+              The value returned by <a href="../man2/read.2.html">read(2)</a> is in host byte order—that
+              is, the native byte order for integers on the host machine.
+
+              The semantics of <a href="../man2/read.2.html">read(2)</a> depend on whether the eventfd
+              counter currently has a nonzero value and whether the
+              <b>EFD_SEMAPHORE </b>flag was specified when creating the eventfd
+              file descriptor:
+
+              •  If <b>EFD_SEMAPHORE </b>was not specified and the eventfd
+                 counter has a nonzero value, then a <a href="../man2/read.2.html">read(2)</a> returns 8
+                 bytes containing that value, and the counter's value is
+                 reset to zero.
+
+              •  If <b>EFD_SEMAPHORE </b>was specified and the eventfd counter
+                 has a nonzero value, then a <a href="../man2/read.2.html">read(2)</a> returns 8 bytes
+                 containing the value 1, and the counter's value is
+                 decremented by 1.
+
+              •  If the eventfd counter is zero at the time of the call
+                 to <a href="../man2/read.2.html">read(2)</a>, then the call either blocks until the
+                 counter becomes nonzero (at which time, the <a href="../man2/read.2.html">read(2)</a>
+                 proceeds as described above) or fails with the error
+                 <b>EAGAIN </b>if the file descriptor has been made nonblocking.
+
+       <a href="../man2/write.2.html">write(2)</a>
+              A <a href="../man2/write.2.html">write(2)</a> call adds the 8-byte integer value supplied in
+              its buffer to the counter.  The maximum value that may be
+              stored in the counter is the largest unsigned 64-bit value
+              minus 1 (i.e., 0xfffffffffffffffe).  If the addition would
+              cause the counter's value to exceed the maximum, then the
+              <a href="../man2/write.2.html">write(2)</a> either blocks until a <a href="../man2/read.2.html">read(2)</a> is performed on the
+              file descriptor, or fails with the error <b>EAGAIN </b>if the file
+              descriptor has been made nonblocking.
+
+              A <a href="../man2/write.2.html">write(2)</a> fails with the error <b>EINVAL </b>if the size of the
+              supplied buffer is less than 8 bytes, or if an attempt is
+              made to write the value 0xffffffffffffffff.
+
+       <a href="../man2/poll.2.html">poll(2)</a>
+       <a href="../man2/select.2.html">select(2)</a>
+       (and similar)
+              The returned file descriptor supports <a href="../man2/poll.2.html">poll(2)</a> (and
+              analogously <a href="../man7/epoll.7.html">epoll(7)</a>) and <a href="../man2/select.2.html">select(2)</a>, as follows:
+
+              •  The file descriptor is readable (the <a href="../man2/select.2.html">select(2)</a> <i>readfds</i>
+                 argument; the <a href="../man2/poll.2.html">poll(2)</a> <b>POLLIN </b>flag) if the counter has a
+                 value greater than 0.
+
+              •  The file descriptor is writable (the <a href="../man2/select.2.html">select(2)</a> <i>writefds</i>
+                 argument; the <a href="../man2/poll.2.html">poll(2)</a> <b>POLLOUT </b>flag) if it is possible to
+                 write a value of at least "1" without blocking.
+
+              •  If an overflow of the counter value was detected, then
+                 <a href="../man2/select.2.html">select(2)</a> indicates the file descriptor as being both
+                 readable and writable, and <a href="../man2/poll.2.html">poll(2)</a> returns a <b>POLLERR</b>
+                 event.  As noted above, <a href="../man2/write.2.html">write(2)</a> can never overflow the
+                 counter.  However an overflow can occur if 2^64 eventfd
+                 "signal posts" were performed by the KAIO subsystem
+                 (theoretically possible, but practically unlikely).  If
+                 an overflow has occurred, then <a href="../man2/read.2.html">read(2)</a> will return that
+                 maximum <i>uint64_t</i> value (i.e., 0xffffffffffffffff).
+
+              The eventfd file descriptor also supports the other file-
+              descriptor multiplexing APIs: <a href="../man2/pselect.2.html">pselect(2)</a> and <a href="../man2/ppoll.2.html">ppoll(2)</a>.
+
+       <a href="../man2/close.2.html">close(2)</a>
+              When the file descriptor is no longer required it should be
+              closed.  When all file descriptors associated with the same
+              eventfd object have been closed, the resources for object
+              are freed by the kernel.
+
+       A copy of the file descriptor created by <b>eventfd</b>() is inherited by
+       the child produced by <a href="../man2/fork.2.html">fork(2)</a>.  The duplicate file descriptor is
+       associated with the same eventfd object.  File descriptors created
+       by <b>eventfd</b>() are preserved across <a href="../man2/execve.2.html">execve(2)</a>, unless the close-on-
+       exec flag has been set.
+</pre>
+<h2><a id="RETURN_VALUE" href="#RETURN_VALUE"></a>RETURN VALUE  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       On success, <b>eventfd</b>() returns a new eventfd file descriptor.  On
+       error, -1 is returned and <i><a href="../man3/errno.3.html">errno</a></i> is set to indicate the error.
+</pre>
+<h2><a id="ERRORS" href="#ERRORS"></a>ERRORS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>EINVAL </b>An unsupported value was specified in <i>flags</i>.
+
+       <b>EMFILE </b>The per-process limit on the number of open file
+              descriptors has been reached.
+
+       <b>ENFILE </b>The system-wide limit on the total number of open files has
+              been reached.
+
+       <b>ENODEV </b>Could not mount (internal) anonymous inode device.
+
+       <b>ENOMEM </b>There was insufficient memory to create a new eventfd file
+              descriptor.
+</pre>
+<h2><a id="ATTRIBUTES" href="#ATTRIBUTES"></a>ATTRIBUTES  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       For an explanation of the terms used in this section, see
+       <a href="../man7/attributes.7.html">attributes(7)</a>.
+       ┌──────────────────────────────────────┬───────────────┬─────────┐
+       │ <b>Interface                            </b>│ <b>Attribute     </b>│ <b>Value   </b>│
+       ├──────────────────────────────────────┼───────────────┼─────────┤
+       │ <b>eventfd</b>()                            │ Thread safety │ MT-Safe │
+       └──────────────────────────────────────┴───────────────┴─────────┘
+</pre>
+<h2><a id="VERSIONS" href="#VERSIONS"></a>VERSIONS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+   <b>C library/kernel differences</b>
+       There are two underlying Linux system calls: <b>eventfd</b>() and the
+       more recent <b>eventfd2</b>().  The former system call does not implement
+       a <i>flags</i> argument.  The latter system call implements the <i>flags</i>
+       values described above.  The glibc wrapper function will use
+       <b>eventfd2</b>() where it is available.
+
+   <b>Additional glibc features</b>
+       The GNU C library defines an additional type, and two functions
+       that attempt to abstract some of the details of reading and
+       writing on an eventfd file descriptor:
+
+           typedef uint64_t eventfd_t;
+
+           int eventfd_read(int fd, eventfd_t *value);
+           int eventfd_write(int fd, eventfd_t value);
+
+       The functions perform the read and write operations on an eventfd
+       file descriptor, returning 0 if the correct number of bytes was
+       transferred, or -1 otherwise.
+</pre>
+<h2><a id="STANDARDS" href="#STANDARDS"></a>STANDARDS  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       Linux, GNU.
+</pre>
+<h2><a id="HISTORY" href="#HISTORY"></a>HISTORY  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <b>eventfd</b>()
+              Linux 2.6.22, glibc 2.8.
+
+       <b>eventfd2</b>()
+              Linux 2.6.27 (see VERSIONS).  Since glibc 2.9, the
+              <b>eventfd</b>() wrapper will employ the <b>eventfd2</b>() system call,
+              if it is supported by the kernel.
+</pre>
+<h2><a id="NOTES" href="#NOTES"></a>NOTES  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       Applications can use an eventfd file descriptor instead of a pipe
+       (see <a href="../man2/pipe.2.html">pipe(2)</a>) in all cases where a pipe is used simply to signal
+       events.  The kernel overhead of an eventfd file descriptor is much
+       lower than that of a pipe, and only one file descriptor is
+       required (versus the two required for a pipe).
+
+       When used in the kernel, an eventfd file descriptor can provide a
+       bridge from kernel to user space, allowing, for example,
+       functionalities like KAIO (kernel AIO) to signal to a file
+       descriptor that some operation is complete.
+
+       A key point about an eventfd file descriptor is that it can be
+       monitored just like any other file descriptor using <a href="../man2/select.2.html">select(2)</a>,
+       <a href="../man2/poll.2.html">poll(2)</a>, or <a href="../man7/epoll.7.html">epoll(7)</a>.  This means that an application can
+       simultaneously monitor the readiness of "traditional" files and
+       the readiness of other kernel mechanisms that support the eventfd
+       interface.  (Without the <b>eventfd</b>() interface, these mechanisms
+       could not be multiplexed via <a href="../man2/select.2.html">select(2)</a>, <a href="../man2/poll.2.html">poll(2)</a>, or <a href="../man7/epoll.7.html">epoll(7)</a>.)
+
+       The current value of an eventfd counter can be viewed via the
+       entry for the corresponding file descriptor in the process's
+       <i>/proc/</i>pid<i>/fdinfo</i> directory.  See <a href="../man5/proc.5.html">proc(5)</a> for further details.
+</pre>
+<h2><a id="EXAMPLES" href="#EXAMPLES"></a>EXAMPLES  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       The following program creates an eventfd file descriptor and then
+       forks to create a child process.  While the parent briefly sleeps,
+       the child writes each of the integers supplied in the program's
+       command-line arguments to the eventfd file descriptor.  When the
+       parent has finished sleeping, it reads from the eventfd file
+       descriptor.
+
+       The following shell session shows a sample run of the program:
+
+           $ <b>./a.out 1 2 4 7 14</b>
+           Child writing 1 to efd
+           Child writing 2 to efd
+           Child writing 4 to efd
+           Child writing 7 to efd
+           Child writing 14 to efd
+           Child completed write loop
+           Parent about to read
+           Parent read 28 (0x1c) from efd
+
+   <b>Program source</b>
+
+       #include &lt;err.h&gt;
+       #include &lt;inttypes.h&gt;
+       #include &lt;stdio.h&gt;
+       #include &lt;stdlib.h&gt;
+       #include &lt;sys/eventfd.h&gt;
+       #include &lt;sys/types.h&gt;
+       #include &lt;unistd.h&gt;
+
+       int
+       main(int argc, char *argv[])
+       {
+           int       efd;
+           uint64_t  u;
+           ssize_t   s;
+
+           if (argc &lt; 2) {
+               fprintf(stderr, "Usage: %s &lt;num&gt;...\n", argv[0]);
+               exit(EXIT_FAILURE);
+           }
+
+           efd = eventfd(0, 0);
+           if (efd == -1)
+               err(EXIT_FAILURE, "eventfd");
+
+           switch (fork()) {
+           case 0:
+               for (size_t j = 1; j &lt; argc; j++) {
+                   printf("Child writing %s to efd\n", argv[j]);
+                   u = strtoull(argv[j], NULL, 0);
+                           /* strtoull() allows various bases */
+                   s = write(efd, &amp;u, sizeof(uint64_t));
+                   if (s != sizeof(uint64_t))
+                       err(EXIT_FAILURE, "write");
+               }
+               printf("Child completed write loop\n");
+
+               exit(EXIT_SUCCESS);
+
+           default:
+               sleep(2);
+
+               printf("Parent about to read\n");
+               s = read(efd, &amp;u, sizeof(uint64_t));
+               if (s != sizeof(uint64_t))
+                   err(EXIT_FAILURE, "read");
+               printf("Parent read %w64u (%#w64x) from efd\n", u, u);
+               exit(EXIT_SUCCESS);
+
+           case -1:
+               err(EXIT_FAILURE, "fork");
+           }
+       }
+</pre>
+<h2><a id="SEE_ALSO" href="#SEE_ALSO"></a>SEE ALSO  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       <a href="../man2/futex.2.html">futex(2)</a>, <a href="../man2/pipe.2.html">pipe(2)</a>, <a href="../man2/poll.2.html">poll(2)</a>, <a href="../man2/read.2.html">read(2)</a>, <a href="../man2/select.2.html">select(2)</a>, <a href="../man2/signalfd.2.html">signalfd(2)</a>,
+       <a href="../man2/timerfd_create.2.html">timerfd_create(2)</a>, <a href="../man2/write.2.html">write(2)</a>, <a href="../man7/epoll.7.html">epoll(7)</a>, <a href="../man7/sem_overview.7.html">sem_overview(7)</a>
+</pre>
+<h2><a id="COLOPHON" href="#COLOPHON"></a>COLOPHON  &nbsp; &nbsp; &nbsp; &nbsp; <a href="#top_of_page"><span class="top-link">top</span></a></h2><pre>
+       This page is part of the <i>man-pages</i> (Linux kernel and C library
+       user-space interface documentation) project.  Information about
+       the project can be found at 
+       ⟨<a href="https://www.kernel.org/doc/man-pages/">https://www.kernel.org/doc/man-pages/</a>⟩.  If you have a bug report
+       for this manual page, see
+       ⟨<a href="https://git.kernel.org/pub/scm/docs/man-pages/man-pages.git/tree/CONTRIBUTING">https://git.kernel.org/pub/scm/docs/man-pages/man-pages.git/tree/CONTRIBUTING</a>⟩.
+       This page was obtained from the tarball man-pages-6.19.tar.gz
+       fetched from
+       ⟨<a href="https://mirrors.edge.kernel.org/pub/linux/docs/man-pages/">https://mirrors.edge.kernel.org/pub/linux/docs/man-pages/</a>⟩ on
+       2026-09-09.  If you discover any rendering problems in this HTML
+       version of the page, or you believe there is a better or more up-
+       to-date source for the page, or you have corrections or
+       improvements to the information in this COLOPHON (which is <i>not</i>
+       part of the original manual page), send a mail to
+       man-pages@man7.org
+
+<span class="footline">Linux man-pages 6.19            2026-02-16                     <i>eventfd</i>(2)</span>
+</pre>
+
+<hr class="end-man-text" />
+<p>Pages that refer to this page:
+    <a href="../man2/io_uring_register.2.html">io_uring_register(2)</a>,&nbsp;
+    <a href="../man2/signalfd.2.html">signalfd(2)</a>,&nbsp;
+    <a href="../man2/syscalls.2.html">syscalls(2)</a>,&nbsp;
+    <a href="../man2/timerfd_create.2.html">timerfd_create(2)</a>,&nbsp;
+    <a href="../man3/io_uring_register_eventfd.3.html">io_uring_register_eventfd(3)</a>,&nbsp;
+    <a href="../man3/io_uring_register_eventfd_async.3.html">io_uring_register_eventfd_async(3)</a>,&nbsp;
+    <a href="../man3/io_uring_unregister_eventfd.3.html">io_uring_unregister_eventfd(3)</a>,&nbsp;
+    <a href="../man5/proc_pid_fd.5.html">proc_pid_fd(5)</a>,&nbsp;
+    <a href="../man5/proc_pid_fdinfo.5.html">proc_pid_fdinfo(5)</a>,&nbsp;
+    <a href="../man5/systemd.exec.5.html">systemd.exec(5)</a>
+</p>
+<hr/>
+
+ 
+<hr class="start-footer" />
+
+<div class="footer">
+
+<table class="colophon-table">
+    <tr>
+    <td class="pub-info">
+        <p>
+            HTML rendering created 2026-09-09
+            by <a href="https://man7.org/mtk/index.html">Michael Kerrisk</a>,
+            author of
+            <a href="https://man7.org/tlpi/"><em>The Linux Programming Interface</em></a>.
+        </p>
+        <p>
+            For details of in-depth
+            <strong>Linux/UNIX system programming training courses</strong>
+            that I teach, look <a href="https://man7.org/training/">here</a>.
+        </p>
+        <p>
+            Hosting by <a href="https://www.jambit.com/index_en.html">jambit GmbH</a>.
+        </p>
+    </td>
+    <td class="colophon-divider">
+    </td>
+    <td class="tlpi-cover">
+        <a href="https://man7.org/tlpi/"><img src="https://man7.org/tlpi/cover/TLPI-front-cover-vsmall.png" alt="Cover of TLPI" /></a>
+    </td>
+    </tr>
+</table>
+
+</div>
+
+<hr class="end-footer" />
+
+
+
+<!--BEGIN-SITETRACKING-->
+<!-- SITETRACKING.man7.org_linux_man-pages -->
+
+<!-- Default Statcounter code for man7.org/linux/man-pages
+http://www.man7.org/linux/man-pages -->
+<script type="text/javascript">
+var sc_project=7422636;
+var sc_invisible=1;
+var sc_security="9b6714ff";
+</script>
+<script type="text/javascript"
+src="https://www.statcounter.com/counter/counter.js"
+async></script>
+<noscript><div class="statcounter"><a title="Web Analytics
+Made Easy - StatCounter" href="https://statcounter.com/"
+target="_blank"><img class="statcounter"
+src="https://c.statcounter.com/7422636/0/9b6714ff/1/"
+alt="Web Analytics Made Easy -
+StatCounter"></a></div></noscript>
+<!-- End of Statcounter Code -->
+
+
+
+<!-- Start of Google Analytics Code -->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9830363-8']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+<!-- End of Google Analytics Code -->
+
+<!--END-SITETRACKING-->
+
+</body>
+</html>

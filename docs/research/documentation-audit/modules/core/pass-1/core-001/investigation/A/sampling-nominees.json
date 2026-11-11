@@ -1,0 +1,34 @@
+[
+  {
+    "unit_id": "core-001:unit:0ace641342c51711",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SnapshotDiffTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Devices.SnapshotDiffTests :: [Fact] public void Apply_DifferentKnownSerials_RepublishesWithoutMutatingPredecessor() ",
+    "source_sha256": "62f2f95c2c6966ccd78eb108fd2a6ffe9d5d9d45bebd4d767fd28781c1f0bfcc",
+    "review_scope": "Read full test and complete local/fixture helper context; source-only evidence, no prior execution credit.",
+    "sample_state": "NOMINATED; COORDINATOR HAS NOT SAMPLED"
+  },
+  {
+    "unit_id": "core-001:unit:41277ac2ed951c1c",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/RescanSchedulerTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Devices.RescanSchedulerTests :: [Fact] public async Task RunAsync_ContinuousSignals_YieldsAtCoalesceCap() ",
+    "source_sha256": "84d9cbc0cf2dffe1e82443b2dcedd23a0dd5936ac03a5b4a72a1ce915775c6c5",
+    "review_scope": "Read full test and complete local/fixture helper context; source-only evidence, no prior execution credit.",
+    "sample_state": "NOMINATED; COORDINATOR HAS NOT SAMPLED"
+  },
+  {
+    "unit_id": "core-001:unit:56feefbf41dc37c4",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysScopeTests :: [Theory] [InlineData(true)] [InlineData(false)] [Trait(\"Category\", \"RuntimeResilience\")] public async Task FindAllAsync_ExitRetiresQueuedIdentityReadsBeforeLaterWorkerAdmission(bool cancel) ",
+    "source_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+    "review_scope": "Read full test and complete local/fixture helper context; source-only evidence, no prior execution credit.",
+    "sample_state": "NOMINATED; COORDINATOR HAS NOT SAMPLED"
+  },
+  {
+    "unit_id": "core-001:unit:73e83bc954975061",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceChangeFeedTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Devices.DeviceChangeFeedTests :: [Fact] public async Task Apply_Overflow_FaultsOnlySlowSubscriberAndAllowsReplayRecovery() ",
+    "source_sha256": "9669997f6a9aff0e5c7c2210ada816c3c8624907db7df75a553b78dfce76ec49",
+    "review_scope": "Read full test and complete local/fixture helper context; source-only evidence, no prior execution credit.",
+    "sample_state": "NOMINATED; COORDINATOR HAS NOT SAMPLED"
+  }
+]

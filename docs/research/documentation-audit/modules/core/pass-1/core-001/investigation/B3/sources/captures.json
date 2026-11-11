@@ -1,0 +1,202 @@
+[
+  {
+    "name": "apple-device-class.m",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/IOHIDFamily/777ccd9698845aadf711e32d843c8c9b777431d9/IOHIDLib/IOHIDDeviceClass.m",
+    "accessed_utc": "2026-11-11T22:59:49.615582+00:00",
+    "status": 200,
+    "sha256": "db981b46de244b06377d64a1df22cbdc60a24e0d3adb1ae0819f0097fe6563b5",
+    "bytes": 61927
+  },
+  {
+    "name": "iokit-head.json",
+    "url": "https://api.github.com/repos/apple-oss-distributions/IOKitUser/commits/main",
+    "accessed_utc": "2026-11-11T22:59:49.855427+00:00",
+    "status": 200,
+    "sha256": "4e7b9dc1b92db54401c236d5b5e3e25d108352aa8db4a45c522a49052b8376c1",
+    "bytes": 114194
+  },
+  {
+    "name": "native-release-ref.json",
+    "url": "https://api.github.com/repos/Yubico/Yubico.NET.SDK/git/ref/tags/1.18.1",
+    "accessed_utc": "2026-11-11T22:59:50.337719+00:00",
+    "status": 200,
+    "sha256": "4fdf71b147d487a197c986b8553779a10a5cdc0c5186fd11fd4eddf5fbfd3374",
+    "bytes": 345
+  },
+  {
+    "name": "native-historical-tree.json",
+    "url": "https://api.github.com/repos/Yubico/Yubico.NET.SDK/git/trees/71a23cd0269c968c1d9420eddb2e2fec71e0cc29?recursive=1",
+    "accessed_utc": "2026-11-11T22:59:50.587765+00:00",
+    "status": 200,
+    "sha256": "c5ed48c1010f53732ff0d4f5fc5edf37e92cc43dc355a05860d3f35c3ed05682",
+    "bytes": 514222
+  },
+  {
+    "name": "IOHIDDevice.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/IOKitUser/323ead896d04424f87184d8f6ff0cce811aab106/hid.subproj/IOHIDDevice.h",
+    "accessed_utc": "2026-11-11T22:59:58.552155+00:00",
+    "status": 200,
+    "sha256": "64aad6babb2e4bbbf31386f54c658fd16fbaa1aa271fb8f396126c22d6f833bd",
+    "bytes": 39062
+  },
+  {
+    "name": "IOHIDManager.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/IOKitUser/323ead896d04424f87184d8f6ff0cce811aab106/hid.subproj/IOHIDManager.h",
+    "accessed_utc": "2026-11-11T22:59:58.806855+00:00",
+    "status": 200,
+    "sha256": "ffdc393a3d21f73dec8c57902622e42d34cd9fb358a1b6c07f339ad82d7b5291",
+    "bytes": 25898
+  },
+  {
+    "name": "IOHIDManager.c",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/IOKitUser/323ead896d04424f87184d8f6ff0cce811aab106/hid.subproj/IOHIDManager.c",
+    "accessed_utc": "2026-11-11T22:59:59.059632+00:00",
+    "status": 200,
+    "sha256": "7d705c8a15ccfb4b32586a7fcd1279d99dadd5c57385f0ba46bfc0862829f7b7",
+    "bytes": 75746
+  },
+  {
+    "name": "IOHIDDevice.c",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/IOKitUser/323ead896d04424f87184d8f6ff0cce811aab106/hid.subproj/IOHIDDevice.c",
+    "accessed_utc": "2026-11-11T22:59:59.310927+00:00",
+    "status": 200,
+    "sha256": "4259c12648907d04e32763923fe36c94d0dac0069df4c5e0100f6bdb8b905576",
+    "bytes": 120528
+  },
+  {
+    "name": "IOHIDBase.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/IOKitUser/323ead896d04424f87184d8f6ff0cce811aab106/hid.subproj/IOHIDBase.h",
+    "accessed_utc": "2026-11-11T22:59:59.592081+00:00",
+    "status": 200,
+    "sha256": "ade3183454757634c433e8fc185349799764a35158c0da80d1a8b9c426fa281b",
+    "bytes": 7860
+  },
+  {
+    "name": "native-release-tree.json",
+    "url": "https://api.github.com/repos/Yubico/Yubico.NET.SDK/git/trees/3eb2d3c35f9f9b1744ad942a25d6bb37a66eed1d?recursive=1",
+    "accessed_utc": "2026-11-11T22:59:59.823908+00:00",
+    "status": 200,
+    "sha256": "6a64dac2b63e556f6ada29313cb55c4ea60eca7703e21b3748c5b2847e167f2c",
+    "bytes": 519374
+  },
+  {
+    "name": "apple-IOReturn.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/xnu/xnu-12377.1.9/iokit/IOKit/IOReturn.h",
+    "accessed_utc": "2026-11-11T23:00:00.187108+00:00",
+    "status": 200,
+    "sha256": "4767dd8a847d4b7dcff0b74c7a67013f0462f3ea6313e5a483f49fe046f93ab1",
+    "bytes": 9741
+  },
+  {
+    "name": "native-owner.h",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/1.18.1/Yubico.NativeShims/hidinput/owner.h",
+    "accessed_utc": "2026-11-11T23:00:07.755343+00:00",
+    "status": 200,
+    "sha256": "19405fcdcd9c996012432d7e25ce4a3b4c96698aafb7b1715fe96f0709b0299f",
+    "bytes": 5675
+  },
+  {
+    "name": "native-owner.c",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/1.18.1/Yubico.NativeShims/hidinput/owner.c",
+    "accessed_utc": "2026-11-11T23:00:08.055258+00:00",
+    "status": 200,
+    "sha256": "e6c14f3d87acbf82644e961508a023264579e2947064d0687660c6a8d3891c90",
+    "bytes": 7649
+  },
+  {
+    "name": "native-internal.h",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/1.18.1/Yubico.NativeShims/hidinput/internal.h",
+    "accessed_utc": "2026-11-11T23:00:08.293825+00:00",
+    "status": 200,
+    "sha256": "329eb49e7ded30a08e19fe8b5223e933ce503028f7aa1176dcc91d5cac07654c",
+    "bytes": 2178
+  },
+  {
+    "name": "native-backend_iohid.c",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/1.18.1/Yubico.NativeShims/hidinput/backend_iohid.c",
+    "accessed_utc": "2026-11-11T23:00:08.538584+00:00",
+    "status": 200,
+    "sha256": "936b1f1bd31ee37668ea0a2d59e729e57bd0f7913bf5cacc53cce9f10d9e5edd",
+    "bytes": 3876
+  },
+  {
+    "name": "native-native_exports.c",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/1.18.1/Yubico.NativeShims/hidinput/native_exports.c",
+    "accessed_utc": "2026-11-11T23:00:08.819693+00:00",
+    "status": 200,
+    "sha256": "7cd871ad4cc6d8db8b7e17df8e8be1cb3d9a3c533b0c8a3623fda53d2cfaa16d",
+    "bytes": 816
+  },
+  {
+    "name": "native-release-tag.json",
+    "url": "https://api.github.com/repos/Yubico/Yubico.NET.SDK/git/tags/3eb2d3c35f9f9b1744ad942a25d6bb37a66eed1d",
+    "accessed_utc": "2026-11-11T23:00:09.056487+00:00",
+    "status": 200,
+    "sha256": "d862b544579249e67279f1cf4a1d7ea8eaf5dd1d8c6898da9d1a03008e4ed931",
+    "bytes": 676
+  },
+  {
+    "name": "CFBase.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/CF/CF-1153.18/CFBase.h",
+    "accessed_utc": "2026-11-11T23:00:44.137994+00:00",
+    "status": 200,
+    "sha256": "99113f53a6724fc5fb07c8ec5791dc6b1f459c2a12113486b69f22c1099a55a1",
+    "bytes": 21043
+  },
+  {
+    "name": "CFSet.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/CF/CF-1153.18/CFSet.h",
+    "accessed_utc": "2026-11-11T23:00:44.423990+00:00",
+    "status": 200,
+    "sha256": "d8033436b3dc2cef9af17b0ec01385ee408a92f820b10fd74accfbe027003a35",
+    "bytes": 22076
+  },
+  {
+    "name": "CFNumber.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/CF/CF-1153.18/CFNumber.h",
+    "accessed_utc": "2026-11-11T23:00:44.682554+00:00",
+    "status": 200,
+    "sha256": "5db6fc331db5b9d8834f89b230946bd613e6651eee1c738bd6baee7127e0f2c5",
+    "bytes": 4798
+  },
+  {
+    "name": "CFString.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/CF/CF-1153.18/CFString.h",
+    "accessed_utc": "2026-11-11T23:00:44.910164+00:00",
+    "status": 200,
+    "sha256": "cf75529893cdc01679d6e02ebfdf2c3ba1357ff671a49ae9f2468507737e99b3",
+    "bytes": 47581
+  },
+  {
+    "name": "CFRunLoop.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/CF/CF-1153.18/CFRunLoop.h",
+    "accessed_utc": "2026-11-11T23:00:45.180083+00:00",
+    "status": 200,
+    "sha256": "9e0c210c8e8c9762c5c70810293868e9d1d67dd46d167cd24e5d2d707f6aae5f",
+    "bytes": 10091
+  },
+  {
+    "name": "IOKitLib.h",
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/IOKitUser/323ead896d04424f87184d8f6ff0cce811aab106/IOKitLib.h",
+    "accessed_utc": "2026-11-11T23:00:45.404484+00:00",
+    "status": 200,
+    "sha256": "d97b87a7d557a4281436c1a92e26abf6651242786887f03d6baa6eaff4b20e86",
+    "bytes": 80026
+  },
+  {
+    "name": "dotnet-native-interop.md",
+    "url": "https://raw.githubusercontent.com/dotnet/docs/main/docs/standard/native-interop/best-practices.md",
+    "accessed_utc": "2026-11-11T23:00:45.676269+00:00",
+    "status": 200,
+    "sha256": "41a5bebd9cae59ae36e1eef3fecdb6e4cb51a79945c691d4adb3d75fdca3b274",
+    "bytes": 31199
+  },
+  {
+    "name": "dotnet-memory.md",
+    "url": "https://raw.githubusercontent.com/dotnet/docs/main/docs/standard/memory-and-spans/memory-t-usage-guidelines.md",
+    "accessed_utc": "2026-11-11T23:00:45.954314+00:00",
+    "status": 200,
+    "sha256": "fd29e85e36de01e97f494548f2bdb5fac937febf2488d889152a2aebe9f52fa6",
+    "bytes": 24460
+  }
+]

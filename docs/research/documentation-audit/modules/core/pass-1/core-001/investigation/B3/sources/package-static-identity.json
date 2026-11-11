@@ -1,0 +1,17 @@
+{
+  "package_path": "/home/rupicola/.nuget/packages/yubico.nativeshims/1.18.1/yubico.nativeshims.1.18.1.nupkg",
+  "package_sha256": "243958f7e87d96e22b33b1d9b469287ea9d6dd3461cd904a292d3342d27d5155",
+  "nuspec_sha256": "79efa0448ff30f0a6e7922104cbe66089bc91d245b3da96f29997a637cff9f7b",
+  "mac_asset_hashes": [
+    {
+      "path": "runtimes/osx-arm64/native/libYubico.NativeShims.dylib",
+      "sha256": "65499e77151d483d8e04bd793c2d520b4f344478ffcacff91bff8e771ae9d8af"
+    },
+    {
+      "path": "runtimes/osx-x64/native/libYubico.NativeShims.dylib",
+      "sha256": "91eb0433ff6ed42480c8766f0fb4e03e73986c1d6c06fb7e6b3068455f7ae02a"
+    }
+  ],
+  "execution": "READ-ONLY-ZIP-HASH; NO-NATIVE-LOAD",
+  "source_build_correspondence": "UNESTABLISHED-BY-THIS-PACKET"
+}

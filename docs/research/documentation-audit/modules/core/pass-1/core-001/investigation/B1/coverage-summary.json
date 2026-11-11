@@ -1,0 +1,20 @@
+{
+  "baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+  "primary_files": 49,
+  "primary_lines": 9747,
+  "primary_units": 1078,
+  "shared_units": 126,
+  "total_units": 1204,
+  "statuses": {
+    "READ-CLEAN": 1104,
+    "READ-CANDIDATE": 99,
+    "READ-EXCLUSION": 1
+  },
+  "candidate_groups": 12,
+  "raw_inventory_matches": true,
+  "all_source_equal_to_pin_with_lf_normalization": true,
+  "new_build_test_formatter_native_device_runs": 0,
+  "central_records_modified": false,
+  "scope": "source/assertion investigation and B1-owned records only"
+}

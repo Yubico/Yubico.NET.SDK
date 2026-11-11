@@ -1,0 +1,18 @@
+{
+  "outcome": "PASS-RECORD-ONLY",
+  "assigned_units": 1144,
+  "primary_units": 1139,
+  "shared_units": 5,
+  "primary_files": 41,
+  "primary_lines": 7636,
+  "read_clean": 1087,
+  "read_candidate": 57,
+  "unread": 0,
+  "all_source_range_capture_hashes_equal": true,
+  "all_mapped_paths_and_record_links_exist": true,
+  "tracked_product_diff_empty": true,
+  "new_sdk_execution_count": 0,
+  "independent_review": "PENDING",
+  "consumer_compilation": "VALID-NOT-CHECKED",
+  "mac_runtime": "NO-NEW-EXECUTION"
+}

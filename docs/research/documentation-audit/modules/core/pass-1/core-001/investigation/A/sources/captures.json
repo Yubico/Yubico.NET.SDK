@@ -1,0 +1,57 @@
+[
+  {
+    "id": "vendor-config",
+    "requested_url": "https://developers.yubico.com/yubikey-manager/Config_Reference.html",
+    "final_url": "https://developers.yubico.com/yubikey-manager/Config_Reference.html",
+    "access_utc": "2026-11-11T22:37:06.851496+00:00",
+    "http_status": 200,
+    "last_modified": "Wed, 11 Nov 2026 19:06:33 GMT",
+    "sha256": "b707e6b2874a1de53149285a9567ff7262b8e6714839658ca42312b4def41538",
+    "bytes": 35699,
+    "retained_path": "vendor-config.html"
+  },
+  {
+    "id": "vendor-fips-form-factor",
+    "requested_url": "https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-fips-specifics.html",
+    "final_url": "https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-fips-specifics.html",
+    "access_utc": "2026-11-11T22:37:06.972092+00:00",
+    "http_status": 200,
+    "last_modified": "Mon, 02 Nov 2026 23:16:46 GMT",
+    "sha256": "5d5ef94f7ba2cd9fbc232c4e922b9c6d638179c8a88290503de3f45e1dbce5b0",
+    "bytes": 23548,
+    "retained_path": "vendor-fips-form-factor.html"
+  },
+  {
+    "id": "windows-container",
+    "requested_url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/devpkey-device-containerid",
+    "final_url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/devpkey-device-containerid",
+    "access_utc": "2026-11-11T22:37:07.457405+00:00",
+    "http_status": 200,
+    "last_modified": "Wed, 26 Aug 2026 17:58:03 GMT",
+    "sha256": "a11a8c3ad8bbf1fab20d93ef237b0a42a93b2ef2e051614e4655ab7d5a827fa8",
+    "bytes": 50027,
+    "retained_path": "windows-container.html"
+  },
+  {
+    "id": "windows-reader-instance",
+    "requested_url": "https://learn.microsoft.com/en-us/windows/win32/api/winscard/nf-winscard-scardgetreaderdeviceinstanceidw",
+    "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/winscard/nf-winscard-scardgetreaderdeviceinstanceidw",
+    "access_utc": "2026-11-11T22:37:07.895485+00:00",
+    "http_status": 200,
+    "last_modified": "Wed, 05 Aug 2026 07:36:35 GMT",
+    "sha256": "586a3696a59bee30045ac891aeb72b83c584de337ed48feba2550a1f243b2673",
+    "bytes": 53657,
+    "retained_path": "windows-reader-instance.html"
+  },
+  {
+    "id": "dotnet10-bounded-channel",
+    "requested_url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Threading.Channels/src/System/Threading/Channels/BoundedChannel.cs",
+    "final_url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Threading.Channels/src/System/Threading/Channels/BoundedChannel.cs",
+    "access_utc": "2026-11-11T22:37:08.166636+00:00",
+    "http_status": 200,
+    "last_modified": null,
+    "sha256": "4798673d97ee37741287c70b7f017b5f962b956b1a9e214b9089e0940a4ee406",
+    "bytes": 35179,
+    "retained_path": "dotnet10-bounded-channel.cs.txt"
+  }
+]

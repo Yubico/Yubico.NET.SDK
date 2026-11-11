@@ -1,0 +1,349 @@
+{
+  "native_source": [
+    {
+      "path": "owner.h",
+      "sha256": "19405fcdcd9c996012432d7e25ce4a3b4c96698aafb7b1715fe96f0709b0299f",
+      "git_blob": "4a04cf96c4d0231e148a1d8233bcbd43bb43ca40",
+      "release_tree_blob_equal": true
+    },
+    {
+      "path": "owner.c",
+      "sha256": "e6c14f3d87acbf82644e961508a023264579e2947064d0687660c6a8d3891c90",
+      "git_blob": "e6747ab4eb1f86cdef7bb16e3ee675e16fb55a43",
+      "release_tree_blob_equal": true
+    },
+    {
+      "path": "internal.h",
+      "sha256": "329eb49e7ded30a08e19fe8b5223e933ce503028f7aa1176dcc91d5cac07654c",
+      "git_blob": "27be5645e470878c1fba3337fbce24848d84ab3d",
+      "release_tree_blob_equal": true
+    },
+    {
+      "path": "backend_iohid.c",
+      "sha256": "936b1f1bd31ee37668ea0a2d59e729e57bd0f7913bf5cacc53cce9f10d9e5edd",
+      "git_blob": "5621234ad60a16812e0fb147133d09aa39f24a8a",
+      "release_tree_blob_equal": true
+    },
+    {
+      "path": "native_exports.c",
+      "sha256": "7cd871ad4cc6d8db8b7e17df8e8be1cb3d9a3c533b0c8a3623fda53d2cfaa16d",
+      "git_blob": "95e9334ca125980649abede4d0f567746721e190",
+      "release_tree_blob_equal": true
+    }
+  ],
+  "ior_return_static_comparison": [
+    {
+      "name": "IOReturnError",
+      "managed_hex": "E00002BC",
+      "apple_hex": "E00002BC",
+      "equal": true
+    },
+    {
+      "name": "IOReturnNoMemory",
+      "managed_hex": "E00002BD",
+      "apple_hex": "E00002BD",
+      "equal": true
+    },
+    {
+      "name": "IOReturnNoResources",
+      "managed_hex": "E00002BE",
+      "apple_hex": "E00002BE",
+      "equal": true
+    },
+    {
+      "name": "IOReturnIPCError",
+      "managed_hex": "E00002BF",
+      "apple_hex": "E00002BF",
+      "equal": true
+    },
+    {
+      "name": "IOReturnNoDevice",
+      "managed_hex": "E00002C0",
+      "apple_hex": "E00002C0",
+      "equal": true
+    },
+    {
+      "name": "IOReturnNotPrivileged",
+      "managed_hex": "E00002C1",
+      "apple_hex": "E00002C1",
+      "equal": true
+    },
+    {
+      "name": "IOReturnBadArgument",
+      "managed_hex": "E00002C2",
+      "apple_hex": "E00002C2",
+      "equal": true
+    },
+    {
+      "name": "IOReturnLockedRead",
+      "managed_hex": "E00002C3",
+      "apple_hex": "E00002C3",
+      "equal": true
+    },
+    {
+      "name": "IOReturnLockedWrite",
+      "managed_hex": "E00002C4",
+      "apple_hex": "E00002C4",
+      "equal": true
+    },
+    {
+      "name": "IOReturnExclusiveAccess",
+      "managed_hex": "E00002C5",
+      "apple_hex": "E00002C5",
+      "equal": true
+    },
+    {
+      "name": "IOReturnBadMessageID",
+      "managed_hex": "E00002C6",
+      "apple_hex": "E00002C6",
+      "equal": true
+    },
+    {
+      "name": "IOReturnUnsupported",
+      "managed_hex": "E00002C7",
+      "apple_hex": "E00002C7",
+      "equal": true
+    },
+    {
+      "name": "IOReturnVMError",
+      "managed_hex": "E00002C8",
+      "apple_hex": "E00002C8",
+      "equal": true
+    },
+    {
+      "name": "IOReturnInternalError",
+      "managed_hex": "E00002C9",
+      "apple_hex": "E00002C9",
+      "equal": true
+    },
+    {
+      "name": "IOReturnIOError",
+      "managed_hex": "E00002CA",
+      "apple_hex": "E00002CA",
+      "equal": true
+    },
+    {
+      "name": "IOReturnCannotLock",
+      "managed_hex": "E00002CB",
+      "apple_hex": "E00002CC",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNotOpen",
+      "managed_hex": "E00002CC",
+      "apple_hex": "E00002CD",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNotReadable",
+      "managed_hex": "E00002CD",
+      "apple_hex": "E00002CE",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNotWritable",
+      "managed_hex": "E00002CE",
+      "apple_hex": "E00002CF",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNotAligned",
+      "managed_hex": "E00002CF",
+      "apple_hex": "E00002D0",
+      "equal": false
+    },
+    {
+      "name": "IOReturnBadMedia",
+      "managed_hex": "E00002D0",
+      "apple_hex": "E00002D1",
+      "equal": false
+    },
+    {
+      "name": "IOReturnStillOpen",
+      "managed_hex": "E00002D1",
+      "apple_hex": "E00002D2",
+      "equal": false
+    },
+    {
+      "name": "IOReturnRLDError",
+      "managed_hex": "E00002D2",
+      "apple_hex": "E00002D3",
+      "equal": false
+    },
+    {
+      "name": "IOReturnDMAError",
+      "managed_hex": "E00002D3",
+      "apple_hex": "E00002D4",
+      "equal": false
+    },
+    {
+      "name": "IOReturnBusy",
+      "managed_hex": "E00002D4",
+      "apple_hex": "E00002D5",
+      "equal": false
+    },
+    {
+      "name": "IOReturnTimeout",
+      "managed_hex": "E00002D5",
+      "apple_hex": "E00002D6",
+      "equal": false
+    },
+    {
+      "name": "IOReturnOffline",
+      "managed_hex": "E00002D6",
+      "apple_hex": "E00002D7",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNotReady",
+      "managed_hex": "E00002D7",
+      "apple_hex": "E00002D8",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNotAttached",
+      "managed_hex": "E00002D8",
+      "apple_hex": "E00002D9",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNoChannels",
+      "managed_hex": "E00002D9",
+      "apple_hex": "E00002DA",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNoSpace",
+      "managed_hex": "E00002DA",
+      "apple_hex": "E00002DB",
+      "equal": false
+    },
+    {
+      "name": "IOReturnPortExists",
+      "managed_hex": "E00002DB",
+      "apple_hex": "E00002DD",
+      "equal": false
+    },
+    {
+      "name": "IOReturnCannotWire",
+      "managed_hex": "E00002DC",
+      "apple_hex": "E00002DE",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNoInterrupt",
+      "managed_hex": "E00002DD",
+      "apple_hex": "E00002DF",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNoFrames",
+      "managed_hex": "E00002DE",
+      "apple_hex": "E00002E0",
+      "equal": false
+    },
+    {
+      "name": "IOReturnMessageTooLarge",
+      "managed_hex": "E00002DF",
+      "apple_hex": "E00002E1",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNotPermitted",
+      "managed_hex": "E00002E0",
+      "apple_hex": "E00002E2",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNoPower",
+      "managed_hex": "E00002E1",
+      "apple_hex": "E00002E3",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNoMedia",
+      "managed_hex": "E00002E2",
+      "apple_hex": "E00002E4",
+      "equal": false
+    },
+    {
+      "name": "IOReturnUnformattedMedia",
+      "managed_hex": "E00002E3",
+      "apple_hex": "E00002E5",
+      "equal": false
+    },
+    {
+      "name": "IOReturnUnsupportedMode",
+      "managed_hex": "E00002E4",
+      "apple_hex": "E00002E6",
+      "equal": false
+    },
+    {
+      "name": "IOReturnUnderrun",
+      "managed_hex": "E00002E5",
+      "apple_hex": "E00002E7",
+      "equal": false
+    },
+    {
+      "name": "IOReturnOverrun",
+      "managed_hex": "E00002E6",
+      "apple_hex": "E00002E8",
+      "equal": false
+    },
+    {
+      "name": "IOReturnDeviceError",
+      "managed_hex": "E00002E7",
+      "apple_hex": "E00002E9",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNoCompletion",
+      "managed_hex": "E00002E8",
+      "apple_hex": "E00002EA",
+      "equal": false
+    },
+    {
+      "name": "IOReturnAborted",
+      "managed_hex": "E00002E9",
+      "apple_hex": "E00002EB",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNoBandwidth",
+      "managed_hex": "E00002EA",
+      "apple_hex": "E00002EC",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNotResponding",
+      "managed_hex": "E00002EB",
+      "apple_hex": "E00002ED",
+      "equal": false
+    },
+    {
+      "name": "IOReturnIsoTooOld",
+      "managed_hex": "E00002EC",
+      "apple_hex": "E00002EE",
+      "equal": false
+    },
+    {
+      "name": "IOReturnIsoTooNew",
+      "managed_hex": "E00002ED",
+      "apple_hex": "E00002EF",
+      "equal": false
+    },
+    {
+      "name": "IOReturnNotFound",
+      "managed_hex": "E00002EE",
+      "apple_hex": "E00002F0",
+      "equal": false
+    },
+    {
+      "name": "IOReturnInvalid",
+      "managed_hex": "E00002EF",
+      "apple_hex": "E0000001",
+      "equal": false
+    }
+  ],
+  "comment": "Pure text/integer analysis; no SDK import, native load or C# type initialization."
+}

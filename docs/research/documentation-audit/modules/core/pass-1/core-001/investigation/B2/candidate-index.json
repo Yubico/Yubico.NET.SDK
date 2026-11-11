@@ -1,0 +1,533 @@
+[
+  {
+    "id": "CORE-B2-C001",
+    "title": "Lead Linux setup with scoped device access",
+    "status": "candidate",
+    "accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:861c4806e5db9c20",
+      "core-001:unit:1b99339355b6e805",
+      "core-001:unit:fc61f377871ecfe8",
+      "core-001:unit:8b8b46c27d1e4f0d",
+      "core-001:unit:d60bc0504e5cd131",
+      "core-001:unit:5e41415c2dce2c7c"
+    ],
+    "documentation": "triage/fresh edit and independent review pending",
+    "implementation": "unchanged; no fix authorized",
+    "decision": "see candidate-specific contract in candidates.md",
+    "qualification": "source/assertion evidence only; no new execution",
+    "associated_unchanged_paths": [
+      {
+        "path": "README.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/NATIVE-AOT.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/linux-setup.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/README.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReportApi.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      }
+    ]
+  },
+  {
+    "id": "CORE-B2-C002",
+    "title": "Distinguish stage history from current integration ownership",
+    "status": "candidate",
+    "accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:00b364de08fe14c1",
+      "core-001:unit:a332077b39ac69e1",
+      "core-001:unit:653ca27d4fa48fbd",
+      "core-001:unit:4ef7577267b13f77"
+    ],
+    "documentation": "triage/fresh edit and independent review pending",
+    "implementation": "unchanged; no fix authorized",
+    "decision": "see candidate-specific contract in candidates.md",
+    "qualification": "source/assertion evidence only; no new execution",
+    "associated_unchanged_paths": [
+      {
+        "path": "docs/architecture/connection-ownership-and-contention.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/architecture/raw-access-tiers.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/migration/v1-to-v2.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-async-boundaries-baseline.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-fido-async-lifetime.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-hid-routing.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-managed-acceptance.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-native-acceptance-results.json",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-native-acceptance.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-native-report-access.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-otp-async-lifetime.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-read-reactor.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/CLAUDE.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/README.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/BlockingReportConnection.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/DescriptorReportApi.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/HardwareScenarios.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/NativeDescriptors.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/NativeScenarios.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/ObservedReadinessNative.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/Program.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/capture.py",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/evidence_gate.py",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/publish_contract.py",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/test_evidence_gates.py",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      }
+    ]
+  },
+  {
+    "id": "CORE-B2-C003",
+    "title": "Describe libudev string and unref contracts accurately",
+    "status": "candidate",
+    "accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:1bf4746599d831da",
+      "core-001:unit:04f5314a854d7252",
+      "core-001:unit:713b545de6bf7f6f",
+      "core-001:unit:2872faf8e791f78f",
+      "core-001:unit:8bd71d3e04aa8485"
+    ],
+    "documentation": "triage/fresh edit and independent review pending",
+    "implementation": "unchanged; no fix authorized",
+    "decision": "see candidate-specific contract in candidates.md",
+    "qualification": "source/assertion evidence only; no new execution",
+    "associated_unchanged_paths": [
+      {
+        "path": "docs/linux-setup.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Native/Linux/Udev/LinuxUdevDeviceSafeHandle.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Native/Linux/Udev/LinuxUdevEnumerateSafeHandle.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Native/Linux/Udev/LinuxUdevMonitorSafeHandle.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Native/Linux/Udev/LinuxUdevSafeHandle.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxUdevHidEventSourceTests.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      }
+    ]
+  },
+  {
+    "id": "CORE-B2-C004",
+    "title": "Unversioned libudev name adds an undeclared runtime prerequisite",
+    "status": "candidate",
+    "accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:7d4dc4a0c00c053f",
+      "core-001:unit:e3416e72a22968f9",
+      "core-001:unit:d60bc0504e5cd131",
+      "core-001:unit:b65ed5271bee3ca1"
+    ],
+    "documentation": "triage/fresh edit and independent review pending",
+    "implementation": "unchanged; no fix authorized",
+    "decision": "see candidate-specific contract in candidates.md",
+    "qualification": "source/assertion evidence only; no new execution",
+    "associated_unchanged_paths": [
+      {
+        "path": "README.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/NATIVE-AOT.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/linux-setup.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/README.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Native/Linux/Linux.Libraries.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/publish_contract.py",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      }
+    ]
+  },
+  {
+    "id": "CORE-B2-C005",
+    "title": "Assertion-failure test lifetimes need independent drain",
+    "status": "candidate",
+    "accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:0cadbf99c2d4ed94",
+      "core-001:unit:a9f3473b241ec152",
+      "core-001:unit:b7f48e6df1905821",
+      "core-001:unit:d37c92618e0c3f3a",
+      "core-001:unit:07fa5bfa47ca0262",
+      "core-001:unit:cf2e4a5bafeb95df",
+      "core-001:unit:bcac53126935796e",
+      "core-001:unit:6b38035906800c58",
+      "core-001:unit:ad9ebd3b4959649c"
+    ],
+    "documentation": "triage/fresh edit and independent review pending",
+    "implementation": "unchanged; no fix authorized",
+    "decision": "see candidate-specific contract in candidates.md",
+    "qualification": "source/assertion evidence only; no new execution",
+    "associated_unchanged_paths": [
+      {
+        "path": "docs/research/linux-async-boundaries-baseline.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-fido-async-lifetime.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-hid-routing.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/research/linux-managed-acceptance.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/tests/CLAUDE.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/WithheldNativeProbe.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoHidConnectionTests.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxNativeAbiTests.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxWorkerFailureTestSetup.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "verification/LinuxHidRouteVerification/test_evidence_gates.py",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      }
+    ]
+  },
+  {
+    "id": "CORE-B2-C006",
+    "title": "Expose direct report ownership and parser scope at entry points",
+    "status": "candidate",
+    "accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:af3b41db7c744bcf",
+      "core-001:unit:e86b3933710ce96a",
+      "core-001:unit:e174adb2bd6ba896",
+      "core-001:unit:4e3c53affdd86747"
+    ],
+    "documentation": "triage/fresh edit and independent review pending",
+    "implementation": "unchanged; no fix authorized",
+    "decision": "see candidate-specific contract in candidates.md",
+    "qualification": "source/assertion evidence only; no new execution",
+    "associated_unchanged_paths": [
+      {
+        "path": "docs/architecture/raw-access-tiers.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "docs/migration/v1-to-v2.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/README.md",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/IHidConnection.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/IHidInterface.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidConnection.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidConnection.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDescriptorParsingTests.cs",
+        "disposition": "PENDING-EXPLICIT-FUTURE-EDITOR-REVIEWER-DISPOSITION",
+        "action": "retain or edit with reason after triage; preserve executable bodies in Pass 1"
+      }
+    ]
+  }
+]

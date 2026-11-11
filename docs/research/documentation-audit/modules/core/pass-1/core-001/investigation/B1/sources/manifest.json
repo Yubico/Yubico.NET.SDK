@@ -1,0 +1,119 @@
+[
+  {
+    "path": "pcsc5-v2.01.01.pdf",
+    "url": "https://pcscworkgroup.com/Download/Specifications/pcsc5_v2.01.01.pdf",
+    "sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+    "bytes": 401060,
+    "access_utc": "2026-11-11T22:35:02.208132+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "SafeHandle-v10.0.0.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/SafeHandle.cs",
+    "sha256": "3df9d6928d6a8bcbce983d5c53ac85a513abe5621ba9adef0e4ffd179d97a7dc",
+    "bytes": 12716,
+    "access_utc": "2026-11-11T22:35:02.453901+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "Task-v10.0.0.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/Task.cs",
+    "sha256": "5b0d6892267269233dcf5c6191f357b0ba6c4257d1e757ca4d2fe93272b29d9b",
+    "bytes": 389364,
+    "access_utc": "2026-11-11T22:35:02.518556+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "Thread-v10.0.0.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/Thread.cs",
+    "sha256": "42f99783b22810e542c2340e50628e16629666e41bdea73d9ce7f54f977e8011",
+    "bytes": 36275,
+    "access_utc": "2026-11-11T22:35:02.766052+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "WaitHandle-v10.0.0.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/WaitHandle.cs",
+    "sha256": "5ac6ee272c07ac37757a036bf63f94919a95cdadb3648ff0fbbfa382c5326d73",
+    "bytes": 23647,
+    "access_utc": "2026-11-11T22:46:38.750514+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "SafeWaitHandle-v10.0.0.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/Microsoft/Win32/SafeHandles/SafeWaitHandle.cs",
+    "sha256": "3756f2a3337f3ebf429833be43f269a9050fa8e19bbcd470d7b39468a216ac08",
+    "bytes": 929,
+    "access_utc": "2026-11-11T22:46:38.973406+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "pcsc-lite-api.html",
+    "url": "https://pcsclite.apdu.fr/api/group__API.html",
+    "sha256": "5d18b385a1d839fcbd7d71a8b9a549cdf6da90b383b8625b673cc69ee565c334",
+    "bytes": 170772,
+    "access_utc": "2026-11-11T22:35:03.056084+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "sp800-73-5-part2.pdf",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-73pt2-5.pdf",
+    "fetch_error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "path": "win-scardconnecta.md",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/docs/sdk-api-src/content/winscard/nf-winscard-scardconnecta.md",
+    "sha256": "ba83bcc19fad37f2b8ac13ec2f7c21f08393a0a3b31a5943752e11f1cd856ed1",
+    "bytes": 8838,
+    "access_utc": "2026-11-11T22:35:03.374844+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "win-scarddisconnect.md",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/docs/sdk-api-src/content/winscard/nf-winscard-scarddisconnect.md",
+    "sha256": "270adee165deb8c06868aa4f9a9e385710270103772ad6aa600a677843fe0d6d",
+    "bytes": 4895,
+    "access_utc": "2026-11-11T22:35:03.637979+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "win-scardreleasecontext.md",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/docs/sdk-api-src/content/winscard/nf-winscard-scardreleasecontext.md",
+    "sha256": "b190956310e490b62f26dff03d03bf7fb98f689a2456707b4e4882f09e774f4f",
+    "bytes": 2928,
+    "access_utc": "2026-11-11T22:35:03.870345+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "win-scardgetstatuschangea.md",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/docs/sdk-api-src/content/winscard/nf-winscard-scardgetstatuschangea.md",
+    "sha256": "d66ea1080c3cb2f7f84e92c6d5d8a9c0ff161e731eb8526ecda0ad677811bd47",
+    "bytes": 5789,
+    "access_utc": "2026-11-11T22:35:04.111615+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "win-scardcancel.md",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/docs/sdk-api-src/content/winscard/nf-winscard-scardcancel.md",
+    "sha256": "6e6629d51fb6ccc239111f5411af18e2e069d1df27de2211642d6451c01a7b73",
+    "bytes": 3907,
+    "access_utc": "2026-11-11T22:35:04.379188+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "win-scardbegintransaction.md",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/docs/sdk-api-src/content/winscard/nf-winscard-scardbegintransaction.md",
+    "sha256": "c27796e6355437ddc7b6dcdfbec45a065b4c5a9c9ce970cd7d9745a7513b63ae",
+    "bytes": 4368,
+    "access_utc": "2026-11-11T22:35:04.628154+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  },
+  {
+    "path": "win-scardendtransaction.md",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/docs/sdk-api-src/content/winscard/nf-winscard-scardendtransaction.md",
+    "sha256": "6880c127ddfe2b4ba1897b2d7602441f868521f76209d725f7f57edb8ec0fedd",
+    "bytes": 5677,
+    "access_utc": "2026-11-11T22:35:04.870276+00:00",
+    "role": "original-source; version/status and actor applicability in register.md"
+  }
+]

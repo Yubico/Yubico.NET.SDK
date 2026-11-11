@@ -1,0 +1,194 @@
+[
+  {
+    "name": "linux-v6.12-open.c",
+    "url": "https://raw.githubusercontent.com/torvalds/linux/v6.12/fs/open.c",
+    "accessed_utc": "2026-11-11T22:56:41.773380+00:00",
+    "http_status": 200,
+    "sha256": "587769343f2fc32552fb8593138c72f47110de8b7933f921a0bf9b627282b59a",
+    "bytes": 40877
+  },
+  {
+    "name": "linux-v6.12-file.c",
+    "url": "https://raw.githubusercontent.com/torvalds/linux/v6.12/fs/file.c",
+    "accessed_utc": "2026-11-11T22:56:41.773980+00:00",
+    "http_status": 200,
+    "sha256": "b7941baea1a17ce6bedc84fdf7096ecf4963ff0ee65929ed620a6b56401be99b",
+    "bytes": 36411
+  },
+  {
+    "name": "linux-v6.12-eventfd.c",
+    "url": "https://raw.githubusercontent.com/torvalds/linux/v6.12/fs/eventfd.c",
+    "accessed_utc": "2026-11-11T22:56:41.774655+00:00",
+    "http_status": 200,
+    "sha256": "bace69ec587ec44839548e4834b4d43c416b75c71a77bfa0153cb8f55b0d468b",
+    "bytes": 11614
+  },
+  {
+    "name": "linux-v6.12-hidraw.c",
+    "url": "https://raw.githubusercontent.com/torvalds/linux/v6.12/drivers/hid/hidraw.c",
+    "accessed_utc": "2026-11-11T22:56:41.775462+00:00",
+    "http_status": 200,
+    "sha256": "282e5b5f16bd16c940abc47cef0b8d9031639c88f375173ed2b48903d21c1efa",
+    "bytes": 15806
+  },
+  {
+    "name": "linux-v6.12-usbhid.c",
+    "url": "https://raw.githubusercontent.com/torvalds/linux/v6.12/drivers/hid/usbhid/hid-core.c",
+    "accessed_utc": "2026-11-11T22:56:41.776096+00:00",
+    "http_status": 200,
+    "sha256": "c7643c5ffd9f8792aa110b55fffd433d96d35cdf07fa68f5d6295a5a3e87ae97",
+    "bytes": 46609
+  },
+  {
+    "name": "linux-v6.12-hid.h",
+    "url": "https://raw.githubusercontent.com/torvalds/linux/v6.12/include/linux/hid.h",
+    "accessed_utc": "2026-11-11T22:56:42.029978+00:00",
+    "http_status": 200,
+    "sha256": "69db832572997025df301fbcf243e0bd7eb00a5dca61edfac46635efe8efe93b",
+    "bytes": 40289
+  },
+  {
+    "name": "close.2.html",
+    "url": "https://man7.org/linux/man-pages/man2/close.2.html",
+    "accessed_utc": "2026-11-11T22:56:42.036640+00:00",
+    "http_status": 200,
+    "sha256": "20eea30e262be7d46294160b5ddbc90048e8185a4766276b15119365207d64c3",
+    "bytes": 18845
+  },
+  {
+    "name": "poll.2.html",
+    "url": "https://man7.org/linux/man-pages/man2/poll.2.html",
+    "accessed_utc": "2026-11-11T22:56:42.040466+00:00",
+    "http_status": 200,
+    "sha256": "411bb440dcaf29549937e84bbeb4de2ab19ba07becaf21071fc8146c02898c38",
+    "bytes": 29911
+  },
+  {
+    "name": "eventfd.2.html",
+    "url": "https://man7.org/linux/man-pages/man2/eventfd.2.html",
+    "accessed_utc": "2026-11-11T22:56:42.149052+00:00",
+    "http_status": 200,
+    "sha256": "2639012787a9c3c0acad8dee59179a402ad6e5a4d12b4bed8d65913a7564e482",
+    "bytes": 23771
+  },
+  {
+    "name": "open.2.html",
+    "url": "https://man7.org/linux/man-pages/man2/open.2.html",
+    "accessed_utc": "2026-11-11T22:56:42.197517+00:00",
+    "http_status": 200,
+    "sha256": "d665489cadb85624d98fae03a8d8d06209030f32735cff8aeba949ad8491c789",
+    "bytes": 76506
+  },
+  {
+    "name": "udev.html",
+    "url": "https://www.freedesktop.org/software/systemd/man/latest/udev.html",
+    "accessed_utc": "2026-11-11T22:56:42.238976+00:00",
+    "http_status": 200,
+    "sha256": "accf994d74ed4ef0cbdf03da7ae42eeef6ced47c91eef26e1265950423d566a8",
+    "bytes": 44263
+  },
+  {
+    "name": "libudev-monitor.c",
+    "url": "https://raw.githubusercontent.com/systemd/systemd/v257/src/libudev/libudev-monitor.c",
+    "accessed_utc": "2026-11-11T22:56:42.241491+00:00",
+    "http_status": 200,
+    "sha256": "3f0808560973029612b17d936b61ecfb71388504ef0fc5af401f25cb440d9589",
+    "bytes": 9324
+  },
+  {
+    "name": "libudev-device.c",
+    "url": "https://raw.githubusercontent.com/systemd/systemd/v257/src/libudev/libudev-device.c",
+    "accessed_utc": "2026-11-11T22:56:42.274996+00:00",
+    "http_status": 200,
+    "sha256": "aa082b13d383f21c00481146a15269b82bd9123772d498985625fa9fc169db8b",
+    "bytes": 27961
+  },
+  {
+    "name": "SafeHandle.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/SafeHandle.cs",
+    "accessed_utc": "2026-11-11T22:56:42.350735+00:00",
+    "http_status": 200,
+    "sha256": "3df9d6928d6a8bcbce983d5c53ac85a513abe5621ba9adef0e4ffd179d97a7dc",
+    "bytes": 12716
+  },
+  {
+    "name": "SafeHandleMarshaller.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/Marshalling/SafeHandleMarshaller.cs",
+    "accessed_utc": "2026-11-11T22:56:42.455668+00:00",
+    "http_status": 200,
+    "sha256": "d40e582fc5f12e671d741fe7d1734e46e86a20e3b9f1a9ac933f07c1ec4d12c1",
+    "bytes": 7697
+  },
+  {
+    "name": "Thread.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/Thread.cs",
+    "accessed_utc": "2026-11-11T22:56:42.524874+00:00",
+    "http_status": 200,
+    "sha256": "42f99783b22810e542c2340e50628e16629666e41bdea73d9ce7f54f977e8011",
+    "bytes": 36275
+  },
+  {
+    "name": "Task.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/Task.cs",
+    "accessed_utc": "2026-11-11T22:56:42.528760+00:00",
+    "http_status": 200,
+    "sha256": "5b0d6892267269233dcf5c6191f357b0ba6c4257d1e757ca4d2fe93272b29d9b",
+    "bytes": 389364
+  },
+  {
+    "name": "Device_Permissions.adoc",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/doc/Device_Permissions.adoc",
+    "accessed_utc": "2026-11-11T22:56:42.569510+00:00",
+    "http_status": 200,
+    "sha256": "e792eb398e6412c1833082f851c8897d1767604bdc5b2f67d142314ab9c322a7",
+    "bytes": 1462
+  },
+  {
+    "name": "python-linux.py",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/ykman/hid/linux.py",
+    "accessed_utc": "2026-11-11T22:56:42.685604+00:00",
+    "http_status": 200,
+    "sha256": "3223b9736e99b5384e8754d1d8ebde22dd5bb7b2b9782b7685adf96e74cba1a1",
+    "bytes": 4244
+  },
+  {
+    "name": "glibc-2.40-close.c",
+    "url": "https://raw.githubusercontent.com/bminor/glibc/glibc-2.40/sysdeps/unix/sysv/linux/close.c",
+    "accessed_utc": "2026-11-11T22:57:14.442827+00:00",
+    "http_status": 200,
+    "sha256": "bf64b4e528aeffe09d68ae8a7f69080a641506cce613925ae64370ed445e21f6",
+    "bytes": 1091
+  },
+  {
+    "name": "69-yubikey.rules",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/master/69-yubikey.rules",
+    "accessed_utc": "2026-11-11T22:57:14.686943+00:00",
+    "http_status": 200,
+    "sha256": "f41538ca6429a4a39a323c2ade93687ca0afcc9d8be586a76c912986caeb1aa8",
+    "bytes": 340
+  },
+  {
+    "name": "ubuntu-noble-libudev1.html",
+    "url": "https://packages.ubuntu.com/noble/amd64/libudev1/filelist",
+    "accessed_utc": "2026-11-11T22:58:53.100186+00:00",
+    "http_status": 200,
+    "sha256": "6da1c1a2da5cb72a1c0fc56b8a9e777a85bb2a6258b49e2e9b79c18961305220",
+    "bytes": 4488
+  },
+  {
+    "name": "ubuntu-noble-libudev-dev.html",
+    "url": "https://packages.ubuntu.com/noble/amd64/libudev-dev/filelist",
+    "accessed_utc": "2026-11-11T22:58:54.914869+00:00",
+    "http_status": 200,
+    "sha256": "6966adc9ef113cd59c9d3d412c633e632ab8904226556ae17000d1162dd27e48",
+    "bytes": 8183
+  },
+  {
+    "name": "native-library-loading.md",
+    "url": "https://raw.githubusercontent.com/dotnet/docs/main/docs/standard/native-interop/native-library-loading.md",
+    "accessed_utc": "2026-11-11T22:58:55.023966+00:00",
+    "http_status": 200,
+    "sha256": "87c52b47a02196d80b68e368658c587d358e788fcf0dbb10856d20b0f3fd6212",
+    "bytes": 2699
+  }
+]

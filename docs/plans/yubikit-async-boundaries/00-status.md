@@ -1,5 +1,53 @@
 # Status: YubiKit async boundaries
 
+## Published review checkpoint — PR 770
+
+[PR 770](https://github.com/Yubico/Yubico.NET.SDK/pull/770) targets `yubikit`.
+Copilot review `5859117963` at `aea925cb3` reported **No open issues**, with zero
+inline comments/threads, while retaining the operator and hosted-evidence caveats.
+That is a COMMENTED review, not maintainer approval or global acceptance.
+
+Hosted checks exposed two branch-owned CI defects despite the clean local gate:
+the worker-interruption fixtures inferred scheduling from `ThreadState`, and the
+publish binder treated `MSBuildAllProjects` as a complete import inventory. The
+corrections were independently specification/quality reviewed:
+
+- `940588bbf` acknowledges the startup wake before interrupting the original
+  worker; unconditional bounded cleanup preserves assertion errors and drains
+  that worker even when fixture setup fails. Constrained-CPU stress reproduced
+  the old failure; fixed families and **188** resilience tests passed.
+- `120fe1fa7` prepares isolated JIT/AOT restore trees and publishes with
+  `--no-restore`. It binds actual evaluated imports, effective properties, assets
+  and package contents for all four consumed projects in both runtime contexts.
+  Capture uses that verified dependency record, not default `obj` or a fixed
+  package-cache path. A cold standalone publish/capture with no default Core
+  `obj` passed, including **31** provenance tests and referenced-import mutation
+  rejection.
+
+Integrated gate `20261111-142952-904-build+test+docs-qa+native-aot-contract-qa+complexity`
+passed **4,082 executed, zero failures, five skips and zero warnings**. No shipping
+transport behavior or package pin was changed by these corrections. A new pushed
+head requires a new Copilot review; the earlier empty review is not clearance of
+later changes.
+
+Integrated runtime validation at recorded HEAD `120fe1fa7` also passed:
+publisher run `20261111-143208-820-linux-hid-verification-publish` had zero
+warnings and bound 223 artifacts. Capture `20261111T133244Z` passed **38 native
+checks per runtime**, all **12** physical mode executions on serial 103 (**86**
+physical checks), all four exact intended negatives and **31** provenance
+regression tests. SOURCEHASH is
+`53c7ae009cdbbd7f74cc95ef9bca13ae43fdb395a19185e65500505fd355fb68`.
+No old capture was relabeled, no operator scenario ran, and this result does not
+attest the following documentation-only HEAD under the strict input contract.
+
+An independent baseline restore blocker remains: `System.Formats.Cbor` 10.0.2
+triggers `NU1902` for [GHSA-vmv3-wvjp-wqpj](https://github.com/advisories/GHSA-vmv3-wvjp-wqpj),
+published November 10. The advisory names 10.0.15 as the patched .NET 10 package.
+This Linux PR has not changed that pin or suppressed the audit. Operator
+touch/active-cancel/removal, hosted green and full telemetry/budgets remain separate
+from local selected-key acceptance. The earlier preparation checkpoints below
+retain their original timing, source and publication scope.
+
 ## Current checkpoint — Linux execution resumed 2026-11-11
 
 The user approved the Linux implementation sequence and pseudocode, with one

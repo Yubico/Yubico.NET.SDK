@@ -1,5 +1,7 @@
 # Cross-platform release signer
 
+> **Fallback only.** Releases are signed in CI by Scribe: run `build.yml` or `build-nativeshims.yml` with `release=true` (see `.claude/skills/Release`). Use this tool only if Scribe is unavailable. It will be removed after the first release signed by Scribe.
+
 `nuget-sign` owns all signing and signature verification: Authenticode for the selected assemblies, the NuGet author signature, certificate chains, timestamps, and signer pinning. This wrapper owns only what is specific to Yubico.NET.SDK releases: GitHub build provenance, the package and assembly allow-lists in `manifests/`, repacking signed assemblies into the CI-built packages, a check that nothing else changed, atomic output, and the release report.
 
 ## Prerequisites and build

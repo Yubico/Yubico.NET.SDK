@@ -123,7 +123,7 @@ limitations under the License. -->
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Formats.Asn1" Version="10.0.14" />
+    <PackageReference Include="System.Formats.Asn1" Version="11.0.0" />
 
     <!-- Remove ExcludeAssets once the package supports netcoreapp and net462 properly -->
     <PackageReference Include="System.Formats.Cbor" Version="10.0.14" ExcludeAssets="buildtransitive" />

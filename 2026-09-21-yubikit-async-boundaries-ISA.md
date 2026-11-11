@@ -13,6 +13,23 @@ updated: 2026-11-11
 
 # YubiKit async boundaries — PRD / ideal state artifact
 
+**Windows implementation checkpoint (2026-11-11, `a0b133f97`):** separate FIDO/OTP native
+owners, typed public routing, direct synchronous facades and pre-open connection/discovery claim
+transfer are implemented and reviewed. FIDO uses `ThreadPoolBoundHandle` overlapped completion;
+OTP preserves zero-desired-access feature opening and worker-owned GET/SET. Unproven checked
+close or BCL request preparation retains native ownership/claims while reporting public faults.
+Public interfaces and raw tiers remain unchanged. Untouched `f99cf78f` Windows baseline passed
+three Core builds and 2,039 tests (three skips, zero warnings); the initial runner collection failure
+was resolved by collecting the existing result, not replaying tests. At pre-public-routing `378a7bb0`,
+86 controlled-seam cases passed on both Linux and Windows (zero skips/warnings). Later routing/facade
+managed checks are separate, overlapping evidence, not native/HID proof. Windows native JIT/AOT,
+hardware and PC/SC acceptance remain pending; READY: no (M4 owner) gates further Windows execution.
+C1/C2 consistency awaits functional native/integration acceptance. Verifier integration/certification
+and inventory refresh remain pending. This checkpoint supersedes older Windows implementation-status
+text below without changing historical evidence or the authoritative **19/72** acceptance count.
+See [architecture](docs/plans/yubikit-async-boundaries/02-architecture.md) and
+[current status](docs/plans/yubikit-async-boundaries/00-status.md).
+
 **Linux execution resumed (2026-11-11):** the user approved L0–L6 and the
 orchestrator/fresh-GPT-6.1-Sol workflow on `yubikit-linux-async`, based on fetched
 `yubikit` revision `3de42bb54`. See the [current Linux checkpoint](docs/plans/yubikit-async-boundaries/00-status.md#current-checkpoint--linux-execution-resumed-2026-11-11).

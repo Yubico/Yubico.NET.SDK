@@ -32,6 +32,7 @@ internal sealed class WindowsHidReportApi : IWindowsHidReportApi
         "Windows denied access to the HID interface. The interface may be held exclusively by another process, " +
         "or this environment may require running the process elevated as Administrator to open YubiKey HID reports.";
     private readonly WindowsHidSafeHandle _handle = new();
+    private readonly WindowsHidReportMetadata? _knownMetadata;
     private ThreadPoolBoundHandle? _binding;
     private WindowsHidOverlappedOperation? _activeOperation;
     private nint _preparsedData;
@@ -40,6 +41,10 @@ internal sealed class WindowsHidReportApi : IWindowsHidReportApi
     private bool _handleReference;
     private bool _closeStarted;
     private WindowsHidRelease _release;
+
+    // Runtime verification may supply descriptor metadata for an owned byte-mode pipe. This
+    // bypasses only HidD descriptor lookup; handle acquisition, binding and all I/O stay native.
+    internal WindowsHidReportApi(WindowsHidReportMetadata? knownMetadata = null) => _knownMetadata = knownMetadata;
 
     public WindowsHidReportMetadata Open(string devicePath)
     {
@@ -67,8 +72,15 @@ internal sealed class WindowsHidReportApi : IWindowsHidReportApi
         }
 
         _handle.DangerousAddRef(ref _handleReference);
+        WindowsHidReportMetadata metadata = _knownMetadata ?? ReadMetadata(value);
+        _binding = ThreadPoolBoundHandle.BindHandle(_handle);
+        return metadata;
+    }
+
+    private WindowsHidReportMetadata ReadMetadata(nint value)
+    {
         byte result = HidNative.GetHidPreparsedData(value, out _preparsedData);
-        error = Marshal.GetLastPInvokeError();
+        int error = Marshal.GetLastPInvokeError();
         if (result == 0)
         {
             ThrowWin32Failure("HidD_GetPreparsedData", error, "Failed to get HID preparsed data.");
@@ -82,7 +94,6 @@ internal sealed class WindowsHidReportApi : IWindowsHidReportApi
             throw new PlatformApiException("HidP_GetCaps", status, "Failed to get HID capabilities.");
         }
 
-        _binding = ThreadPoolBoundHandle.BindHandle(_handle);
         return new WindowsHidReportMetadata(unchecked((ushort)capabilities.UsagePage),
             unchecked((ushort)capabilities.Usage), unchecked((ushort)capabilities.InputReportByteLength),
             unchecked((ushort)capabilities.OutputReportByteLength));

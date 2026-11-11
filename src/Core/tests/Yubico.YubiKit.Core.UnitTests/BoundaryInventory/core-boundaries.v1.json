@@ -108,16 +108,28 @@
       "entries": ["SCardGetReaderDeviceInstanceId#5AAB0CDCBA28"]
     },
     {
+      "path": "Devices/DiscoveryReadAdmission.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Devices/DiscoveryReadAdmission.cs:AcquireAsync checks the complete gate set and consumes permits under AdmissionLock; ineligible requests await a release notification without reservations.", "DiscoveryReadSchedulingTests.FindAllAsync_LiveUnknownPidWaiter_DoesNotBlockDifferentPidMetadata pins healthy known-PID progress while an unknown request remains pending in a live scope."],
+      "status": ["documented", "outstanding"],
+      "entries": ["AcquireAsync#DFEC26A91F30#async-blocked#SemaphoreSlim.Wait(0) consumes an already-available permit under the same lock as complete-set eligibility and release; it cannot wait for a held PID. Ineligible requests await release asynchronously, not by polling. This source classification does not prove subsequent native reads are nonblocking."]
+    },
+    {
       "path": "Devices/DisposalGate.cs", "reviewOwner": "Core maintainers", "rationale": "",
       "evidence": ["Devices/DisposalGate.cs:39 blocks only the synchronous Dispose path while sharing the async disposal completion."],
       "status": ["documented", "outstanding"],
       "entries": ["Dispose#86E469848610#sync-boundary#Synchronous Dispose waits for the same teardown completion as DisposeAsync; this is not an async-safe caller entry point."]
     },
     {
-      "path": "Devices/ProtocolDeviceInfo.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/ProtocolDeviceInfo.cs:408-433 uses a long-running task for best-effort discovery; :573-585 uses a zero-time admission check."],
+      "path": "Devices/DiscoveryWorkerAdmission.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Devices/DiscoveryWorkerAdmission.cs:TryAcquire uses a zero-time admission check."],
       "status": ["documented", "outstanding"],
-      "entries": ["TryAcquire#84505AAFFADC#sync-boundary#SemaphoreSlim.Wait(0) is a nonwaiting admission probe; this does not prove that subsequent native discovery cannot block.", "StartWorker#CD154EF717BA#worker#LongRunning option requests a dedicated discovery worker for connection and read, not a nonblocking native operation.", "StartWorker#E077DB78954B#worker#StartNew launches discovery connection/read work off the caller; caller budget bounds waiting but an abandoned native operation may persist.", "StartSharedRead#2C2010C4C205#async-blocked#StartSharedRead disposes worker admission synchronously after a scheduling failure before returning a task; the IDisposable target is interface-dispatched and its cost is not proved.", "StartSharedRead#F576D5FF836A#async-blocked#StartSharedRead calls a zero-time SemaphoreSlim admission probe before returning a task; bounded poll is observed, not an async wait."]
+      "entries": ["TryAcquire#ABE23A0EB25A#sync-boundary#SemaphoreSlim.Wait(0) is a nonwaiting admission probe; this does not prove that subsequent native discovery cannot block."]
+    },
+    {
+      "path": "Devices/SharedDeviceInfoRead.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Devices/SharedDeviceInfoRead.cs:StartWorker uses a long-running task for best-effort discovery. StartAdmittedRead preserves worker admission after asynchronous USB PID admission through DiscoveryWorkerAdmission.TryAcquire in Devices/DiscoveryWorkerAdmission.cs."],
+      "status": ["documented", "outstanding"],
+      "entries": ["StartWorker#8FAAB298BBD4#worker#LongRunning option requests a dedicated discovery worker for connection and read, not a nonblocking native operation.", "StartWorker#D3E661E1106D#worker#StartNew launches discovery connection/read work off the caller; caller budget bounds waiting but an abandoned native operation may persist.", "StartAdmittedRead#17DAF8E8953E#async-blocked#StartAdmittedRead disposes worker admission synchronously after a scheduling failure before returning a task; the IDisposable target is interface-dispatched and its cost is not proved.", "StartAdmittedRead#EB0665480A95#async-blocked#StartAdmittedRead calls a zero-time SemaphoreSlim admission probe before returning a task; bounded poll is observed, not an async wait."]
     },
     {
       "path": "Devices/RegisteredConnections.cs", "reviewOwner": "Core maintainers", "rationale": "",
@@ -126,16 +138,10 @@
       "entries": ["SendAsync#7E193F00C2D2#async-blocked#FIDO registered wrapper invokes an interface before returning its task; built-in and external implementations may differ, so call-entry blocking is not excluded.", "SendAsync#02DE25ABA089#async-blocked#OTP registered wrapper invokes an interface before returning its task; interface dispatch hides whether send blocks the initiating caller.", "ReceiveAsync#F40A6967CA7E#async-blocked#FIDO registered receive forwards to an interface before returning the task; legacy implementations read a report synchronously.", "ReceiveAsync#4A72BB47AAC9#async-blocked#OTP registered receive forwards to an interface before returning the task; legacy implementations read a feature report synchronously.", "BeginTransactionAsync#EC6EEE925842#async-blocked#Registered smart-card wrapper dispatches BeginTransactionAsync synchronously; external implementations may use the blocking interface default.", "TransmitAndReceiveAsync#018B849AB854#async-blocked#Registered smart-card transmit dispatches through an external interface before task return; native call-entry blocking is unresolved."]
     },
     {
-      "path": "Devices/YubiKeyDeviceMonitorService.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/YubiKeyDeviceMonitorService.cs:360-365 schedules the monitoring loop; :464-490 bounds the synchronous shutdown wait and abandons a stuck generation."],
+      "path": "Devices/YubiKeyMonitor.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Devices/YubiKeyMonitor.cs: CreateAsync schedules the sole monitoring loop and awaits its initial publication; DisposeAsync stops listeners, cancels and awaits the loop without a drain timeout, retires discovery, and completes the feed."],
       "status": ["documented", "outstanding"],
-      "entries": ["StartMonitoring#D45DE04A61FD#worker#Task.Run starts the monitoring loop independently of StartMonitoring; the loop can still wait on discovery and is retired on shutdown.", "StopMonitoring#13EAD41AA391#sync-boundary#The synchronous StopMonitoring path blocks at most its shutdown timeout and abandons an unresponsive monitoring generation."]
-    },
-    {
-      "path": "Devices/YubiKeyManager.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/YubiKeyManager.cs:263 calls ShutdownAsync().GetAwaiter().GetResult() in the synchronous Shutdown entry point."],
-      "status": ["documented", "outstanding"],
-      "entries": ["Shutdown#9872F46D8981#sync-boundary#Shutdown is the synchronous compatibility boundary and blocks the initiating thread until ShutdownAsync completes."]
+      "entries": ["CreateAsync#DB1AA1558398#worker#Task.Run starts one sequential monitoring loop independently of the creation token; creation awaits its first publication. Discovery budgets bound native waits; disposal awaits the loop without abandoning it and does not prove native teardown has finished."]
     },
     {
       "path": "Protocols/Fido/Hid/FidoHidConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",

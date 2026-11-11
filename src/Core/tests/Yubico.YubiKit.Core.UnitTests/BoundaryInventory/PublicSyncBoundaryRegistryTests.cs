@@ -6,7 +6,8 @@ public class PublicSyncBoundaryRegistryTests
     public void Supported_synchronous_entries_resolve_to_public_contracts_and_scoped_owners()
     {
         var rows = PublicSyncBoundaryRegistry.Rows;
-        Assert.Equal(24, rows.Length);
+        // Upstream's 15 entries (no static manager shutdown) plus eight Linux entries.
+        Assert.Equal(23, rows.Length);
         Assert.Empty(PublicSyncBoundaryRegistry.Validate(rows));
     }
 

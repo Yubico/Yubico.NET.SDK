@@ -54,10 +54,6 @@ internal static class ExpertFeatureScenario
             Console.Error.WriteLine($"FAIL mode=expert-feature serial={serial}: {ex}");
             return 1;
         }
-        finally
-        {
-            await YubiKeyManager.ShutdownAsync();
-        }
     }
 
     // The session borrows the public native connection; the outer scope owns its disposal.

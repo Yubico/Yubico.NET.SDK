@@ -253,15 +253,15 @@ public sealed class PivInfoCommand : YkCommandBase<GlobalSettings>
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, GlobalSettings settings, YkDeviceContext deviceContext)
     {
-        await using var session = await deviceContext.Device.CreatePivSessionAsync();
+        await using var session = await deviceContext.Device.CreatePivSessionAsync(deviceContext.SessionOptions);
 
         OutputHelpers.WriteHeader("PIV Application");
 
-        // Device info from management session
+        // Selection metadata is sufficient for these identity/display fields, not live configuration.
         if (deviceContext.Info is { } info)
         {
             OutputHelpers.WriteKeyValue("Firmware", info.VersionName);
-            OutputHelpers.WriteKeyValue("Serial", info.SerialNumber?.ToString() ?? "N/A");
+            OutputHelpers.WriteKeyValue("Serial", deviceContext.Selection.SerialNumber?.ToString() ?? "N/A");
         }
 
         OutputHelpers.WriteKeyValue("Management Key Type", session.ManagementKeyType.ToString());

@@ -49,7 +49,7 @@ public class DiscoverySingleFlightTests
         TimeSpan elapsed;
         try
         {
-            exception = await Record.ExceptionAsync(() => ProtocolDeviceInfo.ReadBoundedAsync(
+            exception = await Record.ExceptionAsync(() => DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 device,
                 ConnectionType.SmartCard,
                 TimeSpan.FromMilliseconds(50),
@@ -93,7 +93,7 @@ public class DiscoverySingleFlightTests
         try
         {
             var reads = devices.Select(device => Record.ExceptionAsync(() =>
-                ProtocolDeviceInfo.ReadBoundedAsync(
+                DiscoveryDeviceInfoReader.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
                     TimeSpan.FromMilliseconds(500),
@@ -142,7 +142,7 @@ public class DiscoverySingleFlightTests
         Exception? exception = null;
         try
         {
-            _ = await ProtocolDeviceInfo.ReadBoundedAsync(
+            _ = await DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 wrapper,
                 ConnectionType.SmartCard,
                 TimeSpan.FromMilliseconds(50),
@@ -174,7 +174,7 @@ public class DiscoverySingleFlightTests
             $"composite:{Guid.NewGuid():N}", smartCard, hid, hidOtp: null, deviceInfo: null);
 
         var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
-            ProtocolDeviceInfo.ReadBoundedAsync(
+            DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 composite,
                 ConnectionType.SmartCard,
                 TimeSpan.FromSeconds(1),
@@ -193,7 +193,7 @@ public class DiscoverySingleFlightTests
         try
         {
             var reads = Enumerable.Range(0, 4).Select(_ => Assert.ThrowsAsync<TimeoutException>(() =>
-                ProtocolDeviceInfo.ReadBoundedAsync(
+                DiscoveryDeviceInfoReader.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
                     TimeSpan.FromMilliseconds(50),
@@ -221,7 +221,7 @@ public class DiscoverySingleFlightTests
 
         try
         {
-            var firstRead = Record.ExceptionAsync(() => ProtocolDeviceInfo.ReadBoundedAsync(
+            var firstRead = Record.ExceptionAsync(() => DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 device,
                 ConnectionType.SmartCard,
                 TimeSpan.FromMilliseconds(100),
@@ -230,7 +230,7 @@ public class DiscoverySingleFlightTests
             await device.ConnectStarted.Task.WaitAsync(TestContext.Current.CancellationToken);
 
             var laterReads = Enumerable.Range(1, waiterCount - 1).Select(_ =>
-                Record.ExceptionAsync(() => ProtocolDeviceInfo.ReadBoundedAsync(
+                Record.ExceptionAsync(() => DiscoveryDeviceInfoReader.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
                     TimeSpan.FromMilliseconds(100),
@@ -264,7 +264,7 @@ public class DiscoverySingleFlightTests
 
         try
         {
-            var firstRead = ProtocolDeviceInfo.ReadBoundedAsync(
+            var firstRead = DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 device,
                 ConnectionType.SmartCard,
                 TimeSpan.FromSeconds(5),
@@ -275,7 +275,7 @@ public class DiscoverySingleFlightTests
             firstWaiter.Cancel();
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => firstRead);
 
-            await Assert.ThrowsAsync<TimeoutException>(() => ProtocolDeviceInfo.ReadBoundedAsync(
+            await Assert.ThrowsAsync<TimeoutException>(() => DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 device,
                 ConnectionType.SmartCard,
                 TimeSpan.FromMilliseconds(50),
@@ -304,7 +304,7 @@ public class DiscoverySingleFlightTests
 
         try
         {
-            await Assert.ThrowsAsync<TimeoutException>(() => ProtocolDeviceInfo.ReadBoundedAsync(
+            await Assert.ThrowsAsync<TimeoutException>(() => DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 device,
                 ConnectionType.SmartCard,
                 TimeSpan.FromMilliseconds(50),
@@ -312,12 +312,12 @@ public class DiscoverySingleFlightTests
                 CancellationToken.None));
             Assert.Equal(1, device.ConnectCalls);
 
-            ProtocolDeviceInfo.NotifyTransportActivity();
+            DiscoveryDeviceInfoReader.NotifyTransportActivity();
 
             // A read from the new generation cannot join the in-flight read from the superseded generation.
             // Its independent attempt observes the quarantined lease and reports unresolved ownership.
             _ = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() =>
-                ProtocolDeviceInfo.ReadBoundedAsync(
+                DiscoveryDeviceInfoReader.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
                     TimeSpan.FromMilliseconds(50),
@@ -337,13 +337,13 @@ public class DiscoverySingleFlightTests
     public async Task ReadBoundedAsync_DifferentFinderScopes_DoNotJoinInFlightRead()
     {
         var device = new ControllableConnectYubiKey(cancelConnectWithCaller: false);
-        var retiringManagerScope = ProtocolDeviceInfo.CreateScope();
-        var replacementManagerScope = ProtocolDeviceInfo.CreateScope();
+        var retiringManagerScope = new DiscoveryReadScope();
+        var replacementManagerScope = new DiscoveryReadScope();
 
         try
         {
             using var firstWaiter = new CancellationTokenSource();
-            var firstRead = ProtocolDeviceInfo.ReadBoundedAsync(
+            var firstRead = DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 device,
                 ConnectionType.SmartCard,
                 TimeSpan.FromSeconds(5),
@@ -356,7 +356,7 @@ public class DiscoverySingleFlightTests
             Assert.Equal(1, device.ConnectCalls);
 
             _ = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() =>
-                ProtocolDeviceInfo.ReadBoundedAsync(
+                DiscoveryDeviceInfoReader.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
                     TimeSpan.FromMilliseconds(50),
@@ -376,12 +376,12 @@ public class DiscoverySingleFlightTests
     [Fact]
     public async Task ReadBoundedAsync_RetiredFinderScope_RejectsLateReadWithoutConnecting()
     {
-        var scope = ProtocolDeviceInfo.CreateScope();
+        var scope = new DiscoveryReadScope();
         var device = new ControllableConnectYubiKey(cancelConnectWithCaller: false);
-        ProtocolDeviceInfo.Retire(scope);
+        scope.Retire();
 
         var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
-            ProtocolDeviceInfo.ReadBoundedAsync(
+            DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 device,
                 ConnectionType.SmartCard,
                 TimeSpan.FromSeconds(1),
@@ -416,7 +416,7 @@ public class DiscoverySingleFlightTests
         {
             // Saturate all workers with hung native reads.
             var hungReads = hungDevices.Select(device => Record.ExceptionAsync(() =>
-                ProtocolDeviceInfo.ReadBoundedAsync(
+                DiscoveryDeviceInfoReader.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
                     TimeSpan.FromMilliseconds(100),
@@ -427,7 +427,7 @@ public class DiscoverySingleFlightTests
             Assert.All(await Task.WhenAll(hungReads), exception => Assert.IsType<TimeoutException>(exception));
 
             // Queue a read behind them with a budget far larger than this test's runtime, then supersede it.
-            var queuedRead = ProtocolDeviceInfo.ReadBoundedAsync(
+            var queuedRead = DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 queuedDevice,
                 ConnectionType.SmartCard,
                 TimeSpan.FromSeconds(30),
@@ -435,8 +435,8 @@ public class DiscoverySingleFlightTests
                 CancellationToken.None,
                 waitForWorkerSlot: true);
 
-            ProtocolDeviceInfo.NotifyTransportActivity();
-            ProtocolDeviceInfo.NotifyTransportActivity();
+            DiscoveryDeviceInfoReader.NotifyTransportActivity();
+            DiscoveryDeviceInfoReader.NotifyTransportActivity();
 
             var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
                 queuedRead.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
@@ -479,7 +479,7 @@ public class DiscoverySingleFlightTests
     }
 
     private static Task<DeviceInfo> ReadAsync(IYubiKey device) =>
-        ProtocolDeviceInfo.ReadBoundedAsync(
+        DiscoveryDeviceInfoReader.ReadBoundedAsync(
             device,
             ConnectionType.SmartCard,
             TimeSpan.FromSeconds(1),

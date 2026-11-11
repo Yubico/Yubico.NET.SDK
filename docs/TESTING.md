@@ -508,7 +508,6 @@ Rule references: [xUnit1051](https://xunit.net/xunit.analyzers/rules/xUnit1051) 
 
 - **UnitTests** — xUnit, no hardware required
 - **IntegrationTests** — xUnit, requires physical YubiKey
-- **TestProject** — ASP.NET Core with NSubstitute, targets net10.0 with AOT
 
 ### Test All Public APIs
 

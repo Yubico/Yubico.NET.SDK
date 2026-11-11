@@ -68,6 +68,64 @@ public readonly record struct DeviceInfo
         ? FirmwareVersion.ToString()
         : VersionQualifier.ToString();
 
+    /// <summary>Compares every field by value, including the bytes of <see cref="ChallengeResponseTimeout"/>.</summary>
+    /// <remarks>
+    ///     The compiler-generated record equality compares <see cref="ReadOnlyMemory{T}"/> by backing reference, so two
+    ///     snapshots decoded from separate response buffers would never be equal. Discovery relies on this comparison
+    ///     to publish <see cref="DeviceUpdated"/> only when metadata actually changed.
+    /// </remarks>
+    public bool Equals(DeviceInfo other) =>
+        IsSky == other.IsSky &&
+        IsFips == other.IsFips &&
+        FormFactor == other.FormFactor &&
+        SerialNumber == other.SerialNumber &&
+        IsLocked == other.IsLocked &&
+        UsbEnabled == other.UsbEnabled &&
+        UsbSupported == other.UsbSupported &&
+        NfcEnabled == other.NfcEnabled &&
+        NfcSupported == other.NfcSupported &&
+        ResetBlocked == other.ResetBlocked &&
+        FipsCapabilities == other.FipsCapabilities &&
+        FipsApproved == other.FipsApproved &&
+        HasPinComplexity == other.HasPinComplexity &&
+        PartNumber == other.PartNumber &&
+        IsNfcRestricted == other.IsNfcRestricted &&
+        AutoEjectTimeout == other.AutoEjectTimeout &&
+        ChallengeResponseTimeout.Span.SequenceEqual(other.ChallengeResponseTimeout.Span) &&
+        DeviceFlags == other.DeviceFlags &&
+        Equals(FirmwareVersion, other.FirmwareVersion) &&
+        Equals(VersionQualifier, other.VersionQualifier) &&
+        Equals(FpsVersion, other.FpsVersion) &&
+        Equals(StmVersion, other.StmVersion);
+
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.Add(IsSky);
+        hash.Add(IsFips);
+        hash.Add(FormFactor);
+        hash.Add(SerialNumber);
+        hash.Add(IsLocked);
+        hash.Add(UsbEnabled);
+        hash.Add(UsbSupported);
+        hash.Add(NfcEnabled);
+        hash.Add(NfcSupported);
+        hash.Add(ResetBlocked);
+        hash.Add(FipsCapabilities);
+        hash.Add(FipsApproved);
+        hash.Add(HasPinComplexity);
+        hash.Add(PartNumber);
+        hash.Add(IsNfcRestricted);
+        hash.Add(AutoEjectTimeout);
+        hash.AddBytes(ChallengeResponseTimeout.Span);
+        hash.Add(DeviceFlags);
+        hash.Add(FirmwareVersion);
+        hash.Add(VersionQualifier);
+        hash.Add(FpsVersion);
+        hash.Add(StmVersion);
+        return hash.ToHashCode();
+    }
+
     /// <summary>Decodes device-information TLVs, ignoring unknown tags.</summary>
     /// <remarks>
     ///     Absent optional fields use zero or null defaults. A supplied firmware version takes precedence

@@ -88,32 +88,32 @@ public class DeviceIdentityContractTests
     // ---------------------------------------------------------------------------------------------
 
     [Fact]
-    public async Task UpdateCache_LateSerialArrival_PopulatesRetainedObjectWithoutEvents()
+    public async Task Apply_LateSerialArrival_PopulatesRetainedObjectAndEmitsUpdate()
     {
-        using var repository = new YubiKeyDeviceRepository();
+        var repository = new DeviceChangeFeed();
         using var cts = new CancellationTokenSource(Bound);
         var firstScan = Published(deviceInfo: null);
-        repository.UpdateCache([firstScan]);
+        repository.Apply([firstScan]);
 
-        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+        await using var watcher = await DeviceChangeWatcher.StartAsync(repository, cts.Token);
 
-        repository.UpdateCache([Published(deviceInfo: WithSerial(103))]);
+        repository.Apply([Published(deviceInfo: WithSerial(103))]);
 
         // Snapshot the cache before draining: the drain sentinel is itself a cache entry.
-        var cached = repository.GetAll();
+        var cached = await DeviceChangeWatcher.ReadSnapshotAsync(repository.Subscribe, cts.Token);
         var events = await watcher.DrainAsync(repository, cts.Token);
 
         var retained = Assert.Single(cached);
         Assert.Same(firstScan, retained);
         Assert.Equal(103, retained.SerialNumber);
-        Assert.Empty(events);
+        Assert.Same(retained, Assert.IsType<DeviceUpdated>(Assert.Single(events)).Device);
     }
 
     // The replacement has only the metadata established for that scan.
     [Fact]
     public async Task UpdateCache_ConnectionSetChangeRepublication_NewObjectDoesNotInheritSerial()
     {
-        using var repository = new YubiKeyDeviceRepository();
+        var repository = new DeviceChangeFeed();
         using var cts = new CancellationTokenSource(Bound);
         var withSerial = new YubiKeyDevice(
             "ykphysical:103",
@@ -121,9 +121,9 @@ public class DeviceIdentityContractTests
             new FakeSlot("hid-fido:a", ConnectionType.HidFido),
             hidOtp: null,
             WithSerial(103));
-        repository.UpdateCache([withSerial]);
+        repository.Apply([withSerial]);
 
-        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+        await using var watcher = await DeviceChangeWatcher.StartAsync(repository, cts.Token);
 
         // Same interface set, different connection set, no metadata on the fresh scan object.
         var republished = new YubiKeyDevice(
@@ -132,9 +132,9 @@ public class DeviceIdentityContractTests
             hidFido: null,
             new FakeSlot("hid-fido:a", ConnectionType.HidOtp),
             deviceInfo: null);
-        repository.UpdateCache([republished]);
+        repository.Apply([republished]);
 
-        var cached = repository.GetAll();
+        var cached = await DeviceChangeWatcher.ReadSnapshotAsync(repository.Subscribe, cts.Token);
         var events = await watcher.DrainAsync(repository, cts.Token);
 
         Assert.Equal(2, events.Count);
@@ -146,20 +146,19 @@ public class DeviceIdentityContractTests
     [Fact]
     public async Task UpdateCache_RemovalEvent_ObjectRetainsLastKnownSerial()
     {
-        using var repository = new YubiKeyDeviceRepository();
+        var repository = new DeviceChangeFeed();
         using var cts = new CancellationTokenSource(Bound);
         var firstScan = Published(deviceInfo: null);
-        repository.UpdateCache([firstScan]);
-        repository.UpdateCache([Published(deviceInfo: WithSerial(103))]); // late serial arrival
+        repository.Apply([firstScan]);
+        repository.Apply([Published(deviceInfo: WithSerial(103))]); // late serial arrival
 
-        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+        await using var watcher = await DeviceChangeWatcher.StartAsync(repository, cts.Token);
 
-        repository.UpdateCache([]);
+        repository.Apply([]);
 
         var events = await watcher.DrainAsync(repository, cts.Token);
 
-        var removal = Assert.Single(events);
-        Assert.Equal(DeviceAction.Removed, removal.Action);
+        var removal = Assert.IsType<DeviceRemoved>(Assert.Single(events));
         Assert.Same(firstScan, removal.Device);
         Assert.Equal(103, removal.Device.SerialNumber);
     }

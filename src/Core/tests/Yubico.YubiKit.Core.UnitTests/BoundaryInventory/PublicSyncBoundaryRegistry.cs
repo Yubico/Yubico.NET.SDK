@@ -33,7 +33,6 @@ internal static class PublicSyncBoundaryRegistry
         ("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose"),
         ("listener start", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start"),
         ("listener stop", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop"),
-        ("manager shutdown", "Yubico.YubiKit.Core.Devices.YubiKeyManager", "Shutdown", "Yubico.YubiKit.Core.Devices.YubiKeyManager", "Shutdown"),
         ("HID scan dispatch", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync")
     ];
 
@@ -62,8 +61,6 @@ internal static class PublicSyncBoundaryRegistry
         new("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_SynchronousDispose_DrainsHeldNativeTransmitBeforeReleasingContext"),
         new("listener start", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start", "MacOSHidListenerLifetimeTests.Start_RegistersAndSchedulesBeforeOpen_ThenRunsAndClosesBeforeRelease"),
         new("listener stop", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop", "MacOSHidListenerLifetimeTests.CallbackSelfStop_DoesNotJoinItself_AndDrainsBeforeRelease"),
-        // A parked publication proves late results are silenced after bounded disposal, not native drain.
-        new("manager shutdown", "Yubico.YubiKit.Core.Devices.YubiKeyManager", "Shutdown", "Yubico.YubiKit.Core.Devices.YubiKeyManager", "Shutdown", "YubiKeyDeviceManagerTests.DisposeAsync_WithAPublicationResumingAfterDisposeReturned_EmitsNothing"),
         // Task.Run is a per-call dispatch, not a bounded executor or a cancellable native operation.
         new("HID scan dispatch", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync", "FindHidInterfacesBoundaryTests.WithheldScanReturnsPendingWithoutBlockingInvocationAndCancellationWaitsForEnumeration")
     ];

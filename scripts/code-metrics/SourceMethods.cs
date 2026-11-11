@@ -230,8 +230,8 @@ static class ShippingSource
     // Scope is the shipping SDK. Each module is laid out as src/<Module>/{src,tests,examples},
     // and only the inner src/ ships: tests are not the subject of the metric, and examples are
     // sample apps outside the solution. Shared test infrastructure sits directly under src/ as
-    // src/Tests.Shared and src/Tests.TestProject, which have no "tests" path segment, so those
-    // are matched by name. Build output and generated files are never source.
+    // src/Tests.Shared, which has no "tests" path segment, so it is matched by name. Build
+    // output and generated files are never source.
     //
     // The path is repo-relative so that folders above the repo (for example a checkout under
     // ~/tests/) cannot exclude everything.

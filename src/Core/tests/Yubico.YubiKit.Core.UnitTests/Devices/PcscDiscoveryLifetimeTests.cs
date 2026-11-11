@@ -41,7 +41,7 @@ public class PcscDiscoveryLifetimeTests
 
         try
         {
-            _ = await Assert.ThrowsAsync<TimeoutException>(() => ProtocolDeviceInfo.ReadSlotBoundedAsync(
+            _ = await Assert.ThrowsAsync<TimeoutException>(() => DiscoveryDeviceInfoReader.ReadSlotBoundedAsync(
                 slot,
                 ConnectionType.SmartCard,
                 TimeSpan.FromMilliseconds(100),
@@ -74,7 +74,7 @@ public class PcscDiscoveryLifetimeTests
         var factory = new FailOnceSmartCardConnectionFactory(failure);
         var device = PcscTestDevices.Create(factory, out var slot);
 
-        _ = await Assert.ThrowsAnyAsync<Exception>(() => ProtocolDeviceInfo.ReadBoundedAsync(
+        _ = await Assert.ThrowsAnyAsync<Exception>(() => DiscoveryDeviceInfoReader.ReadBoundedAsync(
             device,
             ConnectionType.SmartCard,
             TimeSpan.FromSeconds(5),

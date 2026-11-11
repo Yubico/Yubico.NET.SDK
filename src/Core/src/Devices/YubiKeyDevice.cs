@@ -71,6 +71,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     }
     public string DeviceId { get; }
 
+    /// <inheritdoc />
     public ConnectionType AvailableConnections { get; }
 
     internal IReadOnlyList<string> InterfaceIds { get; }
@@ -101,6 +102,9 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
             }
         }
     }
+
+    /// <inheritdoc />
+    public DeviceInfo? CachedDeviceInfo => DeviceInfo;
 
     /// <summary>
     ///     The latched hardware serial number per the <see cref="IYubiKey.SerialNumber" /> contract:

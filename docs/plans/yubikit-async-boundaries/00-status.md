@@ -1,5 +1,48 @@
 # Status: YubiKit async boundaries
 
+## Upstream integration — 2026-11-11
+
+The user requested merging the latest `yubikit` base before any buffer-ownership
+hardening. The fetched base is `c9ce183fb9ac60a82ab5455cd5a87d1e005e19c8`,
+64 upstream commits beyond the branch's common history, merged into the published
+Linux work at `529e2c8ac`. The integration preserves the existing PR history rather
+than rebasing/force-pushing it.
+
+Upstream splits bounded discovery and shared read lifetime out of
+`ProtocolDeviceInfo`: Linux pre-open claim transfer belongs in `SharedDeviceInfoRead`,
+alongside the upstream PID-admission-to-registry-lease handoff. The new scoped
+one-shot discovery and owned-monitor APIs are retained; removed manager shutdown
+and force-rescan APIs are not restored for Linux verification. The independent
+public synchronous registry now has **23** entries (upstream 15 plus Linux eight),
+because static manager shutdown was removed. The adapter registry remains
+**43 operations / 76 profile links**.
+
+Upstream also supplies `System.Formats.Cbor` **10.0.15**, superseding the inherited
+10.0.2 dependency blocker recorded below. This is the base branch's dependency
+update, not an audit suppression or a separate package edit in the Linux feature.
+
+Integrated gate `20261111-164028-868-build+test+docs-qa+native-aot-contract-qa+complexity`
+passed **4,128 executed, zero failures, five skips and zero compiler warnings**.
+The semantic inventory validates **218** source sites and all independent registry
+requirements. Serial resilience run `20261111-164355-178-resilience` passed **197**
+tests with zero warnings. All **179** changed shipping methods against the fetched
+base are within complexity limits. The default comparison against the older Linux
+HEAD also reports two unchanged upstream methods as new (`YubiKeyMonitor.RunAsync`
+and `DeviceInfo.Equals`); they are inherited, not Linux integration regressions.
+
+Independent reviews accepted the production handoff, documentation and inventory
+resolutions. Nine isolated child probes cover Linux discovery PID admission through
+held open/close, canceled/timed-out waits, EINTR/EIO release, true FIDO quiescence
+and direct/composite FIDO/OTP quarantine. A controlled Mac-only routing regression
+released PID admission after unproven Linux close; the corrected focused suite
+passed **93** tests with zero warnings. These are managed integration results;
+publication additionally requires a fresh native-only capture at the committed
+merge HEAD rather than reusing earlier artifacts.
+
+No buffer-ownership hardening, device changes, operator scenarios, or PR merge into
+the base are included. Historical captures below retain their original source,
+package closure and HEAD; they are not attestations of the merged source.
+
 ## Human review follow-up — PR 770
 
 The 39 human review threads were checked against implementation and call sites.

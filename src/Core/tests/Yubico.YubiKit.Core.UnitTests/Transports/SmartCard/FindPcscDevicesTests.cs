@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
@@ -48,31 +49,53 @@ public class FindPcscDevicesTests
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
-    public async Task RescanAsync_SaturatedPcscAdmission_PreservesSnapshotWithoutRemovalEvent()
+    public async Task ListenerScan_SaturatedPcscAdmission_PreservesSnapshotWithoutRemovalEvent()
     {
-        using var repository = new YubiKeyDeviceRepository();
-        var existingDevice = new FakeYubiKey("pcsc:existing", ConnectionType.SmartCard);
-        repository.UpdateCache([existingDevice]);
-
-        await using var watcher = await DeviceEventWatcher.StartAsync(
-            repository,
-            TestContext.Current.CancellationToken);
+        var rig = new FindYubiKeysScopeTests.ScopeRig();
         var api = new StatusBlockingSCardApi("Yubico YubiKey OTP+FIDO+CCID");
         var finder = new FindYubiKeys(
             new FindPcscDevices(NullLogger<FindPcscDevices>.Instance, api),
             new EmptyHidFinder(),
-            UnexpectedSlotCreation);
-        await using var monitor = new YubiKeyDeviceMonitorService(repository, finder);
-        using var saturation = await DiscoveryWorkerAdmissionCollection.SaturateAsync(
-            TestContext.Current.CancellationToken);
+            device => new MetadataSlot(rig, device.ReaderName), topologyResolver: rig);
+        var hid = new OwnedMonitorFixture.FakeDeviceChangeListener();
+        var smartCard = new OwnedMonitorFixture.FakeDeviceChangeListener();
+        var clock = new ObservedTimeProvider();
+        var interval = TimeSpan.FromHours(1);
+        await using var monitor = await YubiKeyMonitor.CreateAsync(finder,
+            [new(ConnectionType.Hid, () => hid), new(ConnectionType.SmartCard, () => smartCard)],
+            interval, clock, TestContext.Current.CancellationToken);
+        var existingDevice = Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken));
+        Assert.Equal(111, existingDevice.SerialNumber);
+        await using var watcher = await DeviceChangeWatcher.StartAsync(monitor.WatchAsync, TestContext.Current.CancellationToken);
+        await watcher.WaitForCountAsync(1, "Initial replay missing", TestContext.Current.CancellationToken);
+        var nativeCalls = api.EstablishContextCalls;
+        Assert.True(nativeCalls > 0);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            monitor.RescanAsync(TestContext.Current.CancellationToken));
+        using (await DiscoveryWorkerAdmissionCollection.SaturateAsync(TestContext.Current.CancellationToken))
+        {
+            smartCard.Raise();
+            await clock.WaitForTimerAsync(interval);
+            await clock.WaitForTimerAsync(RescanScheduler.QuietPeriod);
+            clock.Advance(RescanScheduler.QuietPeriod);
+            // Failed scans do not publish a revision. The next interval timer proves the attempt ended.
+            await clock.WaitForTimerAsync(interval);
+            await OwnedMonitorFixture.WaitForRevisionAsync(monitor, 1, TestContext.Current.CancellationToken);
+            Assert.Same(existingDevice, Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken)));
+            Assert.Equal(nativeCalls, api.EstablishContextCalls);
+        }
 
-        Assert.Equal(SaturatedMessage, exception.Message);
-        Assert.Same(existingDevice, Assert.Single(repository.GetAll()));
-        Assert.Empty(await watcher.DrainAsync(repository, TestContext.Current.CancellationToken));
-        Assert.Equal(0, api.EstablishContextCalls);
+        // The next real hint retries successfully once capacity returns, retaining the published object.
+        smartCard.Raise();
+        await clock.WaitForTimerAsync(RescanScheduler.QuietPeriod);
+        clock.Advance(RescanScheduler.QuietPeriod);
+        await OwnedMonitorFixture.WaitForRevisionAsync(monitor, 2, TestContext.Current.CancellationToken);
+        Assert.True(api.EstablishContextCalls > nativeCalls);
+        Assert.Same(existingDevice, Assert.Single(await DeviceChangeWatcher.ReadSnapshotAsync(monitor.WatchAsync, TestContext.Current.CancellationToken)));
+        await monitor.DisposeAsync();
+        await watcher.Completion.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        Assert.True(watcher.EndedNormally);
+        Assert.All(watcher.Events.Skip(1), change =>
+            Assert.Same(existingDevice, Assert.IsType<DeviceUpdated>(change).Device));
     }
 
     [Fact]
@@ -93,6 +116,22 @@ public class FindPcscDevicesTests
             Assert.Null(device.Atr);
             Assert.Equal(PscsConnectionKind.Usb, device.Kind);
         });
+    }
+
+    [Fact]
+    public async Task FindAllAsync_DuplicatedReaderName_PublishesOneDeviceAndWarns()
+    {
+        var api = new StatusBlockingSCardApi(
+            "Yubico YubiKey OTP+FIDO+CCID 00 00",
+            "Yubico YubiKey OTP+FIDO+CCID 00 00");
+        var logger = new RecordingLogger();
+        var finder = new FindPcscDevices(logger, api);
+
+        var devices = await finder.FindAllAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal("Yubico YubiKey OTP+FIDO+CCID 00 00", Assert.Single(devices).ReaderName);
+        var warning = Assert.Single(logger.Entries, entry => entry.Level == LogLevel.Warning);
+        Assert.Contains("1 duplicate reader name", warning.Message);
     }
 
     [Fact]
@@ -171,12 +210,33 @@ public class FindPcscDevicesTests
         public uint SCardCancel(SCardContext context) => ErrorCode.SCARD_S_SUCCESS;
     }
 
+    private sealed class RecordingLogger : ILogger<FindPcscDevices>
+    {
+        public List<(LogLevel Level, string Message)> Entries { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
+            Exception? exception, Func<TState, Exception?, string> formatter) =>
+            Entries.Add((logLevel, formatter(state, exception)));
+    }
+
     private sealed class EmptyHidFinder : IFindHidInterfaces
     {
         public Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<IHidInterface>>([]);
     }
 
-    private static IYubiKeyConnectionSlot UnexpectedSlotCreation(IDevice device) =>
-        throw new InvalidOperationException("No slot should be created when PC/SC admission is saturated.");
+    private sealed class MetadataSlot(FindYubiKeysScopeTests.ScopeRig rig, string name)
+        : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
+    {
+        public string InterfaceId => rig.InterfaceId(name);
+        public ConnectionType ConnectionType => ConnectionType.SmartCard;
+        public Task<IConnection> OpenRawConnectionAsync(ConnectionType connectionType, CancellationToken cancellationToken) =>
+            Task.FromResult<IConnection>(rig.CreateIdentityConnection(111));
+        public Task<IConnection> ConnectForDiscoveryAsync(ConnectionType connectionType, CancellationToken cancellationToken) =>
+            OpenRawConnectionAsync(connectionType, cancellationToken);
+    }
 }

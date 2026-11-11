@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Collections.Concurrent;
-using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.Hid.Linux;
 
 namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid;
@@ -101,8 +100,8 @@ public class LinuxHidDeviceListenerFaultInjectionTests
         source.ScriptOutcomes(LinuxHidPollOutcome.Event);
         source.ScriptReceives((LinuxHidUdevEvent?)null);
         using var listener = new LinuxHidDeviceListener(() => source);
-        var hints = new ConcurrentQueue<HidDeviceRescanHint>();
-        listener.DeviceEvent = hints.Enqueue;
+        var hints = new ConcurrentQueue<bool>();
+        listener.Changed = () => hints.Enqueue(true);
 
         // Act
         listener.Start();
@@ -111,8 +110,7 @@ public class LinuxHidDeviceListenerFaultInjectionTests
         Assert.True(
             SpinWait.SpinUntil(() => !hints.IsEmpty, DefaultTimeout),
             "Receive failure did not produce a rescan hint");
-        Assert.True(hints.TryDequeue(out var hint));
-        Assert.Equal(HidDeviceRescanHint.Unknown, hint);
+        Assert.True(hints.TryDequeue(out _));
         Assert.Equal(DeviceListenerStatus.Started, listener.Status);
 
         listener.Stop();
@@ -127,8 +125,8 @@ public class LinuxHidDeviceListenerFaultInjectionTests
         source.ScriptOutcomes(LinuxHidPollOutcome.Event);
         source.ScriptReceives(new LinuxHidUdevEvent(Action: null, "/sys/devices/hid-1", "/dev/hidraw0"));
         using var listener = new LinuxHidDeviceListener(() => source);
-        var hints = new ConcurrentQueue<HidDeviceRescanHint>();
-        listener.DeviceEvent = hints.Enqueue;
+        var hints = new ConcurrentQueue<bool>();
+        listener.Changed = () => hints.Enqueue(true);
 
         // Act
         listener.Start();
@@ -137,8 +135,7 @@ public class LinuxHidDeviceListenerFaultInjectionTests
         Assert.True(
             SpinWait.SpinUntil(() => !hints.IsEmpty, DefaultTimeout),
             "Action-less udev event did not produce a rescan hint");
-        Assert.True(hints.TryDequeue(out var hint));
-        Assert.Equal(HidDeviceRescanHint.Unknown, hint);
+        Assert.True(hints.TryDequeue(out _));
 
         listener.Stop();
     }
@@ -154,8 +151,8 @@ public class LinuxHidDeviceListenerFaultInjectionTests
             new LinuxHidUdevEvent("change", "/sys/devices/hid-1", "/dev/hidraw0"),
             new LinuxHidUdevEvent("add", "/sys/devices/hid-2", "/dev/hidraw1"));
         using var listener = new LinuxHidDeviceListener(() => source);
-        var hints = new ConcurrentQueue<HidDeviceRescanHint>();
-        listener.DeviceEvent = hints.Enqueue;
+        var hints = new ConcurrentQueue<bool>();
+        listener.Changed = () => hints.Enqueue(true);
 
         // Act
         listener.Start();
@@ -164,25 +161,22 @@ public class LinuxHidDeviceListenerFaultInjectionTests
         Assert.True(
             SpinWait.SpinUntil(() => !hints.IsEmpty, DefaultTimeout),
             "Add event following an ignored change event did not produce a hint");
-        Assert.True(hints.TryDequeue(out var hint));
-        Assert.Equal(HidDeviceChangeKind.Added, hint!.ChangeKind);
-        Assert.Equal("/sys/devices/hid-2", hint.PlatformDeviceId);
-        Assert.Equal("/dev/hidraw1", hint.DevicePath);
+        Assert.True(hints.TryDequeue(out _));
         Assert.True(hints.IsEmpty);
 
         listener.Stop();
     }
 
     [Fact]
-    public void RemoveEvent_EmitsRemovedHintWithStableIdentity()
+    public void RemoveEvent_EmitsRescanHint()
     {
         // Arrange
         var source = new FakeLinuxHidEventSource();
         source.ScriptOutcomes(LinuxHidPollOutcome.Event);
         source.ScriptReceives(new LinuxHidUdevEvent("remove", "/sys/devices/hid-1", "/dev/hidraw0"));
         using var listener = new LinuxHidDeviceListener(() => source);
-        var hints = new ConcurrentQueue<HidDeviceRescanHint>();
-        listener.DeviceEvent = hints.Enqueue;
+        var hints = new ConcurrentQueue<bool>();
+        listener.Changed = () => hints.Enqueue(true);
 
         // Act
         listener.Start();
@@ -191,9 +185,7 @@ public class LinuxHidDeviceListenerFaultInjectionTests
         Assert.True(
             SpinWait.SpinUntil(() => !hints.IsEmpty, DefaultTimeout),
             "Remove event did not produce a rescan hint");
-        Assert.True(hints.TryDequeue(out var hint));
-        Assert.Equal(HidDeviceChangeKind.Removed, hint!.ChangeKind);
-        Assert.Equal("/sys/devices/hid-1", hint.PlatformDeviceId);
+        Assert.True(hints.TryDequeue(out _));
 
         listener.Stop();
     }
@@ -207,8 +199,8 @@ public class LinuxHidDeviceListenerFaultInjectionTests
         source.ScriptOutcomes(LinuxHidPollOutcome.Event);
         source.ScriptReceives(new LinuxHidUdevEvent("add", "/sys/devices/hid-1", "/dev/hidraw0"));
         using var listener = new LinuxHidDeviceListener(() => source);
-        var hints = new ConcurrentQueue<HidDeviceRescanHint>();
-        listener.DeviceEvent = hints.Enqueue;
+        var hints = new ConcurrentQueue<bool>();
+        listener.Changed = () => hints.Enqueue(true);
 
         // Act
         listener.Start();
@@ -217,10 +209,8 @@ public class LinuxHidDeviceListenerFaultInjectionTests
         Assert.True(
             SpinWait.SpinUntil(() => hints.Count >= 2, DefaultTimeout),
             "Unready hidraw node did not produce a delayed fallback hint");
-        Assert.True(hints.TryDequeue(out var first));
-        Assert.True(hints.TryDequeue(out var fallback));
-        Assert.Equal(HidDeviceChangeKind.Added, first!.ChangeKind);
-        Assert.Equal(first, fallback);
+        Assert.True(hints.TryDequeue(out _));
+        Assert.True(hints.TryDequeue(out _));
 
         listener.Stop();
     }

@@ -119,12 +119,12 @@ internal static class ListenerDrainScenario
             long entryId = target.Value;
             native.RemovalTarget = entryId;
             listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(4));
-            var delivered = new TaskCompletionSource<HidDeviceRescanHint>(TaskCreationOptions.RunContinuationsAsynchronously);
-            listener.DeviceEvent = hint =>
+            var delivered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            // The hint is payload-less, so gate on the native wrapper's selected entry: it records the ID
+            // immediately before forwarding the selected removal. Hints from unrelated keys do not count.
+            listener.Changed = () =>
             {
-                if (hint.ChangeKind == HidDeviceChangeKind.Removed &&
-                    hint.PlatformDeviceId == entryId.ToString(CultureInfo.InvariantCulture))
-                    delivered.TrySetResult(hint);
+                if (native.EntryId == entryId) delivered.TrySetResult();
             };
             listener.Start();
             if (listener.Status != DeviceListenerStatus.Started)
@@ -149,12 +149,11 @@ internal static class ListenerDrainScenario
         {
             native.ReleaseCallback.Set();
             CleanupRemovalListener(listener, native);
-            await YubiKeyManager.ShutdownAsync();
         }
     }
 
     private static async Task<int> DrainRemovalAsync(int serial, long entryId,
-        MacOSHidDeviceListener listener, RecordingListenerNative native, Task<HidDeviceRescanHint> delivered)
+        MacOSHidDeviceListener listener, RecordingListenerNative native, Task delivered)
     {
         Console.WriteLine($"READY_LISTENER_REMOVE serial={serial} entryId={entryId}: operator may remove this selected key; waiting up to 180 seconds");
         if (!native.Entered.Wait(TimeSpan.FromSeconds(180)))
@@ -163,9 +162,7 @@ internal static class ListenerDrainScenario
             return 2;
         }
         Console.WriteLine($"PHASE_NATIVE_REMOVAL_ENTERED serial={serial} entryId={native.EntryId}");
-        HidDeviceRescanHint hint = await delivered.WaitAsync(TimeSpan.FromSeconds(3));
-        if (hint.ChangeKind != HidDeviceChangeKind.Removed || hint.PlatformDeviceId != entryId.ToString(CultureInfo.InvariantCulture))
-            throw new InvalidOperationException($"Removal callback did not pass through as selected rescan hint: {hint}");
+        await delivered.WaitAsync(TimeSpan.FromSeconds(3));
         Task<DrainSnapshot> stopping = Task.Run(() =>
         {
             listener.Stop();
@@ -178,7 +175,7 @@ internal static class ListenerDrainScenario
         native.ReleaseCallback.Set();
         DrainSnapshot snapshot = await stopping.WaitAsync(TimeSpan.FromSeconds(5));
         snapshot.AssertDrained(entryId);
-        Console.WriteLine($"PASS real removal callback matched serial={serial} entryId={snapshot.EntryId} hint={hint.ChangeKind} hintEntryId={hint.PlatformDeviceId} stopRequested={snapshot.StopOrder} callbackExit={snapshot.CallbackExit} closeReturned={snapshot.Closed} closeResult=0x{snapshot.CloseResult:X8} unscheduled={snapshot.Unscheduled} managerReleased={snapshot.ManagerReleased} stopReturned={snapshot.StopReturn}");
+        Console.WriteLine($"PASS real removal callback matched serial={serial} entryId={snapshot.EntryId} rescanHint=true stopRequested={snapshot.StopOrder} callbackExit={snapshot.CallbackExit} closeReturned={snapshot.Closed} closeResult=0x{snapshot.CloseResult:X8} unscheduled={snapshot.Unscheduled} managerReleased={snapshot.ManagerReleased} stopReturned={snapshot.StopReturn}");
         return 0;
     }
 

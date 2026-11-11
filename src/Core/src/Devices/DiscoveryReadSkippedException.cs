@@ -48,7 +48,7 @@ internal enum DiscoveryReadSkipCause
 ///     Thrown when a best-effort discovery device-info read is intentionally skipped because the target does
 ///     not support the internal discovery-only connection path, an active or waiting connection prevents
 ///     exclusive access, bounded worker admission is saturated, or transport activity superseded the read
-///     before it opened the interface (see <see cref="ProtocolDeviceInfo.ReadBoundedAsync" />). The read does
+///     before it opened the interface (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />). The read does
 ///     not open a normal session connection or transmit. Callers degrade like any other failed best-effort
 ///     read: identity unknown / try next transport.
 /// </summary>

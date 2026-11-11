@@ -92,6 +92,24 @@ public class DeviceInfoTests
         Assert.Null(info.PartNumber);
     }
 
+    [Fact]
+    public void Equals_SnapshotsDecodedFromSeparateBuffers_CompareByContent()
+    {
+        // Each decode slices ChallengeResponseTimeout from its own response buffer. Monitoring publishes
+        // DeviceUpdated on inequality, so reference-based memory equality would report a change on every rescan.
+        using var firstTlvs = CreateRequiredDeviceInfoTlvs();
+        using var secondTlvs = CreateRequiredDeviceInfoTlvs();
+        var first = DeviceInfo.CreateFromTlvs(firstTlvs, defaultVersion: null);
+        var second = DeviceInfo.CreateFromTlvs(secondTlvs, defaultVersion: null);
+
+        Assert.Equal(first, second);
+        Assert.True(first == second);
+        Assert.Equal(first.GetHashCode(), second.GetHashCode());
+
+        var differentTimeout = first with { ChallengeResponseTimeout = new byte[] { 0x10 } };
+        Assert.NotEqual(first, differentTimeout);
+    }
+
     private static DisposableTlvList CreateRequiredDeviceInfoTlvs(params Tlv[] additionalTlvs) => new(
     [
         new(0x0A, [0x00]),

@@ -64,14 +64,15 @@ internal static class OperatorScenarios
             catch (IOException) { terminal = true; }
             catch (InvalidOperationException) { terminal = true; }
             // No disposal has been requested yet. An observed absent SDK snapshot is mandatory.
-            IReadOnlyList<IYubiKey> absent = await YubiKeyManager.FindAllAsync(forceRescan: true);
+            IReadOnlyList<IYubiKey> absent = await YubiKeyManager.FindAllAsync();
             evidence.Check(terminal && !absent.Any(device => device.SerialNumber == serial),
                 "operator-removal-terminal-read-and-observed-physical-absence");
         }
         finally { await evidence.MeasureAsync("operator-removal-dispose", () => connection.DisposeAsync().AsTask()); }
         Console.WriteLine($"READY_REPLUG serial={serial}");
         IYubiKey replacement = await ReplacementAsync(serial);
-        evidence.Check(!ReferenceEquals(replacement, selected), "operator-removal-fresh-discovery-generation");
+        // One-shot discovery creates independent views; this is not monitor-generation evidence.
+        evidence.Check(!ReferenceEquals(replacement, selected), "operator-removal-independent-discovery-result");
         await ReopenedAsync(replacement, evidence);
     }
 
@@ -80,7 +81,7 @@ internal static class OperatorScenarios
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         while (true)
         {
-            IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken: deadline.Token);
+            IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(cancellationToken: deadline.Token);
             IYubiKey[] matches = [.. devices.Where(device => device.SerialNumber == serial && device.SupportsConnection(ConnectionType.HidFido))];
             if (matches.Length > 1) throw new InvalidOperationException("Ambiguous replacement");
             if (matches.Length == 1) return matches[0];

@@ -155,9 +155,14 @@ diagrams:
       - src/Core/src/Devices
     symbols:
       YubiKeyManager: src/Core/src/Devices/YubiKeyManager.cs
-      YubiKeyDeviceManager: src/Core/src/Devices/YubiKeyDeviceManager.cs
-      YubiKeyDeviceRepository: src/Core/src/Devices/YubiKeyDeviceRepository.cs
-      YubiKeyDeviceMonitorService: src/Core/src/Devices/YubiKeyDeviceMonitorService.cs
+      YubiKeyMonitor: src/Core/src/Devices/YubiKeyMonitor.cs
+      DeviceChangeFeed: src/Core/src/Devices/DeviceChangeFeed.cs
+      SnapshotDiff: src/Core/src/Devices/SnapshotDiff.cs
+      HotplugSignals: src/Core/src/Devices/HotplugSignals.cs
+      RescanScheduler: src/Core/src/Devices/RescanScheduler.cs
+      IMonitoredDiscovery: src/Core/src/Devices/IMonitoredDiscovery.cs
+      DiscoveryBudgets: src/Core/src/Devices/DiscoveryBudgets.cs
+      IDeviceChangeListener: src/Core/src/Transports/IDeviceChangeListener.cs
       FindYubiKeys: src/Core/src/Devices/FindYubiKeys.cs
       PcscConnectionSlot: src/Core/src/Devices/PcscConnectionSlot.cs
       HidConnectionSlot: src/Core/src/Devices/HidConnectionSlot.cs

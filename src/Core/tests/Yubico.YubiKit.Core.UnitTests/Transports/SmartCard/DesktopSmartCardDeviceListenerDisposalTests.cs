@@ -34,7 +34,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         DesktopSmartCardDeviceListener? listener = null;
         try
         {
-            listener = new DesktopSmartCardDeviceListener();
+            listener = DesktopSmartCardDeviceListener.Create();
         }
         catch (PlatformNotSupportedException)
         {
@@ -62,7 +62,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         DesktopSmartCardDeviceListener? listener = null;
         try
         {
-            listener = new DesktopSmartCardDeviceListener();
+            listener = DesktopSmartCardDeviceListener.Create();
         }
         catch (PlatformNotSupportedException)
         {
@@ -95,7 +95,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         DesktopSmartCardDeviceListener? listener = null;
         try
         {
-            listener = new DesktopSmartCardDeviceListener();
+            listener = DesktopSmartCardDeviceListener.Create();
         }
         catch (PlatformNotSupportedException)
         {
@@ -128,7 +128,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         DesktopSmartCardDeviceListener? listener = null;
         try
         {
-            listener = new DesktopSmartCardDeviceListener();
+            listener = DesktopSmartCardDeviceListener.Create();
         }
         catch (PlatformNotSupportedException)
         {
@@ -167,7 +167,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         DesktopSmartCardDeviceListener? listener = null;
         try
         {
-            listener = new DesktopSmartCardDeviceListener();
+            listener = DesktopSmartCardDeviceListener.Create();
         }
         catch (PlatformNotSupportedException)
         {
@@ -204,7 +204,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         DesktopSmartCardDeviceListener? listener = null;
         try
         {
-            listener = new DesktopSmartCardDeviceListener();
+            listener = DesktopSmartCardDeviceListener.Create();
         }
         catch (PlatformNotSupportedException)
         {
@@ -214,7 +214,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         try
         {
             var eventCount = 0;
-            listener.DeviceEvent = () => Interlocked.Increment(ref eventCount);
+            listener.Changed = () => Interlocked.Increment(ref eventCount);
 
             // Act - wait briefly, no events should fire
             Thread.Sleep(100);
@@ -239,7 +239,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         DesktopSmartCardDeviceListener? listener = null;
         try
         {
-            listener = new DesktopSmartCardDeviceListener();
+            listener = DesktopSmartCardDeviceListener.Create();
             listener.Start();
         }
         catch (PlatformNotSupportedException)
@@ -265,7 +265,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         DesktopSmartCardDeviceListener? listener = null;
         try
         {
-            listener = new DesktopSmartCardDeviceListener();
+            listener = DesktopSmartCardDeviceListener.Create();
         }
         catch (PlatformNotSupportedException)
         {
@@ -290,7 +290,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         DesktopSmartCardDeviceListener? listener = null;
         try
         {
-            listener = new DesktopSmartCardDeviceListener();
+            listener = DesktopSmartCardDeviceListener.Create();
             listener.Start();
         }
         catch (PlatformNotSupportedException)
@@ -322,7 +322,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
         {
             try
             {
-                var listener = new DesktopSmartCardDeviceListener();
+                var listener = DesktopSmartCardDeviceListener.Create();
                 listener.Start(); // Start it so there's actual cleanup needed
                 // Don't dispose - let it become eligible for GC
             }

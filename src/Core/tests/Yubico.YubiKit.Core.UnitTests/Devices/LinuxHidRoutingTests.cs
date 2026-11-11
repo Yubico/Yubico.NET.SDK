@@ -168,17 +168,17 @@ public class LinuxHidRoutingTests
         otpApi.Before = before;
         var slot = Slot(otp, otp ? otpApi : fidoApi, new Reactor());
         var device = Device(otp ? null : slot, otp ? slot : null);
-        var scope = ProtocolDeviceInfo.CreateScope();
+        var scope = new DiscoveryReadScope();
         try
         {
             var read = composite
-                ? ProtocolDeviceInfo.ReadBoundedAsync(device, slot.ConnectionType, TimeSpan.FromMilliseconds(100), NullLogger.Instance, Token, true, scope)
-                : ProtocolDeviceInfo.ReadSlotBoundedAsync(slot, slot.ConnectionType, TimeSpan.FromMilliseconds(100), NullLogger.Instance, Token, true, scope);
+                ? DiscoveryDeviceInfoReader.ReadBoundedAsync(device, slot.ConnectionType, TimeSpan.FromMilliseconds(100), NullLogger.Instance, Token, true, scope)
+                : DiscoveryDeviceInfoReader.ReadSlotBoundedAsync(slot, slot.ConnectionType, TimeSpan.FromMilliseconds(100), NullLogger.Instance, Token, true, scope);
             Assert.True(entered.Wait(TimeSpan.FromSeconds(5), Token));
             await Assert.ThrowsAsync<TimeoutException>(() => read);
             await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => OpenAsync(device, otp, Token));
             var recovered = DeviceConnectionRegistry.WaitForRecoveryForTest(slot.InterfaceId);
-            ProtocolDeviceInfo.Retire(scope);
+            scope.Retire();
             release.Set();
             await recovered.WaitAsync(TimeSpan.FromSeconds(5), Token);
             fidoApi.Before = otpApi.Before = null;
@@ -201,10 +201,10 @@ public class LinuxHidRoutingTests
         api.Otp.GetError = new IOException("Discovery GET failed");
         var slot = Slot(otp, api, api.Reactor);
         var device = Device(otp ? null : slot, otp ? slot : null);
-        var scope = ProtocolDeviceInfo.CreateScope();
+        var scope = new DiscoveryReadScope();
         var read = composite
-            ? ProtocolDeviceInfo.ReadBoundedAsync(device, slot.ConnectionType, TimeSpan.FromSeconds(5), NullLogger.Instance, Token, true, scope)
-            : ProtocolDeviceInfo.ReadSlotBoundedAsync(slot, slot.ConnectionType, TimeSpan.FromSeconds(5), NullLogger.Instance, Token, true, scope);
+            ? DiscoveryDeviceInfoReader.ReadBoundedAsync(device, slot.ConnectionType, TimeSpan.FromSeconds(5), NullLogger.Instance, Token, true, scope)
+            : DiscoveryDeviceInfoReader.ReadSlotBoundedAsync(slot, slot.ConnectionType, TimeSpan.FromSeconds(5), NullLogger.Instance, Token, true, scope);
         await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => read);
         await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => OpenAsync(device, otp, Token));
         Assert.Throws<UnrecoveredConnectionException>(() => DeviceConnectionRegistry.TryAcquireDiscovery(slot.InterfaceId));
@@ -302,8 +302,8 @@ public class LinuxHidRoutingTests
         api.Fido.Before = api.Otp.Before = before;
         var slot = Slot(otp, api, api.Reactor);
         var device = Device(otp ? null : slot, otp ? slot : null);
-        var read = ProtocolDeviceInfo.ReadBoundedAsync(device, slot.ConnectionType,
-            TimeSpan.FromMilliseconds(100), NullLogger.Instance, Token, true, ProtocolDeviceInfo.CreateScope());
+        var read = DiscoveryDeviceInfoReader.ReadBoundedAsync(device, slot.ConnectionType,
+            TimeSpan.FromMilliseconds(100), NullLogger.Instance, Token, true, new DiscoveryReadScope());
         Task recovered = Task.CompletedTask;
         try
         {
@@ -346,7 +346,7 @@ public class LinuxHidRoutingTests
         try
         {
             Assert.True(entered.Wait(TimeSpan.FromSeconds(5), Token));
-            finder.NotifyTransportActivity(ConnectionType.Hid);
+            ((IMonitoredDiscovery)finder).InvalidateEvidence(ConnectionType.Hid);
         }
         finally { release.Set(); }
         Assert.Equal(333, Assert.Single(await oldScan).SerialNumber);
@@ -460,9 +460,9 @@ public class LinuxHidRoutingTests
     {
         var api = new SessionApi();
         var slot = Slot(otp, api, api.Reactor);
-        await Assert.ThrowsAsync<NotSupportedException>(() => ProtocolDeviceInfo.ReadSlotBoundedAsync(slot,
+        await Assert.ThrowsAsync<NotSupportedException>(() => DiscoveryDeviceInfoReader.ReadSlotBoundedAsync(slot,
             otp ? ConnectionType.HidFido : ConnectionType.HidOtp, TimeSpan.FromSeconds(5),
-            NullLogger.Instance, Token, true, ProtocolDeviceInfo.CreateScope()));
+            NullLogger.Instance, Token, true, new DiscoveryReadScope()));
         Assert.Equal(0, api.Fido.Opens + api.Otp.Opens);
         await using var connection = await slot.OpenRawConnectionAsync(slot.ConnectionType, Token);
         using var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([slot.InterfaceId], Token);

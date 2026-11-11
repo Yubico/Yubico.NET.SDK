@@ -20,23 +20,20 @@ internal static class HardwareScenarios
             Console.Error.WriteLine($"BLOCKED: {mode} requires separately coordinated operator actions; no command sent");
             return 2;
         }
-        try
+        // FindAllAsync owns a fresh one-shot discovery scope; no global manager shutdown is needed.
+        IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
+        foreach (IYubiKey key in devices)
+            Console.WriteLine($"FIXTURE serial={key.SerialNumber} id={key.DeviceId} connections={key.AvailableConnections}");
+        if (mode == "--list")
+            return List(devices, evidence);
+        IYubiKey[] matches = [.. devices.Where(device => device.SerialNumber == serial)];
+        if (matches.Length != 1)
         {
-            IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
-            foreach (IYubiKey key in devices)
-                Console.WriteLine($"FIXTURE serial={key.SerialNumber} id={key.DeviceId} connections={key.AvailableConnections}");
-            if (mode == "--list")
-                return List(devices, evidence);
-            IYubiKey[] matches = [.. devices.Where(device => device.SerialNumber == serial)];
-            if (matches.Length != 1)
-            {
-                Console.Error.WriteLine($"BLOCKED: positive serial={serial} matched {matches.Length} devices; no arbitrary selection");
-                return 2;
-            }
-            IYubiKey selected = matches[0];
-            return await DispatchAsync(mode, selected, devices.Count, serial, evidence);
+            Console.Error.WriteLine($"BLOCKED: positive serial={serial} matched {matches.Length} devices; no arbitrary selection");
+            return 2;
         }
-        finally { await YubiKeyManager.ShutdownAsync(); }
+        IYubiKey selected = matches[0];
+        return await DispatchAsync(mode, selected, devices.Count, serial, evidence);
     }
 
     private static int List(IReadOnlyList<IYubiKey> devices, Evidence evidence)

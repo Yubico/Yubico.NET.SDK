@@ -95,6 +95,104 @@ public abstract class WindowsRoutingDirectContract
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SyncDispose_HeldReportAndCheckedClose_DrainsBeforeReturningSharedOutcome(bool startDuringClose)
+    {
+        var reportGate = new ManualResetEventSlim();
+        var closeGate = new ManualResetEventSlim();
+        var returned = new ManualResetEventSlim();
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var closing = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var invoking = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var events = new System.Collections.Concurrent.ConcurrentQueue<string>();
+        // Proven release with a diagnostic makes sharing the final shutdown outcome observable.
+        var api = new WindowsRoutingApi { Length = 17, Release = new(true, 5) };
+        var connection = Connect(api);
+        api.Before = operation =>
+        {
+            if (operation == (Otp ? "set" : "last-use"))
+            {
+                entered.TrySetResult();
+                reportGate.Wait(Token);
+                events.Enqueue("report-last-use-exit");
+            }
+            if (operation == "close")
+            {
+                closing.TrySetResult();
+                closeGate.Wait(Token);
+                events.Enqueue("checked-close-exit");
+            }
+        };
+        Task? report = null;
+        Task<Exception?>? dispose = null;
+        try
+        {
+            report = Task.Factory.StartNew(() => connection.SetReport(new byte[16]),
+                Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+            if (startDuringClose)
+            {
+                _ = connection.DisposeAsync();
+                reportGate.Set();
+                await closing.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+            }
+            dispose = Task.Factory.StartNew(() =>
+            {
+                Assert.False(Thread.CurrentThread.IsThreadPoolThread);
+                invoking.TrySetResult();
+                var error = Record.Exception(connection.Dispose);
+                events.Enqueue("sync-dispose-return");
+                returned.Set();
+                return error;
+            }, Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            await invoking.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+            // Finite nonreturn observations, not universal scheduling or latency proofs.
+            Assert.False(returned.Wait(TimeSpan.FromMilliseconds(200), Token),
+                startDuringClose ? "Dispose returned while checked close was held." : "Dispose returned while native report last use was held.");
+            var first = connection.DisposeAsync().AsTask();
+            Assert.Same(first, connection.DisposeAsync().AsTask());
+            Assert.False(first.IsCompleted);
+            if (!startDuringClose)
+            {
+                Assert.Equal(0, api.Closes);
+                reportGate.Set();
+                await closing.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+                Assert.False(returned.Wait(TimeSpan.FromMilliseconds(200), Token),
+                    "Dispose returned while checked close was held.");
+            }
+            await report.WaitAsync(TimeSpan.FromSeconds(5), Token);
+            Assert.False(first.IsCompleted);
+            closeGate.Set();
+            var syncError = await dispose.WaitAsync(TimeSpan.FromSeconds(5), Token);
+            var asyncError = await Record.ExceptionAsync(() => first.WaitAsync(TimeSpan.FromSeconds(5), Token));
+            if (Otp) Assert.Equal(5, Assert.IsType<System.ComponentModel.Win32Exception>(syncError).NativeErrorCode);
+            else Assert.Equal("Close failed with Windows error 5.", Assert.IsType<IOException>(syncError).Message);
+            Assert.Same(asyncError, syncError);
+            Assert.Equal(["report-last-use-exit", "checked-close-exit", "sync-dispose-return"], events);
+            Assert.Equal(1, api.Closes);
+        }
+        finally
+        {
+            reportGate.Set();
+            closeGate.Set();
+            // Drain every admitted caller and the owner despite runner cancellation or assertion failure.
+            // Observe the expected close diagnostic without allowing it to skip another caller's drain.
+            var shutdown = connection.DisposeAsync().AsTask();
+            var drain = Task.WhenAll(report ?? Task.CompletedTask, dispose ?? Task.CompletedTask, shutdown);
+            _ = await Record.ExceptionAsync(() => drain.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None));
+            // A watchdog expiry is not release proof; retain gates if any worker can still access them.
+            if (drain.IsCompleted)
+            {
+                reportGate.Dispose();
+                closeGate.Dispose();
+                returned.Dispose();
+            }
+            Assert.True(drain.IsCompleted, "Admitted callers and native owner did not drain after both gates were released.");
+        }
+    }
+
     [Fact]
     public async Task SyncDispose_FromNativeWorkerRejectsSelfWait()
     {

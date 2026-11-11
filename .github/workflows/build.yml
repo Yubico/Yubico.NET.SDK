@@ -65,6 +65,9 @@ jobs:
       - name: Run unit tests
         run: dotnet toolchain.cs test
 
+      - name: Run portable Windows HID verification evidence guards
+        run: dotnet toolchain.cs windows-hid-verification-evidence-test
+
       - name: Run runtime resilience checks
         run: dotnet toolchain.cs -- resilience --fast
 

@@ -7,6 +7,16 @@ static class BuildTargets
 {
     public static void Register(ToolchainContext ctx)
     {
+        TargetRegistry.Define("linux-hid-verification-publish", "Publish standalone Linux HID native contract host (JIT and Native AOT)", () =>
+        {
+            const string project = "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj";
+            Dotnet.Run($"restore {project} -r linux-x64 -p:PublishAot=true", "linux-hid-restore");
+            Exec.RunOrFail("python3", "verification/LinuxHidRouteVerification/publish_contract.py begin", Exec.Display.Stream, "linux-hid-publish-inputs");
+            Dotnet.Run($"publish {project} -c Release -r linux-x64 --self-contained -p:PublishAot=false -o artifacts/linux-hid-verification/jit", "linux-hid-jit-publish");
+            Dotnet.Run($"publish {project} -c Release -r linux-x64 --self-contained -p:PublishAot=true -o artifacts/linux-hid-verification/aot", "linux-hid-aot-publish");
+            Exec.RunOrFail("python3", "verification/LinuxHidRouteVerification/publish_contract.py seal", Exec.Display.Stream, "linux-hid-publish-binding");
+        });
+
         TargetRegistry.Define("clean", "Empty artifacts/ except the run logs in artifacts/toolchain (--clean also runs dotnet clean)", () =>
         {
             PrintHeader("Cleaning");

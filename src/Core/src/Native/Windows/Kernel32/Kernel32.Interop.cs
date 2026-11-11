@@ -20,6 +20,30 @@ namespace Yubico.YubiKit.Core.Native.Windows.Kernel32;
 
 internal static partial class NativeMethods
 {
+    [LibraryImport(Libraries.Kernel32, EntryPoint = "CloseHandle", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial int CloseHidHandle(nint handle);
+
+    [LibraryImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true,
+        StringMarshalling = StringMarshalling.Utf16)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial nint CreateHidFile(string path, DESIRED_ACCESS access, FILE_SHARE share,
+        nint securityAttributes, CREATION_DISPOSITION disposition, FILE_FLAG flags, nint template);
+
+    // Win32 BOOL is four bytes. Buffers and OVERLAPPED are retained by the caller beyond this call.
+    [LibraryImport(Libraries.Kernel32, EntryPoint = "ReadFile", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static unsafe partial int ReadFile(nint handle, byte* buffer, uint length,
+        uint* synchronousBytesRead, NativeOverlapped* overlapped);
+
+    [LibraryImport(Libraries.Kernel32, EntryPoint = "WriteFile", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static unsafe partial int WriteFile(nint handle, byte* buffer, uint length,
+        uint* synchronousBytesWritten, NativeOverlapped* overlapped);
+
+    [LibraryImport(Libraries.Kernel32, EntryPoint = "CancelIoEx", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static unsafe partial int CancelIoEx(nint handle, NativeOverlapped* overlapped);
 
     [Flags]
     [SuppressMessage("Design", "CA1069:Enums values should not be duplicated",

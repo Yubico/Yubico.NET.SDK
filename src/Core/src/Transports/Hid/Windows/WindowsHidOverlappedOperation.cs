@@ -23,6 +23,11 @@ internal sealed class WindowsHidOverlappedOperation
 {
     private readonly Action<WindowsHidOverlappedOperation, WindowsHidCompletion> _completion;
 
+    // Worker-only native bookkeeping. Fakes leave these empty. The completion callback uses only
+    // the allocation's state and Complete; it never inspects these fields after publication.
+    internal unsafe NativeOverlapped* NativeOverlapped { get; set; }
+    internal bool RetirementStarted { get; set; }
+
     /// <summary>Creates a request with its bounded internal owner completion recorder.</summary>
     public WindowsHidOverlappedOperation(
         WindowsHidReportDirection direction,

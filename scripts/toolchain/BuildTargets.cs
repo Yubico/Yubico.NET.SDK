@@ -1,5 +1,5 @@
-#:include ../../verification/WindowsHidRouteVerification/RequiredNativeChecks.cs
-#:include ../../verification/WindowsHidRouteVerification/PublicationSeal.cs
+#:include WindowsHidVerification/RequiredNativeChecks.cs
+#:include WindowsHidVerification/PublicationSeal.cs
 
 // Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md.
 

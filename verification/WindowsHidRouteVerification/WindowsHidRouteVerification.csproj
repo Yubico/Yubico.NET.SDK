@@ -12,6 +12,8 @@
     <IsYubiKitSdkLibrary>false</IsYubiKitSdkLibrary>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../scripts/toolchain/WindowsHidVerification/RequiredNativeChecks.cs" Link="RequiredNativeChecks.cs" />
+    <Compile Include="../../scripts/toolchain/WindowsHidVerification/PublicationSeal.cs" Link="PublicationSeal.cs" />
     <ProjectReference Include="../../src/Core/src/Yubico.YubiKit.Core.csproj" />
   </ItemGroup>
 </Project>

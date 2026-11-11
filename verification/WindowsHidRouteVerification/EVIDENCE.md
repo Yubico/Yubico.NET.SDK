@@ -40,6 +40,14 @@ Nothing installs or changes external tooling. Build/test/default do not depend
 on these opt-in targets. `TargetRegistry.Define` automatically exposes them in
 the existing help registry without modifying registry behavior.
 
+The portable evidence helpers are shared from
+`scripts/toolchain/WindowsHidVerification/RequiredNativeChecks.cs` and
+`scripts/toolchain/WindowsHidVerification/PublicationSeal.cs`. The toolchain includes
+them directly and this host links the same files as compile items. Keeping them
+under `scripts/toolchain/` makes the coverage workflow's recursive HEAD-tooling
+overlay onto baseline source self-contained; its existing path filter and tooling
+cache hash cover both helpers.
+
 Published host invocation is also explicit:
 
 ```text

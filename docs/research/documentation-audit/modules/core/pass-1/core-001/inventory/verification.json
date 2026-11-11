@@ -1,0 +1,66 @@
+{
+  "result": "PASS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "d9cf31a17c7580ab580917ce201c4855c3cf89b4",
+  "files_partitioned": 1526,
+  "units_partitioned": 25728,
+  "core_files": 515,
+  "core_csharp": 498,
+  "snapshot_entries": 1442,
+  "effective_public_families": 160,
+  "semantic_reviews_claimed": 0,
+  "protected_campaign_artifacts": 5366,
+  "inherited_groups_routed": 70,
+  "inherited_provenance_rows_routed": 100,
+  "separately_preserved_pgp_labels": 21,
+  "local_record_links_checked": 39,
+  "protected_campaign_manifests": [
+    {
+      "manifest": "docs/research/documentation-audit/record-manifest.json",
+      "files": 784,
+      "sha256": "a15061df202536b7894c257e7dfbee6578240747f69d86d1e40d9534630df905"
+    },
+    {
+      "manifest": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/record-manifest.json",
+      "files": 534,
+      "sha256": "b562b58457fb384dea05e7cadf8b32d64f1abcc56ab2e56abd0b96d906655fe1"
+    },
+    {
+      "manifest": "docs/research/documentation-audit/modules/management/pass-1/management-001/record-manifest.json",
+      "files": 402,
+      "sha256": "49c18caac492aac9afa0d7bcede415f96422e98a3cc85692c3bb2bfa90bff139"
+    },
+    {
+      "manifest": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/record-manifest.json",
+      "files": 607,
+      "sha256": "71698c428044b99165fb68759a2e47b6af701187f0ddb7b5838e5bc3278bf7ee"
+    },
+    {
+      "manifest": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/record-manifest.json",
+      "files": 1965,
+      "sha256": "8ebe4ad00860d44ae06dd05a0ab3ade5f294ffdc42337b3cce5dcf5ec7179318"
+    },
+    {
+      "manifest": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/record-manifest.json",
+      "files": 164,
+      "sha256": "791f112af52904b167ec87c5f70a526f625ccf6524c9daf8a09a68f8cf364ac2"
+    },
+    {
+      "manifest": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/record-manifest.json",
+      "files": 477,
+      "sha256": "9a32ac8f9d2443a65864dbe44432c6d4b1dd40ad7f00b676a6c0ecae950631dc"
+    },
+    {
+      "manifest": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/record-manifest.json",
+      "files": 433,
+      "sha256": "d310ba77bb04a0b0052baa6afd32a0355510018267cef391a02963fcdd555d0d"
+    }
+  ],
+  "protected_integration_records": 8325,
+  "protected_integration_manifest_sha256": "cb9b2617f0165e897b64165ebb3b0c97bc3b76c1ac05dfe2dfcceef34ee951ad",
+  "prior_piv_integration_files": 114,
+  "protected_user_files": 4,
+  "csharp_compilation": "NOT-RUN",
+  "tests": "NOT-RUN",
+  "hardware": "NOT-RUN"
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "unit": "core-001:unit:7185162d8ac4d1bc",
+    "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+    "line": 27,
+    "text": "public class ECPrivateKey : PrivateKey // TODO wrap an ECDH",
+    "status": "UNREAD",
+    "assigned_family": "C"
+  },
+  {
+    "unit": "core-001:unit:1a1c567b03546dc8",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+    "line": 52,
+    "text": "return buffer.ToArray(); // TODO allocation. Can it be avoided?",
+    "status": "UNREAD",
+    "assigned_family": "B"
+  },
+  {
+    "unit": "core-001:unit:11556a8417104227",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+    "line": 22,
+    "text": ": ApduTransmitter(connection, formatter) // TODO refactor to use composition instead of inheritance",
+    "status": "UNREAD",
+    "assigned_family": "B"
+  },
+  {
+    "unit": "core-001:unit:dba607e638633c07",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/IApduProcessor.cs",
+    "line": 20,
+    "text": "// FirmwareVersion? FirmwareVersion { get; } // TODO Could be nice to be able to do additional version checks within the processors.",
+    "status": "UNREAD",
+    "assigned_family": "B"
+  },
+  {
+    "unit": "core-001:unit:ea9f6b5994260910",
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+    "line": 60,
+    "text": "nameof(initializationProcessor)); // TODO. Could also put FirmwareVersion on the IApduProcessor interface",
+    "status": "UNREAD",
+    "assigned_family": "B"
+  },
+  {
+    "unit": "core-001:unit:701661c7b5d0fa15",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistryTests.cs",
+    "line": 44,
+    "text": "[InlineData(\"TODO\")]",
+    "status": "UNREAD",
+    "assigned_family": "B"
+  },
+  {
+    "unit": "core-001:unit:a793e3448845b351",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+    "line": 315,
+    "text": "// 1d. Serial-less same-PID pair (PINs) + Phase-3 topology TODO.",
+    "status": "UNREAD",
+    "assigned_family": "A"
+  },
+  {
+    "unit": "core-001:unit:a793e3448845b351",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+    "line": 338,
+    "text": "// TODO(Phase 3 — A′ Windows topology): when the merger accepts optional topology evidence",
+    "status": "UNREAD",
+    "assigned_family": "A"
+  },
+  {
+    "unit": "core-001:unit:404451ae34dcd8bd",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeSmartCardConnection.cs",
+    "line": 69,
+    "text": "// TODO release managed resources here",
+    "status": "UNREAD",
+    "assigned_family": "B"
+  },
+  {
+    "unit": "core-001:unit:2733265630f01d9f",
+    "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PreviewSignTests.cs",
+    "line": 513,
+    "text": "// TODO: assert existing CtapStatus.UnsupportedAlgorithm after isolating target-operation errors.",
+    "status": "UNREAD",
+    "assigned_family": "BOUNDARY-Ctap2"
+  },
+  {
+    "unit": "core-001:unit:9a1e89b712e42cea",
+    "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PreviewSignTests.cs",
+    "line": 605,
+    "text": "// TODO: assert existing CtapStatus.InvalidOption after isolating target-operation errors.",
+    "status": "UNREAD",
+    "assigned_family": "BOUNDARY-Ctap2"
+  },
+  {
+    "unit": "core-001:unit:bde69f66e0c58c24",
+    "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2PreviewSignTests.cs",
+    "line": 762,
+    "text": "// TODO: assert existing CtapStatus.MissingParameter after isolating target-operation errors.",
+    "status": "UNREAD",
+    "assigned_family": "BOUNDARY-Ctap2"
+  },
+  {
+    "unit": "core-001:unit:3d3ca5ebad61ecd6",
+    "path": "src/Piv/src/PivSession.cs",
+    "line": 181,
+    "text": "// TODO: Add Bio preflight before consuming retries; Bio MPE requires its device-reset route.",
+    "status": "UNREAD",
+    "assigned_family": "BOUNDARY-Piv"
+  },
+  {
+    "unit": "core-001:unit:ee5b81e0432fe552",
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCryptoTests.cs",
+    "line": 190,
+    "text": "// TODO: Add a compatible peer X25519 implementation and compare raw shared secrets.",
+    "status": "UNREAD",
+    "assigned_family": "BOUNDARY-Piv"
+  }
+]

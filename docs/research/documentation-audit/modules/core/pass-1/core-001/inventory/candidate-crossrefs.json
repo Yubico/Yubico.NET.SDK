@@ -1,0 +1,19 @@
+{
+  "source_run": "core-001",
+  "purpose": "Route inventory questions to later investigators without creating confirmed findings or duplicating the inherited registry.",
+  "new_finding_key_rule": "core-001:CORE-XREF-<coordinator-assigned-number>",
+  "historical_key_rule": "<source-run>:<original-id>",
+  "reserved_historical_example": "fixes-wave-001:CORE-001 retains its original provenance in inherited-findings/registry.json.",
+  "accepted_finding_namespaces": "The inherited registry proposes CORE-DOC-* and CORE-IMP-* after Astra collision checking/triage. CORE-XREF below remains a run-qualified candidate-routing namespace.",
+  "status": "VALID-NOT-CHECKED",
+  "questions": [
+    {"inventory_key": "core-001:inventory:discovery", "family": "A", "question": "Reconcile fresh scoped Find calls, owned monitoring, snapshot replay and metadata publication with the inherited discovery/identity questions.", "inherited_labels": ["CORE-001", "MGMT-XREF-001", "MGMT-XREF-002", "MGMT-XREF-003"]},
+    {"inventory_key": "core-001:inventory:lifetimes", "family": "B", "question": "Trace physical claims, borrowed/owned session state, cancellation admission, terminal completion, actual drain and checked native release through each platform.", "inherited_labels": ["PIVCORE-001", "PIVCORE-002", "PIVCORE-003", "PGP-CORE-002", "PGP-CORE-004", "SD-DEP-001", "SD-DEP-004", "OTP-DEP-001", "OTP-DEP-002", "OTP-DEP-003", "HSM-DEP-002"]},
+    {"inventory_key": "core-001:inventory:crypto-credentials", "family": "C", "question": "Reconcile credential byte/character units, caller-owned crypto/encoding buffers, metadata applicability and response ownership with actual consumers.", "inherited_labels": ["CTAP-XREF-003", "PGP-CORE-001", "HSM-DEP-003", "SD-DEP-002"]},
+    {"inventory_key": "core-001:inventory:versions-and-boundaries", "family": "BOUNDARY", "question": "Check raw/effective firmware and factory/profile enforcement separately for each of the nine applets; preserve WebAuthn's indirect CTAP2 route.", "inherited_labels": ["PGP-CORE-003", "HSM-DEP-001", "OTP-DEP-004", "OTP-DEP-005", "SD-DEP-003", "WA-XREF-001"]},
+    {"inventory_key": "core-001:inventory:logging", "family": "C", "question": "Read active templates, payload provenance and caller logger responsibilities; distinguish bounded sentinel tests from a whole-SDK logging guarantee.", "inherited_labels": ["SD-DEP-005"]},
+    {"inventory_key": "core-001:inventory:migration-and-hosts", "family": "SHARED", "question": "Recheck the current migration-map entry and real project selectors without reviving historical global-monitor contracts or archived host collisions.", "inherited_labels": ["DOC-002"]},
+    {"inventory_key": "core-001:inventory:late-windows-handoff", "family": "B", "question": "After the user's readiness notice, record a separate Windows CCID/HID concurrency delta and documentation-impact checkpoint.", "inherited_labels": []}
+  ],
+  "ownership": "The parallel inherited-findings worker owns original finding reconciliation and source-run aliases. This file supplies routing questions only."
+}

@@ -1,0 +1,3325 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "registry_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/registry.json",
+  "registry_sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+  "provenance_rows": 100,
+  "nonadditive_groups": 70,
+  "current_states": "Inherited unchanged; see authoritative registry.",
+  "separately_preserved_pgp_documentation_labels": [
+    "openpgp-001:PGP-DEP-001",
+    "openpgp-001:PGP-DEP-002",
+    "openpgp-001:PGP-DEP-003",
+    "openpgp-001:PGP-DEP-004",
+    "openpgp-001:PGP-DEP-005",
+    "openpgp-001:PGP-DEP-006",
+    "openpgp-001:PGP-DEP-007",
+    "openpgp-001:PGP-DEP-008",
+    "openpgp-001:PGP-DEP-009",
+    "openpgp-001:PGP-DEP-010",
+    "openpgp-001:PGP-DEP-011",
+    "openpgp-001:PGP-DEP-012",
+    "openpgp-001:PGP-DEP-013",
+    "openpgp-001:PGP-DEP-014",
+    "openpgp-001:PGP-DEP-015",
+    "openpgp-001:PGP-DEP-016",
+    "openpgp-001:PGP-DEP-017",
+    "openpgp-001:PGP-DEP-018",
+    "openpgp-001:PGP-DEP-019",
+    "openpgp-001:PGP-DEP-020",
+    "openpgp-001:PGP-DEP-021"
+  ],
+  "groups": [
+    {
+      "group": "discovery-abandonment",
+      "primary_packet": "A",
+      "provenance_keys": [
+        "fixes-wave-001:CORE-001",
+        "audit-v2-20261022-20261031:multi-key-exclusions"
+      ],
+      "secondary_read_packets": [
+        "B1-portable-lifetimes",
+        "B2-linux-lifetimes",
+        "BOUNDARY-Oath"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+        "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+        "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+        "src/Core/src/Devices/FindYubiKeys.cs",
+        "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+        "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+        "src/Core/src/Devices/YubiKeyManager.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryReadSchedulingTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/DeviceConnectionRegistry.cs": "B1-portable-lifetimes",
+        "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs": "A",
+        "src/Core/src/Devices/DiscoveryIdentityReader.cs": "A",
+        "src/Core/src/Devices/FindYubiKeys.cs": "A",
+        "src/Core/src/Devices/ProtocolDeviceInfo.cs": "A",
+        "src/Core/src/Devices/SharedDeviceInfoRead.cs": "A",
+        "src/Core/src/Devices/YubiKeyManager.cs": "A",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryReadSchedulingTests.cs": "A",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs": "A",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs": "B2-linux-lifetimes"
+      },
+      "reopening_targets": [
+        "docs/architecture/connection-ownership-and-contention.md",
+        "docs/architecture/device-discovery-guarantees.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/device-discovery.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Abstractions/IYubiKey.cs",
+        "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+        "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+        "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+        "src/Core/src/Devices/FindYubiKeys.cs",
+        "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+        "src/Core/src/Devices/README.md",
+        "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+        "src/Core/src/Devices/YubiKeyManager.cs",
+        "src/Core/tests/CLAUDE.md",
+        "src/Oath/README.md",
+        "src/Oath/examples/OathTool/Program.cs",
+        "src/Oath/src/IOathSession.cs",
+        "src/Oath/src/IYubiKeyExtensions.cs",
+        "src/Oath/src/OathSession.cs",
+        "src/Oath/tests/CLAUDE.md",
+        "src/Tests.Shared/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "base32-failure-cleanup",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "oath-pilot-and-fixes-wave-002:IMP-004"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Utilities/Base32.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs",
+        "src/Oath/src/CredentialData.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Utilities/Base32.cs": "C",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs": "C",
+        "src/Oath/src/CredentialData.cs": "BOUNDARY-Oath"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Utilities/Base32.cs",
+        "src/Oath/CLAUDE.md",
+        "src/Oath/README.md",
+        "src/Oath/examples/OathTool/Program.cs",
+        "src/Oath/src/IOathSession.cs",
+        "src/Oath/src/IYubiKeyExtensions.cs",
+        "src/Oath/src/OathSession.cs",
+        "src/Oath/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "base32-shape",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "oath-pilot-and-fixes-wave-002:IMP-005"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "current_read_paths": [
+        "src/Cli.Commands/src/Oath/OathHelpers.cs",
+        "src/Core/src/Utilities/Base32.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs",
+        "src/Oath/src/CredentialData.cs"
+      ],
+      "source_primary_owners": {
+        "src/Cli.Commands/src/Oath/OathHelpers.cs": "EXTERNAL",
+        "src/Core/src/Utilities/Base32.cs": "C",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs": "C",
+        "src/Oath/src/CredentialData.cs": "BOUNDARY-Oath"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Utilities/Base32.cs",
+        "src/Oath/CLAUDE.md",
+        "src/Oath/README.md",
+        "src/Oath/examples/OathTool/Program.cs",
+        "src/Oath/src/IOathSession.cs",
+        "src/Oath/src/IYubiKeyExtensions.cs",
+        "src/Oath/src/OathSession.cs",
+        "src/Oath/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "oath-terminal-reset",
+      "primary_packet": "B5-session-framing",
+      "provenance_keys": [
+        "oath-pilot-and-fixes-wave-002:IMP-010"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Oath/src/OathSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Oath/src/OathSession.cs": "BOUNDARY-Oath"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Oath/CLAUDE.md",
+        "src/Oath/README.md",
+        "src/Oath/examples/OathTool/Program.cs",
+        "src/Oath/src/IOathSession.cs",
+        "src/Oath/src/IYubiKeyExtensions.cs",
+        "src/Oath/src/OathSession.cs",
+        "src/Oath/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "oath-auth-failure-state",
+      "primary_packet": "BOUNDARY-Oath",
+      "provenance_keys": [
+        "oath-pilot-and-fixes-wave-002:DEC-001"
+      ],
+      "secondary_read_packets": [
+        "B6-wire-scp"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+        "src/Oath/src/OathSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs": "B6-wire-scp",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs": "B6-wire-scp",
+        "src/Oath/src/OathSession.cs": "BOUNDARY-Oath"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+        "src/Oath/CLAUDE.md",
+        "src/Oath/README.md",
+        "src/Oath/examples/OathTool/Program.cs",
+        "src/Oath/src/IOathSession.cs",
+        "src/Oath/src/IYubiKeyExtensions.cs",
+        "src/Oath/src/OathSession.cs",
+        "src/Oath/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "oath-raw-access-key",
+      "primary_packet": "BOUNDARY-Oath",
+      "provenance_keys": [
+        "oath-pilot-and-fixes-wave-002:DEC-002"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "current_read_paths": [
+        "src/Oath/src/OathSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Oath/src/OathSession.cs": "BOUNDARY-Oath"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Oath/CLAUDE.md",
+        "src/Oath/README.md",
+        "src/Oath/examples/OathTool/Program.cs",
+        "src/Oath/src/IOathSession.cs",
+        "src/Oath/src/IYubiKeyExtensions.cs",
+        "src/Oath/src/OathSession.cs",
+        "src/Oath/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "scp-effective-version",
+      "primary_packet": "B5-session-framing",
+      "provenance_keys": [
+        "oath-pilot-and-fixes-wave-002:DEC-007",
+        "security-domain-001:SD-DEP-003",
+        "yubiotp-001:OTP-DEP-004",
+        "yubihsm-001:HSM-DEP-001",
+        "openpgp-001:PGP-CORE-003"
+      ],
+      "secondary_read_packets": [
+        "A",
+        "B6-wire-scp",
+        "BOUNDARY-Oath",
+        "BOUNDARY-OpenPgp",
+        "BOUNDARY-SecurityDomain",
+        "BOUNDARY-YubiHsm",
+        "BOUNDARY-YubiOtp"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Oath",
+        "BOUNDARY-OpenPgp",
+        "BOUNDARY-SecurityDomain",
+        "BOUNDARY-YubiHsm",
+        "BOUNDARY-YubiOtp"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Devices/FirmwareVersion.cs",
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Oath/src/OathSession.cs",
+        "src/OpenPgp/src/OpenPgpSession.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "src/YubiHsm/src/HsmAuthSession.cs",
+        "src/YubiOtp/src/YubiOtpSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/Feature.cs": "A",
+        "src/Core/src/Devices/FirmwareVersion.cs": "A",
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs": "B5-session-framing",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs": "B6-wire-scp",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Oath/src/OathSession.cs": "BOUNDARY-Oath",
+        "src/OpenPgp/src/OpenPgpSession.cs": "BOUNDARY-OpenPgp",
+        "src/SecurityDomain/src/SecurityDomainSession.cs": "BOUNDARY-SecurityDomain",
+        "src/YubiHsm/src/HsmAuthSession.cs": "BOUNDARY-YubiHsm",
+        "src/YubiOtp/src/YubiOtpSession.cs": "BOUNDARY-YubiOtp"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Devices/FirmwareVersion.cs",
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Oath/CLAUDE.md",
+        "src/Oath/README.md",
+        "src/Oath/examples/OathTool/Program.cs",
+        "src/Oath/src/IOathSession.cs",
+        "src/Oath/src/IYubiKeyExtensions.cs",
+        "src/Oath/src/OathSession.cs",
+        "src/Oath/tests/CLAUDE.md",
+        "src/OpenPgp/CLAUDE.md",
+        "src/OpenPgp/README.md",
+        "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+        "src/OpenPgp/src/IOpenPgpSession.cs",
+        "src/OpenPgp/src/IYubiKeyExtensions.cs",
+        "src/OpenPgp/src/OpenPgpSession.cs",
+        "src/OpenPgp/tests/CLAUDE.md",
+        "src/SecurityDomain/CLAUDE.md",
+        "src/SecurityDomain/README.md",
+        "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "src/SecurityDomain/tests/CLAUDE.md",
+        "src/YubiHsm/CLAUDE.md",
+        "src/YubiHsm/README.md",
+        "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+        "src/YubiHsm/src/HsmAuthSession.cs",
+        "src/YubiHsm/src/IHsmAuthSession.cs",
+        "src/YubiHsm/src/IYubiKeyExtensions.cs",
+        "src/YubiHsm/tests/CLAUDE.md",
+        "src/YubiOtp/CLAUDE.md",
+        "src/YubiOtp/README.md",
+        "src/YubiOtp/examples/OtpTool/Program.cs",
+        "src/YubiOtp/src/IYubiKeyExtensions.cs",
+        "src/YubiOtp/src/IYubiOtpSession.cs",
+        "src/YubiOtp/src/YubiOtpSession.cs",
+        "src/YubiOtp/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "metadata-fips-bits",
+      "primary_packet": "A",
+      "provenance_keys": [
+        "management-001:MGMT-XREF-001",
+        "audit-v2-20261022-20261031:deviceinfo-FIPS-residual"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Management"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Management"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Devices/DeviceInfo.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs",
+        "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/DeviceInfo.cs": "A",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs": "A",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs": "A",
+        "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs": "EXTERNAL"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/DeviceCapabilities.cs",
+        "src/Core/src/Devices/DeviceInfo.cs",
+        "src/Core/tests/CLAUDE.md",
+        "src/Management/CLAUDE.md",
+        "src/Management/README.md",
+        "src/Management/examples/ManagementTool/Program.cs",
+        "src/Management/examples/ManagementTool/README.md",
+        "src/Management/src/IManagementSession.cs",
+        "src/Management/src/IYubiKeyExtensions.cs",
+        "src/Management/src/ManagementSession.cs",
+        "src/Management/tests/CLAUDE.md",
+        "src/Tests.Shared/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "metadata-form-factor",
+      "primary_packet": "A",
+      "provenance_keys": [
+        "management-001:MGMT-XREF-002"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Management"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Management"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Devices/DeviceInfo.cs",
+        "src/Core/src/Devices/FormFactor.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/DeviceInfo.cs": "A",
+        "src/Core/src/Devices/FormFactor.cs": "A",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs": "A"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/DeviceInfo.cs",
+        "src/Core/src/Devices/FormFactor.cs",
+        "src/Management/CLAUDE.md",
+        "src/Management/README.md",
+        "src/Management/examples/ManagementTool/Program.cs",
+        "src/Management/examples/ManagementTool/README.md",
+        "src/Management/src/IManagementSession.cs",
+        "src/Management/src/IYubiKeyExtensions.cs",
+        "src/Management/src/ManagementSession.cs",
+        "src/Management/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "fixture-cache-docs",
+      "primary_packet": "A",
+      "provenance_keys": [
+        "management-001:MGMT-XREF-003",
+        "management-001:MGMT-IMP-009"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Management"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Management"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Abstractions/IYubiKey.cs",
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Devices/YubiKeyDevice.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Management/src/ManagementSession.cs",
+        "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Abstractions/IYubiKey.cs": "A",
+        "src/Core/src/Devices/Feature.cs": "A",
+        "src/Core/src/Devices/YubiKeyDevice.cs": "A",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Management/src/ManagementSession.cs": "BOUNDARY-Management",
+        "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs": "EXTERNAL"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Abstractions/IYubiKey.cs",
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Devices/YubiKeyDevice.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Management/CLAUDE.md",
+        "src/Management/README.md",
+        "src/Management/examples/ManagementTool/Program.cs",
+        "src/Management/examples/ManagementTool/README.md",
+        "src/Management/src/IManagementSession.cs",
+        "src/Management/src/IYubiKeyExtensions.cs",
+        "src/Management/src/ManagementSession.cs",
+        "src/Management/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "metadata-firmware-read",
+      "primary_packet": "A",
+      "provenance_keys": [
+        "management-001:MGMT-IMP-008"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Management"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Management"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Management/src/ManagementSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/Feature.cs": "A",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Management/src/ManagementSession.cs": "BOUNDARY-Management"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Management/CLAUDE.md",
+        "src/Management/README.md",
+        "src/Management/examples/ManagementTool/Program.cs",
+        "src/Management/examples/ManagementTool/README.md",
+        "src/Management/src/IManagementSession.cs",
+        "src/Management/src/IYubiKeyExtensions.cs",
+        "src/Management/src/ManagementSession.cs",
+        "src/Management/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "management-reset-lifecycle",
+      "primary_packet": "BOUNDARY-Management",
+      "provenance_keys": [
+        "management-001:MGMT-IMP-010"
+      ],
+      "secondary_read_packets": [
+        "A",
+        "B5-session-framing"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Management"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Management/src/ManagementSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/Feature.cs": "A",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Management/src/ManagementSession.cs": "BOUNDARY-Management"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Management/CLAUDE.md",
+        "src/Management/README.md",
+        "src/Management/examples/ManagementTool/Program.cs",
+        "src/Management/examples/ManagementTool/README.md",
+        "src/Management/src/IManagementSession.cs",
+        "src/Management/src/IYubiKeyExtensions.cs",
+        "src/Management/src/ManagementSession.cs",
+        "src/Management/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "scp-parameter-ownership",
+      "primary_packet": "B6-wire-scp",
+      "provenance_keys": [
+        "management-001:MGMT-IMP-004",
+        "security-domain-001:SD-DEP-002"
+      ],
+      "secondary_read_packets": [
+        "A",
+        "B5-session-framing",
+        "BOUNDARY-Management",
+        "BOUNDARY-SecurityDomain"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Management",
+        "BOUNDARY-SecurityDomain"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Management/src/ManagementSession.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/Feature.cs": "A",
+        "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs": "B6-wire-scp",
+        "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs": "B6-wire-scp",
+        "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs": "B6-wire-scp",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Management/src/ManagementSession.cs": "BOUNDARY-Management",
+        "src/SecurityDomain/src/SecurityDomainSession.cs": "BOUNDARY-SecurityDomain"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Management/CLAUDE.md",
+        "src/Management/README.md",
+        "src/Management/examples/ManagementTool/Program.cs",
+        "src/Management/examples/ManagementTool/README.md",
+        "src/Management/src/IManagementSession.cs",
+        "src/Management/src/IYubiKeyExtensions.cs",
+        "src/Management/src/ManagementSession.cs",
+        "src/Management/tests/CLAUDE.md",
+        "src/SecurityDomain/CLAUDE.md",
+        "src/SecurityDomain/README.md",
+        "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "src/SecurityDomain/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "credential-length-units",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "ctap2-001:CTAP-XREF-003",
+        "ctap2-001:CTAP-IMP-006",
+        "openpgp-001:PGP-CORE-001"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Ctap2",
+        "BOUNDARY-OpenPgp"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2",
+        "BOUNDARY-OpenPgp"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+        "src/Core/src/Credentials/CredentialReaderOptions.cs",
+        "src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs",
+        "src/OpenPgp/src/OpenPgpSession.Pin.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs": "C",
+        "src/Core/src/Credentials/CredentialReaderOptions.cs": "C",
+        "src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs": "BOUNDARY-Ctap2",
+        "src/OpenPgp/src/OpenPgpSession.Pin.cs": "BOUNDARY-OpenPgp"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+        "src/Core/src/Credentials/CredentialReaderOptions.cs",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md",
+        "src/OpenPgp/CLAUDE.md",
+        "src/OpenPgp/README.md",
+        "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+        "src/OpenPgp/src/IOpenPgpSession.cs",
+        "src/OpenPgp/src/IYubiKeyExtensions.cs",
+        "src/OpenPgp/src/OpenPgpSession.cs",
+        "src/OpenPgp/tests/CLAUDE.md",
+        "src/WebAuthn/README.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-response-ownership",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-004",
+        "ctap2-001:CTAP-IMP-027",
+        "webauthn-001:WA-IMP-006",
+        "webauthn-001:WA-IMP-013"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "B6-wire-scp",
+        "BOUNDARY-WebAuthn"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2",
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+        "src/Ctap2/src/Credentials/MakeCredentialResponse.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Attestation/WebAuthnAttestationObject.cs",
+        "src/WebAuthn/src/Extensions/Codec/PrfCodec.cs",
+        "src/WebAuthn/src/Extensions/Outputs/PrfOutput.cs",
+        "src/WebAuthn/src/Extensions/PreviewSign/GeneratedSigningKey.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs": "B5-session-framing",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs": "B6-wire-scp",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Credentials/GetAssertionResponse.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/Credentials/MakeCredentialResponse.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Attestation/WebAuthnAttestationObject.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Codec/PrfCodec.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Outputs/PrfOutput.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/PreviewSign/GeneratedSigningKey.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-crypto-cleanup",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-005",
+        "ctap2-001:CTAP-IMP-035"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Cryptography/ECPrivateKey.cs",
+        "src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs",
+        "src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs",
+        "src/Ctap2/src/Pin/PinUvAuthProtocolV1.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Cryptography/ECPrivateKey.cs": "C",
+        "src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/LargeBlobs/LargeBlobStorage.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/Pin/PinUvAuthProtocolV1.cs": "BOUNDARY-Ctap2"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Cryptography/ECPrivateKey.cs",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-peer-key-profile",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-007"
+      ],
+      "secondary_read_packets": [
+        "C"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Cryptography/CryptographicDefinitions.cs",
+        "src/Ctap2/src/Cose/CoseKey.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Cryptography/CryptographicDefinitions.cs": "C",
+        "src/Ctap2/src/Cose/CoseKey.cs": "BOUNDARY-Ctap2"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Cryptography/CryptographicDefinitions.cs",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-aaguid-portability",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-025",
+        "webauthn-001:WA-IMP-007"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-WebAuthn"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2",
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Cbor/AaguidConverter.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Cose/Aaguid.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Cbor/AaguidConverter.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Cose/Aaguid.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-decoder-envelope",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-028"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "current_read_paths": [
+        "src/Ctap2/src/Credentials/AttestedCredentialData.cs",
+        "src/Ctap2/src/Credentials/AuthenticatorData.cs"
+      ],
+      "source_primary_owners": {
+        "src/Ctap2/src/Credentials/AttestedCredentialData.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/Credentials/AuthenticatorData.cs": "BOUNDARY-Ctap2"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-arkg-profile",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-029",
+        "ctap2-001:CTAP-IMP-039",
+        "webauthn-001:WA-IMP-019"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-WebAuthn",
+        "C"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2",
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Cryptography/AesUtilities.cs",
+        "src/Core/src/Cryptography/AlgorithmInfo.cs",
+        "src/Core/src/Cryptography/ArkgPrimitives.cs",
+        "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+        "src/Core/src/Cryptography/Asn1KeyInfo.cs",
+        "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+        "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+        "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+        "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs",
+        "src/Core/src/Cryptography/AsnUtilities.cs",
+        "src/Core/src/Cryptography/CmacPrimitives.cs",
+        "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+        "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+        "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+        "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs",
+        "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs",
+        "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.cs",
+        "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+        "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+        "src/Core/src/Cryptography/CurveInfo.cs",
+        "src/Core/src/Cryptography/ECParametersExtensions.cs",
+        "src/Core/src/Cryptography/ECPrivateKey.cs",
+        "src/Core/src/Cryptography/ECPublicKey.cs",
+        "src/Core/src/Cryptography/EcdhPrimitives.cs",
+        "src/Core/src/Cryptography/IArkgPrimitives.cs",
+        "src/Core/src/Cryptography/ICmacPrimitives.cs",
+        "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+        "src/Core/src/Cryptography/IKeyBase.cs",
+        "src/Core/src/Cryptography/IPrivateKey.cs",
+        "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+        "src/Core/src/Cryptography/IPublicKey.cs",
+        "src/Core/src/Cryptography/IPublicKeyExtensions.cs",
+        "src/Core/src/Cryptography/KeyInfo.cs",
+        "src/Core/src/Cryptography/KeyType.cs",
+        "src/Core/src/Cryptography/KeyTypeExtensions.cs",
+        "src/Core/src/Cryptography/Oids.cs",
+        "src/Core/src/Cryptography/PrivateKey.cs",
+        "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+        "src/Core/src/Cryptography/PublicKey.cs",
+        "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs",
+        "src/Core/src/Cryptography/RSAPublicKey.cs",
+        "src/Core/src/Cryptography/RsaFormat.cs",
+        "src/Core/src/Cryptography/X963Kdf.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs",
+        "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignSigningParams.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Cryptography/AesUtilities.cs": "C",
+        "src/Core/src/Cryptography/AlgorithmInfo.cs": "C",
+        "src/Core/src/Cryptography/ArkgPrimitives.cs": "C",
+        "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs": "C",
+        "src/Core/src/Cryptography/Asn1KeyInfo.cs": "C",
+        "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs": "C",
+        "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs": "C",
+        "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs": "C",
+        "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs": "C",
+        "src/Core/src/Cryptography/AsnUtilities.cs": "C",
+        "src/Core/src/Cryptography/CmacPrimitives.cs": "C",
+        "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseEcCurve.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseKeyType.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.cs": "C",
+        "src/Core/src/Cryptography/CryptographyProviders.cs": "C",
+        "src/Core/src/Cryptography/Curve25519PrivateKey.cs": "C",
+        "src/Core/src/Cryptography/Curve25519PublicKey.cs": "C",
+        "src/Core/src/Cryptography/CurveInfo.cs": "C",
+        "src/Core/src/Cryptography/ECParametersExtensions.cs": "C",
+        "src/Core/src/Cryptography/ECPrivateKey.cs": "C",
+        "src/Core/src/Cryptography/ECPublicKey.cs": "C",
+        "src/Core/src/Cryptography/EcdhPrimitives.cs": "C",
+        "src/Core/src/Cryptography/IArkgPrimitives.cs": "C",
+        "src/Core/src/Cryptography/ICmacPrimitives.cs": "C",
+        "src/Core/src/Cryptography/IEcdhPrimitives.cs": "C",
+        "src/Core/src/Cryptography/IKeyBase.cs": "C",
+        "src/Core/src/Cryptography/IPrivateKey.cs": "C",
+        "src/Core/src/Cryptography/IPrivateKeyExtensions.cs": "C",
+        "src/Core/src/Cryptography/IPublicKey.cs": "C",
+        "src/Core/src/Cryptography/IPublicKeyExtensions.cs": "C",
+        "src/Core/src/Cryptography/KeyInfo.cs": "C",
+        "src/Core/src/Cryptography/KeyType.cs": "C",
+        "src/Core/src/Cryptography/KeyTypeExtensions.cs": "C",
+        "src/Core/src/Cryptography/Oids.cs": "C",
+        "src/Core/src/Cryptography/PrivateKey.cs": "C",
+        "src/Core/src/Cryptography/PrivateKeyConsistency.cs": "C",
+        "src/Core/src/Cryptography/PublicKey.cs": "C",
+        "src/Core/src/Cryptography/RSAParametersExtensions.cs": "C",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs": "C",
+        "src/Core/src/Cryptography/RSAPublicKey.cs": "C",
+        "src/Core/src/Cryptography/RsaFormat.cs": "C",
+        "src/Core/src/Cryptography/X963Kdf.cs": "C",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignSigningParams.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-unsigned-outputs",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-030",
+        "webauthn-001:WA-IMP-017",
+        "audit-v2-20261022-20261031:#4"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-WebAuthn"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2",
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+        "src/Ctap2/src/Credentials/MakeCredentialResponse.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Credentials/GetAssertionResponse.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/Credentials/MakeCredentialResponse.cs": "BOUNDARY-Ctap2",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/UserVerification/UvDecision.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/tests/CLAUDE.md",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-blob-format",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-037"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "current_read_paths": [
+        "src/Ctap2/src/LargeBlobs/LargeBlobData.cs"
+      ],
+      "source_primary_owners": {
+        "src/Ctap2/src/LargeBlobs/LargeBlobData.cs": "BOUNDARY-Ctap2"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-preview-der",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-041"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "current_read_paths": [
+        "src/Ctap2/src/Extensions/PreviewSign/PreviewSignDerivedKey.cs"
+      ],
+      "source_primary_owners": {
+        "src/Ctap2/src/Extensions/PreviewSign/PreviewSignDerivedKey.cs": "BOUNDARY-Ctap2"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-metadata-wrapper",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-IMP-043"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "current_read_paths": [
+        "src/Ctap2/src/Crypto/EncryptedMetadataDecryptor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Ctap2/src/Crypto/EncryptedMetadataDecryptor.cs": "BOUNDARY-Ctap2"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "assertion-user-docs",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-XREF-001",
+        "webauthn-001:WA-XREF-001"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2",
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+        "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs"
+      ],
+      "source_primary_owners": {
+        "src/Ctap2/src/Credentials/GetAssertionResponse.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "native-selected-user-actor",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "ctap2-001:CTAP-DEC-002"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "current_read_paths": [
+        "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+        "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs"
+      ],
+      "source_primary_owners": {
+        "src/Ctap2/src/Credentials/GetAssertionResponse.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ctap-profile-evidence",
+      "primary_packet": "BOUNDARY-Ctap2",
+      "provenance_keys": [
+        "ctap2-001:CTAP-DEC-003"
+      ],
+      "secondary_read_packets": [
+        "A"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Devices/FirmwareVersion.cs",
+        "src/Ctap2/src/Ctap2Session.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/FirmwareVersion.cs": "A",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/FirmwareVersion.cs",
+        "src/Ctap2/CLAUDE.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-attestation-policy",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-001"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/WebAuthnBackend.cs",
+        "src/WebAuthn/src/Client/WebAuthnClient.Registration.cs",
+        "src/WebAuthn/src/Preferences/AttestationPreference.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/WebAuthnBackend.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/WebAuthnClient.Registration.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Preferences/AttestationPreference.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-error-provenance",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-002"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+        "src/WebAuthn/src/Client/WebAuthnClient.PinUvAuth.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/WebAuthnClient.PinUvAuth.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-timeout-outcome",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-003"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/CeremonyDeadline.cs",
+        "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs",
+        "src/WebAuthn/src/Client/WebAuthnClient.Registration.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/CeremonyDeadline.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/WebAuthnClient.Registration.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-uv-test-applicability",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-004"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+        "src/WebAuthn/src/Client/WebAuthnBackend.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/UserVerification/UvDecision.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/WebAuthnBackend.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-clientdata-serialization",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-005"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/WebAuthnClient.Validation.cs",
+        "src/WebAuthn/src/Client/WebAuthnClientData.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/WebAuthnClient.Validation.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/WebAuthnClientData.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-zeroing-test",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-008"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Client/PinUvSharedSecret.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/PinUvSharedSecret.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-pin-negotiation",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-009"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+        "src/WebAuthn/src/Client/WebAuthnBackend.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/UserVerification/UvDecision.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/WebAuthnBackend.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-descriptor-recovery",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-010"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+        "src/WebAuthn/src/Client/Authentication/CredentialMatcher.cs",
+        "src/WebAuthn/src/Client/CredentialFilter.cs",
+        "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/Authentication/CredentialMatcher.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/CredentialFilter.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-prf-uv",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-011"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+        "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/PrfProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/UserVerification/UvDecision.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/PrfProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-credprotect",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-012"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Extensions/Inputs/CredProtectInput.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/CredProtectProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Extensions/Inputs/CredProtectInput.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/CredProtectProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-blob-required",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-014"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Extensions/Inputs/LargeBlobInput.cs",
+        "src/WebAuthn/src/Extensions/Inputs/LargeBlobSupport.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Extensions/Inputs/LargeBlobInput.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Inputs/LargeBlobSupport.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-blob-cardinality",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-015"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-blob-absence",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-016"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Extensions/Outputs/LargeBlobOutput.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Extensions/Outputs/LargeBlobOutput.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-minpin-input",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-018"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Extensions/Codec/MinPinLengthCodec.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/MinPinLengthProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Extensions/Codec/MinPinLengthCodec.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/MinPinLengthProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-preview-fixture",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-020"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Extensions/Codec/PreviewSignCodec.cs",
+        "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Extensions/Codec/PreviewSignCodec.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/PreviewSignTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "wa-preview-membership",
+      "primary_packet": "BOUNDARY-WebAuthn",
+      "provenance_keys": [
+        "webauthn-001:WA-IMP-021"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-WebAuthn"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+        "src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Ctap2/src/Ctap2Session.cs": "BOUNDARY-Ctap2",
+        "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs": "BOUNDARY-WebAuthn",
+        "src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs": "BOUNDARY-WebAuthn"
+      },
+      "reopening_targets": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/WebAuthn/CLAUDE.md",
+        "src/WebAuthn/README.md",
+        "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+        "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+        "src/WebAuthn/src/IYubiKeyExtensions.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/PreviewSignTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "scp-auth-readiness",
+      "primary_packet": "B6-wire-scp",
+      "provenance_keys": [
+        "security-domain-001:SD-DEP-001"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-SecurityDomain"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-SecurityDomain"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/SecurityDomain/src/SecurityDomainSession.cs": "BOUNDARY-SecurityDomain"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/SecurityDomain/CLAUDE.md",
+        "src/SecurityDomain/README.md",
+        "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "src/SecurityDomain/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "shared-exchange-ownership",
+      "primary_packet": "B5-session-framing",
+      "provenance_keys": [
+        "security-domain-001:SD-DEP-004",
+        "yubiotp-001:OTP-DEP-001",
+        "yubiotp-001:OTP-DEP-003",
+        "yubihsm-001:HSM-DEP-002",
+        "openpgp-001:PGP-CORE-002",
+        "openpgp-001:PGP-CORE-004",
+        "piv-001:PIVCORE-002"
+      ],
+      "secondary_read_packets": [
+        "A",
+        "B1-portable-lifetimes",
+        "B6-wire-scp",
+        "BOUNDARY-OpenPgp",
+        "BOUNDARY-Piv",
+        "BOUNDARY-SecurityDomain",
+        "BOUNDARY-YubiHsm",
+        "BOUNDARY-YubiOtp",
+        "C"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-OpenPgp",
+        "BOUNDARY-Piv",
+        "BOUNDARY-SecurityDomain",
+        "BOUNDARY-YubiHsm",
+        "BOUNDARY-YubiOtp"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Credentials/UserPresenceNotification.cs",
+        "src/Core/src/Devices/HidConnectionSlot.cs",
+        "src/Core/src/Devices/YubiKeyDevice.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Utilities/ExchangeGuard.cs",
+        "src/OpenPgp/src/OpenPgpSession.Config.cs",
+        "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+        "src/OpenPgp/src/OpenPgpSession.cs",
+        "src/Piv/src/PivSession.cs",
+        "src/YubiHsm/src/HsmAuthSession.cs",
+        "src/YubiOtp/src/IYubiKeyExtensions.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Credentials/UserPresenceNotification.cs": "C",
+        "src/Core/src/Devices/HidConnectionSlot.cs": "B1-portable-lifetimes",
+        "src/Core/src/Devices/YubiKeyDevice.cs": "A",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs": "B6-wire-scp",
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs": "B6-wire-scp",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Core/src/Utilities/ExchangeGuard.cs": "B5-session-framing",
+        "src/OpenPgp/src/OpenPgpSession.Config.cs": "BOUNDARY-OpenPgp",
+        "src/OpenPgp/src/OpenPgpSession.Crypto.cs": "BOUNDARY-OpenPgp",
+        "src/OpenPgp/src/OpenPgpSession.cs": "BOUNDARY-OpenPgp",
+        "src/Piv/src/PivSession.cs": "BOUNDARY-Piv",
+        "src/YubiHsm/src/HsmAuthSession.cs": "BOUNDARY-YubiHsm",
+        "src/YubiOtp/src/IYubiKeyExtensions.cs": "BOUNDARY-YubiOtp"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Credentials/UserPresenceNotification.cs",
+        "src/Core/src/Devices/HidConnectionSlot.cs",
+        "src/Core/src/Devices/YubiKeyDevice.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Utilities/ExchangeGuard.cs",
+        "src/OpenPgp/CLAUDE.md",
+        "src/OpenPgp/README.md",
+        "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+        "src/OpenPgp/src/IOpenPgpSession.cs",
+        "src/OpenPgp/src/IYubiKeyExtensions.cs",
+        "src/OpenPgp/src/OpenPgpSession.cs",
+        "src/OpenPgp/tests/CLAUDE.md",
+        "src/Piv/CLAUDE.md",
+        "src/Piv/README.md",
+        "src/Piv/examples/PivTool/Program.cs",
+        "src/Piv/examples/PivTool/README.md",
+        "src/Piv/src/IPivSession.cs",
+        "src/Piv/src/IYubiKeyExtensions.cs",
+        "src/Piv/src/PivSession.cs",
+        "src/SecurityDomain/CLAUDE.md",
+        "src/SecurityDomain/README.md",
+        "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "src/SecurityDomain/tests/CLAUDE.md",
+        "src/YubiHsm/CLAUDE.md",
+        "src/YubiHsm/README.md",
+        "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+        "src/YubiHsm/src/HsmAuthSession.cs",
+        "src/YubiHsm/src/IHsmAuthSession.cs",
+        "src/YubiHsm/src/IYubiKeyExtensions.cs",
+        "src/YubiHsm/tests/CLAUDE.md",
+        "src/YubiOtp/CLAUDE.md",
+        "src/YubiOtp/README.md",
+        "src/YubiOtp/examples/OtpTool/Program.cs",
+        "src/YubiOtp/src/IYubiKeyExtensions.cs",
+        "src/YubiOtp/src/IYubiOtpSession.cs",
+        "src/YubiOtp/src/YubiOtpSession.cs",
+        "src/YubiOtp/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "logging-payload-policy",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "security-domain-001:SD-DEP-005"
+      ],
+      "secondary_read_packets": [
+        "B6-wire-scp",
+        "BOUNDARY-SecurityDomain"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-SecurityDomain"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+        "src/Core/src/YubiKitLogging.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs": "B6-wire-scp",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs": "B6-wire-scp",
+        "src/Core/src/YubiKitLogging.cs": "C"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+        "src/Core/src/YubiKitLogging.cs",
+        "src/SecurityDomain/CLAUDE.md",
+        "src/SecurityDomain/README.md",
+        "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "src/SecurityDomain/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "otp-hid-framing",
+      "primary_packet": "B5-session-framing",
+      "provenance_keys": [
+        "yubiotp-001:OTP-DEP-002"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-YubiOtp"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-YubiOtp"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "src/YubiOtp/src/Backend/HidBackend.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs": "B5-session-framing",
+        "src/YubiOtp/src/Backend/HidBackend.cs": "BOUNDARY-YubiOtp"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "src/YubiOtp/CLAUDE.md",
+        "src/YubiOtp/README.md",
+        "src/YubiOtp/examples/OtpTool/Program.cs",
+        "src/YubiOtp/src/IYubiKeyExtensions.cs",
+        "src/YubiOtp/src/IYubiOtpSession.cs",
+        "src/YubiOtp/src/YubiOtpSession.cs",
+        "src/YubiOtp/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "otp-relocation-evidence",
+      "primary_packet": "BOUNDARY-YubiOtp",
+      "provenance_keys": [
+        "yubiotp-001:OTP-DEP-005"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Management"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-YubiOtp"
+      ],
+      "current_read_paths": [
+        "src/Management/src/IManagementSession.cs",
+        "src/YubiOtp/src/IYubiOtpSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Management/src/IManagementSession.cs": "BOUNDARY-Management",
+        "src/YubiOtp/src/IYubiOtpSession.cs": "BOUNDARY-YubiOtp"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/YubiOtp/CLAUDE.md",
+        "src/YubiOtp/README.md",
+        "src/YubiOtp/examples/OtpTool/Program.cs",
+        "src/YubiOtp/src/IYubiKeyExtensions.cs",
+        "src/YubiOtp/src/IYubiOtpSession.cs",
+        "src/YubiOtp/src/YubiOtpSession.cs",
+        "src/YubiOtp/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "apdu-tlv-ownership",
+      "primary_packet": "B6-wire-scp",
+      "provenance_keys": [
+        "yubihsm-001:HSM-DEP-003",
+        "piv-001:PIVCORE-003"
+      ],
+      "secondary_read_packets": [
+        "B5-session-framing",
+        "BOUNDARY-Piv",
+        "BOUNDARY-YubiHsm",
+        "C"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Piv",
+        "BOUNDARY-YubiHsm"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Utilities/Tlv.cs",
+        "src/Core/src/Utilities/TlvHelper.cs",
+        "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+        "src/YubiHsm/src/HsmAuthSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs": "B6-wire-scp",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing",
+        "src/Core/src/Utilities/Tlv.cs": "C",
+        "src/Core/src/Utilities/TlvHelper.cs": "C",
+        "src/Piv/src/Cryptography/PrivateKeyOperations.cs": "BOUNDARY-Piv",
+        "src/YubiHsm/src/HsmAuthSession.cs": "BOUNDARY-YubiHsm"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Utilities/Tlv.cs",
+        "src/Core/src/Utilities/TlvHelper.cs",
+        "src/Piv/CLAUDE.md",
+        "src/Piv/README.md",
+        "src/Piv/examples/PivTool/Program.cs",
+        "src/Piv/examples/PivTool/README.md",
+        "src/Piv/src/IPivSession.cs",
+        "src/Piv/src/IYubiKeyExtensions.cs",
+        "src/Piv/src/PivSession.cs",
+        "src/YubiHsm/CLAUDE.md",
+        "src/YubiHsm/README.md",
+        "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+        "src/YubiHsm/src/HsmAuthSession.cs",
+        "src/YubiHsm/src/IHsmAuthSession.cs",
+        "src/YubiHsm/src/IYubiKeyExtensions.cs",
+        "src/YubiHsm/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "pcsc-pin-isolation",
+      "primary_packet": "B1-portable-lifetimes",
+      "provenance_keys": [
+        "piv-001:PIVCORE-001",
+        "audit-v2-20261022-20261031:#22"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Piv"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Piv"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+        "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+        "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+        "src/Piv/src/PivSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Transports/SmartCard/PcscNativeResources.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/SmartCardSharing.cs": "B1-portable-lifetimes",
+        "src/Piv/src/PivSession.cs": "BOUNDARY-Piv"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+        "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+        "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+        "src/Core/tests/CLAUDE.md",
+        "src/Piv/CLAUDE.md",
+        "src/Piv/README.md",
+        "src/Piv/examples/PivTool/Program.cs",
+        "src/Piv/examples/PivTool/README.md",
+        "src/Piv/src/IPivSession.cs",
+        "src/Piv/src/IYubiKeyExtensions.cs",
+        "src/Piv/src/PivSession.cs"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "hsm-supplied-cryptogram-shape",
+      "primary_packet": "BOUNDARY-YubiHsm",
+      "provenance_keys": [
+        "yubihsm-001:HSM-IMP-008"
+      ],
+      "secondary_read_packets": [
+        "C"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-YubiHsm"
+      ],
+      "current_read_paths": [
+        "src/Core/src/Cryptography/AesUtilities.cs",
+        "src/Core/src/Cryptography/AlgorithmInfo.cs",
+        "src/Core/src/Cryptography/ArkgPrimitives.cs",
+        "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+        "src/Core/src/Cryptography/Asn1KeyInfo.cs",
+        "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+        "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+        "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+        "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs",
+        "src/Core/src/Cryptography/AsnUtilities.cs",
+        "src/Core/src/Cryptography/CmacPrimitives.cs",
+        "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+        "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+        "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+        "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs",
+        "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs",
+        "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.cs",
+        "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+        "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+        "src/Core/src/Cryptography/CurveInfo.cs",
+        "src/Core/src/Cryptography/ECParametersExtensions.cs",
+        "src/Core/src/Cryptography/ECPrivateKey.cs",
+        "src/Core/src/Cryptography/ECPublicKey.cs",
+        "src/Core/src/Cryptography/EcdhPrimitives.cs",
+        "src/Core/src/Cryptography/IArkgPrimitives.cs",
+        "src/Core/src/Cryptography/ICmacPrimitives.cs",
+        "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+        "src/Core/src/Cryptography/IKeyBase.cs",
+        "src/Core/src/Cryptography/IPrivateKey.cs",
+        "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+        "src/Core/src/Cryptography/IPublicKey.cs",
+        "src/Core/src/Cryptography/IPublicKeyExtensions.cs",
+        "src/Core/src/Cryptography/KeyInfo.cs",
+        "src/Core/src/Cryptography/KeyType.cs",
+        "src/Core/src/Cryptography/KeyTypeExtensions.cs",
+        "src/Core/src/Cryptography/Oids.cs",
+        "src/Core/src/Cryptography/PrivateKey.cs",
+        "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+        "src/Core/src/Cryptography/PublicKey.cs",
+        "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs",
+        "src/Core/src/Cryptography/RSAPublicKey.cs",
+        "src/Core/src/Cryptography/RsaFormat.cs",
+        "src/Core/src/Cryptography/X963Kdf.cs",
+        "src/YubiHsm/src/HsmAuthSession.cs",
+        "src/YubiHsm/src/SessionKeys.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Cryptography/AesUtilities.cs": "C",
+        "src/Core/src/Cryptography/AlgorithmInfo.cs": "C",
+        "src/Core/src/Cryptography/ArkgPrimitives.cs": "C",
+        "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs": "C",
+        "src/Core/src/Cryptography/Asn1KeyInfo.cs": "C",
+        "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs": "C",
+        "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs": "C",
+        "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs": "C",
+        "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs": "C",
+        "src/Core/src/Cryptography/AsnUtilities.cs": "C",
+        "src/Core/src/Cryptography/CmacPrimitives.cs": "C",
+        "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseEcCurve.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseKeyType.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.cs": "C",
+        "src/Core/src/Cryptography/CryptographyProviders.cs": "C",
+        "src/Core/src/Cryptography/Curve25519PrivateKey.cs": "C",
+        "src/Core/src/Cryptography/Curve25519PublicKey.cs": "C",
+        "src/Core/src/Cryptography/CurveInfo.cs": "C",
+        "src/Core/src/Cryptography/ECParametersExtensions.cs": "C",
+        "src/Core/src/Cryptography/ECPrivateKey.cs": "C",
+        "src/Core/src/Cryptography/ECPublicKey.cs": "C",
+        "src/Core/src/Cryptography/EcdhPrimitives.cs": "C",
+        "src/Core/src/Cryptography/IArkgPrimitives.cs": "C",
+        "src/Core/src/Cryptography/ICmacPrimitives.cs": "C",
+        "src/Core/src/Cryptography/IEcdhPrimitives.cs": "C",
+        "src/Core/src/Cryptography/IKeyBase.cs": "C",
+        "src/Core/src/Cryptography/IPrivateKey.cs": "C",
+        "src/Core/src/Cryptography/IPrivateKeyExtensions.cs": "C",
+        "src/Core/src/Cryptography/IPublicKey.cs": "C",
+        "src/Core/src/Cryptography/IPublicKeyExtensions.cs": "C",
+        "src/Core/src/Cryptography/KeyInfo.cs": "C",
+        "src/Core/src/Cryptography/KeyType.cs": "C",
+        "src/Core/src/Cryptography/KeyTypeExtensions.cs": "C",
+        "src/Core/src/Cryptography/Oids.cs": "C",
+        "src/Core/src/Cryptography/PrivateKey.cs": "C",
+        "src/Core/src/Cryptography/PrivateKeyConsistency.cs": "C",
+        "src/Core/src/Cryptography/PublicKey.cs": "C",
+        "src/Core/src/Cryptography/RSAParametersExtensions.cs": "C",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs": "C",
+        "src/Core/src/Cryptography/RSAPublicKey.cs": "C",
+        "src/Core/src/Cryptography/RsaFormat.cs": "C",
+        "src/Core/src/Cryptography/X963Kdf.cs": "C",
+        "src/YubiHsm/src/HsmAuthSession.cs": "BOUNDARY-YubiHsm",
+        "src/YubiHsm/src/SessionKeys.cs": "BOUNDARY-YubiHsm"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/YubiHsm/CLAUDE.md",
+        "src/YubiHsm/README.md",
+        "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+        "src/YubiHsm/src/HsmAuthSession.cs",
+        "src/YubiHsm/src/IHsmAuthSession.cs",
+        "src/YubiHsm/src/IYubiKeyExtensions.cs",
+        "src/YubiHsm/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "runtime-scalar-copy",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:#17"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Cryptography/ECPrivateKey.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Cryptography/ECPrivateKey.cs": "C"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Cryptography/ECPrivateKey.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "pcsc-reader-name-cleanup",
+      "primary_packet": "B1-portable-lifetimes",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:#18"
+      ],
+      "secondary_read_packets": [
+        "B4-windows-support"
+      ],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs",
+        "src/Core/src/Transports/SmartCard/FindPcscDevices.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs": "B4-windows-support",
+        "src/Core/src/Transports/SmartCard/FindPcscDevices.cs": "B1-portable-lifetimes"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs",
+        "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "ber-length-safety",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:#20",
+        "audit-v2-20261022-20261031:25e"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Utilities/Tlv.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Utilities/Tlv.cs": "C"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Utilities/Tlv.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "metadata-field-length",
+      "primary_packet": "A",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:#21"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Devices/DeviceInfo.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/DeviceInfo.cs": "A"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/DeviceInfo.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "scp-short-response",
+      "primary_packet": "B6-wire-scp",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:#23"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs": "B6-wire-scp",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs": "B6-wire-scp",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs": "B6-wire-scp"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "private-key-consistency",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:#27"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Cryptography/PrivateKeyConsistency.cs": "C",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs": "C"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "metadata-pagination",
+      "primary_packet": "A",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:25b"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Devices/DeviceInfoReader.cs",
+        "src/Core/src/Devices/ProtocolDeviceInfo.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/DeviceInfoReader.cs": "A",
+        "src/Core/src/Devices/ProtocolDeviceInfo.cs": "A"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/DeviceInfoReader.cs",
+        "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "runtime-rng-substitution",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:25c"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Cryptography/AesUtilities.cs",
+        "src/Core/src/Cryptography/AlgorithmInfo.cs",
+        "src/Core/src/Cryptography/ArkgPrimitives.cs",
+        "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+        "src/Core/src/Cryptography/Asn1KeyInfo.cs",
+        "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+        "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+        "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+        "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs",
+        "src/Core/src/Cryptography/AsnUtilities.cs",
+        "src/Core/src/Cryptography/CmacPrimitives.cs",
+        "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+        "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+        "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+        "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs",
+        "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs",
+        "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs",
+        "src/Core/src/Cryptography/CryptographicDefinitions.cs",
+        "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+        "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+        "src/Core/src/Cryptography/CurveInfo.cs",
+        "src/Core/src/Cryptography/ECParametersExtensions.cs",
+        "src/Core/src/Cryptography/ECPrivateKey.cs",
+        "src/Core/src/Cryptography/ECPublicKey.cs",
+        "src/Core/src/Cryptography/EcdhPrimitives.cs",
+        "src/Core/src/Cryptography/IArkgPrimitives.cs",
+        "src/Core/src/Cryptography/ICmacPrimitives.cs",
+        "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+        "src/Core/src/Cryptography/IKeyBase.cs",
+        "src/Core/src/Cryptography/IPrivateKey.cs",
+        "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+        "src/Core/src/Cryptography/IPublicKey.cs",
+        "src/Core/src/Cryptography/IPublicKeyExtensions.cs",
+        "src/Core/src/Cryptography/KeyInfo.cs",
+        "src/Core/src/Cryptography/KeyType.cs",
+        "src/Core/src/Cryptography/KeyTypeExtensions.cs",
+        "src/Core/src/Cryptography/Oids.cs",
+        "src/Core/src/Cryptography/PrivateKey.cs",
+        "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+        "src/Core/src/Cryptography/PublicKey.cs",
+        "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs",
+        "src/Core/src/Cryptography/RSAPublicKey.cs",
+        "src/Core/src/Cryptography/RsaFormat.cs",
+        "src/Core/src/Cryptography/X963Kdf.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Cryptography/AesUtilities.cs": "C",
+        "src/Core/src/Cryptography/AlgorithmInfo.cs": "C",
+        "src/Core/src/Cryptography/ArkgPrimitives.cs": "C",
+        "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs": "C",
+        "src/Core/src/Cryptography/Asn1KeyInfo.cs": "C",
+        "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs": "C",
+        "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs": "C",
+        "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs": "C",
+        "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs": "C",
+        "src/Core/src/Cryptography/AsnUtilities.cs": "C",
+        "src/Core/src/Cryptography/CmacPrimitives.cs": "C",
+        "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseEcCurve.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs": "C",
+        "src/Core/src/Cryptography/Cose/CoseKeyType.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs": "C",
+        "src/Core/src/Cryptography/CryptographicDefinitions.cs": "C",
+        "src/Core/src/Cryptography/CryptographyProviders.cs": "C",
+        "src/Core/src/Cryptography/Curve25519PrivateKey.cs": "C",
+        "src/Core/src/Cryptography/Curve25519PublicKey.cs": "C",
+        "src/Core/src/Cryptography/CurveInfo.cs": "C",
+        "src/Core/src/Cryptography/ECParametersExtensions.cs": "C",
+        "src/Core/src/Cryptography/ECPrivateKey.cs": "C",
+        "src/Core/src/Cryptography/ECPublicKey.cs": "C",
+        "src/Core/src/Cryptography/EcdhPrimitives.cs": "C",
+        "src/Core/src/Cryptography/IArkgPrimitives.cs": "C",
+        "src/Core/src/Cryptography/ICmacPrimitives.cs": "C",
+        "src/Core/src/Cryptography/IEcdhPrimitives.cs": "C",
+        "src/Core/src/Cryptography/IKeyBase.cs": "C",
+        "src/Core/src/Cryptography/IPrivateKey.cs": "C",
+        "src/Core/src/Cryptography/IPrivateKeyExtensions.cs": "C",
+        "src/Core/src/Cryptography/IPublicKey.cs": "C",
+        "src/Core/src/Cryptography/IPublicKeyExtensions.cs": "C",
+        "src/Core/src/Cryptography/KeyInfo.cs": "C",
+        "src/Core/src/Cryptography/KeyType.cs": "C",
+        "src/Core/src/Cryptography/KeyTypeExtensions.cs": "C",
+        "src/Core/src/Cryptography/Oids.cs": "C",
+        "src/Core/src/Cryptography/PrivateKey.cs": "C",
+        "src/Core/src/Cryptography/PrivateKeyConsistency.cs": "C",
+        "src/Core/src/Cryptography/PublicKey.cs": "C",
+        "src/Core/src/Cryptography/RSAParametersExtensions.cs": "C",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs": "C",
+        "src/Core/src/Cryptography/RSAPublicKey.cs": "C",
+        "src/Core/src/Cryptography/RsaFormat.cs": "C",
+        "src/Core/src/Cryptography/X963Kdf.cs": "C"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "runtime-hkdf-substitution",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:25d"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Ctap2"
+      ],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+        "src/Ctap2/src/Pin/PinUvAuthProtocolV2.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs": "C",
+        "src/Ctap2/src/Pin/PinUvAuthProtocolV2.cs": "BOUNDARY-Ctap2"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "tlv-encoder-sizing",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:25f"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Utilities/TlvHelper.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Utilities/TlvHelper.cs": "C"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Utilities/TlvHelper.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "credential-redirect-policy",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:26g",
+        "audit-v2-20261022-20261031:N3"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-YubiOtp"
+      ],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+        "src/YubiOtp/examples/OtpTool/CliOptions.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/DeleteCommand.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/InfoCommand.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs",
+        "src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs",
+        "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+        "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+        "src/YubiOtp/examples/OtpTool/OutputHelper.cs",
+        "src/YubiOtp/examples/OtpTool/Program.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs": "C",
+        "src/YubiOtp/examples/OtpTool/CliOptions.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/DeleteCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/InfoCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/DeviceHelper.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/OtpTool.csproj": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/OutputHelper.cs": "BOUNDARY-YubiOtp",
+        "src/YubiOtp/examples/OtpTool/Program.cs": "BOUNDARY-YubiOtp"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "credential-confirm-cleanup",
+      "primary_packet": "C",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:26h"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs": "C"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "scp-response-authentication",
+      "primary_packet": "B6-wire-scp",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:N2"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs": "B6-wire-scp",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs": "B6-wire-scp",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs": "B6-wire-scp"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "fido-config-initialization",
+      "primary_packet": "B5-session-framing",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:consideration-3"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs": "B5-session-framing",
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs": "B5-session-framing",
+        "src/Core/src/Sessions/ApplicationSession.cs": "B5-session-framing"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "certificate-bundle-partial-cleanup",
+      "primary_packet": "B6-wire-scp",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:consideration-5"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-SecurityDomain"
+      ],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs": "B6-wire-scp",
+        "src/SecurityDomain/src/SecurityDomainSession.cs": "BOUNDARY-SecurityDomain"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "native-stall-evidence",
+      "primary_packet": "B2-linux-lifetimes",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:PCSC-stall-finalizer-flake"
+      ],
+      "secondary_read_packets": [
+        "B1-portable-lifetimes",
+        "B3-macos-lifetimes"
+      ],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidReadReactor.cs",
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxFidoHidConnection.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidNativeApi.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidReadinessNative.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidReportApi.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidReportSizes.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxOtpHidConnection.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+        "src/Core/src/Transports/Hid/MacOS/CoreFoundationString.cs",
+        "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+        "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+        "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs",
+        "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+        "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+        "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+        "src/Core/src/Transports/SmartCard/ISCardApi.cs",
+        "src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs",
+        "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+        "src/Core/src/Transports/SmartCard/PcscConnectionKindDetector.cs",
+        "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+        "src/Core/src/Transports/SmartCard/PcscDevice.cs",
+        "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+        "src/Core/src/Transports/SmartCard/PscsConnectionKind.cs",
+        "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+        "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+        "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidReadReactor.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxFidoHidConnection.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidNativeApi.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidReadinessNative.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidReportApi.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidReportSizes.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxOtpHidConnection.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs": "B2-linux-lifetimes",
+        "src/Core/src/Transports/Hid/MacOS/CoreFoundationString.cs": "B3-macos-lifetimes",
+        "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs": "B3-macos-lifetimes",
+        "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs": "B3-macos-lifetimes",
+        "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs": "B3-macos-lifetimes",
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs": "B3-macos-lifetimes",
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs": "B3-macos-lifetimes",
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs": "B3-macos-lifetimes",
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs": "B3-macos-lifetimes",
+        "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs": "B3-macos-lifetimes",
+        "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/FindPcscDevices.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/ISCardApi.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/PcscConnectionKindDetector.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/PcscDevice.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/PcscNativeResources.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/PscsConnectionKind.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/SmartCardSharing.cs": "B1-portable-lifetimes",
+        "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs": "B1-portable-lifetimes"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "metadata-wide-app-bits",
+      "primary_packet": "A",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:deviceinfo-wide-app-bits"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "src/Core/src/Devices/DeviceInfo.cs"
+      ],
+      "source_primary_owners": {
+        "src/Core/src/Devices/DeviceInfo.cs": "A"
+      },
+      "reopening_targets": [
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md",
+        "src/Core/src/Devices/DeviceInfo.cs",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "migration-yaml",
+      "primary_packet": "B4-windows-support",
+      "provenance_keys": [
+        "oath-pilot-and-fixes-wave-002:DOC-002"
+      ],
+      "secondary_read_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "mandatory_boundary_packets": [
+        "BOUNDARY-Oath"
+      ],
+      "current_read_paths": [
+        "docs/migration/v1-to-v2-map.yml"
+      ],
+      "source_primary_owners": {
+        "docs/migration/v1-to-v2-map.yml": "SHARED"
+      },
+      "reopening_targets": [
+        "docs/migration/v1-to-v2-map.yml",
+        "docs/migration/v1-to-v2.md",
+        "src/Oath/examples/OathTool/Program.cs",
+        "src/Oath/src/IOathSession.cs",
+        "src/Oath/src/IYubiKeyExtensions.cs",
+        "src/Oath/src/OathSession.cs",
+        "src/Oath/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    },
+    {
+      "group": "toolchain-host-selection",
+      "primary_packet": "B4-windows-support",
+      "provenance_keys": [
+        "audit-v2-20261022-20261031:audit-host-selector-collision"
+      ],
+      "secondary_read_packets": [],
+      "mandatory_boundary_packets": [],
+      "current_read_paths": [
+        "scripts/toolchain/Discovery.cs"
+      ],
+      "source_primary_owners": {
+        "scripts/toolchain/Discovery.cs": "SHARED"
+      },
+      "reopening_targets": [
+        "TOOLCHAIN.md",
+        "docs/TESTING.md",
+        "src/Core/README.md",
+        "src/Core/tests/CLAUDE.md"
+      ],
+      "status": "UNREAD",
+      "qualification": "Routing retains inherited states. Questions are nonadditive; consume original evidence before current family/boundary review."
+    }
+  ]
+}

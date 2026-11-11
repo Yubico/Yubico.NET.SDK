@@ -1,0 +1,12 @@
+[
+  {
+    "path": "scripts/toolchain/Process.cs",
+    "issue": "Unbalanced lexical braces: scripts/toolchain/Process.cs: [], [7165]",
+    "disposition": "Whole-file reading unit retains every byte; refine with Roslyn before clean sampling."
+  },
+  {
+    "path": "scripts/toolchain/RunLog.cs",
+    "issue": "Unbalanced lexical braces: scripts/toolchain/RunLog.cs: [], [20988]",
+    "disposition": "Whole-file reading unit retains every byte; refine with Roslyn before clean sampling."
+  }
+]

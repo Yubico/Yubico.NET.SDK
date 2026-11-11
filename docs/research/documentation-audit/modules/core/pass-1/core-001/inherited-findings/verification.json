@@ -1,0 +1,49 @@
+{
+  "scope": "records-only source/hash/path/count/syntax check; no SDK build/test/device execution",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "d9cf31a17c7580ab580917ce201c4855c3cf89b4",
+  "counts": {
+    "run_qualified_provenance_rows": 100,
+    "original_numbered_identity_rows": 95,
+    "historical_unkeyed_observation_rows": 5,
+    "separately_preserved_pgp_documentation_labels": 21,
+    "nonadditive_dependency_groups": 70,
+    "states": {
+      "changed-unresolved-physical": 3,
+      "resolved-source-for-exact-scope": 15,
+      "resolved-source-physical-gap": 1,
+      "needs-decision": 6,
+      "policy-known-rationale-gap": 1,
+      "reproducible-from-source": 5,
+      "changed-reopen-docs": 1,
+      "still-candidate-boundary-review": 15,
+      "resolved-docs-recheck-boundary": 2,
+      "missing-evidence": 3,
+      "retained-applet-finding-current-rebaseline-pending": 21,
+      "source-mapped-review-pending": 16,
+      "changed-source-review-pending": 6,
+      "changed-scoped-policy-physical-gap": 2,
+      "still-candidate-applet-profile": 2,
+      "reproducible-record-check": 1
+    }
+  },
+  "current_unique_source_hashes_checked": 125,
+  "unique_document_reopening_targets_checked": 133,
+  "source_resolved_nonadditive_groups": 14,
+  "errors": [],
+  "initial_record_check_failure": {
+    "missing_targets": [
+      "docs/architecture/connection-ownership-contract.md",
+      "src/Core/src/Devices/Slots/HidConnectionSlot.cs",
+      "src/Core/src/Protocols/ExchangeGuard.cs"
+    ],
+    "disposition": "Corrected record references to current ownership-and-contention guide, Devices/HidConnectionSlot.cs and Utilities/ExchangeGuard.cs; no product edit."
+  },
+  "registry_sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+  "record_sha256": {
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/prepare.py": "e71e9706cbc98e3a1c9c9c213e8ab18386988b09b5eee90f5600a714870adc7d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/sources.md": "add7f3b2fe92c67986bf3d51504d213b95040adc9be86cc16d44f30f1fc78622",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/boundary-seeds.md": "9ed51a236bbe615c1afdfb4c92958eaa63c299b0be5546b8d7410951924c4ed3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings.md": "541b5c88b4ab213e71c49c29b743f5e60846b11aaffcaf5a5692af02af209ce4"
+  }
+}

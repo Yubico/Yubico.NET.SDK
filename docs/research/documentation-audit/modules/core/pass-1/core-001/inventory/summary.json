@@ -1,0 +1,123 @@
+{
+  "baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "d9cf31a17c7580ab580917ce201c4855c3cf89b4",
+  "branch": "yubikit-docs-audit",
+  "core_files": 515,
+  "core_csharp": 498,
+  "shipping_subtree_files": 316,
+  "shipping_csharp": 312,
+  "native_csharp": 57,
+  "core_test_subtree_files": 196,
+  "test_csharp": 186,
+  "external_files": 1011,
+  "snapshot_entries": 1442,
+  "snapshot_types": 160,
+  "effective_source_families": 160,
+  "semantic_units": 25728,
+  "status_counts": {
+    "UNREAD": 14044,
+    "OUT-OF-SCOPE": 7140,
+    "ADMINISTRATIVE-CONTEXT": 4544
+  },
+  "category_counts": {
+    "configuration-data-or-support-contract": 99,
+    "narrative-section-with-complete-examples": 1089,
+    "source-context-and-explanations": 1104,
+    "type-contract": 1128,
+    "member-contract-and-implementation": 10001,
+    "derived-diagram": 7,
+    "structured-map-entry": 54,
+    "whole-source-context-parser-limit": 2,
+    "enum-value": 560
+  },
+  "example_bodies": 501,
+  "specification_candidate_lines": 1658,
+  "unfinished_marker_lines": 14,
+  "family_counts": {
+    "A": {
+      "files": 91,
+      "lines": 16728,
+      "unread_units": 1630,
+      "core_files": 91
+    },
+    "B": {
+      "files": 352,
+      "lines": 62364,
+      "unread_units": 6382,
+      "core_files": 311
+    },
+    "BOUNDARY-Ctap2": {
+      "files": 181,
+      "lines": 39568,
+      "unread_units": 590,
+      "core_files": 0
+    },
+    "BOUNDARY-Management": {
+      "files": 55,
+      "lines": 8641,
+      "unread_units": 331,
+      "core_files": 0
+    },
+    "BOUNDARY-Oath": {
+      "files": 56,
+      "lines": 11227,
+      "unread_units": 239,
+      "core_files": 0
+    },
+    "BOUNDARY-OpenPgp": {
+      "files": 93,
+      "lines": 12927,
+      "unread_units": 328,
+      "core_files": 0
+    },
+    "BOUNDARY-Piv": {
+      "files": 121,
+      "lines": 22213,
+      "unread_units": 513,
+      "core_files": 0
+    },
+    "BOUNDARY-SecurityDomain": {
+      "files": 36,
+      "lines": 5607,
+      "unread_units": 193,
+      "core_files": 0
+    },
+    "BOUNDARY-WebAuthn": {
+      "files": 129,
+      "lines": 19320,
+      "unread_units": 265,
+      "core_files": 0
+    },
+    "BOUNDARY-YubiHsm": {
+      "files": 53,
+      "lines": 6325,
+      "unread_units": 160,
+      "core_files": 0
+    },
+    "BOUNDARY-YubiOtp": {
+      "files": 62,
+      "lines": 10388,
+      "unread_units": 324,
+      "core_files": 0
+    },
+    "C": {
+      "files": 104,
+      "lines": 17050,
+      "unread_units": 1386,
+      "core_files": 104
+    },
+    "EXTERNAL": {
+      "files": 81,
+      "lines": 13261,
+      "unread_units": 703,
+      "core_files": 0
+    },
+    "SHARED": {
+      "files": 112,
+      "lines": 54366,
+      "unread_units": 1000,
+      "core_files": 9
+    }
+  },
+  "qualification": "Inventory is a reading/dispatch denominator. All substantive units begin UNREAD. Character ranges partition files; line ranges can share a boundary line. Compiler binding, runtime behavior and original citations remain unchecked."
+}

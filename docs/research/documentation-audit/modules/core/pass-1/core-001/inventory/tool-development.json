@@ -1,0 +1,41 @@
+{
+  "scope": "Inventory-only tool development; original tool failures remain recorded here.",
+  "attempts": [
+    {
+      "command": "python -B docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/build_inventory.py",
+      "result": "failed",
+      "error": "ValueError: Unbalanced lexical braces: src/Core/src/Cryptography/Cose/CoseKeyOperations.cs: [], [2485]",
+      "cause": "Pygments line-comment tokenization needs a terminal newline; this tracked dormant file ends without one.",
+      "correction": "Tokenize with one sentinel newline and trim the mask to the original character length. Source bytes remain untouched."
+    },
+    {
+      "command": "python -B docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/build_inventory.py",
+      "result": "failed",
+      "error": "fatal: path 'docs/research/documentation-audit/core.md' exists on disk, but not in 'fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef'",
+      "cause": "The coordinator's authorized metadata checkpoint made the active Core handoff tracked after the source pin.",
+      "correction": "Determine baseline membership from the pinned tree. Record the observed metadata HEAD separately."
+    },
+    {
+      "command": "python -B docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/build_inventory.py",
+      "result": "failed",
+      "error": "ValueError: Unbalanced lexical braces: scripts/toolchain/Process.cs: [], [7165]",
+      "cause": "The lexical mask has limits on toolchain string syntax.",
+      "correction": "Retain Process.cs and RunLog.cs as complete file reading units with explicit parser-limit records. Every Core C# file has balanced lexical declaration partitions."
+    },
+    {
+      "command": "python -B docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/verify_inventory.py",
+      "result": "failed",
+      "error": "AssertionError: ('src/Core/src/Abstractions/IDevice.cs', 2618, 2617)",
+      "cause": "The first source-shape pass retained a UTF-8 BOM while the partition verifier decoded with utf-8-sig. Universal-newline reading also risked different offsets on CRLF source.",
+      "correction": "Both passes now decode raw bytes with utf-8-sig, preserving newline characters and using one explicit character-coordinate system. File SHA-256 continues to cover the original raw bytes."
+    }
+  ],
+  "initial_reconciliation_observations": [
+    "The first type extractor counted 159 effective source families and left the public DataEncryptor delegate unmatched. Delegate declarations were added; the reconciled population is 160.",
+    "Source-unit projection initially missed final enum values and some methods with default parameter assignments. The partitioner now retains final enum values and distinguishes parameter defaults from field initializers.",
+    "Initial API projection used 80 unmatched-declaration review markers. These were tool triage markers, rather than findings about SDK behavior. Final projection counts are in public-api.json.",
+    "Partial declarations now map through every defining file. Extension blocks, indexers, operators and finalizers receive source declaration-group candidates; exact overload and generated-symbol binding remains a later compiler check."
+  ],
+  "record_patch_failures": "Three multi-hunk documentation/tool record patches were rejected for stale or unnecessary context during preparation. The patch tool applied none of those envelopes; corrected scoped patches were subsequently applied. These were record-authoring failures and changed no SDK source or frozen input.",
+  "qualification": "This record retains failure messages and correction rationale. The original process transcripts remain in the agent tool history; no historical executable or frozen logger was run."
+}

@@ -1,0 +1,209 @@
+From f44c6d2e8ea70e88e2f00dcfcfe729a155f9c4d7 Mon Sep 17 00:00:00 2001
+From: Dain Nilsson <dain@yubico.com>
+Date: Mon, 27 May 2024 17:16:28 +0200
+Subject: [PATCH] Fix tests
+
+---
+ tests/device/cli/piv/test_pin_puk.py | 42 ++++++++++++++--------------
+ tests/device/cli/test_hsmauth.py     | 15 ++++++++--
+ tests/device/conftest.py             |  7 +++++
+ tests/device/test_oath.py            | 15 +++++-----
+ yubikit/oath.py                      |  7 +++--
+ 5 files changed, 52 insertions(+), 34 deletions(-)
+
+diff --git a/tests/device/cli/piv/test_pin_puk.py b/tests/device/cli/piv/test_pin_puk.py
+index a61712dbe..8fe663ed4 100644
+--- a/tests/device/cli/piv/test_pin_puk.py
++++ b/tests/device/cli/piv/test_pin_puk.py
+@@ -13,7 +13,10 @@
+ class TestPin:
+     def test_change_pin(self, ykman_cli, keys):
+         ykman_cli("piv", "access", "change-pin", "-P", keys.pin, "-n", NON_DEFAULT_PIN)
+-        ykman_cli("piv", "access", "change-pin", "-P", NON_DEFAULT_PIN, "-n", keys.pin)
++        with pytest.raises(SystemExit):
++            ykman_cli(
++                "piv", "access", "change-pin", "-P", keys.pin, "-n", NON_DEFAULT_PIN
++            )
+ 
+     def test_change_pin_prompt(self, ykman_cli, keys):
+         ykman_cli(
+@@ -22,12 +25,13 @@ def test_change_pin_prompt(self, ykman_cli, keys):
+             "change-pin",
+             input=old_new_new(keys.pin, NON_DEFAULT_PIN),
+         )
+-        ykman_cli(
+-            "piv",
+-            "access",
+-            "change-pin",
+-            input=old_new_new(NON_DEFAULT_PIN, keys.pin),
+-        )
++        with pytest.raises(SystemExit):
++            ykman_cli(
++                "piv",
++                "access",
++                "change-pin",
++                input=old_new_new(keys.pin, NON_DEFAULT_PIN),
++            )
+ 
+ 
+ class TestPuk:
+@@ -37,15 +41,10 @@ def test_change_puk(self, ykman_cli, keys):
+         ).output
+         assert "New PUK set." in o1
+ 
+-        o2 = ykman_cli(
+-            "piv", "access", "change-puk", "-p", NON_DEFAULT_PUK, "-n", keys.puk
+-        ).output
+-        assert "New PUK set." in o2
+-
+         with pytest.raises(SystemExit):
+             ykman_cli(
+-                "piv", "access", "change-puk", "-p", NON_DEFAULT_PUK, "-n", keys.puk
+-            )
++                "piv", "access", "change-puk", "-p", keys.puk, "-n", NON_DEFAULT_PUK
++            ).output
+ 
+     def test_change_puk_prompt(self, ykman_cli, keys):
+         ykman_cli(
+@@ -54,12 +53,13 @@ def test_change_puk_prompt(self, ykman_cli, keys):
+             "change-puk",
+             input=old_new_new(keys.puk, NON_DEFAULT_PUK),
+         )
+-        ykman_cli(
+-            "piv",
+-            "access",
+-            "change-puk",
+-            input=old_new_new(NON_DEFAULT_PUK, keys.puk),
+-        )
++        with pytest.raises(SystemExit):
++            ykman_cli(
++                "piv",
++                "access",
++                "change-puk",
++                input=old_new_new(keys.puk, NON_DEFAULT_PUK),
++            )
+ 
+     def test_unblock_pin(self, ykman_cli, keys):
+         for _ in range(3):
+@@ -83,7 +83,7 @@ def test_unblock_pin(self, ykman_cli, keys):
+             )
+ 
+         o = ykman_cli(
+-            "piv", "access", "unblock-pin", "-p", keys.puk, "-n", keys.pin
++            "piv", "access", "unblock-pin", "-p", keys.puk, "-n", NON_DEFAULT_PIN
+         ).output
+         assert "PIN unblocked" in o
+         o = ykman_cli("piv", "info").output
+diff --git a/tests/device/cli/test_hsmauth.py b/tests/device/cli/test_hsmauth.py
+index 91cce929b..6e6c4a7dd 100644
+--- a/tests/device/cli/test_hsmauth.py
++++ b/tests/device/cli/test_hsmauth.py
+@@ -319,7 +319,7 @@ def test_delete_credential(self, ykman_cli, management_key):
+ 
+ 
+ class TestManagementKey:
+-    def test_change_management_key(self, ykman_cli, management_key):
++    def test_change_management_password(self, ykman_cli, management_key):
+         ykman_cli(
+             "hsmauth",
+             "access",
+@@ -353,6 +353,7 @@ def test_change_management_key(self, ykman_cli, management_key):
+             management_key,
+         )
+ 
++    @condition.check(lambda info: not info.pin_complexity)
+     def test_change_management_key_generate(self, ykman_cli, management_key):
+         if len(management_key) != 32:
+             pytest.skip("string management key")
+@@ -366,6 +367,14 @@ def test_change_management_key_generate(self, ykman_cli, management_key):
+             "-g",
+         ).output
+ 
+-        assert re.match(
+-            r"^Generated management key: [a-f0-9]{16}", output, re.MULTILINE
++        gen_key = re.search(r"[a-f0-9]{32}", output).group(0)
++
++        ykman_cli(
++            "hsmauth",
++            "access",
++            "change-management-password",
++            "-m",
++            gen_key,
++            "-n",
++            management_key,
+         )
+diff --git a/tests/device/conftest.py b/tests/device/conftest.py
+index 143e0dab3..4999a5a5b 100644
+--- a/tests/device/conftest.py
++++ b/tests/device/conftest.py
+@@ -42,6 +42,13 @@ def _device(pytestconfig):
+     if version:
+         info.version = Version.from_string(version)
+ 
++        # Monkey patch all parsing of Version to use the supplied value
++        def get_version(cls, data):
++            return info.version
++
++        Version.from_bytes = classmethod(get_version)
++        Version.from_string = classmethod(get_version)
++
+     return dev, info
+ 
+ 
+diff --git a/tests/device/test_oath.py b/tests/device/test_oath.py
+index 0b0263ca6..e6395defd 100644
+--- a/tests/device/test_oath.py
++++ b/tests/device/test_oath.py
+@@ -17,17 +17,16 @@
+ 
+ @pytest.fixture
+ @condition.capability(CAPABILITY.OATH)
+-def session(ccid_connection, info, transport, scp_params):
+-    oath = OathSession(ccid_connection)
++def session(ccid_connection, info, scp_params):
++    fips = CAPABILITY.OATH in info.fips_capable
++    if ccid_connection.transport == TRANSPORT.NFC and fips:
++        oath = OathSession(ccid_connection, scp_params)
++    else:
++        oath = OathSession(ccid_connection)
+     oath.reset()
+ 
+-    if CAPABILITY.OATH in info.fips_capable:
+-        if transport == TRANSPORT.NFC:
+-            oath = OathSession(ccid_connection, scp_params)
++    if fips:
+         oath.set_key(KEY)
+-        if transport == TRANSPORT.NFC:
+-            oath = OathSession(ccid_connection, scp_params)
+-            oath.validate(KEY)
+ 
+     yield oath
+ 
+diff --git a/yubikit/oath.py b/yubikit/oath.py
+index 77ce5fbc7..28bff7dcf 100644
+--- a/yubikit/oath.py
++++ b/yubikit/oath.py
+@@ -274,11 +274,12 @@ def __init__(
+ 
+         if scp_key_params:
+             self.protocol.init_scp(scp_key_params)
++        self._scp_params = scp_key_params
+ 
+         self._has_key = self._challenge is not None
+         self._device_id = _get_device_id(self._salt)
+-        self.protocol.enable_touch_workaround(self._version)
+-        self._neo_unlock_workaround = self.version < (3, 0, 0)
++        self.protocol.enable_touch_workaround(self.version)
++        self._neo_unlock_workaround = not scp_key_params and self.version < (3, 0, 0)
+         logger.debug(
+             f"OATH session initialized (version={self.version}, "
+             f"has_key={self._has_key})"
+@@ -308,6 +309,8 @@ def reset(self) -> None:
+         """Perform a factory reset on the OATH application."""
+         self.protocol.send_apdu(0, INS_RESET, 0xDE, 0xAD)
+         _, self._salt, self._challenge = _parse_select(self.protocol.select(AID.OATH))
++        if self._scp_params:
++            self.protocol.init_scp(self._scp_params)
+         logger.info("OATH application data reset performed")
+         self._has_key = False
+         self._device_id = _get_device_id(self._salt)

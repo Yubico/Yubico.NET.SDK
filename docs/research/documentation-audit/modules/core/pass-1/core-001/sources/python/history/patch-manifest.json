@@ -1,0 +1,50 @@
+[
+  {
+    "revision": "a60ae832f895cfbffc2bb602b41cd6ba20cb2a0e",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/a60ae832f895cfbffc2bb602b41cd6ba20cb2a0e.patch",
+    "sha256": "cf445077b085d55a1e7cf4fdea5496de648bc2b4e8f04506193c8c02fc321f1a",
+    "bytes": 17635
+  },
+  {
+    "revision": "652e5825a2ecea8f9b4e3c55da6bf7b802594263",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/652e5825a2ecea8f9b4e3c55da6bf7b802594263.patch",
+    "sha256": "912c8dbfe25d4dad98b4a41c85bf07ab851c1558423d6ebc5c413ffdd7c947f6",
+    "bytes": 7938
+  },
+  {
+    "revision": "e55c9c2f37c48b0c6d7eaa5eff7794d58adf9b8c",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/e55c9c2f37c48b0c6d7eaa5eff7794d58adf9b8c.patch",
+    "sha256": "18a03ab54bfac9488de9d04a709f8cfd4f6317d65bf26c45bfa515fa83d6dd3a",
+    "bytes": 28160
+  },
+  {
+    "revision": "13f8a21c34e2a8ef483c155d08eb730e7fa59fe9",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/13f8a21c34e2a8ef483c155d08eb730e7fa59fe9.patch",
+    "sha256": "942ee5279027f39653740157ceb4871ffd3620efb800ebfd055a51da723fccb1",
+    "bytes": 1410
+  },
+  {
+    "revision": "c910e5d25ba675ac2bfc97d35f14a4cc0314864f",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/c910e5d25ba675ac2bfc97d35f14a4cc0314864f.patch",
+    "sha256": "6294a10c9e2a7fb64d9640e9eeba25f34e5a491c9fc339d3752ade75b1311747",
+    "bytes": 15514
+  },
+  {
+    "revision": "a10d3b3b249c6dcdba3691824e24758d40994647",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/a10d3b3b249c6dcdba3691824e24758d40994647.patch",
+    "sha256": "b5d8028c84c8bfca3a63d89ecc645f33b5383293c159313f98e20665cebff322",
+    "bytes": 20741
+  },
+  {
+    "revision": "8706337cc0682ccffd6baae6563e02d4bf993036",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/8706337cc0682ccffd6baae6563e02d4bf993036.patch",
+    "sha256": "8f35c6f7fd10969cb37d1fd3af114dd90fc81044989e0991c592bea0b3aba020",
+    "bytes": 22091
+  },
+  {
+    "revision": "7fd50da5db6f844f49947ce888c8ffab9b8e4eff",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/7fd50da5db6f844f49947ce888c8ffab9b8e4eff.patch",
+    "sha256": "ec523bd3cb3c421e3297e9d6bee1ca5d0e62e4dad97240f84bc38a29903d6924",
+    "bytes": 20739
+  }
+]

@@ -1,0 +1,189 @@
+commit 78c44513bed48d7d1b4603045ad8aa712b4ac397
+Author:     Dennis Dyall Wallin <dennis@dyallo.se>
+AuthorDate: Thu Oct 15 18:10:32 2026 +0200
+Commit:     Dennis Dyall Wallin <dennis@dyallo.se>
+CommitDate: Wed Oct 21 17:11:49 2026 +0200
+
+    fix(core): remove RandomNumberGeneratorExt in favour of the runtime API (YESDK-1633, 25c)
+    
+    GetInt32 ported the runtime's rejection sampler with the loop
+    condition inverted for ranges of 2^31 or wider: `uint result =
+    int.MaxValue; while (result > range)` never entered, so
+    GetInt32(int.MinValue, int.MaxValue) returned -1 every time without
+    drawing any random bytes. Both exception messages were also garbled
+    string literals.
+    
+    The type had no callers in the SDK; GetByte and Fill only existed to
+    serve each other. Delete it and its unshipped PublicAPI entries.
+    RandomNumberGenerator.GetInt32, RandomNumberGenerator.Fill and
+    rng.GetBytes(Span<byte>) cover every use.
+    
+    The YESDK-1633 wide-range repro and its counting RNG helper go with
+    the type they tested.
+
+diff --git a/src/Core/src/Cryptography/RandomNumberGeneratorExt.cs b/src/Core/src/Cryptography/RandomNumberGeneratorExt.cs
+deleted file mode 100644
+index 3a6474552..000000000
+--- a/src/Core/src/Cryptography/RandomNumberGeneratorExt.cs
++++ /dev/null
+@@ -1,109 +0,0 @@
+-﻿// Copyright 2025 Yubico AB
+-//
+-// Licensed under the Apache License, Version 2.0 (the "License").
+-// You may not use this file except in compliance with the License.
+-// You may obtain a copy of the License at
+-//
+-//     http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing, software
+-// distributed under the License is distributed on an "AS IS" BASIS,
+-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-// See the License for the specific language governing permissions and
+-// limitations under the License.
+-
+-// Portions of this file have been adopted from the .NET runtime under the following license:
+-// Licensed to the .NET Foundation under one or more agreements.
+-// The .NET Foundation licenses this file to you under the MIT license.
+-
+-// Original source: https://github.com/dotnet/runtime/blob/main/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/RandomNumberGenerator.cs
+-
+-using System.Globalization;
+-using System.Security.Cryptography;
+-
+-namespace Yubico.YubiKit.Core.Cryptography
+-{
+-    /// <summary>
+-    /// Extension class to extend random number functionality.
+-    /// </summary>
+-    public static class RandomNumberGeneratorExt
+-    {
+-        /// <summary>
+-        /// Gets a random 32-bit signed int.
+-        /// </summary>
+-        /// <param name="rng">The <see cref="RandomNumberGenerator"/> instance being extended.</param>
+-        /// <param name="fromInclusive">The lowest value of the range.</param>
+-        /// <param name="toExclusive">One above the highest value of the range.</param>
+-        /// <returns>Random <see langword="Int32"/>.</returns>
+-        public static int GetInt32(
+-            this RandomNumberGenerator rng,
+-            int fromInclusive,
+-            int toExclusive)
+-        {
+-            ArgumentNullException.ThrowIfNull(rng);
+-            if (fromInclusive >= toExclusive)
+-            {
+-                throw new ArithmeticException(string.Format(
+-                    CultureInfo.CurrentCulture,
+-                    "ExceptionMessages.ValueMustBeBetweenXandY," +
+-                    int.MinValue,
+-                    (long)int.MaxValue + 1));
+-            }
+-
+-            var range = (uint)toExclusive - (uint)fromInclusive - 1;
+-            // Mask away bits beyond our range.
+-            var mask = range;
+-            mask |= mask >> 1;
+-            mask |= mask >> 2;
+-            mask |= mask >> 4;
+-            mask |= mask >> 8;
+-            mask |= mask >> 16;
+-            uint result = int.MaxValue;
+-            while (result > range)
+-            {
+-                var data = new byte[sizeof(int)];
+-                rng.GetBytes(data);
+-                result = mask & BitConverter.ToUInt32(data, 0);
+-            }
+-            return (int)result + fromInclusive;
+-        }
+-
+-        /// <summary>
+-        /// Fill a range with random bytes.
+-        /// </summary>
+-        /// <param name="rng">The <see cref="RandomNumberGenerator"/> instance being extended.</param>
+-        /// <param name="data">A <see cref="Span{T}"/> to fill with random bytes.</param>
+-        public static void Fill(
+-            this RandomNumberGenerator rng,
+-            Span<byte> data)
+-        {
+-            for (var i = 0; i < data.Length; ++i)
+-            {
+-                data[i] = rng.GetByte(0x00, 0x100);
+-            }
+-        }
+-
+-        /// <summary>
+-        /// Get a <see langword="byte"/> with a random value.
+-        /// </summary>
+-        /// <param name="rng">The <see cref="RandomNumberGenerator"/> instance being extended.</param>
+-        /// <param name="fromInclusive">The lowest value of the range.</param>
+-        /// <param name="toExclusive">One above the highest value of the range.</param>
+-        /// <returns></returns>
+-        public static byte GetByte(
+-            this RandomNumberGenerator rng,
+-            int fromInclusive,
+-            int toExclusive)
+-        {
+-            if (fromInclusive < 0
+-                || toExclusive > 0x100
+-                || fromInclusive >= toExclusive)
+-            {
+-                throw new ArithmeticException(string.Format(
+-                    CultureInfo.CurrentCulture,
+-                    "ExceptionMessages.ValueMustBeBetweenXandY byte.MinValue byte.MaxValue + 1)"));
+-            }
+-            return (byte)rng.GetInt32(fromInclusive, toExclusive);
+-        }
+-    }
+-}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs
+index d516eabc8..826a8e95f 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs
+@@ -53,27 +53,6 @@ public async Task YESDK1633_DeviceInfoAlwaysMoreData_StopsWithBadResponseWithinP
+         Assert.Equal(protocol.RequestedPages.Count, protocol.RequestedPages.Distinct().Count());
+     }
+ 
+-    // ---- #25 c) RandomNumberGeneratorExt.GetInt32 --------------------------------------------
+-
+-    /// <summary>
+-    ///     For ranges wider than 2^31 the rejection loop is skipped and a constant is returned without
+-    ///     consulting the RNG at all (e.g. [int.MinValue, int.MaxValue) always yields -1).
+-    /// </summary>
+-    [Theory]
+-    [Trait("Audit", "YESDK-1633")]
+-    [InlineData(int.MinValue, int.MaxValue)]
+-    [InlineData(-1, int.MaxValue)]
+-    [InlineData(int.MinValue, 1)]
+-    public void YESDK1633_GetInt32WideRange_ConsumesRandomness(int fromInclusive, int toExclusive)
+-    {
+-        using var rng = new CountingRandomNumberGenerator();
+-
+-        var value = rng.GetInt32(fromInclusive, toExclusive);
+-
+-        Assert.InRange(value, fromInclusive, toExclusive - 1);
+-        Assert.True(rng.GetBytesCalls > 0, $"GetInt32 returned {value} without drawing any random bytes.");
+-    }
+-
+     // ---- #25 d) HkdfUtilities ---------------------------------------------------------------
+ 
+     /// <summary>
+@@ -210,15 +189,4 @@ public void Configure(FirmwareVersion version, ProtocolConfiguration? configurat
+ 
+         public void Dispose() { }
+     }
+-
+-    private sealed class CountingRandomNumberGenerator : RandomNumberGenerator
+-    {
+-        public int GetBytesCalls { get; private set; }
+-
+-        public override void GetBytes(byte[] data)
+-        {
+-            GetBytesCalls++;
+-            RandomNumberGenerator.Fill(data);
+-        }
+-    }
+-}
++}
+\ No newline at end of file

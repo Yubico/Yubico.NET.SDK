@@ -1,0 +1,16 @@
+{
+  "revision": "78c44513bed48d7d1b4603045ad8aa712b4ac397",
+  "command": [
+    "git",
+    "show",
+    "--format=fuller",
+    "--patch",
+    "78c44513bed48d7d1b4603045ad8aa712b4ac397",
+    "--",
+    "src/Core/src/Cryptography",
+    "src/Core/tests"
+  ],
+  "file": "historical-rng-removal-78c44513.patch",
+  "sha256": "62288ae84778396fb04faa1ef60ab1ce4533673dd71b024f3b19463d4287ee15",
+  "scope": "Exact helper/removal/repro source inspection; no execution or publication-time inference"
+}

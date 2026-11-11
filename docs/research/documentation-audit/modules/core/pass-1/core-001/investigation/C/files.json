@@ -1,0 +1,938 @@
+[
+  {
+    "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+    "source_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+    "pinned_git_blob": "0418d7391a09c38c3d86d844a09848b0207b9406",
+    "normalized_equal_to_baseline": true,
+    "lines": 389,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialKind.cs",
+    "source_sha256": "31aea8d0c89266ac907f00b187e656e7c67f7556fb155c361b72b214f5c675dd",
+    "pinned_git_blob": "381f5982a6407158f4579332b45bd70ad3624b2b",
+    "normalized_equal_to_baseline": true,
+    "lines": 50,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialPromptContext.cs",
+    "source_sha256": "aa1eb866acff5887fe426097fc5726e6e1e8a84d1f6fe5065e7c309cfc70bc45",
+    "pinned_git_blob": "43bf24070ab35f67861f5f0183204e9388b1aac9",
+    "normalized_equal_to_baseline": true,
+    "lines": 69,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+    "source_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5",
+    "pinned_git_blob": "31a445a3c16e2eca0d8e5545abf3d9b4b02e06ce",
+    "normalized_equal_to_baseline": true,
+    "lines": 134,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/IConsoleInputSource.cs",
+    "source_sha256": "1c5d1758ba6add46dc7f393d1eff07613da7d9a23c446455cf9c3dfe98ab38d2",
+    "pinned_git_blob": "5fce024430ba7f2f1fe5bff86d5b190aaeb707d5",
+    "normalized_equal_to_baseline": true,
+    "lines": 142,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+    "source_sha256": "948d8513a3853a476323b3263652a8065c4312c02a72910615b259fe93ac2d83",
+    "pinned_git_blob": "e4a88d963c05b5ab43fff6e431fa43a975c45d8b",
+    "normalized_equal_to_baseline": true,
+    "lines": 117,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+    "source_sha256": "64d9cac63c2b0d6c012f761943f2e4ae394340528d29fb875ffb1e1aeb2f39d2",
+    "pinned_git_blob": "fc38cc5e41de2683c0e042e205f3058a15fa975e",
+    "normalized_equal_to_baseline": true,
+    "lines": 84,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/IUserPresencePrompt.cs",
+    "source_sha256": "a569b9dd7c0a0386554ecae71c3de0b5854441c75e16d2bb8e4ba6ea734811c9",
+    "pinned_git_blob": "4dfb1090b73c65c7954ef25288a5a84f3f4bf0a1",
+    "normalized_equal_to_baseline": true,
+    "lines": 67,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceApplications.cs",
+    "source_sha256": "8bb35f828eadb9e8cbe84a1a0fdbeb96539b8dce9920ce3d41853436cc07fcf7",
+    "pinned_git_blob": "2c1b438d5f065121a8abbeebe032d5b3a0b94c3a",
+    "normalized_equal_to_baseline": true,
+    "lines": 32,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceBasis.cs",
+    "source_sha256": "ed4831a45ec802ad1848b6d53a2eb60c9a664409f9b7ffae450bf629f5f978ff",
+    "pinned_git_blob": "26bc97d870188c5cbabb561c9f3a5710bdbf594e",
+    "normalized_equal_to_baseline": true,
+    "lines": 43,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceContext.cs",
+    "source_sha256": "01fd2d3b668e6cde7811eddc27e9cf2dcf83f20097a13d6af3d0d537fb543d1c",
+    "pinned_git_blob": "1d70f9d744a876e5cf74c9d52b2c6a912e2bcd73",
+    "normalized_equal_to_baseline": true,
+    "lines": 78,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+    "source_sha256": "06e90a09cdd8f6ac45a9dbc0d9072f48f9d2ebcc9c9736bccc48864a4d9b63ed",
+    "pinned_git_blob": "853dbd8965dca128ee423079f7f2d0561341bd5a",
+    "normalized_equal_to_baseline": true,
+    "lines": 118,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "source_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "pinned_git_blob": "a9704b1ed619b31ccda8ff49fbae6397e0521baf",
+    "normalized_equal_to_baseline": true,
+    "lines": 205,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceOperations.cs",
+    "source_sha256": "ca493e573bbc6d80e1c8f057ddf12075284cba8db2fe02be21faf60ddcff7ff9",
+    "pinned_git_blob": "2b205a835f5f7c9457ca8f911a20588508be3e9c",
+    "normalized_equal_to_baseline": true,
+    "lines": 101,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceOutcome.cs",
+    "source_sha256": "c6c3184b39fc3c58c631666b1b42a4e61fa34ae4ad9a65a69793526bfa145b2f",
+    "pinned_git_blob": "4af4357859b914a5df49e626db63f9ab16d4140d",
+    "normalized_equal_to_baseline": true,
+    "lines": 31,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/AesUtilities.cs",
+    "source_sha256": "bba001cd62b3b4444e55ca819012679ba386516d7d989f2698a284a655bf551f",
+    "pinned_git_blob": "ddab9d2097f78703bded278a991807c41f3764df",
+    "normalized_equal_to_baseline": true,
+    "lines": 225,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+    "source_sha256": "829a5a818364199c93baab4071fd3d3ad6765cbf8f4ea51d0f9cde54eace6d9f",
+    "pinned_git_blob": "ae6ad77ad6d79f42823c57b8d99cf20cd8e602e1",
+    "normalized_equal_to_baseline": true,
+    "lines": 157,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/ArkgPrimitives.cs",
+    "source_sha256": "acbc1cb55ca788936b0dd821fbcfcff0236c24df95359a86f2aedf2559526013",
+    "pinned_git_blob": "84531811290437132786f178e1fd930b47aad40e",
+    "normalized_equal_to_baseline": true,
+    "lines": 46,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+    "source_sha256": "41806d866579406ab208d89401e7a8d800a164fe1366b1d3e2b9701f5d61a633",
+    "pinned_git_blob": "3b19dc377dc0647dae2b8424be656fd2689ff8fb",
+    "normalized_equal_to_baseline": true,
+    "lines": 729,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/Asn1KeyInfo.cs",
+    "source_sha256": "39dc6cb4e51935d0834e60a947f8ac766e7d1bb2bab32984ad154ecfa6457dde",
+    "pinned_git_blob": "106c146c288e6cda1c4fd811a4ab063daaa9345c",
+    "normalized_equal_to_baseline": true,
+    "lines": 44,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+    "source_sha256": "273b427def8b7d7f4a35a1109fb59a4b896f1d20c1661fe669708b851a4d5a1d",
+    "pinned_git_blob": "cb12eb699b8c519dfcebba438874de9e4695c972",
+    "normalized_equal_to_baseline": true,
+    "lines": 378,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+    "source_sha256": "66e491f2ef133e7ef8f23702ced303a3cbb22043a0e47102b33676e521021cd2",
+    "pinned_git_blob": "4ddd0fd3941e3662b797dd548a87d7b0724f15c1",
+    "normalized_equal_to_baseline": true,
+    "lines": 286,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+    "source_sha256": "99e7c28e9a18c4b7bc0d55c0864621b7cd384ba4aa4d9772a0196304cf9bd9ab",
+    "pinned_git_blob": "2e4595414e314123b224f324a9922806a2f0969e",
+    "normalized_equal_to_baseline": true,
+    "lines": 131,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs",
+    "source_sha256": "bf4b9b50f28551e6bea8c969a5ca4f7c7cda7da1c71377b579c9e8ee56b05e2e",
+    "pinned_git_blob": "aedecfa282c2bd3fc3457594681a7aec7424077b",
+    "normalized_equal_to_baseline": true,
+    "lines": 187,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnUtilities.cs",
+    "source_sha256": "060bb85d2acc3d19528e4adbb73c7aaa7559b4be311081a5fc045dcf36188bc1",
+    "pinned_git_blob": "43000550dcb268bfc913e0a24f6d9567d50a1767",
+    "normalized_equal_to_baseline": true,
+    "lines": 337,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/CmacPrimitives.cs",
+    "source_sha256": "a932263c808aa568e3cb6ca77e24b20301a4bf568c005dccbae75b0b2686ffcd",
+    "pinned_git_blob": "e987919eadcb22d21d6d1411927c192ab22b299c",
+    "normalized_equal_to_baseline": true,
+    "lines": 81,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+    "source_sha256": "f801f7e4b674e9098e681205da3ebe8307dc272b898a14a1c83d3eb3962081e7",
+    "pinned_git_blob": "f7238272f0c0f2b5fc556022e589eb5b30dd8902",
+    "normalized_equal_to_baseline": true,
+    "lines": 293,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+    "source_sha256": "070b55e579d6a92bbb171001cf2a50a17e4efb776c100d7ab79667168e01a544",
+    "pinned_git_blob": "4aa393100a1fc18314787f5199f93b4319994698",
+    "normalized_equal_to_baseline": true,
+    "lines": 62,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+    "source_sha256": "ddcc5cf946ef8601ff4adbae78c29aff14b5e32cb47583f63364e8ad1cdb2f40",
+    "pinned_git_blob": "61dab4694ff9ee8be85e2535d8360b9c3854fe07",
+    "normalized_equal_to_baseline": true,
+    "lines": 80,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs",
+    "source_sha256": "c84aa56f757fda2e5f7597962cf6df740f36cff2275dc9585373b2e0c9f3c22d",
+    "pinned_git_blob": "c3ee169117b7eec8433227681e1375690a36d6e7",
+    "normalized_equal_to_baseline": true,
+    "lines": 31,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs",
+    "source_sha256": "fcdef228f4a2bb3d050699194981b33245f865bb755b4bc0303dbfbd2c7233bb",
+    "pinned_git_blob": "fa43b1fc92b557659db71278fdd28e9c33312eb8",
+    "normalized_equal_to_baseline": true,
+    "lines": 77,
+    "read_complete": true,
+    "status": "READ-HISTORICAL-EXCLUSION"
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+    "source_sha256": "657bf1a5d83f713bf9a9fddbd6a28a0b647c4bf7bf41d87bb9d7c74ce6dc711e",
+    "pinned_git_blob": "d3b0994744b10e8855e8051efac2342392b1d31e",
+    "normalized_equal_to_baseline": true,
+    "lines": 52,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs",
+    "source_sha256": "e72da0896c4ade8a22eb0ce5699a842edc7b6314465c29b706396c7ee4b58827",
+    "pinned_git_blob": "6a4cdd7340f6d7695a7d4e22b39dcf9c1498a2d6",
+    "normalized_equal_to_baseline": true,
+    "lines": 130,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs",
+    "source_sha256": "778fee571d0f0395df1e6f40b56f50b9a899576fc23c3acbfcf633c08e9a10fc",
+    "pinned_git_blob": "5c666dc2cf9bd5c080e34d126cf451e9031a7ee8",
+    "normalized_equal_to_baseline": true,
+    "lines": 81,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs",
+    "source_sha256": "81c2c47e2a3faa58457531d9e45e887cc4683517945a6fa4beb7bfab269050fa",
+    "pinned_git_blob": "8a8f17027d1c6f463c8a7bd42e83da7c3afb058d",
+    "normalized_equal_to_baseline": true,
+    "lines": 139,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographicDefinitions.cs",
+    "source_sha256": "9fde6c5422b1f74c68bc987097c5a0e81e55b2af90378038e52c93ff1a37644a",
+    "pinned_git_blob": "461957c1857a17f56054897223b92cb8c5745ce2",
+    "normalized_equal_to_baseline": true,
+    "lines": 39,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+    "source_sha256": "25d08bea3f633da73e2d8502fbefe5a054709e5a5efae83bc1f7f6433c88a4d2",
+    "pinned_git_blob": "f36c37c382e00109951d622dce42721e18b5c34a",
+    "normalized_equal_to_baseline": true,
+    "lines": 323,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+    "source_sha256": "be37191c048c1b40651e1e7d53a75e0e71f2766e2ba9fce4ca8adf73e50038ad",
+    "pinned_git_blob": "5be13f6a0cd61cd0c9297275b656830ceb7114c2",
+    "normalized_equal_to_baseline": true,
+    "lines": 140,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+    "source_sha256": "096c16ba91e24d9afc500df29c97ef9a822c22e1478d062da51b68d33731a2b1",
+    "pinned_git_blob": "02b8a89c40589800a73ea1dc61c357f7f9b65a2d",
+    "normalized_equal_to_baseline": true,
+    "lines": 115,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/CurveInfo.cs",
+    "source_sha256": "9847305b871aed1a752cb54a4a3e5f294ae2f9e91b165c6ac584d0c1b15e03b3",
+    "pinned_git_blob": "a6ecb1732355600d8fc2dc8f49e6f66d6e30f698",
+    "normalized_equal_to_baseline": true,
+    "lines": 57,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECParametersExtensions.cs",
+    "source_sha256": "b28486df1af31f7a916995e91392a877d3185d50438c30af7ddbc1e12d0f17d4",
+    "pinned_git_blob": "0afab7557bff89dbcdacaeacbf9284e4dd538939",
+    "normalized_equal_to_baseline": true,
+    "lines": 60,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+    "source_sha256": "6a7c5d3ead97b189885e536d0d0a6b7dadfe1a73b4a26c1f13ee4b35d2cc16ab",
+    "pinned_git_blob": "b8caaefb00a693f30f8459be42d74af67adeff04",
+    "normalized_equal_to_baseline": true,
+    "lines": 288,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECPublicKey.cs",
+    "source_sha256": "82c326cbf96868e1b7b9b8490534450b81231794dd96fd64881c85daf39f29e9",
+    "pinned_git_blob": "19691729572232b6d94f431e7a85c6f15dc05f35",
+    "normalized_equal_to_baseline": true,
+    "lines": 191,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/EcdhPrimitives.cs",
+    "source_sha256": "212452f774a2b1fe5b440dc08ef3684658e273db19d99fc03c787f24a6c9aa0c",
+    "pinned_git_blob": "9752025cb1dcf7068288af4a246c3047463dfec5",
+    "normalized_equal_to_baseline": true,
+    "lines": 39,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/IArkgPrimitives.cs",
+    "source_sha256": "de84102c65c5174c3b4992b080b39829beb49ce62029fb8781a0756e7c87df71",
+    "pinned_git_blob": "32279a6aa8e0ffc3775b2c267ed6498314b66ea1",
+    "normalized_equal_to_baseline": true,
+    "lines": 81,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/ICmacPrimitives.cs",
+    "source_sha256": "35e581309105f2e3502121d41453e2ad54a43ff7d8f54aff0085fb987800b9a2",
+    "pinned_git_blob": "82af187e9ce1a583cf7d68767c83cdb5f3e0e44d",
+    "normalized_equal_to_baseline": true,
+    "lines": 24,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+    "source_sha256": "a650aa81dc6c555b543a218e671aea61e945deed94f7094cf505c0548359fe4f",
+    "pinned_git_blob": "98f469d96695294fae459d7cba25a682fbacb4b8",
+    "normalized_equal_to_baseline": true,
+    "lines": 36,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/IKeyBase.cs",
+    "source_sha256": "0df7a9691d6c628cb86bd4a1b899595b86b1a2aa0c8ac92d84b911ba37e90fb9",
+    "pinned_git_blob": "99f86e84031682e42814e492ca92062c5e0e9e69",
+    "normalized_equal_to_baseline": true,
+    "lines": 36,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/IPrivateKey.cs",
+    "source_sha256": "a5e02fcf62680464795ad5b4f323b08cc3676803184086994347fffc31614d2d",
+    "pinned_git_blob": "78881fce117eacdebb5786536769832a5ac25d96",
+    "normalized_equal_to_baseline": true,
+    "lines": 41,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+    "source_sha256": "f2e9ffb6ec2ebe821e37a32ce5517554948d3f698fe06bbbd8974f3be5256b2c",
+    "pinned_git_blob": "b187ee0b22039b1c1a6dd87ddb043fc2f17f1b24",
+    "normalized_equal_to_baseline": true,
+    "lines": 46,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/IPublicKey.cs",
+    "source_sha256": "e67be70749b5ca6cf534d1f3932e718f87e6af834b422e6fb2aa035915990508",
+    "pinned_git_blob": "25262fd2b86d04fc202db7c6ccea1bdde73b001b",
+    "normalized_equal_to_baseline": true,
+    "lines": 37,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/IPublicKeyExtensions.cs",
+    "source_sha256": "22310de0be252b46e787a4cc48fbb68bf6e303a53634cf0d09e3797935753cd9",
+    "pinned_git_blob": "7de169fc48c7c15a779bfa4a62c82aef7444e5ef",
+    "normalized_equal_to_baseline": true,
+    "lines": 28,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/KeyInfo.cs",
+    "source_sha256": "9e48f5e0e3cdbd62f9d5c64a6b5fe84f3e3ca629e5865b8750749079507ec465",
+    "pinned_git_blob": "48fd756049e90b5634163f82b1ebdeb58700ae5c",
+    "normalized_equal_to_baseline": true,
+    "lines": 94,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/KeyType.cs",
+    "source_sha256": "4ccb9fda8061067084e070c682b4a535bda038a4f3382224c2ade229328c7e8d",
+    "pinned_git_blob": "addae9b8f4ce2b2807bf1b1cf42168d5156819fc",
+    "normalized_equal_to_baseline": true,
+    "lines": 59,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/KeyTypeExtensions.cs",
+    "source_sha256": "bb760af5e5690885675018e5be005770f9c97f6c4f7497fa502c684135294bdb",
+    "pinned_git_blob": "db2e840acd550ebc708d3deab82f8cbdda4d03fc",
+    "normalized_equal_to_baseline": true,
+    "lines": 95,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/Oids.cs",
+    "source_sha256": "31af57e783095af7a7d62939706e81efc6974085577c15699975b472f721c2e2",
+    "pinned_git_blob": "adce96118bbbbe12ccd9c4fbc94544aebbb3656f",
+    "normalized_equal_to_baseline": true,
+    "lines": 107,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/PrivateKey.cs",
+    "source_sha256": "0f0750a2111dd64df4a7ea23bd0ad7fe3ab5a2dc39dc4737e35d4a044def753e",
+    "pinned_git_blob": "1374023b917d492b45cc9535e44fde6dab43118c",
+    "normalized_equal_to_baseline": true,
+    "lines": 76,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+    "source_sha256": "33ed0a5a993eb4103a8d1ffb7fe0b5f6deac91b7c6b683293eaea64020ee9452",
+    "pinned_git_blob": "038948c96705c0907293cd80b0f68cd53a34e435",
+    "normalized_equal_to_baseline": true,
+    "lines": 121,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/PublicKey.cs",
+    "source_sha256": "338ae06b1b5fb64f401a86bc9eed7ac5f2180f6f7c1c7d247c758fddd8a2056d",
+    "pinned_git_blob": "2fda19ac0ef7981be19ea59064d9abe0096cb0c1",
+    "normalized_equal_to_baseline": true,
+    "lines": 38,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+    "source_sha256": "c854a473d228470fa7741966cfa09476cc85f24871cde14721829449aca106ab",
+    "pinned_git_blob": "ca82e1c2b4a4b3e928508dac10c598e5c0ef7bd4",
+    "normalized_equal_to_baseline": true,
+    "lines": 138,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/RSAPrivateKey.cs",
+    "source_sha256": "822528251bae1f3ede0c755b81bdaaab61496e71a13fd2fea2429740fa4d6bd7",
+    "pinned_git_blob": "d529b4a0ecbc44fb7c29b823885adc6a7f100637",
+    "normalized_equal_to_baseline": true,
+    "lines": 160,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/RSAPublicKey.cs",
+    "source_sha256": "733b3dc1f974c000459b18cdc5a4e2589eea55dcebb88c4c91dad509582d6a8d",
+    "pinned_git_blob": "e1750bd88ef81daef77303b7ad5ad5482872a700",
+    "normalized_equal_to_baseline": true,
+    "lines": 111,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Cryptography/RsaFormat.cs",
+    "source_sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53",
+    "pinned_git_blob": "44f77bef483e7203a17b470ca343da92db3e273d",
+    "normalized_equal_to_baseline": true,
+    "lines": 1622,
+    "read_complete": true,
+    "status": "READ-HISTORICAL-EXCLUSION"
+  },
+  {
+    "path": "src/Core/src/Cryptography/X963Kdf.cs",
+    "source_sha256": "19726ba3b2398fc710a15afd0af7d8202f96713d6ba782ea323b2384c5033a6d",
+    "pinned_git_blob": "797c41f9ba9d08c965e71dfbf22ebcd8a2d74c85",
+    "normalized_equal_to_baseline": true,
+    "lines": 77,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/Base32.cs",
+    "source_sha256": "326de36769cdefb2136354bace6b496e39c2731d478299473475fa29e58e4011",
+    "pinned_git_blob": "fc1cd20330d27f70345fe6bb2bf879a922601b93",
+    "normalized_equal_to_baseline": true,
+    "lines": 120,
+    "read_complete": true,
+    "status": "READ-CLEAN-NOMINEE"
+  },
+  {
+    "path": "src/Core/src/Utilities/BerLength.cs",
+    "source_sha256": "1bc5304ce9444fe0f0e068748246875e5344453806b5a49f84453cf596cbf920",
+    "pinned_git_blob": "c05a16b7ce25e588150e30dffcfb3f98f51891a0",
+    "normalized_equal_to_baseline": true,
+    "lines": 56,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/ByteUtils.cs",
+    "source_sha256": "4d79076d1895f41a7d2bf3509902b0e807dfaf66ab4a12591450d65e3a4359b2",
+    "pinned_git_blob": "699c766ea09279a881b0caa170842784e11a2aa9",
+    "normalized_equal_to_baseline": true,
+    "lines": 12,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/Crc13239.cs",
+    "source_sha256": "5d35425361675fc7ec4e8ee4c21203e17bf9f7af9677fc9c3e7d1c22a0d49619",
+    "pinned_git_blob": "2344e6ecb15120bb12d3899e74289c23addce819",
+    "normalized_equal_to_baseline": true,
+    "lines": 48,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+    "source_sha256": "b2199a37a76357c932c61b65d6c214a2e31cc1be94353c239788779bcae554ba",
+    "pinned_git_blob": "1da9ea9e1a665dd7a9b87d2a5e1f894cd015c8c2",
+    "normalized_equal_to_baseline": true,
+    "lines": 85,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/DisposableBufferHandle.cs",
+    "source_sha256": "187f5c02860d98ab457dd0dfe2bef57d08b9189bffa0241a69dc68427f51ed03",
+    "pinned_git_blob": "167259880ac7ecfdcb1f9056653750e7d10bd7c6",
+    "normalized_equal_to_baseline": true,
+    "lines": 56,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/DisposableTlvDictionary.cs",
+    "source_sha256": "8c4d4a149f4eb80f2623f62e0ef043932d66f6502057b6946a9eb231e00e6b2f",
+    "pinned_git_blob": "2b11b3ed6ccd088fcc0409ed45003c211e82fd81",
+    "normalized_equal_to_baseline": true,
+    "lines": 109,
+    "read_complete": true,
+    "status": "READ-HISTORICAL-EXCLUSION"
+  },
+  {
+    "path": "src/Core/src/Utilities/DisposableTlvList.cs",
+    "source_sha256": "c56ad000fa7303169ec3aff3c33a1bee0c4ce615784bb2384aad2b33c6e2aa49",
+    "pinned_git_blob": "be52ffee70fff054c4cc9c6fae5068a1d7d68227",
+    "normalized_equal_to_baseline": true,
+    "lines": 91,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/MemoryExtensions.cs",
+    "source_sha256": "19c1eb8cbd96a137e7e3935ad207e160de20f5e653e1b88cbc5ac7b476a42e2a",
+    "pinned_git_blob": "7dc2f7280c477988f7d5c5767b181a7453296199",
+    "normalized_equal_to_baseline": true,
+    "lines": 39,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/MultiString.cs",
+    "source_sha256": "45adcedd24700ced17e77bcd758de47b33ad50f1168d5b1c3446009ee7c13735",
+    "pinned_git_blob": "c9767473c0702756fbfdb5fb840d1495f70ab367",
+    "normalized_equal_to_baseline": true,
+    "lines": 74,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/Tlv.cs",
+    "source_sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42",
+    "pinned_git_blob": "829915a09524ed713edf97b5bea18f77582f2449",
+    "normalized_equal_to_baseline": true,
+    "lines": 275,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/Utilities/TlvHelper.cs",
+    "source_sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44",
+    "pinned_git_blob": "0d415f18d4fb5d5f345b0e08cd99ee5a76c7f314",
+    "normalized_equal_to_baseline": true,
+    "lines": 269,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/src/YubiKitLogging.cs",
+    "source_sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "pinned_git_blob": "f6642bd38e1bcdcf9fd1da1151e8efba292a3817",
+    "normalized_equal_to_baseline": true,
+    "lines": 69,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+    "source_sha256": "1941f01c541936c018b5b2bab91f870f7d99ced69dc1618fde85e95b6b1347c7",
+    "pinned_git_blob": "75727f73480aa814b75c836c977f7e78938045ea",
+    "normalized_equal_to_baseline": true,
+    "lines": 200,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+    "source_sha256": "98aad4a9a600347f4aba9fc11a2bebf5706a6e0841c3c9b042de0ffcdfe5b855",
+    "pinned_git_blob": "6aa12208b48596184c566b63f638d2f3e1703c6f",
+    "normalized_equal_to_baseline": true,
+    "lines": 185,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/ConsoleCredentialReaderTests.cs",
+    "source_sha256": "d6e02a1f3fcbee186b6d465db79fd1dff4b744f032a8c5681cae281d103916aa",
+    "pinned_git_blob": "447ace88d59434d994d36e3922adadc7b7770097",
+    "normalized_equal_to_baseline": true,
+    "lines": 222,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/HexParsingTests.cs",
+    "source_sha256": "88b9e489b25d68f425b6320d36a84a213bb882b8d3a66db4e092e304ae39cea4",
+    "pinned_git_blob": "36457b4260bd0614bef7c131e8e5ee140f9f3d87",
+    "normalized_equal_to_baseline": true,
+    "lines": 161,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/UserPresenceIntentTests.cs",
+    "source_sha256": "cc11552fb8359df794c955c431e412272cab8ae6f87a6bf23522b788629937f9",
+    "pinned_git_blob": "9526ff83e41ca19b07185b49ced3b0b251dfec4f",
+    "normalized_equal_to_baseline": true,
+    "lines": 395,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AlgorithmIdentifierParameterTests.cs",
+    "source_sha256": "1e392325edcc90d627a0dfd65a1f58a912c2fe20f5adacffc536f70352d9f768",
+    "pinned_git_blob": "c4afb0aea563e9ce20f2188c9674a7f955fb7efb",
+    "normalized_equal_to_baseline": true,
+    "lines": 211,
+    "read_complete": false,
+    "status": "UNREAD"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+    "source_sha256": "7e38f085fe9613495c36593698f272af2f6c1b837c2bb5baa7cc6764e1adc61a",
+    "pinned_git_blob": "017143c836abda75c8c177bf885b7f0650cc80cf",
+    "normalized_equal_to_baseline": true,
+    "lines": 110,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+    "source_sha256": "96d55cf3bf798ac6aa1abf65e6071929950a12fb854b62efc3a8149e7a00357f",
+    "pinned_git_blob": "38cf94692aa117c3ee460a49160599be19b29f19",
+    "normalized_equal_to_baseline": true,
+    "lines": 571,
+    "read_complete": false,
+    "status": "UNREAD"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+    "source_sha256": "4d8d414b0d919896747822cf7527511dbe0da6fe08ad7d56965e4720d7734810",
+    "pinned_git_blob": "7b80316618483c1a17b1dcdd79e1874e3055bc88",
+    "normalized_equal_to_baseline": true,
+    "lines": 551,
+    "read_complete": false,
+    "status": "UNREAD"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyDecoderTests.cs",
+    "source_sha256": "8b3a173ae3bd241b4ec07d73a9d30c3d08bb36071f46e1405e686355d21e1578",
+    "pinned_git_blob": "70a9aabe2fd65bf8e0144b53eb7f398572ade793",
+    "normalized_equal_to_baseline": true,
+    "lines": 253,
+    "read_complete": false,
+    "status": "UNREAD"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+    "source_sha256": "8c26a047ed360a4e865ab21a6c44a117afd8e6b42e30b9547db37efb5084bd2a",
+    "pinned_git_blob": "4a18ca842ffb9d447e7e54fa6bd62ed019dfc359",
+    "normalized_equal_to_baseline": true,
+    "lines": 266,
+    "read_complete": false,
+    "status": "UNREAD"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+    "source_sha256": "c9b43fcff740c1c79fe56585f1b1e7fa798a4493f111f7c075f036a52775974f",
+    "pinned_git_blob": "3e0adccf0e057efa37e29acc307762668eaa9d27",
+    "normalized_equal_to_baseline": true,
+    "lines": 334,
+    "read_complete": false,
+    "status": "UNREAD"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+    "source_sha256": "a3a10aa9f03a9c9c38023c03a8a0518dd36d822273ebf6016f9f9b9de7787001",
+    "pinned_git_blob": "c3bfd0eacdcd47ca6ee8333253b456ee6fa05644",
+    "normalized_equal_to_baseline": true,
+    "lines": 103,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicDefinitionsTests.cs",
+    "source_sha256": "26d450371b0ad0de2af0a23a5f5f4ad36cc2ea1c9c38f964adb272017bb4ce00",
+    "pinned_git_blob": "9ac8bc37bddbded14fd925c90f7cbe3c27112397",
+    "normalized_equal_to_baseline": true,
+    "lines": 221,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographyProviderExtensionTests.cs",
+    "source_sha256": "b0d78f740745504de4c6e636f2013fbf95ca070938b2483f2f3c993ef3cfc294",
+    "pinned_git_blob": "76bc1acf2f2eace4f6af69e4f51cd52a93c9a09d",
+    "normalized_equal_to_baseline": true,
+    "lines": 438,
+    "read_complete": false,
+    "status": "UNREAD"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/Curve25519PrivateKeyTests.cs",
+    "source_sha256": "7a41e3311bd2d0e8849584a11264437a688c2b416f6cd238630608b351df1ecc",
+    "pinned_git_blob": "e394954295c3de429836d4c54c0ae12625b16d5e",
+    "normalized_equal_to_baseline": true,
+    "lines": 109,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+    "source_sha256": "777a5b752a742ee7e31e8b99d99df2f9bbf32c0a72cfe2a0095f8b4f84361597",
+    "pinned_git_blob": "e3854095d69131d395d23c48a3d436f28ff209cd",
+    "normalized_equal_to_baseline": true,
+    "lines": 59,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/KnownPrivateKeyVectors.cs",
+    "source_sha256": "10fa11ba4295d4a34ef97b877953b02ec38e2152163a8910374ee3ef7f434814",
+    "pinned_git_blob": "b24be7bb6aab7b452a0e843598db8a2ad4ca6ecd",
+    "normalized_equal_to_baseline": true,
+    "lines": 92,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+    "source_sha256": "2e7ab15dfab3dd56d0315674a89071bf6c88e2b383efc2b1a07e27d2537a4a02",
+    "pinned_git_blob": "0c4df05f03c0fdd27108b0f0430134de18a58b9a",
+    "normalized_equal_to_baseline": true,
+    "lines": 79,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyConsistencyTests.cs",
+    "source_sha256": "6bf4c94ffaad5057920d04ebbdfc2498cfd71a8cdeb12b006bde9624eedcdccf",
+    "pinned_git_blob": "d9f6cb8a6ababb2e81aa6533a7289557e015175e",
+    "normalized_equal_to_baseline": true,
+    "lines": 201,
+    "read_complete": false,
+    "status": "UNREAD"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+    "source_sha256": "d8fa24441e36092acdb7b1e7d839cfd841bc3bc33f95546a1a21a5051a561e2d",
+    "pinned_git_blob": "02698e21192e175651c22be4a675339be43d9f85",
+    "normalized_equal_to_baseline": true,
+    "lines": 454,
+    "read_complete": false,
+    "status": "UNREAD"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyZeroingFollowupTests.cs",
+    "source_sha256": "9ed00911dd78fa126730664aebe3e658bac914db05826d1e45b72b03f40b7b99",
+    "pinned_git_blob": "f247a59971d6f3de62c2e3cf2309838b3e9eb9f7",
+    "normalized_equal_to_baseline": true,
+    "lines": 90,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs",
+    "source_sha256": "7ad62c849fa4023baa623ae74bdb675756725e8d2bf5a3186354b5c01c4702b4",
+    "pinned_git_blob": "72e02a63e50e7ce1c12ac9bea6c9f18350c38f8f",
+    "normalized_equal_to_baseline": true,
+    "lines": 99,
+    "read_complete": true,
+    "status": "READ-CLEAN-NOMINEE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableArrayPoolBufferTests.cs",
+    "source_sha256": "c769011cc5fd5a1a1b27cd5d51d345ef5413f7c272c5a31e56fd8d5d6b1cf8ec",
+    "pinned_git_blob": "465a36c2bf86dd660f3e4e8e7d572910dd91bff5",
+    "normalized_equal_to_baseline": true,
+    "lines": 82,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableTlvListTests.cs",
+    "source_sha256": "a324cd388a830a5db885e59b97558741a5254c2aceb6b525859adcf575ebb5f3",
+    "pinned_git_blob": "ccb18ac48d69089eb575fe2a29aaef16d9b399b8",
+    "normalized_equal_to_baseline": true,
+    "lines": 366,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+    "source_sha256": "542c922ed5911320b517d5cfae7f524d276e43af52ac8372b0a102cdb2c4fbd9",
+    "pinned_git_blob": "02905759f50b8a2a7ef2ee7f117b941d69a74bdb",
+    "normalized_equal_to_baseline": true,
+    "lines": 223,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvTests.cs",
+    "source_sha256": "0de8bda5324ae6b29f00245df91ddae8a6aa33a34b375f703695f655260de92a",
+    "pinned_git_blob": "0117093778573dd937afe5f43b3d1a1662334b38",
+    "normalized_equal_to_baseline": true,
+    "lines": 187,
+    "read_complete": true,
+    "status": "READ-SOURCE-PENDING-FINAL-TRIAGE"
+  }
+]

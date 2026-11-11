@@ -1,0 +1,253 @@
+From 1b87964ba258e3ce39fd2959888dfe7cf81a6843 Mon Sep 17 00:00:00 2001
+From: Dain Nilsson <dain@yubico.com>
+Date: Mon, 3 Jun 2024 12:35:58 +0200
+Subject: [PATCH] SD: Add "replace-kvn" to key import/generate
+
+---
+ tests/device/cli/test_securitydomain.py | 25 +++++++++++++++
+ tests/device/conftest.py                | 24 ++++++++------
+ ykman/_cli/securitydomain.py            | 42 ++++++++++++++++++++-----
+ yubikit/oath.py                         |  7 +++++
+ yubikit/securitydomain.py               |  2 ++
+ 5 files changed, 82 insertions(+), 18 deletions(-)
+
+diff --git a/tests/device/cli/test_securitydomain.py b/tests/device/cli/test_securitydomain.py
+index cb1beb5f2..046c7ef11 100644
+--- a/tests/device/cli/test_securitydomain.py
++++ b/tests/device/cli/test_securitydomain.py
+@@ -15,6 +15,31 @@ def preconditions(ykman_cli):
+     ykman_cli("sd", "reset", "-f")
+ 
+ 
++def test_replace_kvn(ykman_cli):
++    key = "01" * 16
++    keys = f"{key}:{key}:{key}"
++
++    # Replace default SCP03 keyset
++    ykman_cli("--scp-sd", "1", "0", "sd", "keys", "import", "scp03", "2", keys)
++
++    # Generate new SCP11a key
++    ykman_cli("--scp", keys, "sd", "keys", "generate", "scp11a", "3", "-")
++
++    for i in range(3, 8):
++        ykman_cli(
++            "--scp",
++            keys,
++            "sd",
++            "keys",
++            "generate",
++            "scp11a",
++            str(i + 1),
++            "-r",
++            str(i),
++            "-",
++        )
++
++
+ def test_scp11a(ykman_cli):
+     with pytest.raises(ValueError):
+         with open_file("scp/oce.pfx") as f:
+diff --git a/tests/device/conftest.py b/tests/device/conftest.py
+index 4999a5a5b..b10cb60af 100644
+--- a/tests/device/conftest.py
++++ b/tests/device/conftest.py
+@@ -23,6 +23,20 @@ def _device(pytestconfig):
+             serial = None
+         else:
+             pytest.skip("No serial specified for device tests")
++
++    version_str = pytestconfig.getoption("use_version")
++    if version_str:
++        version = Version.from_string(version_str)
++
++        # Monkey patch all parsing of Version to use the supplied value
++        # N.B. There are some instances where ideally we would replace the version,
++        # but we don't really care
++        def get_version(cls, data):
++            return version
++
++        Version.from_bytes = classmethod(get_version)
++        Version.from_string = classmethod(get_version)
++
+     reader = pytestconfig.getoption("reader")
+     if reader:
+         readers = list_devices(reader)
+@@ -38,16 +52,6 @@ def _device(pytestconfig):
+         dev, info = devices[0]
+     if info.serial != serial:
+         pytest.exit("Device serial does not match: %d != %r" % (serial, info.serial))
+-    version = pytestconfig.getoption("use_version")
+-    if version:
+-        info.version = Version.from_string(version)
+-
+-        # Monkey patch all parsing of Version to use the supplied value
+-        def get_version(cls, data):
+-            return info.version
+-
+-        Version.from_bytes = classmethod(get_version)
+-        Version.from_string = classmethod(get_version)
+ 
+     return dev, info
+ 
+diff --git a/ykman/_cli/securitydomain.py b/ykman/_cli/securitydomain.py
+index 50e8be78f..91299b9db 100644
+--- a/ykman/_cli/securitydomain.py
++++ b/ykman/_cli/securitydomain.py
+@@ -104,8 +104,16 @@ def info(ctx):
+     data: List[Any] = []
+     cas = sd.get_supported_ca_identifiers()
+     for ref in sd.get_key_information().keys():
+-        if ref.kid < 0x10:  # SCP03
+-            data.append(f"{ref}")
++        if ref.kid == 1:  # SCP03
++            data.append(
++                {
++                    f"SCP03 (KID=0x01-0x03, KVN=0x{ref.kvn:02X})": [
++                        "Default key set" if ref.kvn == 0xFF else "Imported key set"
++                    ]
++                }
++            )
++        elif ref.kid in (2, 3):  # SCP03 always in full key sets
++            continue
+         else:  # SCP11
+             inner: Dict[str, Any] = {}
+             if ref in cas:
+@@ -116,9 +124,13 @@ def info(ctx):
+                 ]
+             except ApduError:
+                 pass
+-            data.append({ref: inner})
++            try:
++                name = ScpKid(ref.kid).name
++            except ValueError:
++                name = "SCP11 OCE CA"
++            data.append({f"{name} (KID=0x{ref.kid:02X}, KVN=0x{ref.kvn:02X})": inner})
+ 
+-    click.echo("\n".join(pretty_print(data)))
++    click.echo("\n".join(pretty_print({"SCP keys": data})))
+ 
+ 
+ @securitydomain.command()
+@@ -202,7 +214,14 @@ def convert(self, value, param, ctx):
+ @click.pass_context
+ @click_key_argument
+ @click.argument("public-key-output", type=click.File("wb"), metavar="PUBLIC-KEY")
+-def generate_key(ctx, key, public_key_output):
++@click.option(
++    "-r",
++    "--replace-kvn",
++    type=HexIntParamType(),
++    default=0,
++    help="replace an existing key of the same type (same KID)",
++)
++def generate_key(ctx, key, public_key_output, replace_kvn):
+     """
+     Generate an asymmetric key pair.
+ 
+@@ -222,7 +241,7 @@ def generate_key(ctx, key, public_key_output):
+     session = ctx.obj["session"]
+ 
+     try:
+-        public_key = session.generate_ec_key(key)
++        public_key = session.generate_ec_key(key, replace_kvn=replace_kvn)
+     except ApduError as e:
+         if e.sw == SW.NO_SPACE:
+             raise CliFail("No space left for SCP keys")
+@@ -246,7 +265,14 @@ def generate_key(ctx, key, public_key_output):
+ @click_key_argument
+ @click.argument("input", metavar="INPUT")
+ @click.option("-p", "--password", help="password used to decrypt the file (if needed)")
+-def import_key(ctx, key, input, password):
++@click.option(
++    "-r",
++    "--replace-kvn",
++    type=HexIntParamType(),
++    default=0,
++    help="replace an existing key of the same type (same KID)",
++)
++def import_key(ctx, key, input, password, replace_kvn):
+     """
+     Import a key or certificate.
+ 
+@@ -309,7 +335,7 @@ def import_key(ctx, key, input, password):
+         raise CliFail(f"Invalid value for KID={key.kid:x}")
+ 
+     try:
+-        session.put_key(key, target)
++        session.put_key(key, target, replace_kvn)
+     except ApduError as e:
+         if e.sw == SW.NO_SPACE:
+             raise CliFail("No space left for SCP keys")
+diff --git a/yubikit/oath.py b/yubikit/oath.py
+index 28bff7dcf..19975fece 100644
+--- a/yubikit/oath.py
++++ b/yubikit/oath.py
+@@ -5,6 +5,7 @@
+     Version,
+     Tlv,
+     BadResponseError,
++    NotSupportedError,
+ )
+ from .core.smartcard import AID, SmartCardConnection, SmartCardProtocol, ScpKeyParams
+ 
+@@ -273,6 +274,8 @@ def __init__(
+         )
+ 
+         if scp_key_params:
++            if (5, 0, 0) <= self._version < (5, 6, 3):
++                raise NotSupportedError("SCP for OATH requires YubiKey 5.6.3 or later")
+             self.protocol.init_scp(scp_key_params)
+         self._scp_params = scp_key_params
+ 
+@@ -424,6 +427,7 @@ def rename_credential(
+         :param name: The new name of the credential.
+         :param issuer: The credential issuer.
+         """
++        logger.debug(f"Renaming credential '{credential_id!r}' to '{issuer}:{name}'")
+         require_version(self.version, (5, 3, 1))
+         _, _, period = _parse_cred_id(credential_id, OATH_TYPE.TOTP)
+         new_id = _format_cred_id(issuer, name, OATH_TYPE.TOTP, period)
+@@ -435,6 +439,7 @@ def rename_credential(
+ 
+     def list_credentials(self) -> List[Credential]:
+         """List OATH credentials."""
++        logger.debug("Listing OATH credentials...")
+         creds = []
+         for tlv in Tlv.parse_list(self.protocol.send_apdu(0, INS_LIST, 0, 0)):
+             data = Tlv.unpack(TAG_NAME_LIST, tlv)
+@@ -454,6 +459,7 @@ def calculate(self, credential_id: bytes, challenge: bytes) -> bytes:
+         :param credential_id: The id of the credential.
+         :param challenge: The challenge.
+         """
++        logger.debug(f"Calculating response for credential: {credential_id!r}")
+         resp = Tlv.unpack(
+             TAG_RESPONSE,
+             self.protocol.send_apdu(
+@@ -471,6 +477,7 @@ def delete_credential(self, credential_id: bytes) -> None:
+ 
+         :param credential_id: The id of the credential.
+         """
++        logger.debug(f"Deleting crededential: {credential_id!r}")
+         self.protocol.send_apdu(0, INS_DELETE, 0, 0, Tlv(TAG_NAME, credential_id))
+         logger.info("Credential deleted")
+ 
+diff --git a/yubikit/securitydomain.py b/yubikit/securitydomain.py
+index dfb410b48..356d9562d 100644
+--- a/yubikit/securitydomain.py
++++ b/yubikit/securitydomain.py
+@@ -3,6 +3,7 @@
+     AID,
+     SmartCardConnection,
+     SmartCardProtocol,
++    ApduFormat,
+     ApduError,
+     SW,
+     ScpProcessor,
+@@ -100,6 +101,7 @@ class SecurityDomainSession:
+     def __init__(self, connection: SmartCardConnection):
+         self.protocol = SmartCardProtocol(connection)
+         self.protocol.select(AID.SECURE_DOMAIN)
++        self.protocol.apdu_format = ApduFormat.EXTENDED
+         logger.debug("SecurityDomain session initialized")
+ 
+     def authenticate(self, key_params: ScpKeyParams) -> None:

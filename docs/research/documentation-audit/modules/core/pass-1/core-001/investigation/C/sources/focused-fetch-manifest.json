@@ -1,0 +1,50 @@
+[
+  {
+    "file": "draft-arkg-09.txt",
+    "url": "https://www.ietf.org/archive/id/draft-bradleylundberg-cfrg-arkg-09.txt",
+    "sha256": "a4815596bc860c87f1a4f5e234d66f1fb48e5d5e81741957a06b826ea5c3a3be",
+    "bytes": 86658,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passage review pending"
+  },
+  {
+    "file": "rfc9380.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc9380.txt",
+    "sha256": "a2e6ab02b2117d6f52ac293020857752972b2e23ae005c33f612e40436ff4b6d",
+    "bytes": 359795,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passage review pending"
+  },
+  {
+    "file": "rfc9864.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc9864.txt",
+    "sha256": "0f9b6dd26b3285fd9fe7f7e0a82e684d06512dee642703d51c6f88a7b0edaa2b",
+    "bytes": 34530,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passage review pending"
+  },
+  {
+    "file": "openssl-3.0.0-BN_bn2bin.pod",
+    "url": "https://raw.githubusercontent.com/openssl/openssl/openssl-3.0.0/doc/man3/BN_bn2bin.pod",
+    "sha256": "b8614960db2c3b91ac74522d4eda3eb03c381c934daa4e29142d1ba04f83f233",
+    "bytes": 4716,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passage review pending"
+  },
+  {
+    "file": "openssl-3.0.0-EC_POINT_new.pod",
+    "url": "https://raw.githubusercontent.com/openssl/openssl/openssl-3.0.0/doc/man3/EC_POINT_new.pod",
+    "sha256": "cc565ed5ca6c3e1b765ff57a77b98bf5035dfc0c17646c34febf1ed84ba234ed",
+    "bytes": 13256,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passage review pending"
+  },
+  {
+    "file": "openssl-3.0.0-EVP_MAC.pod",
+    "url": "https://raw.githubusercontent.com/openssl/openssl/openssl-3.0.0/doc/man3/EVP_MAC.pod",
+    "sha256": "103f52edd55444eea04308c3f819f07e673e7da903ef215410791f7bc439a95d",
+    "bytes": 18591,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passage review pending"
+  }
+]

@@ -1,0 +1,127 @@
+[
+  {
+    "name": "AesGcm.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/AesGcm.Apple.cs",
+    "sha": "b2621493ae2ec43fef8c2eb1a119a768d6da2b98"
+  },
+  {
+    "name": "AesImplementation.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/AesImplementation.Apple.cs",
+    "sha": "951d3550f1021ddcabb57a45f32095311ba9474d"
+  },
+  {
+    "name": "AppleCCCryptor.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/AppleCCCryptor.cs",
+    "sha": "4def7c949fa6cfc662fd75312d2da50a9b867f83"
+  },
+  {
+    "name": "AppleCCCryptorLite.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/AppleCCCryptorLite.cs",
+    "sha": "638de792af4210e42daceb5a0f5b1cf06e8b13d4"
+  },
+  {
+    "name": "ChaCha20Poly1305.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ChaCha20Poly1305.Apple.cs",
+    "sha": "55d8dee2c7c1e7fb5a61a6c387fa1695d2039892"
+  },
+  {
+    "name": "DesImplementation.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/DesImplementation.Apple.cs",
+    "sha": "84b6cd85b07990a1e8a87bc25a88bd4683a639f4"
+  },
+  {
+    "name": "ECDsa.Create.Android.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsa.Create.Android.cs",
+    "sha": "eaa773c1e3e21ed5ab945291fbe855b5edf69c60"
+  },
+  {
+    "name": "ECDsa.Create.NotSupported.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsa.Create.NotSupported.cs",
+    "sha": "98476a375bc351a013ec4d09f8ee80eb896fc964"
+  },
+  {
+    "name": "ECDsa.Create.OpenSsl.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsa.Create.OpenSsl.cs",
+    "sha": "6b6d8089f3854b5c43357bd4f15d35e8fe4ccbc0"
+  },
+  {
+    "name": "ECDsa.Create.SecurityTransforms.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsa.Create.SecurityTransforms.cs",
+    "sha": "0aa9a1b71b8e0ec87601a0df30889c8162908c31"
+  },
+  {
+    "name": "ECDsa.Create.Windows.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsa.Create.Windows.cs",
+    "sha": "761b0c3eae9d22cd4dea70aeb32b1722cdc7a755"
+  },
+  {
+    "name": "ECDsa.Xml.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsa.Xml.cs",
+    "sha": "efec2250f5d75397298431a079c4f57d643991c6"
+  },
+  {
+    "name": "ECDsa.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsa.cs",
+    "sha": "862d8f790c9a852c4ec694afe9b139fe62d6e72d"
+  },
+  {
+    "name": "ECDsaCng.Key.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsaCng.Key.cs",
+    "sha": "7c441dcf9f32f57677f5fb7cc19a4337576a33e6"
+  },
+  {
+    "name": "ECDsaCng.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsaCng.cs",
+    "sha": "a91e4208b933a17e0097a2cea8c063b3c0315714"
+  },
+  {
+    "name": "ECDsaOpenSsl.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsaOpenSsl.cs",
+    "sha": "b8318f56d2ff5e86a299ce7a41b237c1063297d1"
+  },
+  {
+    "name": "ECDsaWrapper.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsaWrapper.cs",
+    "sha": "bb9cadd9b8524a28395d8c5b2930abd1154b1ec9"
+  },
+  {
+    "name": "EccKeyFormatHelper.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/EccKeyFormatHelper.cs",
+    "sha": "9671592149e621fe1c2c30c339dcd90d287849c0"
+  },
+  {
+    "name": "HashAlgorithmNames.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/HashAlgorithmNames.Apple.cs",
+    "sha": "3cc658ee23164819244013774e5cd8462fc7da52"
+  },
+  {
+    "name": "HashProviderDispenser.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/HashProviderDispenser.Apple.cs",
+    "sha": "60c8b31f876b3654e82d9aff1c90772fcfbb7f12"
+  },
+  {
+    "name": "LiteHash.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/LiteHash.Apple.cs",
+    "sha": "6ba4da55bf738f63df6733be11483471a52f3a3d"
+  },
+  {
+    "name": "Pbkdf2Implementation.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/Pbkdf2Implementation.Apple.cs",
+    "sha": "be842135d75f73cbff2287a35a530367f9ee3fc5"
+  },
+  {
+    "name": "RC2Implementation.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/RC2Implementation.Apple.cs",
+    "sha": "5ff071a57c5c5fe76cf2b4985b951e4a20883a22"
+  },
+  {
+    "name": "RandomNumberGeneratorImplementation.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/RandomNumberGeneratorImplementation.Apple.cs",
+    "sha": "3bb1cd89143e835ed7e27f1ac55abd978c7b2885"
+  },
+  {
+    "name": "TripleDesImplementation.Apple.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/TripleDesImplementation.Apple.cs",
+    "sha": "e7c9668036ed5d52540769b63fae57bf14b4b05f"
+  }
+]

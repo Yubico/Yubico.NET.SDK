@@ -168,3 +168,18 @@ Completed A/B1/B2/B3 records are being checkpointed independently of the still-a
 and validation work. Their original source bytes are protected by a run-local Git attribute rule.
 The retained PC/SC Part 5 original PDF is registered by exact path, size, SHA-256 and source URL in
 `sources/primary-binaries.json`; it is citation evidence, distinct from generated runtime artifacts.
+
+## Crypto completion and final family release
+
+Packet C completed all 104 primary files and all 176 shared IDs: 1,562 final semantic dispositions,
+20 stable provisional concern groups, 207 substantive clean nominees and 85 candidate-associated
+unchanged paths for later editing/review. Eighteen inherited provenance rows / 13 nonadditive groups
+retain their original registry authority. Bounded normative/provider/generator-provenance gaps remain.
+
+**B6 APDU/SCP is active**, owned by fresh Sol `ses_e33107603ffecd1Qe5QFgzPgW3` on the exact 50-file
+packet. B4 and B5 are the other active investigators. The inventory owner is adding completed C to
+the structural roll-up; incomplete or mutable returns remain uncredited.
+
+C's original SEC 2 and X.690 PDFs and ISO-8859-1 X.690 metadata page are registered by exact source
+identity. The HTML's original encoding declaration is retained; it is encoded text, not an executable
+binary. Original bytes are preserved rather than silently transcoded for archive validation.

@@ -1,0 +1,20 @@
+[
+  {
+    "file": "x690-202102-metadata.html",
+    "url": "https://www.itu.int/rec/T-REC-X.690-202102-I/en",
+    "final_url": "https://www.itu.int/rec/T-REC-X.690-202102-I/en",
+    "sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+    "bytes": 11512,
+    "requested_at_utc": "2026-11-11T22:56:23.143991+00:00",
+    "content_type": "text/html"
+  },
+  {
+    "file": "x690-202102.pdf",
+    "url": "https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-X.690-202102-I!!PDF-E&type=items",
+    "final_url": "https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-X.690-202102-I!!PDF-E&type=items",
+    "sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+    "bytes": 840764,
+    "requested_at_utc": "2026-11-11T22:56:23.583516+00:00",
+    "content_type": "application/pdf"
+  }
+]

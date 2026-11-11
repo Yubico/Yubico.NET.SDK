@@ -1,0 +1,198 @@
+From 652e5825a2ecea8f9b4e3c55da6bf7b802594263 Mon Sep 17 00:00:00 2001
+From: Dain Nilsson <dain@yubico.com>
+Date: Wed, 21 May 2025 14:17:13 +0200
+Subject: [PATCH] Support SCP for short APDUs
+
+Use short APDUs for NFC as many readers don't support extended
+---
+ tests/device/test_scp.py           | 36 ++++++++++++++++++++++++
+ ykman/_cli/apdu.py                 | 11 ++++----
+ yubikit/core/smartcard/__init__.py | 44 ++++++++++++++++++++++++------
+ 3 files changed, 77 insertions(+), 14 deletions(-)
+ create mode 100644 tests/device/test_scp.py
+
+diff --git a/tests/device/test_scp.py b/tests/device/test_scp.py
+new file mode 100644
+index 000000000..7ff20b238
+--- /dev/null
++++ b/tests/device/test_scp.py
+@@ -0,0 +1,36 @@
++import os
++
++import pytest
++
++from yubikit.core import TRANSPORT
++from yubikit.core.smartcard import AID, ApduFormat, SmartCardProtocol
++from yubikit.core.smartcard.scp import KeyRef, Scp11KeyParams
++from yubikit.securitydomain import SecurityDomainSession
++
++from . import condition
++
++
++@pytest.fixture
++@condition.min_version(5, 7, 2)
++def scp_params(ccid_connection):
++    ref = KeyRef(0x13, 0x1)
++    sd = SecurityDomainSession(ccid_connection)
++    if ref not in sd.get_key_information():
++        pytest.skip("Default SCP11b key not present, skipping SCP test")
++    chain = sd.get_certificate_bundle(ref)
++    return Scp11KeyParams(ref, chain[-1].public_key())
++
++
++@pytest.mark.parametrize("size", (10, 255, 256, 512, 2048))
++@pytest.mark.parametrize("format", ApduFormat)
++def test_scp_apdus(format, size, ccid_connection, scp_params):
++    if format == ApduFormat.EXTENDED and ccid_connection.transport != TRANSPORT.USB:
++        pytest.skip("Extended APDU format not used over NFC")
++
++    session = SmartCardProtocol(ccid_connection)
++    session.select(AID.MANAGEMENT)
++    session.init_scp(scp_params, format == ApduFormat.SHORT)
++
++    payload = os.urandom(size)
++    resp = session.send_apdu(0, 1, 0, 0, payload)
++    assert resp == payload
+diff --git a/ykman/_cli/apdu.py b/ykman/_cli/apdu.py
+index b1f4fde80..acc355af6 100644
+--- a/ykman/_cli/apdu.py
++++ b/ykman/_cli/apdu.py
+@@ -34,6 +34,7 @@
+ 
+ import click
+ 
++from yubikit.core import TRANSPORT
+ from yubikit.core.smartcard import (
+     AID,
+     SW,
+@@ -108,7 +109,7 @@ def _print_response(resp: bytes, sw: int, no_pretty: bool) -> None:
+     required=False,
+     help="select application",
+ )
+-@click.option("--short", is_flag=True, help="use short APDUs instead of extended")
++@click.option("--short", is_flag=True, help="force usage of short APDUs")
+ @click.argument("apdu", nargs=-1)
+ @click.option("-s", "--send-apdu", multiple=True, help="provide full APDUs")
+ def apdu(ctx, no_pretty, app, short, apdu, send_apdu):
+@@ -162,11 +163,9 @@ def apdu(ctx, no_pretty, app, short, apdu, send_apdu):
+         else:
+             params = None
+ 
+-        # Use extended APDUs on YK 4+, unless --short is specified
+-        if not short and info.version[0] >= 4:
++        # Use extended APDUs on YK 4+ over USB, unless --short is specified
++        if not short and info.version[0] >= 4 and conn.transport == TRANSPORT.USB:
+             protocol.apdu_format = ApduFormat.EXTENDED
+-        elif params:
+-            ctx.fail("--short cannot be used with SCP")
+ 
+         if app:
+             is_first = False
+@@ -176,7 +175,7 @@ def apdu(ctx, no_pretty, app, short, apdu, send_apdu):
+ 
+         if params:
+             click.echo("INITIALIZE SCP")
+-            protocol.init_scp(params)
++            protocol.init_scp(params, short)
+ 
+         if send_apdu:  # Compatibility mode (full APDUs)
+             for apdu in send_apdu:
+diff --git a/yubikit/core/smartcard/__init__.py b/yubikit/core/smartcard/__init__.py
+index 36acf30cd..9b21c40f2 100644
+--- a/yubikit/core/smartcard/__init__.py
++++ b/yubikit/core/smartcard/__init__.py
+@@ -280,11 +280,22 @@ def __init__(
+         scp_state: ScpState,
+         max_apdu_size: int,
+         ins_send_remaining: int = INS_SEND_REMAINING,
++        extended_apdus: bool = True,
+     ):
+         super().__init__(
+-            connection, True, max_apdu_size, ins_send_remaining=ins_send_remaining
++            connection,
++            extended_apdus,
++            max_apdu_size,
++            ins_send_remaining=ins_send_remaining,
+         )
+         self._state = scp_state
++        self.is_short = not extended_apdus
++        # For short APDUs, we need to use the extended processor for MAC calculation
++        self.extended_processor = (
++            ExtendedApduProcessor(connection, max_apdu_size)
++            if self.is_short
++            else self.processor
++        )
+ 
+     def send_apdu(self, cla, ins, p1, p2, data, le, encrypt: bool = True):
+         cla |= 0x04
+@@ -294,7 +305,13 @@ def send_apdu(self, cla, ins, p1, p2, data, le, encrypt: bool = True):
+             data = self._state.encrypt(data)
+ 
+         # Calculate and add MAC to data
+-        apdu = self.processor.format_apdu(cla, ins, p1, p2, data + b"\0" * 8, 0)
++        if self.is_short and len(data) + 8 > SHORT_APDU_MAX_CHUNK:
++            # Will chain command, but MAC should be calculated on whole data
++            apdu = self.extended_processor.format_apdu(
++                cla, ins, p1, p2, data + b"\0" * 8, 0
++            )
++        else:
++            apdu = self.processor.format_apdu(cla, ins, p1, p2, data + b"\0" * 8, 0)
+         mac = self._state.mac(apdu[:-8])
+         data = data + mac
+ 
+@@ -387,7 +404,8 @@ def configure(self, version: Version) -> None:
+             return
+ 
+         if version[0] > 3:
+-            self._apdu_format = ApduFormat.EXTENDED
++            if self.connection.transport == TRANSPORT.USB:
++                self._apdu_format = ApduFormat.EXTENDED
+             self._max_apdu_size = (
+                 _MaxApduSize.YK4_3 if version >= (4, 3) else _MaxApduSize.YK4
+             )
+@@ -439,7 +457,9 @@ def select(self, aid: bytes) -> bytes:
+                 raise ApplicationNotAvailableError()
+             raise
+ 
+-    def init_scp(self, key_params: ScpKeyParams) -> None:
++    def init_scp(self, key_params: ScpKeyParams, short_apdus: bool = False) -> None:
++        if self.connection.transport == TRANSPORT.USB and not short_apdus:
++            self._apdu_format = ApduFormat.EXTENDED
+         try:
+             if isinstance(key_params, Scp03KeyParams):
+                 self._scp03_init(key_params)
+@@ -447,8 +467,8 @@ def init_scp(self, key_params: ScpKeyParams) -> None:
+                 self._scp11_init(key_params)
+             else:
+                 raise ValueError("Unsupported ScpKeyParams")
+-            self._apdu_format = ApduFormat.EXTENDED
+-            self._max_apdu_size = _MaxApduSize.YK4_3
++
++            self._max_apdu_size = max(_MaxApduSize.YK4_3, self._max_apdu_size)
+             logger.info("SCP initialized")
+         except ApduError as e:
+             if e.sw == SW.CLASS_NOT_SUPPORTED:
+@@ -465,7 +485,11 @@ def _scp03_init(self, key_params: Scp03KeyParams) -> None:
+         logger.debug("Initializing SCP03")
+         scp, host_cryptogram = ScpState.scp03_init(self.send_apdu, key_params)
+         processor = ScpProcessor(
+-            self.connection, scp, _MaxApduSize.YK4_3, self._ins_send_remaining
++            self.connection,
++            scp,
++            _MaxApduSize.YK4_3,
++            self._ins_send_remaining,
++            extended_apdus=self._apdu_format == ApduFormat.EXTENDED,
+         )
+ 
+         # Send EXTERNAL AUTHENTICATE
+@@ -479,5 +503,9 @@ def _scp11_init(self, key_params: Scp11KeyParams) -> None:
+         logger.debug("Initializing SCP11")
+         scp = ScpState.scp11_init(self.send_apdu, key_params)
+         self._processor = ScpProcessor(
+-            self.connection, scp, _MaxApduSize.YK4_3, self._ins_send_remaining
++            self.connection,
++            scp,
++            _MaxApduSize.YK4_3,
++            self._ins_send_remaining,
++            extended_apdus=self._apdu_format == ApduFormat.EXTENDED,
+         )

@@ -1,0 +1,33 @@
+# Packet C bounded probe and fixture plan
+
+**Status:** proposed only. No experiments, production tests, builds, native calls or
+device commands ran in this packet. Coordinator approval and serial host assignment
+are required before execution. Use the existing run-owned validation foundation rather
+than creating a general-purpose framework. Each result must name source revision,
+runtime/provider and actual executed fixture count.
+
+## Managed host checks with meaningful outcomes
+
+| Candidates | Fixtures and observations | Boundary |
+| --- | --- | --- |
+| C001–C004 | Fake console with pre-canceled token plus a complete queued PIN and Enter; the same with no queued key; redirected line under pre-cancellation; confirmation cancellation/throw while first owner exists. Retain the actual owner aliases through cleanup. | Distinguish cancellation request, polling branch, returned result and disposed buffer. A fake cannot prove physical terminal/SSH behavior. Do not retain real credentials. |
+| C003 | `é`, a supplementary scalar such as U+1F600, a lone high surrogate, a lone low surrogate, a pair split by Backspace/control input, eight versus nine UTF-16 units, maximum UTF-8 byte limit, empty Enter/EOF/Escape, separator-only hex and arbitrary-length redirected hex. Compare Core reader, CLI SecureCredential and caller context separately. | First agree intended Unicode/empty policy. Record encoded bytes with synthetic nonsecret fixtures only; preserve different code-point/UTF-16/byte counts. No PIN verification/device submissions. |
+| C005–C007 | Capture source and Tlv.Value/AsMemory aliases before disposal; assert source independence and owned-view clearing. Feed `5A 01 AA 5B 01 BB` to single-item Create; tags `0x0102`, `0xFFFF`, valid `0x9F33`, and continuation-tag input `9F 81 01 ...`; BerLength `-1`, `0`, `127`, `128`, `65535`, `65536`. | Establish exact single-item/tag admission behavior without calling it full BER validation. Check untouched borrowed input and failure ownership. |
+| C006 | Synthetic sensitive TLV sequence with skipped match, duplicate dictionary tags, and malformed last item. Use a narrowly approved allocation/observation seam or isolated retained-copy fixture to inspect arrays abandoned by ParseData/DecodeDictionary. | Source shows the gap; a GC scan is not a reliable zeroing oracle. Avoid changing production code in this documentation pass. |
+| C008 | Two factories with distinct recording providers: initialize a static logger under factory A, Configure B, create a new logger, restore A; interleave two UseTemporary scopes deterministically. Throw an application callback exception containing a synthetic sentinel and capture warning exception payload and formatted message. | Factory selection, lifetime ownership and exception propagation differ from payload redaction. Include pre-initialized type behavior; do not infer global secret safety from an empty capture. |
+| C009 | Start with independently published valid SPKI/PKCS#8 fixtures. Append valid DER NULL outside the outer sequence, inside SPKI after BIT STRING, inside RSA component sequence after expected fields, and after the nested Ed/X OCTET STRING. Supply duplicate/unknown EC optional fields, inner curve mismatch, negative RSA INTEGER contents, PKCS#8 attributes, and RFC 5958 version 1. | Record the actual factory path and exception type; generic and typed EC SPKI factories differ. Do not use production encoders as the sole oracle for malformed admission. Clear fixture copies that contain synthetic private material. |
+| C010/C016 | Independently published matching/mismatching EC points; half-supplied Q; scalar zero/out-of-range at correct width; on-curve versus off-curve public point; RSA selected relation violations and deliberately noncanonical ranges. Compare import acceptance against the agreed validation target, not every provider's permissive behavior. Include inner EC parameters present/absent. | Separate shape, selected algebraic consistency, full validation and profile conformance. BigInteger copies are not a zeroable-secret test oracle. |
+| C011/C013/C019 | If approved seams exist, inject failure after each owned secret-copy allocation/HKDF/native conversion stage and retain aliases to verify `finally` cleanup. Check partial output before any return, native BN conversion written count and zero handles. | Native package acceptance and actual OpenSSL behavior require B4's exact version/export context. No device is needed. Native failures should run isolated to avoid process corruption. |
+| C012 | Override one public provider factory with a counting synthetic implementation and trace only known consumers. Independently count direct RNG/HKDF/hash/ECDsa/ECDH calls rather than expecting the factory to intercept them. | A substitution test answers routing, not randomness or cryptographic quality. Avoid changing global factories concurrently. |
+| C013 | AES known-answer aligned/empty blocks through each overload; capture returned plaintext ownership and distinguish it from MemoryStream/provider storage. X9.63 outputs at 1/31/32/33/64 bytes with a published independent vector. | Actual values/cleanup require separately authorized crypto experiments. Preserve original failures and exact provider identity. |
+| C018 | Recover exact Rust revision and generator source referenced by ARKG tests, verify finite A/B/C expected values independently against the deliberately pinned draft-09 target, and separately inspect all secret copies. | Vector agreement cannot establish complete draft conformance, uniqueness for all contexts, entropy, constant time or device previewSign support. Keep the final-RFC/current-draft question distinct from a target-version migration. |
+| C020 | Source-only initial fixture: distinct caller arrays, StaticKeys, SCP03 record clone; separate private key/certificate inputs and SCP11 record clone. Under later approval, dispose each owner and inspect synthetic aliases and sibling references. | Decide/document shared disposal ownership first. B6 owns wire effects and parameter requirements; applet owners decide full-session/reset retention. |
+
+## Preserved exclusions
+
+- No Windows CCID/HID concurrency handoff was treated as ready. This remains a later
+  supplied-delta review against its own source baseline.
+- PIV physical touch, hotplug and touch-dependent cancellation remain deferred.
+- No hardware firmware claim, provider parity or native qualification follows from a
+  managed fake, a compiled example, a sibling vector or a standards passage.
+- No new production tests or implementation refactors are requested by this plan.

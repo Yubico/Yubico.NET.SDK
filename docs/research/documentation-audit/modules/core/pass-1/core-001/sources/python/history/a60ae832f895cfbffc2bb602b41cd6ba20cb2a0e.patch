@@ -1,0 +1,471 @@
+From a60ae832f895cfbffc2bb602b41cd6ba20cb2a0e Mon Sep 17 00:00:00 2001
+From: Dain Nilsson <dain@yubico.com>
+Date: Thu, 9 May 2024 12:23:45 +0200
+Subject: [PATCH] Add ScpKeyParams to session constructors
+
+---
+ ykman/_cli/__main__.py | 69 +++---------------------------------------
+ ykman/_cli/hsmauth.py  |  7 ++++-
+ ykman/_cli/oath.py     |  7 ++++-
+ ykman/_cli/openpgp.py  |  7 ++++-
+ ykman/_cli/piv.py      |  8 +++--
+ ykman/_cli/util.py     | 24 +++++++++++++--
+ yubikit/hsmauth.py     | 18 +++++++++--
+ yubikit/management.py  | 18 ++++++++---
+ yubikit/oath.py        | 12 ++++++--
+ yubikit/openpgp.py     | 11 ++++++-
+ yubikit/piv.py         | 11 ++++++-
+ 11 files changed, 110 insertions(+), 82 deletions(-)
+
+diff --git a/ykman/_cli/__main__.py b/ykman/_cli/__main__.py
+index a4256c2e3..0c1ac8216 100644
+--- a/ykman/_cli/__main__.py
++++ b/ykman/_cli/__main__.py
+@@ -25,19 +25,16 @@
+ # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ # POSSIBILITY OF SUCH DAMAGE.
+ 
+-from yubikit.core import ApplicationNotAvailableError, TRANSPORT
++from yubikit.core import ApplicationNotAvailableError
+ from yubikit.core.otp import OtpConnection
+ from yubikit.core.fido import FidoConnection
+-from yubikit.core.smartcard import SmartCardConnection, SmartCardProtocol
++from yubikit.core.smartcard import SmartCardConnection
+ from yubikit.core.smartcard.scp import (
+     Scp03KeyParams,
+-    Scp11KeyParams,
+     StaticKeys,
+ )
+-from yubikit.scp import ScpSession
+ from yubikit.support import get_name, read_info
+ from yubikit.logging import LOG_LEVEL
+-from yubikit.management import CAPABILITY
+ 
+ from .. import __version__
+ from ..pcsc import list_devices as list_ccid, list_readers
+@@ -339,60 +336,12 @@ def cli(ctx, device, keys, log_level, log_file, reader):
+             # FIDO-only command on Windows without Admin won't work.
+             raise CliFail("FIDO access on Windows requires running as Administrator.")
+ 
+-        orig_select = SmartCardProtocol.select
+-
+         def resolve():
+             items = getattr(resolve, "items", None)
+             if not items:
+                 # We might be connecting over NFC, and thus may require SCP11
+                 if reader is not None:
+                     items = require_reader(connections, reader)
+-                    info = items[1]
+-                    # At least some FIPS functionality, and no manually passed keys
+-                    if info.fips_capable and not keys:
+-                        pub_key = None
+-                        with items[0].open_connection(
+-                            SmartCardConnection
+-                        ) as connection:
+-                            # We can now verify that we are connected over NFC
+-                            if connection.transport == TRANSPORT.NFC:
+-                                # Find a usable SCP11b key, don't care about the issuer
+-                                scp = ScpSession(connection)
+-                                for key_info in scp.get_key_information():
+-                                    if key_info.key.kid == 0x13:
+-                                        cert = scp.get_certificate_bundle(key_info.key)[
+-                                            -1
+-                                        ]
+-                                        pub_key = cert.public_key()
+-                                        logger.info(
+-                                            "SCP11b key found, "
+-                                            "using for FIPS capable applications"
+-                                        )
+-                                        break
+-                                else:
+-                                    logger.debug("No SCP11b key found, not using SCP")
+-
+-                        if pub_key:
+-                            # We have a key, patch SELECT to also initialize SCP11b
+-
+-                            def select_and_secure(self, aid, *args, **kwargs):
+-                                resp = orig_select(self, aid, *args, **kwargs)
+-                                # Verify that the seleted AID requires SCP
+-                                try:
+-                                    capability = CAPABILITY._from_aid(aid)
+-                                    if capability in info.fips_capable:
+-                                        logger.debug(
+-                                            f"Selected FIPS capable {capability}, "
+-                                            "use SCP"
+-                                        )
+-                                        self.init_scp(
+-                                            Scp11KeyParams(key_info.key.kvn, pub_key)
+-                                        )
+-                                except ValueError:
+-                                    pass  # Unrecognized AID, ignore it
+-                                return resp
+-
+-                            SmartCardProtocol.select = select_and_secure  # type: ignore
+                 else:
+                     items = require_device(connections, device)
+                 setattr(resolve, "items", items)
+@@ -402,22 +351,12 @@ def select_and_secure(self, aid, *args, **kwargs):
+         ctx.obj.add_resolver("pid", lambda: resolve()[0].pid)
+         ctx.obj.add_resolver("info", lambda: resolve()[1])
+ 
+-        def restore_select():
+-            SmartCardProtocol.select = orig_select  # type: ignore
+-
+-        ctx.call_on_close(restore_select)
+-
+         if keys:
+             if SmartCardConnection not in connections:
+                 raise CliFail("--keys can only be used with CCID commands")
+             connections = [SmartCardConnection]
+-
+-            def select_and_secure(self, *args, **kwargs):
+-                resp = orig_select(self, *args, **kwargs)
+-                self.init_scp(Scp03KeyParams(keys=keys))
+-                return resp
+-
+-            SmartCardProtocol.select = select_and_secure  # type: ignore
++            # TODO: Use these
++            ctx.obj.add_resolver("scp_params", lambda: Scp03KeyParams(keys=keys))
+ 
+ 
+ @cli.command("list")
+diff --git a/ykman/_cli/hsmauth.py b/ykman/_cli/hsmauth.py
+index 5ccd8d01e..c388e9030 100644
+--- a/ykman/_cli/hsmauth.py
++++ b/ykman/_cli/hsmauth.py
+@@ -51,6 +51,7 @@
+     click_prompt,
+     click_group,
+     pretty_print,
++    get_scp11_params,
+ )
+ 
+ from cryptography.hazmat.primitives import serialization
+@@ -230,7 +231,11 @@ def hsmauth(ctx):
+     dev = ctx.obj["device"]
+     conn = dev.open_connection(SmartCardConnection)
+     ctx.call_on_close(conn.close)
+-    ctx.obj["session"] = HsmAuthSession(conn)
++
++    info = ctx.obj["info"]
++    scp_params = get_scp11_params(info, CAPABILITY.HSMAUTH, conn)
++
++    ctx.obj["session"] = HsmAuthSession(conn, scp_params)
+     info = ctx.obj["info"]
+     ctx.obj["fips_unready"] = (
+         CAPABILITY.HSMAUTH in info.fips_capable
+diff --git a/ykman/_cli/oath.py b/ykman/_cli/oath.py
+index b3273110c..9ee468ce3 100644
+--- a/ykman/_cli/oath.py
++++ b/ykman/_cli/oath.py
+@@ -38,6 +38,7 @@
+     EnumChoice,
+     is_yk4_fips,
+     pretty_print,
++    get_scp11_params,
+ )
+ from yubikit.core.smartcard import ApduError, SW, SmartCardConnection
+ from yubikit.oath import (
+@@ -85,7 +86,11 @@ def oath(ctx):
+     dev = ctx.obj["device"]
+     conn = dev.open_connection(SmartCardConnection)
+     ctx.call_on_close(conn.close)
+-    ctx.obj["session"] = OathSession(conn)
++
++    info = ctx.obj["info"]
++    scp_params = get_scp11_params(info, CAPABILITY.OATH, conn)
++
++    ctx.obj["session"] = OathSession(conn, scp_params)
+     ctx.obj["oath_keys"] = AppData("oath_keys")
+     info = ctx.obj["info"]
+     ctx.obj["fips_unready"] = (
+diff --git a/ykman/_cli/openpgp.py b/ykman/_cli/openpgp.py
+index f29915a8c..b166d1164 100644
+--- a/ykman/_cli/openpgp.py
++++ b/ykman/_cli/openpgp.py
+@@ -39,6 +39,7 @@
+     click_group,
+     EnumChoice,
+     pretty_print,
++    get_scp11_params,
+ )
+ from enum import IntEnum
+ import logging
+@@ -82,7 +83,11 @@ def openpgp(ctx):
+     dev = ctx.obj["device"]
+     conn = dev.open_connection(SmartCardConnection)
+     ctx.call_on_close(conn.close)
+-    ctx.obj["session"] = OpenPgpSession(conn)
++
++    info = ctx.obj["info"]
++    scp_params = get_scp11_params(info, CAPABILITY.OPENPGP, conn)
++
++    ctx.obj["session"] = OpenPgpSession(conn, scp_params)
+ 
+ 
+ @openpgp.command()
+diff --git a/ykman/_cli/piv.py b/ykman/_cli/piv.py
+index 929eb4548..728372e2f 100644
+--- a/ykman/_cli/piv.py
++++ b/ykman/_cli/piv.py
+@@ -73,6 +73,7 @@
+     prompt_timeout,
+     EnumChoice,
+     pretty_print,
++    get_scp11_params,
+ )
+ from cryptography.hazmat.primitives import serialization, hashes
+ from cryptography.hazmat.backends import default_backend
+@@ -196,10 +197,13 @@ def piv(ctx):
+     dev = ctx.obj["device"]
+     conn = dev.open_connection(SmartCardConnection)
+     ctx.call_on_close(conn.close)
+-    session = PivSession(conn)
++
++    info = ctx.obj["info"]
++    scp_params = get_scp11_params(info, CAPABILITY.PIV, conn)
++    session = PivSession(conn, scp_params)
++
+     ctx.obj["session"] = session
+     ctx.obj["pivman_data"] = get_pivman_data(session)
+-    info = ctx.obj["info"]
+     ctx.obj["fips_unready"] = (
+         CAPABILITY.PIV in info.fips_capable and CAPABILITY.PIV not in info.fips_approved
+     )
+diff --git a/ykman/_cli/util.py b/ykman/_cli/util.py
+index e7aef8504..c2084ecd3 100644
+--- a/ykman/_cli/util.py
++++ b/ykman/_cli/util.py
+@@ -28,15 +28,18 @@
+ import functools
+ import click
+ import sys
+-from yubikit.management import DeviceInfo
++from yubikit.core import TRANSPORT
++from yubikit.core.smartcard import SmartCardConnection, Scp11KeyParams
++from yubikit.management import DeviceInfo, CAPABILITY
+ from yubikit.oath import parse_b32_key
++from yubikit.scp import ScpSession
+ from collections import OrderedDict
+ from collections.abc import MutableMapping
+ from cryptography.hazmat.primitives import serialization
+ from contextlib import contextmanager
+ from threading import Timer
+ from enum import Enum
+-from typing import List
++from typing import List, Optional
+ import logging
+ 
+ logger = logging.getLogger(__name__)
+@@ -308,3 +311,20 @@ def pretty_print(value, level: int = 0) -> List[str]:
+ 
+ def is_yk4_fips(info: DeviceInfo) -> bool:
+     return info.version[0] == 4 and info.is_fips
++
++
++def get_scp11_params(
++    info: DeviceInfo, capability: CAPABILITY, connection: SmartCardConnection
++) -> Optional[Scp11KeyParams]:
++    if connection.transport == TRANSPORT.NFC and capability in info.fips_capable:
++        logger.debug("Attempt to find SCP11b key")
++        scp = ScpSession(connection)
++        for key_info in scp.get_key_information():
++            if key_info.key.kid == 0x13:
++                cert = scp.get_certificate_bundle(key_info.key)[-1]
++                pub_key = cert.public_key()
++                logger.info("SCP11b key found, using for FIPS capable applications")
++                return Scp11KeyParams(key_info.key.kvn, pub_key)
++        else:
++            logger.debug("No SCP11b key found, not using SCP")
++    return None
+diff --git a/yubikit/hsmauth.py b/yubikit/hsmauth.py
+index acd3fc309..b10963bfa 100644
+--- a/yubikit/hsmauth.py
++++ b/yubikit/hsmauth.py
+@@ -33,7 +33,14 @@
+     Tlv,
+     InvalidPinError,
+ )
+-from .core.smartcard import AID, SmartCardConnection, SmartCardProtocol, ApduError, SW
++from .core.smartcard import (
++    AID,
++    SmartCardConnection,
++    SmartCardProtocol,
++    ApduError,
++    SW,
++    ScpKeyParams,
++)
+ 
+ from cryptography.hazmat.backends import default_backend
+ from cryptography.hazmat.primitives import hashes
+@@ -213,10 +220,17 @@ def parse(cls, response: bytes) -> "SessionKeys":
+ class HsmAuthSession:
+     """A session with the YubiHSM Auth application."""
+ 
+-    def __init__(self, connection: SmartCardConnection) -> None:
++    def __init__(
++        self,
++        connection: SmartCardConnection,
++        scp_key_params: Optional[ScpKeyParams] = None,
++    ) -> None:
+         self.protocol = SmartCardProtocol(connection)
+         self._version = _parse_select(self.protocol.select(AID.HSMAUTH))
+ 
++        if scp_key_params:
++            self.protocol.init_scp(scp_key_params)
++
+     @property
+     def version(self) -> Version:
+         """The YubiHSM Auth application version."""
+diff --git a/yubikit/management.py b/yubikit/management.py
+index dc55d7ecf..0666dbbff 100644
+--- a/yubikit/management.py
++++ b/yubikit/management.py
+@@ -45,7 +45,7 @@
+     CommandRejectedError,
+ )
+ from .core.fido import FidoConnection
+-from .core.smartcard import AID, SmartCardConnection, SmartCardProtocol
++from .core.smartcard import AID, SmartCardConnection, SmartCardProtocol, ScpKeyParams
+ from fido2.hid import CAPABILITY as CTAP_CAPABILITY
+ 
+ from enum import IntEnum, IntFlag, unique
+@@ -445,10 +445,14 @@ def write_config(self, config):
+ 
+ 
+ class _ManagementSmartCardBackend(_Backend):
+-    def __init__(self, smartcard_connection):
++    def __init__(self, smartcard_connection, scp_key_params):
+         self.protocol = SmartCardProtocol(smartcard_connection)
+         try:
+             select_bytes = self.protocol.select(AID.MANAGEMENT)
++
++            if scp_key_params:
++                self.protocol.init_scp(scp_key_params)
++
+             if select_bytes[-2:] == b"\x90\x00":
+                 # YubiKey Edge incorrectly appends SW twice.
+                 select_bytes = select_bytes[:-2]
+@@ -518,13 +522,19 @@ def write_config(self, config):
+ 
+ class ManagementSession:
+     def __init__(
+-        self, connection: Union[OtpConnection, SmartCardConnection, FidoConnection]
++        self,
++        connection: Union[OtpConnection, SmartCardConnection, FidoConnection],
++        scp_key_params: Optional[ScpKeyParams] = None,
+     ):
+         if isinstance(connection, OtpConnection):
++            if scp_key_params:
++                raise ValueError("SCP can only be used with SmartCardConnection")
+             self.backend: _Backend = _ManagementOtpBackend(connection)
+         elif isinstance(connection, SmartCardConnection):
+-            self.backend = _ManagementSmartCardBackend(connection)
++            self.backend = _ManagementSmartCardBackend(connection, scp_key_params)
+         elif isinstance(connection, FidoConnection):
++            if scp_key_params:
++                raise ValueError("SCP can only be used with SmartCardConnection")
+             self.backend = _ManagementCtapBackend(connection)
+         else:
+             raise TypeError("Unsupported connection type")
+diff --git a/yubikit/oath.py b/yubikit/oath.py
+index a8a65e2e5..77ce5fbc7 100644
+--- a/yubikit/oath.py
++++ b/yubikit/oath.py
+@@ -6,7 +6,7 @@
+     Tlv,
+     BadResponseError,
+ )
+-from .core.smartcard import AID, SmartCardConnection, SmartCardProtocol
++from .core.smartcard import AID, SmartCardConnection, SmartCardProtocol, ScpKeyParams
+ 
+ from urllib.parse import unquote, urlparse, parse_qs
+ from functools import total_ordering
+@@ -262,11 +262,19 @@ def _format_code(credential, timestamp, truncated):
+ class OathSession:
+     """A session with the OATH application."""
+ 
+-    def __init__(self, connection: SmartCardConnection):
++    def __init__(
++        self,
++        connection: SmartCardConnection,
++        scp_key_params: Optional[ScpKeyParams] = None,
++    ):
+         self.protocol = SmartCardProtocol(connection, INS_SEND_REMAINING)
+         self._version, self._salt, self._challenge = _parse_select(
+             self.protocol.select(AID.OATH)
+         )
++
++        if scp_key_params:
++            self.protocol.init_scp(scp_key_params)
++
+         self._has_key = self._challenge is not None
+         self._device_id = _get_device_id(self._salt)
+         self.protocol.enable_touch_workaround(self._version)
+diff --git a/yubikit/openpgp.py b/yubikit/openpgp.py
+index 8ab082272..5011d9dd1 100644
+--- a/yubikit/openpgp.py
++++ b/yubikit/openpgp.py
+@@ -41,6 +41,7 @@
+     ApduError,
+     AID,
+     SW,
++    ScpKeyParams,
+ )
+ 
+ from cryptography import x509
+@@ -992,7 +993,11 @@ def _pad_message(attributes, message, hash_algorithm):
+ class OpenPgpSession:
+     """A session with the OpenPGP application."""
+ 
+-    def __init__(self, connection: SmartCardConnection):
++    def __init__(
++        self,
++        connection: SmartCardConnection,
++        scp_key_params: Optional[ScpKeyParams] = None,
++    ):
+         self.protocol = SmartCardProtocol(connection)
+         try:
+             self.protocol.select(AID.OPENPGP)
+@@ -1004,6 +1009,10 @@ def __init__(self, connection: SmartCardConnection):
+                 self.protocol.select(AID.OPENPGP)
+             else:
+                 raise
++
++        if scp_key_params:
++            self.protocol.init_scp(scp_key_params)
++
+         self._version = self._read_version()
+ 
+         self.protocol.enable_touch_workaround(self.version)
+diff --git a/yubikit/piv.py b/yubikit/piv.py
+index d9d25050e..99d16ffd7 100755
+--- a/yubikit/piv.py
++++ b/yubikit/piv.py
+@@ -42,6 +42,7 @@
+     ApduFormat,
+     SmartCardConnection,
+     SmartCardProtocol,
++    ScpKeyParams,
+ )
+ 
+ from cryptography import x509
+@@ -497,9 +498,17 @@ def _parse_device_public_key(key_type, encoded):
+ class PivSession:
+     """A session with the PIV application."""
+ 
+-    def __init__(self, connection: SmartCardConnection):
++    def __init__(
++        self,
++        connection: SmartCardConnection,
++        scp_key_params: Optional[ScpKeyParams] = None,
++    ):
+         self.protocol = SmartCardProtocol(connection)
+         self.protocol.select(AID.PIV)
++
++        if scp_key_params:
++            self.protocol.init_scp(scp_key_params)
++
+         self._version = Version.from_bytes(
+             self.protocol.send_apdu(0, INS_GET_VERSION, 0, 0)
+         )

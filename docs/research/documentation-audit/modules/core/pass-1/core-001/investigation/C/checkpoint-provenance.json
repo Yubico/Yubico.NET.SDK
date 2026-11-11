@@ -1,0 +1,16 @@
+{
+  "status": "Preserved partial checkpoint, superseded only by the completed investigation return",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "metadata_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+  "prior_identities": {
+    "investigation-C.md": "f1ef236409201e4575b784d61bdd1a91eea41be181eb56c9ce3a72ea992a79ec",
+    "checkpoint-summary.json": "2025e0e8c6aed5b1b2ef09514318da7d92a0b56dc2f69ec8a34eff63879f7fab",
+    "findings.json": "5822889c8f7510c107d88b374b4359bb4bff00b9d8dc9596d1f12602fcddabce",
+    "unit-dispositions.json": "e4d824b96c18d028386e07e2725a343101126b020e86a4831ed1735aaf7f7e8c"
+  },
+  "prior_scope": {"primary_files_read": 95, "primary_files": 104, "shared_units_read": 66, "shared_units": 176},
+  "prior_unit_states": {"READ-CANDIDATE":252,"READ-SOURCE-PENDING-FINAL-TRIAGE":940,"READ-HISTORICAL-EXCLUSION":3,"READ-CLEAN-NOMINEE":13,"UNREAD":354},
+  "prior_candidates": "CORE-C-C001 through CORE-C-C020; provisional local groups, zero accepted allocations",
+  "continuation_authority": "User explicitly directed completion of the same approved Packet C scope, preserving all 104 primary files and all 176 actual shared IDs.",
+  "preservation_method": "Compact identities/counts and stable candidate IDs retain checkpoint provenance; original standards/Python evidence is retained in place without recopying the source corpus."
+}

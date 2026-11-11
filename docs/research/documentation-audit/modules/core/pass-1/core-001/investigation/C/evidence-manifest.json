@@ -1,0 +1,502 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md",
+    "sha256": "cef485c07823d4959f353532846d2f81e84c8d1bbd20ffd0820f2046a8543b34",
+    "bytes": 19154
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/findings.json",
+    "sha256": "b0f9c5a9a292b608222ef94e50c5876008f0ba927b4ebb4cd0f9d4830e9b92f7",
+    "bytes": 70273
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/checkpoint.py",
+    "sha256": "9aea5b59e6900867fbd8d65082d652e61bda87ebd53a57f3ae66781d5fd75164",
+    "bytes": 10488
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/files.json",
+    "sha256": "eecd29238392aa6add753d863f93e51add20cfe6bc538ef24594a7736ea80a5e",
+    "bytes": 38366
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/unit-dispositions.json",
+    "sha256": "40522cf0ef56757479134d8ddd47396347fb3c9fce31ade3ddda4ce4a63d504b",
+    "bytes": 2801289
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/unchanged-paths.json",
+    "sha256": "e8daf89d8082e5ee2bb45197bc9de2d560a421b885653a40f59d91381c1c872a",
+    "bytes": 121003
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/checkpoint-summary.json",
+    "sha256": "2025e0e8c6aed5b1b2ef09514318da7d92a0b56dc2f69ec8a34eff63879f7fab",
+    "bytes": 2399
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/probe-plan.md",
+    "sha256": "c47d7793da888510eac414b435418af462e26a8c0b904a1bc0abff9a5c161324",
+    "bytes": 6632
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/continuation.md",
+    "sha256": "d2f2beb5be9c877416331287abe17ff2ee6b4e5558b3722c19532b6215170f81",
+    "bytes": 4280
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/checkpoint-provenance.json",
+    "sha256": "015d7dbde1d05603ba6622958f1895ca6531cbff7b179525114ba2aa44c2ab28",
+    "bytes": 1384
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/final-review.json",
+    "sha256": "0c86e58c27bfc0774627d517c0f0d087121c2ba6a64b2290fdf9874237f2c56c",
+    "bytes": 19133
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/semantic-notes.json",
+    "sha256": "70b114c5d03007d3c2a9b5f02fdeee54260681b80c7aac36e108f41dc93d0350",
+    "bytes": 39837
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/vector-provenance.py",
+    "sha256": "995830351bed7722708bd32128c6fdcf9153b9c7d2c5f246c6b1dbb51d1786cc",
+    "bytes": 2620
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/finish.py",
+    "sha256": "0cb2377ca42afa96523c2481e7746636d710963f6f01e8bfec4b8dc947bf54ae",
+    "bytes": 19782
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/vector-provenance.json",
+    "sha256": "ae9a6b616698dab3da48c9602cb6209f7e579bbfff80c17bbb31aac252840ead",
+    "bytes": 2934
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/prior-investigation-C.md",
+    "sha256": "f1ef236409201e4575b784d61bdd1a91eea41be181eb56c9ce3a72ea992a79ec",
+    "bytes": 13976
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/file-dispositions.json",
+    "sha256": "162c7e19c4ddbf02773a1e79728281a75b0513b0937a0fe5f86b43300dab4b92",
+    "bytes": 421782
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/clean-nominees.json",
+    "sha256": "5593db4f1e12f76b7219a8a89040c0cfe85ffef96ea70c5f4ea72f8330039db4",
+    "bytes": 376993
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/final-summary.json",
+    "sha256": "9313a4a138fde88a79eb5b7770cd1f168c1c9b1766e7fca59acd232881cd436a",
+    "bytes": 2054
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/inherited-dispositions.json",
+    "sha256": "500abb980906091f7ee404acd9fed65de26418d93277251eedd21a5eb892a538",
+    "bytes": 13901
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/verify-records.py",
+    "sha256": "1b76daaa9a69021b7dfea36bbfac20cfa3b210afaa8ea2e62d6344b8785db841",
+    "bytes": 5515
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc7748.txt",
+    "sha256": "279ca0ecc5e92e2962e27b846986aeb74729d9dd34bd4a04a362f80dcb596ad3",
+    "bytes": 39298
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc5915.txt",
+    "sha256": "5c7b3b2eb449618a581a0ac89209d5d6acc7c375689b2e91304b5dcd866151dc",
+    "bytes": 13646
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc8410.txt",
+    "sha256": "90a0ff0b3dd661d3e26e1873f40f2ca8b41709a7bbd755a1ed3599c4746313d2",
+    "bytes": 34896
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc8032.txt",
+    "sha256": "ed63657ff389301282b169b0abde9b5dd2c7e4d524fdfa5da6ff3094fc93c4c3",
+    "bytes": 103210
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc8017.txt",
+    "sha256": "1e72dc473d18df3fc5598cdc12795a9f18f36f1aef15abc23a55eb0d58151d11",
+    "bytes": 154696
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc5208.txt",
+    "sha256": "89f7338cf546abaee1d14eef7357440f4fc45e579d47dd4b436c29533abafc2e",
+    "bytes": 12063
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc5480.txt",
+    "sha256": "593bf29fd0da2ff8b903c3ebf1c9d189a770039159e2ba46a0c3b91355037f26",
+    "bytes": 36209
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc4648.txt",
+    "sha256": "84e14418f795d503be5f34bf23ce4ebaa119e9ec7c9f667d8caeb111385b178f",
+    "bytes": 35491
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc5958.txt",
+    "sha256": "82778b9ce7b34f02b5ae9777bfb9e42579744aebd2e1479f476513864525af67",
+    "bytes": 26671
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc9053.txt",
+    "sha256": "3d470615875620375f8453ba25b8dce7e4d0271e76b0b79a46df34ccb2d56ab0",
+    "bytes": 120315
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc5639.txt",
+    "sha256": "d19949766009ac82b69e46b09f3a08d712908381300a340d3fa3b1478f4b215e",
+    "bytes": 50566
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10.0.0-UTF8Encoding.cs",
+    "sha256": "47f5e4c98751367a86329ab1e0a76d86b39fd076a5b019284694f39d40fd9011",
+    "bytes": 40321
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc9459.txt",
+    "sha256": "d9a1cca5518895228f2838ea8bc9316adf352646b37bd45f4ec6751c5f39cc36",
+    "bytes": 22097
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10.0.0-Console.cs",
+    "sha256": "2b4af87e0420db3bad13fea14f1ff5b43df881b6430884aeb0ed69a0ace33216",
+    "bytes": 35584
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/cose.xml",
+    "sha256": "765e0cbff5385b3bf3477689af3e82ee870910abbd74ea002513f0f5941cfdb6",
+    "bytes": 79820
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10.0.0-ECDsa.cs",
+    "sha256": "b696081dc22e362c8b1507b358e58abc4b44cb12b573c82fa37c483ad8807c8f",
+    "bytes": 58830
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/fetch-manifest.json",
+    "sha256": "43fe66d10efd7d1d11509c45d640a1b6bd491820b1e5d87e53267eca2187c71a",
+    "bytes": 4939
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/draft-arkg-09.txt",
+    "sha256": "a4815596bc860c87f1a4f5e234d66f1fb48e5d5e81741957a06b826ea5c3a3be",
+    "bytes": 86658
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc9864.txt",
+    "sha256": "0f9b6dd26b3285fd9fe7f7e0a82e684d06512dee642703d51c6f88a7b0edaa2b",
+    "bytes": 34530
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/openssl-3.0.0-BN_bn2bin.pod",
+    "sha256": "b8614960db2c3b91ac74522d4eda3eb03c381c934daa4e29142d1ba04f83f233",
+    "bytes": 4716
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc9380.txt",
+    "sha256": "a2e6ab02b2117d6f52ac293020857752972b2e23ae005c33f612e40436ff4b6d",
+    "bytes": 359795
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/openssl-3.0.0-EC_POINT_new.pod",
+    "sha256": "cc565ed5ca6c3e1b765ff57a77b98bf5035dfc0c17646c34febf1ed84ba234ed",
+    "bytes": 13256
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/openssl-3.0.0-EVP_MAC.pod",
+    "sha256": "103f52edd55444eea04308c3f819f07e673e7da903ef215410791f7bc439a95d",
+    "bytes": 18591
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/focused-fetch-manifest.json",
+    "sha256": "7d7be56cb3c77656fac288322aacc4c7f2146d6f80b294c43523bcd75cb339ee",
+    "bytes": 1875
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/review-register.md",
+    "sha256": "631a4338bfd6a24e531053ef6505405a725e766f41a07a9183adf3f5ab2fca63",
+    "bytes": 10748
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc7517.txt",
+    "sha256": "681c19b92a85068716b7e89c5815aa821bd3f11c755ff1c641b40ae9851bb33c",
+    "bytes": 93906
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc5758.txt",
+    "sha256": "4d02628ff0875a1960d34be584a68f88528b96242bdc5a05a40a29ef01cf1532",
+    "bytes": 15834
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc4493.txt",
+    "sha256": "252850ac038a44e931fdce6cb02b444a18ed1da0c9e212bfdd1da0ed3366fc1c",
+    "bytes": 38751
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc6979.txt",
+    "sha256": "456e8f17558fdbd206f968b96fc6f1b4a71ea331ab30ad17f711ab3adaa7d701",
+    "bytes": 140386
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc3279.txt",
+    "sha256": "6d3f19f18e17fa1c68da5aaf4021327748fabca840d7300443b77357a1fc1614",
+    "bytes": 53833
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10.0.0-AsnWriter.cs",
+    "sha256": "f487cee63409d58310e3ae7d170dd429f52266299b490432c439a85e0cd3d62d",
+    "bytes": 34671
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/sec2-v2.pdf",
+    "sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+    "bytes": 306784
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/completion-fetch-manifest.json",
+    "sha256": "d58a3128174a768c1541cb316dc696fe1fc9ac38785bfeae3c8b2494b90131e1",
+    "bytes": 2610
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10-provider-path-index.json",
+    "sha256": "8aa943a16516db0c6b64f4ad56dc18b4a8f0e5f23dd86ea42236849ef1182dfd",
+    "bytes": 1308
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/provider-index-common.json",
+    "sha256": "fc5192e9419be545986c10045a8f5fb2d97347f4dbfd0d084b682dc92b8da3b7",
+    "bytes": 2503
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/provider-index-crypto.json",
+    "sha256": "df6dca297dfe251018260b87c94ff0574f1f9fb38660ace38ab8126fe1d80039",
+    "bytes": 6804
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/sec2-v2.txt",
+    "sha256": "93d6a91157c802de1226c08fcf36ecd78d292ac814d12bb4deb54e77362f3300",
+    "bytes": 74669
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10.0.0-ECDsaSecurityTransforms.cs",
+    "sha256": "0f417ba18b0be376d064baa1089136c807292a78570a454c863577c88f1666cd",
+    "bytes": 7550
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10.0.0-ECDsaOpenSsl.cs",
+    "sha256": "19b4738fe00454723992e4373faff25f5055b583b8245d8397c9d1c0ec3793d9",
+    "bytes": 12673
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10.0.0-ECDsaCng.ImportExport.cs",
+    "sha256": "d02098d85d159009da8b9b3bf6bd97c92cce08f04233ee18dcaf72e99e41ea66",
+    "bytes": 9854
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10.0.0-EccSecurityTransforms.macOS.cs",
+    "sha256": "b3f0009ee308c307f2e6f260cf6b8889429c672ce0e09fa265fe51532b794faa",
+    "bytes": 3006
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/dotnet-v10.0.0-EccSecurityTransforms.cs",
+    "sha256": "1eacea397d385fc86cabb3d524cbac72644330cc8832f4dcc53dcfe51c063658",
+    "bytes": 8670
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/provider-source-manifest.json",
+    "sha256": "3796c350d40c39dc48603e03415ef60e0674346fc3b8dddabe2c865e3b005ae9",
+    "bytes": 1872
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc3565.txt",
+    "sha256": "c0d1599fac901f8b1a7480a1ca77715021b76af892970cbca2317fe49905550b",
+    "bytes": 26773
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc3370.txt",
+    "sha256": "702c366b9360e01d207c220960b538db18685880add3afefbd401a85b136a825",
+    "bytes": 51001
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/oid-and-nist-followup-manifest.json",
+    "sha256": "005dfbc08f46991089cbd7cb6e700ca751e7e35a3cf764ff6f0f8b64def70110",
+    "bytes": 725
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/x690-202102-metadata.html",
+    "sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+    "bytes": 11512
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/x690-202102.pdf",
+    "sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+    "bytes": 840764
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/ber-source-attempts.json",
+    "sha256": "3e726b442d4aba64e44bef953b514edb215a873ec91c22c6260e947048834ade",
+    "bytes": 830
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/x690-202102.txt",
+    "sha256": "1678a1fb52b9f3919d54203e174f3c13114e425019518f096914cf3aeb515d54",
+    "bytes": 122541
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/final-source-register.md",
+    "sha256": "6078fe5116d94de6ae580797220f0e190bc322a6a4b0b8c6817626e5630fb23e",
+    "bytes": 13576
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/historical-rng-removal-78c44513.patch",
+    "sha256": "62288ae84778396fb04faa1ef60ab1ce4533673dd71b024f3b19463d4287ee15",
+    "bytes": 7987
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/historical-source-manifest.json",
+    "sha256": "765c41628fc66dc6e26cb39ad6d873b21c47c32105176d3059d4c1301b12a501",
+    "bytes": 488
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/manifest.json",
+    "sha256": "c0359b1a331c66b5e0aa594b0e11fa1342a92fc362e3b3600e069c5a6c0f76b3",
+    "bytes": 4161
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/context.md",
+    "sha256": "68694ce44329e1d16d56f048cfe4f1c1ad6c7d12152f92f703e1c8b3671d9ba7",
+    "bytes": 7589
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/yubikit-core-smartcard-scp.py.json",
+    "sha256": "3cd49a8039f3bbc3d39beda315d3220e27c3b1ccbba8f40dc02ce716084edb27",
+    "bytes": 65613
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/yubikit-core-smartcard-__init__.py.json",
+    "sha256": "4e9bac0940d1b724c56d52c281753a2b94fc7745e01ea39eec135b6f560b5266",
+    "bytes": 74089
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/yubikit-oath.py.json",
+    "sha256": "1f72eabd79c6b4d349f64651b0aa1c9d53aa5c9e15f6de31c57067ef31be7b7d",
+    "bytes": 137701
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/yubikit-management.py.json",
+    "sha256": "a78d1b7db0e1f5b4b6aac01b0f0b896596a183093cc461205669843658895848",
+    "bytes": 206582
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/13f8a21c34e2a8ef483c155d08eb730e7fa59fe9.patch",
+    "sha256": "942ee5279027f39653740157ceb4871ffd3620efb800ebfd055a51da723fccb1",
+    "bytes": 1410
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/652e5825a2ecea8f9b4e3c55da6bf7b802594263.patch",
+    "sha256": "912c8dbfe25d4dad98b4a41c85bf07ab851c1558423d6ebc5c413ffdd7c947f6",
+    "bytes": 7938
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/a60ae832f895cfbffc2bb602b41cd6ba20cb2a0e.patch",
+    "sha256": "cf445077b085d55a1e7cf4fdea5496de648bc2b4e8f04506193c8c02fc321f1a",
+    "bytes": 17635
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/e55c9c2f37c48b0c6d7eaa5eff7794d58adf9b8c.patch",
+    "sha256": "18a03ab54bfac9488de9d04a709f8cfd4f6317d65bf26c45bfa515fa83d6dd3a",
+    "bytes": 28160
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/a10d3b3b249c6dcdba3691824e24758d40994647.patch",
+    "sha256": "b5d8028c84c8bfca3a63d89ecc645f33b5383293c159313f98e20665cebff322",
+    "bytes": 20741
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/7fd50da5db6f844f49947ce888c8ffab9b8e4eff.patch",
+    "sha256": "ec523bd3cb3c421e3297e9d6bee1ca5d0e62e4dad97240f84bc38a29903d6924",
+    "bytes": 20739
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/8706337cc0682ccffd6baae6563e02d4bf993036.patch",
+    "sha256": "8f35c6f7fd10969cb37d1fd3af114dd90fc81044989e0991c592bea0b3aba020",
+    "bytes": 22091
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/c910e5d25ba675ac2bfc97d35f14a4cc0314864f.patch",
+    "sha256": "6294a10c9e2a7fb64d9640e9eeba25f34e5a491c9fc339d3752ade75b1311747",
+    "bytes": 15514
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/patch-manifest.json",
+    "sha256": "38a6f513dc86bddcfc21a0826c3834bf3953d678cdeec8d1f00e260323f4e1de",
+    "bytes": 2241
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/f44c6d2e8ea70e88e2f00dcfcfe729a155f9c4d7.patch",
+    "sha256": "e96a6c6e8a63f478cbddbe759011fe9cf002f42d0615ef92a3dbb5d718a72af8",
+    "bytes": 7642
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/1b87964ba258e3ce39fd2959888dfe7cf81a6843.patch",
+    "sha256": "f62d8c5e3bdbab61b90c281096737811c5c66ec679849e94b797c9e618e655fb",
+    "bytes": 9039
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/04c8cda4b7c23686f840490203e5c515aa2fa61f.patch",
+    "sha256": "250da609fa2803f415fc0fc6a74f38b10345b38b96db8a7f04de9f97bcb5ec33",
+    "bytes": 13414
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/focused-followup-manifest.json",
+    "sha256": "f206d027181dce6e4fb9b31c88b446aebf0bc7222306af16d7d9602b86061e3c",
+    "bytes": 841
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/pyproject.toml",
+    "sha256": "7d5e86083f18513fa9d493cdad5404cf1e344fe3679c8822b9d400d429779fd6",
+    "bytes": 1804
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/NEWS",
+    "sha256": "96a5c7a25c58412610d2be4365fae7f21039c68efb01910669b15f68a76b3dd7",
+    "bytes": 22537
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/tests/test_core.py",
+    "sha256": "7dcf52981297c2ddfe041451dbecb8f7210376edf524dcbd76df9be47f74c6e4",
+    "bytes": 3198
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/tests/device/test_scp.py",
+    "sha256": "5dd8d9a89afebce4704b2d8882588bfadb6b1d08e605dd3c95a6ee1864793316",
+    "bytes": 1397
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/yubikit/core/__init__.py",
+    "sha256": "524305273499d3a0fc37ff58c207a180cf3d280490bb48c4596507ed8a56061c",
+    "bytes": 12640
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/yubikit/core/smartcard/__init__.py",
+    "sha256": "595be784aa2ede30488263cbc63686e94365a68d598b96fb350c71c1b5d694bd",
+    "bytes": 16266
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/yubikit/core/smartcard/scp.py",
+    "sha256": "e1bbcae2b85b459d1801feb0630c83a00f96cb0dd7513087545b837464c70d1e",
+    "bytes": 12322
+  }
+]

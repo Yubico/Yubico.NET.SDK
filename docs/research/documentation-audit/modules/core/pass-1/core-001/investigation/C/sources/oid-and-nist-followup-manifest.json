@@ -1,0 +1,22 @@
+[
+  {
+    "file": "rfc3565.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc3565.txt",
+    "sha256": "c0d1599fac901f8b1a7480a1ca77715021b76af892970cbca2317fe49905550b",
+    "bytes": 26773,
+    "requested_at_utc": "2026-11-11T22:54:29.478314+00:00"
+  },
+  {
+    "file": "rfc3370.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc3370.txt",
+    "sha256": "702c366b9360e01d207c220960b538db18685880add3afefbd401a85b136a825",
+    "bytes": 51001,
+    "requested_at_utc": "2026-11-11T22:54:29.720571+00:00"
+  },
+  {
+    "file": "nist-sp800-186-final-page.html",
+    "url": "https://csrc.nist.gov/pubs/sp/800/186/final",
+    "error": "HTTP Error 403: Forbidden",
+    "requested_at_utc": "2026-11-11T22:54:29.955899+00:00"
+  }
+]

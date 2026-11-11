@@ -1,0 +1,20 @@
+[
+  {
+    "revision": "f44c6d2e8ea70e88e2f00dcfcfe729a155f9c4d7",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/f44c6d2e8ea70e88e2f00dcfcfe729a155f9c4d7.patch",
+    "sha256": "e96a6c6e8a63f478cbddbe759011fe9cf002f42d0615ef92a3dbb5d718a72af8",
+    "bytes": 7642
+  },
+  {
+    "revision": "1b87964ba258e3ce39fd2959888dfe7cf81a6843",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/1b87964ba258e3ce39fd2959888dfe7cf81a6843.patch",
+    "sha256": "f62d8c5e3bdbab61b90c281096737811c5c66ec679849e94b797c9e618e655fb",
+    "bytes": 9039
+  },
+  {
+    "revision": "04c8cda4b7c23686f840490203e5c515aa2fa61f",
+    "url": "https://github.com/Yubico/yubikey-manager/commit/04c8cda4b7c23686f840490203e5c515aa2fa61f.patch",
+    "sha256": "250da609fa2803f415fc0fc6a74f38b10345b38b96db8a7f04de9f97bcb5ec33",
+    "bytes": 13414
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "file": "rfc7517.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc7517.txt",
+    "sha256": "681c19b92a85068716b7e89c5815aa821bd3f11c755ff1c641b40ae9851bb33c",
+    "bytes": 93906,
+    "requested_at_utc": "2026-11-11T22:51:40.762144+00:00",
+    "status": "FETCHED; passage disposition follows in final register"
+  },
+  {
+    "file": "rfc6979.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc6979.txt",
+    "sha256": "456e8f17558fdbd206f968b96fc6f1b4a71ea331ab30ad17f711ab3adaa7d701",
+    "bytes": 140386,
+    "requested_at_utc": "2026-11-11T22:51:40.762769+00:00",
+    "status": "FETCHED; passage disposition follows in final register"
+  },
+  {
+    "file": "rfc4493.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc4493.txt",
+    "sha256": "252850ac038a44e931fdce6cb02b444a18ed1da0c9e212bfdd1da0ed3366fc1c",
+    "bytes": 38751,
+    "requested_at_utc": "2026-11-11T22:51:40.763116+00:00",
+    "status": "FETCHED; passage disposition follows in final register"
+  },
+  {
+    "file": "rfc5758.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc5758.txt",
+    "sha256": "4d02628ff0875a1960d34be584a68f88528b96242bdc5a05a40a29ef01cf1532",
+    "bytes": 15834,
+    "requested_at_utc": "2026-11-11T22:51:40.763689+00:00",
+    "status": "FETCHED; passage disposition follows in final register"
+  },
+  {
+    "file": "rfc3279.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc3279.txt",
+    "sha256": "6d3f19f18e17fa1c68da5aaf4021327748fabca840d7300443b77357a1fc1614",
+    "bytes": 53833,
+    "requested_at_utc": "2026-11-11T22:51:40.988215+00:00",
+    "status": "FETCHED; passage disposition follows in final register"
+  },
+  {
+    "file": "sec2-v2.pdf",
+    "url": "https://www.secg.org/sec2-v2.pdf",
+    "sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+    "bytes": 306784,
+    "requested_at_utc": "2026-11-11T22:51:41.002846+00:00",
+    "status": "FETCHED; passage disposition follows in final register"
+  },
+  {
+    "file": "nist-sp800-186.pdf",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-186.pdf",
+    "requested_at_utc": "2026-11-11T22:51:41.011973+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "file": "dotnet-v10.0.0-AsnWriter.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Formats.Asn1/src/System/Formats/Asn1/AsnWriter.cs",
+    "sha256": "f487cee63409d58310e3ae7d170dd429f52266299b490432c439a85e0cd3d62d",
+    "bytes": 34671,
+    "requested_at_utc": "2026-11-11T22:51:41.012220+00:00",
+    "status": "FETCHED; passage disposition follows in final register"
+  }
+]

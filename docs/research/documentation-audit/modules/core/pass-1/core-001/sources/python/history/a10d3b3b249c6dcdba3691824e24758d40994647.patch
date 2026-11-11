@@ -1,0 +1,618 @@
+From a10d3b3b249c6dcdba3691824e24758d40994647 Mon Sep 17 00:00:00 2001
+From: Dain Nilsson <dain@yubico.com>
+Date: Wed, 8 May 2024 14:09:10 +0200
+Subject: [PATCH] Refactor SCP
+
+---
+ ykman/_cli/__main__.py                        |  12 +-
+ .../{smartcard.py => smartcard/__init__.py}   |  91 ++++-----------
+ yubikit/core/smartcard/_defs.py               |  59 ++++++++++
+ yubikit/core/{ => smartcard}/scp.py           | 110 ++++++++----------
+ yubikit/management.py                         |   7 --
+ yubikit/openpgp.py                            |   4 -
+ yubikit/piv.py                                |   4 -
+ yubikit/scp.py                                |  45 +++++--
+ 8 files changed, 178 insertions(+), 154 deletions(-)
+ rename yubikit/core/{smartcard.py => smartcard/__init__.py} (83%)
+ create mode 100644 yubikit/core/smartcard/_defs.py
+ rename yubikit/core/{ => smartcard}/scp.py (78%)
+
+diff --git a/ykman/_cli/__main__.py b/ykman/_cli/__main__.py
+index d9ab92e82..a4256c2e3 100644
+--- a/ykman/_cli/__main__.py
++++ b/ykman/_cli/__main__.py
+@@ -29,7 +29,11 @@
+ from yubikit.core.otp import OtpConnection
+ from yubikit.core.fido import FidoConnection
+ from yubikit.core.smartcard import SmartCardConnection, SmartCardProtocol
+-from yubikit.core.scp import StaticKeys
++from yubikit.core.smartcard.scp import (
++    Scp03KeyParams,
++    Scp11KeyParams,
++    StaticKeys,
++)
+ from yubikit.scp import ScpSession
+ from yubikit.support import get_name, read_info
+ from yubikit.logging import LOG_LEVEL
+@@ -381,7 +385,9 @@ def select_and_secure(self, aid, *args, **kwargs):
+                                             f"Selected FIPS capable {capability}, "
+                                             "use SCP"
+                                         )
+-                                        self.scp11_init(key_info.key, pub_key)
++                                        self.init_scp(
++                                            Scp11KeyParams(key_info.key.kvn, pub_key)
++                                        )
+                                 except ValueError:
+                                     pass  # Unrecognized AID, ignore it
+                                 return resp
+@@ -408,7 +414,7 @@ def restore_select():
+ 
+             def select_and_secure(self, *args, **kwargs):
+                 resp = orig_select(self, *args, **kwargs)
+-                self.scp03_init(keys)
++                self.init_scp(Scp03KeyParams(keys=keys))
+                 return resp
+ 
+             SmartCardProtocol.select = select_and_secure  # type: ignore
+diff --git a/yubikit/core/smartcard.py b/yubikit/core/smartcard/__init__.py
+similarity index 83%
+rename from yubikit/core/smartcard.py
+rename to yubikit/core/smartcard/__init__.py
+index ebaa2aa0b..905d2cfe5 100644
+--- a/yubikit/core/smartcard.py
++++ b/yubikit/core/smartcard/__init__.py
+@@ -25,82 +25,31 @@
+ # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ # POSSIBILITY OF SUCH DAMAGE.
+ 
+-from . import (
++from .. import (
+     Version,
+     TRANSPORT,
+     USB_INTERFACE,
+     Connection,
+-    CommandError,
+     ApplicationNotAvailableError,
+ )
+-from .scp import ScpState, SessionKeys, StaticKeys, Key
+-from cryptography.hazmat.primitives.asymmetric import ec
++from ._defs import ApduError, ApduFormat, SW, AID
++from .scp import (
++    ScpState,
++    ScpKeyParams,
++    Scp03KeyParams,
++    Scp11KeyParams,
++)
+ from time import time
+-from enum import Enum, IntEnum, unique
+-from typing import Tuple, Union
++from typing import Tuple
+ import abc
+ import struct
+ import logging
+ import warnings
+ 
+-logger = logging.getLogger(__name__)
+-
+-
+-class ApduError(CommandError):
+-    """Thrown when an APDU response has the wrong SW code"""
+-
+-    def __init__(self, data: bytes, sw: int):
+-        self.data = data
+-        self.sw = sw
+-
+-    def __str__(self):
+-        return f"APDU error: SW=0x{self.sw:04x}"
+-
+-
+-@unique
+-class ApduFormat(str, Enum):
+-    """APDU encoding format"""
+ 
+-    SHORT = "short"
+-    EXTENDED = "extended"
++__all__ = ["ApduError", "ApduFormat", "SW", "AID"]
+ 
+-
+-@unique
+-class AID(bytes, Enum):
+-    """YubiKey Application smart card AID values."""
+-
+-    OTP = bytes.fromhex("a0000005272001")
+-    MANAGEMENT = bytes.fromhex("a000000527471117")
+-    OPENPGP = bytes.fromhex("d27600012401")
+-    OATH = bytes.fromhex("a0000005272101")
+-    PIV = bytes.fromhex("a000000308")
+-    FIDO = bytes.fromhex("a0000006472f0001")
+-    HSMAUTH = bytes.fromhex("a000000527210701")
+-    SCP = bytes.fromhex("a000000151000000")
+-
+-
+-@unique
+-class SW(IntEnum):
+-    NO_INPUT_DATA = 0x6285
+-    VERIFY_FAIL_NO_RETRY = 0x63C0
+-    MEMORY_FAILURE = 0x6581
+-    WRONG_LENGTH = 0x6700
+-    SECURITY_CONDITION_NOT_SATISFIED = 0x6982
+-    AUTH_METHOD_BLOCKED = 0x6983
+-    DATA_INVALID = 0x6984
+-    CONDITIONS_NOT_SATISFIED = 0x6985
+-    COMMAND_NOT_ALLOWED = 0x6986
+-    INCORRECT_PARAMETERS = 0x6A80
+-    FUNCTION_NOT_SUPPORTED = 0x6A81
+-    FILE_NOT_FOUND = 0x6A82
+-    NO_SPACE = 0x6A84
+-    REFERENCE_DATA_NOT_FOUND = 0x6A88
+-    APPLET_SELECT_FAILED = 0x6999
+-    WRONG_PARAMETERS_P1P2 = 0x6B00
+-    INVALID_INSTRUCTION = 0x6D00
+-    CLASS_NOT_SUPPORTED = 0x6E00
+-    COMMAND_ABORTED = 0x6F00
+-    OK = 0x9000
++logger = logging.getLogger(__name__)
+ 
+ 
+ class SmartCardConnection(Connection, metaclass=abc.ABCMeta):
+@@ -123,7 +72,7 @@ def send_and_receive(self, apdu: bytes) -> Tuple[bytes, int]:
+ INS_SEND_REMAINING = 0xC0
+ 
+ 
+-class ApduProcessor:
++class ApduProcessor(abc.ABC):
+     @abc.abstractmethod
+     def send_apdu(
+         self,
+@@ -370,9 +319,17 @@ def select(self, aid: bytes) -> bytes:
+                 raise ApplicationNotAvailableError()
+             raise
+ 
+-    def scp03_init(self, keys: Union[SessionKeys, StaticKeys]) -> None:
++    def init_scp(self, key_params: ScpKeyParams):
++        if isinstance(key_params, Scp03KeyParams):
++            self._scp03_init(key_params)
++        elif isinstance(key_params, Scp11KeyParams):
++            self._scp11_init(key_params)
++        else:
++            raise ValueError("Unsupported ScpKeyParams")
++
++    def _scp03_init(self, key_params: Scp03KeyParams) -> None:
+         logger.debug("Initializing SCP03")
+-        scp, host_cryptogram = ScpState.scp03_init(self, keys)
++        scp, host_cryptogram = ScpState.scp03_init(self.send_apdu, key_params)
+         processor = ScpProcessor(self.connection, scp, self._ins_send_remaining)
+ 
+         # Send EXTERNAL AUTHENTICATE
+@@ -381,9 +338,9 @@ def scp03_init(self, keys: Union[SessionKeys, StaticKeys]) -> None:
+         self._apdu_format = ApduFormat.EXTENDED
+         logger.info("SCP03 initialized")
+ 
+-    def scp11_init(self, key: Key, pk_sd_ecka: ec.EllipticCurvePublicKey) -> None:
++    def _scp11_init(self, key_params: Scp11KeyParams) -> None:
+         logger.debug("Initializing SCP11")
+-        scp = ScpState.scp11_init(self, key, pk_sd_ecka)
++        scp = ScpState.scp11_init(self.send_apdu, key_params)
+         self._processor = ScpProcessor(self.connection, scp, self._ins_send_remaining)
+         self._apdu_format = ApduFormat.EXTENDED
+         logger.info("SCP11 initialized")
+diff --git a/yubikit/core/smartcard/_defs.py b/yubikit/core/smartcard/_defs.py
+new file mode 100644
+index 000000000..8a4e97629
+--- /dev/null
++++ b/yubikit/core/smartcard/_defs.py
+@@ -0,0 +1,59 @@
++from .. import CommandError
++from enum import Enum, IntEnum, unique
++
++
++class ApduError(CommandError):
++    """Thrown when an APDU response has the wrong SW code"""
++
++    def __init__(self, data: bytes, sw: int):
++        self.data = data
++        self.sw = sw
++
++    def __str__(self):
++        return f"APDU error: SW=0x{self.sw:04x}"
++
++
++@unique
++class ApduFormat(str, Enum):
++    """APDU encoding format"""
++
++    SHORT = "short"
++    EXTENDED = "extended"
++
++
++@unique
++class AID(bytes, Enum):
++    """YubiKey Application smart card AID values."""
++
++    OTP = bytes.fromhex("a0000005272001")
++    MANAGEMENT = bytes.fromhex("a000000527471117")
++    OPENPGP = bytes.fromhex("d27600012401")
++    OATH = bytes.fromhex("a0000005272101")
++    PIV = bytes.fromhex("a000000308")
++    FIDO = bytes.fromhex("a0000006472f0001")
++    HSMAUTH = bytes.fromhex("a000000527210701")
++    SCP = bytes.fromhex("a000000151000000")
++
++
++@unique
++class SW(IntEnum):
++    NO_INPUT_DATA = 0x6285
++    VERIFY_FAIL_NO_RETRY = 0x63C0
++    MEMORY_FAILURE = 0x6581
++    WRONG_LENGTH = 0x6700
++    SECURITY_CONDITION_NOT_SATISFIED = 0x6982
++    AUTH_METHOD_BLOCKED = 0x6983
++    DATA_INVALID = 0x6984
++    CONDITIONS_NOT_SATISFIED = 0x6985
++    COMMAND_NOT_ALLOWED = 0x6986
++    INCORRECT_PARAMETERS = 0x6A80
++    FUNCTION_NOT_SUPPORTED = 0x6A81
++    FILE_NOT_FOUND = 0x6A82
++    NO_SPACE = 0x6A84
++    REFERENCE_DATA_NOT_FOUND = 0x6A88
++    APPLET_SELECT_FAILED = 0x6999
++    WRONG_PARAMETERS_P1P2 = 0x6B00
++    INVALID_INSTRUCTION = 0x6D00
++    CLASS_NOT_SUPPORTED = 0x6E00
++    COMMAND_ABORTED = 0x6F00
++    OK = 0x9000
+diff --git a/yubikit/core/scp.py b/yubikit/core/smartcard/scp.py
+similarity index 78%
+rename from yubikit/core/scp.py
+rename to yubikit/core/smartcard/scp.py
+index 8b0319bc3..aceaa0e4c 100644
+--- a/yubikit/core/scp.py
++++ b/yubikit/core/smartcard/scp.py
+@@ -25,15 +25,18 @@
+ # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ # POSSIBILITY OF SUCH DAMAGE.
+ 
+-from . import Tlv, BadResponseError
++from .. import Tlv, NotSupportedError, BadResponseError
++from ._defs import ApduError, SW
+ from cryptography.hazmat.backends import default_backend
+ from cryptography.hazmat.primitives import cmac, hashes, serialization, constant_time
+ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+ from cryptography.hazmat.primitives.asymmetric import ec
+ from cryptography.hazmat.primitives.kdf.x963kdf import X963KDF
+-from typing import NamedTuple, Tuple, Optional, Union
++from dataclasses import dataclass
++from typing import NamedTuple, Tuple, Optional, Union, Callable
+ 
+ import os
++import abc
+ import struct
+ import logging
+ 
+@@ -82,37 +85,6 @@ def _init_cipher(key: bytes, counter: int, response=False) -> Cipher:
+     )
+ 
+ 
+-class Key(bytes):
+-    @property
+-    def kid(self) -> int:
+-        return self[0]
+-
+-    @property
+-    def kvn(self) -> int:
+-        return self[1]
+-
+-    def __new__(cls, kid_or_data: Union[int, bytes], kvn: Optional[int] = None):
+-        """This allows creation by passing either binary data, or kid and kvn."""
+-        if isinstance(kid_or_data, int):  # kid and kvn
+-            if kvn is None:
+-                raise ValueError("Missing kvn")
+-            data = bytes([kid_or_data, kvn])
+-        else:  # Binary id and version
+-            if kvn is not None:
+-                raise ValueError("kvn can only be provided if kid_or_data is a kid")
+-            data = kid_or_data
+-
+-        # mypy thinks this is wrong
+-        return super(Key, cls).__new__(cls, data)  # type: ignore
+-
+-    def __init__(self, kid_or_data: Union[int, bytes], kvn: Optional[int] = None):
+-        if len(self) != 2:
+-            raise ValueError("Incorrect length")
+-
+-    def __repr__(self):
+-        return f"Key(kid=0x{self.kid:02x}, kvn=0x{self.kvn:02x})"
+-
+-
+ class SessionKeys(NamedTuple):
+     """SCP Session Keys."""
+ 
+@@ -142,6 +114,25 @@ def derive(self, context: bytes) -> SessionKeys:
+         )
+ 
+ 
++@dataclass
++class ScpKeyParams(abc.ABC):
++    kvn: int
++
++
++@dataclass
++class Scp03KeyParams(ScpKeyParams):
++    kvn: int = 0
++    keys: Union[StaticKeys, SessionKeys] = StaticKeys.default()
++
++
++@dataclass
++class Scp11KeyParams(ScpKeyParams):
++    pk_sd_ecka: ec.EllipticCurvePublicKey
++
++
++SendApdu = Callable[[int, int, int, int, bytes], bytes]
++
++
+ class ScpState:
+     def __init__(
+         self,
+@@ -198,37 +189,34 @@ def decrypt(self, encrypted: bytes) -> bytes:
+     @classmethod
+     def scp03_init(
+         cls,
+-        protocol,  #: SmartCardProtocol,
+-        keys: Union[StaticKeys, SessionKeys],
++        send_apdu: SendApdu,
++        key_params: Scp03KeyParams,
++        *,
+         host_challenge: Optional[bytes] = None,
+-        kvn: int = 0,
+     ) -> Tuple["ScpState", bytes]:
+         logger.debug("Initializing SCP03 handshake")
+         host_challenge = host_challenge or os.urandom(8)
+ 
+-        resp = protocol.send_apdu(0x80, 0x50, kvn, 0, host_challenge)
+-
+-        """try:
+-            resp = protocol.send_apdu(0x80, 0x50, kvn, 0, host_challenge)
++        try:
++            resp = send_apdu(0x80, 0x50, key_params.kvn, 0, host_challenge)
+         except ApduError as e:
+             if e.sw == SW.CLASS_NOT_SUPPORTED:
+                 raise NotSupportedError(
+                     "This YubiKey does not support secure messaging"
+                 )
+             raise
+-        """
+ 
+-        diversification_data = resp[:10]
+-        key_info = resp[10:13]
++        diversification_data = resp[:10]  # noqa: unused
++        key_info = resp[10:13]  # noqa: unused
+         card_challenge = resp[13:21]
+         card_cryptogram = resp[21:29]
+ 
+         context = host_challenge + card_challenge
+ 
+-        if isinstance(keys, StaticKeys):
+-            session_keys = keys.derive(context)
++        if isinstance(key_params.keys, StaticKeys):
++            session_keys = key_params.keys.derive(context)
+         else:
+-            session_keys = keys
++            session_keys = key_params.keys
+ 
+         gen_card_crypto = _derive(
+             session_keys.key_smac, _CARD_CRYPTOGRAM, context, 0x40
+@@ -246,9 +234,8 @@ def scp03_init(
+     @classmethod
+     def scp11_init(
+         cls,
+-        protocol,  #: SmartCardProtocol,
+-        key: Key,
+-        pk_sd_ecka: ec.EllipticCurvePublicKey,
++        send_apdu: SendApdu,
++        key_params: Scp11KeyParams,
+     ) -> "ScpState":
+         logger.debug("Initializing SCP11 handshake")
+ 
+@@ -260,7 +247,7 @@ def scp11_init(
+         key_len = bytes([16])  # 128-bit
+ 
+         # Host ephemeral key
+-        esk_oce_ecka = ec.generate_private_key(pk_sd_ecka.curve)
++        esk_oce_ecka = ec.generate_private_key(key_params.pk_sd_ecka.curve)
+         epk_oce_ecka = esk_oce_ecka.public_key()
+         data = Tlv(
+             0xA6,
+@@ -279,22 +266,21 @@ def scp11_init(
+         # No static host key, same as ephemeral
+         sk_oce_ecka = esk_oce_ecka
+ 
+-        resp = protocol.send_apdu(0x80, 0x88, key.kvn, key.kid, data)
+-        """try:
+-            resp = protocol.send_apdu(0x80, 0x88, key.kvn, key.kid, data)
++        try:
++            resp = send_apdu(0x80, 0x88, key_params.kvn, 0x13, data)
+         except ApduError as e:
+             if e.sw == SW.CLASS_NOT_SUPPORTED:
+                 raise NotSupportedError(
+                     "This YubiKey does not support secure messaging"
+                 )
+-            raise"""
++            raise
+ 
+-        epk_sd_ecka, receipt = Tlv.parse_list(resp)
+-        assert epk_sd_ecka.tag == 0x5F49
+-        assert receipt.tag == 0x86
++        epk_sd_ecka_tlv, resp = Tlv.parse_from(resp)
++        epk_sd_ecka = Tlv.unpack(0x5F49, epk_sd_ecka_tlv)
++        receipt = Tlv.unpack(0x86, resp)
+ 
+         # Derive keys
+-        key_agreement_data = data + epk_sd_ecka
++        key_agreement_data = data + epk_sd_ecka_tlv
+         sharedinfo = key_usage + key_type + key_len
+ 
+         # GPC v2.3 Amendment F (SCP11) v1.3 §3.1.2 Key Derivation
+@@ -302,10 +288,10 @@ def scp11_init(
+             esk_oce_ecka.exchange(
+                 ec.ECDH(),
+                 ec.EllipticCurvePublicKey.from_encoded_point(
+-                    sk_oce_ecka.curve, epk_sd_ecka.value
++                    sk_oce_ecka.curve, epk_sd_ecka
+                 ),
+             )
+-            + sk_oce_ecka.exchange(ec.ECDH(), pk_sd_ecka)
++            + sk_oce_ecka.exchange(ec.ECDH(), key_params.pk_sd_ecka)
+         )
+ 
+         # 5 keys were derived, one for verification of receipt
+@@ -313,8 +299,8 @@ def scp11_init(
+         keys = [keys[i : i + ln] for i in range(0, ln * 5, ln)]
+         c = cmac.CMAC(algorithms.AES(keys.pop(0)))
+         c.update(key_agreement_data)
+-        c.verify(receipt.value)
++        c.verify(receipt)
+         # The 4 remaining keys are session keys
+         session_keys = SessionKeys(*keys)
+ 
+-        return cls(session_keys, receipt.value)
++        return cls(session_keys, receipt)
+diff --git a/yubikit/management.py b/yubikit/management.py
+index 150b013b0..dc55d7ecf 100644
+--- a/yubikit/management.py
++++ b/yubikit/management.py
+@@ -540,13 +540,6 @@ def close(self) -> None:
+     def version(self) -> Version:
+         return self.backend.version
+ 
+-    def init_scp03(self):
+-        require_version(self.version, (5, 3, 0))
+-        backend = self.backend
+-        if isinstance(backend, _ManagementSmartCardBackend):
+-            return backend.protocol.init_scp03()
+-        raise NotSupportedError("Requires smart card connection")
+-
+     def read_device_info(self) -> DeviceInfo:
+         """Get detailed information about the YubiKey."""
+         require_version(self.version, (4, 1, 0))
+diff --git a/yubikit/openpgp.py b/yubikit/openpgp.py
+index adf0045b6..8ab082272 100644
+--- a/yubikit/openpgp.py
++++ b/yubikit/openpgp.py
+@@ -1020,10 +1020,6 @@ def _read_version(self) -> Version:
+         bcd = self.protocol.send_apdu(0, INS.GET_VERSION, 0, 0)
+         return Version(*(_bcd(x) for x in bcd))
+ 
+-    def init_scp03(self):
+-        require_version(self.version, (5, 3, 0))
+-        return self.protocol.init_scp03()
+-
+     @property
+     def aid(self) -> OpenPgpAid:
+         """Get the AID used to select the applet."""
+diff --git a/yubikit/piv.py b/yubikit/piv.py
+index 9523d2a8b..d9d25050e 100755
+--- a/yubikit/piv.py
++++ b/yubikit/piv.py
+@@ -514,10 +514,6 @@ def __init__(self, connection: SmartCardConnection):
+     def version(self) -> Version:
+         return self._version
+ 
+-    def init_scp03(self):
+-        require_version(self.version, (5, 3, 0))
+-        return self.protocol.init_scp03()
+-
+     def reset(self) -> None:
+         logger.debug("Preparing PIV reset")
+ 
+diff --git a/yubikit/scp.py b/yubikit/scp.py
+index 86882c8a8..beeb2713f 100644
+--- a/yubikit/scp.py
++++ b/yubikit/scp.py
+@@ -4,11 +4,10 @@
+     SmartCardConnection,
+     SmartCardProtocol,
+ )
+-from .core.scp import Key
+ 
+ from cryptography import x509
+ from dataclasses import dataclass
+-from typing import Mapping, Sequence
++from typing import Mapping, Sequence, Union, Optional
+ 
+ 
+ import logging
+@@ -20,15 +19,46 @@
+ INS_STORE_DATA = 0xE2
+ 
+ 
++class ScpKey(bytes):
++    @property
++    def kid(self) -> int:
++        return self[0]
++
++    @property
++    def kvn(self) -> int:
++        return self[1]
++
++    def __new__(cls, kid_or_data: Union[int, bytes], kvn: Optional[int] = None):
++        """This allows creation by passing either binary data, or kid and kvn."""
++        if isinstance(kid_or_data, int):  # kid and kvn
++            if kvn is None:
++                raise ValueError("Missing kvn")
++            data = bytes([kid_or_data, kvn])
++        else:  # Binary id and version
++            if kvn is not None:
++                raise ValueError("kvn can only be provided if kid_or_data is a kid")
++            data = kid_or_data
++
++        # mypy thinks this is wrong
++        return super(ScpKey, cls).__new__(cls, data)  # type: ignore
++
++    def __init__(self, kid_or_data: Union[int, bytes], kvn: Optional[int] = None):
++        if len(self) != 2:
++            raise ValueError("Incorrect length")
++
++    def __repr__(self):
++        return f"ScpKey(kid=0x{self.kid:02x}, kvn=0x{self.kvn:02x})"
++
++
+ @dataclass
+ class KeyInformation:
+-    key: Key
++    key: ScpKey
+     componets: Mapping[int, int]
+ 
+     @classmethod
+     def parse(cls, data: bytes) -> "KeyInformation":
+         return cls(
+-            Key(data[:2]),
++            ScpKey(data[:2]),
+             dict(zip(data[2::2], data[3::2])),
+         )
+ 
+@@ -36,13 +66,14 @@ def parse(cls, data: bytes) -> "KeyInformation":
+ @dataclass
+ class CaIssuer:
+     value: bytes
+-    key: Key
++    key: ScpKey
+ 
+     @classmethod
+     def parse_list(cls, data: bytes) -> Sequence["CaIssuer"]:
+         tlvs = Tlv.parse_list(data)
+         return [
+-            cls(tlvs[i].value, Key(tlvs[i + 1].value)) for i in range(0, len(tlvs), 2)
++            cls(tlvs[i].value, ScpKey(tlvs[i + 1].value))
++            for i in range(0, len(tlvs), 2)
+         ]
+ 
+ 
+@@ -70,7 +101,7 @@ def get_supported_ca_identifiers(self, kloc: bool = False) -> Sequence[CaIssuer]
+         """20-byte key identifier, key type, key version"""
+         return CaIssuer.parse_list(self.get_data(0xFF33 if kloc else 0xFF34))
+ 
+-    def get_certificate_bundle(self, key: Key) -> Sequence[x509.Certificate]:
++    def get_certificate_bundle(self, key: ScpKey) -> Sequence[x509.Certificate]:
+         data = Tlv(0xA6, Tlv(0x83, key))
+         return [
+             x509.load_der_x509_certificate(cert)

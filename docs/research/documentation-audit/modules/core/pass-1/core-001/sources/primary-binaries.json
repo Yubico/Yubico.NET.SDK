@@ -1,5 +1,5 @@
 {
-  "scope": "Original non-text source documents retained for Core Pass-1 citation evidence; executable/build artifacts remain external.",
+  "scope": "Original PDF and encoding-qualified source bytes retained for Core Pass-1 citation evidence; executable/build artifacts remain external.",
   "files": [
     {
       "path": "investigation/B1/sources/pcsc5-v2.01.01.pdf",
@@ -10,6 +10,35 @@
       "access_utc": "2026-11-11T22:35:02.208132+00:00",
       "authority": "investigation/B1/sources/manifest.json",
       "applicability": "Exact revision, actor and claim applicability are recorded in investigation/B1/sources/register.md; retaining the PDF supplies no general conformance claim."
+    },
+    {
+      "path": "investigation/C/sources/sec2-v2.pdf",
+      "kind": "original-specification-pdf",
+      "bytes": 306784,
+      "sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+      "url": "https://www.secg.org/sec2-v2.pdf",
+      "access_utc": "2026-11-11T22:51:41.002846+00:00",
+      "authority": "investigation/C/sources/completion-fetch-manifest.json"
+    },
+    {
+      "path": "investigation/C/sources/x690-202102.pdf",
+      "kind": "original-specification-pdf",
+      "bytes": 840764,
+      "sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+      "url": "https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-X.690-202102-I!!PDF-E&type=items",
+      "access_utc": "2026-11-11T22:56:23.583516+00:00",
+      "authority": "investigation/C/sources/ber-source-attempts.json"
+    },
+    {
+      "path": "investigation/C/sources/x690-202102-metadata.html",
+      "kind": "original-source-html",
+      "encoding": "iso-8859-1",
+      "encoding_evidence": "Original HTML declares <META http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">.",
+      "bytes": 11512,
+      "sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+      "url": "https://www.itu.int/rec/T-REC-X.690-202102-I/en",
+      "access_utc": "2026-11-11T22:56:23.143991+00:00",
+      "authority": "investigation/C/sources/ber-source-attempts.json"
     }
   ]
 }

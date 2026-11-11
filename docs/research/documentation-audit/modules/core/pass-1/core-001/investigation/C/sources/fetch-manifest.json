@@ -1,0 +1,130 @@
+[
+  {
+    "file": "rfc8017.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc8017.txt",
+    "sha256": "1e72dc473d18df3fc5598cdc12795a9f18f36f1aef15abc23a55eb0d58151d11",
+    "bytes": 154696,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc8032.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc8032.txt",
+    "sha256": "ed63657ff389301282b169b0abde9b5dd2c7e4d524fdfa5da6ff3094fc93c4c3",
+    "bytes": 103210,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc7748.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc7748.txt",
+    "sha256": "279ca0ecc5e92e2962e27b846986aeb74729d9dd34bd4a04a362f80dcb596ad3",
+    "bytes": 39298,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc8410.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc8410.txt",
+    "sha256": "90a0ff0b3dd661d3e26e1873f40f2ca8b41709a7bbd755a1ed3599c4746313d2",
+    "bytes": 34896,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc5915.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc5915.txt",
+    "sha256": "5c7b3b2eb449618a581a0ac89209d5d6acc7c375689b2e91304b5dcd866151dc",
+    "bytes": 13646,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc5480.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc5480.txt",
+    "sha256": "593bf29fd0da2ff8b903c3ebf1c9d189a770039159e2ba46a0c3b91355037f26",
+    "bytes": 36209,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc5208.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc5208.txt",
+    "sha256": "89f7338cf546abaee1d14eef7357440f4fc45e579d47dd4b436c29533abafc2e",
+    "bytes": 12063,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc5958.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc5958.txt",
+    "sha256": "82778b9ce7b34f02b5ae9777bfb9e42579744aebd2e1479f476513864525af67",
+    "bytes": 26671,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc4648.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc4648.txt",
+    "sha256": "84e14418f795d503be5f34bf23ce4ebaa119e9ec7c9f667d8caeb111385b178f",
+    "bytes": 35491,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc9053.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc9053.txt",
+    "sha256": "3d470615875620375f8453ba25b8dce7e4d0271e76b0b79a46df34ccb2d56ab0",
+    "bytes": 120315,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc9459.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc9459.txt",
+    "sha256": "d9a1cca5518895228f2838ea8bc9316adf352646b37bd45f4ec6751c5f39cc36",
+    "bytes": 22097,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "rfc5639.txt",
+    "url": "https://www.rfc-editor.org/rfc/rfc5639.txt",
+    "sha256": "d19949766009ac82b69e46b09f3a08d712908381300a340d3fa3b1478f4b215e",
+    "bytes": 50566,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "cose.xml",
+    "url": "https://www.iana.org/assignments/cose/cose.xml",
+    "sha256": "765e0cbff5385b3bf3477689af3e82ee870910abbd74ea002513f0f5941cfdb6",
+    "bytes": 79820,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "dotnet-v10.0.0-UTF8Encoding.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Text/UTF8Encoding.cs",
+    "sha256": "47f5e4c98751367a86329ab1e0a76d86b39fd076a5b019284694f39d40fd9011",
+    "bytes": 40321,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "dotnet-v10.0.0-Console.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Console/src/System/Console.cs",
+    "sha256": "2b4af87e0420db3bad13fea14f1ff5b43df881b6430884aeb0ed69a0ace33216",
+    "bytes": 35584,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  },
+  {
+    "file": "dotnet-v10.0.0-ECDsa.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/ECDsa.cs",
+    "sha256": "b696081dc22e362c8b1507b358e58abc4b44cb12b573c82fa37c483ad8807c8f",
+    "bytes": 58830,
+    "access_date": "2026-11-11",
+    "status": "FETCHED; passages require semantic inspection"
+  }
+]

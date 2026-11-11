@@ -1,0 +1,2214 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/xsl" href="cose.xsl"?>
+<?xml-model href="cose.rng" schematypens="http://relaxng.org/ns/structure/1.0" ?>
+<registry xmlns="http://www.iana.org/assignments" id="cose">
+  <title>CBOR Object Signing and Encryption (COSE)</title>
+  <created>2017-01-11</created>
+  <updated>2026-08-25</updated>
+  
+  
+  <registry id="header-parameters">
+    <title>COSE Header Parameters</title>
+    <xref type="rfc" data="rfc9052"/>
+    <range>
+      <value>Integers less than -65536</value>
+      <registration_rule>Private Use</registration_rule>
+    </range>
+    <range>
+      <value>Integer values in the range -1 to -65536</value>
+      <registration_rule>delegated to the COSE Header Algorithm Parameters registry</registration_rule>
+    </range>
+    <range>
+      <value>Integer values between 1 and 255</value>
+      <registration_rule>Standards Action With Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Integer values from 256 to 65535</value>
+      <registration_rule>Specification Required</registration_rule>
+    </range>
+    <range>
+      <value>Integer values greater than 65535</value>
+      <registration_rule>Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Strings of length 1</value>
+      <registration_rule>Standards Action With Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Strings of length 2</value>
+      <registration_rule>Specification Required</registration_rule>
+    </range>
+    <range>
+      <value>Strings of length greater than 2</value>
+      <registration_rule>Expert Review</registration_rule>
+    </range>
+    <expert>Francesca Palombini, Carsten Bormann</expert>
+    <record date="2017-01-11">
+      <name>Reserved for Private Use</name>
+      <label>less than -65536</label>
+      <value/>
+      <reg/>
+      <description/>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record>
+      <name>delegated to the COSE Header Algorithm Parameters registry</name>
+      <label>-65536 to -1</label>
+      <value/>
+      <reg/>
+      <description/>
+    </record>
+    <record date="2017-01-11">
+      <name>Reserved</name>
+      <label>0</label>
+      <value/>
+      <reg/>
+      <description/>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>alg</name>
+      <label>1</label>
+      <value>int / tstr</value>
+      <reg><xref type="registry" data="cose">COSE Algorithms</xref></reg>
+      <description>Cryptographic algorithm to use</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>crit</name>
+      <label>2</label>
+      <value>[+ label]</value>
+      <reg><xref type="registry" data="cose">COSE Header Parameters</xref></reg>
+      <description>Critical headers to be understood</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>content type</name>
+      <label>3</label>
+      <value>tstr / uint</value>
+      <reg><xref type="registry" data="core-parameters">COAP Content-Formats</xref> 
+        or <xref type="registry" data="media-types">Media Types</xref></reg>
+      <description>Content type of the payload</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>kid</name>
+      <label>4</label>
+      <value>bstr</value>
+      <reg/>
+      <description>Key identifier</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>IV</name>
+      <label>5</label>
+      <value>bstr</value>
+      <reg/>
+      <description>Full Initialization Vector</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>Partial IV</name>
+      <label>6</label>
+      <value>bstr</value>
+      <reg/>
+      <description>Partial Initialization Vector</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>counter signature</name>
+      <label>7</label>
+      <value>COSE_Signature / [+ COSE_Signature ]</value>
+      <reg/>
+      <description>CBOR-encoded signature structure (Deprecated by <xref type="rfc" data="rfc9338"/>)</description>
+      <xref type="rfc" data="rfc8152"/>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <label>8</label>
+      <value/>
+      <reg/>
+      <description/>
+    </record>
+    <record date="2017-01-11">
+      <name>CounterSignature0</name>
+      <label>9</label>
+      <value>bstr</value>
+      <reg/>
+      <description>Counter signature with implied signer and headers (Deprecated by <xref type="rfc" data="rfc9338"/>)</description>
+      <xref type="rfc" data="rfc8152"/>
+    </record>
+    <record date="2019-03-26">
+      <name>kid context</name>
+      <label>10</label>
+      <value>bstr</value>
+      <reg/>
+      <description>Identifies the context for the key identifier</description>
+      <xref type="rfc" data="rfc8613" section="5.1"/>
+    </record>
+    <record date="2022-10-24">
+      <name>Countersignature version 2</name>
+      <label>11</label>
+      <value>COSE_Countersignature / [+ COSE_Countersignature]</value>
+      <reg/>
+      <description>V2 countersignature attribute</description>
+      <xref type="rfc" data="rfc9338"/>
+    </record>
+    <record date="2022-10-24">
+      <name>Countersignature0 version 2</name>
+      <label>12</label>
+      <value>COSE_Countersignature0</value>
+      <reg/>
+      <description>V2 Abbreviated Countersignature</description>
+      <xref type="rfc" data="rfc9338"/>
+    </record>
+    <record date="2023-08-29">
+      <name>kcwt</name>
+      <label>13</label>
+      <value>COSE_Messages</value>
+      <reg/>
+      <description>A CBOR Web Token (CWT) containing a COSE_Key in a 'cnf' 
+        claim and possibly other claims. CWT is defined in <xref type="rfc" data="rfc8392"/>. 
+        COSE_Messages is defined in <xref type="rfc" data="rfc9052"/>.</description>
+      <xref type="rfc" data="rfc9528"/>
+    </record>
+    <record date="2023-08-29">
+      <name>kccs</name>
+      <label>14</label>
+      <value>map</value>
+      <reg/>
+      <description>A CWT Claims Set (CCS) containing a COSE_Key in a 'cnf' 
+        claim and possibly other claims. CCS is defined in <xref type="rfc" data="rfc8392"/>.</description>
+      <xref type="rfc" data="rfc9528"/>
+    </record>
+    <record date="2024-01-12" updated="2024-06-26">
+      <name>CWT Claims</name>
+      <label>15</label>
+      <value>map</value>
+      <reg>map keys in <xref type="registry" data="cwt">CWT Claims</xref></reg>
+      <description>Location for CWT Claims in COSE Header Parameters.</description>
+      <xref type="rfc" data="rfc9597" section="2"/>
+    </record>
+    <record date="2024-04-09" updated="2024-04-10">
+      <name>typ (type)</name>
+      <label>16</label>
+      <value>uint / tstr</value>
+      <reg><xref type="registry" data="core-parameters">COAP Content-Formats</xref> 
+        or <xref type="registry" data="media-types">Media Types</xref></reg>
+      <description>Content type of the complete COSE object</description>
+      <xref type="rfc" data="rfc9596" section="2"/>
+    </record>
+    <record date="2026-01-16">
+      <name>sd_claims (TEMPORARY - registered 2026-01-16, expires 2027-01-16)</name>
+      <label>17</label>
+      <value>[ +bstr ]</value>
+      <reg/>
+      <description>A list of selectively disclosed claims, which were originally redacted, then later disclosed at the discretion of the sender.</description>
+      <xref type="draft" data="RFC-ietf-spice-sd-cwt-06" section="4"/>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <label>18-21</label>
+      <value/>
+      <reg/>
+      <description/>
+    </record>
+    <record date="2024-03-06" updated="2024-03-11">
+      <name>c5t</name>
+      <label>22</label>
+      <value>COSE_CertHash</value>
+      <reg/>
+      <description>Hash of a C509Certificate</description>
+      <xref type="draft" data="RFC-ietf-cose-cbor-encoded-cert-20"/>
+    </record>
+    <record date="2024-03-06" updated="2024-03-11">
+      <name>c5u</name>
+      <label>23</label>
+      <value>uri</value>
+      <reg/>
+      <description>URI pointing to a C509 certificate</description>
+      <xref type="draft" data="RFC-ietf-cose-cbor-encoded-cert-20"/>
+    </record>
+    <record date="2024-03-06" updated="2024-03-11">
+      <name>c5b</name>
+      <label>24</label>
+      <value>COSE_C509</value>
+      <reg/>
+      <description>An unordered bag of C509 certificates</description>
+      <xref type="draft" data="RFC-ietf-cose-cbor-encoded-cert-20"/>
+    </record>
+    <record date="2024-03-06" updated="2024-03-11">
+      <name>c5c</name>
+      <label>25</label>
+      <value>COSE_C509</value>
+      <reg/>
+      <description>An ordered chain of C509 certificates</description>
+      <xref type="draft" data="RFC-ietf-cose-cbor-encoded-cert-20"/>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <label>26-31</label>
+      <value/>
+      <reg/>
+      <description/>
+    </record>
+    <record date="2019-08-20">
+      <name>x5bag</name>
+      <label>32</label>
+      <value>COSE_X509</value>
+      <reg/>
+      <description>An unordered bag of X.509 certificates</description>
+      <xref type="rfc" data="rfc9360"/>
+    </record>
+    <record date="2019-08-20">
+      <name>x5chain</name>
+      <label>33</label>
+      <value>COSE_X509</value>
+      <reg/>
+      <description>An ordered chain of X.509 certificates</description>
+      <xref type="rfc" data="rfc9360"/>
+    </record>
+    <record date="2019-08-20">
+      <name>x5t</name>
+      <label>34</label>
+      <value>COSE_CertHash</value>
+      <reg/>
+      <description>Hash of an X.509 certificate</description>
+      <xref type="rfc" data="rfc9360"/>
+    </record>
+    <record date="2019-08-20">
+      <name>x5u</name>
+      <label>35</label>
+      <value>uri</value>
+      <reg/>
+      <description>URI pointing to an X.509 certificate</description>
+      <xref type="rfc" data="rfc9360"/>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <label>36-169</label>
+      <value/>
+      <reg/>
+      <description/>
+    </record>
+    <record date="2026-01-16">
+      <name>sd_alg (TEMPORARY - registered 2026-01-16, expires 2027-01-16)</name>
+      <label>170</label>
+      <value>int</value>
+      <reg><xref type="registry" data="cose">COSE Algorithms</xref></reg>
+      <description>The hash algorithm used for redacting disclosures.</description>
+      <xref type="draft" data="RFC-ietf-spice-sd-cwt-06" section="7"/>
+    </record>
+    <record date="2026-01-16">
+      <name>sd_aead_encrypted_claims (TEMPORARY - registered 2026-01-16, expires 2027-01-16)</name>
+      <label>171</label>
+      <value>[ +[bstr,bstr,bstr] ]</value>
+      <reg/>
+      <description>A list of AEAD encrypted selectively disclosed claims, which were originally redacted, then later disclosed at the discretion of the sender.</description>
+      <xref type="draft" data="RFC-ietf-spice-sd-cwt-06" section="12.1"/>
+    </record>
+    <record date="2026-01-16">
+      <name>sd_aead (TEMPORARY - registered 2026-01-16, expires 2027-01-16)</name>
+      <label>172</label>
+      <value>uint .size 2</value>
+      <reg><xref type="registry" data="aead-parameters">AEAD Algorithms</xref></reg>
+      <description>The AEAD algorithm used for encrypting disclosures.</description>
+      <xref type="draft" data="RFC-ietf-spice-sd-cwt-06" section="12.1"/>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <label>173-255</label>
+      <value/>
+      <reg/>
+      <description/>
+    </record>
+    <record date="2021-03-19">
+      <name>CUPHNonce</name>
+      <label>256</label>
+      <value>bstr</value>
+      <reg/>
+      <description>Challenge Nonce</description>
+      <xref type="uri" data="https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.0-20201202.html">FIDO Device Onboard Specification</xref>
+    </record>
+    <record date="2021-03-19">
+      <name>CUPHOwnerPubKey</name>
+      <label>257</label>
+      <value>array</value>
+      <reg/>
+      <description>Public Key</description>
+      <xref type="uri" data="https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.0-20201202.html">FIDO Device Onboard Specification</xref>
+    </record>
+    <record date="2025-03-05">
+      <name>payload-hash-alg</name>
+      <label>258</label>
+      <value>int</value>
+      <reg><xref type="registry" data="cose">COSE Algorithms</xref></reg>
+      <description>The hash algorithm used to produce the payload of a COSE_Sign1</description>
+      <xref type="rfc" data="rfc9995" section="3"/>
+    </record>
+    <record date="2025-03-05">
+      <name>preimage-content-type</name>
+      <label>259</label>
+      <value>uint / tstr</value>
+      <reg><xref type="registry" data="core-parameters">CoAP Content-Formats</xref></reg>
+      <description>The content-format number or content-type (media-type name) of data that has been hashed to produce the payload of the COSE_Sign1</description>
+      <xref type="rfc" data="rfc9995" section="3"/>
+    </record>
+    <record date="2025-03-05">
+      <name>payload-location</name>
+      <label>260</label>
+      <value>tstr</value>
+      <reg/>
+      <description>The string or URI hint for the location of the data hashed to produce the payload of a COSE_Sign1</description>
+      <xref type="rfc" data="rfc9995" section="3"/>
+    </record>
+    <record date="2025-06-16" updated="2026-01-16">
+      <name>x5ts</name>
+      <label>261</label>
+      <value>array of COSE_CertHash</value>
+      <reg/>
+      <description>CBOR array of instances of COSE_CertHash</description>
+      <xref type="uri" data="https://portal.etsi.org/webapp/WorkProgram/Report_WorkItem.asp?WKI_ID=63599">TS 119 152-1 V0.0.9, Clause 5.2.2</xref>
+    </record>
+    <record date="2025-06-16" updated="2026-01-16">
+      <name>srCms</name>
+      <label>262</label>
+      <value>array of SrCm</value>
+      <reg/>
+      <description>set of commitments and optional commitments qualifiers</description>
+      <xref type="uri" data="https://portal.etsi.org/webapp/WorkProgram/Report_WorkItem.asp?WKI_ID=63599">TS 119 152-1 V0.0.9, Clause 5.2.3</xref>
+    </record>
+    <record date="2025-06-16" updated="2026-01-16">
+      <name>sigPl</name>
+      <label>263</label>
+      <value>map</value>
+      <reg/>
+      <description>CBOR map for indicating the location where the signature was generated. 
+It may contain an indication of the country, the locality, the region, a box number in a 
+post office, the postal code, and the street address</description>
+      <xref type="uri" data="https://portal.etsi.org/webapp/WorkProgram/Report_WorkItem.asp?WKI_ID=63599">TS 119 152-1 V0.0.9, Clause 5.2.4</xref>
+    </record>
+    <record date="2025-06-16" updated="2026-01-16">
+      <name>srAts</name>
+      <label>264</label>
+      <value>map</value>
+      <reg/>
+      <description>CBOR map that may contain: an array of attributes that the signer claims 
+to be in possession of, an array of attribute certificates (X.509 attribute certificates or 
+other) issued to the signer, an array of signed assertions issued by a third party to the signer,
+or any combination of the three aforementioned CBOR arrays</description>
+      <xref type="uri" data="https://portal.etsi.org/webapp/WorkProgram/Report_WorkItem.asp?WKI_ID=63599">TS 119 152-1 V0.0.9, Clause 5.2.5</xref>
+    </record>
+    <record date="2025-06-16" updated="2026-01-16">
+      <name>adoTst</name>
+      <label>265</label>
+      <value>map</value>
+      <reg/>
+      <description>CBOR map that encapsulates one or more electronic time-stamps, generated 
+before the signature production, and whose message imprint computation input is the COSE 
+Payload of the CB-AdES signature</description>
+      <xref type="uri" data="https://portal.etsi.org/webapp/WorkProgram/Report_WorkItem.asp?WKI_ID=63599">TS 119 152-1 V0.0.9, Clause 5.2.6</xref>
+    </record>
+    <record date="2025-06-16" updated="2026-01-16">
+      <name>sigPId</name>
+      <label>266</label>
+      <value>map</value>
+      <reg/>
+      <description>CBOR map that identifies a certain signature policy and may contain the 
+digest of the document defining this signature policy.</description>
+      <xref type="uri" data="https://portal.etsi.org/webapp/WorkProgram/Report_WorkItem.asp?WKI_ID=63599">TS 119 152-1 V0.0.9, Clause 5.2.7</xref>
+    </record>
+    <record date="2025-06-16" updated="2026-01-16">
+      <name>sigD</name>
+      <label>267</label>
+      <value>map</value>
+      <reg/>
+      <description>CBOR map that references data objects that are detached from the CB-AdES 
+signature and that are collectively signed.</description>
+      <xref type="uri" data="https://portal.etsi.org/webapp/WorkProgram/Report_WorkItem.asp?WKI_ID=63599">TS 119 152-1 V0.0.9, Clause 5.2.8</xref>
+    </record>
+    <record date="2025-06-16" updated="2026-01-16">
+      <name>uHeaders</name>
+      <label>268</label>
+      <value>[+bstr]</value>
+      <reg/>
+      <description>CBOR array that contains a number of CBOR elements that are placed within 
+the array in the order they are incorporated into the CB-AdES signature</description>
+      <xref type="uri" data="https://portal.etsi.org/webapp/WorkProgram/Report_WorkItem.asp?WKI_ID=63599">TS 119 152-1 V0.0.9, Clause 5.3.1</xref>
+    </record>
+    <record date="2025-08-28" updated="2026-02-23">
+      <name>3161-ttc</name>
+      <label>269</label>
+      <value>bstr</value>
+      <reg/>
+      <description>Timestamp Token per <xref type="rfc" data="rfc3161"/>: Timestamp, Then COSE</description>
+      <xref type="rfc" data="rfc9921" section="3.2"/>
+    </record>
+    <record date="2025-08-28" updated="2026-02-23">
+      <name>3161-ctt</name>
+      <label>270</label>
+      <value>bstr</value>
+      <reg/>
+      <description>Timestamp Token per <xref type="rfc" data="rfc3161"/>: COSE, Then Timestamp</description>
+      <xref type="rfc" data="rfc9921" section="3.1"/>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <label>271-393</label>
+      <value/>
+      <reg/>
+      <description/>
+    </record>
+    <record date="2025-05-16" updated="2025-09-12">
+      <name>receipts</name>
+      <label>394</label>
+      <value>array</value>
+      <reg/>
+      <description>Priority ordered sequence of CBOR encoded Receipts</description>
+      <xref type="rfc" data="rfc9942" section="2"/>
+    </record>
+    <record date="2025-05-16" updated="2025-09-12">
+      <name>vds</name>
+      <label>395</label>
+      <value>int</value>
+      <reg><xref type="registry" data="cose">COSE Verifiable Data Structure Algorithms</xref></reg>
+      <description>Algorithm identifier for verifiable data structures, used to produce verifiable data structure proofs</description>
+      <xref type="rfc" data="rfc9942" section="2"/>
+    </record>
+    <record date="2025-05-16" updated="2025-09-12">
+      <name>vdp</name>
+      <label>396</label>
+      <value>map</value>
+      <reg>map key in <xref type="registry" data="cose">COSE Verifiable Data Structure Proofs</xref></reg>
+      <description>Location for verifiable data structure proofs in COSE Header Parameters</description>
+      <xref type="rfc" data="rfc9942" section="2"/>
+    </record>
+  </registry>
+  
+  <registry id="header-algorithm-parameters">
+    <title>COSE Header Algorithm Parameters</title>
+    <xref type="rfc" data="rfc9053"/>
+    <registration_rule>Expert Review</registration_rule>
+    <expert>Göran Selander, Derek Atkins, Sean Turner</expert>
+    <record>
+      <name>Unassigned</name>
+      <algorithm/>
+      <label>-65536 to -33</label>
+      <value/>
+      <description/>
+    </record>
+    <record date="2026-08-25">
+      <name>c5u-sender</name>
+      <algorithm>ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-SS+A128KW, 
+        ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-32</label>
+      <value>uri</value>
+      <description>URI pointing to a C509 certificate</description>
+      <xref type="draft" data="RFC-ietf-cose-cbor-encoded-cert-20"/>
+    </record>
+    <record date="2026-08-25">
+      <name>c5t-sender</name>
+      <algorithm>ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-SS+A128KW, 
+        ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-31</label>
+      <value>COSE_CertHash</value>
+      <description>Hash of a C509Certificate</description>
+      <xref type="draft" data="RFC-ietf-cose-cbor-encoded-cert-20"/>
+    </record>
+    <record date="2026-08-25">
+      <name>c5c-sender</name>
+      <algorithm>ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-SS+A128KW, 
+        ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-30</label>
+      <value>COSE_C509</value>
+      <description>An ordered chain of C509 certificates</description>
+      <xref type="draft" data="RFC-ietf-cose-cbor-encoded-cert-20"/>
+    </record>
+    <record date="2022-10-27">
+      <name>x5chain-sender</name>
+      <algorithm>ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-SS+A128KW, 
+        ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-29</label>
+      <value>COSE_X509</value>
+      <description>static key X.509 certificate chain</description>
+      <xref type="rfc" data="rfc9360"/>
+    </record>
+    <record date="2022-10-27">
+      <name>x5u-sender</name>
+      <algorithm>ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-SS+A128KW,
+        ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-28</label>
+      <value>uri</value>
+      <description>URI for the sender's X.509 certificate</description>
+      <xref type="rfc" data="rfc9360"/>
+    </record>
+    <record date="2022-10-27">
+      <name>x5t-sender</name>
+      <algorithm>ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-SS+A128KW,
+        ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-27</label>
+      <value>COSE_CertHash</value>
+      <description>Thumbprint for the sender's X.509 certificate</description>
+      <xref type="rfc" data="rfc9360"/>
+    </record>
+    <record date="2017-01-11">
+      <name>PartyV other</name>
+      <algorithm>direct+HKDF-SHA-256, direct+HKDF-SHA-512, direct+HKDF-AES-128, 
+        direct+HKDF-AES-256, ECDH-ES+HKDF-256, ECDH-ES+HKDF-512, 
+        ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-ES+A128KW, ECDH-ES+A192KW, 
+        ECDH-ES+A256KW, ECDH-SS+A128KW, ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-26</label>
+      <value>bstr</value>
+      <description>Party V other provided information</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>PartyV nonce</name>
+      <algorithm>direct+HKDF-SHA-256, direct+HKDF-SHA-512, direct+HKDF-AES-128, 
+        direct+HKDF-AES-256, ECDH-ES+HKDF-256, ECDH-ES+HKDF-512, 
+        ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-ES+A128KW, ECDH-ES+A192KW, 
+        ECDH-ES+A256KW, ECDH-SS+A128KW, ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-25</label>
+      <value>bstr / int</value>
+      <description>Party V provided nonce</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>PartyV identity</name>
+      <algorithm>direct+HKDF-SHA-256, direct+HKDF-SHA-512, direct+HKDF-AES-128, 
+        direct+HKDF-AES-256, ECDH-ES+HKDF-256, ECDH-ES+HKDF-512, 
+        ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-ES+A128KW, ECDH-ES+A192KW, 
+        ECDH-ES+A256KW, ECDH-SS+A128KW, ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-24</label>
+      <value>bstr</value>
+      <description>Party V identity information</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>PartyU other</name>
+      <algorithm>direct+HKDF-SHA-256, direct+HKDF-SHA-512, direct+HKDF-AES-128, 
+        direct+HKDF-AES-256, ECDH-ES+HKDF-256, ECDH-ES+HKDF-512, 
+        ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-ES+A128KW, ECDH-ES+A192KW, 
+        ECDH-ES+A256KW, ECDH-SS+A128KW, ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-23</label>
+      <value>bstr</value>
+      <description>Party U other provided information</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>PartyU nonce</name>
+      <algorithm>direct+HKDF-SHA-256, direct+HKDF-SHA-512, direct+HKDF-AES-128, 
+        direct+HKDF-AES-256, ECDH-ES+HKDF-256, ECDH-ES+HKDF-512, 
+        ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-ES+A128KW, ECDH-ES+A192KW, 
+        ECDH-ES+A256KW, ECDH-SS+A128KW, ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-22</label>
+      <value>bstr / int</value>
+      <description>Party U provided nonce</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>PartyU identity</name>
+      <algorithm>direct+HKDF-SHA-256, direct+HKDF-SHA-512, direct+HKDF-AES-128, 
+        direct+HKDF-AES-256, ECDH-ES+HKDF-256, ECDH-ES+HKDF-512, 
+        ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-ES+A128KW, ECDH-ES+A192KW, 
+        ECDH-ES+A256KW, ECDH-SS+A128KW, ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-21</label>
+      <value>bstr</value>
+      <description>Party U identity information</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>salt</name>
+      <algorithm>direct+HKDF-SHA-256, direct+HKDF-SHA-512, 
+        direct+HKDF-AES-128, direct+HKDF-AES-256, ECDH-ES+HKDF-256, 
+        ECDH-ES+HKDF-512, ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, 
+        ECDH-ES+A128KW, ECDH-ES+A192KW, ECDH-ES+A256KW, 
+        ECDH-SS+A128KW, ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-20</label>
+      <value>bstr</value>
+      <description>Random salt</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <algorithm/>
+      <label>-19 to -4</label>
+      <value/>
+      <description/>
+    </record>
+    <record date="2017-01-11">
+      <name>static key id</name>
+      <algorithm>ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-SS+A128KW, 
+        ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-3</label>
+      <value>bstr</value>
+      <description>Static public key identifier for the sender</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>static key</name>
+      <algorithm>ECDH-SS+HKDF-256, ECDH-SS+HKDF-512, ECDH-SS+A128KW, 
+        ECDH-SS+A192KW, ECDH-SS+A256KW</algorithm>
+      <label>-2</label>
+      <value>COSE_Key</value>
+      <description>Static public key for the sender</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>ephemeral key</name>
+      <algorithm>ECDH-ES+HKDF-256, ECDH-ES+HKDF-512, ECDH-ES+A128KW, 
+        ECDH-ES+A192KW, ECDH-ES+A256KW</algorithm>
+      <label>-1</label>
+      <value>COSE_Key</value>
+      <description>Ephemeral public key for the sender</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+  </registry>
+  
+  <registry id="algorithms">
+    <title>COSE Algorithms</title>
+    <xref type="rfc" data="rfc9053"/>
+	<xref type="rfc" data="rfc9054"/>
+  <xref type="rfc" data="rfc9864" section="4.2"/>
+    <range>
+      <value>Integers less than -65536</value>
+      <registration_rule>Private Use</registration_rule>
+    </range>
+    <range>
+      <value>Integer values from -65536 to -257</value>
+      <registration_rule>Specification Required</registration_rule>
+    </range>
+    <range>
+      <value>Integer values between -256 and 255</value>
+      <registration_rule>Standards Action With Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Integer values from 256 to 65535</value>
+      <registration_rule>Specification Required</registration_rule>
+    </range>
+    <range>
+      <value>Integer values greater than 65535</value>
+      <registration_rule>Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Strings of length 1</value>
+      <registration_rule>Standards Action With Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Strings of length 2</value>
+      <registration_rule>Specification Required</registration_rule>
+    </range>
+    <range>
+      <value>Strings of length greater than 2</value>
+      <registration_rule>Expert Review</registration_rule>
+    </range>
+    <expert>Göran Selander, Derek Atkins, Sean Turner</expert>
+    <record>
+      <name>Reserved for Private Use</name>
+      <value>less than -65536</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>-65536</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <recommended/>
+    </record>
+    <record date="2018-04-19" updated="2020-08-12">
+      <name>RS1</name>
+      <value>-65535</value>
+      <description>RSASSA-PKCS1-v1_5 using SHA-1</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IESG</controller>
+      <xref type="rfc" data="rfc8812"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2023-06-01">
+      <name>A128CTR</name>
+      <value>-65534</value>
+      <description>AES-CTR w/ 128-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9459"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2023-06-01">
+      <name>A192CTR</name>
+      <value>-65533</value>
+      <description>AES-CTR w/ 192-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9459"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2023-06-01">
+      <name>A256CTR</name>
+      <value>-65532</value>
+      <description>AES-CTR w/ 256-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9459"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2023-06-01">
+      <name>A128CBC</name>
+      <value>-65531</value>
+      <description>AES-CBC w/ 128-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9459"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2023-06-01">
+      <name>A192CBC</name>
+      <value>-65530</value>
+      <description>AES-CBC w/ 192-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9459"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2023-06-01">
+      <name>A256CBC</name>
+      <value>-65529</value>
+      <description>AES-CBC w/ 256-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9459"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>-65528 to -269</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <recommended/>
+    </record> 
+    <record date="2025-05-13">
+      <name>ESB512</name>
+      <value>-268</value>
+      <description>ECDSA using BrainpoolP512r1 curve and SHA-512</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9864" section="2.1"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2025-05-13">
+      <name>ESB384</name>
+      <value>-267</value>
+      <description>ECDSA using BrainpoolP384r1 curve and SHA-384</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9864" section="2.1"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2025-05-13">
+      <name>ESB320</name>
+      <value>-266</value>
+      <description>ECDSA using BrainpoolP320r1 curve and SHA-384</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9864" section="2.1"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2025-05-13">
+      <name>ESB256</name>
+      <value>-265</value>
+      <description>ECDSA using BrainpoolP256r1 curve and SHA-256</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9864" section="2.1"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2025-02-20">
+      <name>KT256</name>
+      <value>-264</value>
+      <description>KT256 XOF</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9861"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2025-02-20">
+      <name>KT128</name>
+      <value>-263</value>
+      <description>KT128 XOF</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9861"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2025-02-20">
+      <name>TurboSHAKE256</name>
+      <value>-262</value>
+      <description>TurboSHAKE256 XOF</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9861"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2025-02-20">
+      <name>TurboSHAKE128</name>
+      <value>-261</value>
+      <description>TurboSHAKE128 XOF</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9861"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2021-03-04" updated="2022-01-25">
+      <name>WalnutDSA</name>
+      <value>-260</value>
+      <description>WalnutDSA signature</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9021"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2018-04-19" updated="2020-08-12">
+      <name>RS512</name>
+      <value>-259</value>
+      <description>RSASSA-PKCS1-v1_5 using SHA-512</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IESG</controller>
+      <xref type="rfc" data="rfc8812"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2018-04-19" updated="2020-08-12">
+      <name>RS384</name>
+      <value>-258</value>
+      <description>RSASSA-PKCS1-v1_5 using SHA-384</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IESG</controller>
+      <xref type="rfc" data="rfc8812"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2018-04-19" updated="2020-08-12">
+      <name>RS256</name>
+      <value>-257</value>
+      <description>RSASSA-PKCS1-v1_5 using SHA-256</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IESG</controller>
+      <xref type="rfc" data="rfc8812"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>-256 to -54</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <recommended/>
+    </record>
+    <record date="2025-05-12">
+      <name>Ed448</name>
+      <value>-53</value>
+      <description>EdDSA using the Ed448 parameter set in <xref type="rfc" data="rfc8032" section="5.2" label-format="of"/></description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9864" section="2.2"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2025-05-12">
+      <name>ESP512</name>
+      <value>-52</value>
+      <description>ECDSA using P-521 curve and SHA-512</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9864" section="2.1"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2025-05-12">
+      <name>ESP384</name>
+      <value>-51</value>
+      <description>ECDSA using P-384 curve and SHA-384</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9864" section="2.1"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2025-04-24" updated="2025-10-24">
+      <name>ML-DSA-87</name>
+      <value>-50</value>
+      <description>CBOR Object Signing Algorithm for ML-DSA-87</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9964"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2025-04-24" updated="2025-10-24">
+      <name>ML-DSA-65</name>
+      <value>-49</value>
+      <description>CBOR Object Signing Algorithm for ML-DSA-65</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9964"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2025-04-24" updated="2025-10-24">
+      <name>ML-DSA-44</name>
+      <value>-48</value>
+      <description>CBOR Object Signing Algorithm for ML-DSA-44</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9964"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2020-06-18" updated="2020-08-12">
+      <name>ES256K</name>
+      <value>-47</value>
+      <description>ECDSA using secp256k1 curve and SHA-256</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IESG</controller>
+      <xref type="rfc" data="rfc8812"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2020-01-02">
+      <name>HSS-LMS</name>
+      <value>-46</value>
+      <description>HSS/LMS hash-based digital signature</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc8778"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2019-08-13">
+      <name>SHAKE256</name>
+      <value>-45</value>
+      <description>SHAKE-256 512-bit Hash Value</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9054"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2019-08-13">
+      <name>SHA-512</name>
+      <value>-44</value>
+      <description>SHA-2 512-bit Hash</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9054"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2019-08-13">
+      <name>SHA-384</name>
+      <value>-43</value>
+      <description>SHA-2 384-bit Hash</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9054"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-07-17">
+      <name>RSAES-OAEP w/ SHA-512</name>
+      <value>-42</value>
+      <description>RSAES-OAEP w/ SHA-512</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc8230"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-07-17">
+      <name>RSAES-OAEP w/ SHA-256</name>
+      <value>-41</value>
+      <description>RSAES-OAEP w/ SHA-256</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc8230"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-07-17">
+      <name>RSAES-OAEP w/ RFC 8017 default parameters</name>
+      <value>-40</value>
+      <description>RSAES-OAEP w/ SHA-1</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc8230"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-07-17">
+      <name>PS512</name>
+      <value>-39</value>
+      <description>RSASSA-PSS w/ SHA-512</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc8230"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-07-17">
+      <name>PS384</name>
+      <value>-38</value>
+      <description>RSASSA-PSS w/ SHA-384</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc8230"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-07-17">
+      <name>PS256</name>
+      <value>-37</value>
+      <description>RSASSA-PSS w/ SHA-256</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc8230"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11" updated="2025-05-12">
+      <name>ES512</name>
+      <value>-36</value>
+      <description>ECDSA w/ SHA-512</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9053"/>
+      <xref type="rfc" data="rfc9864"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2017-01-11" updated="2025-05-12">
+      <name>ES384</name>
+      <value>-35</value>
+      <description>ECDSA w/ SHA-384</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9053"/>
+      <xref type="rfc" data="rfc9864"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-SS + A256KW</name>
+      <value>-34</value>
+      <description>ECDH SS w/ Concat KDF and AES Key Wrap w/ 256-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-SS + A192KW</name>
+      <value>-33</value>
+      <description>ECDH SS w/ Concat KDF and AES Key Wrap w/ 192-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-SS + A128KW</name>
+      <value>-32</value>
+      <description>ECDH SS w/ Concat KDF and AES Key Wrap w/ 128-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-ES + A256KW</name>
+      <value>-31</value>
+      <description>ECDH ES w/ Concat KDF and AES Key Wrap w/ 256-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-ES + A192KW</name>
+      <value>-30</value>
+      <description>ECDH ES w/ Concat KDF and AES Key Wrap w/ 192-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-ES + A128KW</name>
+      <value>-29</value>
+      <description>ECDH ES w/ Concat KDF and AES Key Wrap w/ 128-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-SS + HKDF-512</name>
+      <value>-28</value>
+      <description>ECDH SS w/ HKDF - generate key directly</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-SS + HKDF-256</name>
+      <value>-27</value>
+      <description>ECDH SS w/ HKDF - generate key directly</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-ES + HKDF-512</name>
+      <value>-26</value>
+      <description>ECDH ES w/ HKDF - generate key directly</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>ECDH-ES + HKDF-256</name>
+      <value>-25</value>
+      <description>ECDH ES w/ HKDF - generate key directly</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>-24 to -20</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <recommended/>
+    </record>
+    <record date="2025-05-12">
+      <name>Ed25519</name>
+      <value>-19</value>
+      <description>EdDSA using the Ed25519 parameter set in <xref type="rfc" data="rfc8032" section="5.1" label-format="of"/></description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9864" section="2.2"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2019-08-13">
+      <name>SHAKE128</name>
+      <value>-18</value>
+      <description>SHAKE-128 256-bit Hash Value</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9054"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2019-08-13">
+      <name>SHA-512/256</name>
+      <value>-17</value>
+      <description>SHA-2 512-bit Hash truncated to 256-bits</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9054"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2019-08-13">
+      <name>SHA-256</name>
+      <value>-16</value>
+      <description>SHA-2 256-bit Hash</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9054"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2019-08-13">
+      <name>SHA-256/64</name>
+      <value>-15</value>
+      <description>SHA-2 256-bit Hash truncated to 64-bits</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9054"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Filter Only</recommended>
+    </record>
+    <record date="2019-08-13">
+      <name>SHA-1</name>
+      <value>-14</value>
+      <description>SHA-1 Hash</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9054"/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Filter Only</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>direct+HKDF-AES-256</name>
+      <value>-13</value>
+      <description>Shared secret w/ AES-MAC 256-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>direct+HKDF-AES-128</name>
+      <value>-12</value>
+      <description>Shared secret w/ AES-MAC 128-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>direct+HKDF-SHA-512</name>
+      <value>-11</value>
+      <description>Shared secret w/ HKDF and SHA-512</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>direct+HKDF-SHA-256</name>
+      <value>-10</value>
+      <description>Shared secret w/ HKDF and SHA-256</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2025-05-12">
+      <name>ESP256</name>
+      <value>-9</value>
+      <description>ECDSA using P-256 curve and SHA-256</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9864" section="2.1"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11" updated="2025-05-12">
+      <name>EdDSA</name>
+      <value>-8</value>
+      <description>EdDSA</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9053"/>
+      <xref type="rfc" data="rfc9864"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2017-01-11" updated="2025-05-12">
+      <name>ES256</name>
+      <value>-7</value>
+      <description>ECDSA w/ SHA-256</description>
+      <capabilities>[kty]</capabilities>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9053"/>
+      <xref type="rfc" data="rfc9864"/>
+      <recommended>Deprecated</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>direct</name>
+      <value>-6</value>
+      <description>Direct use of CEK</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>A256KW</name>
+      <value>-5</value>
+      <description>AES Key Wrap w/ 256-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>A192KW</name>
+      <value>-4</value>
+      <description>AES Key Wrap w/ 192-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>A128KW</name>
+      <value>-3</value>
+      <description>AES Key Wrap w/ 128-bit key</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>-2 to -1</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <recommended/>
+    </record>
+    <record date="2017-01-11">
+      <name>Reserved</name>
+      <value>0</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>A128GCM</name>
+      <value>1</value>
+      <description>AES-GCM mode w/ 128-bit key, 128-bit tag</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>A192GCM</name>
+      <value>2</value>
+      <description>AES-GCM mode w/ 192-bit key, 128-bit tag</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>A256GCM</name>
+      <value>3</value>
+      <description>AES-GCM mode w/ 256-bit key, 128-bit tag</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>HMAC 256/64</name>
+      <value>4</value>
+      <description>HMAC w/ SHA-256 truncated to 64 bits</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>HMAC 256/256</name>
+      <value>5</value>
+      <description>HMAC w/ SHA-256</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>HMAC 384/384</name>
+      <value>6</value>
+      <description>HMAC w/ SHA-384</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>HMAC 512/512</name>
+      <value>7</value>
+      <description>HMAC w/ SHA-512</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>8-9</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <recommended/>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-CCM-16-64-128</name>
+      <value>10</value>
+      <description>AES-CCM mode 128-bit key, 64-bit tag, 13-byte nonce</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-CCM-16-64-256</name>
+      <value>11</value>
+      <description>AES-CCM mode 256-bit key, 64-bit tag, 13-byte nonce</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-CCM-64-64-128</name>
+      <value>12</value>
+      <description>AES-CCM mode 128-bit key, 64-bit tag, 7-byte nonce</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-CCM-64-64-256</name>
+      <value>13</value>
+      <description>AES-CCM mode 256-bit key, 64-bit tag, 7-byte nonce</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-MAC 128/64</name>
+      <value>14</value>
+      <description>AES-MAC 128-bit key, 64-bit tag</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-MAC 256/64</name>
+      <value>15</value>
+      <description>AES-MAC 256-bit key, 64-bit tag</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>16-23</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <recommended/>
+    </record>
+    <record date="2017-01-11">
+      <name>ChaCha20/Poly1305</name>
+      <value>24</value>
+      <description>ChaCha20/Poly1305 w/ 256-bit key, 128-bit tag</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-MAC 128/128</name>
+      <value>25</value>
+      <description>AES-MAC 128-bit key, 128-bit tag</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-MAC 256/128</name>
+      <value>26</value>
+      <description>AES-MAC 256-bit key, 128-bit tag</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>27-29</value>
+      <description/>
+      <capabilities/>
+      <controller/>
+      <recommended/>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-CCM-16-128-128</name>
+      <value>30</value>
+      <description>AES-CCM mode 128-bit key, 128-bit tag, 13-byte nonce</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-CCM-16-128-256</name>
+      <value>31</value>
+      <description>AES-CCM mode 256-bit key, 128-bit tag, 13-byte nonce</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-CCM-64-128-128</name>
+      <value>32</value>
+      <description>AES-CCM mode 128-bit key, 128-bit tag, 7-byte nonce</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>AES-CCM-64-128-256</name>
+      <value>33</value>
+      <description>AES-CCM mode 256-bit key, 128-bit tag, 7-byte nonce</description>
+      <capabilities>[kty]</capabilities>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2020-02-01">
+      <name>IV-GENERATION</name>
+      <value>34</value>
+      <description>For doing IV generation for symmetric algorithms.</description>
+      <capabilities/>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+  </registry>
+
+  <registry id="key-common-parameters">
+    <title>COSE Key Common Parameters</title>
+    <xref type="rfc" data="rfc9052"/>
+    <range>
+      <value>Integers less than -65536</value>
+      <registration_rule>Private Use</registration_rule>
+    </range>
+    <range>
+      <value>Integer values in the range -65536 to -1</value>
+      <registration_rule>used for key parameters specific to a single algorithm
+delegated to the COSE Key Type Parameters registry</registration_rule>
+    </range>
+    <range>
+      <value>Integer values between 0 and 255</value>
+      <registration_rule>Standards Action With Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Integer values from 256 to 65535</value>
+      <registration_rule>Specification Required</registration_rule>
+    </range>
+    <range>
+      <value>Integer values greater than 65535</value>
+      <registration_rule>Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Strings of length 1</value>
+      <registration_rule>Standards Action With Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Strings of length 2</value>
+      <registration_rule>Specification Required</registration_rule>
+    </range>
+    <range>
+      <value>Strings of length greater than 2</value>
+      <registration_rule>Expert Review</registration_rule>
+    </range>
+    <expert>Francesca Palombini, Carsten Bormann</expert>
+    <record date="2017-01-11">
+      <name>Reserved for Private Use</name>
+      <label>less than -65536</label>
+      <cbor-type/>
+      <reg/>
+      <description/>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record>
+      <name>used for key parameters specific to a single algorithm
+        delegated to the COSE Key Type Parameters registry</name>
+      <label>-65536 to -1</label>
+      <cbor-type/>
+      <reg/>
+      <description/>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-03-27">
+      <name>Reserved</name>
+      <label>0</label>
+      <cbor-type/>
+      <reg/>
+      <description/>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>kty</name>
+      <label>1</label>
+      <cbor-type>tstr / int</cbor-type>
+      <reg><xref type="registry" data="cose">COSE Key Types</xref></reg>
+      <description>Identification of the key type</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>kid</name>
+      <label>2</label>
+      <cbor-type>bstr</cbor-type>
+      <reg/>
+      <description>Key identification value - match to kid in message</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>alg</name>
+      <label>3</label>
+      <cbor-type>tstr / int</cbor-type>
+      <reg><xref type="registry" data="cose">COSE Algorithms</xref></reg>
+      <description>Key usage restriction to this algorithm</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>key_ops</name>
+      <label>4</label>
+      <cbor-type>[+ (tstr/int)]</cbor-type>
+      <reg/>
+      <description>Restrict set of permissible operations</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+    <record date="2017-01-11">
+      <name>Base IV</name>
+      <label>5</label>
+      <cbor-type>bstr</cbor-type>
+      <reg/>
+      <description>Base IV to be XORed with Partial IVs</description>
+      <xref type="rfc" data="rfc9052"/>
+    </record>
+</registry>
+
+  <registry id="key-type-parameters">
+    <title>COSE Key Type Parameters</title>
+    <xref type="rfc" data="rfc9053"/>
+    <registration_rule>Expert Review</registration_rule>
+    <expert>Göran Selander, Derek Atkins, Sean Turner</expert>
+    <record date="2017-01-11">
+      <keytype>1</keytype>
+      <name>crv</name>
+      <label>-1</label>
+      <cbor-type>int / tstr</cbor-type>
+      <description>EC identifier -- Taken from the "COSE Elliptic Curves" registry</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11" updated="2022-01-19">
+      <keytype>1</keytype>
+      <name>x</name>
+      <label>-2</label>
+      <cbor-type>bstr</cbor-type>
+      <description>Public Key</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <keytype>1</keytype>
+      <name>d</name>
+      <label>-4</label>
+      <cbor-type>bstr</cbor-type>
+      <description>Private key</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record> 
+    <record date="2017-01-11" updated="2019-03-14">
+      <keytype>2</keytype>
+      <name>crv</name>
+      <label>-1</label>
+      <cbor-type>int / tstr</cbor-type>
+      <description>EC identifier -- Taken from the "COSE Elliptic Curves" registry</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11" updated="2022-01-19">
+      <keytype>2</keytype>
+      <name>x</name>
+      <label>-2</label>
+      <cbor-type>bstr</cbor-type>
+      <description>x-coordinate</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <keytype>2</keytype>
+      <name>y</name>
+      <label>-3</label>
+      <cbor-type>bstr / bool</cbor-type>
+      <description>y-coordinate</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>   
+    <record date="2017-01-11">
+      <keytype>2</keytype>
+      <name>d</name>
+      <label>-4</label>
+      <cbor-type>bstr</cbor-type>
+      <description>Private key</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>n</name>
+      <label>-1</label>
+      <cbor-type>bstr</cbor-type>
+      <description>the RSA modulus n</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>e</name>
+      <label>-2</label>
+      <cbor-type>bstr</cbor-type>
+      <description>the RSA public exponent e</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>d</name>
+      <label>-3</label>
+      <cbor-type>bstr</cbor-type>
+      <description>the RSA private exponent d</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>p</name>
+      <label>-4</label>
+      <cbor-type>bstr</cbor-type>
+      <description>the prime factor p of n</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>q</name>
+      <label>-5</label>
+      <cbor-type>bstr</cbor-type>
+      <description>the prime factor q of n</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>dP</name>
+      <label>-6</label>
+      <cbor-type>bstr</cbor-type>
+      <description>dP is d mod (p - 1)</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>dQ</name>
+      <label>-7</label>
+      <cbor-type>bstr</cbor-type>
+      <description>dQ is d mod (q - 1)</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>qInv</name>
+      <label>-8</label>
+      <cbor-type>bstr</cbor-type>
+      <description>qInv is the CRT coefficient q^(-1) mod p</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>other</name>
+      <label>-9</label>
+      <cbor-type>array</cbor-type>
+      <description>other prime infos, an array</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>r_i</name>
+      <label>-10</label>
+      <cbor-type>bstr</cbor-type>
+      <description>a prime factor r_i of n, where i &gt;= 3</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>d_i</name>
+      <label>-11</label>
+      <cbor-type>bstr</cbor-type>
+      <description>d_i = d mod (r_i - 1)</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-07-17">
+      <keytype>3</keytype>
+      <name>t_i</name>
+      <label>-12</label>
+      <cbor-type>bstr</cbor-type>
+      <description>the CRT coefficient t_i = (r_1 * r_2 * ... *
+        r_(i-1))^(-1) mod r_i</description>
+      <xref type="rfc" data="rfc8230"/>
+    </record>
+    <record date="2017-01-11">
+      <keytype>4</keytype>
+      <name>k</name>
+      <label>-1</label>
+      <cbor-type>bstr</cbor-type>
+      <description>Key Value</description>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2020-01-02">
+      <keytype>5</keytype>
+      <name>pub</name>
+      <label>-1</label>
+      <cbor-type>bstr</cbor-type>
+      <description>Public key for HSS/LMS hash-based digital signature</description>
+      <xref type="rfc" data="rfc8778"/>
+    </record>
+    <record date="2021-03-04">
+      <keytype>6</keytype>
+      <name>N</name>
+      <label>-1</label>
+      <cbor-type>uint</cbor-type>
+      <description>Group and Matrix (NxN) size</description>
+      <xref type="rfc" data="rfc9021"/>
+    </record>
+    <record date="2021-03-04">
+      <keytype>6</keytype>
+      <name>q</name>
+      <label>-2</label>
+      <cbor-type>uint</cbor-type>
+      <description>Finite field F_q</description>
+      <xref type="rfc" data="rfc9021"/>
+    </record>
+    <record date="2021-03-04">
+      <keytype>6</keytype>
+      <name>t-values</name>
+      <label>-3</label>
+      <cbor-type>array (of uint)</cbor-type>
+      <description>List of T-values, entries in F_q</description>
+      <xref type="rfc" data="rfc9021"/>
+    </record>
+    <record date="2021-03-04">
+      <keytype>6</keytype>
+      <name>matrix 1</name>
+      <label>-4</label>
+      <cbor-type>array (of array of uint)</cbor-type>
+      <description>NxN Matrix of entries in F_q in column-major form</description>
+      <xref type="rfc" data="rfc9021"/>
+    </record>
+    <record date="2021-03-04">
+      <keytype>6</keytype>
+      <name>permutation 1</name>
+      <label>-5</label>
+      <cbor-type>array (of uint)</cbor-type>
+      <description>Permutation associated with matrix 1</description>
+      <xref type="rfc" data="rfc9021"/>
+    </record>
+    <record date="2021-03-04">
+      <keytype>6</keytype>
+      <name>matrix 2</name>
+      <label>-6</label>
+      <cbor-type>array (of array of uint)</cbor-type>
+      <description>NxN Matrix of entries in F_q in column-major form</description>
+      <xref type="rfc" data="rfc9021"/>
+    </record>
+    <record date="2025-04-24" updated="2025-10-24">
+      <keytype>7</keytype>
+      <name>pub</name>
+      <label>-1</label>
+      <cbor-type>bstr</cbor-type>
+      <description>Public key</description>
+      <xref type="rfc" data="rfc9964"/>
+    </record>
+        <record date="2025-04-24" updated="2025-10-24">
+      <keytype>7</keytype>
+      <name>priv</name>
+      <label>-2</label>
+      <cbor-type>bstr</cbor-type>
+      <description>Private key</description>
+      <xref type="rfc" data="rfc9964"/>
+    </record>
+  </registry>
+
+  <registry id="key-type">
+    <title>COSE Key Types</title>
+    <xref type="rfc" data="rfc9053"/>
+    <registration_rule>Expert Review</registration_rule>
+    <expert>Göran Selander, Derek Atkins, Sean Turner</expert>
+    <record date="2017-01-11">
+      <name>Reserved</name>
+      <value>0</value>
+      <description>This value is reserved</description>
+      <capabilities/>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>OKP</name>
+      <value>1</value>
+      <description>Octet Key Pair</description>
+      <capabilities>[kty(1), crv]</capabilities>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>EC2</name>
+      <value>2</value>
+      <description>Elliptic Curve Keys w/ x- and y-coordinate pair</description>
+      <capabilities>[kty(2), crv]</capabilities>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-07-17">
+      <name>RSA</name>
+      <value>3</value>
+      <description>RSA Key</description>
+      <capabilities>[kty(3)]</capabilities>
+      <xref type="rfc" data="rfc8230"/>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2017-01-11">
+      <name>Symmetric</name>
+      <value>4</value>
+      <description>Symmetric Keys</description>
+      <capabilities>[kty(4)]</capabilities>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2020-01-02">
+      <name>HSS-LMS</name>
+      <value>5</value>
+      <description>Public key for HSS/LMS hash-based digital signature</description>
+      <capabilities>[kty(5), hash algorithm]</capabilities>
+      <xref type="rfc" data="rfc8778"/>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2021-03-04" updated="2022-01-19">
+      <name>WalnutDSA</name>
+      <value>6</value>
+      <description>WalnutDSA public key</description>
+      <capabilities>[kty(6)]</capabilities>
+      <xref type="rfc" data="rfc9021"/>
+      <xref type="rfc" data="rfc9053"/>
+    </record>
+    <record date="2025-04-24" updated="2025-10-24">
+      <name>AKP</name>
+      <value>7</value>
+      <description>COSE Key Type for Algorithm Key Pairs</description>
+      <capabilities>[kty(7)]</capabilities>
+      <xref type="rfc" data="rfc9964"/>
+    </record>
+  </registry>
+
+  <registry id="elliptic-curves">
+    <title>COSE Elliptic Curves</title>
+    <xref type="rfc" data="rfc9053"/>
+    <range>
+      <value>Integers less than -65536</value>
+      <registration_rule>Private Use</registration_rule>
+    </range>
+    <range>
+      <value>Integer values -65536 to -257</value>
+      <registration_rule>Specification Required</registration_rule>
+    </range>
+    <range>
+      <value>Integer values -256 to 255</value>
+      <registration_rule>Standards Action With Expert Review</registration_rule>
+    </range>
+    <range>
+      <value>Integer values 256 to 65535</value>
+      <registration_rule>Specification Required</registration_rule>
+    </range>
+    <range>
+      <value>Integer values greater than 65535</value>
+      <registration_rule>Expert Review</registration_rule>
+    </range>
+    <expert>Göran Selander, Derek Atkins, Sean Turner</expert>
+    <record date="2017-01-11">
+      <name>Reserved for Private Use</name>
+      <value>Integer values less than -65536</value>
+      <keytype/>
+      <description/>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>-65536 to -1</value>
+      <keytype/>
+      <description/>
+      <controller/>
+      <recommended/>
+    </record>
+    <record date="2017-03-26">
+      <name>Reserved</name>
+      <value>0</value>
+      <keytype/>
+      <description/>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>No</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>P-256</name>
+      <value>1</value>
+      <keytype>EC2</keytype>
+      <description>NIST P-256 also known as secp256r1</description>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>P-384</name>
+      <value>2</value>
+      <keytype>EC2</keytype>
+      <description>NIST P-384 also known as secp384r1</description>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>P-521</name>
+      <value>3</value>
+      <keytype>EC2</keytype>
+      <description>NIST P-521 also known as secp521r1</description>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>X25519</name>
+      <value>4</value>
+      <keytype>OKP</keytype>
+      <description>X25519 for use w/ ECDH only</description>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>X448</name>
+      <value>5</value>
+      <keytype>OKP</keytype>
+      <description>X448 for use w/ ECDH only</description>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>Ed25519</name>
+      <value>6</value>
+      <keytype>OKP</keytype>
+      <description>Ed25519 for use w/ EdDSA only</description>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2017-01-11">
+      <name>Ed448</name>
+      <value>7</value>
+      <keytype>OKP</keytype>
+      <description>Ed448 for use w/ EdDSA only</description>
+      <controller/>
+      <xref type="rfc" data="rfc9053"/>
+      <recommended>Yes</recommended>
+    </record>
+    <record date="2020-06-18" updated="2020-08-12">
+      <name>secp256k1</name>
+      <value>8</value>
+      <keytype>EC2</keytype>
+      <description>SECG secp256k1 curve</description>
+      <controller>IESG</controller>
+      <xref type="rfc" data="rfc8812"/>
+      <recommended>No</recommended>
+    </record>
+    <record>
+      <name>Unassigned</name>
+      <value>9-255</value>
+      <keytype/>
+      <description/>
+      <controller/>
+      <recommended/>
+    </record>
+    <record date="2023-12-13">
+      <name>brainpoolP256r1</name>
+      <value>256</value>
+      <keytype>EC2</keytype>
+      <description>BrainpoolP256r1</description>
+      <controller><xref type="uri" data="https://www.iso.org/committee/45144.html">ISO/IEC JTC 1/SC 17/WG 10</xref></controller>
+      <xref type="uri" data="https://www.iso.org/standard/69084.html">ISO/IEC 18013-5:2021, 9.1.5.2</xref>
+      <recommended>No</recommended>
+    </record>
+    <record date="2023-12-13">
+      <name>brainpoolP320r1</name>
+      <value>257</value>
+      <keytype>EC2</keytype>
+      <description>BrainpoolP320r1</description>
+      <controller><xref type="uri" data="https://www.iso.org/committee/45144.html">ISO/IEC JTC 1/SC 17/WG 10</xref></controller>
+      <xref type="uri" data="https://www.iso.org/standard/69084.html">ISO/IEC 18013-5:2021, 9.1.5.2</xref>
+      <recommended>No</recommended>
+    </record>
+    <record date="2023-12-13">
+      <name>brainpoolP384r1</name>
+      <value>258</value>
+      <keytype>EC2</keytype>
+      <description>BrainpoolP384r1</description>
+      <controller><xref type="uri" data="https://www.iso.org/committee/45144.html">ISO/IEC JTC 1/SC 17/WG 10</xref></controller>
+      <xref type="uri" data="https://www.iso.org/standard/69084.html">ISO/IEC 18013-5:2021, 9.1.5.2</xref>
+      <recommended>No</recommended>
+    </record>
+    <record date="2023-12-13">
+      <name>brainpoolP512r1</name>
+      <value>259</value>
+      <keytype>EC2</keytype>
+      <description>BrainpoolP512r1</description>
+      <controller><xref type="uri" data="https://www.iso.org/committee/45144.html">ISO/IEC JTC 1/SC 17/WG 10</xref></controller>
+      <xref type="uri" data="https://www.iso.org/standard/69084.html">ISO/IEC 18013-5:2021, 9.1.5.2</xref>
+      <recommended>No</recommended>
+    </record>
+  </registry>
+
+  <registry id="verifiable-data-structure-algorithms">
+    <title>COSE Verifiable Data Structure Algorithms</title>
+    <xref type="rfc" data="rfc9942"/>
+    <registration_rule>Specification Required</registration_rule>
+    <expert>Mike Jones, Orie Steele</expert>
+    <record date="2025-09-12">
+      <name>Reserved</name>
+      <value>0</value>
+      <description>Reserved</description>
+      <controller/>
+      <xref type="rfc" data="rfc9942"/>
+    </record>
+    <record date="2025-09-12">
+      <name>RFC9162_SHA256</name>
+      <value>1</value>
+      <description>SHA256 Binary Merkle Tree</description>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9162" section="2.1"/>
+    </record>
+  </registry>
+
+  <registry id="verifiable-data-structure-proofs">
+    <title>COSE Verifiable Data Structure Proofs</title>
+    <xref type="rfc" data="rfc9942"/>
+    <registration_rule>Specification Required</registration_rule>
+    <expert>Mike Jones, Orie Steele</expert>
+    <record date="2025-09-12">
+      <data>1</data>
+      <name>inclusion proofs</name>
+      <label>-1</label>
+      <cbor-type>array (of bstr)</cbor-type>
+      <description>Proof of inclusion</description>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9942" section="5.2"/>
+    </record>
+    <record date="2025-09-12">
+      <data>1</data>
+      <name>consistency proofs</name>
+      <label>-2</label>
+      <cbor-type>array (of bstr)</cbor-type>
+      <description>Proof of append only property</description>
+      <controller>IETF</controller>
+      <xref type="rfc" data="rfc9942" section="5.3"/>
+    </record>
+  </registry>
+
+  <people/>
+</registry>

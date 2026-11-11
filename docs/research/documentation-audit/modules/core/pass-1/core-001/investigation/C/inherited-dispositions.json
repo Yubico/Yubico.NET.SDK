@@ -1,0 +1,187 @@
+{
+  "registry_sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+  "provenance_rows": 18,
+  "nonadditive_groups": 13,
+  "rows": [
+    {
+      "key": "oath-pilot-and-fixes-wave-002:IMP-004",
+      "group": "base32-failure-cleanup",
+      "registry_state_preserved": "resolved-source-for-exact-scope",
+      "C_recommendation": "SOURCE-CONFIRMED-FOR-EXACT-SCOPE",
+      "C_observation": "Complete Core codec/tests and narrow CredentialData.ParseUri/CLI delegation inspected. Disjoint failed output clears; overlap admission preserves source/destination. URI temporary cleanup is finally/delegation evidence, not directly observed abandoned storage.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "oath-pilot-and-fixes-wave-002:IMP-005",
+      "group": "base32-shape",
+      "registry_state_preserved": "resolved-source-for-exact-scope",
+      "C_recommendation": "SOURCE-CONFIRMED-FOR-EXACT-SCOPE",
+      "C_observation": "Exact terminal-count/padding rules and independent RFC literals checked. Core permits empty material and noncanonical pad bits; OATH boundaries reject empty. Existing accepted local permissiveness is preserved.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "ctap2-001:CTAP-XREF-003",
+      "group": "credential-length-units",
+      "registry_state_preserved": "reproducible-from-source",
+      "C_recommendation": "DECISION-AND-BOUNDARY-QUALIFIED",
+      "C_observation": "Core counts UTF-16 char units, prompt context carries code-point/byte units and current CTAP preset already documents its limitation. Unicode/device-minimum/final-NUL/profile enforcement belongs to a maintainer decision and each applet boundary; no silent normalization or generic PIN policy adopted.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "ctap2-001:CTAP-IMP-005",
+      "group": "ctap-crypto-cleanup",
+      "registry_state_preserved": "still-candidate-boundary-review",
+      "C_recommendation": "BOUNDARY-REFERRAL-WITH-CORE-EVIDENCE",
+      "C_observation": "C inspected Core AES/ARKG/encoding secret-copy/failure scopes. CTAP PIN, blob and extension salt/profile implementations retain their original boundary owner and unexecuted qualification; Core array cleanup cannot close all applet-owned outputs.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "ctap2-001:CTAP-IMP-006",
+      "group": "credential-length-units",
+      "registry_state_preserved": "needs-decision",
+      "C_recommendation": "DECISION-AND-BOUNDARY-QUALIFIED",
+      "C_observation": "Core counts UTF-16 char units, prompt context carries code-point/byte units and current CTAP preset already documents its limitation. Unicode/device-minimum/final-NUL/profile enforcement belongs to a maintainer decision and each applet boundary; no silent normalization or generic PIN policy adopted.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "ctap2-001:CTAP-IMP-035",
+      "group": "ctap-crypto-cleanup",
+      "registry_state_preserved": "still-candidate-boundary-review",
+      "C_recommendation": "BOUNDARY-REFERRAL-WITH-CORE-EVIDENCE",
+      "C_observation": "C inspected Core AES/ARKG/encoding secret-copy/failure scopes. CTAP PIN, blob and extension salt/profile implementations retain their original boundary owner and unexecuted qualification; Core array cleanup cannot close all applet-owned outputs.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "security-domain-001:SD-DEP-005",
+      "group": "logging-payload-policy",
+      "registry_state_preserved": "source-mapped-review-pending",
+      "C_recommendation": "SOURCE-CONFIRMED-QUALIFICATION-AND-B6-REFERRAL",
+      "C_observation": "Global factory is not a redactor; static logger retention and application exception provenance were inspected. Actual formatter/SD templates remain B6/SD boundary primary work. Explicit CLI provisioning output is distinct from SDK logging.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-001",
+      "group": "credential-length-units",
+      "registry_state_preserved": "source-mapped-review-pending",
+      "C_recommendation": "DECISION-AND-BOUNDARY-QUALIFIED",
+      "C_observation": "Core counts UTF-16 char units, prompt context carries code-point/byte units and current CTAP preset already documents its limitation. Unicode/device-minimum/final-NUL/profile enforcement belongs to a maintainer decision and each applet boundary; no silent normalization or generic PIN policy adopted.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:#17",
+      "group": "runtime-scalar-copy",
+      "registry_state_preserved": "missing-evidence",
+      "C_recommendation": "REFERENCE-PATH-QUALIFIED; ACTUAL-RUNTIME-GAP",
+      "C_observation": "SDK temporary D cleanup is explicit. .NET v10.0.0 absent-Q macOS extraction introduces a replacement managed D; supplied-Q import skips that extraction in inspected source. Narrow the warning and retain actual installed-runtime/upstream disposition gap without claiming native erasure or all-platform equivalence.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:#20",
+      "group": "ber-length-safety",
+      "registry_state_preserved": "resolved-source-for-exact-scope",
+      "C_recommendation": "SOURCE-CONFIRMED-FOR-EXACT-SCOPE",
+      "C_observation": "Truncated/reserved/overflowing lengths reject before slicing, and valid redundant long-form length octets survive as permitted by original X690. Current single-item/tag admission and negative BerLength questions are separate from the fixed length defect; preserve #20 and 25e as one nonadditive mechanism.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:#27",
+      "group": "private-key-consistency",
+      "registry_state_preserved": "changed-source-review-pending",
+      "C_recommendation": "SOURCE-GUARDS-CONFIRMED-WITH-RESIDUAL-ADMISSION",
+      "C_observation": "RSA selected relations and provider-backed EC mismatch checks are present on parameter/typed-factory paths. Literal RFC vectors have stable byte widths; DP-based metadata sizing and minimal fresh perturbed components can reject before the desired check. No passing rerun or full mathematical/native validation claimed.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:25c",
+      "group": "runtime-rng-substitution",
+      "registry_state_preserved": "changed-source-review-pending",
+      "C_recommendation": "SOURCE-CONFIRMED-FOR-EXACT-SCOPE",
+      "C_observation": "Exact removal commit 78c44513 and parent helper/repro read. Wide range could skip RNG consumption; parent GetInt32/GetByte search finds helper self-calls and its repro, not a shipping wide-range caller. Runtime replacement is not a statistical/all-provider randomness proof.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:25d",
+      "group": "runtime-hkdf-substitution",
+      "registry_state_preserved": "resolved-source-for-exact-scope",
+      "C_recommendation": "SOURCE-CONFIRMED-FOR-EXACT-SCOPE",
+      "C_observation": "Removed custom byte-counter wrap mechanism is absent; current C ARKG uses runtime HKDF with 32-byte outputs. X9.63 is a separate counter KDF, and runtime secrecy/profile correctness still require their own qualification.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:25e",
+      "group": "ber-length-safety",
+      "registry_state_preserved": "resolved-source-for-exact-scope",
+      "C_recommendation": "SOURCE-CONFIRMED-FOR-EXACT-SCOPE",
+      "C_observation": "Truncated/reserved/overflowing lengths reject before slicing, and valid redundant long-form length octets survive as permitted by original X690. Current single-item/tag admission and negative BerLength questions are separate from the fixed length defect; preserve #20 and 25e as one nonadditive mechanism.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:25f",
+      "group": "tlv-encoder-sizing",
+      "registry_state_preserved": "resolved-source-for-exact-scope",
+      "C_recommendation": "SOURCE-CONFIRMED-FOR-EXACT-SCOPE",
+      "C_observation": "EncodeDictionary builds TLVs, sums actual TotalLength and clears temporary TLVs in finally. Literal two-byte-tag and long-length tests inspect exact complete bytes. Aggregate overflow, source/result ownership and decode-copy cleanup are separate concerns.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:26g",
+      "group": "credential-redirect-policy",
+      "registry_state_preserved": "resolved-source-for-exact-scope",
+      "C_recommendation": "SOURCE-CONFIRMED-WITH-SEPARATE-RESIDUALS",
+      "C_observation": "Redirected text now validates policy and confirmation uses lines; hex, immutable string, cancellation and Unicode questions are separate current concerns. N3 CLI.Commands scan-code assertions/helper read; later standalone OtpTool behavior remains YubiOTP-owned and physical keyboard-output history is not rerun.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:26h",
+      "group": "credential-confirm-cleanup",
+      "registry_state_preserved": "resolved-source-for-exact-scope",
+      "C_recommendation": "SOURCE-CONFIRMED-FOR-EXACT-SCOPE",
+      "C_observation": "Both entries stay under finally and only the matched first owner transfers. Old cleanup defect is distinct from stale before-second-prompt XML and the pool test's reuse assumption.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    },
+    {
+      "key": "audit-v2-20261022-20261031:N3",
+      "group": "credential-redirect-policy",
+      "registry_state_preserved": "changed-source-review-pending",
+      "C_recommendation": "SOURCE-CONFIRMED-WITH-SEPARATE-RESIDUALS",
+      "C_observation": "Redirected text now validates policy and confirmation uses lines; hex, immutable string, cancellation and Unicode questions are separate current concerns. N3 CLI.Commands scan-code assertions/helper read; later standalone OtpTool behavior remains YubiOTP-owned and physical keyboard-output history is not rerun.",
+      "execution": "NOT-RUN",
+      "counting": "Original provenance identity; association is not a new independent bug",
+      "registry_owner_action": "Reconcile C's bounded evidence; authoritative registry remains unchanged by C."
+    }
+  ]
+}

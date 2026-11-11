@@ -1,0 +1,49 @@
+{
+  "schema": "core-001-python-source-v1",
+  "status": "PIN-AVAILABLE; bounded Core source/test/history context recorded in context.md",
+  "access_date": "2026-11-11",
+  "repository": "https://github.com/Yubico/yubikey-manager",
+  "reference_revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+  "reference_version": "5.9.3-dev.0",
+  "remote_check": {
+    "method": "git ls-remote https://github.com/Yubico/yubikey-manager.git HEAD refs/heads/main refs/tags/5.9.2",
+    "HEAD": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "main": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "tag_5_9_2_ref": "3f34fbdf5c2c65fead30472cc7a0b2720b0e73a1"
+  },
+  "local_reference": {
+    "path": "/home/rupicola/Code/y/yubikey-manager",
+    "status_porcelain": "",
+    "shallow": true,
+    "author_and_committer_timestamp": "2026-06-30T17:17:03+02:00",
+    "subject": "Merge PR #733",
+    "publication_timestamp": "Unestablished. Git timestamps record commit metadata, not publication time."
+  },
+  "relationship_to_prior_work": "The earlier OATH/PIV pin is still the current remote main revision observed on the access date. Its prior use alone was not treated as freshness evidence; the remote was checked again. The installed 5.9.2 capture is a separate release artifact and is not identified with this development revision.",
+  "evidence_role": "Sibling implementation and tests, plus bounded origin history. This source is not normative conformance evidence, earliest hardware support evidence, or fresh native/device execution.",
+  "immutable_url_template": "https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/{path}",
+  "files": [
+    {"path":"pyproject.toml","sha256":"7d5e86083f18513fa9d493cdad5404cf1e344fe3679c8822b9d400d429779fd6"},
+    {"path":"NEWS","sha256":"96a5c7a25c58412610d2be4365fae7f21039c68efb01910669b15f68a76b3dd7"},
+    {"path":"yubikit/core/__init__.py","sha256":"524305273499d3a0fc37ff58c207a180cf3d280490bb48c4596507ed8a56061c"},
+    {"path":"yubikit/core/smartcard/__init__.py","sha256":"595be784aa2ede30488263cbc63686e94365a68d598b96fb350c71c1b5d694bd"},
+    {"path":"yubikit/core/smartcard/scp.py","sha256":"e1bbcae2b85b459d1801feb0630c83a00f96cb0dd7513087545b837464c70d1e"},
+    {"path":"yubikit/core/fido.py","sha256":"c6d83434feb5f06f06348146298297d7e2c222dffa31aa2ba931fa3b9d784975"},
+    {"path":"yubikit/core/otp.py","sha256":"da093d3fd225df32de247c3f88aed0467115458de9073c2d18abdcd17f2379a2"},
+    {"path":"yubikit/oath.py","sha256":"245d1b72971b1ef40686150cd257a978ae3c1de2118b6c8d3c8f3df92f8fb929"},
+    {"path":"yubikit/management.py","sha256":"7cc29f5803f36c945ec613849c65ee9ea83f7d4e260880ebab7096a4dcbe3192"},
+    {"path":"yubikit/piv.py","sha256":"f1055e88dca0c8b0ff107a3f1724cd9e03447a95565ecbfde7517f8114ba47fd"},
+    {"path":"yubikit/openpgp.py","sha256":"bcd266e53411a9611ee133ed5f33e2907294fbe374aa56a19672a151e86a2926"},
+    {"path":"yubikit/hsmauth.py","sha256":"e3573d5580928b84818939b6eb1ae0083c7d01793589746eace80db32fe2cab3"},
+    {"path":"yubikit/yubiotp.py","sha256":"ac2f9d053e8c900300f82cb45bf4bb07df3e8985754ca6a57924e1aaff9d25d2"},
+    {"path":"ykman/device.py","sha256":"398338584cce6a3980387fe1b7b0e8b1ced7bc1330252b363ff40be0689d4c2e"},
+    {"path":"ykman/util.py","sha256":"d3c6fab9488188ae572a3f848ac3edc0ab5f6765b8239a848c7ece1fbed94546"},
+    {"path":"tests/test_core.py","sha256":"7dcf52981297c2ddfe041451dbecb8f7210376edf524dcbd76df9be47f74c6e4"},
+    {"path":"tests/device/test_scp.py","sha256":"5dd8d9a89afebce4704b2d8882588bfadb6b1d08e605dd3c95a6ee1864793316"},
+    {"path":"tests/test_oath.py","sha256":"3f171661fd952e2ae2719a43f5c0341587013066bebe729fa649bc73ea7f7f0f"},
+    {"path":"tests/test_management.py","sha256":"b29cdb3ce6636c7a692253212c90017c1505b46cc69388cba182ac593d63c719"},
+    {"path":"tests/test_hsmauth.py","sha256":"22b23cfef3c6130d2434d87d2e1396c3df0949aa8f1b32c26f3dc77751167d9d"},
+    {"path":"tests/test_util.py","sha256":"3ca61ccb38dd3a7cda45b3f2ee311584ead20dc8f892c9f582f9cfa82421dee7"}
+  ],
+  "execution": "Git/source inspection only. No Python package import, CLI, cryptographic computation, tests, native calls or device work."
+}

@@ -1,0 +1,1009 @@
+{
+  "schema": "core-001-packet-C-candidates-v1",
+  "baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "status": "Completed static investigator return; 20 provisional local groups, zero accepted allocations",
+  "accepted_ids_allocated": 0,
+  "execution": "Static source inspection only; no builds, tests, native calls, devices or cryptographic experiments",
+  "candidates": [
+    {
+      "id": "CORE-C-C001",
+      "kind": "documentation-correction",
+      "title": "Describe interactive and redirected credential storage separately",
+      "observed": "ConsoleCredentialReader says it never allocates credential strings and clears intermediate buffers on all paths. ReadLineEntry obtains a managed string from ReadLine and merely drops its local reference in finally. ISecureCredentialReader repeats the string-free assurance.",
+      "desired": "Explain that interactive input uses a cleared pooled char buffer, whereas redirected input uses a managed string whose contents cannot be cleared by this reader. Keep the existing fallback visible without endorsing its secret-lifetime limitation.",
+      "locations": [
+        {
+          "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+          "first": 22,
+          "last": 48
+        },
+        {
+          "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+          "first": 157,
+          "last": 182
+        },
+        {
+          "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+          "first": 19,
+          "last": 27
+        }
+      ],
+      "reopen": [
+        "docs/usage/user-interaction.md",
+        "src/Core/src/Credentials/ISecureCredentialReader.cs",
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs"
+      ],
+      "confidence": "high-source-inspection",
+      "implementation": "Separate policy question: replace or retain redirected string input in Pass 2.",
+      "final_observation": "Confirmed with complete reader, CLI byte reader and user-interaction guide. Keep Core redirected ReadLine storage distinct from CLI raw-stream storage. The guide's callback distinction is accurate; reopen only where reader examples or broad secret-lifetime claims need correction.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C002",
+      "kind": "documentation-correction",
+      "title": "Keep the first confirmation entry alive until comparison",
+      "observed": "ISecureCredentialReader says the first buffer is always zeroed before the second prompt. ReadCredentialWithConfirmation retains first, acquires second, compares exact byte lengths and FixedTimeEquals, disposes second, and returns first only on a match. Its finally disposes first on all other exits.",
+      "desired": "Describe retained first-entry ownership, comparison, second-entry cleanup, failure cleanup and successful ownership transfer in that order.",
+      "locations": [
+        {
+          "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+          "first": 64,
+          "last": 83
+        },
+        {
+          "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+          "first": 80,
+          "last": 131
+        }
+      ],
+      "reopen": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+        "docs/usage/user-interaction.md"
+      ],
+      "inherited_aliases": [
+        "audit-v2-20261022-20261031:26h"
+      ],
+      "confidence": "high-source-inspection; tests inspected, not run",
+      "final_observation": "Complete confirmation and audit repro assertions confirm finally ownership. Original 26h is resolved for its identified source paths; its stale before-second-prompt XML is a documentation issue, not recurrence of the fixed cleanup bug. Pool sentinel reuse remains a qualified test oracle.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C003",
+      "kind": "documentation-and-policy-decision",
+      "title": "Name credential length units and the input-path differences",
+      "observed": "Core MinLength/MaxLength count UTF-16 char units before encoding. Interactive input ignores disallowed/control/excess chars and Backspace removes one UTF-16 unit. Redirected text rejects the entire line for text-policy violations. Hex redirected input bypasses MinLength/MaxLength/CharacterFilter and validates only symbols and ExpectedByteLength. Empty admitted text/hex reaches the positive-only DisposableArrayPoolBuffer constructor. Encoding.UTF8 can replace unpaired surrogates. CLI SecureCredential instead builds Rune-based UTF-8, removes a full UTF-8 scalar on Backspace, throws for malformed interactive UTF-16/overflow, and accepts raw redirected bytes while discarding CR anywhere.",
+      "desired": "Document the existing Core units and filtered-versus-rejected behavior. Keep the prompt context's code-point minimum and byte maximum distinct. Obtain a maintainer decision for Unicode validity, empty-input and consistent hex policy rather than silently changing the contract.",
+      "locations": [
+        {
+          "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+          "first": 44,
+          "last": 82
+        },
+        {
+          "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+          "first": 157,
+          "last": 377
+        },
+        {
+          "path": "src/Cli.Shared/src/Output/SecureCredential.cs",
+          "first": 169,
+          "last": 363
+        }
+      ],
+      "reopen": [
+        "src/Core/src/Credentials/CredentialPromptContext.cs",
+        "src/Cli.Shared/src/Output/PinPrompt.cs",
+        "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+        "src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs",
+        "docs/usage/user-interaction.md"
+      ],
+      "inherited_aliases": [
+        "openpgp-001:PGP-CORE-001",
+        "ctap2-001:CTAP-XREF-003",
+        "ctap2-001:CTAP-IMP-006",
+        "audit-v2-20261022-20261031:26g",
+        "audit-v2-20261022-20261031:N3"
+      ],
+      "confidence": "high for branches/units; Unicode policy unresolved; no terminal execution",
+      "final_observation": "All CLI Rune/UTF-8 tests read: malformed surrogate, scalar backspace, overflow clearing, logical-size versus pool-slack and CRLF fixtures are explicit. FromUtf8String still uses replacement-fallback Encoding.UTF8, while redirected Prompt accepts raw bytes. These paths differ deliberately in source; input-layer Unicode enforcement is an unresolved contract allocation, not permission for normalization or a future breaking API. Core empty admitted results encounter positive-only buffer construction. The OpenPGP and CTAP preset/profile checks stay boundary-owned.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "MAINTAINER-DECISION-REQUIRED",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C004",
+      "kind": "implementation-followup-and-documentation-qualification",
+      "title": "Cancellation is only polled while waiting for an interactive key",
+      "observed": "Core ReadCredential passes no token to its redirected path. Interactive ReadCredentialCore checks cancellation only inside while (!KeyAvailable), so already queued input can complete under an already canceled token. The inspected cancellation test deliberately supplies no keys and therefore covers only the waiting branch.",
+      "desired": "Preserve the cancellation gap as an implementation concern and qualify current responsiveness. Later verification should cover pre-canceled queued input and redirected input separately.",
+      "locations": [
+        {
+          "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+          "first": 70,
+          "last": 78
+        },
+        {
+          "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+          "first": 210,
+          "last": 280
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/ConsoleCredentialReaderTests.cs",
+          "first": 205,
+          "last": 221
+        }
+      ],
+      "reopen": [
+        "src/Core/src/Credentials/ISecureCredentialReader.cs",
+        "docs/usage/user-interaction.md"
+      ],
+      "confidence": "high-static; unexecuted",
+      "final_observation": "The queued-key and redirected cancellation branches remain source-derived gaps; the existing pre-cancelled no-keys test proves only its polling branch. CLI Prompt is synchronous and has no cancellation parameter, distinct from ICredentialPrompt's asynchronous cancellation obligation.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C005",
+      "kind": "documentation-correction",
+      "title": "Describe TLV views, copies and disposal boundaries accurately",
+      "observed": "Tlv.Value returns a ReadOnlyMemory slice of the owned encoding, despite saying copy. AsMemory returns ReadOnlyMemory, despite XML saying mutable Memory and manipulation. Dispose clears the encoding and resets Tag/Length; existing views observe cleared bytes and AsMemory/AsSpan remain callable. DisposableTlvList copies its collection but shares and disposes the original Tlv references. DisposableBufferHandle clears the supplied Memory without returning a rented array to its pool.",
+      "desired": "Name which storage is copied, which values alias, and who clears each source/result. State that a pool rental needs a separate return owner; suggest DisposableArrayPoolBuffer for combined clearing and return. Preserve the supported post-disposal inspection already asserted by TLV tests.",
+      "locations": [
+        {
+          "path": "src/Core/src/Utilities/Tlv.cs",
+          "first": 31,
+          "last": 89
+        },
+        {
+          "path": "src/Core/src/Utilities/Tlv.cs",
+          "first": 153,
+          "last": 176
+        },
+        {
+          "path": "src/Core/src/Utilities/DisposableTlvList.cs",
+          "first": 20,
+          "last": 90
+        },
+        {
+          "path": "src/Core/src/Utilities/DisposableBufferHandle.cs",
+          "first": 19,
+          "last": 55
+        },
+        {
+          "path": "src/Core/src/Utilities/MemoryExtensions.cs",
+          "first": 17,
+          "last": 38
+        }
+      ],
+      "reopen": [
+        "docs/usage/tlv-processing.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/README.md"
+      ],
+      "confidence": "high-source-inspection; matching tests inspected, not run",
+      "final_observation": "The full TLV guide's nested sensitive example has complete source/intermediate/result finally cleanup and can remain unchanged. Introductory wording that both Tlv and the static TlvHelper own buffers should name returned owners instead. MemoryExtensions also needs useful lookup/alias semantics: GetMemory returns empty on a miss, GetSpan uses the indexer and throws, TryGetSpan returns false plus empty. ReadOnlyMemory is a view, not an immutability or independent ownership guarantee. DisposableArrayPoolBuffer previously obtained aliases must not be used after return to the pool.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs",
+      "ownership_qualification": "ReadOnlyMemory is not an immutable-storage or clearing-owner contract. Tlv.Value and key getters borrow their owners; Memory-returning TLV helpers transfer writable output. DecodeDictionary transfers values typed ReadOnlyMemory without a disposable clear owner, and clearing a later mutable copy does not erase the original or abandoned parse copies. The raw HID paragraph likewise cannot make original readonly returned secret storage disappear by clearing a copy. Preserve this as a caller/API ownership qualification for C005/C006/C013 and the B5 boundary; recommend existing disposable/writable owners where available, without inventing a breaking API or writable-cast workaround. For C017, retain the contributor policy favoring disposable reference-type owners while correcting its rationale: a struct copy duplicates an array reference, not the array bytes, so clearing the shared backing array affects all aliases. The hazard is shared mutation and ambiguous lifetime/disposal ownership, not an inability for ZeroMemory to reach aliases. The root CLAUDE wording is a narrow shared-editor dependency, not an added C primary population."
+    },
+    {
+      "id": "CORE-C-C006",
+      "kind": "implementation-followup",
+      "title": "TLV convenience decoders abandon owned sensitive copies",
+      "observed": "TryFindValue allocates currentValue through ParseData, clones it again on a match, and clears neither matched nor skipped arrays. DecodeDictionary abandons duplicate values and previously allocated values on a later parsing failure. A caller can clear only returned storage, not those abandoned copies. DecodeList has distinct explicit temporary/failure cleanup and should remain the recommended disposable path for sensitive sequences.",
+      "desired": "Track cleanup fixes separately; avoid a general assurance that disposing a returned item or clearing the returned value erases every decoder copy. Document successful caller ownership without portraying these gaps as intended behavior.",
+      "locations": [
+        {
+          "path": "src/Core/src/Utilities/TlvHelper.cs",
+          "first": 73,
+          "last": 93
+        },
+        {
+          "path": "src/Core/src/Utilities/TlvHelper.cs",
+          "first": 194,
+          "last": 220
+        },
+        {
+          "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+          "first": 44,
+          "last": 59
+        }
+      ],
+      "reopen": [
+        "docs/usage/tlv-processing.md",
+        "src/Core/src/Utilities/TlvHelper.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs"
+      ],
+      "confidence": "high-static; failure cleanup probes planned, unexecuted",
+      "final_observation": "Confirmed source-only copies in successful and skipped TryFindValue branches and duplicate/failing dictionary decode. Existing list cleanup tests and GetValue's returned copy do not observe these abandoned arrays. RecordingSmartCardConnection intentionally retains copied commands and borrowed queued responses; use synthetic fixtures and explicit cleanup, rather than inheriting production-secret erasure assurances.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs",
+      "ownership_qualification": "ReadOnlyMemory is not an immutable-storage or clearing-owner contract. Tlv.Value and key getters borrow their owners; Memory-returning TLV helpers transfer writable output. DecodeDictionary transfers values typed ReadOnlyMemory without a disposable clear owner, and clearing a later mutable copy does not erase the original or abandoned parse copies. The raw HID paragraph likewise cannot make original readonly returned secret storage disappear by clearing a copy. Preserve this as a caller/API ownership qualification for C005/C006/C013 and the B5 boundary; recommend existing disposable/writable owners where available, without inventing a breaking API or writable-cast workaround. For C017, retain the contributor policy favoring disposable reference-type owners while correcting its rationale: a struct copy duplicates an array reference, not the array bytes, so clearing the shared backing array affects all aliases. The hazard is shared mutation and ambiguous lifetime/disposal ownership, not an inability for ZeroMemory to reach aliases. The root CLAUDE wording is a narrow shared-editor dependency, not an added C primary population."
+    },
+    {
+      "id": "CORE-C-C007",
+      "kind": "implementation-followup-and-policy-decision",
+      "title": "Specify TLV framing and tag admission bounds",
+      "observed": "Tlv.Create parses the first item without checking that the remaining span is empty, although its input says and nothing more. Constructor tags are any 0..FFFF integer, emitted by minimal integer width, whereas the parser recognizes a two-byte tag only when the first octet's low five bits are 1F and never follows additional continuation bytes. Some accepted constructor tags therefore do not round-trip. BerLength accepts negative values and Write casts them to a byte; the class advertises decoding although it supplies only sizing/writing.",
+      "desired": "Decide exact single-item and supported-tag validation in Pass 2, describe the current bounded smart-card codec in Pass 1, and remove unsupported decoding claims from BerLength. Avoid calling the existing tag handling a general BER parser.",
+      "locations": [
+        {
+          "path": "src/Core/src/Utilities/Tlv.cs",
+          "first": 31,
+          "last": 55
+        },
+        {
+          "path": "src/Core/src/Utilities/Tlv.cs",
+          "first": 178,
+          "last": 259
+        },
+        {
+          "path": "src/Core/src/Utilities/BerLength.cs",
+          "first": 17,
+          "last": 55
+        }
+      ],
+      "reopen": [
+        "src/Core/src/Utilities/TlvHelper.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+        "docs/usage/tlv-processing.md"
+      ],
+      "inherited_aliases": [
+        "audit-v2-20261022-20261031:#20",
+        "audit-v2-20261022-20261031:25e"
+      ],
+      "confidence": "high-static; exact BER clauses still require original-source review",
+      "final_observation": "ITU-T X.690 (02/2021) original clauses 8.1.2.2/8.1.2.4 and 8.1.3.4-8.1.3.6 were inspected. General BER follows continuation tag octets; 0xFF length is forbidden and redundant long-form length octets are permitted. Current overflow/truncation fixes match their exact historical scope; remaining single-item/tag admission and negative BerLength questions are separate. ByteUtils.ValidateByte uses a one-string ArgumentOutOfRangeException constructor, so its apparent diagnostic is a parameter name, a low-impact taxonomy follow-up rather than an encoding correctness claim.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "MAINTAINER-DECISION-REQUIRED",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C008",
+      "kind": "documentation-correction-and-implementation-followup",
+      "title": "Separate logging configuration from redaction guarantees",
+      "observed": "YubiKitLogging stores a factory and returns loggers; it contains no redaction layer and does not dispose supplied or replaced factories. Existing static ILogger fields retain loggers created under the earlier factory, so replacing/restoring the property affects newly created loggers only. UseTemporary is process-global and overlapping scopes can restore stale factories. UserPresenceNotification passes the application callback exception object to LogWarning, so arbitrary exception text can reach providers. docs/LOGGING.md says secrets are never logged and no overhead, and advertises raw APDU/CBOR bytes without local sensitivity conditions.",
+      "desired": "Explain configure-before-first-use, application factory ownership, narrow temporary scope behavior and application exception provenance. Reconcile actual payload templates through B-stage owners before any global secret-redaction assurance. Keep the inherited payload-policy item separate from source-confirmed factory behavior.",
+      "locations": [
+        {
+          "path": "src/Core/src/YubiKitLogging.cs",
+          "first": 20,
+          "last": 68
+        },
+        {
+          "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+          "first": 142,
+          "last": 168
+        },
+        {
+          "path": "docs/LOGGING.md",
+          "first": 15,
+          "last": 20
+        },
+        {
+          "path": "docs/LOGGING.md",
+          "first": 163,
+          "last": 211
+        },
+        {
+          "path": "src/Cli.Shared/src/Device/DeviceSelector.cs",
+          "first": 19,
+          "last": 20
+        },
+        {
+          "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+          "first": 26,
+          "last": 32
+        },
+        {
+          "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+          "first": 65,
+          "last": 69
+        },
+        {
+          "path": "docs/usage/user-interaction.md",
+          "first": 146,
+          "last": 162
+        }
+      ],
+      "reopen": [
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/LOGGING.md",
+        "src/Tests.Shared/RecordingSmartCardConnection.cs"
+      ],
+      "inherited_aliases": [
+        "security-domain-001:SD-DEP-005"
+      ],
+      "confidence": "high for inspected factory/callback; whole-Core template audit remains pending with A/B",
+      "final_observation": "Complete logger-containing dependency ranges inspected: DeviceSelector's static logger captures the factory and passes exceptions through; Tests.Shared constructs its own process-lifetime factory for its AllowList rather than configuring the SDK globally. Core notification cleanup logs application exception objects. No central redactor exists. HsmAuth CLI explicitly prints generated keys as provisioning output; distinguish that intentional command output from SDK diagnostics and never use it to promise safe logs. Actual APDU templates remain SD/B6-owned referrals, not an unfinished C unit.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C009",
+      "kind": "implementation-followup-and-documentation-qualification",
+      "title": "ASN.1 decoders consume AlgorithmIdentifier but leave other framing unchecked",
+      "observed": "The shared public decoder checks AlgorithmIdentifier exhaustion after constructing a key, but does not check the top-level reader or SPKI sequence remainder; its RSA BIT STRING reader leaves outer remainder unchecked. Private typed decoders leave top-level remainders unchecked; the 25519 decoder leaves the inner OCTET STRING reader remainder unchecked; RSA leaves its component sequence/reader remainder unchecked. EC accepts BER for the inner key, skips arbitrary optional fields and accepts repeated public points without validating inner curve parameters against the outer curve. The public ECPublicKey SPKI factory instead uses BCL import plus exact bytesRead, so factories have different admission paths.",
+      "desired": "Keep the existing exact AlgorithmIdentifier claim narrowly scoped. Record strict single-key parsing, optional attribute policy, inner/outer curve agreement and error taxonomy as separate Pass-2 decisions/fixes. Add malformed/trailing fixtures before asserting whole-DER validation.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+          "first": 38,
+          "last": 91
+        },
+        {
+          "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+          "first": 99,
+          "last": 149
+        },
+        {
+          "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+          "first": 163,
+          "last": 270
+        },
+        {
+          "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+          "first": 288,
+          "last": 365
+        },
+        {
+          "path": "src/Core/src/Cryptography/ECPublicKey.cs",
+          "first": 160,
+          "last": 175
+        }
+      ],
+      "reopen": [
+        "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs",
+        "src/Core/src/Cryptography/RSAPublicKey.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md"
+      ],
+      "confidence": "high-static; consequential parser fixtures unexecuted",
+      "final_observation": "All nine remaining primary crypto tests read. AlgorithmIdentifierParameterTests checks exactly supported parameter combinations and AsnContentException, including BCL EC importer differences. PrivateKeyDecodingZeroingTests' trailing NULL is inside PrivateKeyInfo after privateKey; it does not cover top-level bytes or the inner CurvePrivateKey reader. RFC 5208 attributes are valid optional fields but typed decoders reject them; this is a supported-subset/compatibility question. RFC 5958 distinguishes a valid version value from validation of the whole all-zero fixture. Preserve exact error types instead of generic CryptographicException claims.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C010",
+      "kind": "documentation-correction-and-policy-decision",
+      "title": "Distinguish key shape, algebraic consistency, and full validation",
+      "observed": "Ordinary EC public wrappers check prefix/coordinate widths without on-curve validation. Private consistency skips checking when either Q coordinate is absent, and width checks do not prove a scalar is in range. RSA consistency checks selected algebraic relations but not primality, distinct odd primes, or all canonical ranges; public RSA admission checks modulus storage width and absence of private fields rather than full RFC 8017 validity. RSAPublicKey.Parameters XML incorrectly describes private operations and private components. Both public parameter structs expose mutable array aliases; ECPublicKey separately caches PublicPoint so caller mutation can make representations disagree.",
+      "desired": "Describe wrappers and performed checks precisely; tell callers to treat exposed arrays as key-owned. Correct RSA public XML. Obtain an explicit validation boundary rather than silently promising full mathematical validity or immutable key carriers.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/RSAPublicKey.cs",
+          "first": 28,
+          "last": 56
+        },
+        {
+          "path": "src/Core/src/Cryptography/ECPublicKey.cs",
+          "first": 41,
+          "last": 85
+        },
+        {
+          "path": "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+          "first": 37,
+          "last": 115
+        },
+        {
+          "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+          "first": 65,
+          "last": 89
+        },
+        {
+          "path": "src/Core/src/Cryptography/RSAPrivateKey.cs",
+          "first": 58,
+          "last": 67
+        },
+        {
+          "path": "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+          "first": 43,
+          "last": 125
+        },
+        {
+          "path": "src/Core/src/Cryptography/ECParametersExtensions.cs",
+          "first": 27,
+          "last": 40
+        }
+      ],
+      "reopen": [
+        "src/Core/src/Cryptography/AsnUtilities.cs",
+        "src/Core/src/Cryptography/RSAPrivateKey.cs",
+        "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+        "src/Core/README.md"
+      ],
+      "inherited_aliases": [
+        "audit-v2-20261022-20261031:#27"
+      ],
+      "confidence": "high for observed checks; independent standards and provider qualification remain separate",
+      "final_observation": "The current constructor selects RSA metadata using DP.Length * 16 before algebraic checking, rather than modulus value/width. A shorter valid CRT exponent or AddOne's minimal unsigned encoding can therefore hit NotSupportedException before the intended consistency check. Literal RFC 7517 fixtures have stable component widths; fresh generated-key perturbation tests retain this input-dependent admission issue. NormalizeParameters pads shorter arrays but preserves oversized ones, so its must-have-length description is stronger than its implementation. Public wrappers remain mutable array carriers; no redesign is proposed.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "MAINTAINER-DECISION-REQUIRED",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C011",
+      "kind": "documentation-correction-and-security-followup",
+      "title": "Describe managed secret copies without minimizing added exposure",
+      "observed": "PrivateKeyConsistency explicitly uses non-zeroable, variable-time BigInteger temporaries, then claims this adds no exposure because caller arrays already exist. Those temporaries have independent lifetimes. ArkgPrimitivesOpenSsl also retains managed scalar/reduction intermediates and copies in BnBinaryToBigNum/BnBigNumToBinaryWithPadding without clearing those arrays; privateScalarBytes is not cleared. kPrime clears only after later successful HKDF, so earlier exceptions bypass cleanup. HashToScalar/ExpandMessageXmd and ScalarToBytes leave input-derived byte arrays uncleared.",
+      "desired": "Keep honest current limitations and classify caller input, owned scalar/shared-secret copies, public points and key handles by semantic role. Track implementation cleanup and constant-time policy separately; remove the unsupported no-added-exposure rationale.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+          "first": 72,
+          "last": 81
+        },
+        {
+          "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+          "first": 89,
+          "last": 143
+        },
+        {
+          "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+          "first": 237,
+          "last": 443
+        },
+        {
+          "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+          "first": 640,
+          "last": 670
+        },
+        {
+          "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+          "first": 196,
+          "last": 211
+        }
+      ],
+      "reopen": [
+        "src/Core/src/Cryptography/IArkgPrimitives.cs",
+        "docs/architecture/webauthn-extension-processing.md",
+        "docs/CRYPTO-APIS.md"
+      ],
+      "inherited_aliases": [
+        "ctap2-001:CTAP-IMP-005",
+        "ctap2-001:CTAP-IMP-035",
+        "audit-v2-20261022-20261031:#17"
+      ],
+      "confidence": "high-static; native allocation internals and exploitability unqualified",
+      "final_observation": "Pinned .NET v10.0.0 EccSecurityTransforms routes absent Q through ExtractPublicKeyFromPrivateKey, whose ReadEncryptedPkcs8 replaces an ECParameters value containing a private D; that new managed array is not cleared by the runtime method. The supplied-Q path skips that derivation and ImportKey returns its CryptoPool staging in finally. ECDsaSecurityTransforms signing uses the imported SecKey and does not itself call the absent-Q extraction path. ECPrivateKey's assertion that supplied Q necessarily uses the same derivation path is unsupported by this checked revision. Narrow the warning to the verified D-only route; current installed runtime/native provider cleanup remains separately unqualified. BigInteger copies and SDK-owned ARKG arrays still have independent cleanup obligations.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C012",
+      "kind": "documentation-correction",
+      "title": "Scope cryptography provider substitution to actual factory call sites",
+      "observed": "CryptographyProviders claims every SDK crypto operation routes through this class. Inspected code directly calls ECDsa/ECDiffieHellman, HKDF, IncrementalHash, HMACSHA256 and static SHA256 methods. Its ARKG creator is internal although ArkgPrimitives says applications can replace it. XML examples use AES rather than the BCL Aes type and omit disposal in several returned-provider examples; old UsersManualAlternateCrypto xref needs current guidance.",
+      "desired": "Explain actual public replaceable factories, configuration lifetime and per-call ownership, with complete using scopes. Preserve direct-runtime substitution gaps as inherited policy questions instead of claiming universal replacement.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+          "first": 19,
+          "last": 52
+        },
+        {
+          "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+          "first": 55,
+          "last": 315
+        },
+        {
+          "path": "src/Core/src/Cryptography/ArkgPrimitives.cs",
+          "first": 34,
+          "last": 43
+        },
+        {
+          "path": "docs/migration/v1-to-v2-gaps.md",
+          "first": 49,
+          "last": 52
+        }
+      ],
+      "reopen": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographyProviderExtensionTests.cs",
+        "docs/CRYPTO-APIS.md",
+        "docs/migration/v1-to-v2.md",
+        "docs/migration/v1-to-v2-map.yml"
+      ],
+      "inherited_aliases": [
+        "audit-v2-20261022-20261031:25c",
+        "audit-v2-20261022-20261031:25d"
+      ],
+      "confidence": "high for inspected call sites; repository-wide caller inventory pending",
+      "final_observation": "Exact historical RNG removal commit and parent helper/repro were read. Wide ranges could skip the loop without consuming RNG; the only located instance consumers are the helper's own GetByte/Fill and its regression test, not an observed shipping random workflow. The custom HKDF wrap loop is gone and Core's actual ARKG outputs are 32 bytes. Internal ECDH/CMAC factory routing is exercised by current tests but remains unavailable as a public extension point. The migration gap's literally-commented-out claim is stale; retain public versus internal availability and universal-provider claims separately.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C013",
+      "kind": "implementation-followup-and-documentation-qualification",
+      "title": "Separate crypto-object disposal from all-buffer cleanup",
+      "observed": "AesUtilities creates plaintext.ToArray copies and MemoryStream buffers without clearing them; decrypt returns another copy while its MemoryStream retains plaintext. The byte-array overload clones a returned ReadOnlyMemory again. X963Kdf retains the secret-derived stack hash on return and lacks cleanup for partial result on failure. CmacPrimitivesOpenSsl.CmacFinal leaves outputBuffer on success/failure, although the active default is the managed AesCmac implementation. ASN private encoders use AsnWriter buffers in addition to the owned encodings they explicitly clear.",
+      "desired": "Keep current cleanup evidence local to each owner. Track unzeroed owned copies in Pass 2. Qualify docs/CRYPTO-APIS.md's blanket zero-allocation/auto-zeroing claims: disposing a provider does not clear caller arrays or every temporary copy.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/AesUtilities.cs",
+          "first": 24,
+          "last": 223
+        },
+        {
+          "path": "src/Core/src/Cryptography/X963Kdf.cs",
+          "first": 22,
+          "last": 76
+        },
+        {
+          "path": "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+          "first": 238,
+          "last": 251
+        },
+        {
+          "path": "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+          "first": 68,
+          "last": 284
+        },
+        {
+          "path": "docs/CRYPTO-APIS.md",
+          "first": 6,
+          "last": 64
+        },
+        {
+          "path": "src/Cli.Commands/src/HsmAuth/HsmAuthCommands.cs",
+          "first": 310,
+          "last": 329
+        },
+        {
+          "path": "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+          "first": 24,
+          "last": 35
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+          "first": 41,
+          "last": 60
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+          "first": 42,
+          "last": 51
+        },
+        {
+          "path": "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+          "first": 26,
+          "last": 41
+        }
+      ],
+      "reopen": [
+        "docs/MEMORY-MANAGEMENT.md",
+        "src/Core/src/Cryptography/ICmacPrimitives.cs",
+        "src/Core/src/Cryptography/IEcdhPrimitives.cs"
+      ],
+      "confidence": "high for explicit SDK copies; AsnWriter/provider internals need exact revision follow-up",
+      "final_observation": "Exact AsnWriter v10.0.0 source confirms Encode returns an independent copy without clearing the writer buffer and Reset clears the written internal prefix. Production private encoders omit Reset even though some test fixture writers use it. Existing zeroing observers establish explicit INTEGER/encoded temporary cleanup, not writer-storage erasure. BCL/provider disposal cannot erase every caller/runtime copy. CmacPrimitivesOpenSsl is a retained alternate helper and is not the active ICmacPrimitives default. HsmAuth's two RNG allocations precede the inner try; second allocation failure can abandon the first owned key. No failure injection ran.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs",
+      "ownership_qualification": "ReadOnlyMemory is not an immutable-storage or clearing-owner contract. Tlv.Value and key getters borrow their owners; Memory-returning TLV helpers transfer writable output. DecodeDictionary transfers values typed ReadOnlyMemory without a disposable clear owner, and clearing a later mutable copy does not erase the original or abandoned parse copies. The raw HID paragraph likewise cannot make original readonly returned secret storage disappear by clearing a copy. Preserve this as a caller/API ownership qualification for C005/C006/C013 and the B5 boundary; recommend existing disposable/writable owners where available, without inventing a breaking API or writable-cast workaround. For C017, retain the contributor policy favoring disposable reference-type owners while correcting its rationale: a struct copy duplicates an array reference, not the array bytes, so clearing the shared backing array affects all aliases. The hazard is shared mutation and ambiguous lifetime/disposal ownership, not an inability for ZeroMemory to reach aliases. The root CLAUDE wording is a narrow shared-editor dependency, not an added C primary population.",
+      "allocation_failure_qualification": "For C013, RSAParameters.DeepCopy allocates several private arrays in an object initializer before NormalizeParameters enters its try. Failure of a later allocation can abandon earlier owned private clones without explicit clearing; observer-throw fixtures occur after that allocation stage and do not cover it. This is a conditional source-derived lifetime concern, not an executed OOM repro, exploit claim or authorization for a refactor."
+    },
+    {
+      "id": "CORE-C-C014",
+      "kind": "documentation-correction",
+      "title": "Refresh test comments to describe current assertions and failure paths",
+      "observed": "CoreNumericBoundaryAuditReproTests still describes the former 32-bit overflow, negative slicing path and rented sizing estimate as present behavior; current parser guards the range and encoding sizes exactly. TlvHelperTests says indefinite-length rejection is caused by slicing, whereas source has an explicit rejection. The credential pool sentinel test assumes thread-local ArrayPool reuse; its precondition checks mutation, not exact array identity, so its comment is stronger than its assertions.",
+      "desired": "Describe regression fixtures and current observed checks directly. Preserve the old finding IDs as provenance, and qualify pool identity assumptions without claiming portable guaranteed reuse.",
+      "locations": [
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+          "first": 54,
+          "last": 138
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+          "first": 93,
+          "last": 99
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+          "first": 45,
+          "last": 76
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+          "first": 467,
+          "last": 481
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+          "first": 120,
+          "last": 128
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+          "first": 296,
+          "last": 318
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+          "first": 22,
+          "last": 24
+        },
+        {
+          "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+          "first": 457,
+          "last": 467
+        },
+        {
+          "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+          "first": 122,
+          "last": 138
+        },
+        {
+          "path": "src/Core/src/Cryptography/RSAPrivateKey.cs",
+          "first": 114,
+          "last": 129
+        },
+        {
+          "path": "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+          "first": 55,
+          "last": 64
+        },
+        {
+          "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+          "first": 98,
+          "last": 101
+        },
+        {
+          "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+          "first": 287,
+          "last": 290
+        }
+      ],
+      "reopen": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs"
+      ],
+      "confidence": "high-source/assertion inspection; tests unexecuted",
+      "final_observation": "Additional assertion limits: raw EC wrong-point-length P-384/P-521 cases supply a 32-byte D and fail scalar admission before point-length validation; comments must not claim isolated point coverage. Zero-valued width fixtures test shape, not valid private keys. PrivateKeyConsistency's known vectors are independently published inputs; source comments about their earlier programmatic extraction are provenance, not a fresh arithmetic run. SecureCredentialTests.DeclinedInteractiveInputLeavesNoSecretBehind only asserts null; separate TrackingArrayPool tests actually observe clearing/return. Neither source test names nor this audit establish new executions.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs",
+      "observer_scope_qualification": "For C014, internal observer comments saying callbacks must never retain private values need a precise test-only exception: the zeroing tests intentionally retain array references to inspect them after the production owner clears them. They must not mutate live private data or transfer production ownership. Preserve these observation scopes rather than claiming the tests obey a blanket no-retention instruction or prove erasure of unobserved runtime/native copies."
+    },
+    {
+      "id": "CORE-C-C015",
+      "kind": "documentation-correction",
+      "title": "Retain current catalog mappings while qualifying registry status",
+      "observed": "The fetched IANA COSE registry (updated 2026-08-25) confirms all inspected catalog numeric mappings, including Ed25519 -19 and Brainpool 256/258/259. Its Recommended column labels ES256/384/512, EdDSA, RS1 and AES-CBC deprecated; this is separate from the catalog's structural applicability and existing applet profile choices. CoseKeyType cites the Common Parameters registry while linking the key-type subregistry. Unknown/None zero values are local sentinels in registries where zero is reserved.",
+      "desired": "Use precise registry names and local sentinel semantics. If adding registry status context, state it as registry metadata and retain existing protocol profiles. Do not automatically replace ES256/EdDSA IDs in CTAP/WebAuthn or infer provider/device support from a registered mapping.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+          "first": 17,
+          "last": 31
+        },
+        {
+          "path": "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+          "first": 17,
+          "last": 61
+        },
+        {
+          "path": "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs",
+          "first": 32,
+          "last": 89
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+          "first": 51,
+          "last": 54
+        }
+      ],
+      "reopen": [
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+        "src/Core/src/Cryptography/KeyType.cs"
+      ],
+      "confidence": "high registry-row inspection; protocol policy remains with boundary owners",
+      "final_observation": "All modeled curve/key/operation rows inspected against current IANA records and original RFC/SEC tables. RFC 9053 allows ECDSA only for its modeled P-256/P-384/P-521 set unless extended elsewhere; broad structural ECDSA applicability on secp256k1/Brainpool does not validate its associated -7 mapping for that combination. SEC 2 retrieved v2.0 copy retains Draft page headers; identify those exact bytes instead of upgrading its status. The NIST final metadata was readable through webfetch, while direct PDF and follow-up retention requests were forbidden; no NIST-final table or approval claim is inferred.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C016",
+      "kind": "documentation-correction-and-source-qualification",
+      "title": "Qualify RFC 5915 encoding profile and broad conformance language",
+      "observed": "AsnPrivateKeyEncoder omits inner ECPrivateKey parameters because the named curve is in the outer AlgorithmIdentifier. RFC 5915 section 3 explicitly says conforming implementations MUST include the inner parameters despite ASN.1 OPTIONAL; publicKey is SHOULD. The source also claims every standards-compliant producer emits a particular wrapper and that standards-compliant importers reject the legacy implicit form, which is broader than an observed BCL or ASN.1 syntax result.",
+      "desired": "Keep the interoperable encoding behavior distinct from strict RFC 5915 conformance. Have the maintainer settle the target profile before any runtime change, and phrase compatibility comments around the explicit ASN.1 schema and verified importers.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+          "first": 208,
+          "last": 228
+        },
+        {
+          "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+          "first": 209,
+          "last": 235
+        }
+      ],
+      "reopen": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+        "src/Core/src/Cryptography/AsnUtilities.cs"
+      ],
+      "confidence": "high exact original passage; profile decision open",
+      "final_observation": "RFC 5208/5958 container text and RFC 5915 schema/prose have now been inspected. Keep inner optional syntax, RFC 5915 MUST/SHOULD conformance text and actual BCL acceptance distinct. Existing explicit-tag and BCL-import assertions verify their finite representation scenarios, not every compliant producer/importer or complete RFC conformance.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "MAINTAINER-DECISION-REQUIRED",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C017",
+      "kind": "documentation-correction",
+      "title": "Correct stale and overbroad helper API guidance",
+      "observed": "IPrivateKeyExtensions example spells RsaPrivateKey instead of RSAPrivateKey and presents an ordinary checked cast as a special safety property. ISecureCredentialReader example calls obsolete synchronous pivSession.VerifyPin. docs/MEMORY-MANAGEMENT.md says spans cannot be used in async methods despite its own modern post-await span example and C# 13+ support for segments that do not cross suspension. Its illustrative CommandApdu struct owns a cloned byte array and conflicts with the root sensitive-owner rule if used for secrets.",
+      "desired": "Use current names and explicitly classified fragments with complete resource scopes. Explain span suspension restrictions precisely and use the actual borrowed ApduCommand contract or a clearly nonsecret illustration.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+          "first": 23,
+          "last": 43
+        },
+        {
+          "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+          "first": 34,
+          "last": 43
+        },
+        {
+          "path": "docs/MEMORY-MANAGEMENT.md",
+          "first": 27,
+          "last": 66
+        },
+        {
+          "path": "docs/MEMORY-MANAGEMENT.md",
+          "first": 169,
+          "last": 182
+        },
+        {
+          "path": "docs/migration/v1-to-v2-gaps.md",
+          "first": 64,
+          "last": 67
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+          "first": 38,
+          "last": 48
+        },
+        {
+          "path": "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+          "first": 98,
+          "last": 118
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+          "first": 123,
+          "last": 141
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+          "first": 246,
+          "last": 250
+        },
+        {
+          "path": "src/Core/src/Cryptography/PrivateKey.cs",
+          "first": 19,
+          "last": 26
+        },
+        {
+          "path": "docs/MEMORY-MANAGEMENT.md",
+          "first": 197,
+          "last": 204
+        },
+        {
+          "path": "CLAUDE.md",
+          "first": 63,
+          "last": 65
+        }
+      ],
+      "reopen": [
+        "docs/CRYPTO-APIS.md",
+        "src/Core/src/Cryptography/IPublicKeyExtensions.cs"
+      ],
+      "confidence": "high static and Context7 orientation; meaningful snippets not compiled",
+      "final_observation": "Also correct stale migration-gap claims that no shared Base32 exists. Core's current decode delegation and OATH nonempty policy are present; other missing codecs remain separate. Helpers named for supported prime curves should say modeled ordinary short-Weierstrass curves where mathematical prime-field 25519 would otherwise be confused with a key algorithm OID. CmacBlockCipherAlgorithm.Unknown incorrectly describes AES-128 although zero is rejected by KeyLength/MacLength and the managed default. Preserve genuine ECPrivateKey TODO and historical code rather than declaring unfinished work removed.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs",
+      "ownership_qualification": "ReadOnlyMemory is not an immutable-storage or clearing-owner contract. Tlv.Value and key getters borrow their owners; Memory-returning TLV helpers transfer writable output. DecodeDictionary transfers values typed ReadOnlyMemory without a disposable clear owner, and clearing a later mutable copy does not erase the original or abandoned parse copies. The raw HID paragraph likewise cannot make original readonly returned secret storage disappear by clearing a copy. Preserve this as a caller/API ownership qualification for C005/C006/C013 and the B5 boundary; recommend existing disposable/writable owners where available, without inventing a breaking API or writable-cast workaround. For C017, retain the contributor policy favoring disposable reference-type owners while correcting its rationale: a struct copy duplicates an array reference, not the array bytes, so clearing the shared backing array affects all aliases. The hazard is shared mutation and ambiguous lifetime/disposal ownership, not an inability for ZeroMemory to reach aliases. The root CLAUDE wording is a narrow shared-editor dependency, not an added C primary population."
+    },
+    {
+      "id": "CORE-C-C018",
+      "kind": "documentation-and-source-qualification",
+      "title": "Pin the ARKG draft and distinguish finite vectors from a full oracle",
+      "observed": "The implementation names draft-bradleylundberg-cfrg-arkg-09. Its retained original is a July 7, 2025 Internet-Draft with intended Informational status and January 8, 2026 expiry, rather than a final standard. IArkgPrimitives promises each unique context produces a unique key pair; finite group/hash outputs provide domain separation rather than an injective guarantee for arbitrary contexts. ArkgP256Tests cites a Rust path and /tmp/gen_kat without an immutable revision or retained generator, describes both vectors although it has A/B/C, and compares the handle only for A.",
+      "desired": "Retain the deliberate draft-09 target as work in progress, state context domain separation without an absolute uniqueness guarantee, and describe exactly the finite known-answer assertions. Recover/pin the Rust/generator provenance before claiming an independently reproducible oracle or full draft conformance. Further full mathematical derivation review remains open.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/IArkgPrimitives.cs",
+          "first": 45,
+          "last": 75
+        },
+        {
+          "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+          "first": 26,
+          "last": 35
+        },
+        {
+          "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+          "first": 20,
+          "last": 98
+        }
+      ],
+      "reopen": [
+        "docs/architecture/webauthn-extension-processing.md",
+        "src/Core/src/Cryptography/CryptographyProviders.cs"
+      ],
+      "confidence": "high for exact draft status and assertions; full derivation conformance/oracle provenance unverified",
+      "final_observation": "Draft-09 sections 2.3, 3.1-3.3 and 4.1 plus RFC 9380 hash_to_field/expand_message_xmd/P-256 suite were read and compared stepwise to all derivation helpers. Context framing, domain tags, 48-byte expansion, wide modular-reduction decomposition, HMAC truncation and ciphertext layout are structurally aligned. Sub-KEM intentionally ignores ctx, so omitting ctx_sub is allowed by the cited draft. Native conversion checks and secret-copy gaps still preclude blanket conformance. Initial retained-reference search plus one focused exact-name search found historical SDK PR #468 but no immutable Rust generator revision/source; record that precise oracle-provenance gap. No substitute draft/profile or sibling KAT was promoted to a normative oracle.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C019",
+      "kind": "implementation-followup-and-native-qualification",
+      "title": "Check ARKG native allocation and conversion outcomes at their actual calls",
+      "observed": "Native wrappers construct SafeHandles without throwing on zero handles, use DangerousGetHandle to call native functions, and callers discard BN_bn2binpad results when exporting coordinates/shared secrets. OpenSSL 3.0.0 original BN conversion documentation returns NULL on BN_bin2bn error and a byte count or -1 for BN_bn2binpad. The managed wrappers alone do not establish native release, constant-time scalar handling, allocation-failure behavior or available exports on each target platform.",
+      "desired": "Record checked-allocation/conversion and secret-native-point cleanup as Pass-2 review inputs. B4 owns the loader/package availability qualification; keep C's conclusions limited to actual ARKG call sites and retain native-shim internals as an external source gap.",
+      "locations": [
+        {
+          "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+          "first": 107,
+          "last": 142
+        },
+        {
+          "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+          "first": 456,
+          "last": 495
+        },
+        {
+          "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+          "first": 559,
+          "last": 728
+        }
+      ],
+      "reopen": [
+        "src/Core/src/Cryptography/ArkgPrimitives.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs"
+      ],
+      "confidence": "high managed source; original OpenSSL API contract read; packaged shim/runtime behavior unexecuted",
+      "final_observation": "OpenSSL 3.0.0 point/free and EVP_MAC originals inspected: point clear_free explicitly erases sensitive contents, while SDK SafeEcPoint calls the ordinary free export even for shared-secret points. Allocation NULL and BN written-count handling remain actual-call follow-ups. ComputeEcdhSharedSecret's scalar span has no explicit 32-byte admission, while production Derive supplies 32 bytes. The exact NativeShims binary/export/provider implementation remains B4-owned external qualification; C supplies no new Windows/macOS/Linux acceptance claim.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "No new policy authorized",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    },
+    {
+      "id": "CORE-C-C020",
+      "kind": "cross-packet-ownership-documentation-and-policy",
+      "title": "Make SCP parameter containment ownership visible to B6 and applet editors",
+      "observed": "The narrowly read parameter boundary differs by layer: SessionCreationOptions borrows SCP parameters and presence service; Scp03KeyParameters stores the supplied StaticKeys reference and disposes that same object; StaticKeys clones source spans. Scp11KeyParameters copies the certificate collection but retains each certificate and the EC private-key reference, then disposes those same objects. Its public key is retained without disposal. Record with-expressions can share the contained disposable owners. XML calls OceKeyRef required for a/c although the constructor does not require it, and claims empty/null b fields while the full constructor accepts supplied values for b.",
+      "desired": "B6 should describe construction/containment/disposal and alias lifetime explicitly, and reconcile required-versus-optional metadata with its actual SCP initializer. Cross-reference the same ownership in Security Domain/OpenPGP/PIV examples. Keep record cloning and disposed-alias policy as consequential decisions rather than changing APIs in Pass 1.",
+      "locations": [
+        {
+          "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+          "first": 25,
+          "last": 59
+        },
+        {
+          "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+          "first": 27,
+          "last": 112
+        },
+        {
+          "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+          "first": 45,
+          "last": 92
+        },
+        {
+          "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+          "first": 22,
+          "last": 39
+        },
+        {
+          "path": "src/Cli.Commands/src/HsmAuth/HsmAuthCommands.cs",
+          "first": 251,
+          "last": 419
+        }
+      ],
+      "reopen": [
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "src/SecurityDomain/README.md",
+        "src/OpenPgp/README.md",
+        "src/Piv/README.md"
+      ],
+      "primary_owner": "B6-wire-scp; applet-specific caller dispositions stay with boundary owners",
+      "confidence": "high for narrowly inspected containment boundary; no wire, certificate-profile or full B6 audit",
+      "final_observation": "Narrow Scp11X963Kdf dependency read supports current C provider-test assertions: exported D arrays, shared-secret arrays, concatenation owner and receipt buffers have separate finally scopes; receipt comparison failure and provider Dispose failure are modeled in existing tests. No full SCP wire review or GlobalPlatform-source download was undertaken. Parameter-clone/certificate containment facts and initializer OCE-reference/profile questions remain B6 referrals, with source hashes and unchanged-path disposition retained. HsmAuth CLI shared callers omit deviceContext.SessionOptions; boundary owners should compare that with intended SCP/presence option propagation rather than C claiming universal callback adoption.",
+      "documentation_state": "PROPOSED-CORRECTION-OR-QUALIFICATION; fresh editor/reviewer assignment required",
+      "implementation_state": "UNCHANGED; source concerns remain candidates, not fixed/intended-contract declarations",
+      "decision_state": "MAINTAINER-DECISION-REQUIRED",
+      "qualification_state": "STATIC-SOURCE-ONLY; SDK/host-crypto/native/device execution NOT-RUN",
+      "independent_review": "PENDING-FRESH-REVIEW",
+      "counting": "Local related concern group; inherited associations are not additive bugs"
+    }
+  ],
+  "completion_date_session": "2026-11-12",
+  "qualification_register": "final-review.json"
+}

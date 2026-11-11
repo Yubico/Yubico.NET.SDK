@@ -1,0 +1,81 @@
+{
+  "scope": "Static source-literal annotation only: base64url/hex text conversion. No signing, key generation, modular arithmetic, primality, SDK codec/test, native call or cryptographic experiment.",
+  "inputs": {
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/KnownPrivateKeyVectors.cs": "10fa11ba4295d4a34ef97b877953b02ec38e2152163a8910374ee3ef7f434814",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc7517.txt": "681c19b92a85068716b7e89c5815aa821bd3f11c755ff1c641b40ae9851bb33c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc6979.txt": "456e8f17558fdbd206f968b96fc6f1b4a71ea331ab30ad17f711ab3adaa7d701"
+  },
+  "observations": [
+    {
+      "fixture": "Rfc7517Rsa2048Modulus",
+      "original": "RFC 7517 Appendix A.2",
+      "result": "literal base64url-to-hex equality"
+    },
+    {
+      "fixture": "Rfc7517Rsa2048Exponent",
+      "original": "RFC 7517 Appendix A.2",
+      "result": "literal base64url-to-hex equality"
+    },
+    {
+      "fixture": "Rfc7517Rsa2048D",
+      "original": "RFC 7517 Appendix A.2",
+      "result": "literal base64url-to-hex equality"
+    },
+    {
+      "fixture": "Rfc7517Rsa2048P",
+      "original": "RFC 7517 Appendix A.2",
+      "result": "literal base64url-to-hex equality"
+    },
+    {
+      "fixture": "Rfc7517Rsa2048Q",
+      "original": "RFC 7517 Appendix A.2",
+      "result": "literal base64url-to-hex equality"
+    },
+    {
+      "fixture": "Rfc7517Rsa2048DP",
+      "original": "RFC 7517 Appendix A.2",
+      "result": "literal base64url-to-hex equality"
+    },
+    {
+      "fixture": "Rfc7517Rsa2048DQ",
+      "original": "RFC 7517 Appendix A.2",
+      "result": "literal base64url-to-hex equality"
+    },
+    {
+      "fixture": "Rfc7517Rsa2048InverseQ",
+      "original": "RFC 7517 Appendix A.2",
+      "result": "literal base64url-to-hex equality"
+    },
+    {
+      "fixture": "Rfc6979P256D",
+      "original": "RFC 6979 A.2.5/A.2.6",
+      "result": "literal published hex equality"
+    },
+    {
+      "fixture": "Rfc6979P256X",
+      "original": "RFC 6979 A.2.5/A.2.6",
+      "result": "literal published hex equality"
+    },
+    {
+      "fixture": "Rfc6979P256Y",
+      "original": "RFC 6979 A.2.5/A.2.6",
+      "result": "literal published hex equality"
+    },
+    {
+      "fixture": "Rfc6979P384D",
+      "original": "RFC 6979 A.2.5/A.2.6",
+      "result": "literal published hex equality"
+    },
+    {
+      "fixture": "Rfc6979P384X",
+      "original": "RFC 6979 A.2.5/A.2.6",
+      "result": "literal published hex equality"
+    },
+    {
+      "fixture": "Rfc6979P384Y",
+      "original": "RFC 6979 A.2.5/A.2.6",
+      "result": "literal published hex equality"
+    }
+  ],
+  "historical_claim_limit": "This reproduces fixture text identity, not the earlier author's programmatic extraction or arithmetic verification and not provider or device conformance."
+}

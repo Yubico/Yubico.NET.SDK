@@ -1,0 +1,36 @@
+From 13f8a21c34e2a8ef483c155d08eb730e7fa59fe9 Mon Sep 17 00:00:00 2001
+From: Giovanni Simoni <giovanni.simoni@yubico.com>
+Date: Mon, 4 May 2026 15:40:28 +0200
+Subject: [PATCH] Interpret TAG_MORE_DATA as number of following pages
+
+In future revisions of the firmware, the byte associated with TAG_MORE_DATA
+will be declaring the amount of pages available after the current one.
+---
+ yubikit/management.py | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/yubikit/management.py b/yubikit/management.py
+index a460a0bbd..1c08d34df 100644
+--- a/yubikit/management.py
++++ b/yubikit/management.py
+@@ -645,16 +645,18 @@ def read_device_info(self) -> DeviceInfo:
+         return self._do_read_device_info()
+ 
+     def _do_read_device_info(self) -> DeviceInfo:
+-        more_data = True
++        more_data = 1
+         tlvs = {}
+         page = 0
+         while more_data:
++            more_data -= 1
+             logger.debug(f"Reading DeviceInfo page: {page}")
+             encoded = self.backend.read_config(page)
+             if len(encoded) - 1 != encoded[0]:
+                 raise BadResponseError("Invalid length")
+             data = Tlv.parse_dict(encoded[1:])
+-            more_data = data.pop(TAG_MORE_DATA, 0) == b"\1"
++            if TAG_MORE_DATA in data:
++                more_data = int.from_bytes(data.pop(TAG_MORE_DATA))
+             tlvs.update(data)
+             page += 1
+ 

@@ -1,0 +1,18 @@
+{
+  "result": "PASS-STATIC-RECORD-IDENTITIES-AND-JOINS",
+  "primary_files": 104,
+  "primary_units": 1386,
+  "shared_units": 176,
+  "unit_ids_reconciled": 1562,
+  "unread_or_pending_final_triage": 0,
+  "original_download_hashes_checked": 38,
+  "unchanged_candidate_paths_compared_to_pin": 85,
+  "local_candidates": 20,
+  "inherited_rows": 18,
+  "inherited_groups": 13,
+  "clean_nominees": 207,
+  "owned_evidence_files": 100,
+  "semantic_read_proof": "Authored complete-read observations in semantic-notes/final-review and exact unit dossiers; not inferred from these mechanical checks.",
+  "sdk_tests_builds_crypto_experiments_native_device_execution": 0,
+  "limits": "This verifies records/source identity only; it is not independent review, compiled consumer/API binding or runtime/provider/device qualification."
+}

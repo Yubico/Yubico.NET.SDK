@@ -1,0 +1,350 @@
+From 04c8cda4b7c23686f840490203e5c515aa2fa61f Mon Sep 17 00:00:00 2001
+From: Dain Nilsson <dain@yubico.com>
+Date: Thu, 30 May 2024 14:57:12 +0200
+Subject: [PATCH] Improve error handling when attempting to send too large
+ APDUs
+
+---
+ yubikit/core/smartcard/__init__.py | 84 +++++++++++++++++++++++-------
+ yubikit/hsmauth.py                 |  1 +
+ yubikit/management.py              |  7 +--
+ yubikit/oath.py                    |  2 +-
+ yubikit/openpgp.py                 |  5 +-
+ yubikit/piv.py                     |  5 +-
+ yubikit/securitydomain.py          |  6 +--
+ yubikit/yubiotp.py                 |  2 +-
+ 8 files changed, 77 insertions(+), 35 deletions(-)
+
+diff --git a/yubikit/core/smartcard/__init__.py b/yubikit/core/smartcard/__init__.py
+index 51e3da32b..4930a8811 100644
+--- a/yubikit/core/smartcard/__init__.py
++++ b/yubikit/core/smartcard/__init__.py
+@@ -191,10 +191,16 @@ def send_apdu(self, cla, ins, p1, p2, data, le):
+ 
+ 
+ class ExtendedApduProcessor(ApduFormatProcessor):
++    def __init__(self, connection, max_apdu_size):
++        super().__init__(connection)
++        self._max_apdu_size = max_apdu_size
++
+     def format_apdu(self, cla, ins, p1, p2, data, le):
+         buf = struct.pack(">BBBBBH", cla, ins, p1, p2, 0, len(data)) + data
+         if le:
+             buf += struct.pack(">H", le)
++        if len(buf) > self._max_apdu_size:
++            raise NotSupportedError("APDU length exceeds YubiKey capability")
+         return buf
+ 
+ 
+@@ -205,12 +211,13 @@ class ChainedResponseProcessor(ApduProcessor):
+     def __init__(
+         self,
+         connection: SmartCardConnection,
+-        extended_apdus: bool = True,
++        extended_apdus: bool,
++        max_apdu_size: int,
+         ins_send_remaining: int = INS_SEND_REMAINING,
+     ):
+         self.connection = connection
+         self.processor = (
+-            ExtendedApduProcessor(connection)
++            ExtendedApduProcessor(connection, max_apdu_size)
+             if extended_apdus
+             else ShortApduProcessor(connection)
+         )
+@@ -235,7 +242,9 @@ def __init__(
+         connection: SmartCardConnection,
+         ins_send_remaining: int = INS_SEND_REMAINING,
+     ):
+-        super().__init__(connection, ins_send_remaining=ins_send_remaining)
++        super().__init__(
++            connection, True, _MaxApduSize.YK4, ins_send_remaining=ins_send_remaining
++        )
+         self._last_long_resp = 0.0
+ 
+     def send_apdu(self, cla, ins, p1, p2, data, le):
+@@ -260,9 +269,12 @@ def __init__(
+         self,
+         connection: SmartCardConnection,
+         scp_state: ScpState,
++        max_apdu_size: int,
+         ins_send_remaining: int = INS_SEND_REMAINING,
+     ):
+-        super().__init__(connection, ins_send_remaining=ins_send_remaining)
++        super().__init__(
++            connection, True, max_apdu_size, ins_send_remaining=ins_send_remaining
++        )
+         self._state = scp_state
+ 
+     def send_apdu(self, cla, ins, p1, p2, data, le, encrypt: bool = True):
+@@ -289,6 +301,12 @@ def send_apdu(self, cla, ins, p1, p2, data, le, encrypt: bool = True):
+         return resp, sw
+ 
+ 
++class _MaxApduSize(IntEnum):
++    NEO = 1390
++    YK4 = 2038
++    YK4_3 = 3062
++
++
+ class SmartCardProtocol:
+     """An implementation of the Smart Card protocol."""
+ 
+@@ -298,10 +316,17 @@ def __init__(
+         ins_send_remaining: int = INS_SEND_REMAINING,
+     ):
+         self.connection = smartcard_connection
++        self._max_apdu_size = _MaxApduSize.NEO
+         self._apdu_format = ApduFormat.SHORT
+         self._ins_send_remaining = ins_send_remaining
++        self._reset_processor()
++
++    def _reset_processor(self) -> None:
+         self._processor = ChainedResponseProcessor(
+-            self.connection, False, ins_send_remaining
++            self.connection,
++            self._apdu_format == ApduFormat.EXTENDED,
++            self._max_apdu_size,
++            self._ins_send_remaining,
+         )
+ 
+     @property
+@@ -319,22 +344,44 @@ def apdu_format(self, value) -> None:
+             return
+         if value != ApduFormat.EXTENDED:
+             raise ValueError(f"Cannot change to {value}")
+-        self._processor = ChainedResponseProcessor(
+-            self.connection, ins_send_remaining=self._ins_send_remaining
+-        )
+         self._apdu_format = value
++        self._reset_processor()
+ 
+     def close(self) -> None:
+         self.connection.close()
+ 
+     def enable_touch_workaround(self, version: Version) -> None:
++        warnings.warn(
++            "Deprecated: use SmartCardProtocol.configure(version) instead.",
++            DeprecationWarning,
++        )
++        self._do_enable_touch_workaround(version)
++
++    def _do_enable_touch_workaround(self, version: Version) -> bool:
+         if self.connection.transport == TRANSPORT.USB and (
+             (4, 2, 0) <= version <= (4, 2, 6)
+         ):
++            self._max_apdu_size = _MaxApduSize.YK4
+             self._processor = TouchWorkaroundProcessor(
+                 self.connection, self._ins_send_remaining
+             )
+             logger.debug("Touch workaround enabled")
++            return True
++        return False
++
++    def configure(self, version: Version) -> None:
++        """Configure the connection optimally for the given YubiKey version."""
++        if isinstance(self._processor, ScpProcessor):
++            return
++        if self._do_enable_touch_workaround(version):
++            return
++
++        if version[0] > 3:
++            self._apdu_format = ApduFormat.EXTENDED
++            self._max_apdu_size = (
++                _MaxApduSize.YK4_3 if version >= (4, 3) else _MaxApduSize.YK4
++            )
++            self._reset_processor()
+ 
+     def send_apdu(
+         self,
+@@ -368,11 +415,7 @@ def select(self, aid: bytes) -> bytes:
+         :param aid: The YubiKey application AID value.
+         """
+         logger.debug(f"Selecting AID: {aid.hex()}")
+-        self._processor = ChainedResponseProcessor(
+-            self.connection,
+-            self._apdu_format == ApduFormat.EXTENDED,
+-            self._ins_send_remaining,
+-        )
++        self._reset_processor()
+ 
+         try:
+             return self.send_apdu(0, INS_SELECT, P1_SELECT, P2_SELECT, aid)
+@@ -394,6 +437,9 @@ def init_scp(self, key_params: ScpKeyParams) -> None:
+                 self._scp11_init(key_params)
+             else:
+                 raise ValueError("Unsupported ScpKeyParams")
++            self._apdu_format = ApduFormat.EXTENDED
++            self._max_apdu_size = _MaxApduSize.YK4_3
++            logger.info("SCP initialized")
+         except ApduError as e:
+             if e.sw == SW.CLASS_NOT_SUPPORTED:
+                 raise NotSupportedError(
+@@ -408,7 +454,9 @@ def init_scp(self, key_params: ScpKeyParams) -> None:
+     def _scp03_init(self, key_params: Scp03KeyParams) -> None:
+         logger.debug("Initializing SCP03")
+         scp, host_cryptogram = ScpState.scp03_init(self.send_apdu, key_params)
+-        processor = ScpProcessor(self.connection, scp, self._ins_send_remaining)
++        processor = ScpProcessor(
++            self.connection, scp, _MaxApduSize.YK4_3, self._ins_send_remaining
++        )
+ 
+         # Send EXTERNAL AUTHENTICATE
+         # P1 = C-DECRYPTION, R-ENCRYPTION, C-MAC, and R-MAC
+@@ -416,12 +464,10 @@ def _scp03_init(self, key_params: Scp03KeyParams) -> None:
+             0x84, INS_EXTERNAL_AUTHENTICATE, 0x33, 0, host_cryptogram, 0, encrypt=False
+         )
+         self._processor = processor
+-        self._apdu_format = ApduFormat.EXTENDED
+-        logger.info("SCP03 initialized")
+ 
+     def _scp11_init(self, key_params: Scp11KeyParams) -> None:
+         logger.debug("Initializing SCP11")
+         scp = ScpState.scp11_init(self.send_apdu, key_params)
+-        self._processor = ScpProcessor(self.connection, scp, self._ins_send_remaining)
+-        self._apdu_format = ApduFormat.EXTENDED
+-        logger.info("SCP11 initialized")
++        self._processor = ScpProcessor(
++            self.connection, scp, _MaxApduSize.YK4_3, self._ins_send_remaining
++        )
+diff --git a/yubikit/hsmauth.py b/yubikit/hsmauth.py
+index b10963bfa..639a0b98a 100644
+--- a/yubikit/hsmauth.py
++++ b/yubikit/hsmauth.py
+@@ -230,6 +230,7 @@ def __init__(
+ 
+         if scp_key_params:
+             self.protocol.init_scp(scp_key_params)
++        self.protocol.configure(self._version)
+ 
+     @property
+     def version(self) -> Version:
+diff --git a/yubikit/management.py b/yubikit/management.py
+index 2d54ef7c1..bb02ccd4f 100644
+--- a/yubikit/management.py
++++ b/yubikit/management.py
+@@ -455,16 +455,16 @@ def __init__(self, smartcard_connection, scp_key_params):
+ 
+             if scp_key_params:
+                 self.protocol.init_scp(scp_key_params)
+-
+-            if select_bytes[-2:] == b"\x90\x00":
++            elif select_bytes[-2:] == b"\x90\x00":
+                 # YubiKey Edge incorrectly appends SW twice.
+                 select_bytes = select_bytes[:-2]
++
+             select_str = select_bytes.decode()
+             self.version = Version.from_string(select_str)
+             # For YubiKey NEO, we use the OTP application for further commands
+             if self.version[0] == 3:
+                 # Workaround to "de-select" on NEO, otherwise it gets stuck.
+-                self.protocol.connection.send_and_receive(b"\xa4\x04\x00\x08")
++                smartcard_connection.send_and_receive(b"\xa4\x04\x00\x08")
+                 self.protocol.select(AID.OTP)
+         except ApplicationNotAvailableError:
+             if smartcard_connection.transport == TRANSPORT.NFC:
+@@ -473,6 +473,7 @@ def __init__(self, smartcard_connection, scp_key_params):
+                 self.version = Version.from_bytes(status[:3])
+             else:
+                 raise
++        self.protocol.configure(self.version)
+ 
+     def close(self):
+         self.protocol.close()
+diff --git a/yubikit/oath.py b/yubikit/oath.py
+index 19975fece..b40dc7145 100644
+--- a/yubikit/oath.py
++++ b/yubikit/oath.py
+@@ -281,7 +281,7 @@ def __init__(
+ 
+         self._has_key = self._challenge is not None
+         self._device_id = _get_device_id(self._salt)
+-        self.protocol.enable_touch_workaround(self.version)
++        self.protocol.configure(self.version)
+         self._neo_unlock_workaround = not scp_key_params and self.version < (3, 0, 0)
+         logger.debug(
+             f"OATH session initialized (version={self.version}, "
+diff --git a/yubikit/openpgp.py b/yubikit/openpgp.py
+index 5011d9dd1..864753bb6 100644
+--- a/yubikit/openpgp.py
++++ b/yubikit/openpgp.py
+@@ -37,7 +37,6 @@
+ from .core.smartcard import (
+     SmartCardConnection,
+     SmartCardProtocol,
+-    ApduFormat,
+     ApduError,
+     AID,
+     SW,
+@@ -1015,9 +1014,7 @@ def __init__(
+ 
+         self._version = self._read_version()
+ 
+-        self.protocol.enable_touch_workaround(self.version)
+-        if not 0 < self.version[0] < 4:
+-            self.protocol.apdu_format = ApduFormat.EXTENDED
++        self.protocol.configure(self.version)
+ 
+         # Note: This value is cached!
+         # Do not rely on contained information that can change!
+diff --git a/yubikit/piv.py b/yubikit/piv.py
+index 4e39b162e..8bc442ede 100755
+--- a/yubikit/piv.py
++++ b/yubikit/piv.py
+@@ -39,7 +39,6 @@
+     SW,
+     AID,
+     ApduError,
+-    ApduFormat,
+     SmartCardConnection,
+     SmartCardProtocol,
+     ScpKeyParams,
+@@ -513,9 +512,7 @@ def __init__(
+         self._version = Version.from_bytes(
+             self.protocol.send_apdu(0, INS_GET_VERSION, 0, 0)
+         )
+-        self.protocol.enable_touch_workaround(self.version)
+-        if self.version >= (4, 0, 0):
+-            self.protocol.apdu_format = ApduFormat.EXTENDED
++        self.protocol.configure(self.version)
+ 
+         try:
+             self._management_key_type = self.get_management_key_metadata().key_type
+diff --git a/yubikit/securitydomain.py b/yubikit/securitydomain.py
+index 356d9562d..ab9a4b3a4 100644
+--- a/yubikit/securitydomain.py
++++ b/yubikit/securitydomain.py
+@@ -1,9 +1,8 @@
+-from .core import Tlv, int2bytes, BadResponseError
++from .core import Tlv, int2bytes, BadResponseError, Version
+ from .core.smartcard import (
+     AID,
+     SmartCardConnection,
+     SmartCardProtocol,
+-    ApduFormat,
+     ApduError,
+     SW,
+     ScpProcessor,
+@@ -101,7 +100,8 @@ class SecurityDomainSession:
+     def __init__(self, connection: SmartCardConnection):
+         self.protocol = SmartCardProtocol(connection)
+         self.protocol.select(AID.SECURE_DOMAIN)
+-        self.protocol.apdu_format = ApduFormat.EXTENDED
++        # We don't know the exact version, but this is the minimum that supports SCP
++        self.protocol.configure(Version(5, 3, 0))
+         logger.debug("SecurityDomain session initialized")
+ 
+     def authenticate(self, key_params: ScpKeyParams) -> None:
+diff --git a/yubikit/yubiotp.py b/yubikit/yubiotp.py
+index 2924eeb76..2adf60121 100644
+--- a/yubikit/yubiotp.py
++++ b/yubikit/yubiotp.py
+@@ -734,7 +734,7 @@ def __init__(self, connection: Union[OtpConnection, SmartCardConnection]):
+                 self._version = max(mgmt_version, otp_version)
+             else:
+                 self._version = mgmt_version or otp_version
+-            card_protocol.enable_touch_workaround(self._version)
++            card_protocol.configure(self._version)
+             self.backend = _YubiOtpSmartCardBackend(
+                 card_protocol, self._version, self._status[3]
+             )

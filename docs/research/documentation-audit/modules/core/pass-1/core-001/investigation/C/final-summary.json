@@ -1,0 +1,55 @@
+{
+  "baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+  "completion_date_session": "2026-11-12",
+  "completion": "COMPLETE-STATIC-INVESTIGATION; editor/reviewer/acceptance/execution gates remain separate",
+  "packet_sha256": "9ba1809d37186d462f6c554f85766284702e1382fe1b8e9e1cbd4db88d0860d4",
+  "inventory_sha256": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+  "primary_files_read_completely": 104,
+  "primary_file_count": 104,
+  "primary_lines": 17050,
+  "primary_units_read": 1386,
+  "shared_units_read": 176,
+  "selected_source_and_range_checks": 1562,
+  "shared_prose_count": 174,
+  "shared_assignment_count": 176,
+  "count_discrepancy": "All 176 actual JSON IDs retained and read. Inventory owner reconciles prose; C changed no central denominator.",
+  "unit_status_counts": {
+    "READ-CANDIDATE": 305,
+    "READ-CANDIDATE-CONTEXT": 639,
+    "READ-CLEAN": 611,
+    "READ-HISTORICAL-EXCLUSION": 3,
+    "READ-HISTORICAL-CONTEXT": 4
+  },
+  "unit_status_counts_by_assignment": {
+    "primary": {
+      "READ-CANDIDATE": 282,
+      "READ-CANDIDATE-CONTEXT": 554,
+      "READ-CLEAN": 547,
+      "READ-HISTORICAL-EXCLUSION": 3
+    },
+    "shared-read": {
+      "READ-HISTORICAL-CONTEXT": 4,
+      "READ-CANDIDATE": 23,
+      "READ-CANDIDATE-CONTEXT": 85,
+      "READ-CLEAN": 64
+    }
+  },
+  "clean_sample_nominees": 207,
+  "inherited_provenance_rows_dispositioned": 18,
+  "inherited_nonadditive_groups": 13,
+  "local_candidate_groups": 20,
+  "accepted_ids_allocated": 0,
+  "bounded_external_qualifications": [
+    "NIST-FINAL",
+    "RUST-KAT",
+    "ACTUAL-PROVIDERS",
+    "APPLET-PROFILES"
+  ],
+  "independent_review": "PENDING; not performed by this investigator",
+  "docs_editing": "NOT-AUTHORIZED-IN-THIS-PACKET",
+  "builds_tests_formatters_crypto_experiments_native_device_runs": 0,
+  "commits_index_ref_writes_pushes_subagents": 0,
+  "central_records_changed_by_C": false,
+  "checkpoint_provenance": "checkpoint-provenance.json; prior-investigation-C.md"
+}

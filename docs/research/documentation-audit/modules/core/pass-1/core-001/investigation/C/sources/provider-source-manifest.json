@@ -1,0 +1,37 @@
+[
+  {
+    "file": "dotnet-v10.0.0-ECDsaCng.ImportExport.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/Common/src/System/Security/Cryptography/ECDsaCng.ImportExport.cs",
+    "sha256": "d02098d85d159009da8b9b3bf6bd97c92cce08f04233ee18dcaf72e99e41ea66",
+    "bytes": 9854,
+    "requested_at_utc": "2026-11-11T22:52:41.067048+00:00"
+  },
+  {
+    "file": "dotnet-v10.0.0-ECDsaOpenSsl.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/Common/src/System/Security/Cryptography/ECDsaOpenSsl.cs",
+    "sha256": "19b4738fe00454723992e4373faff25f5055b583b8245d8397c9d1c0ec3793d9",
+    "bytes": 12673,
+    "requested_at_utc": "2026-11-11T22:52:41.067655+00:00"
+  },
+  {
+    "file": "dotnet-v10.0.0-ECDsaSecurityTransforms.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/Common/src/System/Security/Cryptography/ECDsaSecurityTransforms.cs",
+    "sha256": "0f417ba18b0be376d064baa1089136c807292a78570a454c863577c88f1666cd",
+    "bytes": 7550,
+    "requested_at_utc": "2026-11-11T22:52:41.068152+00:00"
+  },
+  {
+    "file": "dotnet-v10.0.0-EccSecurityTransforms.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/Common/src/System/Security/Cryptography/EccSecurityTransforms.cs",
+    "sha256": "1eacea397d385fc86cabb3d524cbac72644330cc8832f4dcc53dcfe51c063658",
+    "bytes": 8670,
+    "requested_at_utc": "2026-11-11T22:52:41.069141+00:00"
+  },
+  {
+    "file": "dotnet-v10.0.0-EccSecurityTransforms.macOS.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/Common/src/System/Security/Cryptography/EccSecurityTransforms.macOS.cs",
+    "sha256": "b3f0009ee308c307f2e6f260cf6b8889429c672ce0e09fa265fe51532b794faa",
+    "bytes": 3006,
+    "requested_at_utc": "2026-11-11T22:52:41.069512+00:00"
+  }
+]

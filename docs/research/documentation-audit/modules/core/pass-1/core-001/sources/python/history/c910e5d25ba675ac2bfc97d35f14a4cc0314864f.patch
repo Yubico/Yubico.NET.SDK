@@ -1,0 +1,427 @@
+From c910e5d25ba675ac2bfc97d35f14a4cc0314864f Mon Sep 17 00:00:00 2001
+From: Dain Nilsson <dain@yubico.com>
+Date: Tue, 22 Apr 2025 20:01:28 +0200
+Subject: [PATCH] Override version checks for 0.0.1
+
+---
+ tests/conftest.py        |  1 -
+ tests/device/conftest.py | 15 +++++----------
+ ykman/_cli/__main__.py   | 34 +++++++---------------------------
+ ykman/_cli/oath.py       |  5 ++---
+ ykman/_cli/util.py       | 16 +---------------
+ yubikit/core/__init__.py | 15 ++++++---------
+ yubikit/hsmauth.py       |  5 ++++-
+ yubikit/management.py    |  8 ++++++++
+ yubikit/oath.py          |  3 ++-
+ yubikit/openpgp.py       |  3 ++-
+ yubikit/piv.py           |  5 +++--
+ yubikit/yubiotp.py       | 13 +++++++------
+ 12 files changed, 47 insertions(+), 76 deletions(-)
+
+diff --git a/tests/conftest.py b/tests/conftest.py
+index 92b853c7b..9d2ca87e9 100644
+--- a/tests/conftest.py
++++ b/tests/conftest.py
+@@ -2,4 +2,3 @@ def pytest_addoption(parser):
+     parser.addoption("--device", action="store", type=int)
+     parser.addoption("--reader", action="store")
+     parser.addoption("--no-serial", action="store_true")
+-    parser.addoption("--use-version", action="store")
+diff --git a/tests/device/conftest.py b/tests/device/conftest.py
+index 9a8b318ea..9059007f6 100644
+--- a/tests/device/conftest.py
++++ b/tests/device/conftest.py
+@@ -1,11 +1,12 @@
+ from ykman.device import list_all_devices, read_info
+ from ykman.pcsc import list_devices
+ from ykman._cli.util import find_scp11_params
+-from yubikit.core import TRANSPORT, Version, _override_version
++from yubikit.core import TRANSPORT, _override_version
+ from yubikit.core.otp import OtpConnection
+ from yubikit.core.fido import FidoConnection
+ from yubikit.core.smartcard import SmartCardConnection
+ from yubikit.core.smartcard.scp import ScpKid
++from yubikit.management import RELEASE_TYPE
+ from functools import partial
+ from . import condition
+ 
+@@ -24,13 +25,6 @@ def _device(pytestconfig):
+         else:
+             pytest.skip("No serial specified for device tests")
+ 
+-    version = None
+-    version_str = pytestconfig.getoption("use_version")
+-    if version_str:
+-        version = Version.from_string(version_str)
+-        _override_version(version)
+-        os.environ["_YK_OVERRIDE_VERSION"] = version_str
+-
+     reader = pytestconfig.getoption("reader")
+     if reader:
+         readers = list_devices(reader)
+@@ -46,8 +40,9 @@ def _device(pytestconfig):
+         dev, info = devices[0]
+     if info.serial != serial:
+         pytest.exit("Device serial does not match: %d != %r" % (serial, info.serial))
+-    if version:
+-        info.version = version
++
++    if info.version_qualifier.type != RELEASE_TYPE.FINAL:
++        _override_version(info.version)
+ 
+     return dev, info
+ 
+diff --git a/ykman/_cli/__main__.py b/ykman/_cli/__main__.py
+index c30db501e..08cc93698 100644
+--- a/ykman/_cli/__main__.py
++++ b/ykman/_cli/__main__.py
+@@ -25,7 +25,7 @@
+ # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ # POSSIBILITY OF SUCH DAMAGE.
+ 
+-from yubikit.core import ApplicationNotAvailableError, Version, _override_version
++from yubikit.core import ApplicationNotAvailableError, _override_version
+ from yubikit.core.otp import OtpConnection
+ from yubikit.core.fido import FidoConnection
+ from yubikit.core.smartcard import SmartCardConnection
+@@ -35,6 +35,7 @@
+     ScpKid,
+     KeyRef,
+ )
++from yubikit.management import RELEASE_TYPE
+ from yubikit.support import get_name, read_info
+ from yubikit.logging import LOG_LEVEL
+ 
+@@ -82,7 +83,6 @@
+ import time
+ import sys
+ import re
+-import os
+ 
+ import logging
+ 
+@@ -90,10 +90,6 @@
+ logger = logging.getLogger(__name__)
+ 
+ 
+-# Development key builds are treated as having the following version
+-_OVERRIDE_VERSION = Version.from_string(os.environ.get("_YK_OVERRIDE_VERSION", "5.7.4"))
+-
+-
+ CLICK_CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], max_content_width=999)
+ 
+ 
+@@ -406,28 +402,12 @@ def resolve():
+                 else:
+                     items = require_device(connections, device)
+ 
+-                if items[1].version.major == 0:
+-                    logger.info(
+-                        "Debug key detected, "
+-                        f"overriding version with {_OVERRIDE_VERSION}"
+-                    )
++                if items[1].version_qualifier.type != RELEASE_TYPE.FINAL:
+                     # Preview build, override version and get new DeviceInfo
+-                    _override_version(_OVERRIDE_VERSION)
+-                    info_connections = (
+-                        connections if not reader else [SmartCardConnection]
+-                    )
+-                    for c in info_connections:
+-                        if items[0].supports_connection(c):
+-                            try:
+-                                with items[0].open_connection(c) as conn:
+-                                    info = read_info(conn, items[0].pid)
+-                                items = (items[0], info)
+-                            except Exception:
+-                                logger.debug("Failed", exc_info=True)
+-                                continue
+-                            break
+-                    else:
+-                        raise CliFail("Failed to connect to YubiKey.")
++                    version_q = items[1].version_qualifier
++                    _override_version(version_q.version)
++                    logger.info(f"Debug key detected: {version_q}")
++
+                 setattr(resolve, "items", items)
+             return items
+ 
+diff --git a/ykman/_cli/oath.py b/ykman/_cli/oath.py
+index e4eaf1d6d..51d0a24e3 100644
+--- a/ykman/_cli/oath.py
++++ b/ykman/_cli/oath.py
+@@ -48,7 +48,6 @@
+     prompt_timeout,
+     EnumChoice,
+     is_yk4_fips,
+-    check_version,
+     pretty_print,
+     get_scp_params,
+ )
+@@ -570,14 +569,14 @@ def _add_cred(ctx, data, touch, force):
+     if len(data.secret) < 2:
+         raise CliFail("Secret must be at least 2 bytes.")
+ 
+-    if touch and not check_version(version, (4, 2, 6)):
++    if touch and not version >= (4, 2, 6):
+         raise CliFail("Require touch is not supported on this YubiKey.")
+ 
+     if data.counter and data.oath_type != OATH_TYPE.HOTP:
+         raise CliFail("Counter only supported for HOTP accounts.")
+ 
+     if data.hash_algorithm == HASH_ALGORITHM.SHA512 and (
+-        not check_version(version, (4, 3, 1)) or is_yk4_fips(ctx.obj["info"])
++        not version >= (4, 3, 1) or is_yk4_fips(ctx.obj["info"])
+     ):
+         raise CliFail("Algorithm SHA512 not supported on this YubiKey.")
+ 
+diff --git a/ykman/_cli/util.py b/ykman/_cli/util.py
+index aa4271718..8da4f7f07 100644
+--- a/ykman/_cli/util.py
++++ b/ykman/_cli/util.py
+@@ -26,13 +26,7 @@
+ # POSSIBILITY OF SUCH DAMAGE.
+ 
+ from ..util import parse_certificates
+-from yubikit.core import (
+-    TRANSPORT,
+-    Version,
+-    require_version,
+-    NotSupportedError,
+-    ApplicationNotAvailableError,
+-)
++from yubikit.core import TRANSPORT, ApplicationNotAvailableError
+ from yubikit.core.smartcard import SmartCardConnection, ApduError
+ from yubikit.core.smartcard.scp import ScpKid, KeyRef, ScpKeyParams, Scp11KeyParams
+ from yubikit.management import DeviceInfo, CAPABILITY
+@@ -334,14 +328,6 @@ def pretty_print(value, level: int = 0) -> Sequence[str]:
+     return lines
+ 
+ 
+-def check_version(version: Version, req: tuple[int, int, int]) -> bool:
+-    try:
+-        require_version(version, req)
+-        return True
+-    except NotSupportedError:
+-        return False
+-
+-
+ def is_yk4_fips(info: DeviceInfo) -> bool:
+     return info.version[0] == 4 and info.is_fips
+ 
+diff --git a/yubikit/core/__init__.py b/yubikit/core/__init__.py
+index 7132096ef..a53526302 100644
+--- a/yubikit/core/__init__.py
++++ b/yubikit/core/__init__.py
+@@ -238,12 +238,15 @@ class _OverrideVersion:
+     def __init__(self):
+         self._version: Optional[Version] = None
+ 
+-    def __call__(self, value):
++    def __call__(self, value: Version) -> None:
+         logger.info(f"Overriding version check for development devices with {value}")
+         self._version = value
+ 
++    def patch(self, version: Version) -> Version:
++        return version == (0, 0, 1) and _override_version._version or version
+ 
+-# Set this to override a version with major version == 0 in version checks
++
++# Set this to override development versions in version checks
+ _override_version = _OverrideVersion()
+ 
+ 
+@@ -251,13 +254,7 @@ def require_version(
+     my_version: Version, min_version: tuple[int, int, int], message=None
+ ):
+     """Ensure a version is at least min_version."""
+-    # Allow overriding version checks for development devices
+-    v = my_version[0] == 0 and _override_version._version
+-    if v:
+-        logger.debug("Overriding version check with {v}")
+-        my_version = v
+-
+-    if my_version < min_version:
++    if not my_version >= min_version:
+         if not message:
+             message = "This action requires YubiKey %d.%d.%d or later" % min_version
+         raise NotSupportedError(message)
+diff --git a/yubikit/hsmauth.py b/yubikit/hsmauth.py
+index 178b2dd68..c265be241 100644
+--- a/yubikit/hsmauth.py
++++ b/yubikit/hsmauth.py
+@@ -32,6 +32,7 @@
+     Version,
+     Tlv,
+     InvalidPinError,
++    _override_version,
+ )
+ from .core.smartcard import (
+     AID,
+@@ -227,7 +228,9 @@ def __init__(
+         scp_key_params: Optional[ScpKeyParams] = None,
+     ) -> None:
+         self.protocol = SmartCardProtocol(connection)
+-        self._version = _parse_select(self.protocol.select(AID.HSMAUTH))
++        self._version = _override_version.patch(
++            _parse_select(self.protocol.select(AID.HSMAUTH))
++        )
+ 
+         if scp_key_params:
+             self.protocol.init_scp(scp_key_params)
+diff --git a/yubikit/management.py b/yubikit/management.py
+index 5df59f79b..96836bc27 100644
+--- a/yubikit/management.py
++++ b/yubikit/management.py
+@@ -605,6 +605,11 @@ def __init__(
+             self.backend = _ManagementCtapBackend(connection)
+         else:
+             raise TypeError("Unsupported connection type")
++
++        if self.backend.version == (0, 0, 1):
++            logger.debug("Overriding development version...")
++            self.backend.version = self._do_read_device_info().version_qualifier.version
++
+         logger.debug(
+             "Management session initialized for "
+             f"connection={type(connection).__name__}, version={self.version}"
+@@ -629,6 +634,9 @@ def version(self) -> Version:
+     def read_device_info(self) -> DeviceInfo:
+         """Get detailed information about the YubiKey."""
+         require_version(self.version, (4, 1, 0))
++        return self._do_read_device_info()
++
++    def _do_read_device_info(self) -> DeviceInfo:
+         more_data = True
+         tlvs = {}
+         page = 0
+diff --git a/yubikit/oath.py b/yubikit/oath.py
+index 4f33496f9..8d3f7c55e 100644
+--- a/yubikit/oath.py
++++ b/yubikit/oath.py
+@@ -6,6 +6,7 @@
+     Tlv,
+     BadResponseError,
+     NotSupportedError,
++    _override_version,
+ )
+ from .core.smartcard import AID, SmartCardConnection, SmartCardProtocol, ScpKeyParams
+ 
+@@ -93,7 +94,7 @@ def parse_b32_key(key: str):
+ def _parse_select(response):
+     data = Tlv.parse_dict(response)
+     return (
+-        Version.from_bytes(data[TAG_VERSION]),
++        _override_version.patch(Version.from_bytes(data[TAG_VERSION])),
+         data.get(TAG_NAME),
+         data.get(TAG_CHALLENGE),
+     )
+diff --git a/yubikit/openpgp.py b/yubikit/openpgp.py
+index 880ed39d3..dc607dc31 100644
+--- a/yubikit/openpgp.py
++++ b/yubikit/openpgp.py
+@@ -33,6 +33,7 @@
+     require_version,
+     int2bytes,
+     bytes2int,
++    _override_version,
+ )
+ from .core.smartcard import (
+     SmartCardConnection,
+@@ -1027,7 +1028,7 @@ def _read_version(self) -> Version:
+         logger.debug("Getting version number")
+         try:
+             bcd = self.protocol.send_apdu(0, INS.GET_VERSION, 0, 0)
+-            return Version(*(_bcd(x) for x in bcd))
++            return _override_version.patch(Version(*(_bcd(x) for x in bcd)))
+         except ApduError as e:
+             # Pre 1.0.2 versions don't support reading the version
+             if e.sw == SW.CONDITIONS_NOT_SATISFIED:
+diff --git a/yubikit/piv.py b/yubikit/piv.py
+index f3c88b23e..b0d5f0555 100755
+--- a/yubikit/piv.py
++++ b/yubikit/piv.py
+@@ -34,6 +34,7 @@
+     NotSupportedError,
+     BadResponseError,
+     InvalidPinError,
++    _override_version,
+ )
+ from .core.smartcard import (
+     SW,
+@@ -664,8 +665,8 @@ def __init__(
+             self.protocol.init_scp(scp_key_params)
+ 
+         logger.debug("Getting PIV version")
+-        self._version = Version.from_bytes(
+-            self.protocol.send_apdu(0, INS_GET_VERSION, 0, 0)
++        self._version = _override_version.patch(
++            Version.from_bytes(self.protocol.send_apdu(0, INS_GET_VERSION, 0, 0))
+         )
+         self.protocol.configure(self.version)
+ 
+diff --git a/yubikit/yubiotp.py b/yubikit/yubiotp.py
+index ef73cbe06..906b1d2e0 100644
+--- a/yubikit/yubiotp.py
++++ b/yubikit/yubiotp.py
+@@ -32,6 +32,7 @@
+     require_version,
+     NotSupportedError,
+     BadResponseError,
++    _override_version,
+ )
+ from .core import ApplicationNotAvailableError
+ from .core.otp import (
+@@ -381,7 +382,7 @@ def __init__(self, key: bytes):
+         self._update_flags(CFGFLAG.HMAC_LT64, True)
+ 
+     def is_supported_by(self, version):
+-        return version >= (2, 2, 0) or version[0] == 0
++        return version >= (2, 2, 0)
+ 
+     def require_touch(self: Cfg, value: bool) -> Cfg:
+         self._update_flags(CFGFLAG.CHAL_BTN_TRIG, value)
+@@ -430,7 +431,7 @@ def __init__(self, key: bytes):
+         self._update_flags(CFGFLAG.OATH_FIXED_MODHEX2, True)
+ 
+     def is_supported_by(self, version):
+-        return version >= (2, 2, 0) or version[0] == 0
++        return version >= (2, 2, 0)
+ 
+     def digits8(self: Cfg, value: bool) -> Cfg:
+         self._update_flags(CFGFLAG.OATH_HOTP8, value)
+@@ -475,7 +476,7 @@ def __init__(self, scan_codes: bytes):
+         self._update_flags(CFGFLAG.SHORT_TICKET, True)
+ 
+     def is_supported_by(self, version):
+-        return version >= (2, 2, 0) or version[0] == 0
++        return version >= (2, 2, 0)
+ 
+ 
+ class YubiOtpSlotConfiguration(KeyboardSlotConfiguration):
+@@ -561,7 +562,7 @@ def __init__(self):
+         self._key = b"\0" * KEY_SIZE
+ 
+     def is_supported_by(self, version):
+-        return version >= (2, 2, 0) or version[0] == 0
++        return version >= (2, 2, 0)
+ 
+     def _update_flags(self, flag, value):
+         # NB: All EXT flags are allowed
+@@ -717,7 +718,7 @@ def __init__(
+                 raise ValueError("SCP can only be used with SmartCardConnection")
+             otp_protocol = OtpProtocol(connection)
+             self._status = otp_protocol.read_status()
+-            self._version = otp_protocol.version
++            self._version = _override_version.patch(otp_protocol.version)
+             self.backend: _Backend = _YubiOtpOtpBackend(otp_protocol)
+         elif isinstance(connection, SmartCardConnection):
+             card_protocol = SmartCardProtocol(connection)
+@@ -737,7 +738,7 @@ def __init__(
+                 # NEO reports the highest of these two
+                 self._version = max(mgmt_version, otp_version)
+             else:
+-                self._version = mgmt_version or otp_version
++                self._version = _override_version.patch(mgmt_version or otp_version)
+             card_protocol.configure(self._version)
+             if scp_key_params:
+                 card_protocol.init_scp(scp_key_params)

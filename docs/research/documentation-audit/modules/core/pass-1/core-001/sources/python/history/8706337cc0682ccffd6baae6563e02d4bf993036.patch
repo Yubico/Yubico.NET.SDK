@@ -1,0 +1,625 @@
+From 8706337cc0682ccffd6baae6563e02d4bf993036 Mon Sep 17 00:00:00 2001
+From: Dain Nilsson <dain@yubico.com>
+Date: Tue, 26 Sep 2023 14:25:17 +0200
+Subject: [PATCH] Refactor SCP03 implementation.
+
+---
+ yubikit/core/scp03.py     | 165 ++++++++++++++++++++++++++++++
+ yubikit/core/smartcard.py | 136 ++++++++++++++++++------
+ yubikit/management.py     |   5 +
+ yubikit/piv.py            |   3 +
+ yubikit/scp03.py          | 210 --------------------------------------
+ 5 files changed, 279 insertions(+), 240 deletions(-)
+ create mode 100644 yubikit/core/scp03.py
+ delete mode 100644 yubikit/scp03.py
+
+diff --git a/yubikit/core/scp03.py b/yubikit/core/scp03.py
+new file mode 100644
+index 000000000..1bc565fb0
+--- /dev/null
++++ b/yubikit/core/scp03.py
+@@ -0,0 +1,165 @@
++# Copyright (c) 2023 Yubico AB
++# All rights reserved.
++#
++#   Redistribution and use in source and binary forms, with or
++#   without modification, are permitted provided that the following
++#   conditions are met:
++#
++#    1. Redistributions of source code must retain the above copyright
++#       notice, this list of conditions and the following disclaimer.
++#    2. Redistributions in binary form must reproduce the above
++#       copyright notice, this list of conditions and the following
++#       disclaimer in the documentation and/or other materials provided
++#       with the distribution.
++#
++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
++# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
++# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
++# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++# POSSIBILITY OF SUCH DAMAGE.
++
++from . import BadResponseError
++from cryptography.hazmat.backends import default_backend
++from cryptography.hazmat.primitives import cmac, constant_time
++from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
++from typing import NamedTuple, Tuple
++
++import struct
++
++
++_DEFAULT_KEY = b"\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f"
++
++_KEY_ENC = 0x04
++_KEY_MAC = 0x06
++_KEY_RMAC = 0x07
++_CARD_CRYPTOGRAM = 0x00
++_HOST_CRYPTOGRAM = 0x01
++
++
++def _derive(key: bytes, t: int, context: bytes, L: int = 0x80) -> bytes:
++    # this only supports aes128
++    if L != 0x80 and L != 0x40:
++        raise ValueError("L must be 0x40 or 0x80")
++
++    i = b"\0" * 11 + struct.pack("!BBHB", t, 0, L, 1) + context
++
++    c = cmac.CMAC(algorithms.AES(key), backend=default_backend())
++    c.update(i)
++    return c.finalize()[: L // 8]
++
++
++def _calculate_mac(key: bytes, chain: bytes, message: bytes) -> Tuple[bytes, bytes]:
++    c = cmac.CMAC(algorithms.AES(key), backend=default_backend())
++    c.update(chain)
++    c.update(message)
++    chain = c.finalize()
++    return chain, chain[:8]
++
++
++def _init_cipher(key: bytes, counter: int, response=False) -> Cipher:
++    encryptor = Cipher(
++        algorithms.AES(key), modes.ECB(), backend=default_backend()  # nosec ECB
++    ).encryptor()
++    iv_data = (b"\x80" if response else b"\x00") + int.to_bytes(counter, 15, "big")
++    iv = encryptor.update(iv_data) + encryptor.finalize()
++    return Cipher(
++        algorithms.AES(key),
++        modes.CBC(iv),
++        backend=default_backend(),
++    )
++
++
++class SessionKeys(NamedTuple):
++    """SCP03 Session Keys."""
++
++    key_senc: bytes
++    key_smac: bytes
++    key_srmac: bytes
++
++
++class StaticKeys(NamedTuple):
++    """SCP03 Static Keys."""
++
++    key_enc: bytes
++    key_mac: bytes
++    key_dek: bytes
++
++    @classmethod
++    def default(cls) -> "StaticKeys":
++        return cls(_DEFAULT_KEY, _DEFAULT_KEY, _DEFAULT_KEY)
++
++    def derive(self, context: bytes) -> SessionKeys:
++        return SessionKeys(
++            _derive(self.key_enc, _KEY_ENC, context),
++            _derive(self.key_mac, _KEY_MAC, context),
++            _derive(self.key_mac, _KEY_RMAC, context),
++        )
++
++
++class Scp03State:
++    def __init__(
++        self,
++        session_keys: SessionKeys,
++        mac_chain: bytes = b"\0" * 16,
++        enc_counter: int = 1,
++    ):
++        self._keys = session_keys
++        self._mac_chain = mac_chain
++        self._enc_counter = enc_counter
++
++    def generate_host_cryptogram(self, context: bytes, card_cryptogram: bytes) -> bytes:
++        gen_card_crypto = _derive(self._keys.key_smac, _CARD_CRYPTOGRAM, context, 0x40)
++        if not constant_time.bytes_eq(gen_card_crypto, card_cryptogram):
++            raise BadResponseError("Wrong card cryptogram")
++
++        return _derive(self._keys.key_smac, _HOST_CRYPTOGRAM, context, 0x40)
++
++    def encrypt(self, data: bytes) -> bytes:
++        # Pad the data
++        msg = data
++        padlen = 15 - len(msg) % 16
++        msg += b"\x80"
++        msg = msg.ljust(len(msg) + padlen, b"\0")
++
++        # Encrypt
++        cipher = _init_cipher(self._keys.key_senc, self._enc_counter)
++        encryptor = cipher.encryptor()
++        encrypted = encryptor.update(msg) + encryptor.finalize()
++        self._enc_counter += 1
++        return encrypted
++
++    def mac(self, data: bytes, update: bool = True) -> bytes:
++        next_mac_chain, mac = _calculate_mac(self._keys.key_smac, self._mac_chain, data)
++        if update:
++            self._mac_chain = next_mac_chain
++        return mac
++
++    def unmac(self, data: bytes, sw: int) -> bytes:
++        msg, mac = data[:-8], data[-8:]
++        rmac = _calculate_mac(
++            self._keys.key_srmac, self._mac_chain, msg + struct.pack("!H", sw)
++        )[1]
++        if not constant_time.bytes_eq(mac, rmac):
++            raise BadResponseError("Wrong MAC")
++        return msg
++
++    def decrypt(self, encrypted: bytes) -> bytes:
++        # Decrypt
++        cipher = _init_cipher(self._keys.key_senc, self._enc_counter - 1, True)
++        decryptor = cipher.decryptor()
++        decrypted = decryptor.update(encrypted) + decryptor.finalize()
++
++        # Unpad
++        unpadded = decrypted.rstrip(b"\x00")
++        if unpadded[-1] != 0x80:
++            raise BadResponseError("Wrong padding")
++        unpadded = unpadded[:-1]
++
++        return unpadded
+diff --git a/yubikit/core/smartcard.py b/yubikit/core/smartcard.py
+index 7df4ee77d..eb76db164 100644
+--- a/yubikit/core/smartcard.py
++++ b/yubikit/core/smartcard.py
+@@ -33,9 +33,11 @@
+     CommandError,
+     ApplicationNotAvailableError,
+ )
++from .scp03 import Scp03State, SessionKeys, StaticKeys
+ from time import time
+ from enum import Enum, IntEnum, unique
+-from typing import Tuple
++from typing import Tuple, Union, Optional
++import os
+ import abc
+ import struct
+ import logging
+@@ -148,6 +150,7 @@ def __init__(
+         self._ins_send_remaining = ins_send_remaining
+         self._touch_workaround = False
+         self._last_long_resp = 0.0
++        self._scp03: Optional[Scp03State] = None
+ 
+     def close(self) -> None:
+         self.connection.close()
+@@ -158,25 +161,15 @@ def enable_touch_workaround(self, version: Version) -> None:
+         )
+         logger.debug(f"Touch workaround enabled={self._touch_workaround}")
+ 
+-    def select(self, aid: bytes) -> bytes:
+-        """Perform a SELECT instruction.
+-
+-        :param aid: The YubiKey application AID value.
+-        """
+-        try:
+-            return self.send_apdu(0, INS_SELECT, P1_SELECT, P2_SELECT, aid)
+-        except ApduError as e:
+-            if e.sw in (
+-                SW.FILE_NOT_FOUND,
+-                SW.APPLET_SELECT_FAILED,
+-                SW.INVALID_INSTRUCTION,
+-                SW.WRONG_PARAMETERS_P1P2,
+-            ):
+-                raise ApplicationNotAvailableError()
+-            raise
+-
+     def send_apdu(
+-        self, cla: int, ins: int, p1: int, p2: int, data: bytes = b"", le: int = 0
++        self,
++        cla: int,
++        ins: int,
++        p1: int,
++        p2: int,
++        data: bytes = b"",
++        le: int = 0,
++        encrypt: bool = True,
+     ) -> bytes:
+         """Send APDU message.
+ 
+@@ -199,25 +192,43 @@ def send_apdu(
+             )  # Dummy APDU, returns error
+             self._last_long_resp = 0
+ 
++        if self._scp03:
++            cla |= 0x04
++            if encrypt:
++                data = self._scp03.encrypt(data)
++
++            # Calculate and add MAC to data
++            if (
++                self.apdu_format is ApduFormat.SHORT
++                and len(data) <= SHORT_APDU_MAX_CHUNK
++            ):
++                # No chunking, just send short
++                apdu = _encode_short_apdu(cla, ins, p1, p2, data + b"\0" * 8, le)
++                mac = self._scp03.mac(apdu[:-8])
++                data = data + mac
++            else:
++                apdu = _encode_extended_apdu(cla, ins, p1, p2, data + b"\0" * 8, le)
++                mac = self._scp03.mac(apdu[:-8])
++                data = data + mac
++
+         if self.apdu_format is ApduFormat.SHORT:
+             while len(data) > SHORT_APDU_MAX_CHUNK:
+-                chunk, data = data[:SHORT_APDU_MAX_CHUNK], data[SHORT_APDU_MAX_CHUNK:]
+-                response, sw = self.connection.send_and_receive(
+-                    _encode_short_apdu(0x10 | cla, ins, p1, p2, chunk, le)
++                chunk, data = (
++                    data[:SHORT_APDU_MAX_CHUNK],
++                    data[SHORT_APDU_MAX_CHUNK:],
+                 )
++                apdu = _encode_short_apdu(0x10 | cla, ins, p1, p2, chunk, le)
++                response, sw = self.connection.send_and_receive(apdu)
+                 if sw != SW.OK:
+                     raise ApduError(response, sw)
+-            response, sw = self.connection.send_and_receive(
+-                _encode_short_apdu(cla, ins, p1, p2, data, le)
+-            )
++            apdu = _encode_short_apdu(cla, ins, p1, p2, data, le)
+             get_data = _encode_short_apdu(0, self._ins_send_remaining, 0, 0, b"")
+         elif self.apdu_format is ApduFormat.EXTENDED:
+-            response, sw = self.connection.send_and_receive(
+-                _encode_extended_apdu(cla, ins, p1, p2, data, le)
+-            )
++            apdu = _encode_extended_apdu(cla, ins, p1, p2, data, le)
+             get_data = _encode_extended_apdu(0, self._ins_send_remaining, 0, 0, b"")
+         else:
+             raise TypeError("Invalid ApduFormat set")
++        response, sw = self.connection.send_and_receive(apdu)
+ 
+         # Read chained response
+         buf = b""
+@@ -225,13 +236,78 @@ def send_apdu(
+             buf += response
+             response, sw = self.connection.send_and_receive(get_data)
+ 
+-        if sw != SW.OK:
+-            raise ApduError(response, sw)
+         buf += response
+ 
++        if self._scp03 and buf:
++            buf = self._scp03.unmac(buf, sw)
++            if buf:
++                buf = self._scp03.decrypt(buf)
++
++        if sw != SW.OK:
++            raise ApduError(buf, sw)
++
+         if self._touch_workaround and len(buf) > 54:
+             self._last_long_resp = time()
+         else:
+             self._last_long_resp = 0
+ 
+         return buf
++
++    def select(self, aid: bytes) -> bytes:
++        """Perform a SELECT instruction.
++
++        :param aid: The YubiKey application AID value.
++        """
++        try:
++            self._scp03 = None
++            return self.send_apdu(0, INS_SELECT, P1_SELECT, P2_SELECT, aid)
++        except ApduError as e:
++            if e.sw in (
++                SW.FILE_NOT_FOUND,
++                SW.APPLET_SELECT_FAILED,
++                SW.INVALID_INSTRUCTION,
++                SW.WRONG_PARAMETERS_P1P2,
++            ):
++                raise ApplicationNotAvailableError()
++            raise
++
++    def init_scp03(self, host_challenge: Optional[bytes] = None) -> "Scp03Handshake":
++        self._scp03 = None
++        return Scp03Handshake(self, host_challenge or os.urandom(8))
++
++    def _set_scp03_state(self, state: Scp03State) -> None:
++        self._scp03 = state
++
++
++class Scp03Handshake:
++    def __init__(self, protocol: SmartCardProtocol, host_challenge: bytes):
++        self._protocol = protocol
++        self._host_challenge = host_challenge
++
++        resp = protocol.send_apdu(0x80, 0x50, 0, 0, self._host_challenge)
++        self._diversification_data = resp[:10]
++        self._key_info = resp[10:13]
++        self._card_challenge = resp[13:21]
++        self._card_cryptogram = resp[21:29]
++
++    @property
++    def diversification_data(self):
++        return self._diversification_data
++
++    @property
++    def key_info(self):
++        return self._key_info
++
++    def authenticate(self, keys: Union[StaticKeys, SessionKeys]) -> None:
++        context = self._host_challenge + self._card_challenge
++
++        if isinstance(keys, StaticKeys):
++            session_keys = keys.derive(context)
++        else:
++            session_keys = keys
++
++        state = Scp03State(session_keys)
++        host_cryptogram = state.generate_host_cryptogram(context, self._card_cryptogram)
++
++        self._protocol._set_scp03_state(state)
++        self._protocol.send_apdu(0x84, 0x82, 0x33, 0, host_cryptogram, encrypt=False)
+diff --git a/yubikit/management.py b/yubikit/management.py
+index 6dd4c00ad..ab46790de 100644
+--- a/yubikit/management.py
++++ b/yubikit/management.py
+@@ -529,6 +529,11 @@ def close(self) -> None:
+     def version(self) -> Version:
+         return self.backend.version
+ 
++    def init_scp03(self):
++        backend = self.backend
++        if isinstance(backend, _ManagementSmartCardBackend):
++            return backend.protocol.init_scp03()
++
+     def read_device_info(self) -> DeviceInfo:
+         """Get detailed information about the YubiKey."""
+         require_version(self.version, (4, 1, 0))
+diff --git a/yubikit/piv.py b/yubikit/piv.py
+index d9d25050e..d80d410ed 100755
+--- a/yubikit/piv.py
++++ b/yubikit/piv.py
+@@ -514,6 +514,9 @@ def __init__(self, connection: SmartCardConnection):
+     def version(self) -> Version:
+         return self._version
+ 
++    def init_scp03(self):
++        return self.protocol.init_scp03()
++
+     def reset(self) -> None:
+         logger.debug("Preparing PIV reset")
+ 
+diff --git a/yubikit/scp03.py b/yubikit/scp03.py
+deleted file mode 100644
+index bb32fed00..000000000
+--- a/yubikit/scp03.py
++++ /dev/null
+@@ -1,210 +0,0 @@
+-# Copyright (c) 2023 Yubico AB
+-# All rights reserved.
+-#
+-#   Redistribution and use in source and binary forms, with or
+-#   without modification, are permitted provided that the following
+-#   conditions are met:
+-#
+-#    1. Redistributions of source code must retain the above copyright
+-#       notice, this list of conditions and the following disclaimer.
+-#    2. Redistributions in binary form must reproduce the above
+-#       copyright notice, this list of conditions and the following
+-#       disclaimer in the documentation and/or other materials provided
+-#       with the distribution.
+-#
+-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+-# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+-# POSSIBILITY OF SUCH DAMAGE.
+-
+-from .core import TRANSPORT
+-from .core.smartcard import SmartCardConnection, SmartCardProtocol
+-
+-from cryptography.hazmat.backends import default_backend
+-from cryptography.hazmat.primitives import cmac, constant_time
+-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+-from typing import NamedTuple, Tuple, Optional
+-
+-import struct
+-import os
+-
+-
+-_DEFAULT_KEY = b"\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f"
+-
+-_KEY_ENC = 0x04
+-_KEY_MAC = 0x06
+-_KEY_RMAC = 0x07
+-_CARD_CRYPTOGRAM = 0x00
+-_HOST_CRYPTOGRAM = 0x01
+-
+-
+-def _derive(key: bytes, t: int, context: bytes, L: int = 0x80) -> bytes:
+-    # this only supports aes128
+-    if L != 0x80 and L != 0x40:
+-        raise ValueError("L must be 0x40 or 0x80")
+-
+-    i = b"\0" * 11 + struct.pack("!BBHB", t, 0, L, 1) + context
+-
+-    c = cmac.CMAC(algorithms.AES(key), backend=default_backend())
+-    c.update(i)
+-    return c.finalize()[: L // 8]
+-
+-
+-def _calculate_mac(key: bytes, chain: bytes, message: bytes) -> Tuple[bytes, bytes]:
+-    c = cmac.CMAC(algorithms.AES(key), backend=default_backend())
+-    c.update(chain)
+-    c.update(message)
+-    chain = c.finalize()
+-    return chain, chain[:8]
+-
+-
+-class StaticKeys(NamedTuple):
+-    """SCP03 Static Keys."""
+-
+-    key_enc: bytes
+-    key_mac: bytes
+-    key_dek: bytes
+-
+-    @classmethod
+-    def default(cls) -> "StaticKeys":
+-        return cls(_DEFAULT_KEY, _DEFAULT_KEY, _DEFAULT_KEY)
+-
+-
+-class SessionKeys(NamedTuple):
+-    """SCP03 Session Keys."""
+-
+-    key_senc: bytes
+-    key_smac: bytes
+-    key_srmac: bytes
+-
+-
+-class Scp03Session:
+-    def __init__(
+-        self,
+-        connection: SmartCardConnection,
+-        session_keys: SessionKeys,
+-        mac_chain: bytes,
+-    ):
+-        self._connection = connection
+-        self._keys = session_keys
+-        self._mac_chain = mac_chain
+-        self._enc_counter = 1
+-
+-    @classmethod
+-    def init_session(
+-        cls, connection: SmartCardConnection, static_keys: StaticKeys
+-    ) -> "Scp03Session":
+-        protocol = SmartCardProtocol(connection)
+-
+-        host_challenge = os.urandom(8)
+-        resp = protocol.send_apdu(0x80, 0x50, 0, 0, host_challenge)
+-        # diversification_data = resp[:10]
+-        # key_info = resp[10:13]
+-        card_challenge = resp[13:21]
+-        card_cryptogram = resp[21:29]
+-
+-        context = host_challenge + card_challenge
+-
+-        session_keys = SessionKeys(
+-            _derive(static_keys.key_enc, _KEY_ENC, context),
+-            _derive(static_keys.key_mac, _KEY_MAC, context),
+-            _derive(static_keys.key_mac, _KEY_RMAC, context),
+-        )
+-
+-        gen_card_crypto = _derive(
+-            session_keys.key_smac, _CARD_CRYPTOGRAM, context, 0x40
+-        )
+-        if not constant_time.bytes_eq(gen_card_crypto, card_cryptogram):
+-            raise Exception("Wrong card cryptogram")  # TODO
+-
+-        host_cryptogram = _derive(
+-            session_keys.key_smac, _HOST_CRYPTOGRAM, context, 0x40
+-        )
+-
+-        msg = (
+-            struct.pack("!BBBBB", 0x84, 0x82, 0x33, 0, len(host_cryptogram) + 8)
+-            + host_cryptogram
+-        )
+-        mac_chain, mac = _calculate_mac(session_keys.key_smac, b"\0" * 16, msg)
+-        protocol.send_apdu(0x84, 0x82, 0x33, 0, host_cryptogram + mac)
+-
+-        return cls(connection, session_keys, mac_chain)
+-
+-    def send_and_receive(self, apdu: bytes) -> Tuple[bytes, int]:
+-        cla, ins, p1, p2 = apdu[:4]
+-
+-        key = algorithms.AES(self._keys.key_senc)
+-        cipher = Cipher(key, modes.ECB(), backend=default_backend())  # nosec ECB
+-        counter = int.to_bytes(self._enc_counter, 15, "big")
+-        encryptor = cipher.encryptor()
+-        iv_send = encryptor.update(b"\x00" + counter) + encryptor.finalize()
+-        encryptor = cipher.encryptor()
+-        iv_recv = encryptor.update(b"\x80" + counter) + encryptor.finalize()
+-
+-        # TODO: Handle extended APDUs?
+-        msg = apdu[5:]
+-        padlen = 15 - len(msg) % 16
+-        msg += b"\x80"
+-        msg = msg.ljust(len(msg) + padlen, b"\0")
+-
+-        cipher = Cipher(key, modes.CBC(iv_send), backend=default_backend())
+-        encryptor = cipher.encryptor()
+-        encrypted = encryptor.update(msg) + encryptor.finalize()
+-
+-        wrapped = bytes([0x84 | cla, ins, p1, p2, len(encrypted) + 8]) + encrypted
+-        next_mac_chain, mac = _calculate_mac(
+-            self._keys.key_smac, self._mac_chain, wrapped
+-        )
+-        wrapped += mac
+-
+-        resp, sw = self._connection.send_and_receive(wrapped)
+-        data, mac = resp[:-8], resp[-8:]
+-        rmac = _calculate_mac(
+-            self._keys.key_srmac, next_mac_chain, data + struct.pack("!H", sw)
+-        )[1]
+-        if not constant_time.bytes_eq(mac, rmac):
+-            raise Exception("Wrong MAC")  # TODO
+-
+-        cipher = Cipher(key, modes.CBC(iv_recv), backend=default_backend())
+-        decryptor = cipher.decryptor()
+-        decrypted = decryptor.update(data) + decryptor.finalize()
+-        decrypted = decrypted.rstrip(b"\x00")[:-1]
+-
+-        self._enc_counter += 1
+-        self._mac_chain = next_mac_chain
+-
+-        return decrypted, sw
+-
+-
+-class Scp03Connection(SmartCardConnection):
+-    def __init__(
+-        self,
+-        connection: SmartCardConnection,
+-        static_keys: StaticKeys,
+-    ):
+-        self._connection = connection
+-        self._keys = static_keys
+-        self._session: Optional[Scp03Session] = None
+-
+-    @property
+-    def transport(self) -> TRANSPORT:
+-        return self._connection.transport
+-
+-    def send_and_receive(self, apdu: bytes) -> Tuple[bytes, int]:
+-        # If a new AID is selected, perform the session initialization
+-        if apdu[:4] == b"\x00\xa4\x04\x00":
+-            resp = self._connection.send_and_receive(apdu)
+-            self._session = Scp03Session.init_session(self._connection, self._keys)
+-            return resp
+-
+-        if self._session:
+-            return self._session.send_and_receive(apdu)
+-        raise Exception("No SCP03 session established")

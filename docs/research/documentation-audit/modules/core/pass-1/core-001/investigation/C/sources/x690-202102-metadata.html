@@ -1,0 +1,178 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<meta http-equiv="Content-Language" content="en">
+<meta name="keywords" content="X.690,X690,ITU-T Recommendations,ITU-T,recommendation,ITU">
+<meta name="author" content="tsbmail">
+<link href="/net/res/templates/v1.0/css/itu_new.css" rel="stylesheet" type="text/css">
+<title>X.690 : Information technology - ASN.1 encoding rules: Specification of Basic Encoding Rules (BER), Canonical Encoding Rules (CER) and Distinguished Encoding Rules (DER)</title>
+<meta http-equiv="Cache-Control" CONTENT="no cache">
+<meta http-equiv="Expires" CONTENT="Tue, 01 may 2000 17:00:00 GMT"><script language="JavaScript" type="text/javascript">
+							var lang_version = null;
+						</script><script language="JavaScript" src="/res/templates/v1.0/js/cssversion.js"></script><script language="JavaScript" src="/res/templates/v4.0/js/menutable.js"></script><script Language="JavaScript1.2" src="/res/templates/v4.0/js/HM_Loader.js" type="text/javascript"></script></head>
+<body bgcolor="#FFFFFF" text="#000000" link="#000066" vlink="#0099FF" alink="#0099FF" style="margin: 0px"><span id="xawmMenuPathImg-itu_en" style="position:relative;"><img id="awmMenuPathImg-itu_en" src="/net/res/templates/menus/awmmenupath.gif" alt=""></span><script type="text/javascript">var MenuLinkedBy='AllWebMenus [4]', awmBN='624'; awmAltUrl='';</script><script charset="UTF-8" src="/net/res/templates/menus/itu_en.js" language="JavaScript1.2" type="text/javascript"></script><script type="text/javascript">awmBuildMenu();</script><div><a name="top"></a><table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr style="background-color: #004B96;">
+<td style="padding-left: 5pt;"><a href="/net/home/index.aspx"><img src="/net/res/templates/images/logos/ITU-official-logo_75.gif" border="0" width="190" height="75" alt="International Telecommunication Union"></a></td>
+<td style="padding-right: 5pt; padding-left: 5pt;" width="190"> </td>
+<td valign="top" style="width: 100%;"><img src="/net/res/templates/images/top_images/top.jpg" border="0" Height="75" Width="300" alt="ITU"></td>
+<td style="background-color: #004B96; color: white; font-size: 8pt; padding-top: 5pt; padding-right: 10pt; text-align: right;" valign="top">
+<table border="0" cellpadding="0" cellspacing="0" align="right" style="background-color: #004B96;">
+<tr>
+<td style="font-weight: bold; background-color: #004B96; font-family: arial; color: white; white-space: nowrap;"><small><a href="./recommendation.asp?lang=fr&amp;parent=T-REC-X.690-202102-I" class="topritems" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace"><font color="white">Français</font></a> 
+				<a href="./recommendation.asp?lang=es&amp;parent=T-REC-X.690-202102-I" class="topritems" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace"><font color="white">Español</font></a></small></td>
+</tr>
+<tr><td style="margin: 0px; font-size: 5pt;"> </td></tr>
+<tr>
+<td>
+<table border="0" cellpadding="0" cellspacing="0" align="right">
+<tr>
+<td style="border-right: white 1px solid; padding-right: 5pt;"><a href="/home/sitemap.html" class="topritems"><img src="/res/templates/v4.0/images/misc/site-map.gif" border="0" width="19" height="17" alt="Site map" ToolTip="Site map"></a></td>
+<td style="border-right: white 1px solid; padding-left: 5pt; padding-right: 5pt;"><a href="/net/about/contact.aspx" class="topritems"><img src="/res/templates/v4.0/images/misc/contact-us.gif" border="0" width="19" height="17" alt="Contact us" ToolTip="Contact us"></a></td>
+<td style="padding-left: 5pt;"><a href="_page.print" class="topritems"><img src="/res/templates/v4.0/images/misc/printer.gif" border="0" width="19" height="17" alt="Print version" ToolTip="Print version"></a></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td colspan="2"> </td>
+<td style="font-size: 9pt;" valign="middle"><a href="/index.html" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">Home</a>
+		: <a href="/ITU-T/index.html" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">ITU-T</a> 
+		: <a href="/publications/sector.aspx?sector=2&amp;lang=e" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">Publications</a>
+		: <a href="./recommendation.asp?lang=en&amp;parent=T-REC" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">Recommendations</a>
+			  : <a href="./recommendation.asp?lang=en&amp;parent=T-REC-X" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">X Series</a>
+		: <a href="./recommendation.asp?lang=en&amp;parent=T-REC-X.690" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">X.690</a>
+		: X.690 (02/21)</td>
+<td style="color: #004B96; white-space: nowrap; text-align: right; padding: 5pt;">
+<form name="Qform" action="https://www.itu.int/search/index.asp" method="get"><input type="text" name="SearchString" size="13" class="formdisplay"><input type="submit" value="Search" name="SearchAction" class="formdisplay"><input type="hidden" name="Action" value="Search"><input type="hidden" name="pagelanguage" value="en"></form><a href="/rec/new.asp?lang=en">Recently posted</a> - 
+            <a href="https://www.itu.int/search" target="_blank">Search Recommendations</a></td>
+</tr>
+<tr valign="top">
+<td colspan="2" style="background-color: #CFDEF3; border-right: #004B96 1px solid; border-bottom: #004B96 1px solid; border-top: #004B96 1px solid; text-align: center; font-family: verdana; font-size: 10pt; font-weight: bold; color: #004B96; padding: 3pt; "> </td>
+<td colspan="3" style="background-color:#004B96; height: 22pt; padding-left: 5pt;"><span id="awmAnchor-itu_en"> </span></td>
+</tr>
+<tr valign="top"><td colspan="5" style="width: 100%; padding: 10pt 5pt 5pt 5pt; background-color: #FFFFFF; border-bottom: #004B96 1px solid; text-align: left; font-family: verdana; font-size: 10pt; font-weight: bold; color: #004B96; padding: 3pt; "><strong>X.690 : Information technology - ASN.1 encoding rules: Specification of Basic Encoding Rules (BER), Canonical Encoding Rules (CER) and Distinguished Encoding Rules (DER)</strong>					
+							 <a href="https://www.itu.int/en/ITU-R/study-groups/rsg3/rwp3m/Pages/recp1144tables.aspx" target="_blank"></a></td>
+</tr>
+<tr valign="top">
+<td colspan="5" style="height: 350pt; width: 100%; padding: 10pt 5pt 5pt 5pt; border-bottom: #004B96 1px solid;">
+<table border="0" width="100%" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">
+<tr><td width="40%">
+<table border="0">
+<tr>
+<td style="font-size: 9pt;">
+<p><strong>Recommendation X.690 (02/21)</strong></p>
+</td>
+</tr>
+<tr>
+<td style="font-size: 9pt;">
+<p>Approved in 2021-02-13</p>
+</td>
+</tr>
+<tr>
+<td style="font-size: 9pt;"><p>Status :  In force </p>
+</td>
+</tr>
+</table>
+</td>
+<td width="60%" valign="top">
+<table border="0" width="100%">
+<tr>
+<td colspan="2" style="font-size: 9pt;color: red;">
+<p>The zip file containing the Word versions of Rec. ITU-T X.680 (2021) | ISO/IEC 8824-1:2021 to Rec. ITU-T X.693 (2021) | ISO/IEC 8825-4:2021 can be found at http://www.itu.int/rec/T-REC-X.680-X.693-202102-I/en</p>
+</td>
+</tr>
+<tr><td colspan="2"></td></tr>
+</table>
+</td>
+</tr>
+</table>
+<hr xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">
+<table border="0" width="100%" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">
+<tr>
+<td colspan="2" style="font-size: 11pt;"><p><strong>Access : Freely available items</strong></p>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="font-size: 10pt;">
+<p>Available languages and formats :</p>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0">
+<tr>
+<td>  </td>
+<td colspan="2">
+<table><tr>
+<td align="left"><img border="0" src="/res/templates/dms/images/arrow_down.gif" width="24" height="24" alt="Click on the Item"></td>
+<td vAlign="top"><p align="left"><strong><font color="#000080" size="1">Click on the selected format <br> and language to get the document </font></strong></p></td>
+</tr>
+</table>
+</td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td vAlign="top"></td>
+<td vAlign="top" width="130"><strong><font size="1" color="#000000">Format </font></strong></td>
+<td vAlign="top" width="100"><strong><font size="1" color="#000000">Size </font></strong></td>
+<td vAlign="top" width="40"><strong><font size="1" color="#000000">Posted </font></strong></td>
+<td vAlign="top" width="80"><strong><font size="1" color="#000000">Article Number </font></strong></td>
+</tr>
+<tr style="height: 1pt;">
+<td align="right" style="height: 1pt;"></td>
+<td align="right" bgColor="black" style="height: 1pt;" colspan="6"></td>
+</tr>
+<tr>
+<td align="middle" vAlign="middle"><strong><font size="1" color="#000000">English </font></strong></td>
+<td bgColor="#FFFF80" width="130">
+<p><a href="https://www.itu.int/rec/dologin_pub.asp?lang=e&amp;id=T-REC-X.690-202102-I!!PDF-E&amp;type=items"><img border="0" src="/res/templates/dms/images/pdf.gif" align="middle" width="16" height="16" alt="PDF Document"><strong><font size="1"> PDF (acrobat) </font></strong></a></p>
+</td>
+<td align="right" bgColor="#FFFFCC" width="100"><strong><font size="1" color="#000080">840764 bytes </font></strong></td>
+<td align="center" bgColor="#FFFFCC" width="70"><strong><font size="1" color="#000080">2021-04-27</font></strong></td>
+<td align="center" bgColor="#FFFFCC" width="70"><strong><font size="1" color="#000080">E 44386 </font></strong></td>
+</tr>
+<tr style="height: 1pt;">
+<td align="right" style="height: 1pt;"></td>
+<td align="right" bgColor="black" style="height: 1pt;" colspan="4"></td>
+</tr>
+</table>
+<hr>
+</td>
+</tr>
+</table>
+<hr xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:user="http://mycompany.com/mynamespace">
+</td>
+</tr>
+</table>
+<p class="paraSmall"> </p>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr valign="top">
+<td align="right" class="footeritems"><a href="#top" class="footeritems">Top</a> - 
+					<a href="/home/feedback/index.phtml" class="footeritems">Feedback</a> - 
+					<a href="/home/contact/index.html" class="footeritems">Contact us</a> - 
+					<a href="/home/copyright/index.html" class="footeritems">Copyright © ITU</a> 2008 All Rights Reserved<br>Contact for this page : 
+					<a href="/home/feedback/index.phtml?mail=tsbmail" class="footeritems">ITU-T Publications</a><br>Updated : 2021-05-18</td>
+<td> </td>
+</tr>
+</table>
+</div><script language="javascript" src="/js/webtrends.js" type="text/javascript"></script><script language="javascript" type="text/javascript">
+				//
+				var _tag=new WebTrends();
+				_tag.dcsGetId();
+				//</script><script language="javascript" type="text/javascript">
+				//
+				_tag.dcsCustom=function(){
+				// Add custom parameters here.
+				//_tag.DCSext.param_name=param_value;
+				}
+				_tag.dcsCollect();
+				//</script><noscript>
+<div><img alt="DCSIMG" id="DCSIMG" width="1" height="1" src="//sdc.itu.int/dcsxwo60zspjo5dshtr0ytqo3_9q8g/njs.gif?dcsuri=/nojavascript&amp;WT.js=No&amp;WT.tv=9.4.0&amp;dcssip=www.itu.int"></div>
+</noscript>
+</body>
+</html>

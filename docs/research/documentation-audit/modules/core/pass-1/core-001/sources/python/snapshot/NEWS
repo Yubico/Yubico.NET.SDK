@@ -1,0 +1,408 @@
+* Version 5.9.2 (released 2026-06-30)
+ ** CLI: Fix YubiKey 4 FIPS CLI PIN commands for FIDO
+ ** Windows and MacOS installers built with Python 3.14.6
+
+* Version 5.9.1 (released 2026-04-15)
+ ** Restrict DLL search paths (YSA-2026-01).
+ ** Improve device information when listing YubiKeys with no serial number visible over OTP.
+ ** Windows and MacOS installers built with Python 3.14.4
+
+* Version 5.9.0 (released 2026-01-22)
+ ** OATH: Add support for importing credentials from PSKC files.
+ ** OATH: Add --generate flag to "oath accounts add" command to generate random secrets.
+ ** CLI: Include attached devices in error output when device selection fails.
+ ** PIV: Add support for decompressing certificates using CXF.
+ ** PIV: Correct display of PIN attempts remaining when >= 15.
+ ** PIV: Deprecate ykman.piv.parse_rfc4514_string. Use from_rfc4514_string from cryptography instead.
+ ** OpenPGP: Improve error handling for YubiKey NEO.
+ ** HSM Auth: Add "hsmauth credentials change-password" command.
+ ** Bugfix: Fix error handling in "apdu" command.
+ ** Dependency: Add python-pskc library for PSKC support.
+ ** Windows and MacOS installers built with Python 3.14.2
+
+* Version 5.8.0 (released 2025-09-03)
+ ** Python 3.10 or later is now required.
+ ** CLI: The "otp settings" command now supports --serial-usb-visible.
+ ** CLI: List PIV "retired" key slots after normal slots.
+ ** CLI: Add --no-update-chuid to "piv certificate" commands.
+ ** CLI: Improve "fido" command error handing when FIDO2 is disabled/missing.
+ ** CLI: Support "fido reset" when multiple keys are connected.
+ ** Windows CLI: Fix issue with command line arguments starting with "~".
+ ** Add "YkmanDevice.reinsert" method to simplify reconnecting a YubiKey.
+ ** PIV: Add "PivSession.get_serial" method.
+ ** Building the project now uses uv.
+ ** Windows and MacOS installers built with Python 3.13.7
+
+* Version 5.7.2 (released 2025-06-09)
+  This is a Windows-only patch release.
+ ** FIDO reset over NFC on Windows fixed.
+ ** Windows installer built with Python 3.13.4
+
+* Version 5.7.1 (released 2025-06-09)
+ ** Bugfix: Fix OTP connections for YubiKeys with all other USB interfaces deactivated.
+ ** Windows and MacOS installers built with Python 3.13.4
+
+* Version 5.7.0 (released 2025-05-28)
+ ** Python 3.9 or later is now required.
+ ** PIV: Improve error handling for the Printed data slot.
+ ** PIV: Improve error handling when decompressing malformed certificates.
+ ** Fix incompatibility with pyscard 2.2.2.
+ ** Improve compatibility with NFC readers that don't support extended APDUs.
+ ** Building the project now requires Poetry version 2.0 or later.
+ ** Windows and MacOS installers built with Python 3.13.3
+
+* Version 5.6.1 (released 2025-03-18)
+ ** Fix: Version 5.6.0 uses Exclusive smart card connections, which caused connections
+    to fail if another application was accessing the YubiKey. This version adds a
+    fallback to use non-exclusive connections in case of such a failure.
+ ** Bugfix: APDU encoding was slightly incorrect for commands which specify Le, but no
+    data body. This caused issued on some platforms.
+ ** CLI: The "fido info" command now shows the YubiKey AAGUID, when available.
+
+* Version 5.6.0 (released 2025-03-12)
+ ** SCP: Add support for specifying Le (needed in OpenPGP get_challenge).
+ ** PIV: When writing a new CHUID, prefer to keep data from the old one if possible.
+ ** CLI: Specifying public-key is now optional when generating a PIV certificate,
+    if a public key can be read from the YubiKey itself.
+ ** CLI: (YK FIPS) Disallow --protect for PIV when not in FIPS approved state.
+ ** CLI: Support specifying Le in "apdu" command.
+ ** CLI: Show OpenPGP key information in "openpgp info" and "openpgp keys info" commands.
+ ** CLI: Detect OpenPGP memory corruption, and correctly factory reset OpenPGP if needed.
+ ** CLI: Don't fail on corrupted configuration files, instead show a warning.
+ ** Require Poetry >= 2.0 for building and packaging of the library.
+ ** Bugfix: CLI - Don't use extended APDUs in the "apdu" command on old YubiKeys which
+    do not support it.
+
+* Version 5.5.1 (released 2024-07-01)
+ ** Bugfix: CLI - Don't use formatting that doesn't work on older Python versions.
+    Note: As the 5.5.0 installers bundle Python 3.12, this will be a source-only release.
+
+* Version 5.5.0 (released 2024-06-26)
+ ** Add Secure Channel support to smartcard sessions.
+ ** Support extended APDUs in the "apdu" command (this is now the default).
+ ** HSMAuth: Treat management key as a PIN/password instead of a key, adding new CLI
+    commands.
+ ** PIV: Deprecate explicit passing of management key type when authenticating.
+ ** CLI: Add "config nfc --restrict" command to set "NFC restricted mode".
+ ** CLI: Display more information about PIN complexity and FIPS status for compatible
+    YubiKeys.
+ ** CLI: Improved error messages for illegal values of PIV PIN and PUK.
+ ** CLI: Drop error messages for old 3.x commands.
+ ** CLI: Removal of --upload for YubiCloud credentials. Export to CSV and upload via web
+    instead.
+ ** CLI: Add more detailed information to the CLI output for several commands.
+
+* Version 5.4.0 (released 2024-03-27)
+ ** Support for YubiKey Bio Multi-protocol Edition.
+ ** CLI: Improve error messages for several failures.
+ ** Attempt to send SIGHUP to yubikey-agent if it is blocking the connection.
+ ** Bugfix: Allow "fido config" to work when no PIN is set on the YubiKey.
+ ** Bugfix: MacOS - Fix race condition resulting in unneeded delay in fido commands over
+    USB.
+ ** Bugfix: Linux - Fix error when listing OTP devices when no YubiKeys are attached.
+ ** Bugfix: OpenPGP - Fix RSA key generation on YubiKey NEO.
+
+* Version 5.3.0 (released 2024-01-31)
+ ** FIDO: Add new CLI commands for PIN management and authenticator config
+    (force-change, set-min-length, toggle-always-uv, enable-ep-attestation).
+ ** PIV: Improve handling of legacy "PUK blocked" flag.
+ ** PIV: Improve handling of malformed certificates.
+ ** PIV: Display key information in "piv info" output on supported devices.
+ ** OTP: Fix some commands incorrectly showing errors when used over NFC/CCID.
+ ** Add tab-completion for YubiKey serial numbers and NFC readers.
+
+* Version 5.2.1 (released 2023-10-10)
+ ** Add support for Python 3.12.
+ ** OATH: detect and remove corrupted credentials.
+ ** Bugfix: HSMAUTH: Fix order of CLI arguments.
+
+* Version 5.2.0 (released 2023-08-21)
+ ** PIV: Support for compressed certificates.
+ ** OpenPGP: Use InvalidPinError for wrong PIN.
+ ** Add YubiHSM Auth application support.
+ ** Improved API documentation.
+ ** Scripting: Add name attribute to device.
+ ** Bugfix: PIV: don't throw InvalidPasswordError on malformed PEM private key.
+
+* Version 5.1.1 (released 2023-04-27)
+ ** Bugfix: PIV: string representation of SLOT caused infinite loop on Python <3.11.
+ ** Bugfix: Fix errors in 'ykman config nfc' on YubiKeys without NFC capability.
+ ** Bugfix: Fix error message shown when invalid modhex input length given for YubiOTP.
+
+* Version 5.1.0 (released 2023-04-17)
+ ** Add OpenPGP functionality to supported API.
+ ** Add PIV key info command to CLI.
+ ** PIV: Support signing prehashed data via API.
+ ** Bugfix: Fix signing PIV certificates/CSRs with key that always requires PIN.
+ ** Bugfix: Fix incorrect display name detection for certain keys over NFC.
+
+* Version 5.0.1 (released 2023-01-17)
+ ** Bugfix: Fix the interactive confirmation prompt for some CLI commands.
+ ** Bugfix: OpenPGP Signature PIN policy values were swapped.
+ ** Bugfix: FIDO: Handle discoverable credentials that are missing name or displayName.
+ ** Add support for Python 3.11.
+ ** Remove extra whitespace characters from CLI into command output.
+
+* Version 5.0.0 (released 2022-10-19)
+ ** Various cleanups and improvements to the API.
+ ** Improvements to the handling of YubiKeys and connections.
+ ** Command aliases for ykman 3.x (introduced in ykman 4.0) have now been dropped.
+ ** Installers for ykman are now provided for Windows (amd64) and MacOS (universal2).
+ ** Logging has been improved, and a new TRAFFIC level has been introduced.
+ ** The codebase has been improved for scripting usage, either directly as a Python
+    module, or via the new "ykman script" command.
+    See doc/Scripting.adoc, doc/Library_Usage.adoc, and examples/ for more details.
+ ** PIV: Add support for dotted-string OIDs when parsing RFC4514 strings.
+ ** PIV: Drop support for signing certificates and CSRs with SHA-1.
+ ** FIDO: Credential management commands have been improved to deal with ambiguity
+    in certain cases.
+ ** OATH: Access Keys ("remembered" passwords) are now stored in the system keyring.
+ ** OpenPGP: Commands have been added to manage PINs.
+
+* Version 4.0.9 (released 2022-06-17)
+ ** Dependency: Add support for python-fido2 1.x
+ ** Fix: Drop stated support for Click 6 as features from 7 are being used.
+
+* Version 4.0.8 (released 2022-01-31)
+ ** Bugfix: Fix error message for invalid modhex when programing a YubiOTP credential.
+ ** Bugfix: Fix issue with displaying a Steam credential when it is the only account.
+ ** Bugfix: Prevent installation of files in site-packages root.
+ ** Bugfix: Fix cleanup logic in PIV for protected management key.
+ ** Add support for token identifier when programming slot-based HOTP.
+ ** Add support for programming NDEF in text mode.
+ ** Dependency: Add support for Cryptography <= 38.
+
+* Version 4.0.7 (released 2021-09-08)
+ ** Bugfix release: Fix broken naming for "YubiKey 4", and a small OATH issue with
+    touch Steam credentials.
+
+* Version 4.0.6 (released 2021-09-08)
+ ** Improve handling of YubiKey device reboots.
+ ** More consistently mask PIN/password input in prompts.
+ ** Support switching mode over CCID for YubiKey Edge.
+ ** Run pkill from PATH instead of fixed location.
+
+* Version 4.0.5 (released 2021-07-16)
+ ** Bugfix: Fix PIV feature detection for some YubiKey NEO versions.
+ ** Bugfix: Fix argument short form for --period when adding TOTP credentials.
+ ** Bugfix: More strict validation for some arguments, resulting in better error messages.
+ ** Bugfix: Correctly handle TOTP credentials using period != 30 AND touch_required.
+ ** Bugfix: Fix prompting for access code in the otp settings command (now uses "-A -").
+
+* Version 4.0.3 (released 2021-05-17)
+ ** Add support for fido reset over NFC.
+ ** Bugfix: The --touch argument to piv change-management-key was ignored.
+ ** Bugfix: Don't prompt for password when importing PIV key/cert if file is invalid.
+ ** Bugfix: Fix setting touch-eject/auto-eject for YubiKey 4 and NEO.
+ ** Bugfix: Detect PKCS#12 format when outer sequence uses indefinite length.
+ ** Dependency: Add support for Click 8.
+
+* Version 4.0.2 (released 2021-04-12)
+ ** Update device names.
+ ** Add read_info output to the --diagnose command, and show exception types.
+ ** Bugfix: Fix read_info for YubiKey Plus.
+
+* Version 4.0.1 (released 2021-03-29)
+ ** Add support for YK5-based FIPS YubiKeys.
+ ** Bugfix: Fix OTP device enumeration on Win32.
+
+* Version 4.0.0 (released 2021-03-02)
+ ** Drop support for Python < 3.6.
+ ** Drop reliance on libusb and libykpersonalize.
+ ** Support the "fido" and "otp" subcommands over NFC (using the --reader flag)
+ ** New "ykman --diagnose" command to aid in troubleshooting.
+ ** New "ykman apdu" command for sending raw APDUs over the smart card interface.
+ ** Restructuring of subcommands, with aliases for old versions (to be removed
+    in a future release).
+ ** Major changes to the underlying "library" code:
+  *** New "yubikit" package added for custom development and advanced scripting.
+  *** Type hints added for a large part of the "public" API.
+ ** OpenPGP: Add support for KDF enabled YubiKeys.
+ ** Static password: Add support for FR, IT, UK and BEPO keyboard layouts.
+
+* Version 3.1.2 (released 2021-01-21)
+ ** Bugfix release: Fix dependency on python-fido2 version.
+
+* Version 3.1.1 (released 2020-01-29)
+ ** Add support for YubiKey 5C NFC
+ ** OpenPGP: set-touch now performs compatibility checks before prompting for PIN
+ ** OpenPGP: Improve error messages and documentation for set-touch
+ ** PIV: read-object command no longer adds a trailing newline
+ ** CLI: Hint at missing permissions when opening a device fails
+ ** Linux: Improve error handling when pcscd is not running
+ ** Windows: Improve how .DLL files are loaded, thanks to Marius Gabriel Mihai for reporting this!
+ ** Bugfix: set-touch now accepts the cached-fixed option
+ ** Bugfix: Fix crash in OtpController.prepare_upload_key() error parsing
+ ** Bugfix: Fix crash in piv info command when a certificate slot contains an invalid certificate
+ ** Library: PivController.read_certificate(slot) now wraps certificate parsing exceptions in new exception type `InvalidCertificate`
+ ** Library: PivController.list_certificates() now returns `None` for slots containing invalid certificate, instead of raising an exception
+
+* Version 3.1.0 (released 2019-08-20)
+ ** Add support for YubiKey 5Ci
+ ** OpenPGP: the info command now prints OpenPGP specification version as well
+ ** OpenPGP: Update support for attestation to match OpenPGP v3.4
+ ** PIV: Use UTC time for self-signed certificates
+ ** OTP: Static password now supports the Norman keyboard layout
+
+* Version 3.0.0 (released 2019-06-24)
+ ** Add support for new YubiKey Preview and lightning form factor
+ ** FIDO: Support for credential management
+ ** OpenPGP: Support for OpenPGP attestation, cardholder certificates and cached touch policies
+ ** OTP: Add flag for using numeric keypad when sending digits
+
+* Version 2.1.1 (released 2019-05-28)
+ ** OTP: Add initial support for uploading Yubico OTP credentials to YubiCloud
+ ** Don't automatically select the U2F applet on YubiKey NEO, it might be blocked by the OS
+ ** ChalResp: Always pad challenge correctly
+ ** Bugfix: Don't crash with older versions of cryptography
+ ** Bugfix: Password was always prompted in OATH command, even if sent as argument
+
+* Version 2.1.0 (released 2019-03-11)
+ ** Add --reader flag to ykman list, to list available smart card readers
+ ** FIPS: Checking if a YubiKey FIPS is in FIPS mode is now opt-in, with the --check-fips flag
+ ** PIV: Add commands for writing and reading arbitrary PIV objects
+ ** PIV: Verify that the PIN must be between 6 - 8 characters long
+ ** PIV: In import-certificate, make the verification that the certificate and private key matches opt-in, with the --verify flag
+ ** PIV: The piv info command now shows the serial number of the certificates
+ ** PIV: The piv info command now shows the full Distinguished Name (DN) of the certificate subject and issuer, if possible
+ ** PIV: Malformed certificates are now handled better
+ ** OpenPGP: The openpgp touch command now shows current touch policies
+ ** The ykman usb/nfc config command now accepts openpgp as well as opgp as an argument
+ ** Bugfix: Fix support for german (DE) keyboard layout for static passwords
+
+* Version 2.0.0 (released 2019-01-09)
+ ** Add support for Security Key NFC
+ ** Add experimental support for external smart card reader. See --reader flag
+ ** Add a minimal manpage
+ ** Add examples in help texts
+ ** PIV: update CHUID when importing a certificate
+ ** PIV: Optionally validate that private key and certificate match when importing a certificate (on by default in CLI)
+ ** PIV: Improve support for importing certificate chains and .PEM files with comments
+ ** Breaking API changes:
+  *** Merge CCID status word constants into a single SW enum in ykman.driver_ccid
+  *** Throw custom exception types instead of raw APDUErrors from many methods of PivController
+  *** Write CLI prompts to standard error instead of standard output
+  *** Replace function `ykman.util.parse_certificate` with `parse_certificates` which returns a list
+
+* Version 1.0.1 (released 2018-10-10)
+ ** Support for YubiKey 5A
+ ** OATH: Ignore extra parameters in URI parsing
+ ** Bugfix: Never say that NFC is supported for YubiKeys without NFC
+
+* Version 1.0.0 (released 2018-09-24)
+ ** Add support for YubiKey 5 Series
+ ** Config: Add flag to generate a random configuration lock
+ ** OATH: Give a proper error message when a touch credential times out
+ ** NDEF: Allow setting the NDEF prefix from the CLI
+ ** FIDO: Block reset when multiple YubiKeys are connected
+
+* Version 0.7.1 (released 2018-07-09)
+ ** Support for YubiKey FIPS.
+ ** OTP: Allow setting and removing access codes on the slots.
+ ** Interfaces: set-lock-code now only accepts hexadecimal inputs.
+ ** Bugfix: Don't fail to open the YubiKey when the serial is not visible.
+
+* Version 0.7.0 (released 2018-05-07)
+ ** Support for YubiKey Preview.
+ ** Add command to configure enabled applications over USB and NFC. See ykman config -h.
+ ** Add command for selecting which slot to use for NDEF. See ykman otp ndef -h.
+
+* Version 0.6.1 (released 2018-04-16)
+ ** Support for YubiKeys with FIDO2. See ykman fido -h
+ ** Report the form factor for YubiKeys that support it.
+ ** OTP: slot command is now called otp. See ykman otp -h for all changes.
+ ** Static password: Add support for different keyboard layouts. See ykman otp static -h
+ ** PIV: Signatures for CSRs are now correct.
+ ** PIV: Commands on slots with PIN policy ALWAYS no longer fail if the YubiKey has a management key protected by PIN.
+ ** Mode: The U2F mode is now called FIDO.
+ ** Dependencies: libu2f-host is no longer used for FIDO communication over USB, instead the python library fido2 is used.
+
+* Version 0.6.0 (released 2018-02-09)
+ ** OpenPGP: Expose remaining PIN retries in info command and API.
+ ** CCID: Only try YubiKey smart card readers by default.
+ ** Handle NEO issues with challenge-response credentials better.
+ ** Improve logging.
+ ** Improve error handling when opening device over OTP.
+ ** Bugfix: Fix adding OTP data through the interactive prompt.
+
+* Version 0.5.0 (released 2017-12-15)
+ ** API breaking changes:
+  *** OATH: New API more similar to yubioath-android
+ ** CLI breaking changes:
+  *** OATH: Touch prompt now written to stderr instead of stdout
+  *** OATH: `-a|--algorithm` option to `list` command removed
+  *** OATH: Columns in `code` command are now dynamically spaced depending on contents
+  *** OATH: `delete` command now requires confirmation or `-f|--force` argument
+  *** OATH: IDs printed by `list` command now include TOTP period if not 30
+  *** Changed outputs:
+   **** INFO: "Device name" output changed to "Device type"
+   **** PIV: "Management key is stored on device" output changed to "Management key is stored on the YubiKey"
+   **** PIV: "All PIV data have been cleared from the device" output changed to "All PIV data have been cleared from your YubiKey"
+   **** PIV: "The current management key is stored on the device" prompt changed to "The current management key is stored on the YubiKey"
+   **** SLOT: "blank to use device serial" prompt changed to "blank to use YubiKey serial number"
+   **** SLOT: "Using device serial" output changed to "Using YubiKey device serial"
+   **** Lots of failure case outputs changed
+ ** New features:
+  *** Support for multiple devices via new top-level option `-d|--device`
+  *** New top-level option `-l|--log-level` to enable logging
+  *** OATH: Support for remembering passwords locally.
+  *** OATH: New option `-s|--single` for `code` command
+  *** PIV: `set-pin-retries` command now warns that PIN and PUK will be reset to factory defaults, and prints those defaults after resetting
+ ** API bug fixes:
+  *** OATH: `valid_from` and `valid_to` for `Code` are now absolute instead of relative to the credential period
+  *** OATH: `period` for non-TOTP `Code` is now `None`
+
+* Version 0.4.6 (released 2017-10-17)
+ ** Will now attempt to open device 3 times before failing
+ ** OpenPGP: Don't say data is removed when not
+ ** OpenPGP: Don't swallow APDU errors
+ ** PIV: Block on-chip RSA key generation for firmware versions 4.2.0 to 4.3.4 (inclusive) since these chips are vulnerable to http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-15361[CVE-2017-15631].
+
+* Version 0.4.5 (released 2017-09-14)
+ ** OATH: Don't print issuer if there is no issuer.
+
+* Version 0.4.4 (released 2017-09-06)
+ ** OATH: Fix yet another issue with backwards compatibility, for adding new credentials.
+
+* Version 0.4.3 (released 2017-09-06)
+ ** OATH: Fix issue with backwards compatibility, when used as a library.
+
+* Version 0.4.2 (released 2017-09-05)
+ ** OATH: Support 7 digit credentials.
+ ** OATH: Support credentials with a period other than 30 seconds.
+ ** OATH: The remove command is now called delete.
+
+* Version 0.4.1 (released 2017-08-10)
+ ** PIV: Dropped support for deriving a management key from PIN.
+ ** PIV: Added support for generating a random management key and storing it on the device protected by the PIN.
+ ** OpenPGP: The reset command now handles a device in terminated state.
+ ** OATH: Credential filtering is now working properly on Python 2.
+
+* Version 0.4.0 (released 2017-06-19)
+ ** Added PIV support. The tool and library now supports most of the PIV functionality found on the YubiKey 4 and NEO. To list the available commands, run ykman piv -h.
+ ** Mode command now supports adding and removing modes incrementally.
+
+* Version 0.3.3 (released 2017-05-08)
+ ** Bugfix: Fix issue with OATH credentials from Steam on YubiKey 4.
+
+* Version 0.3.2 (released 2017-04-24)
+ ** Allow access code input through an interactive prompt.
+ ** Bugfix: Some versions of YubiKey NEO occasionally failed calculating challenge-response credentials with touch.
+
+* Version 0.3.1 (released 2017-03-13)
+ ** Allow programming of TOTP credentials in YubiKey Slots using the chalresp command.
+ ** Add a calculate command (and library support) to perform a challenge-response operation. Can also be used to generate TOTP codes for credentials stored in a slot.
+ ** OATH: Remove whitespace in secret keys provided by the user.
+ ** OATH: Prompt the user to touch the YubiKey for HOTP touch credentials.
+ ** Bugfix: The flag for showing hidden credentials was not working correctly for the oath code command.
+
+* Version 0.3.0 (released 2017-01-23)
+ ** OATH functionality added. The tool now exposes the OATH functionality found on the YubiKey 4 and NEO. To list the available commands, run ykman oath -h.
+ ** Added support for randomly generated static passwords.
+
+* Version 0.2.0 (released 2016-11-23)
+ ** Removed all GUI code. This project is now only for the python library and CLI tool. The GUI will be re-released separately in a different project.
+ ** Added command to update settings for YubiKey Slots.
+
+* Version 0.1.0 (released 2016-07-07)
+ ** Initial release for beta testing.

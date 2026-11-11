@@ -1,0 +1,52 @@
+{
+  "baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+  "packet_sha256": "9ba1809d37186d462f6c554f85766284702e1382fe1b8e9e1cbd4db88d0860d4",
+  "inventory_sha256": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+  "primary_file_count": 104,
+  "primary_file_lines": 17050,
+  "primary_files_read_completely": 95,
+  "primary_unread_paths": [
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AlgorithmIdentifierParameterTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyDecoderTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographyProviderExtensionTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyConsistencyTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs"
+  ],
+  "primary_units": 1386,
+  "shared_read_units": 176,
+  "dispatch_shared_count": 174,
+  "shared_count_discrepancy": "Current JSON contains 176 IDs; dispatch prose says 174. Exact JSON retained, no denominator edited.",
+  "unit_status_counts": {
+    "READ-CANDIDATE": 252,
+    "READ-SOURCE-PENDING-FINAL-TRIAGE": 940,
+    "READ-HISTORICAL-EXCLUSION": 3,
+    "READ-CLEAN-NOMINEE": 13,
+    "UNREAD": 354
+  },
+  "unit_status_counts_by_assignment": {
+    "primary": {
+      "READ-CANDIDATE": 242,
+      "READ-SOURCE-PENDING-FINAL-TRIAGE": 884,
+      "READ-HISTORICAL-EXCLUSION": 3,
+      "READ-CLEAN-NOMINEE": 13,
+      "UNREAD": 244
+    },
+    "shared-read": {
+      "UNREAD": 110,
+      "READ-CANDIDATE": 10,
+      "READ-SOURCE-PENDING-FINAL-TRIAGE": 56
+    }
+  },
+  "candidate_count": 20,
+  "selected_unit_source_and_range_hash_checks": 1562,
+  "accepted_findings": 0,
+  "completion": "PARTIAL-CHECKPOINT; whole-packet completion explicitly outstanding",
+  "builds_tests_formatters_crypto_experiments_native_device_runs": 0,
+  "central_records_changed": false,
+  "commits_index_ref_writes_pushes_subagents": 0
+}

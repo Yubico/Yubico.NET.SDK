@@ -1,0 +1,18 @@
+# Scribe job: Authenticode-sign the SDK assemblies between `dotnet build` and `dotnet pack --no-build`.
+# Paths are relative to the repository root.
+stub: yubico-net-sdk
+releaseType: public
+jobs:
+  - name: sdk-assemblies
+    platform: linux
+    steps:
+      - id: 1
+        action: windows
+        description: Yubico .NET SDK
+        files:
+          - Yubico.Core/src/bin/Release/net472/Yubico.Core.dll
+          - Yubico.Core/src/bin/Release/netstandard2.0/Yubico.Core.dll
+          - Yubico.Core/src/bin/Release/netstandard2.1/Yubico.Core.dll
+          - Yubico.YubiKey/src/bin/Release/net472/Yubico.YubiKey.dll
+          - Yubico.YubiKey/src/bin/Release/netstandard2.0/Yubico.YubiKey.dll
+          - Yubico.YubiKey/src/bin/Release/netstandard2.1/Yubico.YubiKey.dll

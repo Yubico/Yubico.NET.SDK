@@ -270,14 +270,12 @@ internal sealed class SharedDeviceInfoRead
             // START a new open against hardware its evidence no longer names.
             ThrowIfSuperseded(scope, key, epoch);
 
-            // Discovery creates this connection, so discovery disposes it. A PC/SC slot takes the discovery
-            // registration before native open. Resolve the selected member when the provider is the published
-            // composite device so metadata reads follow the same route as direct slot reads.
+            // Discovery creates and disposes this connection. Built-in PC/SC and macOS/Linux HID owners
+            // take the exact discovery registration before native open, including failed/late opens.
+            // Resolve the published composite's selected member just as for a direct slot read. Set transfer
+            // before invoking the owner: a throw or disposal diagnostic is not permission to release twice.
             var pcscSlot = ResolvePcscSlot(provider, key.Connection);
-            // Only built-in macOS HID owns its registry claim through native teardown. Windows and Linux
-            // HID use the provider fallback below until their owned lifetimes land (slices S1 and S3 in
-            // docs/plans/yubikit-async-boundaries/00-status.md; design in 02-architecture.md).
-            var hidSlot = ResolveMacHidSlot(provider, key.Connection);
+            var hidSlot = ResolveOwnedHidSlot(provider, key.Connection);
             registrationTransferred = pcscSlot is not null || hidSlot is not null;
             var conn = pcscSlot is not null
                 ? await pcscSlot.OpenRegisteredConnectionAsync(discoveryLease, cancellationToken).ConfigureAwait(false)
@@ -294,16 +292,16 @@ internal sealed class SharedDeviceInfoRead
         }
     }
 
-    private static HidConnectionSlot? ResolveMacHidSlot(IDiscoveryConnectionProvider provider, ConnectionType connection)
+    private static HidConnectionSlot? ResolveOwnedHidSlot(IDiscoveryConnectionProvider provider, ConnectionType connection)
     {
         if (connection is not (ConnectionType.HidFido or ConnectionType.HidOtp)) return null;
-        if (provider is YubiKeyDevice published)
-            return published.TryResolveSlot(connection, out var selected) ? AsBuiltInMacHidSlot(selected) : null;
-        return AsBuiltInMacHidSlot(provider);
+        return provider is YubiKeyDevice published
+            ? published.TryResolveSlot(connection, out var selected) ? AsOwnedHidSlot(selected, connection) : null
+            : AsOwnedHidSlot(provider, connection);
     }
 
-    private static HidConnectionSlot? AsBuiltInMacHidSlot(object candidate) =>
-        candidate is HidConnectionSlot hid && (hid.IsBuiltInMacFido || hid.IsBuiltInMacOtp) ? hid : null;
+    private static HidConnectionSlot? AsOwnedHidSlot(object candidate, ConnectionType connection) =>
+        candidate is HidConnectionSlot { OwnsNativeLifetime: true } hid && hid.ConnectionType == connection ? hid : null;
 
     private static PcscConnectionSlot? ResolvePcscSlot(
         IDiscoveryConnectionProvider provider,

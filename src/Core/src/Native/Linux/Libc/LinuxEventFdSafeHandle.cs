@@ -12,18 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
-
 namespace Yubico.YubiKit.Core.Native.Linux.Libc;
 
-internal sealed class LinuxEventFdSafeHandle : SafeHandle
+internal sealed class LinuxEventFdSafeHandle : LinuxFileSafeHandle
 {
-    public LinuxEventFdSafeHandle()
-        : base(new IntPtr(-1), true)
-    {
-    }
-
-    public override bool IsInvalid => handle == new IntPtr(-1);
-
-    protected override bool ReleaseHandle() => NativeMethods.close(handle) == 0;
 }

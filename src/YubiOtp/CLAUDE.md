@@ -126,6 +126,14 @@ marker behavior is covered by `YubiOtpHmacChallengeKnownAnswerTests` in integrat
 ## Test Infrastructure
 
 ### Unit Tests
+
+`YubiOtpSessionLinuxCrossLayerTests` uses actual Linux slots/`YubiKeyDevice` and the production OTP
+owner with fake feature bytes underneath. It pins held initial status without blocking task return,
+borrowed sequential sessions, exact serial/CRC framing, touch cancellation held through acknowledged
+abort before serial recovery, and completed/failed terminal presence after applet CRC validation.
+No real slot is provisioned. The existing internal `OtpHidProtocol.Configure` synchronous initialization
+wait remains: public YubiOTP awaits ReadStatus before Configure; the test's exact report queue rejects
+extra hidden Configure I/O. See [L6a managed evidence](../../docs/research/linux-managed-acceptance.md).
 - NDEF encoding: URI prefix compression, text records, null handling
 - Challenge padding: pad-byte-differs-from-last logic
 - Slot mapping: all slot × operation combinations

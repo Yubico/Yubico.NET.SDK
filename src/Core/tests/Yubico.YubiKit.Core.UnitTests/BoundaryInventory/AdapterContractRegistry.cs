@@ -11,6 +11,22 @@ internal static class AdapterContractRegistry
     // Independent of the JSON rows: deleting one cannot shrink the gate.
     private static readonly (string Route, string Operation, string Owner, string Symbol, string[] Roles)[] Required =
     [
+        ("Linux HID FIDO", "open", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "OpenAsync", ["pending", "failure", "cancel before"]),
+        ("Linux HID FIDO", "send", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "SendAsync", ["native drain", "failure"]),
+        ("Linux HID FIDO", "receive", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "ReceiveAsync", ["terminal", "cancel detach"]),
+        ("Linux HID FIDO", "dispose", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "DisposeAsync", ["claim drain", "quiescence", "failure"]),
+        ("Linux HID OTP", "open", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxOtpHidConnection", "OpenAsync", ["cancel before", "pending", "failure"]),
+        ("Linux HID OTP", "send", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxOtpHidConnection", "SendAsync", ["owned output", "submitted cancellation"]),
+        ("Linux HID OTP", "receive", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxOtpHidConnection", "ReceiveAsync", ["failure cleanup", "cancel before"]),
+        ("Linux HID OTP", "dispose", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxOtpHidConnection", "DisposeAsync", ["claim drain", "failure"]),
+        ("Linux direct input (sync)", "open", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", ".ctor", ["partial open failure"]),
+        ("Linux direct input (sync)", "get", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "GetReport", ["descriptor sized input"]),
+        ("Linux direct input (sync)", "set", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "SetReport", ["native drain"]),
+        ("Linux direct input (sync)", "dispose", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "Dispose", ["quiescence drain"]),
+        ("Linux direct feature (sync)", "open", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", ".ctor", ["open failure"]),
+        ("Linux direct feature (sync)", "get", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "GetReport", ["fixed input metadata"]),
+        ("Linux direct feature (sync)", "set", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "SetReport", ["native drain"]),
+        ("Linux direct feature (sync)", "dispose", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "Dispose", ["shared close"]),
         ("macOS FIDO", "open", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSFidoHidConnection", "OpenAsync", ["pending", "failure", "cancel before"]),
         ("macOS FIDO", "send", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSFidoHidConnection", "SendAsync", ["overlap", "drain"]),
         ("macOS FIDO", "receive", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSFidoHidConnection", "ReceiveAsync", ["terminal"]),
@@ -54,8 +70,7 @@ internal static class AdapterContractRegistry
         foreach (var row in rows)
         {
             var key = (row.Route, row.Operation);
-            if (row.Route.StartsWith("Windows HID", StringComparison.Ordinal) ||
-                row.Route.StartsWith("Linux HID", StringComparison.Ordinal))
+            if (row.Route.StartsWith("Windows HID", StringComparison.Ordinal))
                 errors.Add($"deferred route cannot be verified: {row.Route}");
             if (!Required.Any(item => item.Route == key.Route && item.Operation == key.Operation))
                 errors.Add($"unexpected operation: {row.Route}/{row.Operation}");
@@ -65,19 +80,19 @@ internal static class AdapterContractRegistry
             ValidateProfiles(row, tests, seenProfiles, errors);
         }
 
-        foreach (var required in Required)
-            if (!keys.Contains((required.Route, required.Operation)))
-                errors.Add($"missing required operation: {required.Route}/{required.Operation}");
+        foreach (var (Route, Operation, Owner, Symbol, Roles) in Required)
+            if (!keys.Contains((Route, Operation)))
+                errors.Add($"missing required operation: {Route}/{Operation}");
 
         return errors;
     }
 
     private static void ValidateOwner(AdapterContractRow row, Assembly core, List<string> errors)
     {
-        var expected = Required.FirstOrDefault(item => item.Route == row.Route && item.Operation == row.Operation);
-        if (expected.Owner is not null && row.Owner != expected.Owner)
+        var (Route, Operation, Owner, Symbol, Roles) = Required.FirstOrDefault(item => item.Route == row.Route && item.Operation == row.Operation);
+        if (Owner is not null && row.Owner != Owner)
             errors.Add($"wrong owner: {row.Route}/{row.Operation}/{row.Owner}");
-        if (expected.Symbol is not null && row.Symbol != expected.Symbol)
+        if (Symbol is not null && row.Symbol != Symbol)
             errors.Add($"wrong symbol: {row.Route}/{row.Operation}/{row.Symbol}");
         var owner = core.GetType(row.Owner);
         if (owner is null)

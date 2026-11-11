@@ -149,7 +149,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
             return false;
         }
 
-        _shutdownEventHandle = LibcNativeMethods.eventfd(
+        _shutdownEventHandle = LibcNativeMethods.EventFd(
             0,
             LibcNativeMethods.EFD_CLOEXEC | LibcNativeMethods.EFD_NONBLOCK);
         if (_shutdownEventHandle.IsInvalid)
@@ -167,7 +167,8 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
             return false;
         }
 
-        var shutdownFd = _shutdownEventHandle.DangerousGetHandle().ToInt32();
+        using var shutdownLease = new LinuxDescriptorLease(_shutdownEventHandle);
+        var shutdownFd = shutdownLease.Descriptor;
         if (shutdownFd < 0)
         {
             Logger.LogWarning("Invalid Linux HID listener shutdown fd");
@@ -188,8 +189,14 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
     public LinuxHidPollOutcome WaitForEvent()
     {
         var pollFds = _pollFds ?? throw new InvalidOperationException("The event source is not initialized.");
+        // The listener thread owns both handles. Retain them explicitly for this raw-fd
+        // poll; future report-reactor registrations need references across registration too.
+        using var shutdownLease = new LinuxDescriptorLease(_shutdownEventHandle
+            ?? throw new InvalidOperationException("The shutdown event is not initialized."));
+        using var monitorLease = new LinuxDescriptorLease(_monitorHandle
+            ?? throw new InvalidOperationException("The monitor is not initialized."), pollFds[0].fd);
 
-        var pollResult = LibcNativeMethods.poll(pollFds, pollFds.Length, -1);
+        var pollResult = LibcNativeMethods.Poll(pollFds, pollFds.Length, -1);
         if (pollResult < 0)
         {
             var error = Marshal.GetLastPInvokeError();
@@ -262,7 +269,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
         {
             var signal = BitConverter.GetBytes(1UL);
             WriteShutdownSignal(
-                () => LibcNativeMethods.write(handle, signal, signal.Length),
+                () => LibcNativeMethods.Write(handle, signal, signal.Length),
                 Marshal.GetLastPInvokeError,
                 (result, error) =>
                 {
@@ -293,7 +300,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
             return false;
         }
 
-        using var handle = LibcNativeMethods.open(
+        using var handle = LibcNativeMethods.Open(
             devNode,
             LibcNativeMethods.OpenFlags.O_RDONLY | LibcNativeMethods.OpenFlags.O_NONBLOCK);
         return !handle.IsInvalid;
@@ -392,7 +399,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
         var buffer = new byte[sizeof(ulong)];
         while (true)
         {
-            var result = LibcNativeMethods.read(handle, buffer, buffer.Length);
+            var result = LibcNativeMethods.Read(handle, buffer, buffer.Length);
             if (result > 0)
             {
                 continue;

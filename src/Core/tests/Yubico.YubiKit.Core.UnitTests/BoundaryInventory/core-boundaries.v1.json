@@ -2,6 +2,14 @@
   "version": 1,
   "families": [
     {
+      "path": "Transports/Hid/Linux/LinuxHidReadReactor.cs", "reviewOwner": "Core maintainers",
+      "rationale": "", "evidence": ["docs/research/linux-read-reactor.md; LinuxHidReadReactorTests exercises recoverable published admission, late quiescence, owner-worker reference release, held retirement without replacement/pool jobs, and real Linux eventfd/poll. RetireWake closes only the private local eventfd after poll exits; Linux v6.12 fs/eventfd.c release has no driver wait or flush."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "StartRun#337C13CD93F1#worker#One lazy background poller per reactor; it owns local eventfd retirement and reuses the same thread for admissions pending retirement. No replacement exists until close finishes. Quiescence never schedules device-reference release; the existing native owner worker releases it synchronously."
+      ]
+    },
+    {
       "path": "Cryptography/ArkgPrimitivesOpenSsl.cs", "reviewOwner": "Core maintainers",
       "rationale": "The ARKG OpenSSL shim executes scalar and elliptic-curve operations synchronously on its caller; handle allocation and release are also native calls. This records the native boundary, not an asynchronous cryptography guarantee.",
       "evidence": ["Cryptography/ArkgPrimitivesOpenSsl.cs:559-729 declares LibraryImport entry points and synchronous SafeHandle wrappers."],
@@ -25,9 +33,9 @@
     {
       "path": "Native/Linux/Libc/Libc.Interop.cs", "reviewOwner": "Core maintainers",
       "rationale": "Linux libc descriptor creation, control, polling and I/O are direct synchronous syscalls; poll/read/ioctl can wait. Thread ownership and cancellation of the callers are not established by this import.",
-      "evidence": ["Native/Linux/Libc/Libc.Interop.cs defines descriptor, eventfd, poll, ioctl and read/write imports used by Linux HID transport."],
+      "evidence": ["Native/Linux/Libc/Libc.Interop.cs defines correctly sized glibc descriptor, eventfd, poll, ioctl and read/write imports behind retained SafeHandle wrappers; LinuxNativeAbiTests exercises no-hardware libc calls on Linux only. LinuxHidReportApi supplies synchronous borrowed payload framing, not worker/reactor lifetime or universal Linux acceptance."],
       "status": ["documented", "outstanding"],
-      "entries": ["close#EE72E8ED3D1B", "eventfd#1833694553D4", "fcntl#AFE107268B15", "ioctl#8D8BEE00DD48", "open#91D5CE3F5AA6", "poll#6B473884AC18", "read#0372EB9CAA7E", "read#5A5F9E134014", "write#6C2A23AD2136", "write#CA83A8D38638"]
+      "entries": ["CloseNative#AB23CA887F47", "EventFdNative#188838700E3A", "FcntlNative#B72685BB3C69", "IoctlNative#1C398565A0D6", "OpenNative#A67E07214EFC", "PollNative#43D95689098D", "ReadNative#BEB520FE25CA", "WriteNative#90CB71EE475A"]
     },
     {
       "path": "Native/Linux/Udev/Udev.Interop.cs", "reviewOwner": "Core maintainers",
@@ -173,15 +181,47 @@
     },
     {
       "path": "Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs:139 uses Task.Run(Dispose) for async disposal."],
+      "evidence": ["docs/research/linux-otp-async-lifetime.md; LinuxOtpHidConnectionTests and LinuxReportConnectionTests cover fixed GET8/metadata8 and arbitrary supported direct SET length over the OTP native owner. The expert facade remains synchronous."],
       "status": ["documented", "outstanding"],
-      "entries": ["DisposeAsync#659A3F9F9394#worker#DisposeAsync offloads synchronous feature-report teardown with Task.Run; this does not provide native asynchronous cancellation."]
+      "entries": [
+        "GetReport#5C94CE2F3F40#sync-boundary#The expert facade synchronously waits for one owned eight-byte feature GET on the original OTP native worker; submitted cancellation cannot detach native work.",
+        "LinuxHidFeatureReportConnection#D0F706E22406#sync-boundary#The direct constructor waits for rooted native-worker open; typed factory routing remains L5 work.",
+        "SetReport#848A2BD4BFA9#sync-boundary#The expert facade waits for one owned-copy feature SET on the OTP worker, preserving supported arbitrary caller length rather than imposing typed8."
+      ]
     },
     {
       "path": "Transports/Hid/Linux/LinuxHidIOReportConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/Linux/LinuxHidIOReportConnection.cs:125 uses Task.Run(Dispose) for async disposal."],
+      "evidence": ["docs/research/linux-fido-async-lifetime.md; LinuxReportConnectionTests and LinuxFidoHidConnectionTests exercise the synchronous facade over the migrated native owner. Public IHidInterface/IHidConnection remain synchronous."],
       "status": ["documented", "outstanding"],
-      "entries": ["DisposeAsync#FCEDA5AD5B71#worker#DisposeAsync offloads synchronous Linux input/output teardown; it does not make the underlying native close cancellable."]
+      "entries": [
+        "LinuxHidIOReportConnection#AF4CCDEF6397#sync-boundary#The expert facade constructor synchronously waits for the native owner's worker open, metadata and reactor activation; typed factory migration is deferred to L5.",
+        "GetReport#8E09DC6C4EC0#sync-boundary#Direct synchronous GetReport waits indefinitely for an owned descriptor-capacity raw report or terminal failure, retaining the old Linux absence of a read timeout.",
+        "SetReport#032152D8F03D#sync-boundary#Direct synchronous SetReport waits for its one admitted owned-copy write on the native worker, preserving supported arbitrary caller payload lengths."
+      ]
+    },
+    {
+      "path": "Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["docs/research/linux-fido-async-lifetime.md; LinuxFidoHidConnectionTests uses held open/metadata/write/close, cancellation and late quiescence against the production owner. LinuxFidoWorkerFailureTests interrupts the real worker at idle, queued open/send and cleanup; verifies terminal public tasks, cleared queued copy, original-worker cleanup, original diagnostic and claim proof, and an isolated finalizer. No native duration, public typed factory or whole-platform async acceptance is inferred."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "Close#8754FB6D55EC#worker#Only the original native worker waits for the exact registration's nonfaulting actual Quiescence before synchronous ReleaseReference and checked CloseOnce, including after a loop fault. Neither a failed wake nor the initial worker exception bypasses this wait; the initial error remains in the shared disposal outcome even when actual release succeeds.",
+        "Dispose#6598DA5CE8A0#sync-boundary#Synchronous compatibility disposal drains the shared owner outcome; worker and reactor callback self-drain is rejected. DisposeAsync awaits without this caller wait.",
+        "OpenOnWorker#9DAE97F245B0#worker#The original native worker waits for immutable Activation after first storing the registration token. Failed activation retains the token through actual shutdown drain.",
+        "StartWithoutContext#D246286E1DF5#worker#Already-suppressed-context branch starts the one dedicated background native owner worker. No operation creates a replacement or pool job.",
+        "StartWithoutContext#7B4EF209B7C9#worker#Ordinary-context branch suppresses ambient context and starts the same single dedicated native owner worker. Branches are mutually exclusive.",
+        "WorkLoop#B03EAA730F94#worker#AutoResetEvent.WaitOne parks the single native owner worker until one admitted operation or coalesced shutdown; no ordinary-operation backlog is admitted. A loop fault stops admission, faults pending public open/send/read tasks, clears a queued output copy and requests removal under the owner lock, then uses this same worker for safe checked cleanup. Event retirement is serialized with every setter."
+      ]
+    },
+    {
+      "path": "Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["docs/research/linux-otp-async-lifetime.md; LinuxOtpHidConnectionTests withholds open/GET/SET/close and tests owned buffers, cancellation, overlap and checked claim release. LinuxOtpWorkerFailureTests interrupts the original idle/queued worker and exercises nonblocking finalization and rooted unknown release. Managed seams only; no factory or physical/native-duration acceptance."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "Dispose#ECEF9CDF1276#sync-boundary#Synchronous disposal drains the same shared owner outcome as async disposal and refuses original-worker self-drain; a held feature ioctl may wait indefinitely.",
+        "StartWithoutContext#B085C0F085CF#worker#Already-suppressed-context branch starts the single dedicated OTP native worker. No per-call Task.Run, ordinary backlog or replacement worker.",
+        "StartWithoutContext#6A9DCE332DE3#worker#Ordinary-context branch suppresses ambient ExecutionContext before starting that same native worker; the two start sites are mutually exclusive.",
+        "WorkLoop#FDADB684A777#worker#WaitOne parks the original native worker for one admitted open/GET/SET or coalesced shutdown. Unexpected failure stops admission, terminalizes actual pending tasks, clears staging and checks close on this same worker. Event retirement shares the setter lock."
+      ]
     },
     {
       "path": "Transports/Hid/MacOS/IIOKitDeviceLifetime.cs", "reviewOwner": "Core maintainers", "rationale": "",
@@ -251,9 +291,9 @@
     },
     {
       "path": "Devices/HidConnectionSlot.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/HidConnectionSlot.cs:53-82 returns Task.FromResult only after non-macOS IHidInterface.ConnectToIOReports or ConnectToFeatureReports runs."],
+      "evidence": ["Devices/HidConnectionSlot.cs OpenRawConnectionAsync selects native-owning asynchronous macOS/Linux FIDO/OTP connections first; only Windows/custom IHidInterface fallback calls ConnectToIOReports or ConnectToFeatureReports before Task.FromResult. L5 changes routing, not these two fallback invocation identities."],
       "status": ["documented", "outstanding"],
-      "entries": ["OpenRawConnectionAsync#2D6CDB08BA90#async-blocked#Feature-report connection opens synchronously through IHidInterface before the task is returned; native open may block on Windows or Linux.", "OpenRawConnectionAsync#ABE529EA2920#async-blocked#Input/output-report connection opens synchronously through IHidInterface before Task.FromResult, not on a dedicated worker."]
+      "entries": ["OpenRawConnectionAsync#2D6CDB08BA90#async-blocked#Windows/custom feature-report fallback opens synchronously through IHidInterface before task return; built-in Linux OTP now bypasses this adapter and transfers its claim to the L4 owner.", "OpenRawConnectionAsync#ABE529EA2920#async-blocked#Windows/custom IO-report fallback opens synchronously through IHidInterface before Task.FromResult; built-in Linux FIDO now bypasses this adapter and transfers its claim to the L3 owner."]
     },
     {
       "path": "Protocols/Fido/Hid/IFidoHidProtocol.cs", "reviewOwner": "Core maintainers", "rationale": "",

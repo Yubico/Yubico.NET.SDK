@@ -42,7 +42,7 @@ internal static class ProtocolDeviceInfo
         {
             if (protocol is ISmartCardProtocol smartCard)
             {
-                await smartCard.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
+                _ = await smartCard.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
             }
             else if (protocol is IFidoHidProtocol fidoHid)
             {

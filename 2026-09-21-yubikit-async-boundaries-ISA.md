@@ -8,17 +8,34 @@ phase: execute
 progress: 19/72
 mode: interactive
 started: 2026-09-21T16:01:47Z
-updated: 2026-09-27
+updated: 2026-11-11
 ---
 
 # YubiKit async boundaries — PRD / ideal state artifact
 
-**Current acceptance (2026-09-27): 19/72 checked, 53 pending.** The checklist
+**Linux execution resumed (2026-11-11):** the user approved L0–L6 and the
+orchestrator/fresh-GPT-6.1-Sol workflow on `yubikit-linux-async`, based on fetched
+`yubikit` revision `3de42bb54`. See the [current Linux checkpoint](docs/plans/yubikit-async-boundaries/00-status.md#current-checkpoint--linux-execution-resumed-2026-11-11).
+Linux is no longer user-deferred. Typed/direct HID owners, readiness input and
+factory/discovery integration are implemented and reviewed in the worktree;
+managed public journeys and JIT/AOT native-descriptor checks passed. After HID was
+released from VM passthrough, selected serial **103** passed six read-only physical
+routes in both runtimes (**43 physical checks per runtime**, capture
+`20261111T115147Z`, repeated at final runtime/verification commit `adf3a9115` in
+capture `20261111T123927Z`). Pending-read disposal/reopen and three PC/SC lifecycle cycles
+passed; touch/active-cancel/removal still need operator coordination. The final repository gate passed
+4,078 executed tests (zero failures, five skips), build/docs/AOT-contract/complexity
+checks and zero warnings; the status document retains the earlier intermittent
+test failures and their investigation limits separately from that passing run.
+Current NativeShims is `1.18.1`; references to `.8` below retain their historical
+evidence scope. No additional criterion is checked by this execution update.
+
+**Retained acceptance (2026-09-27): 19/72 checked, 53 pending.** The checklist
 below is authoritative. ISC-19 has one accepted managed protected-continuation
 profile; ISC-33 covers observed macOS listener teardown, not every host.
 ISC-4/37/53/56/62 remain open. After replug the selected-key smart-card
 probe passes; pre-open sharing contention is historical, not a current blocker.
-Windows/Linux native and hardware routes remain deferred. See [current evidence](#verification)
+Windows native/hardware remains deferred; Linux work is active as noted above. See [current evidence](#verification)
 and [remaining work](docs/plans/yubikit-async-boundaries/00-status.md).
 
 **Final local public-contract increment, 2026-09-25:** implemented idle borrowed

@@ -110,6 +110,27 @@ applet sessions.
 The host also provides an operator-driven `--monitor` mode. Its recorded evidence is macOS-only and
 belongs to the research record. It is not run by continuous integration.
 
+### Linux HID native contracts
+
+`verification/LinuxHidRouteVerification` is a separate, non-packable .NET 10 host. The
+`linux-hid-verification-publish` toolchain target explicitly publishes both JIT and Native AOT
+executables because the host is outside the solution. The Linux workflow additionally runs its
+`--native` mode and requires both sensitivity controls to fail with their exact assertion and
+exit code 1 (not watchdog expiry). The existing three-OS/all-ten-library gate remains unchanged.
+CI and capture share the JSON result gate: JIT must report `DynamicCode=true`, AOT
+`false`, and native success requires `PASSED` plus the exact 38 unique named checks.
+Publishing seals a stable before/after input and complete published-artifact manifest;
+capture verifies it before any child or device operation and rejects stale/missing
+bindings. An environment source hash is only a label, never build attestation.
+
+This mode executes real libc descriptor operations, eventfd and poll through the production Linux
+read reactor, and the Linux FIDO owner over real socket descriptors with synthetic FIDO64 metadata.
+It is **not hidraw/device evidence**. The host also builds serial-selected, read-only hardware modes;
+their availability and executed counts are recorded separately in
+[`linux-native-acceptance.md`](research/linux-native-acceptance.md). A no-device result is blocked
+hardware evidence, not a passing hardware case. Operator touch/removal/active-cancel modes are gated
+on separate coordination and never run in CI or the capture script.
+
 ## Native dependencies
 
 Core uses `Yubico.NativeShims` for PC/SC, macOS HID input, and OpenSSL-backed ARKG operations. The package contains

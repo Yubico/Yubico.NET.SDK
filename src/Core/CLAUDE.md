@@ -140,10 +140,146 @@ close retains the owner and physical claim rather than allowing unsafe reopen. T
 wake and registry/discovery claim transfer belong to this same connection lifetime.
 `FidoHidProtocol.Configure` performs local setup only; `ApplicationSession` awaits FIDO
 channel initialization. Public lower-level `IHidConnection` compatibility remains
-synchronous; the typed macOS OTP path uses a separate worker, and Windows/Linux HID
-behavior must not be inferred from either macOS path. See
+synchronous; the typed macOS OTP path uses a separate worker. Linux has its own FIDO/OTP
+owners described below; Windows/custom HID retains the compatibility adapters. See
 [retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
 for public entry points and known limits.
+
+### Linux native report boundary (L1)
+
+`ILinuxHidReportApi` is the internal, synchronous borrowed-payload
+seam used by Linux FIDO and OTP report connections; it does not itself supply a reactor or lifetime
+worker. Direct IO metadata/read capacity follows bounded unnumbered descriptor sizes; direct IO
+and feature SET preserve caller payload length. The L3 FIDO owner enforces typed64 at Send/Receive;
+the L4 typed OTP owner enforces Send8/Receive8 separately.
+`LinuxHidReportApi` adds native zero report-ID framing, rejects short writes/feature transfers,
+and clears owned stack/pool framing in `finally`. Feature GET retains OTP8 payload / 9 native bytes.
+Its parser retains the existing YubiKey last-main-item behavior, with bounded arithmetic; it is not
+a general HID parser. See [L1 source evidence and limits](../../docs/research/linux-native-report-access.md).
+
+libc descriptors are **int**, not pointer-width handles: `open`/`eventfd` imports return `int` and
+initialize a preallocated SafeHandle; fd 0 is valid. Do not use the default SafeHandle return
+marshaller here (its unmanaged representation is `IntPtr`). Native calls retain managed handles.
+`LinuxFileSafeHandle.CloseOnce` disposes once and observes cached release evidence: pending native
+references or an unexecuted release give **no release proof**. After reference drain, successful
+close or Linux EINTR/EIO proves release (with diagnostic error preserved); EBADF and unexpected
+errors do not. Never retry native close. Future owners must inspect this outcome before releasing
+a physical claim. L3/L4 apply this evidence in separate FIDO and OTP owners.
+
+### Linux read-reactor infrastructure (L2)
+
+`ILinuxHidReadReactor` supplies internal readiness registration, not a typed connection or factory
+migration. `LinuxHidReadReactor.Shared` lazily runs one poller while registrations exist and exits
+when idle; instance disposal permanently shuts it down. Registrations retain SafeHandle references
+through snapshot/callback drain and identify callbacks by registration identity plus generation.
+Only bounded nonblocking reads belong in those internal callbacks; no application callbacks or
+open/write/ioctl/close may run on the poller. Consumer TCS continuations must run asynchronously.
+Every published Register returns a token, with immutable Activation outcome separate from actual
+Quiescence. RequestRemoval reports wake failure but the same Quiescence remains observable for late
+drain; neither terminal notification nor failed shutdown acknowledges it. Only after Quiescence may
+the existing native owner worker synchronously ReleaseReference, then inspect L1 CloseOnce before
+claim release. There are no registration/run cleanup tasks. The poller retires its private local
+eventfd after poll exits; pending admissions cannot create replacements before that retirement
+finishes. No timeout or cross-thread close pretends to recover a live snapshot. See
+[L2 handoff and evidence](../../docs/research/linux-read-reactor.md).
+
+### Linux FIDO owner seam (L3)
+
+`LinuxFidoHidConnection.OpenAsync(path, reportApi, reactor, cancellationToken, physicalClaim)`
+constructs/root-pins `LinuxFidoHidNativeOwner` before native acquisition. One dedicated background
+worker owns open, descriptor ioctl, output, reactor activation wait, actual quiescence wait,
+reference release and checked close. One ordinary raw operation is admitted; there is no backlog,
+per-operation Task.Run or worker replacement. Send copies caller memory and cannot complete while
+native output is held. Pending receive cancellation detaches only that reader, not native input.
+Its TCS task is the actual public task (no async wrapper), so terminal disposal cannot overtake it.
+The reactor only performs bounded nonblocking reads (32 attempts, four EINTR maximum); its
+160-report queue faults on overflow, clears abandoned data and requests removal to avoid spinning.
+
+Shutdown requests removal even during held output and waits for the exact token's true Quiescence
+on the original worker before ReleaseReference/CloseOnce. EINTR/EIO close diagnostics are reported
+after releasing the original claim; lack of release proof quarantines it and retains the GC root.
+The facade finalizer only requests shutdown and never waits. A broken wake can leave shutdown
+pending indefinitely; no replacement worker or timeout claims otherwise.
+
+Unexpected worker-loop failure closes admission under the owner lock, terminalizes the public
+reader and any accepted open/send completion, clears queued output and requests reactor removal.
+The still-available original worker then performs true-quiescence/checked-close cleanup. Native
+release proof still releases the original claim, but the first loop error remains in the shared
+disposal outcome. Interrupted/failed cleanup quarantines uncertain state without retries. Event
+retirement uses the same admission lock as all setters, and the finalizer request cannot throw.
+
+`LinuxHidIOReportConnection` is now the synchronous expert facade over this same owner. It keeps
+descriptor metadata, exact actual raw input lengths, arbitrary supported SET lengths and indefinite
+reads (no imported macOS timeout). EOF is deliberately terminal rather than an empty success.
+Public `IHidInterface`/`IHidConnection` signatures are unchanged. L5 routes typed opens and
+discovery/registry transfer to this owner (below). No shared worker framework was added.
+See [L3 contract, evidence and limits](../../docs/research/linux-fido-async-lifetime.md).
+
+### Linux OTP owner seam (L4)
+
+`LinuxOtpHidConnection.OpenAsync(path, reportApi, cancellationToken, physicalClaim)` implements
+`IOtpHidConnection` over a separate `LinuxOtpHidNativeOwner`. Rooting precedes native acquisition;
+one context-suppressed dedicated worker owns open, feature GET/SET and checked close. Exactly one
+ordinary raw call is admitted; there is no backlog, per-call Task.Run, replay or reactor involvement.
+Send owns a copy before publication and clears it before task completion. Receive allocates eight
+bytes on the worker, clears failed/partial output, and transfers successful storage to the caller.
+Pre-dispatch cancellation submits nothing; after native dispatch cancellation cannot detach GET/SET.
+
+Shutdown stops admission and shares one outcome across sync/async callers, after any admitted native
+call returns. EINTR/EIO release the original claim with diagnostics; unknown release retains and
+quarantines the rooted owner/claim. Unexpected worker failure stops admissions, faults actual pending
+open/send/receive tasks, clears staging and attempts checked cleanup on that original worker. The
+initial error survives successful cleanup. Signal retirement shares the setter lock. Finalization
+only requests nonblocking, nonthrowing shutdown, even after worker failure/event retirement.
+
+`LinuxHidFeatureReportConnection` is the synchronous expert facade over the same OTP owner:
+metadata/GET remain8; direct SET retains supported caller lengths, rather than imposing typed8.
+L1 still supplies native framing, exact-count checking and scoped zeroing. No factory/discovery
+routing or adapter-registry rows change in L4. L5 routing is described below.
+See [L4 handoff](../../docs/research/linux-otp-async-lifetime.md).
+
+### Linux public factory and discovery routing (L5)
+
+`HidConnectionSlot.OwnsNativeLifetime` describes built-in macOS **or Linux** HID; it is not a
+platform-wide async-provider abstraction. Linux slots call `LinuxFidoHidConnection.OpenAsync` /
+`LinuxOtpHidConnection.OpenAsync`, bypassing the synchronous `IHidConnection` adapters. The internal
+slot accepts optional `ILinuxHidReportApi` / `ILinuxHidReadReactor` seams, alongside its existing macOS
+seams; `LinuxHidInterface` has an internal descriptor constructor for no-hardware route tests.
+Direct `IHidInterface.ConnectTo*Reports` methods remain synchronous expert facades.
+
+`YubiKeyDevice` claims every known physical member before open, then transfers that exact registration
+to the native owner instead of wrapping it. The requested transport must still match the selected slot.
+`SharedDeviceInfoRead` resolves the same owned slot for direct and published-composite providers and
+transfers the per-interface discovery lease before invoking open (even if it later throws). Once
+transferred, only the native owner releases it: neither a caller timeout nor a disposal exception is
+release proof. EINTR/EIO report disposal diagnostics **after** releasing the original claim; unknown
+release retains/quarantines it. Windows/custom adapters and PC/SC paths keep their prior behavior.
+`DiscoveryDeviceInfoReader` bounds the caller's wait; `SharedDeviceInfoRead` owns admission, the lease,
+worker, connection, and read pipeline. `ProtocolDeviceInfo.ReadAsync` only borrows an already-open
+connection and owns the matching protocol, not discovery scheduling or connection teardown.
+
+`LinuxHidRoutingTests` exercises real public typed connection and raw-session factories, grouped claims,
+held open/report/close, canceled/failed opens, unknown release, late discovery cleanup, replacement evidence,
+and borrowed idle/active session reuse under fake native seams. Preserve worker priority, evidence epochs,
+one-connection/one-session admission, and no transport fallback. L6a adds managed public applet journeys
+and bounded registry links (below); hardware/native acceptance remains L6b work. See
+[L5 routing handoff](../../docs/research/linux-hid-routing.md).
+
+### Bounded managed Linux acceptance (L6a)
+
+`AdapterContractRegistry` independently requires 43 operations / 76 runnable profile links, including 16
+Linux typed/direct operations / 27 links; `PublicSyncBoundaryRegistry` independently requires 23 public
+reachability entries, including 8 retained Linux synchronous paths. These are links, not native attestation.
+`LinuxDirectFacadeAcceptanceTests` checks sync facade failure, held output, true-quiescence and close drain.
+Applet tests `Ctap2SessionLinuxCrossLayerTests` and `YubiOtpSessionLinuxCrossLayerTests` use actual
+`LinuxHidInterface`/`HidConnectionSlot`/`YubiKeyDevice` and the production owners, faking only report/reactor
+seams. They preserve borrowed idle reuse, cancellation recovery, terminal presence ownership, and an
+owned pending CTAP exchange's claim through drain. OTP Configure is unchanged: public initialization
+awaits status first. `PcscConnectionLifetimeTests.LiveRegisteredConnection_*` holds disconnect and context
+release independently and isolates rooted live release-failure/quarantine probes using `PcscIsolatedProbe`.
+L6a changed no shipping source sites; its historical 219-site snapshot remains documented/outstanding.
+The current merged inventory incorporates upstream discovery/monitor changes; see the boundary-inventory README. See
+[managed evidence and remaining L6b scope](../../docs/research/linux-managed-acceptance.md).
 
 ### Listener and Native Retry Loops
 
@@ -307,7 +443,7 @@ Conversion traps, in the order they bite:
 | `bool` parameters/returns | Not blittable. Annotate `[MarshalAs(UnmanagedType.U1)]` (or `.I4` — match the C header), or change the signature to the native integer type. |
 | Delegate callbacks | Not marshalled at all by the generator. Use `delegate* unmanaged[Cdecl]<...>` with an `[UnmanagedCallersOnly]` target, as `Native/MacOS/HidInput/HidInput.Interop.cs` does. A function pointer also avoids the per-instance thunk and the "keep the delegate alive" `GCHandle` dance. |
 | `string` return values | Needs an explicit marshaller (`Utf8StringMarshaller`) or return `nint` and convert. Silent ownership bugs live here — say who frees the buffer in a comment. |
-| `SafeHandle` | **Is** supported, including as a return type. Keep the existing `LinuxUdevSafeHandle`-style pattern; do not downgrade to `nint` during conversion. |
+| `SafeHandle` | Supported for pointer-width native handles, including returns such as `LinuxUdevSafeHandle`. Its default unmanaged representation is `IntPtr`, **not** an `int` file descriptor. For libc `open`/`eventfd`, return native `int` into a preallocated managed SafeHandle, retaining SafeHandle ownership and references on caller APIs. |
 | `SetLastError = true` | Keep it only where a caller actually reads `errno`/`GetLastError`. It is not free. |
 | Array parameters | Delete `[MarshalAs(UnmanagedType.LPArray, SizeParamIndex = n)]` outright. Do **not** replace it with `[MarshalUsing(CountElementName = ...)]` — leave the parameter as a bare `byte[]`/`IntPtr[]`. See the note below on why that is safe, not merely tidier. |
 
@@ -517,10 +653,10 @@ A simply unavailable transport service (no PC/SC service/library/readers) can en
 transports are scanned. This is best-effort partial discovery, not proof that all OS interfaces were
 accessible. If PC/SC enumeration itself throws (worker saturation or `SCardGetStatusChange` error), the
 scan fails rather than committing false-empty removals. In-scope PC/SC and HID enumeration waits start
-together; an enumeration timeout instead logs and omits just that transport for one scan, using the other's
-results. The enumeration budget is five seconds. During initial creation
-this failure propagates and tears down the partial monitor; later scans retain the last publication and
-the next trigger retries. Timeout-induced partial results can produce removals/re-additions.
+together with a five-second budget. One-shot discovery logs an enumeration timeout and omits that
+transport for that call. Monitored discovery instead throws rather than publishing a timeout-induced
+partial snapshot: initial creation propagates the failure and tears down partial ownership; later scans
+retain the last publication and retry on the next trigger.
 
 Creation tolerates listener unavailability but the public factory still requires the first
 successful scan/publication. Hints during initialization remain pending for an ordered follow-up scan.
@@ -737,7 +873,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
   scans/publications; `DeviceChangeFeed` owns membership, identity retention, and isolated subscriptions.
   Disposal stops listeners, cancels and awaits the loop without a timeout, retires discovery, then completes
   the feed; bounded native waits do not release native leases before actual teardown.
-- **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Existing HID registered-wrapper release behavior is unchanged.
+- **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Built-in macOS/Linux HID transfer claims to their native owners before open; Windows/custom HID registered-wrapper release behavior is unchanged. Linux EINTR/EIO close diagnostics still release proven-closed descriptors' original claims.
 
 ## Known Gotchas
 

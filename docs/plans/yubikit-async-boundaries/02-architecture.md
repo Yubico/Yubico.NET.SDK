@@ -2,6 +2,23 @@
 
 # Architecture: one key's asynchronous lifecycle
 
+**Linux implementation checkpoint — 2026-11-11:** the `yubikit-linux-async`
+worktree implements typed FIDO/OTP owners, shared direct synchronous facades,
+poll/eventfd input and pre-open factory/discovery claim transfer. L0–L6b passed
+per-slice specification and lifetime/quality reviews, followed by an independent
+whole-change software-integration review. The current inventory has **219 sites**
+(132 imports, 3 exports, 37 waits, 18 scheduling sites, 21 pre-task-return gaps,
+6 callback registrations and 2 unmanaged callback addresses). Required managed
+links cover **43 adapter rows / 76 profiles** and **24 public-sync entries**.
+JIT and Native AOT each executed 38 real-libc/production-reactor synthetic-descriptor
+checks, with intended blocking-entry and false-quiescence controls rejected.
+Selected-key read-only hardware subsequently passed all six routes under JIT and
+AOT on serial 103 (43 physical checks per runtime), including pending-read
+disposal/reopen and three PC/SC lifecycle cycles. Touch/cancel/removal operator
+scenarios, hosted CI and global budgets remain unverified. See
+[current status](00-status.md) and [bound native evidence](../../research/linux-native-acceptance.md).
+The September counts and selected-macOS evidence below remain historical.
+
 Status: revised single-key Gate 2 approved by the user on 2026-09-22; independent design review passed.
 The first smart-card lifetime slice is committed at `db7a1bf6`; macOS typed/direct
 reports and listener teardown have since been verified at bounded grades in the
@@ -181,10 +198,10 @@ table rather than being repeated in every cell.
 |---|---|---|
 | Windows HID | FIDO input and output use owned overlapped `ReadFile`/`WriteFile` completion; immediate-success notification rules prevent double completion. `CancelIoEx` requests cancellation, while terminal completion controls storage release. Preserve OTP zero-desired-access opening; classify feature GET and SET independently, using the connection's blocking owner unless that direction is separately verified for overlapped execution. | Approved design only for this effort. Existing HID code/tests remain, but no Windows HID route has migrated and native-runtime/hardware evidence is pending. |
 | macOS HID | FIDO input uses persistent IOKit event delivery and bounded owned reports instead of per-call caller-run-loop pumping. FIDO output and OTP feature GET and SET use connection-owned workers, not unverified callback APIs. | Final-source `21498d24` selected-key `.8` Native AOT passed typed FIDO/OTP, direct IO/feature, automatic active cancellation, and real matching listener/late-drain modes. The public pending-read completion barrier was fixed without weakening its probe. Earlier physical removal and late-drain evidence supports bounded ISC-33. Public direct calls remain synchronous; fresh-host permission was user-deferred and universal coverage remains open. |
-| Linux HID | FIDO input uses nonblocking read plus `poll`/`eventfd` readiness and wake signaling. FIDO output uses the connection's blocking owner when it may block. OTP feature GET and SET ioctls are classified independently and never run on the read-readiness loop. | Approved design only for this effort. Existing HID code/tests remain, but no Linux HID route has migrated and native-runtime/hardware evidence is pending. |
+| Linux HID | FIDO input uses nonblocking read plus `poll`/`eventfd` readiness and wake signaling. FIDO output uses its connection worker. OTP feature GET/SET and checked close use the OTP connection worker. Registration activation, actual quiescence and owner-worker reference release are separate observations. | Implemented and managed-tested in `yubikit-linux-async`; real-libc synthetic-descriptor routes and selected-key read-only physical typed/direct/raw routes passed under JIT/AOT on serial 103. Capture `20261111T115147Z` supersedes historical usbfs blockage. Operator touch/cancel/removal and global acceptance remain pending. |
 | Windows smart card | Apply the portable smart-card policy: adapt classified blocking context/connect/transmit/transaction/end/disconnect/release calls through the connection owner; keep status monitoring's context/lifetime independent. Platform release and monitor semantics require their own evidence. | Portable owner slice implemented and managed-tested. Windows native-runtime/hardware evidence remains pending. |
 | macOS smart card | Apply the same portable smart-card policy without inferring that one platform's release/monitor result proves another's. | Portable owner and built-in async acquisition passed managed withheld-native probes; after replug, final-source `21498d24` selected-key `.8` Native AOT passed three async open/begin/read/end/dispose/reopen cycles. Pre-open sharing contention is historical; other platforms and interrupted native release remain pending. |
-| Linux smart card | Apply the same portable smart-card policy. Interpret release results by established platform evidence without changing the approved cleanup policy. | Portable owner slice implemented and managed-tested. Linux native-runtime/hardware evidence remains pending. |
+| Linux smart card | Apply the same portable smart-card policy. Interpret release results by established platform evidence without changing the approved cleanup policy. | Portable owner implemented and managed-tested. Selected serial 103 passed three open/begin/select/read/end/dispose cycles and two reopens per runtime under JIT/AOT. Interrupted release, other readers/platforms and the full hardware matrix remain pending. |
 
 These rows map to the existing parameterized ISC-4, ISC-8–20, ISC-26–40, ISC-44–46,
 ISC-54 and ISC-57–64 obligations as applicable. They add no criterion, checkmark,

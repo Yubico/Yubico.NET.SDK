@@ -1,6 +1,7 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
+using System.ComponentModel;
 using System.Reflection;
 using Yubico.YubiKit.Core.Transports.Hid.Windows;
 using Yubico.YubiKit.Core.UnitTests.BoundaryInventory;
@@ -10,6 +11,34 @@ namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows;
 public class WindowsOtpHidNativeOwnerTests
 {
     internal static CancellationToken Token => TestContext.Current.CancellationToken;
+
+    [Fact]
+    public async Task OpenCancellation_AfterSuccessPublicationBeforeAwait_KeepsConnectionUsable()
+    {
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(Token);
+        var api = new WindowsOtpReportApi();
+        var claim = new WindowsOtpClaim();
+        var owner = await WindowsOtpHidNativeOwner.OpenAsync("feature", api, cancellation.Token, claim,
+            async opening =>
+            {
+                await opening.WaitAsync(TimeSpan.FromSeconds(5), Token);
+                // The worker has published success, but the factory still owns its cancellation registration.
+                cancellation.Cancel();
+            });
+        try
+        {
+            Assert.Equal(8, (await owner.ReceiveAsync(Token).WaitAsync(TimeSpan.FromSeconds(5), Token)).Length);
+            Assert.Equal(0, api.Closes);
+            Assert.Equal(0, claim.Releases);
+        }
+        finally
+        {
+            // Drain the original worker before test-owned resources leave scope, even if the test was cancelled.
+            await owner.ShutdownAsync().WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+        }
+        Assert.Equal(1, api.Closes);
+        Assert.Equal(1, claim.Releases);
+    }
 
     [Theory]
     [InlineData("open")]
@@ -181,15 +210,20 @@ public class WindowsOtpHidNativeOwnerTests
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task FailedOrCancelledOpen_KeepsClaimThroughCheckedClose(bool cancel)
+    [InlineData(false, 0u)]
+    [InlineData(true, 0u)]
+    [InlineData(true, 5u)]
+    public async Task FailedOrCancelledOpen_KeepsClaimThroughCheckedClose(bool cancel, uint closeError)
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(Token);
         using var probe = new WithheldNativeProbe();
         using var releaseClose = new ManualResetEventSlim();
         var closeEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var api = new WindowsOtpReportApi { OpenError = cancel ? null : new IOException("open metadata failed") };
+        var api = new WindowsOtpReportApi
+        {
+            OpenError = cancel ? null : new IOException("open metadata failed"),
+            Release = new(true, closeError)
+        };
         var claim = new WindowsOtpClaim();
         api.Before = name =>
         {
@@ -211,7 +245,15 @@ public class WindowsOtpHidNativeOwnerTests
         finally
         {
             releaseClose.Set();
-            await Assert.ThrowsAnyAsync<Exception>(probe.ReleaseAndDrainAsync);
+            if (closeError != 0)
+            {
+                var error = await Assert.ThrowsAsync<AggregateException>(probe.ReleaseAndDrainAsync);
+                Assert.Collection(error.InnerExceptions,
+                    primary => Assert.IsAssignableFrom<OperationCanceledException>(primary),
+                    cleanup => Assert.Equal((int)closeError, Assert.IsType<Win32Exception>(cleanup).NativeErrorCode));
+            }
+            else if (cancel) await Assert.ThrowsAnyAsync<OperationCanceledException>(probe.ReleaseAndDrainAsync);
+            else await Assert.ThrowsAsync<IOException>(probe.ReleaseAndDrainAsync);
         }
         Assert.Equal(1, api.Closes);
         Assert.Equal(1, claim.Releases);

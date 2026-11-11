@@ -30,6 +30,7 @@ internal sealed class WindowsOtpHidNativeOwner
     private byte[]? _inputCopy;
     private Exception? _workerFailure;
     private bool _openAttempted;
+    private bool _openSucceeded;
     private bool _active;
     private bool _stopping;
 
@@ -46,7 +47,7 @@ internal sealed class WindowsOtpHidNativeOwner
     /// <summary>Transfers the claim before acquisition and opens on a context-suppressed dedicated worker.</summary>
     /// <remarks>Failed/canceled open awaits checked cleanup, preserving both primary and cleanup errors.</remarks>
     internal static Task<WindowsOtpHidNativeOwner> OpenAsync(string devicePath, IWindowsHidFeatureReportApi reportApi,
-        CancellationToken cancellationToken, IDisposable? physicalClaim = null)
+        CancellationToken cancellationToken, IDisposable? physicalClaim = null, Func<Task, Task>? beforeOpenCompletionAwait = null)
     {
         WindowsOtpHidNativeOwner owner;
         try { owner = new WindowsOtpHidNativeOwner(reportApi, physicalClaim); }
@@ -56,15 +57,19 @@ internal sealed class WindowsOtpHidNativeOwner
             catch (Exception releaseError) { throw new AggregateException(constructionError, releaseError); }
             throw;
         }
-        return owner.OpenAndCleanupAsync(devicePath, cancellationToken);
+        return owner.OpenAndCleanupAsync(devicePath, cancellationToken, beforeOpenCompletionAwait);
     }
 
-    private async Task<WindowsOtpHidNativeOwner> OpenAndCleanupAsync(string devicePath, CancellationToken cancellationToken)
+    private async Task<WindowsOtpHidNativeOwner> OpenAndCleanupAsync(string devicePath, CancellationToken cancellationToken,
+        Func<Task, Task>? beforeOpenCompletionAwait)
     {
         try
         {
-            using var cancellation = cancellationToken.UnsafeRegister(_ => RequestShutdown(), null);
-            await StartOpen(devicePath, cancellationToken).ConfigureAwait(false);
+            using var cancellation = cancellationToken.UnsafeRegister(_ => CancelOpen(), null);
+            var opening = StartOpen(devicePath, cancellationToken);
+            // Per-open test seam: hold the consumer before observing worker publication, without changing its scheduler.
+            if (beforeOpenCompletionAwait is not null) await beforeOpenCompletionAwait(opening).ConfigureAwait(false);
+            await opening.ConfigureAwait(false);
             return this;
         }
         catch (Exception openError)
@@ -118,10 +123,12 @@ internal sealed class WindowsOtpHidNativeOwner
             // Preserve the Windows signed-short descriptor boundary, and require a payload.
             if (Metadata.FeatureReportByteLength is < 2 or > (ushort)short.MaxValue)
                 throw new IOException("Windows OTP feature descriptor length is invalid.");
-            cancellationToken.ThrowIfCancellationRequested();
             lock (_sync)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 ObjectDisposedException.ThrowIf(_stopping, this);
+                // Retire creation-token authority atomically with success, before any consumer can resume.
+                _openSucceeded = true;
                 _ = opened.TrySetResult();
             }
         }
@@ -133,6 +140,14 @@ internal sealed class WindowsOtpHidNativeOwner
             {
                 if (ReferenceEquals(_workCompletion, opened)) _workCompletion = null;
             }
+        }
+    }
+
+    private void CancelOpen()
+    {
+        lock (_sync)
+        {
+            if (!_openSucceeded) RequestShutdown();
         }
     }
 

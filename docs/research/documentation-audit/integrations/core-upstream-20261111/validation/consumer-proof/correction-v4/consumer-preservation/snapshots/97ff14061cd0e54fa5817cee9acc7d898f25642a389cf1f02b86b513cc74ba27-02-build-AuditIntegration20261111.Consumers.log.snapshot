@@ -1,0 +1,34 @@
+$ dotnet build docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj (in 178 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj (in 189 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj (in 149 ms).
+  19 of 22 projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.SecurityDomain -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll
+  Yubico.YubiKit.Piv -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.YubiOtp -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll
+  Yubico.YubiKit.YubiHsm -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.Ctap2 -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll
+  Yubico.YubiKit.Cli.Shared -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Oath -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.WebAuthn -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll
+  Yubico.YubiKit.Cli.Commands -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll
+  ManagementTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll
+  OtpTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool.dll
+  HsmAuthTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.dll
+  OpenPgpTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool.dll
+  FidoTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool.dll
+  MacOSHidRouteVerification -> /home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidRouteVerification/bin/Release/net10.0/MacOSHidRouteVerification.dll
+  OathTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.dll
+  PivTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.dll
+  Yubico.YubiKit.NativeAotVerification -> /home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/bin/Release/net10.0/Yubico.YubiKit.NativeAotVerification.dll
+  Yubico.YubiKit.AuditIntegration20261111.Consumers -> /home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.Consumers/bin/Release/net10.0/Yubico.YubiKit.AuditIntegration20261111.Consumers.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.75

@@ -1,0 +1,12 @@
+// Find all connected YubiKeys
+var devices = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+foreach (var device in devices)
+{
+    var info = await device.GetDeviceInfoAsync(cancellationToken: cancellationToken);
+    Console.WriteLine($"Serial: {info.SerialNumber}");
+    Console.WriteLine($"Firmware: {info.FirmwareVersion}");
+    Console.WriteLine($"USB enabled: {info.UsbEnabled}");
+}
+
+// Find specific device
+var yubiKey = devices.SingleOrDefault(device => device.SerialNumber == 12345678);

@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "-c",
+    "import subprocess,sys,time;print('parent stdout',flush=True);print('parent stderr',file=sys.stderr,flush=True);p=subprocess.Popen([sys.executable,'-c',\"import signal,time,os;signal.signal(signal.SIGTERM,signal.SIG_IGN);print('OWNED_DESCENDANT='+str(os.getpid()),flush=True);time.sleep(120)\"]);time.sleep(0.25);sys.exit(9)"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T18:41:51.357011+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-second/records/orphan",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-second/records/journals/orphan",
+  "qualification_faults": []
+}

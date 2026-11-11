@@ -1,0 +1,112 @@
+{
+  "status": "static correction prepared; actual v2 capture/live proof awaits coordinator review and execution",
+  "root_cause": "Default MSBuild XML namespace was omitted by unqualified generated Import lookup; actual path and exact Exists condition were already correct.",
+  "compiler_attempt": "probe-first",
+  "build_label": "consumer-probe-build-first",
+  "proposed_capture_name": "probe-first-v2",
+  "compilation_change": "None. Original successful build, C# bodies and compiled hook reused unchanged. New tools are post-build verifier tools, not original compilation inputs.",
+  "protected_originals": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py",
+      "bytes": 41278,
+      "sha256": "54cb56e12e3b683d2c662c133dc6e23eadef355d7e515f478a87b36a87f25281"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/preparation-seal.json",
+      "bytes": 31893,
+      "sha256": "6353150d700c743b6d64fab417acd742f31eea2d984de2eca3a50a301b377980"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inputs.json",
+      "bytes": 49129,
+      "sha256": "af9a3e6a35388d6d8fc0973a263098aa2eaad573f81a43fd6191873fefd23f83"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/Capture.targets",
+      "bytes": 7800,
+      "sha256": "3242fe01c0f0ac6d7a1d27bd4539da21fb143e4c5b882aaee30e629532f4bf8a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/run-lane.sh",
+      "bytes": 1847,
+      "sha256": "e28f00a8ff8f0416d7e62f29ff432923fb821e3f4b34d395679a8ea54daa7b2e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/tooling-provenance.json",
+      "bytes": 15107,
+      "sha256": "0b56d25ce523b69848033b41fd676e199e2bc20a6faa607d35e4a188e806cfdb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/consumer-validation-preparation.md",
+      "bytes": 16670,
+      "sha256": "3a8204c0e8855590bf62892f7f6b1b55691a88eab42c08f880499bd0f00dbc22"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/probe-first/failure.json",
+      "bytes": 137442,
+      "sha256": "594b2dd49a252c0d09d1acb458224f7c87c38afd6b14a6cdbfac19509289e6ba"
+    }
+  ],
+  "new_tools": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v2.py",
+      "bytes": 5211,
+      "sha256": "78024e05a44e82b309c3ec70a5814c13513f0a9436ccc345c224e0b19380b695"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/nuget-imports-v2.py",
+      "bytes": 5472,
+      "sha256": "2949c4359d893cb600042ba29eb48e7ccadf08e9af6e176c51fc9e1e9c17007f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/preserve-capture-failure-v2.py",
+      "bytes": 6324,
+      "sha256": "a94c26f965cfeb51c766824aaab35043072574dd6fdfd11dc138d61e3d51ffbd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/run-lane-v2.sh",
+      "bytes": 1989,
+      "sha256": "34b9bfc6a85276e1db8993302f2d4980b9d200df11850615a3133e63bc31c3d5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v2/handoff.md",
+      "bytes": 8066,
+      "sha256": "00ec820628f75b3d4af029d761c4856e9e36e1ac851672cb6a07fb309fd55c66"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v2/generated-import-inspection-second.json",
+      "bytes": 81957,
+      "sha256": "200a55baa9a425141df747a17b60b3d4df28b4a546685d174b29f54160945a6a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v2/recorded-probe-input-inspection.json",
+      "bytes": 3179,
+      "sha256": "5ab1b6bef2603b62cc24be028e8cd1eb42c32b1ac80ce2ae2c659b3c1e10f16a"
+    }
+  ],
+  "preservation_manifest": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v2/failure-preservation/manifest.json",
+    "bytes": 496311,
+    "sha256": "7993195c1d68e4f893f1306a7e3580ac02ece135298593891b060a27840fc1cc"
+  },
+  "transformations": [
+    {
+      "before": "matches = [n for n in ET.parse(path).iter('Import') if n.attrib.get('Project') == needle]",
+      "after": "matches = [n for n in generated_msbuild_imports(path, package) if n.attrib.get('Project') == needle]",
+      "count": 1
+    },
+    {
+      "before": "destination = HERE / 'evidence' / attempt",
+      "after": "destination = HERE / 'evidence' / CAPTURE_NAME",
+      "count": 2
+    },
+    {
+      "before": "result = dict(status='captured-current-compiler-inputs', context=context, attempt=attempt,",
+      "after": "result = dict(status='captured-current-compiler-inputs', context=context, attempt=attempt, capture_name=CAPTURE_NAME, proof_revision='v2', correction_receipt_sha256=CORRECTION_RECEIPT_SHA256,",
+      "count": 1
+    }
+  ],
+  "effective_base_source_sha256": "e5ab2196456726c6bb297a02f5b12ea7ef0a4ac4d31250ec554294d3f7386ae8",
+  "canonical_checks": "Original strict policy/Csc/graph/output/import-order/Exists checks remain; namespace helper also validates exact installed target and enclosing canonical guards. No generic MSBuild interpreter or path normalization.",
+  "documentation_source": "https://github.com/python/cpython/blob/main/Doc/library/xml.etree.elementtree.rst"
+}

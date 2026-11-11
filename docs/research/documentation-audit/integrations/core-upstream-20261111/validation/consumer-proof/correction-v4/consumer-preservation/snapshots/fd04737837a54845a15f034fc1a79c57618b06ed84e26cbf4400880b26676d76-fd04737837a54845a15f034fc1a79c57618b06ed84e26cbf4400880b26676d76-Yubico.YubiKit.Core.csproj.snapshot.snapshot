@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Override default multi-targeting if needed -->
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.Core</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.Core</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>Core library for Yubico.NET.SDK providing device management, connection abstractions, and APDU protocol handling for YubiKey devices.</Description>
+    <PackageTags>yubikey;yubico;smartcard;fido2;authentication;hardware-security;apdu;pcsc</PackageTags>
+
+    <!-- Allow unsafe code for performance-critical operations -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Package versions come from Directory.Packages.props -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Yubico.NativeShims" />
+  </ItemGroup>
+
+  <!-- Explicit InternalsVisibleTo for legacy project names -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Yubico.YubiKit" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Core.UnitTests" />
+    <InternalsVisibleTo Include="MacOSHidRouteVerification" />
+    <InternalsVisibleTo Include="LinuxHidRouteVerification" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Tests.Shared" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Ctap2" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Management" />
+  </ItemGroup>
+
+  <!--
+    Applet modules whose IYubiKey.Create<App>SessionAsync entry points open a connection the caller never
+    sees, and so must hand its ownership to the session they return (ApplicationSession.OwnConnection).
+    Internal rather than public: transferring connection ownership is not something an SDK consumer needs,
+    and every consumer-facing path already has a clear owner.
+  -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Yubico.YubiKit.Oath" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.OpenPgp" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Piv" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.SecurityDomain" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.YubiHsm" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.YubiOtp" />
+  </ItemGroup>
+
+  <!-- Applet tests that directly exercise their internal protocol-backed implementations. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Ctap2.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Management.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Piv.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.SecurityDomain.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.YubiOtp.UnitTests" />
+  </ItemGroup>
+
+</Project>

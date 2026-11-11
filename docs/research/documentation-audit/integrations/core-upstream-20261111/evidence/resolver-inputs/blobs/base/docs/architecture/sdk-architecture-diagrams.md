@@ -1,0 +1,429 @@
+# Yubico Yubikit .NET SDK v2 — Architecture Diagrams
+
+> **Study & presentation material.** Layered mermaid diagrams at progressive zoom depths.
+> Authoritative branch: `yubikit`. Source of truth: `src/<Module>/src/*.csproj` + `docs/architecture/`.
+> Diagram-to-source evidence is tracked in `docs/architecture/sdk-architecture-map.yml`. Validate with
+> `dotnet toolchain.cs -- docs-architecture` (resolves the evidence map and checks image freshness +
+> integrity). Regenerate images with `scripts/architecture/render-architecture.sh`; do not hand-edit
+> rendered images.
+>
+> **How to use these:** Read top to bottom. Each level zooms in one step. For a talk, one
+> diagram per slide, in this order. For learning, study L2–L4 with the code open beside you —
+> every box is a real type you can grep for.
+
+---
+
+## L0 — Context: what the SDK is
+
+The 10,000ft view. One glance answers "what does this thing do and where does it sit."
+
+```mermaid
+flowchart LR
+    App["Your .NET App<br/>(desktop / service / CLI)"]
+    subgraph SDK["Yubico Yubikit .NET SDK v2"]
+        direction TB
+        Apps["App modules<br/>PIV · OATH · CTAP2 · WebAuthn<br/>OpenPGP · Mgmt · YubiOTP · HSM · SD"]
+        Core["Core<br/>discovery · connections · APDU · SCP · crypto"]
+        Apps --> Core
+    end
+    OS["OS transport layer<br/>PC/SC · HID (USB/NFC)"]
+    HW["YubiKey hardware<br/>(one or many)"]
+
+    App -->|"typed C# API<br/>(async)"| SDK
+    Core -->|"native interop<br/>Win / macOS / Linux"| OS
+    OS -->|"APDU · CTAPHID · OTP frames"| HW
+```
+
+**Teaching note:** the SDK is *authenticator-side* — it talks to the key. Server-side / RP
+verification (WebAuthn assertion checking) is deliberately **not** the SDK's job.
+
+---
+
+## L1 — Assembly dependency graph
+
+Which shipping assembly depends on which. This is the single most important slide for
+"how is the codebase organized." Edges are real `<ProjectReference>` entries.
+
+```mermaid
+flowchart TD
+    Core["Yubico.YubiKit.Core<br/><i>the hub — everything depends on it</i>"]
+
+    Mgmt["Management"]
+    Piv["Piv"]
+    Oath["Oath"]
+    OpenPgp["OpenPgp"]
+    SD["SecurityDomain"]
+    Hsm["YubiHsm"]
+    Otp["YubiOtp"]
+    Ctap2["Ctap2"]
+    WebAuthn["WebAuthn"]
+
+    Mgmt --> Core
+    Piv --> Core
+    Oath --> Core
+    OpenPgp --> Core
+    SD --> Core
+    Hsm --> Core
+    Otp --> Core
+    Ctap2 --> Core
+    WebAuthn -->|"one-way<br/>(Ctap2 has no ref back)"| Ctap2
+    Ctap2 --> Core
+
+    classDef hub fill:#1f6feb,color:#fff,stroke:#0b3d91,stroke-width:2px;
+    classDef second fill:#8957e5,color:#fff,stroke:#4c2889;
+    class Core hub;
+    class WebAuthn second;
+```
+
+**Key facts to say out loud:**
+- **Core is the only hub.** Every app module has exactly *one* project reference → Core.
+- **WebAuthn is the only 2nd-level module:** `Core ← Ctap2 ← WebAuthn`. WebAuthn is a
+  higher-level client over CTAP2 and must never duplicate CTAP2 behavior.
+- App modules **do not** reference each other. They are independent verticals over Core.
+- (Not shown: CLI/test/example projects — noise for an architecture talk.)
+
+---
+
+## L2 — Layered stack: how one module is built
+
+Zoom into a single app module (PIV shown) and see the layers from public API down to
+the metal. This is the mental model that transfers to *every* module.
+
+```mermaid
+flowchart TD
+    subgraph AppLayer["Application layer (per module)"]
+        Sess["PivSession : ApplicationSession, IPivSession<br/><i>sealed facade — public API</i>"]
+    end
+
+    subgraph BaseLayer["Session base (Core.Sessions)"]
+        Base["ApplicationSession (abstract)<br/>owns IProtocol · FirmwareVersion · Init · Auth<br/>IsSupported(Feature) / EnsureSupports(Feature)"]
+    end
+
+    subgraph ProtoLayer["Protocol (Core.Protocols)"]
+        SCProto["ISmartCardProtocol<br/>(PIV/OATH/OpenPGP/SD/HSM)"]
+        FidoProto["IFidoHidProtocol<br/>(shared FIDO CTAPHID)"]
+        OtpProto["IOtpHidProtocol<br/>(YubiOTP)"]
+    end
+
+    subgraph PipeLayer["APDU decorator pipeline (SmartCard path)"]
+        Recv["ChainedResponseReceiver<br/>(reassembles 0x61xx more-data)"]
+        Xmit["ApduTransmitter / ChainedApduTransmitter"]
+        Fmt["IApduFormatter<br/>(Short vs Extended)"]
+        Scp["(optional) ScpProcessor<br/>SCP03 / SCP11 encrypt+MAC"]
+        Recv --> Xmit --> Fmt
+        Scp -.wraps.- Xmit
+    end
+
+    subgraph CtapLayer["CTAP2 path (beside APDU, not below it)"]
+        CborB["CtapRequestBuilder → CBOR bytes<br/>CtapResponseParser ← CBOR bytes"]
+        FBack["ICtap2Backend"]
+        HidB["HidBackend<br/>CTAPHID_CBOR (0x10) frames"]
+        ScB["SmartCardBackend<br/>wraps CTAP in APDU (CLA 0x80, INS 0x10)"]
+        CborB --> FBack
+        FBack --> HidB
+        FBack --> ScB
+    end
+
+    subgraph ConnLayer["Connection (Core.Transports)"]
+        SCConn["ISmartCardConnection"]
+        FidoConn["IFidoHidConnection"]
+        OtpConn["IOtpHidConnection"]
+    end
+
+    subgraph NativeLayer["Transports + Native interop"]
+        Pcsc["PC/SC (SmartCard/CCID)"]
+        Hid["HID (FIDO + OTP)"]
+        Nat["Native: Windows · macOS · Linux"]
+    end
+
+    Sess --> Base
+    Base --> SCProto
+    Base -.-> FidoProto
+    Base -.-> OtpProto
+    SCProto --> Recv
+    Fmt --> SCConn
+    FidoProto --> FidoConn
+    OtpProto --> OtpConn
+    SCConn --> Pcsc
+    FidoConn --> Hid
+    OtpConn --> Hid
+    Pcsc --> Nat
+    Hid --> Nat
+
+    %% CTAP2 path wiring — note ScB rejoins the SmartCard pipeline
+    FidoSess["Ctap2Session"] --> CborB
+    ScB -->|"reuses ISmartCardProtocol<br/>(same APDU pipeline)"| SCProto
+    HidB --> FidoProto
+```
+
+**Teaching notes:**
+- `ApplicationSession` holds and disposes its `IProtocol`, but that does not imply ownership of the
+  underlying `IConnection`. A direct `Session.CreateAsync(connection)` borrows the caller's connection;
+  only a convenience API that opened a hidden connection calls internal `OwnConnection()`.
+- The protocol layer shown here is internal session machinery. Consumers choose applet sessions first,
+  guarded `Raw*Session` types for supported low-level exchanges, or explicitly unguarded raw connections.
+- **Two-phase init pattern (memorize this):** private ctor stores connection →
+  static `CreateAsync(...)` does async selection + `ConfigureProtocolAsync(...)`.
+- **Deliberately flat command model:** there are **no** `SignCommand`/`VerifyPinCommand`
+  classes. Session methods build the `ApduCommand` inline. (CTAP2 is the exception — it
+  builds CBOR via `CtapRequestBuilder`.)
+- **Transport split:**
+  - *SmartCard-only:* PIV, OATH, OpenPGP, SecurityDomain, YubiHSM.
+  - *Backend pattern (multi-transport):* Management, CTAP2, YubiOTP — an `IxxxBackend`
+    interface with a `SmartCard` impl and a `Hid` impl.
+- **CTAP2 path (the box beside APDU):** CTAP2 does **not** build APDUs at the session
+  layer — it builds **CBOR** via `CtapRequestBuilder` and parses replies via
+  `CtapResponseParser`. That CBOR then goes through `ICtap2Backend`, which has two impls:
+  - `HidBackend` — sends CTAPHID_CBOR frames (command `0x10`) over `IFidoHidProtocol`.
+    This is the genuinely separate path.
+  - `SmartCardBackend` — wraps the CTAP payload in a single APDU (`CLA 0x80, INS 0x10`) and
+    **reuses `ISmartCardProtocol` — the exact same APDU decorator pipeline** as PIV/OATH.
+    Used for NFC and (FW 5.8.0+) USB SmartCard FIDO2.
+- **The "aggregate them later" story:** the two paths already converge. Only `HidBackend` is
+  distinct; `SmartCardBackend` is a thin CTAP-in-APDU adapter over the shared pipeline. So the
+  diagram is deliberately drawn as **CTAP beside APDU, with the SmartCard backend rejoining the
+  APDU pipeline** — the honest picture, and the slide that motivates a future merge.
+
+---
+
+## L3 — Command execution: how one API call becomes bytes and back
+
+The dynamic view. Trace a single SmartCard operation (e.g. `PivSession.GetSerialNumberAsync`)
+end-to-end. This is the "aha" slide — it shows the decorator pipeline in motion.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Caller as Your code
+    participant Sess as PivSession
+    participant Proto as ISmartCardProtocol<br/>(PcscProtocol)
+    participant Recv as ChainedResponseReceiver
+    participant Xmit as ApduTransmitter
+    participant Fmt as IApduFormatter
+    participant Conn as ISmartCardConnection
+    participant HW as YubiKey
+
+    Caller->>Sess: GetSerialNumberAsync()
+    Sess->>Sess: build ApduCommand inline
+    Sess->>Proto: TransmitAndReceiveAsync(ApduCommand, throwOnError)
+    Proto->>Recv: TransmitAsync(cmd)
+    Recv->>Xmit: TransmitAsync(cmd)
+    Xmit->>Fmt: Format(cla,ins,p1,p2,data,le)
+    Fmt-->>Xmit: wire bytes
+    Xmit->>Conn: TransmitAndReceiveAsync(bytes)
+    Conn->>HW: SCardTransmit (PC/SC)
+    HW-->>Conn: raw response bytes
+    Conn-->>Xmit: bytes
+    Xmit-->>Recv: ApduResponse
+    Note over Recv: loop while SW1==0x61<br/>(send 0xC0, accumulate Data)
+    Recv-->>Proto: full ApduResponse
+    Note over Proto: if !IsOK() && throwOnError<br/>→ throw ApduException
+    Proto-->>Sess: ApduResponse
+    Sess->>Sess: parse response.Data → typed result
+    Sess-->>Caller: int serial
+```
+
+**Teaching notes:**
+- **Decorator pipeline:** `ChainedResponseReceiver` (response reassembly) wraps
+  `ApduTransmitter` (send) wraps `IApduFormatter` (wire serialization). Each layer has one job.
+- **Short vs Extended APDU** is chosen by firmware + `SupportsExtendedApdu()` at
+  `Configure()` time. Extended = FW ≥ 4.0; short path uses `ChainedApduTransmitter` to split.
+- **SCP variant:** if `scpKeyParams` were passed, an `ScpProcessor` sits in the chain and
+  encrypts/MACs every APDU before it hits the wire, decrypts on the way back.
+- **Security detail worth mentioning:** the wire buffer is zeroed in a `finally` — the SDK
+  is disciplined about not leaving sensitive bytes in memory.
+
+### L3b — the CTAP2 variant (same shape, different bytes)
+
+Trace `Ctap2Session.MakeCredentialAsync`. Note it's the *same* two-transport idea, but the
+payload is CBOR, not an APDU — and over SmartCard it collapses back onto the APDU pipeline.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Caller as Your code
+    participant Sess as Ctap2Session
+    participant Build as CtapRequestBuilder
+    participant Back as ICtap2Backend
+    participant Parse as CtapResponseParser
+    participant HW as YubiKey
+
+    Caller->>Sess: MakeCredentialAsync(params)
+    Sess->>Build: Create(0x01).Add(...).Build()
+    Build-->>Sess: command byte + CBOR payload
+    alt HID transport (USB)
+        Sess->>Back: SendCborAsync(request) [HidBackend]
+        Back->>HW: CTAPHID_CBOR (0x10) frames
+        HW-->>Back: status byte + CBOR
+    else SmartCard transport (NFC / USB FW≥5.8.0)
+        Sess->>Back: SendCborAsync(request) [SmartCardBackend]
+        Note over Back: wrap in APDU CLA=0x80 INS=0x10<br/>then reuse the L3 APDU pipeline
+        Back->>HW: APDU (via ISmartCardProtocol)
+        HW-->>Back: APDU response (status byte + CBOR)
+    end
+    Back->>Back: check CtapStatus, strip status byte
+    Back-->>Sess: CBOR response bytes
+    Sess->>Parse: parse CBOR → typed result
+    Parse-->>Sess: MakeCredentialData
+    Sess-->>Caller: typed credential
+```
+
+**Teaching notes (CTAP2):**
+- **CBOR in, CBOR out** — `CtapRequestBuilder` / `CtapResponseParser` replace the inline
+  `ApduCommand` build that every other module uses. This is *the* CTAP2 exception to the flat
+  command model.
+- **Status byte convention:** the authenticator's reply starts with a single `CtapStatus`
+  byte; the backend checks it (`CtapException.ThrowIfError`) then strips it before parsing.
+- **The convergence point:** in the SmartCard branch, everything below "wrap in APDU" is the
+  *identical* pipeline from L3 — this is why the two paths can eventually merge.
+
+---
+
+## L4 — Device discovery & connection flow
+
+How the SDK finds keys and opens a connection. Answers "how do I get from nothing to a
+usable YubiKey object." Entry point is the **static** `YubiKeyManager` — no DI required.
+
+```mermaid
+flowchart TD
+    Start(["YubiKeyManager.FindAllAsync(type=All)"])
+    Mgr["YubiKeyDeviceManager<br/><i>composition root (lazy)</i>"]
+    Repo["YubiKeyDeviceRepository<br/><i>cache</i>"]
+    Mon["YubiKeyDeviceMonitorService<br/><i>hot-plug events</i>"]
+    Find["FindYubiKeys.FindAllAsync"]
+
+    FPcsc["IFindPcscDevices<br/>(PC/SC readers)"]
+    FHid["IFindHidInterfaces<br/>(FIDO + OTP HID)"]
+    Merge{"Merge interfaces of<br/>same physical key<br/>(by USB Product ID)"}
+
+    Slot["PcscConnectionSlot / HidConnectionSlot<br/><i>raw live interface candidate</i>"]
+    Flat["YubiKeyDevice<br/>optional SmartCard · FIDO · OTP slots"]
+
+    Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous"])
+
+    Start --> Mgr
+    Mgr --> Repo
+    Mgr --> Mon
+    Mgr -->|cache miss / forceRescan| Find
+    Find --> FPcsc
+    Find --> FHid
+    FPcsc --> Slot
+    FHid --> Slot
+    Slot --> Merge
+    Merge --> Flat
+    Flat --> Result
+```
+
+### Then: connecting (transport selection)
+
+```mermaid
+flowchart TD
+    Direct["direct typed<br/>ConnectAsync&lt;TConnection&gt;()"]
+    Default["parameterless ConnectAsync()"]
+    Q{"parameterless<br/>ConnectAsync()?"}
+    Throw["throw if multi-interface"]
+    Typed["one typed connect:<br/>&lt;ISmartCardConnection&gt; etc."]
+    AppletEntry["applet session extension"]
+    AppletKind{"application"}
+
+    subgraph Applet["Applet transport selection"]
+        M["Management: SmartCard → HidFido → HidOtp"]
+        O["YubiOTP: SmartCard → HidOtp"]
+        F["CTAP2 / WebAuthn: select HidFido if exposed,<br/>otherwise SmartCard; no contention fallback"]
+        S["PIV·OATH·OpenPGP·SD·HSM: SmartCard only"]
+    end
+
+    Select["ResolveSessionTransport:<br/>select exactly one transport"]
+    Attempt["claim all known member interface IDs<br/>and open selected connection"]
+    Refuse["ConnectionInUseException<br/>before physical open"]
+    Conn["open IConnection"]
+    Caller["direct caller owns/disposes IConnection"]
+    Session["ApplicationSession<br/>holds/disposes IProtocol<br/>borrows caller connection"]
+    Own{"convenience API opened<br/>hidden connection?"}
+    Ready["session ready"]
+
+    Direct --> Typed
+    Default --> Q
+    Q -->|yes, multi| Throw
+    Q -->|single interface| Typed
+    AppletEntry --> AppletKind
+    AppletKind --> M
+    AppletKind --> O
+    AppletKind --> F
+    AppletKind --> S
+    M & O & F & S --> Select
+    Select --> Typed
+    Typed --> Attempt
+    Attempt -->|held| Refuse
+    Attempt -->|available| Conn
+    Conn -->|direct typed call returns| Caller
+    Conn -->|applet extension continues| Session --> Own
+    Own -->|yes: internal OwnConnection| Ready
+    Own -->|no: caller disposes connection| Ready
+```
+
+**Teaching notes:**
+- **One `IYubiKey` = one physical key.** It exposes `AvailableConnections`
+  (`SmartCard | HidFido | HidOtp` flags). Discovery publishes one internal production implementation,
+  `YubiKeyDevice`. Before merging, each live PC/SC or HID handle is a raw `PcscConnectionSlot` or `HidConnectionSlot`,
+  not an `IYubiKey`.
+- **Merge logic** is conservative: interfaces merge by USB Product ID; NFC is never merged
+  with USB; ambiguity → surface as separate rows rather than mis-merge.
+- **Connection ownership:** a grouped physical key admits one live connection across CCID, FIDO HID,
+  and OTP HID. One live session is allowed per connection. A direct session factory borrows
+  the caller's connection; only convenience entry points own the hidden connection they create.
+- **Transport selection is single-shot:** each applet selects one supported transport from its default order
+  or explicit override. Held and platform errors propagate without trying another interface.
+- **Monitoring:** `StartMonitoring()` exposes hot-plug events through one stream — `await foreach`
+  over `YubiKeyManager.WatchAsync(ct)`. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type.
+  Good "advanced" slide if time allows.
+
+---
+
+## Appendix — the 6 types to memorize first
+
+If your audience remembers only six names, make it these:
+
+| Type | Layer | Why it matters |
+|---|---|---|
+| `YubiKeyManager` | discovery | static entry point — how you find keys |
+| `IYubiKey` | device model | one physical key; `ConnectAsync<T>()` |
+| `IConnection` | transport | base for SmartCard / FIDO-HID / OTP-HID connections |
+| `ApplicationSession` | session base | firmware, init, auth, protocol lifetime, optional hidden-connection ownership |
+| `RawSmartCardSession` | raw session | supported explicit SELECT and APDU exchange path |
+| `ApduCommand` / `ApduResponse` | pipeline | the record structs that flow through the decorator chain |
+
+---
+
+## Rendered images
+
+Pre-rendered for slides and offline viewing (regenerate with the command below):
+
+| Level | SVG (scales for print/slides) | PNG (3× raster) |
+|---|---|---|
+| L0 Context | `images/L0-context.svg` | `images/png/L0-context.png` |
+| L1 Assembly deps | `images/L1-assembly-deps.svg` | `images/png/L1-assembly-deps.png` |
+| L2 Layered stack (+ CTAP2 path) | `images/L2-layered-stack.svg` | `images/png/L2-layered-stack.png` |
+| L3 APDU sequence | `images/L3-apdu-sequence.svg` | `images/png/L3-apdu-sequence.png` |
+| L3b CTAP2 sequence | `images/L3b-fido2-ctap-sequence.svg` | `images/png/L3b-fido2-ctap-sequence.png` |
+| L4 Discovery | `images/L4-discovery.svg` | `images/png/L4-discovery.png` |
+| L4 Connection | `images/L4-connection.svg` | `images/png/L4-connection.png` |
+
+Regenerate after editing the diagrams:
+
+```bash
+# SVG (vector — best for slides)
+mmdc -i docs/architecture/sdk-architecture-diagrams.md -o docs/architecture/images/sdk.svg -t neutral -b transparent
+# PNG (3× raster)
+mmdc -i docs/architecture/sdk-architecture-diagrams.md -o docs/architecture/images/png/sdk.png -t neutral -b white -s 3
+# then rename sdk-1..7 → L0..L4 per the table above
+```
+
+Requires `@mermaid-js/mermaid-cli` (`npm i -g @mermaid-js/mermaid-cli`).
+
+---
+
+*Authoritative branch: `yubikit`. Type names cited are grep-able in `src/Core/src/` and
+`src/<Module>/src/`, and are tracked in `docs/architecture/sdk-architecture-map.yml`.
+Verify against source before presenting; `dotnet toolchain.cs -- docs-architecture` checks
+diagram-to-source evidence, renders, and image freshness.*

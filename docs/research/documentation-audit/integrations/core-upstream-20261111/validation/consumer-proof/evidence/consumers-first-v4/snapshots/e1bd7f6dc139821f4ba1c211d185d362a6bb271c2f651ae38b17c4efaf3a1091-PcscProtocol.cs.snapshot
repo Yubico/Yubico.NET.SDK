@@ -1,0 +1,207 @@
+// Copyright 2025 Yubico AB
+// 
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
+
+namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+
+/// <summary>
+///     APDU protocol over a single smart-card connection. Overlapping logical exchanges are refused —
+///     a smart card is a stateful sequential peer, so interleaved APDUs from two operations would corrupt
+///     each other's chained state.
+/// </summary>
+internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
+{
+    private const byte INS_SELECT = 0xA4;
+    private const byte P1_SELECT = 0x04;
+    private const byte P2_SELECT = 0x00;
+    private const byte INS_SEND_REMAINING = 0xC0;
+
+    private readonly ISmartCardConnection _connection;
+    private readonly ILogger<PcscProtocol> _logger;
+    private readonly ExchangeGuard _exchangeGuard = new();
+    private readonly DisposalGate _disposalGate = new();
+    private Exception? _recoveryFailure;
+    internal byte InsSendRemaining { get; private set; }
+    private IApduProcessor _processor;
+    private bool _disposed;
+
+    public PcscProtocol(
+        ISmartCardConnection connection,
+        ReadOnlyMemory<byte> insSendRemaining = default,
+        ILogger<PcscProtocol>? logger = null)
+    {
+        _logger = logger ?? NullLogger<PcscProtocol>.Instance;
+        _connection = connection;
+        InsSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
+        UseExtendedApdus = _connection.SupportsExtendedApdu();
+        _processor = BuildBaseProcessor();
+    }
+
+    internal bool UseExtendedApdus { get; private set; }
+
+    public int MaxApduSize { get; private set; } = SmartCardMaxApduSizes.Neo; // Lowest as default
+
+    public FirmwareVersion? FirmwareVersion { get; private set; }
+
+    private IApduProcessor BuildCommandProcessor(bool secure = false)
+    {
+        return UseExtendedApdus
+            ? new ApduTransmitter(_connection, new ApduFormatterExtended(MaxApduSize))
+            : new ChainedApduTransmitter(_connection, new ApduFormatterShort(), MarkRecoveryRequired, secure);
+    }
+
+    private IApduProcessor BuildBaseProcessor()
+    {
+        return new ChainedResponseReceiver(FirmwareVersion, BuildCommandProcessor(), InsSendRemaining, MarkRecoveryRequired);
+    }
+
+    private void ReconfigureProcessor() =>
+        _processor = BuildBaseProcessor();
+
+    internal IApduProcessor GetBaseProcessor() => BuildBaseProcessor();
+
+    internal IApduProcessor GetBaseCommandProcessor() => BuildCommandProcessor(secure: true);
+
+    /// <summary>
+    ///     The guard refusing overlapping logical exchanges on this protocol's connection. Shared with
+    ///     decorators that drive the same connection through their own processors (e.g. the SCP wrapper), so
+    ///     plain and wrapped traffic can never interleave.
+    /// </summary>
+    internal ExchangeGuard ExchangeGuard => _exchangeGuard;
+
+    internal void MarkRecoveryRequired(Exception failure) => _recoveryFailure ??= failure;
+
+    internal void ThrowIfRecoveryRequired()
+    {
+        if (_recoveryFailure is { } failure)
+            throw new InvalidOperationException(
+                "SmartCard continuation failed; dispose and reopen the connection before another exchange.", failure);
+    }
+
+
+    /// <summary>
+    ///     Releases this protocol. The connection is NOT disposed: a protocol is a user of the connection it
+    ///     was handed, never its owner. Whoever created the connection disposes it.
+    /// </summary>
+    public void Dispose() => _disposalGate.Dispose(() =>
+    {
+        _exchangeGuard.CloseAndDrain();
+        _disposed = true;
+    });
+
+    public ValueTask DisposeAsync() => _disposalGate.DisposeAsync(async () =>
+    {
+        await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+        _disposed = true;
+    });
+
+    public async Task<ApduResponse> TransmitAndReceiveAsync(
+        ApduCommand command,
+        bool throwOnError = true,
+        CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        _logger.LogTrace("Transmitting APDU: CLA 0x{Cla:X2} INS 0x{Ins:X2} P1 0x{P1:X2} P2 0x{P2:X2} Le {Le} data length {Length}",
+            command.Cla, command.Ins, command.P1, command.P2, command.Le, command.Data.Length);
+
+        var response = await _exchangeGuard.RunAsync(
+                exchangeToken =>
+                {
+                    ThrowIfRecoveryRequired();
+                    return _processor.TransmitAsync(command, false, exchangeToken);
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (throwOnError && !response.IsOK())
+        {
+            throw ApduException.FromResponse(response, command, "APDU command failed");
+        }
+
+        return response;
+    }
+
+    public async Task<ReadOnlyMemory<byte>> SelectAsync(
+        ReadOnlyMemory<byte> applicationId,
+        CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        _logger.LogTrace("Selecting application ID: {ApplicationId}", Convert.ToHexString(applicationId.Span));
+
+        var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
+        var response = await _exchangeGuard.RunAsync(
+                exchangeToken =>
+                {
+                    ThrowIfRecoveryRequired();
+                    return _processor.TransmitAsync(selectCommand, false, exchangeToken);
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
+        return !response.IsOK()
+            ? throw ApduException.FromResponse(response, selectCommand, "SELECT command failed")
+            : response.Data;
+    }
+
+    public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration = null)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        _exchangeGuard.Run(() =>
+        {
+            ThrowIfRecoveryRequired();
+            FirmwareVersion = firmwareVersion;
+            var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);
+
+            if (FirmwareVersion.IsAlphaOrBeta)
+            {
+                UseExtendedApdus = _connection.SupportsExtendedApdu();
+                MaxApduSize = SmartCardMaxApduSizes.Yk43;
+                ReconfigureProcessor();
+                return;
+            }
+
+            if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
+            {
+                if (insSendRemainingChanged)
+                    ReconfigureProcessor();
+
+                return;
+            }
+
+            var forceShortApdu = configuration is { ForceShortApdus: true };
+            UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
+            MaxApduSize = firmwareVersion.IsAtLeast(FirmwareVersion.V4_3_0)
+                ? SmartCardMaxApduSizes.Yk43
+                : SmartCardMaxApduSizes.Yk4;
+
+            ReconfigureProcessor();
+        });
+    }
+
+    private bool ConfigureInsSendRemaining(ProtocolConfiguration? configuration)
+    {
+        if (configuration is not { InsSendRemaining: byte insSendRemaining } || InsSendRemaining == insSendRemaining)
+            return false;
+
+        InsSendRemaining = insSendRemaining;
+        return true;
+    }
+
+}

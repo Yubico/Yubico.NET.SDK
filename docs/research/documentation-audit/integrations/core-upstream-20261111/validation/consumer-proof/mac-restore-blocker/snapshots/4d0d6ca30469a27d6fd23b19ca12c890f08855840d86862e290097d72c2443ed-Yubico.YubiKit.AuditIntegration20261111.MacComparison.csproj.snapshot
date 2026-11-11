@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../../../../../../../verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj" ReferenceOutputAssembly="false" AdditionalProperties="BoundaryCorePath=/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll;BoundaryNativeVersion=1.18.1;BoundaryComparisonVariant=audit-integration-20261111" />
+
+
+  </ItemGroup>
+</Project>

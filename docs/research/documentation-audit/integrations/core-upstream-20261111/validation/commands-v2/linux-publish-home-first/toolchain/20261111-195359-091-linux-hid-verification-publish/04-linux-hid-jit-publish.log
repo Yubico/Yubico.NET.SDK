@@ -1,0 +1,6 @@
+$ dotnet publish verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj -c Release -r linux-x64 --self-contained --no-restore -p:PublishAot=false --artifacts-path artifacts/linux-hid-verification/build/jit -o artifacts/linux-hid-verification/jit
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/build/jit/bin/Yubico.YubiKit.Core/release/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/build/jit/bin/Yubico.YubiKit.Management/release/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Ctap2 -> /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/build/jit/bin/Yubico.YubiKit.Ctap2/release/Yubico.YubiKit.Ctap2.dll
+  LinuxHidRouteVerification -> /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/build/jit/bin/LinuxHidRouteVerification/release_linux-x64/LinuxHidRouteVerification.dll
+  LinuxHidRouteVerification -> /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/jit/

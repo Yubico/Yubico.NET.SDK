@@ -1,0 +1,15 @@
+{
+  "Mode": "--sensitivity-blocking",
+  "Baseline": "3de42bb54c5e8c986364f0f04398d4e85a66a596",
+  "SourceHash": "90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa",
+  "Runtime": ".NET 10.0.15",
+  "Kernel": "Omarchy",
+  "KernelRelease": "7.2.15-1-omarchy",
+  "DynamicCode": false,
+  "Checks": [],
+  "Measurements": [],
+  "NativeProbes": [],
+  "Idle": [],
+  "Failure": "System.InvalidOperationException: owner-report-entry-off-caller-and-returned-task-still-pending\n   at LinuxHidRouteVerification.Evidence.Check(Boolean, String) \u002B 0x90\n   at LinuxHidRouteVerification.NativeScenarios.\u003CBlockingControlAsync\u003Ed__11.MoveNext() \u002B 0x3b4\n--- End of stack trace from previous location ---\n   at LinuxHidRouteVerification.NativeScenarios.\u003CBlockingControlAsync\u003Ed__11.MoveNext() \u002B 0x4b9\n--- End of stack trace from previous location ---\n   at LinuxHidRouteVerification.NativeScenarios.\u003CBlockingControlAsync\u003Ed__11.MoveNext() \u002B 0x5bd\n--- End of stack trace from previous location ---\n   at Program.\u003C\u003CMain\u003E$\u003Ed__0.MoveNext() \u002B 0x9c0",
+  "Outcome": "FAILED"
+}

@@ -1,0 +1,18 @@
+{
+  "status": "actual restore profile and admission Core identity agree; Csc/copy proof still required",
+  "descriptor": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/routing/mac-comparison-restore-isolated-first.json",
+    "bytes": 2472,
+    "sha256": "246467b9ef5329741b2d4e016bb00642216f66491fd78ee33dbc8bc9b6125761"
+  },
+  "dgspec": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+    "bytes": 24344,
+    "sha256": "23caffbc15f5f4d313e2174f55866854b9b132327805310ab83cfaff6c6e7da0"
+  },
+  "assets": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+    "bytes": 118048,
+    "sha256": "3850e6a352628733cfb3bb2ff2f8f400cbdd4ecb9c512f223f690cf9b688d399"
+  }
+}

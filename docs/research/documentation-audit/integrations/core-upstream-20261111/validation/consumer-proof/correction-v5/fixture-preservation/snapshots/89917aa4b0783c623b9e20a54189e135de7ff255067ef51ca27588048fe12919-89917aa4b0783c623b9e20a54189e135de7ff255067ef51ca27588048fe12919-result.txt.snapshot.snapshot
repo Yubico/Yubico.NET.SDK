@@ -1,0 +1,8 @@
+RESULT: PASSED  (dotnet toolchain.cs -- build --project Yubico.YubiKit.Management.IntegrationTests --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      5.4s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261111-211347-126-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

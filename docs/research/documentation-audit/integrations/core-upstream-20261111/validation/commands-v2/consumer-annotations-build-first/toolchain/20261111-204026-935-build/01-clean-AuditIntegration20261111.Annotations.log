@@ -1,0 +1,52 @@
+$ dotnet clean docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj -c Release
+Build started 11/11/2026 8:40:27 PM.
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Creating directory "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.Annotations/obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj" (2:2) on node 1 (Clean target(s)).
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.Y.4CE3D1A9.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/refint/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll".
+   2:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj" (2:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj" (3:2) on node 1 (Clean target(s)).
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/refint/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll".
+     3>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj" (Clean target(s)).
+     2>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj" (Clean target(s)).
+     1>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.34

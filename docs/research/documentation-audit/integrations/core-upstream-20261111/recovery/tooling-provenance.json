@@ -1,0 +1,91 @@
+{
+  "tools": [
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+      "bytes": 18700,
+      "sha256": "d44dfe05fe38c75527ac8c0bfcfd8b87225f1246e8cc2f738638057ba28c82f0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-preserved-relocated.py",
+      "bytes": 2689,
+      "sha256": "56fcd7721f1e72016100d77c2e05c96eded80a6ab5abdbf144d59362e720b4ba"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/qualify-logger-v2.py",
+      "bytes": 7768,
+      "sha256": "ebbf75d9282832974e90a5c09e76c341fd74db66d03c6f98bef5208a9c655f8a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/linux-evidence-gates-home.py",
+      "bytes": 1999,
+      "sha256": "79be7c80e83c6c3c122aa59a0c0bbad02df177f40a10245408dff9472fc8eaf5"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/verify-recovery.py",
+      "bytes": 5976,
+      "sha256": "4161b0fa37612b1ea5ea2f6337d4b32cc254c175d6bfb2fcd7543bbd79f09887"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/capture-evidence.py",
+      "bytes": 6478,
+      "sha256": "0abdb3044cbefc41a3d008a4e8f2c3bb271f00935d017e0880bd474555b7779d"
+    }
+  ],
+  "checks": [
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-preserved-relocated.py"
+      ],
+      "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+      "exit_code": 0,
+      "stdout_sha256": "325d673072b49954a80512ab7b2a0afbb1af8179323c51f9f4229b46ed212c80",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utc": "2026-11-11T18:36:02.415743+00:00"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/verify-recovery.py"
+      ],
+      "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+      "exit_code": 0,
+      "stdout_sha256": "583d88a1ceb98a77f71315f00c61fef5fcff1d5994908347dcd2bffd757f92f2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utc": "2026-11-11T18:36:03.064127+00:00"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/linux-evidence-gates-home.py",
+        "--check-source"
+      ],
+      "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+      "exit_code": 0,
+      "stdout_sha256": "9fecbc3dc14525e06770e7cc563a9419c4e8d157114e357f383e6471b0fb9fc6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utc": "2026-11-11T18:36:03.090778+00:00"
+    }
+  ],
+  "preserved_v1_logger_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "original_before_sha256": "8f45a2c984ab0d741152378d5fcadb4f785a478fca9b47f4ba384139cf7558c9",
+  "linux_gate_source_sha256": "1ef6aaa3c5e8fd60e9f939139146e43ca585c3e2713ab6ce6efe498ed34d003d",
+  "qualification_report_sha256": "ae47b3573581af2e216eed7f34efd6c8212c0a64d564a62f703094b1201a464c",
+  "runtime_root": "/home/rupicola/Code/y/.core-docs-audit-runtime",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "documentation_sources": [
+    "https://github.com/git/git/blob/v2.56.0/builtin/worktree.c",
+    "https://github.com/git/git/blob/v2.56.0/Documentation/git-worktree.adoc",
+    "https://github.com/python/cpython/blob/main/Doc/library/subprocess.rst",
+    "https://github.com/python/cpython/blob/main/Doc/library/tempfile.rst"
+  ],
+  "scope": "Storage recovery, read-only identity checks and disposable Python logger qualification only. No SDK/native/device gate."
+}

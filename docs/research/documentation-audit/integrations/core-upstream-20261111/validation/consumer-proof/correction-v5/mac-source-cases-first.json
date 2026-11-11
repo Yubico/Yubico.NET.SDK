@@ -1,0 +1,672 @@
+{
+  "status": "all ten isolated source-contract cases match required outcomes",
+  "cases": [
+    {
+      "name": "exact-declared-Core-DLL-copy",
+      "expected_admission": true,
+      "observed_admission": true,
+      "error": null,
+      "result": [
+        {
+          "role": "declared-comparison-Core-copy",
+          "core_compiler_input": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+            "bytes": 816128,
+            "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+            "kind": "resolved-copy/native",
+            "retained": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/consumers-first/binaries/c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3-Yubico.YubiKit.Core.dll",
+            "binary": true
+          },
+          "current_core_input": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+            "kind": "comparison-copy-current-Core-input",
+            "bytes": 816128,
+            "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+            "binary": true,
+            "retained": null,
+            "source_contract_only": true
+          },
+          "source_project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+          "source_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "related_extension": null,
+          "declaration_inputs": [
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+              "kind": "comparison-copy-declaration",
+              "bytes": 1261,
+              "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            },
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+              "kind": "comparison-copy-declaration",
+              "bytes": 584,
+              "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            },
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+              "kind": "comparison-copy-declaration",
+              "bytes": 3088,
+              "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            },
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/Directory.Build.props",
+              "kind": "comparison-copy-declaration",
+              "bytes": 570,
+              "sha256": "1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            }
+          ],
+          "boundary": "Only the exact declared DLL and its project-local .pdb/.xml output paths; each actual copied source/destination still receives the unchanged v4 byte-equality check. No symbol-file semantic association or runtime behavior is inferred.",
+          "source": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+            "kind": "actual-resolved-copy-source",
+            "bytes": 816128,
+            "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+            "binary": true,
+            "retained": null,
+            "source_contract_only": true
+          },
+          "output": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/bin/audit-integration-20261111/build/Release/net10.0/Yubico.YubiKit.Core.dll",
+            "kind": "actual-resolved-copy-output",
+            "bytes": 816128,
+            "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+            "binary": true,
+            "retained": null,
+            "source_contract_only": true
+          }
+        }
+      ],
+      "read_only_oracle_records": [
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "kind": "comparison-copy-current-Core-input",
+          "bytes": 816128,
+          "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 1261,
+          "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 584,
+          "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 3088,
+          "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/Directory.Build.props",
+          "kind": "comparison-copy-declaration",
+          "bytes": 570,
+          "sha256": "1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "kind": "actual-resolved-copy-source",
+          "bytes": 816128,
+          "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/bin/audit-integration-20261111/build/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "kind": "actual-resolved-copy-output",
+          "bytes": 816128,
+          "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        }
+      ]
+    },
+    {
+      "name": "precisely-owned-Core-PDB-sidecar",
+      "expected_admission": true,
+      "observed_admission": true,
+      "error": null,
+      "result": [
+        {
+          "role": "declared-comparison-Core-related-copy",
+          "core_compiler_input": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+            "bytes": 816128,
+            "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+            "kind": "resolved-copy/native",
+            "retained": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/consumers-first/binaries/c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3-Yubico.YubiKit.Core.dll",
+            "binary": true
+          },
+          "current_core_input": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+            "kind": "comparison-copy-current-Core-input",
+            "bytes": 816128,
+            "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+            "binary": true,
+            "retained": null,
+            "source_contract_only": true
+          },
+          "source_project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+          "source_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb",
+          "related_extension": ".pdb",
+          "declaration_inputs": [
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+              "kind": "comparison-copy-declaration",
+              "bytes": 1261,
+              "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            },
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+              "kind": "comparison-copy-declaration",
+              "bytes": 584,
+              "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            },
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+              "kind": "comparison-copy-declaration",
+              "bytes": 3088,
+              "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            },
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/Directory.Build.props",
+              "kind": "comparison-copy-declaration",
+              "bytes": 570,
+              "sha256": "1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            }
+          ],
+          "boundary": "Only the exact declared DLL and its project-local .pdb/.xml output paths; each actual copied source/destination still receives the unchanged v4 byte-equality check. No symbol-file semantic association or runtime behavior is inferred.",
+          "source": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb",
+            "kind": "actual-resolved-copy-source",
+            "bytes": 234576,
+            "sha256": "3ce122e8eb0d197db59631d637badedf332b2e3c339da792d2c970df797a79ec",
+            "binary": true,
+            "retained": null,
+            "source_contract_only": true
+          },
+          "output": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/bin/audit-integration-20261111/build/Release/net10.0/Yubico.YubiKit.Core.pdb",
+            "kind": "actual-resolved-copy-output",
+            "bytes": 234576,
+            "sha256": "3ce122e8eb0d197db59631d637badedf332b2e3c339da792d2c970df797a79ec",
+            "binary": true,
+            "retained": null,
+            "source_contract_only": true
+          }
+        }
+      ],
+      "read_only_oracle_records": [
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "kind": "comparison-copy-current-Core-input",
+          "bytes": 816128,
+          "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 1261,
+          "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 584,
+          "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 3088,
+          "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/Directory.Build.props",
+          "kind": "comparison-copy-declaration",
+          "bytes": 570,
+          "sha256": "1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb",
+          "kind": "actual-resolved-copy-source",
+          "bytes": 234576,
+          "sha256": "3ce122e8eb0d197db59631d637badedf332b2e3c339da792d2c970df797a79ec",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/bin/audit-integration-20261111/build/Release/net10.0/Yubico.YubiKit.Core.pdb",
+          "kind": "actual-resolved-copy-output",
+          "bytes": 234576,
+          "sha256": "3ce122e8eb0d197db59631d637badedf332b2e3c339da792d2c970df797a79ec",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        }
+      ]
+    },
+    {
+      "name": "precisely-owned-Core-XML-sidecar",
+      "expected_admission": true,
+      "observed_admission": true,
+      "error": null,
+      "result": [
+        {
+          "role": "declared-comparison-Core-related-copy",
+          "core_compiler_input": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+            "bytes": 816128,
+            "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+            "kind": "resolved-copy/native",
+            "retained": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/consumers-first/binaries/c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3-Yubico.YubiKit.Core.dll",
+            "binary": true
+          },
+          "current_core_input": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+            "kind": "comparison-copy-current-Core-input",
+            "bytes": 816128,
+            "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+            "binary": true,
+            "retained": null,
+            "source_contract_only": true
+          },
+          "source_project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+          "source_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml",
+          "related_extension": ".xml",
+          "declaration_inputs": [
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+              "kind": "comparison-copy-declaration",
+              "bytes": 1261,
+              "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            },
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+              "kind": "comparison-copy-declaration",
+              "bytes": 584,
+              "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            },
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+              "kind": "comparison-copy-declaration",
+              "bytes": 3088,
+              "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            },
+            {
+              "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/Directory.Build.props",
+              "kind": "comparison-copy-declaration",
+              "bytes": 570,
+              "sha256": "1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a",
+              "binary": false,
+              "retained": null,
+              "source_contract_only": true
+            }
+          ],
+          "boundary": "Only the exact declared DLL and its project-local .pdb/.xml output paths; each actual copied source/destination still receives the unchanged v4 byte-equality check. No symbol-file semantic association or runtime behavior is inferred.",
+          "source": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml",
+            "kind": "actual-resolved-copy-source",
+            "bytes": 712328,
+            "sha256": "1a1a2441bdd7a701bcbfd94ccd901f2d4d8f8f03dfe900d3ac4985a3580436c7",
+            "binary": true,
+            "retained": null,
+            "source_contract_only": true
+          },
+          "output": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/bin/audit-integration-20261111/build/Release/net10.0/Yubico.YubiKit.Core.xml",
+            "kind": "actual-resolved-copy-output",
+            "bytes": 712328,
+            "sha256": "1a1a2441bdd7a701bcbfd94ccd901f2d4d8f8f03dfe900d3ac4985a3580436c7",
+            "binary": true,
+            "retained": null,
+            "source_contract_only": true
+          }
+        }
+      ],
+      "read_only_oracle_records": [
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "kind": "comparison-copy-current-Core-input",
+          "bytes": 816128,
+          "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 1261,
+          "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 584,
+          "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 3088,
+          "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/Directory.Build.props",
+          "kind": "comparison-copy-declaration",
+          "bytes": 570,
+          "sha256": "1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml",
+          "kind": "actual-resolved-copy-source",
+          "bytes": 712328,
+          "sha256": "1a1a2441bdd7a701bcbfd94ccd901f2d4d8f8f03dfe900d3ac4985a3580436c7",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/bin/audit-integration-20261111/build/Release/net10.0/Yubico.YubiKit.Core.xml",
+          "kind": "actual-resolved-copy-output",
+          "bytes": 712328,
+          "sha256": "1a1a2441bdd7a701bcbfd94ccd901f2d4d8f8f03dfe900d3ac4985a3580436c7",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        }
+      ]
+    },
+    {
+      "name": "wrong-project-rejected",
+      "expected_admission": false,
+      "observed_admission": false,
+      "error": "Resolved non-package copy lacks its actual project-output identity: /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+      "result": null,
+      "read_only_oracle_records": []
+    },
+    {
+      "name": "missing-HintPath-rejected",
+      "expected_admission": false,
+      "observed_admission": false,
+      "error": "Comparison Core HintPath/CopyLocal declaration changed",
+      "result": null,
+      "read_only_oracle_records": []
+    },
+    {
+      "name": "wrong-prepared-Core-property-rejected",
+      "expected_admission": false,
+      "observed_admission": false,
+      "error": "Comparison copy does not use the actual prepared current-Core property",
+      "result": null,
+      "read_only_oracle_records": []
+    },
+    {
+      "name": "missing-actual-Csc-Core-input-rejected",
+      "expected_admission": false,
+      "observed_admission": false,
+      "error": "Direct Core copy lacks its actual Csc DLL input identity",
+      "result": null,
+      "read_only_oracle_records": []
+    },
+    {
+      "name": "changed-current-DLL-vs-Csc-input-rejected",
+      "expected_admission": false,
+      "observed_admission": false,
+      "error": "Current direct Core DLL differs from its actual Csc input identity",
+      "result": null,
+      "read_only_oracle_records": [
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "kind": "comparison-copy-current-Core-input",
+          "bytes": 816129,
+          "sha256": "42277b02206b2174a501f66a01f40a2fa8d7d04706358e904bcbd905ba528bcf",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        }
+      ]
+    },
+    {
+      "name": "wrong-copy-output-bytes-rejected",
+      "expected_admission": false,
+      "observed_admission": false,
+      "error": "Resolved source and actual output bytes differ",
+      "result": null,
+      "read_only_oracle_records": [
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "kind": "comparison-copy-current-Core-input",
+          "bytes": 816128,
+          "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 1261,
+          "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 584,
+          "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+          "kind": "comparison-copy-declaration",
+          "bytes": 3088,
+          "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/Directory.Build.props",
+          "kind": "comparison-copy-declaration",
+          "bytes": 570,
+          "sha256": "1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a",
+          "binary": false,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "kind": "actual-resolved-copy-source",
+          "bytes": 816128,
+          "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        },
+        {
+          "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/bin/audit-integration-20261111/build/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "kind": "actual-resolved-copy-output",
+          "bytes": 816129,
+          "sha256": "42277b02206b2174a501f66a01f40a2fa8d7d04706358e904bcbd905ba528bcf",
+          "binary": true,
+          "retained": null,
+          "source_contract_only": true
+        }
+      ]
+    },
+    {
+      "name": "unrelated-source-file-rejected",
+      "expected_admission": false,
+      "observed_admission": false,
+      "error": "Resolved non-package copy lacks its actual project-output identity: /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Other.dll",
+      "result": null,
+      "read_only_oracle_records": []
+    }
+  ],
+  "scope": "Not a Mac compile/capture or simulated complete project proof. Exact copy-loop AST only; package lookup has no Core owner and project-reference outputs are empty, matching this direct-reference source contract. Binary reads use registered retained consumer oracles; never mutable current Core bin paths. Negative data/XML mutations are in memory only. Only this report is written.",
+  "retained_manifest": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/manifest.json",
+    "bytes": 19520090,
+    "sha256": "e2715d38f1ce0e6a99607e12cc9ba7d06ec0bd0a0a60eafb4f47e44fda129d15"
+  },
+  "retained_oracles": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+      "bytes": 816128,
+      "sha256": "c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3",
+      "kind": "resolved-copy/native",
+      "retained": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/consumers-first/binaries/c76948cefe38c84a132360946e4558625838e659483651b706d0a2f86fe0f8a3-Yubico.YubiKit.Core.dll",
+      "binary": true
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb",
+      "bytes": 234576,
+      "sha256": "3ce122e8eb0d197db59631d637badedf332b2e3c339da792d2c970df797a79ec",
+      "kind": "resolved-copy/native",
+      "retained": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/consumers-first/binaries/3ce122e8eb0d197db59631d637badedf332b2e3c339da792d2c970df797a79ec-Yubico.YubiKit.Core.pdb",
+      "binary": true
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml",
+      "bytes": 712328,
+      "sha256": "1a1a2441bdd7a701bcbfd94ccd901f2d4d8f8f03dfe900d3ac4985a3580436c7",
+      "kind": "resolved-copy/native",
+      "retained": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/consumers-first/binaries/1a1a2441bdd7a701bcbfd94ccd901f2d4d8f8f03dfe900d3ac4985a3580436c7-Yubico.YubiKit.Core.xml",
+      "binary": true
+    }
+  ],
+  "actual_project_source": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+    "bytes": 1261,
+    "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78"
+  },
+  "wrapper": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+    "bytes": 584,
+    "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed"
+  },
+  "tool_sources": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v5.py",
+      "bytes": 7022,
+      "sha256": "0c1bb1a6f71718706dc2a168ba66b9d5d83ed15c1addfaa6d2d53cac6eeb2a75"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/copy-owner.py",
+      "bytes": 4770,
+      "sha256": "7f4374db50feafbf3c4c1fb2cc14b7b266a3c1b9010c1f7f0bf415b785dcdf07"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/source-cases.py",
+      "bytes": 8082,
+      "sha256": "1679e588aeebda93170e627d9a86ca0a940b2c1cde8a4b67d427d930b26a78ba"
+    }
+  ],
+  "effective_collector_sha256": "8f48ef7a9ef476364c063d85b5a6da79289df4a56a97b0bbcb294d8cadc5ff4b",
+  "exact_copy_loop_sha256": "72ed667b9f845ee901de9a3c6c68ca0d527f0228d1fbcbbfeaebb3170f8fe9ad",
+  "transformations": [
+    {
+      "before": "            binding = dict(role='package-copy', package_id=row['package_id'], asset=relative, asset_kinds=kinds)\n        else:",
+      "after": "            binding = dict(role='package-copy', package_id=row['package_id'], asset=relative, asset_kinds=kinds)\n        elif is_declared_comparison_copy(project, path):\n            binding = declared_comparison_copy_owner(project, policy, path, destination, compiler_bindings, retain)\n        else:",
+      "count": 1
+    },
+    {
+      "before": "require(package_refs == expected_compile, 'Selected package compile assets and actual Csc package reference set differ')",
+      "after": "compile_candidates = compile_candidate_dispositions(project, raw, expected_compile, package_refs, packages, retain)",
+      "count": 1
+    },
+    {
+      "before": "return dict(target_selection=selection, packages=dispositions, compiler_input_bindings=compiler_bindings,",
+      "after": "return dict(target_selection=selection, packages=dispositions, compiler_input_bindings=compiler_bindings, compile_candidate_dispositions=compile_candidates,",
+      "count": 1
+    }
+  ]
+}

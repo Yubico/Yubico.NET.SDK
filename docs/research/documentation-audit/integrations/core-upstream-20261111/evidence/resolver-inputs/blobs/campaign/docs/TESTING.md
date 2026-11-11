@@ -1,0 +1,586 @@
+# Testing Guidelines
+
+**CRITICAL: Read this before running any tests.**
+
+Canonical platform findings and simplification direction: [Testing Platform Findings](TESTING_PLATFORM_FINDINGS.md).
+
+## The #1 Rule
+
+**ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
+
+This codebase uses a mix of xUnit v2 and xUnit v3 test projects that require different CLI invocations. The build script handles this automatically.
+
+## Why This Matters
+
+| Runner | Command | Filter Syntax |
+|--------|---------|---------------|
+| xUnit v3 (Microsoft.Testing.Platform) | `dotnet run --project <proj>` | `-- --filter "..."` |
+| xUnit v2 (traditional) | `dotnet test <proj>` | `--filter "..."` |
+
+If you use the wrong command or filter syntax, tests will fail with confusing errors like:
+- "No test matches the given testcase filter"
+- "The test run was aborted"
+- Build succeeds but no tests run
+
+## Correct Commands
+
+```bash
+# Run all tests
+dotnet toolchain.cs test
+
+# Run tests for a specific module (partial match)
+dotnet toolchain.cs -- test --project Core
+dotnet toolchain.cs -- test --project Ctap2
+dotnet toolchain.cs -- test --project Piv
+
+# Run tests with a filter
+dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTestClass"
+dotnet toolchain.cs -- test --filter "Method~Sign"
+
+# Combine project and filter
+dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
+```
+
+### Reading filter results
+
+Two things routinely mislead people here, both worth knowing before you trust a green run.
+
+**`Method~` is not a VSTest property.** The unit projects run xUnit v3 / Microsoft Testing
+Platform; the integration projects run xUnit v2 under VSTest, where only `FullyQualifiedName`,
+`DisplayName` and traits exist. The toolchain normalises `Method~` and `Name~` to
+`FullyQualifiedName~` for those projects so one syntax works on both runners. `FullyQualifiedName~`
+is the precise form if you would rather be explicit.
+
+**A run that executes nothing fails.** VSTest prints `No test matches the given testcase filter`
+and still exits `0`, and a run where every test is skipped (no matching YubiKey) exits `0` too. The
+toolchain preflights both runners and reports such a project as `○ NO-TESTS`, which fails the
+`test` target.
+
+**Read the RESULT block at the end.** It states `PASSED` or `FAILED`, the per-test totals
+(`tests: N executed, N failed, N skipped`), each failing test with its message, and a `Next:`
+command that re-runs only those tests. The full output is saved under `artifacts/toolchain/`. See
+"Reading the Output" in [TOOLCHAIN.md](../TOOLCHAIN.md).
+
+## Integration Test Strategy
+
+Integration tests require a physical YubiKey and can be slow (especially RSA keygen). Follow this tiered approach:
+
+### During Development
+
+Run integration tests **only for the module you changed**:
+
+```bash
+# Quick smoke test — skips slow keygen and user-presence tests
+dotnet toolchain.cs -- test --integration --project Piv --smoke
+
+# Targeted test for a specific method you touched
+dotnet toolchain.cs -- test --integration --project Oath --filter "FullyQualifiedName~CalculateAll"
+```
+
+### When Finishing a Module
+
+Run the **full integration suite** for the affected module (no `--smoke`):
+
+```bash
+dotnet toolchain.cs -- test --integration --project Piv
+```
+
+### Before PR / Final Validation
+
+Run full integration for all affected modules. You do **not** need to run all modules unless changes touch Core or shared infrastructure.
+
+### What `--smoke` Skips
+
+The `--smoke` flag excludes tests with these traits:
+- **`Slow`** — RSA 3072/4096 key generation (30+ seconds each), long delays
+- **`RequiresUserPresence`** — Tests needing physical touch or device insert/remove
+
+This typically cuts PIV integration time from ~4 minutes to under 1 minute.
+
+## Common Mistakes
+
+```bash
+# WRONG - May fail on xUnit v3 projects
+dotnet test src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj
+
+# WRONG - Filter syntax incompatible with xUnit v3
+dotnet test --filter "FullyQualifiedName~MyTest"
+
+# CORRECT - Always use the build script
+dotnet toolchain.cs -- test --project Ctap2 --filter "FullyQualifiedName~MyTest"
+```
+
+## How Detection Works
+
+The build script checks each test project's `.csproj` file for:
+```xml
+<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+```
+
+- If present: xUnit v3 (Microsoft.Testing.Platform) - uses `dotnet run`
+- If absent: xUnit v2 (traditional) - uses `dotnet test`
+
+## Test Project Locations
+
+Tests are organized per-module:
+```
+Yubico.YubiKit.Core/tests/Yubico.YubiKit.Core.UnitTests/
+src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/
+Yubico.YubiKit.Piv/tests/Yubico.YubiKit.Piv.UnitTests/
+... etc
+```
+
+Run `dotnet toolchain.cs -- --help` to see all discovered test projects.
+
+## Filter Syntax Reference
+
+### xUnit v2 vs v3 Filter Differences
+
+When running filtered tests **outside** the build script (ad-hoc debugging), syntax differs by xUnit version:
+
+| Version | Detection | Filter Syntax |
+|---------|-----------|---------------|
+| xUnit v2 | No `UseMicrosoftTestingPlatformRunner` | `--filter "FullyQualifiedName~TestName"` |
+| xUnit v3 | Has `UseMicrosoftTestingPlatformRunner` | `-m TestName` or `--method TestName` |
+
+**Check version:** Look for `<PackageReference Include="xunit"` in the `.csproj`:
+- `3.x.x` → xUnit v3 syntax
+- `2.x.x` → xUnit v2 syntax
+
+**Recommendation:** Use `dotnet toolchain.cs -- test --filter "..."` which handles this automatically.
+
+### xUnit v3 Focused Filters
+
+`toolchain.cs` translates common VSTest-style filters to Microsoft.Testing.Platform-native xUnit v3 flags. Positive filters are preflighted with `--list-tests`; if a selected xUnit v3 project has no matching tests, that project is reported as `no matching tests`. If every selected xUnit v3 project preflighted by the positive filter has no matching tests, the toolchain fails clearly with `No tests matched the specified filter`. Exclusion filters still apply to the actual run.
+
+This matters when a project filter selects multiple Ctap2/WebAuthn test projects and only one contains the focused method.
+
+### Standard Filter Expressions
+
+```
+FullyQualifiedName~MyClass     Tests containing 'MyClass' in full name
+Name=MyTestMethod              Exact test method name
+ClassName~Integration          Classes containing 'Integration'
+Name!=SkipMe                   Exclude tests named 'SkipMe'
+```
+
+## Summary
+
+1. **Always** use `dotnet toolchain.cs test`
+2. **Never** use `dotnet test` directly
+3. Use `--project` for module filtering
+4. Use `--filter` for test filtering
+5. When in doubt, run `dotnet toolchain.cs test` without filters first
+
+## Hardware Authorization
+
+Integration tests only ever touch devices whose serial number is in the gitignored
+`YubiKeyTests:AllowedSerialNumbers` list; anything else hard-fails with `Environment.Exit(-1)`
+before a single hardware operation runs. Those listed keys are **dedicated test keys**.
+
+That makes the authorization boundary simple, and worth stating plainly so it is not
+re-litigated per run:
+
+| Operation class | Authorized unattended? |
+|---|---|
+| State mutation, PIV reset, key generation on an allow-listed key | Yes — no per-run approval needed |
+| User Presence / touch ceremonies | No — human must be present |
+| User Verification, PIN, bio enrollment | No — human must approve and know device state |
+| Insert / remove / power-cycle timing | No — human must coordinate |
+
+The distinction is presence and timing, not destruction. There is no additional config gate:
+the allow list is the boundary, and adding a second one would only obscure it.
+
+## FIDO2/WebAuthn Hardware Coordination
+
+FIDO2 and WebAuthn tests often need User Presence (touch), User Verification (PIN/bio), credential creation, or reset timing. These checks are not unattended agent gates.
+
+Use these lanes:
+
+| Lane | Examples | Agent-runnable? | Rule |
+|------|----------|-----------------|------|
+| Read-only smoke | `GetInfo`, construction/unit tests | Yes | Use `dotnet toolchain.cs test` or integration `--smoke` |
+| User Presence | `MakeCredential`, `GetAssertion`, `previewSign` ceremonies | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
+| User Verification / PIN | PIN token, UV-required/preferred, bio enrollment | No by default | Requires explicit human approval and known device/PIN state |
+| Destructive state change | Persistent credential deletion, PIV reset, key generation | Yes on an allow-listed test key | See [Hardware Authorization](#hardware-authorization); destruction alone is not the gate |
+| FIDO2 reset | `authenticatorReset` | No | Needs the power-cycle window plus touch — timing, not destruction, is why |
+| Insert/remove/touch timing | Reset power-cycle window, physical insertion/removal | No | Human-coordinated timing only |
+
+These filters skip User Presence, but are not by themselves an agent-safety guarantee. In particular,
+CTAP2 `WithCtap2SessionAsync` defaults to PIN normalization before its callback: it can set/change a PIN
+or consume a retry even when the final operation is GetInfo. Inspect the selected tests' setup and apply
+the existing PIN/interaction policy; GetInfo itself needs no additional approval gate. See
+[CTAP2 test guidance](../src/Ctap2/tests/CLAUDE.md#reset-before-tests).
+
+```bash
+dotnet toolchain.cs -- test --integration --project Ctap2 --smoke
+dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
+dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category!=RequiresUserPresence"
+```
+
+Human-coordinated UP/UV commands require approval immediately before execution:
+
+```bash
+dotnet toolchain.cs -- test --integration --project Ctap2 --filter "Category=RequiresUserPresence"
+dotnet toolchain.cs -- test --integration --project WebAuthn --filter "Category=RequiresUserPresence"
+```
+
+## Hardware Test Infrastructure Limitations
+
+### `[WithYubiKey]` + `[InlineData]` Incompatibility
+
+The `[WithYubiKey]` attribute (used for integration tests requiring physical YubiKeys) is **incompatible** with `[InlineData]` parameterized tests.
+
+**Problem:** `[WithYubiKey]` is a custom xUnit v2 `DataAttribute` that supplies the complete argument row. Combining it with `[InlineData]` creates separate, incomplete rows rather than merging the arguments.
+
+```csharp
+// ❌ WRONG - Does not work
+[WithYubiKey(MinFirmware = "5.7.0")]
+[SkippableTheory]
+[InlineData(KeyType.Rsa3072)]
+[InlineData(KeyType.Rsa4096)]
+public async Task SignAsync_LargeRsa_Works(KeyType algorithm, YubiKeyTestState state)
+{
+    // This will fail - state won't be injected correctly
+}
+
+// ✅ CORRECT - Use separate tests
+[SkippableTheory]
+[WithYubiKey(MinFirmware = "5.7.0")]
+public async Task SignAsync_Rsa3072_Works(YubiKeyTestState state) { /* ... */ }
+
+[SkippableTheory]
+[WithYubiKey(MinFirmware = "5.7.0")]
+public async Task SignAsync_Rsa4096_Works(YubiKeyTestState state) { /* ... */ }
+```
+
+**Workaround:** Split parameterized tests into separate test methods, one per parameter combination.
+
+---
+
+## Multi-Transport Test Infrastructure
+
+### Overview
+
+One physical YubiKey can expose several connection types, such as SmartCard, HID FIDO, and HID OTP. The test infrastructure represents those connections on one `YubiKeyTestState`; `[WithYubiKey]` filters devices but does not automatically enumerate one test row per connection.
+
+### How It Works
+
+Each `[WithYubiKey]` attribute:
+
+1. Creates one placeholder test row during discovery.
+2. Binds that row to the first matching authorized device during execution.
+3. Applies `ConnectionType` as a device filter; it does not open that connection or force a session to use it.
+
+With an unfiltered `[WithYubiKey]`, `state.ConnectionType` is the device's complete `AvailableConnections` flag set and can contain several values. With a concrete filter such as `[WithYubiKey(ConnectionType = ConnectionType.HidFido)]`, `state.ConnectionType` records that requested connection type while `state.AvailableConnections` still reports the device's complete set.
+
+To create separate rows for separate connection types, apply one attribute per concrete connection type. Each attribute still binds independently to a matching authorized device.
+
+### ConnectionType Filtering
+
+Use the `ConnectionType` property to require that the bound device exposes a connection type:
+
+```csharp
+// One device row; state.ConnectionType may contain multiple flags.
+[SkippableTheory]
+[WithYubiKey]
+public async Task DefaultSelection(YubiKeyTestState state)
+{
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}
+
+// One row whose device must expose SmartCard.
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+public async Task SmartCardOnly(YubiKeyTestState state)
+{
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}
+
+// Three separate rows, one for each requested connection type.
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+public async Task EachManagementConnection(YubiKeyTestState state)
+{
+    // This demonstrates independent device-filter rows, not operation-transport coverage.
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}
+```
+
+The filter alone does not pin Management to that connection. Pin the session explicitly when the test's meaning depends on the connection used.
+
+### Test Output Format
+
+Test output includes `state.ConnectionType`. An unfiltered row can therefore display a combined flag set, while rows created by concrete `ConnectionType` filters display the requested single value. Multiple output rows come from multiple `[WithYubiKey]` attributes, not automatic per-interface enumeration.
+
+### Default Management Selection
+
+`WithManagementAsync` leaves `preferredConnection` as `null` unless the caller supplies it. Management
+selects the first exposed supported interface in its default order: SmartCard, HID FIDO, then HID OTP.
+Connection or initialization failure does not try another interface. The callback receives cached
+`state.DeviceInfo`, not a fresh query at helper entry. Use this form for transport-independent tests:
+
+```csharp
+[SkippableTheory]
+[WithYubiKey]
+public async Task GetDeviceInfo_DefaultManagementSelection(YubiKeyTestState state)
+{
+    await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+    {
+        var deviceInfo = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
+    });
+}
+```
+
+Do not pass `preferredConnection: state.ConnectionType` from an unfiltered row. On a composite device, that value is a multi-flag set rather than one valid Management connection type.
+
+### Transport-Specific Testing
+
+When behavior must be exercised over concrete connections, declare one row per connection, pass the row's concrete `state.ConnectionType` as `preferredConnection`, and assert the session's actual `ConnectionType`:
+
+```csharp
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+public async Task GetDeviceInfo_UsesRequestedManagementConnection(YubiKeyTestState state)
+{
+    Assert.True(state.ConnectionType is
+        ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp);
+
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
+
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+    }, preferredConnection: state.ConnectionType);
+}
+```
+
+An explicit `preferredConnection` is a single-candidate request and does not fall back. If the requested interface is already owned, the test receives the connection error instead of silently exercising a different transport.
+
+### Best Practices
+
+1. **Use default selection for transport-independent tests**: Apply one unfiltered `[WithYubiKey]` and omit `preferredConnection`.
+2. **Create explicit rows for connection-specific tests**: Apply separate attributes with one concrete `ConnectionType` each.
+3. **Pin and verify concrete connections**: Pass `preferredConnection: state.ConnectionType` and assert `mgmt.ConnectionType` in those rows.
+4. **Do not pin from unfiltered state**: Its `ConnectionType` can be a multi-flag set that is invalid as a preference.
+5. **Avoid DeviceId parsing**: Use `ConnectionType` filters instead of inferring interfaces from identifier strings.
+
+### Migration from Old Patterns
+
+**Old (fragile):**
+```csharp
+var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+var fidoDevice = devices.FirstOrDefault(d => 
+    d.DeviceId.Contains(":0001") || d.DeviceId.Contains(":F1D0"));
+```
+
+**New (declarative and transport-specific):**
+```csharp
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+public async Task ManagementOverFido_Works(YubiKeyTestState state)
+{
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        Assert.Equal(ConnectionType.HidFido, mgmt.ConnectionType);
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+    }, preferredConnection: state.ConnectionType);
+}
+```
+
+---
+
+## Test Traits and Categories
+
+Tests are categorized using xUnit traits to enable filtering. Use the `TestCategories` constants from `Yubico.YubiKit.Tests.Shared.Infrastructure`.
+
+### Available Categories
+
+| Category | Constant | Description |
+|----------|----------|-------------|
+| `RequiresHardware` | `TestCategories.RequiresHardware` | Test needs a physical YubiKey connected |
+| `RequiresUserPresence` | `TestCategories.RequiresUserPresence` | Test needs user interaction (insert/remove/touch) |
+| `Slow` | `TestCategories.Slow` | Test takes >5 seconds (delays, performance tests) |
+| `Integration` | `TestCategories.Integration` | Test exercises multiple components |
+| `RequiresFirmware` | `TestCategories.RequiresFirmware` | Test needs specific firmware features |
+
+### How to Apply Traits
+
+```csharp
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
+
+public class MyTests
+{
+    // Test requires hardware (device must be connected, but runs automatically)
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task FindAllAsync_ReturnsDevice() { }
+
+    // Test requires user to insert/remove device (cannot run in CI/agents)
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
+    public async Task WatchAsync_DetectsRemoval() { }
+
+    // Slow test with long delays
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.Slow)]
+    public async Task Performance_ManyOperations() { }
+}
+```
+
+### Filtering Tests by Category
+
+```bash
+# Skip tests requiring user interaction (for CI/agents)
+dotnet toolchain.cs -- test --filter "Category!=RequiresUserPresence"
+
+# Skip slow tests
+dotnet toolchain.cs -- test --filter "Category!=Slow"
+
+# Skip hardware tests (run only unit tests)
+dotnet toolchain.cs -- test --filter "Category!=RequiresHardware"
+
+# Run only fast unit tests (no hardware, no user presence, not slow)
+dotnet toolchain.cs -- test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow"
+```
+
+### When to Apply Each Trait
+
+**`RequiresHardware`:**
+- Tests that call `YubiKeyManager.FindAllAsync()` expecting results
+- Tests that open connections to devices
+- Tests that send APDU commands
+
+**`RequiresUserPresence`:**
+- Tests waiting for device insertion/removal events
+- Tests requiring touch for user presence verification
+- Tests that prompt for PIN entry via physical interaction
+- **AI agents cannot run these tests** - they require human interaction
+
+**`Slow`:**
+- Tests with `Task.Delay()` > 5 seconds
+- Performance benchmark tests
+- Tests waiting for timeout conditions
+
+### AI Agent Guidelines
+
+**When writing new tests, agents MUST apply appropriate traits:**
+
+1. If the test calls `YubiKeyManager.FindAllAsync()` or opens device connections:
+   → Add `[Trait(TestCategories.Category, TestCategories.RequiresHardware)]`
+
+2. If the test waits for device insertion/removal or requires touch:
+   → Add `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]`
+   → Add `[Trait(TestCategories.Category, TestCategories.Slow)]`
+
+3. If the test has intentional delays > 5 seconds:
+   → Add `[Trait(TestCategories.Category, TestCategories.Slow)]`
+
+**Agents should skip `RequiresUserPresence` tests** when running test suites:
+```bash
+dotnet toolchain.cs -- test --filter "Category!=RequiresUserPresence"
+```
+
+---
+
+## Writing New Tests
+
+> READ WHEN authoring a new unit or integration test, naming a test method, or writing setup/cleanup for hardware-dependent tests.
+
+### Warning-Free Test Code
+
+Test projects inherit `TreatWarningsAsErrors=true` from `Directory.Build.props`, just like shipping code. Compiler and enabled analyzer warnings must be fixed before a push; do not add blanket suppressions, disable analyzers, or override warnings-as-errors to make a build pass.
+
+- **Cancellation (`xUnit1051`, xUnit v3):** Pass `TestContext.Current.CancellationToken` to APIs that accept a token, including `Task.Run`, `Task.Delay`, `WaitAsync`, synchronization waits, and SDK calls. Pass the token both to the operation and to a separate timeout wait; cancelling `WaitAsync` alone does not cancel the underlying operation. Test helpers should accept and forward the caller's token. xUnit v2 has no equivalent `TestContext.Current` cancellation API; do not copy v3-only code into v2 projects.
+- **Cancellation scenarios:** Use a disposed `CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken)` and cancel that source at the intended point. Preserve pre-cancelled and mid-operation cancellation assertions rather than replacing their tokens with the runner token.
+- **Async (`xUnit1031`):** Use `async Task`/`async ValueTask` tests and `await`. Do not use `.Result`, `.Wait()`, or `.GetAwaiter().GetResult()`, even after a completion assertion or another wait. For `Task<Task<T>>`, await the invocation to obtain the inner task, then await that task separately; this preserves tests that distinguish returning promptly from completing promptly.
+- **Synchronous boundary tests:** A deliberately blocked native fake or a synchronous compatibility API may still require a dedicated caller thread. Keep such blocking work off the test's async execution path; use bounded, cancellable coordination waits and release fake gates in `finally`.
+- **Cleanup:** Always release held fake/native gates in `finally`. If cancellation would abandon a worker that still uses resources about to be disposed, cleanup may explicitly use `CancellationToken.None` with a finite timeout to drain it. Explain that lifetime requirement locally. This is a narrow teardown exception, not a default for ordinary operations or waits.
+- **Nullable flow (`CS8602` and related warnings):** Guard the nullable value directly before dereferencing it. A derived condition (such as an index calculated with `?.`) does not prove the original value is non-null. Use `Assert.NotNull` or a value returned by `Assert.IsType<T>` for test expectations, and `is null`/`?? throw` guards for helpers. Do not add `!` merely to silence the compiler.
+
+```csharp
+[Fact]
+public async Task Read_WhenCancelled_StopsWaiting()
+{
+    using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
+        TestContext.Current.CancellationToken);
+    var read = reader.ReadAsync(cancellation.Token);
+    cancellation.Cancel();
+
+    await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+        read.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+}
+```
+
+Rule references: [xUnit1051](https://xunit.net/xunit.analyzers/rules/xUnit1051) and [xUnit1031](https://xunit.net/xunit.analyzers/rules/xUnit1031). The pre-push gate is documented in [Commit Guidelines](COMMIT_GUIDELINES.md#pre-push-and-pr-gate).
+
+### Test Project Layout
+
+- **UnitTests** — xUnit, no hardware required
+- **IntegrationTests** — xUnit, requires physical YubiKey
+- **TestProject** — ASP.NET Core with NSubstitute, targets net10.0 with AOT
+
+### Test All Public APIs
+
+```csharp
+[Fact]
+public async Task ConnectAsync_WhenDeviceAvailable_ReturnsConnection()
+{
+    // Arrange
+    var device = new MockYubiKey { IsConnected = true };
+
+    // Act
+    var connection = await device.ConnectAsync<ISmartCardConnection>();
+
+    // Assert
+    Assert.NotNull(connection);
+    Assert.True(connection.IsConnected);
+}
+```
+
+### Use Descriptive Test Names
+
+```csharp
+// ✅ GOOD
+[Fact]
+public void CommandApdu_WithNullData_ThrowsArgumentNullException()
+
+// ❌ BAD
+[Fact]
+public void Test1()
+```
+
+Naming pattern: `Subject_WhenCondition_ExpectedBehavior`.
+
+### Clean Up in Integration Tests
+
+```csharp
+[Fact]
+public async Task IntegrationTest_WithRealDevice()
+{
+    await using var connection = await _device.ConnectAsync<ISmartCardConnection>();
+
+    try
+    {
+        var result = await connection.TransmitAsync(apdu);
+        Assert.NotNull(result);
+    }
+    finally
+    {
+        await ResetDeviceAsync(connection);
+    }
+}
+```
+
+> The **Test Philosophy: Value Over Coverage** rules (no validation-only tests, no skipped tests as placeholders) live in `CLAUDE.md` verbatim — those mandates are load-on-startup because they catch the most common AI-agent failure mode.

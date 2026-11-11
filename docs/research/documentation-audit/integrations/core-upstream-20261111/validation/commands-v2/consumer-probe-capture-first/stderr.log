@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 687, in <module>
+    main()
+    ~~~~^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 678, in main
+    capture(args.context, args.attempt, args.build_label)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 568, in capture
+    projects = [compiler_project(folder, data, retain) for folder in folders]
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 430, in compiler_project
+    analyzer = analyzer_proof(policy, project, analyzers, assets, retain)
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 237, in analyzer_proof
+    require(len(matches) == 1 and matches[0].attrib.get('Condition') == f"Exists('{needle}')",
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            'Generated NuGet analyzer import identity changed')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 26, in require
+    raise ValueError(message)
+ValueError: Generated NuGet analyzer import identity changed

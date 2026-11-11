@@ -1,6 +1,7 @@
 #!/usr/bin/env dotnet run
 
 #:package Bullseye
+#:property PublishAot=false
 
 #:include scripts/toolchain/Conventions.cs
 #:include scripts/toolchain/Options.cs

@@ -1,0 +1,101 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "-c",
+    "import subprocess,sys,time;print('parent stdout',flush=True);print('parent stderr',file=sys.stderr,flush=True);p=subprocess.Popen([sys.executable,'-c',\"import signal,time,os;signal.signal(signal.SIGTERM,signal.SIG_IGN);print('OWNED_DESCENDANT='+str(os.getpid()),flush=True);time.sleep(120)\"]);time.sleep(0.25);sys.exit(9)"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 18700,
+    "sha256": "d44dfe05fe38c75527ac8c0bfcfd8b87225f1246e8cc2f738638057ba28c82f0"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T18:31:23.688225+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/orphan",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/journals/orphan",
+  "qualification_faults": [],
+  "exit_code": 9,
+  "status": "failed",
+  "errors": [
+    "ValueError: Command exited 9"
+  ],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 2909010,
+    "sid": 2909010,
+    "leader_start_ticks": 79967352,
+    "before": {
+      "members": [
+        {
+          "pid": 2909011,
+          "state": "S",
+          "ppid": 2908989,
+          "pgid": 2909010,
+          "sid": 2909010,
+          "start_ticks": 79967354
+        }
+      ],
+      "escaped": []
+    },
+    "signals": [
+      {
+        "signal": "SIGTERM",
+        "proven_members": [
+          {
+            "pid": 2909011,
+            "state": "S",
+            "ppid": 2908989,
+            "pgid": 2909010,
+            "sid": 2909010,
+            "start_ticks": 79967354
+          }
+        ]
+      },
+      {
+        "signal": "SIGKILL",
+        "proven_members": [
+          {
+            "pid": 2909011,
+            "state": "S",
+            "ppid": 2908989,
+            "pgid": 2909010,
+            "sid": 2909010,
+            "start_ticks": 79967354
+          }
+        ]
+      }
+    ],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": null,
+  "retained": [],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/orphan/stdout.log",
+      "bytes": 39,
+      "sha256": "8a372c7585cc0f42b4982d6a9b7aebdd65c9a75d606840c650c8e2e22e65f200"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/orphan/stderr.log",
+      "bytes": 14,
+      "sha256": "3025edbb0f8eed1690aa1bbe911f59fbfa8705c117f10ff81b620f1db8b83b5b"
+    }
+  ],
+  "finished": "2026-11-11T18:31:27.104512+00:00"
+}

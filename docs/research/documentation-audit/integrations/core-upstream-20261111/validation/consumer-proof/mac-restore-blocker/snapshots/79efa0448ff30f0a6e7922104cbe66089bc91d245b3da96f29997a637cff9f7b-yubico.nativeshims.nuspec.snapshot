@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Yubico.NativeShims</id>
+    <version>1.18.1</version>
+    <authors>Yubico AB</authors>
+    <owners>Yubico AB</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <readme>docs/readme.md</readme>
+    <description>DO NOT USE THIS LIBRARY DIRECTLY.
+
+            This is an internal package that is subject to change.</description>
+    <repository type="git" url="https://github.com/Yubico/Yubico.NET.SDK" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.2" />
+      <group targetFramework=".NETStandard2.0" />
+    </dependencies>
+  </metadata>
+</package>

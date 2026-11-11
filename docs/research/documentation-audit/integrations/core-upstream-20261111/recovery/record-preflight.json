@@ -1,0 +1,7 @@
+{
+  "scope": "Current packet read-only raw/LF-normalized/Git-attribute inspection; final snapshot/staged checks pending",
+  "records_inspected": 416,
+  "normalization_changes": [],
+  "new_tool_ast_and_hygiene_files": 6,
+  "recovery_handoff_sha256": "74212fe0ff516f48b3d2b4498d213ef57cb86ae335b7fe704851d663eb83c9d9"
+}

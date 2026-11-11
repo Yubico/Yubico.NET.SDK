@@ -1,0 +1,9 @@
+using System;
+using Yubico.YubiKit.Core.Devices;
+
+// Find all connected YubiKeys
+var devices = await YubiKeyManager.FindAllAsync();
+foreach (var device in devices)
+{
+    Console.WriteLine($"Found YubiKey: {device.DeviceId} ({device.AvailableConnections})");
+}

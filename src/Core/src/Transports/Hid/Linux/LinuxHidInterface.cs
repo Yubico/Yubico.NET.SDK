@@ -17,7 +17,6 @@ using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Native.Linux.Libc;
 using Yubico.YubiKit.Core.Native.Linux.Udev;
-using Yubico.YubiKit.Core.Transports.Hid;
 using LibcNativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 using UdevNativeMethods = Yubico.YubiKit.Core.Native.Linux.Udev.NativeMethods;
 
@@ -43,7 +42,7 @@ internal sealed class LinuxHidInterface : IHidInterface
     /// </summary>
     public HidInterfaceType InterfaceType { get; }
 
-    private LinuxHidInterface(HidDescriptorInfo descriptorInfo)
+    internal LinuxHidInterface(HidDescriptorInfo descriptorInfo)
     {
         DescriptorInfo = descriptorInfo;
         InterfaceType = HidInterfaceClassifier.Classify(descriptorInfo);
@@ -247,7 +246,7 @@ internal sealed class LinuxHidInterface : IHidInterface
         try
         {
             // Try opening with O_RDWR | O_NONBLOCK first (for descriptor reading)
-            handle = LibcNativeMethods.open(devNode,
+            handle = LibcNativeMethods.Open(devNode,
                 LibcNativeMethods.OpenFlags.O_RDWR | LibcNativeMethods.OpenFlags.O_NONBLOCK);
 
             if (handle.IsInvalid)
@@ -256,7 +255,7 @@ internal sealed class LinuxHidInterface : IHidInterface
                 handle.Dispose();
 
                 // O_RDWR failed, try O_RDONLY | O_NONBLOCK
-                handle = LibcNativeMethods.open(devNode,
+                handle = LibcNativeMethods.Open(devNode,
                     LibcNativeMethods.OpenFlags.O_RDONLY | LibcNativeMethods.OpenFlags.O_NONBLOCK);
 
                 if (handle.IsInvalid)
@@ -284,7 +283,7 @@ internal sealed class LinuxHidInterface : IHidInterface
         var descSizePtr = Marshal.AllocHGlobal(LibcNativeMethods.DescriptorSizeSize);
         try
         {
-            int result = LibcNativeMethods.ioctl(handle, LibcNativeMethods.HIDIOCGRDESCSIZE, descSizePtr);
+            int result = LibcNativeMethods.Ioctl(handle, LibcNativeMethods.HIDIOCGRDESCSIZE, descSizePtr);
             if (result < 0)
             {
                 return (0, 0);
@@ -301,7 +300,7 @@ internal sealed class LinuxHidInterface : IHidInterface
             try
             {
                 Marshal.WriteInt32(descPtr, descSize);
-                result = LibcNativeMethods.ioctl(handle, LibcNativeMethods.HIDIOCGRDESC, descPtr);
+                result = LibcNativeMethods.Ioctl(handle, LibcNativeMethods.HIDIOCGRDESC, descPtr);
                 if (result < 0)
                 {
                     return (0, 0);

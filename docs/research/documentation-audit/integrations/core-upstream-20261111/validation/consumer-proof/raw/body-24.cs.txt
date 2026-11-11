@@ -1,0 +1,10 @@
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Management;
+
+var device = await YubiKeyManager.FindFirstAsync(cancellationToken: cancellationToken);
+await using var session = await device.CreateManagementSessionAsync(
+    cancellationToken: cancellationToken);
+
+var info = await session.GetDeviceInfoAsync(cancellationToken);
+Console.WriteLine(info.SerialNumber);
+Console.WriteLine(info.VersionName);

@@ -1,0 +1,75 @@
+{
+  "scope": "Read-only exact difference; no assertion that potential restore assets must all be consumed or why any was filtered",
+  "projects": [
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "assets": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/project.assets.json",
+      "assets_sha256": "6098d74e778be7b1fba60147db3f88c24e40e7178377865aac027e2696570d4b",
+      "actual_package_ref_count": 10,
+      "potential_selected_compile_count": 10,
+      "unconsumed_selected_compile_assets": [],
+      "actual_package_refs_not_selected_assets": []
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj",
+      "assets": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/project.assets.json",
+      "assets_sha256": "d533278f1070dae5f3941c17e1389675b73e99908ea0755950cc089db581f050",
+      "actual_package_ref_count": 10,
+      "potential_selected_compile_count": 10,
+      "unconsumed_selected_compile_assets": [],
+      "actual_package_refs_not_selected_assets": []
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+      "assets": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/project.assets.json",
+      "assets_sha256": "d64b9f3e96b96a895cf6d080362b6e749c00c0577c43d24534bafd8c90093517",
+      "actual_package_ref_count": 34,
+      "potential_selected_compile_count": 37,
+      "unconsumed_selected_compile_assets": [
+        {
+          "package_id": "Microsoft.TestPlatform.ObjectModel/18.0.1",
+          "asset": "lib/net8.0/Microsoft.TestPlatform.CoreUtilities.dll",
+          "target_metadata": {},
+          "path": "/home/rupicola/.nuget/packages/microsoft.testplatform.objectmodel/18.0.1/lib/net8.0/Microsoft.TestPlatform.CoreUtilities.dll",
+          "bytes": 99360,
+          "sha256": "7837f9df4b11a9844143fc9419e5752bdd50305436adcbf84f82b8a52d5909d7",
+          "same_filename_actual_refs": [
+            "/home/rupicola/.nuget/packages/microsoft.testplatform.testhost/18.0.1/lib/net8.0/Microsoft.TestPlatform.CoreUtilities.dll"
+          ]
+        },
+        {
+          "package_id": "Microsoft.TestPlatform.ObjectModel/18.0.1",
+          "asset": "lib/net8.0/Microsoft.TestPlatform.PlatformAbstractions.dll",
+          "target_metadata": {},
+          "path": "/home/rupicola/.nuget/packages/microsoft.testplatform.objectmodel/18.0.1/lib/net8.0/Microsoft.TestPlatform.PlatformAbstractions.dll",
+          "bytes": 51784,
+          "sha256": "668c7f0df2c30feac9cea9dce808ccabb72ff575c1e820404124212b4eae1773",
+          "same_filename_actual_refs": [
+            "/home/rupicola/.nuget/packages/microsoft.testplatform.testhost/18.0.1/lib/net8.0/Microsoft.TestPlatform.PlatformAbstractions.dll"
+          ]
+        },
+        {
+          "package_id": "Microsoft.TestPlatform.ObjectModel/18.0.1",
+          "asset": "lib/net8.0/Microsoft.VisualStudio.TestPlatform.ObjectModel.dll",
+          "target_metadata": {},
+          "path": "/home/rupicola/.nuget/packages/microsoft.testplatform.objectmodel/18.0.1/lib/net8.0/Microsoft.VisualStudio.TestPlatform.ObjectModel.dll",
+          "bytes": 335392,
+          "sha256": "f6d6bc01a85fd68a0599533fcc0de7357922051bad90012b8ad15de31a4ef5e9",
+          "same_filename_actual_refs": [
+            "/home/rupicola/.nuget/packages/microsoft.testplatform.testhost/18.0.1/lib/net8.0/Microsoft.VisualStudio.TestPlatform.ObjectModel.dll"
+          ]
+        }
+      ],
+      "actual_package_refs_not_selected_assets": []
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj",
+      "assets": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Tests.Shared/obj/project.assets.json",
+      "assets_sha256": "10dde4b169068edf8e4ac69f067a8ea8dfc28a100466987b6f8b30c6a2d7a8b5",
+      "actual_package_ref_count": 23,
+      "potential_selected_compile_count": 23,
+      "unconsumed_selected_compile_assets": [],
+      "actual_package_refs_not_selected_assets": []
+    }
+  ]
+}

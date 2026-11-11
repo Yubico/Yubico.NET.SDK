@@ -1,0 +1,929 @@
+// Copyright 2026 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Microsoft.Extensions.Logging;
+using System.Buffers.Binary;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Oath.Backend;
+
+namespace Yubico.YubiKit.Oath;
+
+/// <summary>
+///     Manages an OATH applet session on a YubiKey device.
+/// </summary>
+public sealed class OathSession : ApplicationSession, IOathSession
+{
+    private static readonly Feature FeatureRenameCredential = new("Rename Credential", 5, 3, 1);
+    private static readonly Feature FeatureScp03 = new("SCP03 for OATH", 5, 6, 3);
+
+    private readonly ILogger _logger;
+
+    private IOathBackend _backend = null!;
+    private byte[] _salt = [];
+    private byte[] _challenge = [];
+
+    /// <inheritdoc />
+    public string DeviceId { get; private set; } = string.Empty;
+
+    /// <inheritdoc />
+    public ReadOnlyMemory<byte> Salt => _salt;
+
+    /// <inheritdoc />
+    public bool IsLocked { get; private set; }
+
+    /// <inheritdoc />
+    public bool IsPasswordProtected { get; private set; }
+
+    private OathSession(
+        ISmartCardConnection connection,
+        IUserPresencePrompt? userPresencePrompt = null)
+        : base(connection, userPresencePrompt)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        _logger = Logger;
+    }
+
+    /// <summary>
+    ///     Creates and initializes an OATH session.
+    /// </summary>
+    /// <param name="connection">The caller-owned SmartCard connection to borrow for the session lifetime.</param>
+    /// <param name="options">
+    ///     Optional session creation settings. If specified, <see cref="SessionCreationOptions.PreferredConnectionType" />
+    ///     must match the supplied SmartCard connection; it does not select another connection.
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token for initialization.</param>
+    /// <returns>An initialized session that the caller must dispose with <c>await using</c>.</returns>
+    /// <remarks>
+    ///     Disposing the session leaves the borrowed connection open. Dispose the connection separately with
+    ///     <c>await using</c>, after the session. Only one live session may use a connection; dispose it before
+    ///     creating the next session on that connection.
+    /// </remarks>
+    /// <exception cref="BadResponseException">
+    ///     SELECT lacks required version or nonempty device-ID metadata, the version is not three bytes,
+    ///     or a present authentication challenge is empty.
+    /// </exception>
+    public static Task<OathSession> CreateAsync(
+        ISmartCardConnection connection,
+        SessionCreationOptions? options = null,
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
+            connection,
+            options,
+            () => new OathSession(connection, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                CreateOathProtocolConfiguration(options?.ProtocolConfiguration),
+                options?.FirmwareVersionOverride,
+                options?.ScpKeyParameters,
+                token),
+            cancellationToken);
+
+    private static ProtocolConfiguration CreateOathProtocolConfiguration(ProtocolConfiguration? configuration) =>
+        (configuration ?? default) with { InsSendRemaining = OathConstants.InsSendRemaining };
+
+    private async Task InitializeAsync(
+        ProtocolConfiguration? configuration,
+        FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
+        CancellationToken cancellationToken)
+    {
+        if (IsInitialized)
+            return;
+
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
+            .ConfigureAwait(false);
+        IOathBackend backend = new OathBackend(protocol);
+
+        var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+        ApplyInitialization(initialization, firmwareVersionOverride);
+
+        if (scpKeyParams is not null)
+        {
+            if (!IsSupported(FeatureScp03))
+            {
+                throw new NotSupportedException(
+                    $"SCP03 for OATH requires firmware {FeatureScp03.Version}+, " +
+                    $"but this device has {FirmwareVersion}.");
+            }
+        }
+
+        var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
+                protocol,
+                FirmwareVersion,
+                configuration,
+                scpKeyParams,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!ReferenceEquals(protocol, effectiveProtocol))
+        {
+            backend = new OathBackend(effectiveProtocol);
+        }
+
+        _backend = backend;
+
+        _logger.LogDebug("OATH session initialized, DeviceId={DeviceId}, IsLocked={IsLocked}", DeviceId, IsLocked);
+    }
+
+    private void ApplyInitialization(OathInitialization initialization, FirmwareVersion? firmwareVersionOverride)
+    {
+        FirmwareVersion = firmwareVersionOverride ?? initialization.FirmwareVersion;
+
+        CryptographicOperations.ZeroMemory(_salt);
+        _salt = initialization.Salt;
+
+        CryptographicOperations.ZeroMemory(_challenge);
+        _challenge = initialization.Challenge;
+
+        DeviceId = ComputeDeviceId(_salt);
+        IsLocked = _challenge.Length > 0;
+        IsPasswordProtected = IsLocked;
+    }
+
+    /// <summary>
+    ///     A <see cref="Credential" /> names the device it was read from. Sending its ID to a different
+    ///     device would act on whichever credential there happens to share the name.
+    /// </summary>
+    private void ThrowIfFromAnotherDevice(Credential credential)
+    {
+        if (credential.DeviceId != DeviceId)
+        {
+            throw new ArgumentException(
+                $"The credential belongs to OATH device '{credential.DeviceId}', not to this session's device '{DeviceId}'.",
+                nameof(credential));
+        }
+    }
+
+    internal static string ComputeDeviceId(ReadOnlySpan<byte> salt)
+    {
+        Span<byte> hash = stackalloc byte[32];
+        SHA256.HashData(salt, hash);
+        return Convert.ToBase64String(hash[..16]).TrimEnd('=');
+    }
+
+    /// <summary>
+    ///     Sends a command through the backend, translating a "security status not satisfied"
+    ///     APDU failure into a dedicated <see cref="OathException" /> with
+    ///     <see cref="OathFailureReason.Locked" /> so callers do not need to interpret raw status words.
+    /// </summary>
+    private async Task<ApduResponse> SendAsync(ApduCommand command, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+        catch (ApduException ex) when (ex.SW == SWConstants.SecurityStatusNotSatisfied)
+        {
+            throw new OathException(OathFailureReason.Locked, ex.SW, ex);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+
+        var command = new ApduCommand(0x00, OathConstants.InsList, 0x00, 0x00);
+        var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
+        var responseData = response.Data;
+
+        if (responseData.Length == 0)
+            return [];
+
+        var credentials = new List<Credential>();
+        using var tlvs = TlvHelper.DecodeList(responseData.Span);
+
+        foreach (var tlv in tlvs)
+        {
+            if (tlv.Tag != OathConstants.TagNameList)
+                continue;
+
+            var value = tlv.Value.Span;
+            if (value.Length < 2)
+                throw new BadResponseException("LIST entry requires a type/algorithm byte and a credential ID.");
+
+            byte typeByte = value[0];
+            var oathType = (OathType)(typeByte & OathConstants.MaskType);
+            var credentialId = value[1..].ToArray();
+
+            if (!TryParseCredentialId(credentialId, oathType, "LIST", out var issuer, out var name, out var period))
+                continue;
+
+            credentials.Add(new Credential(
+                DeviceId,
+                credentialId,
+                issuer,
+                name,
+                oathType,
+                period,
+                touchRequired: null));
+        }
+
+        return credentials;
+    }
+
+    /// <inheritdoc />
+    public async Task PutCredentialAsync(
+        CredentialData credentialData,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(credentialData);
+
+        credentialData.ValidateRequest();
+        byte[] credId = credentialData.GetId();
+        byte[] secret = credentialData.GetProcessedSecret();
+
+        byte typeByte = (byte)((byte)credentialData.OathType | (byte)credentialData.HashAlgorithm);
+
+        // TAG_KEY value: [type_byte][digits_byte][secret...]
+        byte[] keyValue = [(byte)typeByte, (byte)credentialData.Digits, .. secret];
+
+        try
+        {
+            byte[]? data = null;
+            try
+            {
+                data = EncodePutCredentialPayload(
+                    credId,
+                    keyValue,
+                    credentialData.RequireTouch,
+                    credentialData.OathType == OathType.Hotp ? credentialData.Counter : 0);
+                var command = new ApduCommand(0x00, OathConstants.InsPut, 0x00, 0x00, data);
+                await SendAsync(command, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (data is not null)
+                {
+                    CryptographicOperations.ZeroMemory(data);
+                }
+            }
+
+            _logger.LogDebug("Credential stored: {CredentialIdLength} bytes", credId.Length);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(keyValue);
+            CryptographicOperations.ZeroMemory(secret);
+        }
+    }
+
+    private static byte[] EncodePutCredentialPayload(
+        ReadOnlyMemory<byte> credentialId,
+        ReadOnlyMemory<byte> keyValue,
+        bool requireTouch,
+        int hotpCounter)
+    {
+        using var nameTlv = new Tlv(OathConstants.TagName, credentialId);
+        using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
+
+        byte[]? propBytes = requireTouch
+            ? [OathConstants.TagProperty, OathConstants.PropRequireTouch]
+            : null;
+
+        Tlv? imfTlv = null;
+        try
+        {
+            if (hotpCounter > 0)
+            {
+                Span<byte> imfBytes = stackalloc byte[4];
+                BinaryPrimitives.WriteInt32BigEndian(imfBytes, hotpCounter);
+                imfTlv = new Tlv(OathConstants.TagImf, imfBytes);
+            }
+
+            var totalSize = nameTlv.TotalLength + keyTlv.TotalLength + (propBytes?.Length ?? 0) + (imfTlv?.TotalLength ?? 0);
+            var data = new byte[totalSize];
+            var offset = 0;
+
+            nameTlv.AsSpan().CopyTo(data.AsSpan(offset));
+            offset += nameTlv.TotalLength;
+
+            keyTlv.AsSpan().CopyTo(data.AsSpan(offset));
+            offset += keyTlv.TotalLength;
+
+            // TAG_PROPERTY is raw bytes [tag, value], NOT TLV-encoded.
+            // This matches ykman Python: struct.pack(">BB", TAG_PROPERTY, PROP_REQUIRE_TOUCH).
+            if (propBytes is not null)
+            {
+                propBytes.CopyTo(data.AsSpan(offset));
+                offset += propBytes.Length;
+            }
+
+            imfTlv?.AsSpan().CopyTo(data.AsSpan(offset));
+
+            return data;
+        }
+        finally
+        {
+            imfTlv?.Dispose();
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteCredentialAsync(
+        Credential credential,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
+
+        using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
+        var command = new ApduCommand(0x00, OathConstants.InsDelete, 0x00, 0x00, nameTlv.AsMemory());
+        await SendAsync(command, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<Credential> RenameCredentialAsync(
+        Credential credential,
+        string? newIssuer,
+        string newName,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
+        EnsureSupports(FeatureRenameCredential);
+
+        ReadOnlyMemory<byte> oldId = credential.Id;
+        byte[] newId = Credential.FormatCredentialId(newIssuer, newName, credential.OathType, credential.Period);
+
+        using var oldNameTlv = new Tlv(OathConstants.TagName, oldId);
+        using var newNameTlv = new Tlv(OathConstants.TagName, newId);
+        byte[] data = [.. oldNameTlv.AsSpan(), .. newNameTlv.AsSpan()];
+
+        try
+        {
+            var command = new ApduCommand(0x00, OathConstants.InsRename, 0x00, 0x00, data);
+            await SendAsync(command, cancellationToken).ConfigureAwait(false);
+
+            return new Credential(
+                DeviceId,
+                newId,
+                newIssuer,
+                newName,
+                credential.OathType,
+                credential.Period,
+                credential.TouchRequired);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(data);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<ReadOnlyMemory<byte>> CalculateAsync(
+        Credential credential,
+        ReadOnlyMemory<byte> challenge,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
+
+        using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
+        using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
+
+        byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
+        UserPresenceNotification userPresenceNotification =
+            CreateUserPresenceNotification(CreateUserPresenceContext(credential, UserPresenceOperations.Oath.Calculate));
+        try
+        {
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
+                        var response = await SendAsync(command, token).ConfigureAwait(false);
+                        try
+                        {
+                            using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
+                            foreach (var tlv in responseTlvs)
+                            {
+                                if (tlv.Tag != OathConstants.TagResponse)
+                                    continue;
+
+                                // YKOATH full response: [digits][HMAC]. The credential does not
+                                // carry an algorithm, so validate structure, not a fixed digest size.
+                                if (tlv.Value.Length < 2)
+                                    throw new BadResponseException("CALCULATE response requires a digit header and HMAC payload.");
+
+                                await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
+                                    .ConfigureAwait(false);
+                                return tlv.Value[1..].ToArray();
+                            }
+
+                            throw new BadResponseException("No TAG_RESPONSE in CALCULATE response.");
+                        }
+                        finally
+                        {
+                            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+                        }
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(data);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<Code> CalculateCodeAsync(
+        Credential credential,
+        long? timestamp = null,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
+
+        long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        ArgumentOutOfRangeException.ThrowIfNegative(ts, nameof(timestamp));
+        byte[] challenge;
+
+        if (credential.OathType == OathType.Totp)
+        {
+            // RFC 6238 §4.2: T = floor((now - T0) / X). Credentials read from the device are already
+            // validated; this guards a Credential built by the caller.
+            if (credential.Period <= 0)
+                throw new ArgumentException("TOTP credential period must be positive (RFC 6238 §4.1).", nameof(credential));
+
+            _ = Code.GetTotpWindow(ts, credential.Period);
+            long timeStep = ts / credential.Period;
+            challenge = new byte[OathConstants.ChallengeLength];
+            BinaryPrimitives.WriteInt64BigEndian(challenge, timeStep);
+        }
+        else
+        {
+            challenge = [];
+        }
+
+        using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
+        using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
+
+        byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
+        UserPresenceNotification userPresenceNotification =
+            CreateUserPresenceNotification(CreateUserPresenceContext(credential, UserPresenceOperations.Oath.CalculateCode));
+        try
+        {
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        // P2=0x01 requests truncated response
+                        var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x01, data);
+                        var response = await SendAsync(command, token).ConfigureAwait(false);
+                        try
+                        {
+                            using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
+                            foreach (var tlv in responseTlvs)
+                            {
+                                if (tlv.Tag != OathConstants.TagTruncated)
+                                    continue;
+
+                                Code.ParsedCode parsedCode = Code.ParseCode(credential, tlv.Value.Span);
+                                await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
+                                    .ConfigureAwait(false);
+                                return Code.FormatCode(credential, ts, parsedCode);
+                            }
+
+                            throw new BadResponseException("No TAG_TRUNCATED in CALCULATE response.");
+                        }
+                        finally
+                        {
+                            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+                        }
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(data);
+        }
+    }
+
+    private UserPresenceContext? CreateUserPresenceContext(Credential credential, string operation)
+    {
+        if (!IsUserPresenceNotificationEnabled || credential.TouchRequired is not true)
+            return null;
+
+        return new UserPresenceContext
+        {
+            Application = UserPresenceApplications.Oath,
+            Operation = operation,
+            Scope = credential.Issuer is not null
+                ? $"{credential.Issuer}:{credential.Name}"
+                : credential.Name,
+            Basis = UserPresenceBasis.PolicyRequires
+        };
+    }
+
+    /// <summary>
+    ///     Parses a credential ID from a device response. A recognized ASCII-digit TOTP period prefix
+    ///     that is zero or exceeds Int32.MaxValue is logged by ID length and skipped, so that entry
+    ///     does not hide the rest of the device's credentials. This is not general raw-ID validation.
+    /// </summary>
+    private bool TryParseCredentialId(
+        byte[] credentialId,
+        OathType oathType,
+        string instruction,
+        out string? issuer,
+        out string name,
+        out int period)
+    {
+        try
+        {
+            (issuer, name, period) = Credential.ParseCredentialId(credentialId, oathType);
+            return true;
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex,
+                "Skipping credential with malformed ID (length {Length}) in {Instruction} response",
+                credentialId.Length, instruction);
+            issuer = null;
+            name = string.Empty;
+            period = 0;
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(
+        long? timestamp = null,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+
+        long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        _ = Code.GetTotpWindow(ts, OathConstants.DefaultPeriod);
+        long timeStep = ts / OathConstants.DefaultPeriod;
+
+        byte[] challenge = new byte[OathConstants.ChallengeLength];
+        BinaryPrimitives.WriteInt64BigEndian(challenge, timeStep);
+
+        using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
+
+        // P2=0x01 requests truncated responses
+        var command = new ApduCommand(0x00, OathConstants.InsCalculateAll, 0x00, 0x01, challengeTlv.AsMemory());
+        var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var result = new Dictionary<Credential, Code?>();
+            using var tlvs = TlvHelper.DecodeList(response.Data.Span);
+
+            for (int i = 0; i < tlvs.Count; i++)
+            {
+                var nameTlv = tlvs[i];
+                Tlv? responseTlv = ParseCalculateAllEntry(tlvs, i);
+                if (responseTlv is null)
+                    continue;
+                i++;
+
+                // Required wire structure is independent of the host's credential-name grammar.
+                Code.ParsedCode? parsedCode = responseTlv.Tag == OathConstants.TagTruncated
+                    ? Code.ParseTruncatedResponse(responseTlv.Value.Span)
+                    : null;
+
+                // TAG_NAME contains the raw ID, unlike LIST's [type/algorithm][ID].
+                // Preserve the existing unknown-result behavior; only known results produce codes.
+                var credentialId = nameTlv.Value.ToArray();
+                var oathType = responseTlv.Tag == OathConstants.TagHotp ? OathType.Hotp : OathType.Totp;
+                if (!TryParseCredentialId(credentialId, oathType, "CALCULATE ALL", out var issuer, out var name, out var period))
+                    continue;
+
+                bool touchRequired = responseTlv.Tag == OathConstants.TagTouch;
+                var credential = new Credential(DeviceId, credentialId, issuer, name, oathType, period, touchRequired);
+                Code? code = null;
+                if (parsedCode is { } parsed)
+                {
+                    code = credential.Period != OathConstants.DefaultPeriod
+                        ? await CalculateCodeAsync(credential, ts, cancellationToken).ConfigureAwait(false)
+                        : Code.FormatCode(credential, ts, parsed);
+                }
+
+                result[credential] = code;
+            }
+
+            return result;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+        }
+    }
+
+    private static Tlv? ParseCalculateAllEntry(IReadOnlyList<Tlv> tlvs, int index)
+    {
+        ReadOnlySpan<int> nonResultTags = [OathConstants.TagName, OathConstants.TagNameList,
+            OathConstants.TagKey, OathConstants.TagChallenge, OathConstants.TagResponse,
+            OathConstants.TagProperty, OathConstants.TagVersion, OathConstants.TagImf, OathConstants.TagAlgorithm];
+        var nameTlv = tlvs[index];
+        if (nameTlv.Tag != OathConstants.TagName)
+        {
+            if (nonResultTags.Contains(nameTlv.Tag) || nameTlv.Tag is OathConstants.TagTruncated
+                or OathConstants.TagHotp or OathConstants.TagTouch)
+                throw new BadResponseException("CALCULATE ALL response is missing its credential ID.");
+
+            // Unknown standalone metadata must not shift the following name/response pair.
+            return null;
+        }
+
+        if (nameTlv.Value.Length == 0 || index + 1 == tlvs.Count)
+            throw new BadResponseException("CALCULATE ALL entry requires a credential ID and response.");
+
+        var responseTlv = tlvs[index + 1];
+        // P2=1 requests truncated values. A known full-response or metadata tag is not
+        // an unknown future marker, regardless of whether its value is well formed.
+        if (nonResultTags.Contains(responseTlv.Tag))
+            throw new BadResponseException("CALCULATE ALL entry requires a truncated response or marker.");
+
+        return responseTlv;
+    }
+
+    /// <inheritdoc />
+    public async Task ResetAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+
+        var command = new ApduCommand(0x00, OathConstants.InsReset, 0xDE, 0xAD);
+        await SendAsync(command, cancellationToken).ConfigureAwait(false);
+
+        // Confirmed RESET success is terminal for plain and SCP sessions. DisposeAsync clears
+        // readiness immediately, then drains/disposes the protocol, derived keys and applet secrets.
+        // It intentionally does not observe caller cancellation after this destructive exchange.
+        // Cancellation/overlap refusal before admission never reaches this boundary.
+        await DisposeAsync().ConfigureAwait(false);
+        _logger.LogInformation("OATH application reset; session ended. Reopen the connection before creating a new session.");
+    }
+
+    /// <inheritdoc />
+    public byte[] DeriveKey(ReadOnlyMemory<byte> password)
+    {
+        ThrowIfDisposed();
+
+        return Rfc2898DeriveBytes.Pbkdf2(
+            password.Span,
+            _salt,
+            iterations: 1000,
+            HashAlgorithmName.SHA1,
+            outputLength: 16);
+    }
+
+    /// <inheritdoc />
+    public async Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+
+        if (key.Length == 0)
+            throw new ArgumentException("Key must not be empty.", nameof(key));
+
+        if (_challenge.Length == 0)
+            throw new InvalidOperationException("Device is not locked; no challenge to validate against.");
+
+        byte[]? clientResponse = null;
+        byte[] clientChallenge = new byte[OathConstants.ChallengeLength];
+
+        try
+        {
+            clientResponse = HMACSHA1.HashData(key.Span, _challenge);
+            RandomNumberGenerator.Fill(clientChallenge);
+
+            using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
+            using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
+
+            byte[] data = [.. responseTlv.AsSpan(), .. challengeTlv.AsSpan()];
+            try
+            {
+                var command = new ApduCommand(0x00, OathConstants.InsValidate, 0x00, 0x00, data);
+                var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
+
+                // Verify device's response
+                byte[] expectedResponse = HMACSHA1.HashData(key.Span, clientChallenge);
+                byte[]? deviceResponse = null;
+                try
+                {
+                    using var deviceTlvs = TlvHelper.DecodeList(response.Data.Span);
+
+                    foreach (var tlv in deviceTlvs)
+                    {
+                        if (tlv.Tag == OathConstants.TagResponse)
+                        {
+                            deviceResponse = tlv.Value.ToArray();
+                            break;
+                        }
+                    }
+
+                    if (deviceResponse is null)
+                        throw new BadResponseException("No TAG_RESPONSE in VALIDATE response.");
+
+                    if (!CryptographicOperations.FixedTimeEquals(expectedResponse, deviceResponse))
+                        throw new BadResponseException("The OATH device authentication response did not match verification.");
+
+                    IsLocked = false;
+                    CryptographicOperations.ZeroMemory(_challenge);
+                    _challenge = [];
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+                    CryptographicOperations.ZeroMemory(expectedResponse);
+                    if (deviceResponse is not null)
+                        CryptographicOperations.ZeroMemory(deviceResponse);
+                }
+            }
+            catch (ApduException ex) when (
+                ex.SW == SWConstants.ReferenceDataUnusable ||
+                ex.SW == SWConstants.InvalidCommandDataParameter)
+            {
+                // Preserve the existing rejection category and raw status. These statuses
+                // do not by themselves prove that a user supplied an incorrect password.
+                throw new OathException(OathFailureReason.WrongPassword, ex.SW, ex);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(data);
+            }
+        }
+        finally
+        {
+            if (clientResponse is not null)
+                CryptographicOperations.ZeroMemory(clientResponse);
+            CryptographicOperations.ZeroMemory(clientChallenge);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+
+        if (key.Length == 0)
+            throw new ArgumentException("Key must not be empty.", nameof(key));
+
+        byte[] clientChallenge = new byte[OathConstants.ChallengeLength];
+        byte[]? clientResponse = null;
+        byte[]? keyValue = null;
+
+        try
+        {
+            RandomNumberGenerator.Fill(clientChallenge);
+            clientResponse = HMACSHA1.HashData(key.Span, clientChallenge);
+
+            byte typeByte = (byte)((byte)OathType.Totp | (byte)OathHashAlgorithm.Sha1);
+            keyValue = new byte[1 + key.Length];
+            keyValue[0] = typeByte;
+            key.Span.CopyTo(keyValue.AsSpan(1));
+
+            using var keyTlv = new Tlv(OathConstants.TagKey, keyValue);
+            using var challengeTlv = new Tlv(OathConstants.TagChallenge, clientChallenge);
+            using var responseTlv = new Tlv(OathConstants.TagResponse, clientResponse);
+
+            byte[] data = [.. keyTlv.AsSpan(), .. challengeTlv.AsSpan(), .. responseTlv.AsSpan()];
+            try
+            {
+                var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, data);
+                await SendAsync(command, cancellationToken).ConfigureAwait(false);
+                IsPasswordProtected = true;
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(data);
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(clientChallenge);
+            if (clientResponse is not null)
+                CryptographicOperations.ZeroMemory(clientResponse);
+            if (keyValue is not null)
+                CryptographicOperations.ZeroMemory(keyValue);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task UnsetKeyAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+
+        // Send SET CODE with empty key TLV to clear the access key
+        using var keyTlv = new Tlv(OathConstants.TagKey, ReadOnlySpan<byte>.Empty);
+        var command = new ApduCommand(0x00, OathConstants.InsSetCode, 0x00, 0x00, keyTlv.AsMemory());
+        await SendAsync(command, cancellationToken).ConfigureAwait(false);
+        IsPasswordProtected = false;
+    }
+
+    /// <inheritdoc />
+    // Generic and non-generic forms preserve the established task-operation ergonomics.
+#pragma warning disable RS0026
+    public async Task<T> AuthenticateAndRetryAsync<T>(
+        Func<CancellationToken, Task<T>> operation,
+        Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(operation);
+        ArgumentNullException.ThrowIfNull(passwordProvider);
+
+        try
+        {
+            return await operation(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OathException ex) when (ex.Reason == OathFailureReason.Locked)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            ReadOnlyMemory<byte> password = await passwordProvider(cancellationToken).ConfigureAwait(false);
+            byte[] key = DeriveKey(password);
+            await AuthenticateWithDerivedKeyAsync(key, cancellationToken).ConfigureAwait(false);
+
+            return await operation(cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    ///     Validates an already-derived access key and unconditionally zeroes it once the attempt
+    ///     completes, whether validation succeeds or fails (e.g. with
+    ///     <see cref="OathFailureReason.WrongPassword" />).
+    /// </summary>
+    /// <remarks>
+    ///     Extracted from <see cref="AuthenticateAndRetryAsync{T}" /> and kept <c>internal</c> rather
+    ///     than a private local step so the zeroing guarantee on the wrong-password failure branch —
+    ///     not just the success branch — can be exercised directly by unit tests with a caller-owned
+    ///     key array. Not part of the public API.
+    /// </remarks>
+    internal async Task AuthenticateWithDerivedKeyAsync(byte[] key, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        try
+        {
+            await ValidateAsync(key, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task AuthenticateAndRetryAsync(
+        Func<CancellationToken, Task> operation,
+        Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(operation);
+
+        _ = await AuthenticateAndRetryAsync(
+            async ct =>
+            {
+                await operation(ct).ConfigureAwait(false);
+                return true;
+            },
+            passwordProvider,
+            cancellationToken).ConfigureAwait(false);
+    }
+#pragma warning restore RS0026
+
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            if (disposing)
+            {
+                CryptographicOperations.ZeroMemory(_salt);
+                CryptographicOperations.ZeroMemory(_challenge);
+            }
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+}

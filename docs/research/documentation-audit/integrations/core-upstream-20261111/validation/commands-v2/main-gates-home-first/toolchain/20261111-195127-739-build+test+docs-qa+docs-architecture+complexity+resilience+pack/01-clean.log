@@ -1,0 +1,12 @@
+$ dotnet clean Yubico.YubiKit.sln -c Release
+Build started 11/11/2026 7:51:28 PM.
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/Yubico.YubiKit.sln" on node 1 (Clean target(s)).
+     1>ValidateSolutionConfiguration:
+         Building solution configuration "Release|Any CPU".
+     1>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/Yubico.YubiKit.sln" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.77

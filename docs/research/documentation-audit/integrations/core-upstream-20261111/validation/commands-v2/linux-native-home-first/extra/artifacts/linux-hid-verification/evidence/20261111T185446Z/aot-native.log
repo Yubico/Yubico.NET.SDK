@@ -1,0 +1,139 @@
+FIXTURE real libc/socketpair/eventfd/poll; synthetic FIDO64 metadata; NO hardware
+PASS check=libc-failed-open-negative-fd-and-errno-ENOENT
+PASS check=libc-real-eventfd-write
+PASS check=libc-real-eventfd-read
+PASS check=libc-eventfd-checked-close
+PASS check=libc-fd-zero-fixture-child-stdin-closed
+PASS check=libc-real-fd-zero-valid-and-checked-close
+PASS check=reactor-real-registration-pending-readiness
+PASS check=reactor-explicit-eventfd-signal-not-data
+PASS check=reactor-real-poll-readiness-generation
+PASS check=reactor-removal-eventfd-wake
+PASS check=reactor-quiescence-owner-release-before-checked-close
+PASS check=reactor-idle-registration-activated
+PASS check=reactor-shutdown-eventfd-wake-actual-quiescence
+PASS check=reactor-shutdown-reference-release-checked-close
+PASS check=reactor-real-eventfd-control-syscalls-observed
+REACTOR realPollCalls=4 realEventfdWrites=3 realEventfdReads=3
+PASS check=reactor-held-internal-read-callback-entered
+PASS check=reactor-no-false-quiescence-while-callback-held
+PASS check=reactor-early-reference-release-rejected
+PASS check=reactor-held-callback-real-exit-quiescence-release-close
+PASS check=fd-reuse-predecessor-close-proven
+PASS check=fd-reuse-real-same-integer-descriptor
+PASS check=fd-reuse-stale-token-generation-isolation
+PASS check=fd-reuse-successor-and-sentinel-drained-close
+PASS check=owner-output-entered-report-seam
+PASS check=owner-report-entry-off-caller-and-returned-task-still-pending
+PASS check=owner-one-pending-output-no-replacement-worker
+PASS check=owner-real-native-input-await-is-pending
+PASS check=owner-held-output-cannot-stall-other-input-progress
+PASS check=owner-owned-output-copy-production-L1-zero-ID-framing-no-drop
+PASS check=owner-40-owned-input-buffers-no-drop-reorder-or-reuse
+PASS check=owner-pending-reader-cancel-detaches
+PASS check=owner-cancel-recovery-real-reactor
+PASS check=owner-dispose-read-was-pending
+PASS check=owner-dispose-terminalizes-real-pending-read
+PASS check=owner-actual-quiescence-worker-release-checked-close
+PASS check=owner-original-output-worker-performs-checked-close
+NATIVE probe readCalls=48 writeCalls=1 maxPendingOutput=1 outputWorker=18 closeWorker=18
+PASS check=owner-after-pending-dispose-reopen-real-reactor-read
+PASS check=owner-reopened-checked-close
+{
+  "Mode": "--native",
+  "Baseline": "3de42bb54c5e8c986364f0f04398d4e85a66a596",
+  "SourceHash": "90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa",
+  "Runtime": ".NET 10.0.15",
+  "Kernel": "Omarchy",
+  "KernelRelease": "7.2.15-1-omarchy",
+  "DynamicCode": false,
+  "Checks": [
+    "libc-failed-open-negative-fd-and-errno-ENOENT",
+    "libc-real-eventfd-write",
+    "libc-real-eventfd-read",
+    "libc-eventfd-checked-close",
+    "libc-fd-zero-fixture-child-stdin-closed",
+    "libc-real-fd-zero-valid-and-checked-close",
+    "reactor-real-registration-pending-readiness",
+    "reactor-explicit-eventfd-signal-not-data",
+    "reactor-real-poll-readiness-generation",
+    "reactor-removal-eventfd-wake",
+    "reactor-quiescence-owner-release-before-checked-close",
+    "reactor-idle-registration-activated",
+    "reactor-shutdown-eventfd-wake-actual-quiescence",
+    "reactor-shutdown-reference-release-checked-close",
+    "reactor-real-eventfd-control-syscalls-observed",
+    "reactor-held-internal-read-callback-entered",
+    "reactor-no-false-quiescence-while-callback-held",
+    "reactor-early-reference-release-rejected",
+    "reactor-held-callback-real-exit-quiescence-release-close",
+    "fd-reuse-predecessor-close-proven",
+    "fd-reuse-real-same-integer-descriptor",
+    "fd-reuse-stale-token-generation-isolation",
+    "fd-reuse-successor-and-sentinel-drained-close",
+    "owner-output-entered-report-seam",
+    "owner-report-entry-off-caller-and-returned-task-still-pending",
+    "owner-one-pending-output-no-replacement-worker",
+    "owner-real-native-input-await-is-pending",
+    "owner-held-output-cannot-stall-other-input-progress",
+    "owner-owned-output-copy-production-L1-zero-ID-framing-no-drop",
+    "owner-40-owned-input-buffers-no-drop-reorder-or-reuse",
+    "owner-pending-reader-cancel-detaches",
+    "owner-cancel-recovery-real-reactor",
+    "owner-dispose-read-was-pending",
+    "owner-dispose-terminalizes-real-pending-read",
+    "owner-actual-quiescence-worker-release-checked-close",
+    "owner-original-output-worker-performs-checked-close",
+    "owner-after-pending-dispose-reopen-real-reactor-read",
+    "owner-reopened-checked-close"
+  ],
+  "Measurements": [
+    {
+      "Name": "reactor-shutdown",
+      "CallerReturnMs": 0.0064,
+      "TotalMs": 0.0145,
+      "AllocatedBytes": 0
+    },
+    {
+      "Name": "synthetic-owner-open",
+      "CallerReturnMs": 0.0504,
+      "TotalMs": 0.1463,
+      "AllocatedBytes": 16144
+    },
+    {
+      "Name": "synthetic-held-output",
+      "CallerReturnMs": 0.0014,
+      "TotalMs": 0.1264,
+      "AllocatedBytes": null
+    },
+    {
+      "Name": "synthetic-owner-dispose",
+      "CallerReturnMs": 0.0059,
+      "TotalMs": 0.0157,
+      "AllocatedBytes": 808
+    }
+  ],
+  "NativeProbes": [
+    {
+      "Name": "synthetic-descriptor-production-L1-report-call-excludes-held-seam",
+      "ReadCalls": 48,
+      "WriteCalls": 1,
+      "PendingAtBarrier": 1,
+      "OutputWorker": 18,
+      "CloseWorker": 18,
+      "ReportWriteCallMs": 0.007102
+    }
+  ],
+  "Idle": [
+    {
+      "Scope": "whole-process-with-one-live-synthetic-owner-and-reactor",
+      "WallMs": 250.2545,
+      "CpuMs": 0.072,
+      "ThreadDelta": 0,
+      "AllocatedBytes": 16400
+    }
+  ],
+  "Failure": null,
+  "Outcome": "PASSED"
+}
+RESULT: PASSED; checks=38; exit=0

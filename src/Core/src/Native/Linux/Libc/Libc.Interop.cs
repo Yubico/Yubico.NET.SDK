@@ -16,8 +16,8 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.Native.Linux.Libc;
 
-// This file contains native methods (P/Invoke) for Linux libc functions.
-// Currently we only need open, close, and ioctl.
+// glibc libc.so.6 ABI. Raw descriptor ints are hidden behind retained SafeHandle
+// wrappers; these synchronous entry points do not establish worker ownership.
 internal static partial class NativeMethods
 {
 
@@ -27,7 +27,8 @@ internal static partial class NativeMethods
         O_RDONLY = 0,
         O_WRONLY = 1,
         O_RDWR = 2,
-        O_NONBLOCK = 0x800
+        O_NONBLOCK = 0x800,
+        O_CLOEXEC = 0x80000
     }
 
 
@@ -82,11 +83,28 @@ internal static partial class NativeMethods
     /// <returns>Number of file descriptors with events, 0 on timeout, -1 on error (check errno).</returns>
     [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "poll", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial int poll([In, Out] PollFd[] fds, int nfds, int timeout);
+    private static partial int PollNative([In, Out] PollFd[] fds, nuint nfds, int timeout);
+
+    public static int Poll(PollFd[] fds, int nfds, int timeout)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(nfds);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(nfds, fds.Length);
+        return PollNative(fds, (nuint)nfds, timeout);
+    }
 
     [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "eventfd", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial LinuxEventFdSafeHandle eventfd(uint initval, int flags);
+    private static partial int EventFdNative(uint initval, int flags);
+
+    public static LinuxEventFdSafeHandle EventFd(uint initval, int flags)
+    {
+        var result = new LinuxEventFdSafeHandle();
+        int fd = EventFdNative(initval, flags);
+        int error = Marshal.GetLastPInvokeError();
+        result.Initialize(fd);
+        Marshal.SetLastPInvokeError(error);
+        return result;
+    }
 
 
     public const long HIDIOCGRAWINFO = 0x0000000080084803;
@@ -98,7 +116,7 @@ internal static partial class NativeMethods
     // (Get), the buffer size is the size of the buffer into which the result
     // will be placed. With "CS" (Set), the buffer size is the size of the
     // data being sent.
-    // The buffer size is ORed into bits 16 - 21.
+    // The generic Linux ioctl size field occupies bits 16 - 29.
     // For example, to build the ioctl flag for Get with a buffer of 256
     // bytes, use
     //   HIDIOCGFEATURE | (256 << 16);
@@ -129,16 +147,28 @@ internal static partial class NativeMethods
     [LibraryImport(Libraries.LinuxKernelLib, StringMarshalling = StringMarshalling.Utf8, EntryPoint = "open",
         SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial LinuxFileSafeHandle open(string filename, OpenFlags flag);
+    private static partial int OpenNative(string filename, OpenFlags flag);
+
+    public static LinuxFileSafeHandle Open(string filename, OpenFlags flag)
+    {
+        // Allocate before acquiring the fd. SafeHandle's default native return marshaller uses
+        // IntPtr, which is not the ABI of an int-returning libc function on 64-bit Linux.
+        var result = new LinuxFileSafeHandle();
+        int fd = OpenNative(filename, flag | OpenFlags.O_CLOEXEC);
+        int error = Marshal.GetLastPInvokeError();
+        result.Initialize(fd);
+        Marshal.SetLastPInvokeError(error);
+        return result;
+    }
 
     // This will be called from within the SafeHandle class, but should be
     // called by no one else.
     [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "close", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial int close(IntPtr handle);
+    internal static partial int CloseNative(int fd);
 
-    // The SDK uses ioctl for only three requests: info, descriptor size, and
-    // descriptor. All three will be called as follows.
+    // Metadata requests (info, descriptor size, descriptor) use the legacy pointer
+    // wrapper below; report feature requests use the span wrapper and include the ID.
     // Pass in one of the HIDIOCG values as the request. Pass in a buffer
     // that is the corresponding Size bytes long, that will accept the
     // result. For example, to get the RAWINFO, create an IntPtr with space
@@ -149,37 +179,58 @@ internal static partial class NativeMethods
     // where the targets are located.
     [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "ioctl", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial int ioctl(LinuxFileSafeHandle handle, long request, IntPtr result);
+    private static unsafe partial int IoctlNative(int fd, nuint request, void* result);
+
+    public static unsafe int Ioctl(LinuxFileSafeHandle handle, long request, IntPtr result)
+    {
+        using var lease = new LinuxDescriptorLease(handle);
+        return IoctlNative(lease.Descriptor, checked((nuint)request), (void*)result);
+    }
+
+    internal static unsafe int Ioctl(LinuxFileSafeHandle handle, nuint request, Span<byte> buffer)
+    {
+        using var lease = new LinuxDescriptorLease(handle);
+        fixed (byte* pointer = buffer)
+            return IoctlNative(lease.Descriptor, request, pointer);
+    }
 
     // Read count bytes. Place them into outputBuffer.
     [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "read", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial int read(LinuxFileSafeHandle handle,
-        byte[] outputBuffer,
-        int count);
+    private static unsafe partial nint ReadNative(int fd, byte* outputBuffer, nuint count);
 
-    // Read count bytes from an event fd. Place them into outputBuffer.
-    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "read", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial int read(LinuxEventFdSafeHandle handle,
-        byte[] outputBuffer,
-        int count);
+    public static int Read(LinuxFileSafeHandle handle, byte[] outputBuffer, int count) =>
+        checked((int)Read(handle, outputBuffer.AsSpan(0, count)));
+
+    internal static unsafe nint Read(LinuxFileSafeHandle handle, Span<byte> outputBuffer)
+    {
+        using var lease = new LinuxDescriptorLease(handle);
+        fixed (byte* pointer = outputBuffer)
+            return ReadNative(lease.Descriptor, pointer, (nuint)outputBuffer.Length);
+    }
 
     // Write the count bytes in inputBuffer.
     [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "write", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial int write(LinuxFileSafeHandle handle,
-        byte[] inputBuffer,
-        int count);
+    private static unsafe partial nint WriteNative(int fd, byte* inputBuffer, nuint count);
 
-    // Write count bytes to an event fd.
-    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "write", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial int write(LinuxEventFdSafeHandle handle,
-        byte[] inputBuffer,
-        int count);
+    public static int Write(LinuxFileSafeHandle handle, byte[] inputBuffer, int count) =>
+        checked((int)Write(handle, inputBuffer.AsSpan(0, count)));
+
+    internal static unsafe nint Write(LinuxFileSafeHandle handle, ReadOnlySpan<byte> inputBuffer)
+    {
+        using var lease = new LinuxDescriptorLease(handle);
+        fixed (byte* pointer = inputBuffer)
+            return WriteNative(lease.Descriptor, pointer, (nuint)inputBuffer.Length);
+    }
 
     [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "fcntl", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial int fcntl(IntPtr fd, int cmd, int flags = 0);
+    private static partial int FcntlNative(int fd, int cmd, int flags);
+
+    internal static int Fcntl(LinuxFileSafeHandle handle, int command, int flags = 0)
+    {
+        using var lease = new LinuxDescriptorLease(handle);
+        return FcntlNative(lease.Descriptor, command, flags);
+    }
 }

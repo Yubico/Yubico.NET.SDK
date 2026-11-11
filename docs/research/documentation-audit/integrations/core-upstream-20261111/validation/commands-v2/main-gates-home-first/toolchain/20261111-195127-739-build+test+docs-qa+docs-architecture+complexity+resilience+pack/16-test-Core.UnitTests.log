@@ -1,0 +1,24 @@
+$ dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release -- --filter-trait "Category=RuntimeResilience"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.15)
+
+[+166/x0/?0] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Transports.Hid.MacOSHidListenerLifetimeTests.ConcurrentStopAfterDeadline_UsesRemainingBudgetAndLaterDisposeDoesNotWaitAgain (3s)
+
+[+174/x0/?0] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryReadSchedulingTests.FindAllAsync_LiveUnknownPidWaiter_DoesNotBlockDifferentPidMetadata (6s)
+
+[+176/x0/?0] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryReadSchedulingTests.ScanAsync_ExitKeepsNativeAdmissionAndRetiresQueuedSiblings(cancel: False) (9s)
+
+[+177/x0/?0] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryReadSchedulingTests.ScanAsync_ExitKeepsNativeAdmissionAndRetiresQueuedSiblings(cancel: True) (12s)
+
+[+183/x0/?0] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysFaultInjectionTests.FindAllAsync_SaturatedWorkersBeyondBudget_IdentityDegradesToNull_BoundPreserved (15s)
+
+[+187/x0/?0] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysScopeTests.FindAllAsync_ExitRetiresQueuedIdentityReadsBeforeLaterWorkerAdmission(cancel: False) (18s)
+
+[+196/x0/?0] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.YubiKeyMonitorTests.DisposeAsync_RetiresQueuedBuiltInFinderReadsBeforeWorkerCapacityReturns (21s)
+
+
+Test run summary: Passed! - /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64)
+  total: 197
+  failed: 0
+  succeeded: 197
+  skipped: 0
+  duration: 21s 457ms

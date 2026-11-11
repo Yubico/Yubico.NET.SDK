@@ -1,0 +1,300 @@
+{
+  "status": "read-only restore blocker diagnosed; no retry or credential action",
+  "actual_failure": "NU1301 / HTTP 401 during package-id index lookup before Mac Csc; no concrete NativeShims version resolved",
+  "original_build": {
+    "exit_code": 1,
+    "quiescent": true,
+    "retained": true
+  },
+  "intended_wrapper": [
+    {
+      "Include": "../../../../../../../../../verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "ReferenceOutputAssembly": "false",
+      "AdditionalProperties": "BoundaryCorePath=/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll;BoundaryNativeVersion=1.18.1;BoundaryComparisonVariant=audit-integration-20261111"
+    }
+  ],
+  "actual_restore": {
+    "output_path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/local/",
+    "native_dependency": {
+      "net10.0": {
+        "target": "Package",
+        "version": "[1.18.1-async.8, )",
+        "versionOverride": "[1.18.1-async.8, )"
+      }
+    },
+    "central_native_version": {
+      "net10.0": "1.18.1"
+    },
+    "resolved_native_libraries": []
+  },
+  "expected_variant_restore_exists": false,
+  "source_fact": "SDK NuGet.targets _GenerateRestoreProjectPathItemsPerFramework converts ProjectReference to a property of absolute path strings, then constructs fresh restore items; the wrapper AdditionalProperties are absent from this restore path walk. Observed local variant and default VersionOverride confirm the mismatch.",
+  "cache": {
+    "available_versions": [
+      "1.16.1",
+      "1.18.1"
+    ],
+    "intended_version": "1.18.1",
+    "manifest": {
+      "id": "Yubico.NativeShims",
+      "version": "1.18.1"
+    },
+    "canonical_content_sha512": "wY0h9CadqsHY39M5dg8Lx+kRl4tkiO4e+NQS7lLAt4DeT3dcR0y+8KoSRNoUOpazFGrxQPqxr/aFM7OQTvhnHA==",
+    "accepted_sdk_catalog_matches": 21,
+    "cached_source": "https://api.nuget.org/v3/index.json",
+    "archive": {
+      "path": "/home/rupicola/.nuget/packages/yubico.nativeshims/1.18.1/yubico.nativeshims.1.18.1.nupkg",
+      "bytes": 84067166,
+      "sha256": "243958f7e87d96e22b33b1d9b469287ea9d6dd3461cd904a292d3342d27d5155"
+    },
+    "signed_archive_sha512": "n5JVxbjdaMMPVTyO647xLlHOBN4r7dR0HZoBHe0m8kGHM2Nhq3c5iw1mrZQVdgqH4Adm9NxaM91zBAf3kInsJA==",
+    "exact_unintended_minimum_cached": false,
+    "caution": "1.18.1 is newer than the prerelease lower bound; no concrete version resolved in the failed restore. Warm cache for the intended baseline is not proof private-feed authentication works."
+  },
+  "redacted_nuget_configuration": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/nuget.config",
+      "relevant_github_sources": [
+        {
+          "name": "Yubico_GH",
+          "source": "https://nuget.pkg.github.com/Yubico/index.json",
+          "config_credential_presence": {
+            "Username": false,
+            "Password": false,
+            "ClearTextPassword": false,
+            "ValidAuthenticationTypes": false
+          },
+          "disabled": false
+        }
+      ],
+      "credential_values_read_into_tool_output": false,
+      "raw_config_copied": false
+    },
+    {
+      "path": "/home/rupicola/.nuget/NuGet/NuGet.Config",
+      "relevant_github_sources": [],
+      "credential_values_read_into_tool_output": false,
+      "raw_config_copied": false
+    }
+  ],
+  "relevant_environment_presence_only": {
+    "GH_TOKEN": false,
+    "GITHUB_TOKEN": false,
+    "NUGET_PLUGIN_PATHS": false,
+    "NuGetPackageSourceCredentials_Yubico_GH": false
+  },
+  "authentication_limits": "No credential values, NuGet.Config bytes, gh token/status, keyring/provider token, login or network request was performed. Credential validity/scopes cannot be established from presence; 401 is the observed failure.",
+  "compilation": "No Mac compiler/capture policy file or DLL produced by this attempt; clean/restore is not compilation.",
+  "preserved": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/invocation.json",
+      "bytes": 1349,
+      "sha256": "4b76da98c76a633af751f5031addb15c8219e39dd9e4e70536ab6b9801cf4a6c",
+      "kind": "original-failed-build-record",
+      "retained": "snapshots/4b76da98c76a633af751f5031addb15c8219e39dd9e4e70536ab6b9801cf4a6c-invocation.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/receipt.json",
+      "bytes": 6089,
+      "sha256": "7c907ffc1d2536aaaf4d1a73987fcd906da9ac191a1bb875d1b2eb82e34b4f68",
+      "kind": "original-failed-build-record",
+      "retained": "snapshots/7c907ffc1d2536aaaf4d1a73987fcd906da9ac191a1bb875d1b2eb82e34b4f68-receipt.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "original-failed-build-record",
+      "retained": "snapshots/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-stderr.log.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/stdout.log",
+      "bytes": 3532,
+      "sha256": "97bfce444bc3cc98fdf56c41590c2020a44c41f623f85a22fda4b8da752bc1c2",
+      "kind": "original-failed-build-record",
+      "retained": "snapshots/97bfce444bc3cc98fdf56c41590c2020a44c41f623f85a22fda4b8da752bc1c2-stdout.log.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/toolchain/20261111-213708-766-build/01-clean-AuditIntegration20261111.MacComparison.log",
+      "bytes": 1850,
+      "sha256": "0d5812d9b01284b4d175e7f692b30e50a34db7d969d681b90b2b376a2c980913",
+      "kind": "original-failed-build-record",
+      "retained": "snapshots/0d5812d9b01284b4d175e7f692b30e50a34db7d969d681b90b2b376a2c980913-01-clean-AuditIntegration20261111.MacComparison.log.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/toolchain/20261111-213708-766-build/02-build-AuditIntegration20261111.MacComparison.log",
+      "bytes": 9363,
+      "sha256": "bc9f2e837a5f685acac6fda7e3e79d7e2b34746260cfed5e3f9dc926583f9b70",
+      "kind": "original-failed-build-record",
+      "retained": "snapshots/bc9f2e837a5f685acac6fda7e3e79d7e2b34746260cfed5e3f9dc926583f9b70-02-build-AuditIntegration20261111.MacComparison.log.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/toolchain/20261111-213708-766-build/result.json",
+      "bytes": 1095,
+      "sha256": "5b93b39de926e8872e7646f34bdb71baa34c40ad6a8464e099801b645024c488",
+      "kind": "original-failed-build-record",
+      "retained": "snapshots/5b93b39de926e8872e7646f34bdb71baa34c40ad6a8464e099801b645024c488-result.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/toolchain/20261111-213708-766-build/result.txt",
+      "bytes": 826,
+      "sha256": "b25cd8eab2483339bdbb22210338854bdfa9bf52287febaa0de9e7dea196283d",
+      "kind": "original-failed-build-record",
+      "retained": "snapshots/b25cd8eab2483339bdbb22210338854bdfa9bf52287febaa0de9e7dea196283d-result.txt.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/toolchain/20261111-213708-766-build/run.log",
+      "bytes": 3908,
+      "sha256": "4fced2fc8be8960d2b141e88411a2fd8d5d045e843072ed28752ddb3275d9b1e",
+      "kind": "original-failed-build-record",
+      "retained": "snapshots/4fced2fc8be8960d2b141e88411a2fd8d5d045e843072ed28752ddb3275d9b1e-run.log.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/local/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "bytes": 24339,
+      "sha256": "fa08dc303bd20019840cc6dc145bc566228d40bc4b891c09f11d556769885f9d",
+      "kind": "original-failed-restore-metadata",
+      "retained": "snapshots/fa08dc303bd20019840cc6dc145bc566228d40bc4b891c09f11d556769885f9d-MacOSHidBoundaryComparison.csproj.nuget.dgspec.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/local/MacOSHidBoundaryComparison.csproj.nuget.g.props",
+      "bytes": 1121,
+      "sha256": "d914f16cc85ca38f1b10995a2b7d8bbd7e7fdd3ec4d444fc7c7b0ed5b949cb4b",
+      "kind": "original-failed-restore-metadata",
+      "retained": "snapshots/d914f16cc85ca38f1b10995a2b7d8bbd7e7fdd3ec4d444fc7c7b0ed5b949cb4b-MacOSHidBoundaryComparison.csproj.nuget.g.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/local/MacOSHidBoundaryComparison.csproj.nuget.g.targets",
+      "bytes": 149,
+      "sha256": "b14461e0cb1be3f77fcf9fe2fdd62889325ca92523d0f606980ed59eb5c4aa1c",
+      "kind": "original-failed-restore-metadata",
+      "retained": "snapshots/b14461e0cb1be3f77fcf9fe2fdd62889325ca92523d0f606980ed59eb5c4aa1c-MacOSHidBoundaryComparison.csproj.nuget.g.targets.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/local/project.assets.json",
+      "bytes": 25563,
+      "sha256": "bd4253782072a24dc25d48eafb48cb8ae686e08d90e0200f1924e1696e34f40b",
+      "kind": "original-failed-restore-metadata",
+      "retained": "snapshots/bd4253782072a24dc25d48eafb48cb8ae686e08d90e0200f1924e1696e34f40b-project.assets.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/local/project.nuget.cache",
+      "bytes": 4429,
+      "sha256": "0ab7b156d2cd46cd4c6ff3c1e97c979bbd081e7f978f138629f6ba4e55a37042",
+      "kind": "original-failed-restore-metadata",
+      "retained": "snapshots/0ab7b156d2cd46cd4c6ff3c1e97c979bbd081e7f978f138629f6ba4e55a37042-project.nuget.cache.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.MacComparison/obj/project.assets.json",
+      "bytes": 86796,
+      "sha256": "0e9458a501cd6f7b6e89c5cc96edef53bcf83a68e6e058d17dd30a9de85b42c2",
+      "kind": "original-traversal-restore-metadata",
+      "retained": "snapshots/0e9458a501cd6f7b6e89c5cc96edef53bcf83a68e6e058d17dd30a9de85b42c2-project.assets.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.MacComparison/obj/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj.nuget.dgspec.json",
+      "bytes": 24236,
+      "sha256": "a96299d9631d6a819d84b8ab5fb18af9aa8b5c575a32a3177af16046e7935620",
+      "kind": "original-traversal-restore-metadata",
+      "retained": "snapshots/a96299d9631d6a819d84b8ab5fb18af9aa8b5c575a32a3177af16046e7935620-Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj.nuget.dgspec.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.MacComparison/obj/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj.nuget.g.props",
+      "bytes": 1814,
+      "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f",
+      "kind": "original-traversal-restore-metadata",
+      "retained": "snapshots/859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f-Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj.nuget.g.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.MacComparison/obj/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj.nuget.g.targets",
+      "bytes": 538,
+      "sha256": "56b2afc3694f98da94e5f5a3ec6c32c46911340f027f44666cca046b6d50ee43",
+      "kind": "original-traversal-restore-metadata",
+      "retained": "snapshots/56b2afc3694f98da94e5f5a3ec6c32c46911340f027f44666cca046b6d50ee43-Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj.nuget.g.targets.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.MacComparison/obj/project.nuget.cache",
+      "bytes": 502,
+      "sha256": "a98dadc65a205bef2dbb3f12a78c48af85d662ae09c331fc48d012eb1f219359",
+      "kind": "original-traversal-restore-metadata",
+      "retained": "snapshots/a98dadc65a205bef2dbb3f12a78c48af85d662ae09c331fc48d012eb1f219359-project.nuget.cache.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "bytes": 1261,
+      "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+      "kind": "declaration-or-selected-tool-source",
+      "retained": "snapshots/93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78-MacOSHidBoundaryComparison.csproj.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/Directory.Build.props",
+      "bytes": 570,
+      "sha256": "1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a",
+      "kind": "declaration-or-selected-tool-source",
+      "retained": "snapshots/1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a-Directory.Build.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+      "bytes": 584,
+      "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed",
+      "kind": "declaration-or-selected-tool-source",
+      "retained": "snapshots/4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed-Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/Directory.Packages.props",
+      "bytes": 3227,
+      "sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "kind": "declaration-or-selected-tool-source",
+      "retained": "snapshots/12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f-Directory.Packages.props.snapshot"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/NuGet.targets",
+      "bytes": 75474,
+      "sha256": "ce10b22f349503468546cd445e3e0ed7637e6b759b90a225a6c96ba2759bd0fb",
+      "kind": "declaration-or-selected-tool-source",
+      "retained": "snapshots/ce10b22f349503468546cd445e3e0ed7637e6b759b90a225a6c96ba2759bd0fb-NuGet.targets.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/lane.sh",
+      "bytes": 1628,
+      "sha256": "9fe65a29122d95eabcfafcc60e00cda53e4ae8f58d53386a8582b7902f17a807",
+      "kind": "declaration-or-selected-tool-source",
+      "retained": "snapshots/9fe65a29122d95eabcfafcc60e00cda53e4ae8f58d53386a8582b7902f17a807-lane.sh.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/receipt.json",
+      "bytes": 12123,
+      "sha256": "174bef5e532a95386a0e573bef9692b68e1e90824186b930779868f72eaabc39",
+      "kind": "declaration-or-selected-tool-source",
+      "retained": "snapshots/174bef5e532a95386a0e573bef9692b68e1e90824186b930779868f72eaabc39-receipt.json.snapshot"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/yubico.nativeshims/1.18.1/yubico.nativeshims.nuspec",
+      "bytes": 750,
+      "sha256": "79efa0448ff30f0a6e7922104cbe66089bc91d245b3da96f29997a637cff9f7b",
+      "kind": "canonical-cached-package-metadata",
+      "retained": "snapshots/79efa0448ff30f0a6e7922104cbe66089bc91d245b3da96f29997a637cff9f7b-yubico.nativeshims.nuspec.snapshot"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/yubico.nativeshims/1.18.1/.nupkg.metadata",
+      "bytes": 178,
+      "sha256": "79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3",
+      "kind": "canonical-cached-package-metadata",
+      "retained": "snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/yubico.nativeshims/1.18.1/yubico.nativeshims.1.18.1.nupkg.sha512",
+      "bytes": 88,
+      "sha256": "927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55",
+      "kind": "canonical-cached-package-metadata",
+      "retained": "snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/inspect.py",
+      "bytes": 10233,
+      "sha256": "2e88ba787532c2623b91b1141aab23900fd3e035259b69207619deebeccb593f",
+      "kind": "diagnosis-tool",
+      "retained": "snapshots/2e88ba787532c2623b91b1141aab23900fd3e035259b69207619deebeccb593f-inspect.py.snapshot"
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+{
+  "audit-v2-attended": {
+    "bytes": 37,
+    "sha256": "55f533f7b11aff999858431468b69ca67da237c8fb913e9a2d57744b988ee970"
+  },
+  "certificate-bundle": {
+    "bytes": 53,
+    "sha256": "5e7dd4d078167870fcf1bc1674a413fd735d3af63e7c25b40cb1ec1f92d24e7e"
+  },
+  "core-upstream-20261111": {
+    "bytes": 57,
+    "sha256": "d109cefb859975bc054f89f22684609368c10fea8444784f09d350107f7a8301"
+  },
+  "ctap2-001-edit-a": {
+    "bytes": 36,
+    "sha256": "cdcf177e8e1176bb1c96da9e82c21edfcf6c7d59e3e255e0cbd27602439f4fcc"
+  },
+  "ctap2-001-edit-b": {
+    "bytes": 36,
+    "sha256": "77df884e59bc2e8db1a0f4a9aa3ad70bb2cf84ea0ee9b6003cb2920b383883ef"
+  },
+  "ctap2-001-edit-c": {
+    "bytes": 36,
+    "sha256": "14be581317c68737a9ee1d69f9e54fe6b28be6c675cb678d451490c9e9ad424b"
+  },
+  "ctap2-001-edit-d": {
+    "bytes": 36,
+    "sha256": "2e933ec2fc92563d3d2e5c355a0e667c12fb15017547b5ed601e681f36f3184b"
+  },
+  "ctap2-001-edit-e": {
+    "bytes": 36,
+    "sha256": "65f941ab3fd952e8a6462097ac03eb1bbd0c9f09ec18914ae4e85378180c0a81"
+  },
+  "ctap2-001-edit-f": {
+    "bytes": 36,
+    "sha256": "3c7d5fd3451e53f61b0c3fea81b1792cf9cd853cf28bcce2af7141b7acd1db4f"
+  },
+  "deviceinfo-lengths": {
+    "bytes": 53,
+    "sha256": "a7b81d9f31f437fdb380d8eee201e7a9d55137506191d1644748e6d057c3cb55"
+  },
+  "docs-patch-validation": {
+    "bytes": 56,
+    "sha256": "a69784f6e434ea306439b330cf4f68c319148df0979693537da4a2ba4b3abba0"
+  },
+  "factory-reset-docs": {
+    "bytes": 53,
+    "sha256": "9ef6b6fff632fdcb9ac55a54bd8795e53d23488ada449b18af7f84dcecba3e1a"
+  },
+  "fixture-worktree": {
+    "bytes": 96,
+    "sha256": "7e723a5517c29617ec03dd901527a48ed7f13c10294c6620309f23bb01cd118c"
+  },
+  "fixture-worktree1": {
+    "bytes": 105,
+    "sha256": "e4b62baf238d2bb698882cedb40f7a15b16aed5a7bd41c609226f7d50ca6cd7e"
+  },
+  "fixture-worktree2": {
+    "bytes": 103,
+    "sha256": "6edb64b01d569138fc16c9cd9c2d57323cd06353536adbbc0258489e62911957"
+  },
+  "fixture-worktree3": {
+    "bytes": 102,
+    "sha256": "a6b1456ed54981299c4058377ea73ae5f9d7cd82b8aa8b18404a9b3baec80eee"
+  },
+  "fixture-worktree4": {
+    "bytes": 107,
+    "sha256": "fe52d6d6ddaa77d3e8c4aa23092d662e986d421a3f90386a7959744b13d09c8f"
+  },
+  "m2-pr755-d4f61110a": {
+    "bytes": 74,
+    "sha256": "5f1f147b87113a94097ddbd33887032256ed63e0edb1abd38aac6e321c815556"
+  },
+  "m3-runner": {
+    "bytes": 65,
+    "sha256": "c6363dc9adfaf1eac0cf3c28db3dc3373a22b57a131e09a0b71ffc0f06f356fe"
+  },
+  "management-001-edit-a": {
+    "bytes": 41,
+    "sha256": "243f3b2476c7b8fb59f3a49bd62e11f43ed22e7ce2521fbb990c2ae697ad7ec4"
+  },
+  "management-001-edit-b": {
+    "bytes": 41,
+    "sha256": "26369234f6c70d360a0b063b785447a368bcc6736dda406f028d630baaa59659"
+  },
+  "management-001-edit-c": {
+    "bytes": 41,
+    "sha256": "cd622737b935f2057212833e5a3152d1fe5017ea6e99c3cfb78ffd30bd4f0aa1"
+  },
+  "migration-ci-split": {
+    "bytes": 53,
+    "sha256": "8f4b3ac199fed5826ac2e8e1b556b347724d9e92c20f7a000a74d9b60c272fe1"
+  },
+  "oath-ordering": {
+    "bytes": 48,
+    "sha256": "f92016d0fc138a27f045a4fd3b04bbb09b930b1ccc3cac6fd47a4597ade08a9b"
+  },
+  "oath-secret": {
+    "bytes": 46,
+    "sha256": "36f9d0fd8345fd6b5a7631caf64df0129a2462833deecac3056a20945515124e"
+  },
+  "openpgp-cert-errors": {
+    "bytes": 54,
+    "sha256": "86cbd4df22011e2b18fd158ad3544a415e3976c2a8d277ae9f7fc5ae3160c7b2"
+  },
+  "pcsc-exclusive": {
+    "bytes": 49,
+    "sha256": "742d9a83df4392e414d27cbc79b8f4f917be00a4bc06eb132e57ecdd5cb83231"
+  },
+  "pcsc-reader-cleanup": {
+    "bytes": 54,
+    "sha256": "ffd98fbd427d30a1711437a2548840660be92bc91ce52bfd09c0aa0995a5dc3d"
+  },
+  "pr755-876f22e651": {
+    "bytes": 71,
+    "sha256": "c399544c516661888ddc14d8fcdf85c26a846fa7d6a1c67b7c9e39d6d48898a4"
+  },
+  "pr770-clean-publish": {
+    "bytes": 39,
+    "sha256": "097586ed46585871130a2e5241cddb75a00574c4e9cb3773a3af54ddf2ec8a4f"
+  },
+  "registration-transports": {
+    "bytes": 58,
+    "sha256": "c304184c860dfc728c89166cce0cf0b31a5134f1379b82339b8b149f2061f4e5"
+  },
+  "rp-validator": {
+    "bytes": 47,
+    "sha256": "aabfaa89f32638eea3ecdea5ce2093f1f85275de618eecec25737dbc30fb8ccd"
+  },
+  "yubikit-3de42bb541": {
+    "bytes": 73,
+    "sha256": "eadafbf09bf43fa5a56bf33e7b6ca032cc252f631585eb11050c14e454c11d73"
+  },
+  "yubikit-audit-closeout-integration": {
+    "bytes": 62,
+    "sha256": "5950d6487b0fac33ca161dbd737ea2df17fa8781f3989cbe5529be60642e3cea"
+  },
+  "yubikit-audit-closeout-report": {
+    "bytes": 57,
+    "sha256": "9c9d54e0ccbd1f9b1df797dec5520d845742924c62a405aa4be4b727ba4fdd19"
+  },
+  "yubikit-audit-hmac-closeout": {
+    "bytes": 55,
+    "sha256": "b694f1367f61c854a43092c6a51c43505644939807a2b378bb46dcd7483e39b4"
+  },
+  "yubikit-cli-device-selection": {
+    "bytes": 56,
+    "sha256": "b943f551d3e3466576eb30cbdcc08ce3a31a012f7a8c3c1e39babc85b0e3a7ce"
+  },
+  "yubikit-cryptographic-catalog": {
+    "bytes": 49,
+    "sha256": "e04649e4af5c11c61ad9fcf0c16c665377f3bab4c8c95c04ba082307e7cf5f45"
+  },
+  "yubikit-device-metadata-discovery": {
+    "bytes": 61,
+    "sha256": "513691f860a9407e6dd5a82224f48961b6f3de7bd946516ff7eb5a68d2364db8"
+  },
+  "yubikit-discovery-admission": {
+    "bytes": 55,
+    "sha256": "a91d8f34821c7dfb0f076f34ecb6a43c852578412c7d989c6bf2835f2642526b"
+  },
+  "yubikit-key-metadata": {
+    "bytes": 40,
+    "sha256": "44502bf7510019372372e69e3559620320e272acdc76faf154e988d89003aac9"
+  },
+  "yubikit-linux-async": {
+    "bytes": 47,
+    "sha256": "6a22af5fc0551a4449cbafb8bea5e12f3d1a6fb38bbe2b13183db4d6adf3d0d3"
+  },
+  "yubikit-monitor-change-feed": {
+    "bytes": 55,
+    "sha256": "1b32386d87b5b279d452d7d4aa108abfb7e84b544e4c103f0a24780f0e48ea89"
+  },
+  "yubikit-monitor-worker-simplification": {
+    "bytes": 65,
+    "sha256": "3ec8fa4562121b85244d9fb072b5d513a82ecd299a2ab43339a8340c2f9320e9"
+  },
+  "yubikit-oath-fix-cli": {
+    "bytes": 40,
+    "sha256": "a82df7b8aea75df9f916782b201e5bcf2cd18b11043a5203175086f6003edb92"
+  },
+  "yubikit-oath-fix-inputs": {
+    "bytes": 43,
+    "sha256": "e650f2c333e73bdaf68bdc0cb3c8453256aaa0da267b8200f8e16311abd6ca4d"
+  },
+  "yubikit-oath-fix-lifecycle": {
+    "bytes": 46,
+    "sha256": "8a82c9e6ca7db42207f4a86c9095358272e917eb75b464302d86411724f8665d"
+  },
+  "yubikit-oath-fix-protocol": {
+    "bytes": 45,
+    "sha256": "7d08ad5662fbc26fb6a5d7d0187fad3cdadbc653f69d9e34db043c3d9dbd3e43"
+  },
+  "yubikit-oath-scp-reference-probe": {
+    "bytes": 52,
+    "sha256": "aa31a376ecba386c31b82c992d7af14087c227c405de88ecb7fc2ac56110c18d"
+  },
+  "yubikit-owned-monitor": {
+    "bytes": 49,
+    "sha256": "47e1419496da8be300a93e7179d15a5721224a17272c7446071c5793a9dc0ab5"
+  },
+  "yubikit-piv-session-consistency": {
+    "bytes": 59,
+    "sha256": "a719a281fc2a16d729662c685180973a44add32baddf4fdc0ef3ba21088c6e58"
+  },
+  "yubikit-session-initialization": {
+    "bytes": 58,
+    "sha256": "e33429f6161d89ec8a0c9cf930ffd3001ba0624cf194363aa6d3b06aba657aee"
+  },
+  "yubikit-stack-docs": {
+    "bytes": 46,
+    "sha256": "2d1d13a7db836cc0e78178f70758a10ac5a63f644499bbbeb8adc75a95a611e2"
+  },
+  "yubikit-toolchain": {
+    "bytes": 45,
+    "sha256": "66949a4feb24d53740f59f5e1de5a1f32902d2700e2b8874393d48b8b19283ae"
+  }
+}

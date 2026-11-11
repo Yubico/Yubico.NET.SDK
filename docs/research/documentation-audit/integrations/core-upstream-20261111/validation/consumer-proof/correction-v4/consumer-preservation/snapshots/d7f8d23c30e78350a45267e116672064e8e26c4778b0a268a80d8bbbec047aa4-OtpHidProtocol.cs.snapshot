@@ -1,0 +1,632 @@
+// Copyright 2025 Yubico AB
+// 
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Buffers;
+using System.Buffers.Binary;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Utilities;
+
+namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
+
+/// <summary>
+/// Implements OTP HID protocol for communication with YubiKey OTP/Keyboard interface.
+/// Uses 8-byte feature reports with outbound CRC generation. Inbound CRC validation remains command-specific.
+/// Based on the Java yubikit-android OtpProtocol implementation.
+/// </summary>
+/// <remarks>
+///     Concurrency: a slot command is a 70-byte frame written as ten sequenced feature reports
+///     followed by a polled multi-report read — a foreign report written mid-frame corrupts the frame.
+///     This class serializes full logical exchanges (including lazy initialization) through an
+///     internal guard: overlapping calls are refused immediately. An exchange in flight runs to completion.
+///     The initialization path itself issues a slot command on NEO (firmware 3.x), so it runs inside the caller's guarded
+///     exchange via the unguarded core methods — it must never call the public guarded methods.
+/// </remarks>
+internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
+{
+    private readonly IOtpHidConnection _connection;
+    private readonly ExchangeGuard _exchangeGuard = new();
+    private readonly DisposalGate _disposalGate = new();
+    private readonly ILogger<OtpHidProtocol> _logger;
+    private readonly ArrayPool<byte> _bufferPool;
+    // Production keeps the device's 14-second touch window; the internal override makes timeout tests deterministic.
+    private readonly TimeSpan _touchTimeout;
+    private FirmwareVersion? _firmwareVersion;
+    private Exception? _resetFailure;
+    private bool _initialized;
+    private bool _disposed;
+
+    public OtpHidProtocol(
+        IOtpHidConnection connection,
+        ILogger<OtpHidProtocol>? logger = null,
+        ArrayPool<byte>? bufferPool = null,
+        TimeSpan? touchTimeout = null)
+    {
+        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
+        _logger = logger ?? NullLogger<OtpHidProtocol>.Instance;
+        _bufferPool = bufferPool ?? ArrayPool<byte>.Shared;
+        _touchTimeout = touchTimeout ?? TimeSpan.FromSeconds(14);
+    }
+
+    public FirmwareVersion? FirmwareVersion => _firmwareVersion;
+
+    public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
+    {
+        // Initialization touches the wire, so it must hold the guard like any exchange.
+        _exchangeGuard.RunAsync(
+                exchangeToken =>
+                {
+                    ThrowIfResetFailed();
+                    return EnsureInitializedUnderGuardAsync(exchangeToken);
+                },
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        _logger.LogDebug("OTP protocol configured, firmware version: {Version}", _firmwareVersion);
+    }
+
+    /// <summary>
+    /// Ensures the protocol is initialized by reading the initial status. Must be called from within
+    /// the exchange guard (or single-threaded initialization) — on NEO it issues a slot command via the
+    /// unguarded core.
+    /// </summary>
+    private async Task EnsureInitializedUnderGuardAsync(CancellationToken cancellationToken)
+    {
+        if (_initialized)
+            return;
+
+        // Read initial feature report to get version
+        var featureReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
+
+        // Extract version from feature report bytes 1-3
+        _firmwareVersion = new FirmwareVersion(featureReport.Span[1], featureReport.Span[2], featureReport.Span[3]);
+
+        // Handle NEO quirk: if major version is 3, may have cached pgmSeq in arbitrator
+        if (_firmwareVersion.Major == 3)
+        {
+            _logger.LogDebug("NEO detected (firmware 3.x), refreshing programming sequence");
+            // Force communication with applet to refresh pgmSeq by writing an invalid scan map
+            var scanMap = new byte[51];
+            Array.Fill(scanMap, (byte)'c');
+            try
+            {
+                await SendAndReceiveCoreUnderGuardAsync(
+                        0x12,
+                        scanMap,
+                        UserPresenceNotification.None,
+                        exchangeToken: cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch when (_resetFailure is null)
+            {
+                // Expected to fail - the scan map command should be rejected
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(scanMap);
+            }
+        }
+
+        _initialized = true;
+        _logger.LogDebug("OTP protocol initialized, firmware version: {Version}", _firmwareVersion);
+    }
+
+    public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+        byte slot,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default) =>
+        SendAndReceiveAsync(
+            slot,
+            data,
+            UserPresenceNotification.None,
+            cancellationToken: cancellationToken);
+
+    public async Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+        byte slot,
+        ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(userPresenceNotification);
+
+        if (data.Length > OtpConstants.SlotDataSize)
+        {
+            throw new ArgumentException($"Payload too large for HID frame! Max {OtpConstants.SlotDataSize} bytes.", nameof(data));
+        }
+
+        return await _exchangeGuard.RunAsync(
+                async exchangeToken =>
+                {
+                    ThrowIfResetFailed();
+                    await EnsureInitializedUnderGuardAsync(exchangeToken).ConfigureAwait(false);
+                    return await SendAndReceiveCoreUnderGuardAsync(
+                            slot,
+                            data,
+                            userPresenceNotification,
+                            exchangeToken,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Performs one slot command exchange (frame write + response read) without entering the guard.
+    /// Callers must already hold the guard.
+    /// </summary>
+    private async Task<ReadOnlyMemory<byte>> SendAndReceiveCoreUnderGuardAsync(
+        byte slot,
+        ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken exchangeToken,
+        CancellationToken callerToken = default)
+    {
+        // Pad data to slot data size (64 bytes)
+        var payload = new byte[OtpConstants.SlotDataSize];
+        data.Span.CopyTo(payload);
+        var wireAttempted = false;
+        try
+        {
+            _logger.LogTrace("Sending OTP slot command 0x{Slot:X2} with {Length} bytes payload", slot, data.Length);
+
+            var programmingSequence = await SendFrameAsync(
+                slot, payload, exchangeToken, () => wireAttempted = true).ConfigureAwait(false);
+
+            // Read response using Java-style single polling loop
+            return await ReadFrameJavaStyleAsync(
+                    programmingSequence,
+                    userPresenceNotification,
+                    exchangeToken,
+                    callerToken)
+                .ConfigureAwait(false);
+        }
+        catch
+        {
+            // The first attempted write may have reached the device even when the transport throws.
+            // A failed completion reset already latched the cause; do not send a second abort.
+            if (wireAttempted && _resetFailure is null)
+                await ResetStateAfterAbandonmentAsync("incomplete OTP HID exchange", exchangeToken)
+                    .ConfigureAwait(false);
+            throw;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(payload);
+        }
+    }
+
+    /// <summary>
+    /// Reads one frame response using the legacy C# approach:
+    /// 1. First wait for ReadPending flag (like WaitForReadPending)
+    /// 2. Then read data packets using the frame reader pattern
+    /// </summary>
+    /// <param name="programmingSequence">The programming sequence before the command was sent.</param>
+    /// <param name="userPresenceNotification">The non-null handle for the SDK operation.</param>
+    /// <param name="exchangeToken">Uncancellable token for the admitted protocol exchange.</param>
+    /// <param name="callerToken">Caller token used as a cancellation signal while the device waits for touch.</param>
+    private async Task<ReadOnlyMemory<byte>> ReadFrameJavaStyleAsync(
+        int programmingSequence,
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken exchangeToken,
+        CancellationToken callerToken)
+    {
+        _logger.LogDebug("ReadFrameJavaStyleAsync starting, programmingSequence={ProgSeq}", programmingSequence);
+
+        // Phase 1: Wait for ReadPending flag (legacy C# WaitForReadPending approach)
+        var (firstReport, hasData) = await WaitForReadyToReadAsync(
+                programmingSequence,
+                 () => userPresenceNotification.RequestAsync(UserPresenceBasis.DeviceWaiting, callerToken),
+                exchangeToken,
+                callerToken)
+            .ConfigureAwait(false);
+
+        if (!hasData)
+        {
+            // Status-only response (config command, sequence updated)
+            ReadOnlyMemory<byte> statusResponse = firstReport.Slice(1, 6).ToArray();
+            _logger.LogDebug("Status-only response received ({ByteCount} bytes)", statusResponse.Length);
+            return statusResponse;
+        }
+
+        // Phase 2: Read data packets (legacy C# frame reader pattern)
+        return await ReadDataPacketsAsync(firstReport, exchangeToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Waits for the device to be ready to read (ReadPending flag set) or command complete.
+    /// Uses tight polling - the write-side delays provide sufficient device processing time.
+    /// </summary>
+    private async Task<(ReadOnlyMemory<byte> Report, bool HasData)> WaitForReadyToReadAsync(
+        int programmingSequence,
+        Func<ValueTask> notifyUserPresenceAsync,
+        CancellationToken exchangeToken,
+        CancellationToken callerToken)
+    {
+        const int timeLimitMs = 3000; // 3s: HMAC-SHA1 slot writes can take ~1s on some firmware
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+        while (stopwatch.ElapsedMilliseconds < timeLimitMs)
+        {
+            var report = await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
+            var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+
+            _logger.LogTrace("WaitForReadyToRead: statusByte=0x{Status:X2}, report={ByteCount} bytes",
+                statusByte, report.Length);
+
+            // Check for touch pending
+            if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) != 0)
+            {
+                _logger.LogDebug("Touch pending, waiting for user interaction...");
+                await notifyUserPresenceAsync().ConfigureAwait(false);
+                report = await WaitForTouchCompleteAsync(exchangeToken, callerToken).ConfigureAwait(false);
+                statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+                stopwatch.Restart();
+            }
+
+            // Check for ReadPending flag - data is ready
+            if ((statusByte & OtpConstants.ResponsePendingFlag) != 0)
+            {
+                _logger.LogDebug("ReadPending flag detected, data ready");
+                return (report, true); // Has data
+            }
+
+            // Status response (statusByte == 0) - check if command completed
+            if (statusByte == 0)
+            {
+                var nextSeq = report.Span[OtpConstants.StatusOffsetProgSeq];
+                var touchLow = report.Span[OtpConstants.StatusOffsetTouchLow];
+
+                _logger.LogTrace("Status response: nextSeq={NextSeq}, progSeq={ProgSeq}",
+                    nextSeq, programmingSequence);
+
+                // Check if sequence incremented (command completed without data)
+                if (nextSeq == programmingSequence + 1 ||
+                    (nextSeq == 0 && programmingSequence > 0 &&
+                     (touchLow & OtpConstants.ConfigSlotsProgrammedMask) == 0))
+                {
+                    _logger.LogDebug("Sequence updated from {OldSeq} to {NewSeq}, no data response",
+                        programmingSequence, nextSeq);
+                    return (report, false); // No data, just status
+                }
+
+                // Sequence hasn't changed - device still processing, keep polling
+                _logger.LogTrace("Device still processing (seq unchanged), continuing poll");
+                continue;
+            }
+
+            // WritePending or other flags - device is busy, keep polling
+            _logger.LogTrace("Device busy (statusByte=0x{Status:X2}), continuing poll", statusByte);
+        }
+
+        throw new TimeoutException($"Timeout waiting for device response after {stopwatch.ElapsedMilliseconds}ms");
+    }
+
+    /// <summary>
+    /// Reads data packets after ReadPending was detected.
+    /// Uses the legacy C# frame reader pattern.
+    /// </summary>
+    private async Task<ReadOnlyMemory<byte>> ReadDataPacketsAsync(
+        ReadOnlyMemory<byte> firstReport,
+        CancellationToken cancellationToken)
+    {
+        const int maximumResponseLength = (OtpConstants.SequenceMask + 1) * OtpConstants.FeatureReportDataSize;
+        byte[] responseBuffer = _bufferPool.Rent(maximumResponseLength);
+        var expectedSequence = 0;
+        var responseLength = 0;
+
+        try
+        {
+            // Process the first report (already has ReadPending set)
+            var report = firstReport;
+
+            while (true)
+            {
+                var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+
+                // Check if ReadPending is still set
+                if ((statusByte & OtpConstants.ResponsePendingFlag) == 0)
+                {
+                    throw new BadResponseException("Incomplete OTP HID response transfer.");
+                }
+
+                var packetSeq = statusByte & OtpConstants.SequenceMask;
+
+                // Sequence zero is the terminal marker only after at least one data packet.
+                if (packetSeq == 0 && responseLength != 0)
+                {
+                    await ResetStateAsync(cancellationToken).ConfigureAwait(false);
+                    _logger.LogDebug("Transmission complete (seq reset to 0)");
+                    break;
+                }
+
+                if (packetSeq != expectedSequence)
+                {
+                    throw new BadResponseException(
+                        $"Unexpected OTP HID response sequence {packetSeq}; expected {expectedSequence}.");
+                }
+
+                if (responseLength > maximumResponseLength - OtpConstants.FeatureReportDataSize)
+                    throw new InvalidOperationException("OTP HID response exceeds the maximum packet sequence range.");
+
+                // Add payload to buffer (7 bytes)
+                report.Span[..OtpConstants.FeatureReportDataSize]
+                    .CopyTo(responseBuffer.AsSpan(responseLength));
+                responseLength += OtpConstants.FeatureReportDataSize;
+                expectedSequence++;
+
+                _logger.LogTrace("Added packet seq={Seq}, total={Total} bytes", packetSeq, responseLength);
+
+                // Read next report
+                report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            var rawResponse = responseBuffer.AsSpan(0, responseLength).ToArray();
+            _logger.LogDebug("{Length} bytes read over HID", rawResponse.Length);
+            return rawResponse;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(responseBuffer);
+            _bufferPool.Return(responseBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Waits for touch to complete (TouchPending flag to clear).
+    /// </summary>
+    /// <param name="exchangeToken">Uncancellable token for the admitted protocol exchange.</param>
+    /// <param name="callerToken">Caller token used as a cancellation signal while waiting for touch.</param>
+    /// <returns>The first report that no longer indicates a touch wait.</returns>
+    private async Task<ReadOnlyMemory<byte>> WaitForTouchCompleteAsync(
+        CancellationToken exchangeToken,
+        CancellationToken callerToken)
+    {
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+        while (stopwatch.Elapsed < _touchTimeout)
+        {
+            if (callerToken.IsCancellationRequested)
+            {
+                callerToken.ThrowIfCancellationRequested();
+            }
+
+            await Task.Delay(250, exchangeToken).ConfigureAwait(false);
+
+            var report = await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
+            var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+
+            if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) == 0)
+            {
+                _logger.LogDebug("Touch completed after {Ms}ms", stopwatch.ElapsedMilliseconds);
+                return report;
+            }
+
+            if (callerToken.IsCancellationRequested)
+            {
+                callerToken.ThrowIfCancellationRequested();
+            }
+        }
+
+        throw new OtpHidTouchTimeoutException("Timeout waiting for user touch");
+    }
+
+    private async Task ResetStateAfterAbandonmentAsync(
+        string reason,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await ResetStateAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // The guard remains held: a failed abort leaves framing unknown for this protocol instance.
+            try
+            {
+                _logger.LogWarning("Unable to reset OTP HID state after {Reason}; exception type {ExceptionType}",
+                    reason, ex.GetType().FullName);
+            }
+            catch (Exception)
+            {
+                // Diagnostics must not replace the caller's cancellation, timeout, or response failure.
+            }
+        }
+    }
+
+    private void ThrowIfResetFailed()
+    {
+        if (_resetFailure is { } failure)
+            throw new InvalidOperationException(
+                "OTP HID state could not be recovered after a failed reset; this protocol is unusable. Dispose it and reopen the connection.",
+                failure);
+    }
+
+    public async Task<ReadOnlyMemory<byte>> ReadStatusAsync(CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        var featureReport = await _exchangeGuard.RunAsync(
+                async exchangeToken =>
+                {
+                    ThrowIfResetFailed();
+                    await EnsureInitializedUnderGuardAsync(exchangeToken).ConfigureAwait(false);
+                    return await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        // Return bytes 1-6 (skip first and last byte)
+        return featureReport.Slice(1, 6);
+    }
+
+    /// <summary>
+    /// Reads a single 8-byte feature report asynchronously.
+    /// </summary>
+    private async Task<ReadOnlyMemory<byte>> ReadFeatureReportAsync(CancellationToken cancellationToken)
+    {
+        var report = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
+        _logger.LogTrace("Read feature report ({ByteCount} bytes)", report.Span.Length);
+        return report;
+    }
+
+    /// <summary>
+    /// Writes a single 8-byte feature report.
+    /// </summary>
+    private async Task WriteFeatureReportAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+    {
+        _logger.LogTrace("Write feature report ({ByteCount} bytes)", buffer.Span.Length);
+        await _connection.SendAsync(buffer, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Waits for the WRITE flag to be cleared (device ready to receive).
+    /// </summary>
+    private async Task AwaitReadyToWriteAsync(CancellationToken cancellationToken)
+    {
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        const int timeLimitMs = 1000;
+        const int pollIntervalMs = 5;
+
+        while (stopwatch.ElapsedMilliseconds < timeLimitMs)
+        {
+            var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
+            if ((report.Span[OtpConstants.FeatureReportDataSize] & OtpConstants.SlotWriteFlag) == 0)
+            {
+                return;
+            }
+
+            await Task.Delay(pollIntervalMs, cancellationToken).ConfigureAwait(false);
+        }
+
+        throw new TimeoutException("Timeout waiting for YubiKey to become ready to receive");
+    }
+
+    /// <summary>
+    /// Packs and sends one 70-byte frame as multiple 8-byte feature reports.
+    /// </summary>
+    private async Task<int> SendFrameAsync(
+        byte slot, byte[] payload, CancellationToken cancellationToken, Action onWireAttempt)
+    {
+        _logger.LogDebug("SendFrameAsync: slot=0x{Slot:X2}, payloadLen={Len}", slot, payload.Length);
+        _logger.LogTrace("Sending {ByteCount}-byte payload to slot 0x{Slot:X2}", payload.Length, slot);
+
+        // Format 70-byte frame: [64-byte payload][1-byte slot][2-byte CRC][3-byte filler]
+        var frame = new byte[OtpConstants.FrameSize];
+        byte[]? report = null;
+        try
+        {
+            payload.CopyTo(frame.AsSpan());
+            frame[OtpConstants.SlotDataSize] = slot;
+
+            // Calculate and write CRC (little-endian)
+            var crc = ChecksumUtils.CalculateCrc(payload, payload.Length);
+            BinaryPrimitives.WriteUInt16LittleEndian(frame.AsSpan(OtpConstants.SlotDataSize + 1), crc);
+            // Last 3 bytes are filler (already zero)
+
+            _logger.LogTrace("Prepared 70-byte frame for transmission");
+
+            // Get current programming sequence
+            var statusReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
+            var programmingSequence = statusReport.Span[OtpConstants.StatusOffsetProgSeq];
+
+            _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {ByteCount} bytes",
+                programmingSequence, statusReport.Length);
+
+            // Send frame as 8-byte feature reports
+            report = new byte[OtpConstants.FeatureReportSize];
+            byte seq = 0;
+            var frameOffset = 0;
+            var sentCount = 0;
+
+            while (frameOffset < OtpConstants.FrameSize)
+            {
+                // Copy 7 bytes of frame data to report
+                var bytesToCopy = Math.Min(OtpConstants.FeatureReportDataSize, OtpConstants.FrameSize - frameOffset);
+                Array.Clear(report, 0, OtpConstants.FeatureReportDataSize);
+                Array.Copy(frame, frameOffset, report, 0, bytesToCopy);
+
+                // Set sequence with write flag
+                report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.SlotWriteFlag | seq);
+                await AwaitReadyToWriteAsync(cancellationToken).ConfigureAwait(false);
+                _logger.LogTrace("Sending report #{Count} (seq={Seq}): {ByteCount} bytes",
+                    sentCount, seq, report.Length);
+                onWireAttempt();
+                await WriteFeatureReportAsync(report, cancellationToken).ConfigureAwait(false);
+                sentCount++;
+
+                frameOffset += OtpConstants.FeatureReportDataSize;
+                seq++;
+            }
+
+            _logger.LogDebug("Sent {Count} reports, returning programmingSequence={ProgSeq}", sentCount, programmingSequence);
+            return programmingSequence;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(frame);
+            if (report is not null)
+                CryptographicOperations.ZeroMemory(report);
+        }
+    }
+
+    /// <summary>
+    /// Resets the state of YubiKey from reading.
+    /// </summary>
+    private async Task ResetStateAsync(CancellationToken cancellationToken)
+    {
+        var buffer = new byte[OtpConstants.FeatureReportSize];
+        try
+        {
+            buffer[OtpConstants.FeatureReportSize - 1] = OtpConstants.DummyReportWrite;
+            try
+            {
+                await WriteFeatureReportAsync(buffer, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Even a complete response leaves framing unknown if its reset fails.
+                _resetFailure ??= ex;
+                throw;
+            }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(buffer);
+        }
+    }
+
+    /// <summary>
+    ///     Releases this protocol. The connection is NOT disposed: a protocol is a user of the connection it
+    ///     was handed, never its owner. Whoever created the connection disposes it.
+    /// </summary>
+    public void Dispose() => _disposalGate.Dispose(() =>
+    {
+        _exchangeGuard.CloseAndDrain();
+        _disposed = true;
+    });
+
+    public ValueTask DisposeAsync() => _disposalGate.DisposeAsync(async () =>
+    {
+        await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+        _disposed = true;
+    });
+}

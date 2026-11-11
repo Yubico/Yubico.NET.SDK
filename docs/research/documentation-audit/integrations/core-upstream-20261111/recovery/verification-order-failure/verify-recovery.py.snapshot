@@ -1,0 +1,110 @@
+"""Read-only storage/source-identity replay; leaves all original captures untouched."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import stat
+import subprocess
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[5]
+ENV = dict(os.environ, GIT_OPTIONAL_LOCKS='0', PYTHONDONTWRITEBYTECODE='1')
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def record(root, relative):
+    path = root / relative
+    st = path.lstat()
+    row = dict(path=relative, mode=stat.S_IMODE(st.st_mode))
+    if stat.S_ISLNK(st.st_mode):
+        row.update(kind='symlink', target=os.readlink(path))
+    elif stat.S_ISREG(st.st_mode):
+        raw = path.read_bytes()
+        row.update(kind='file', bytes=len(raw), sha256=sha(raw))
+    elif stat.S_ISDIR(st.st_mode):
+        row.update(kind='directory')
+    else:
+        raise ValueError(f'Unexpected file type: {path}')
+    return row
+
+
+def git(*args, root=ROOT):
+    return subprocess.check_output(['git', *args], cwd=root, env=ENV)
+
+
+def main():
+    receipt_raw = (HERE / 'relocation-receipt.json').read_bytes()
+    assert sha(receipt_raw) == '0da550fd99ca719dc1de1c91ee32bf5569e824cc27905d9f606830fea74e791c'
+    receipt = json.loads(receipt_raw)
+    assert str(ROOT) == receipt['new_root']
+    old = Path(receipt['old_root'])
+    baseline_raw = (HERE / 'checkout-before.json').read_bytes()
+    assert sha(baseline_raw) == receipt['checkout_manifest_sha256']
+    baseline = json.loads(baseline_raw)
+    old_paths = sorted(path.relative_to(old).as_posix() for path in old.rglob('*'))
+    assert old_paths == [row['path'] for row in baseline['entries']], 'Inactive original set changed'
+    for row in baseline['entries']:
+        assert record(old, row['path']) == row, f'Inactive original changed: {row["path"]}'
+        assert record(ROOT, row['path']) == row, f'Original copied bytes changed: {row["path"]}'
+    assert stat.S_IMODE(old.stat().st_mode) == baseline['root_mode'] == stat.S_IMODE(ROOT.stat().st_mode)
+    admin = Path(receipt['private_admin'])
+    backup = Path(receipt['private_admin_backup'])
+    admin_raw = (HERE / 'admin-before.json').read_bytes()
+    assert sha(admin_raw) == receipt['admin_manifest_sha256']
+    admin_before = json.loads(admin_raw)
+    assert sorted(path.relative_to(backup).as_posix() for path in backup.rglob('*')) == [row['path'] for row in admin_before['entries']]
+    for row in admin_before['entries']:
+        assert record(backup, row['path']) == row, 'Private admin backup changed'
+        if row['path'] != 'gitdir':
+            assert record(admin, row['path']) == row, f'Private merge/index metadata changed: {row["path"]}'
+    assert sha((admin / 'index').read_bytes()) == receipt['index_sha256']
+    assert (admin / 'gitdir').read_bytes() == (str(ROOT / '.git') + '\n').encode()
+    primary = Path(receipt['primary'])
+    backlinks = json.loads((HERE / 'backlinks-before.json').read_bytes())
+    current_links = {path.parent.name: dict(bytes=len(path.read_bytes()), sha256=sha(path.read_bytes()))
+                     for path in sorted((primary / '.git/worktrees').glob('*/gitdir'))}
+    assert backlinks.keys() == current_links.keys()
+    assert [name for name in backlinks if backlinks[name] != current_links[name]] == ['core-upstream-20261111']
+    primary_before = json.loads((HERE / 'primary-before.json').read_bytes())
+    assert git('rev-parse', 'HEAD', root=primary).decode().strip() == primary_before['head']
+    assert git('symbolic-ref', 'HEAD', root=primary).decode().strip() == primary_before['branch']
+    for row in primary_before['user_files']:
+        raw = (primary / row['path']).read_bytes()
+        assert len(raw) == row['bytes'] and sha(raw) == row['sha256']
+    assert git('rev-parse', 'HEAD').decode().strip() == receipt['head']
+    assert git('rev-parse', 'MERGE_HEAD').decode().strip() == receipt['merge_head']
+    assert not git('ls-files', '--unmerged')
+    state = json.loads((HERE.parent / 'evidence/resolution-state.json').read_bytes())
+    accepted = state['pending_product_tree']
+    tree = {}
+    for entry in git('ls-tree', '-r', '-z', accepted).split(b'\0'):
+        if entry:
+            metadata, path = entry.split(b'\t', 1)
+            mode, kind, oid = metadata.split()
+            assert kind == b'blob'
+            tree[path] = (mode, oid)
+    index = {}
+    for entry in git('ls-files', '--stage', '-z').split(b'\0'):
+        if entry:
+            metadata, path = entry.split(b'\t', 1)
+            mode, oid, stage = metadata.split()
+            assert stage == b'0' and path not in index
+            index[path] = (mode, oid)
+    assert tree == index and len(index) == 7196, 'Reviewed product-index identity changed'
+    review = HERE.parent / 'review.md'
+    assert accepted in review.read_text()
+    print(json.dumps(dict(status='verified-relocation-and-accepted-source-binding',
+        checked_root=str(ROOT), inactive_original_unchanged=True, original_entries=len(baseline['entries']),
+        copied_original_entries_unchanged=True, private_admin_backup_verified=True,
+        private_admin_changed_only=['gitdir'], index_sha256=receipt['index_sha256'],
+        head=receipt['head'], merge_head=receipt['merge_head'], accepted_product_tree=accepted,
+        accepted_index_entries=len(index), independent_review_sha256=sha(review.read_bytes()),
+        primary_unchanged=True, other_backlinks_unchanged=True,
+        limits='Read-only relocation/source identity verification. No build/test/native/device result.'), indent=2))
+
+
+if __name__ == '__main__':
+    main()

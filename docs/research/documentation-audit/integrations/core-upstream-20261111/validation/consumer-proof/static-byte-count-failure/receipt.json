@@ -1,0 +1,31 @@
+{
+  "status": "failed",
+  "exit_code": 1,
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py",
+    "static"
+  ],
+  "interpretation": "Read-only static check reproduces the initial preparation failure. The corrected body hash is accurate, but its manually transcribed byte count was 532 instead of actual 531. No build/compiler/product failure.",
+  "inputs": [
+    {
+      "source": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py",
+      "snapshot": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/static-byte-count-failure/proof.py.snapshot",
+      "bytes": 38523,
+      "sha256": "d3e85819a2a69c23f9ba71c8fad1483172ee3a66ccceaa3e8767c36145a136e8"
+    },
+    {
+      "source": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/prepare.py",
+      "snapshot": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/static-byte-count-failure/prepare.py.snapshot",
+      "bytes": 15317,
+      "sha256": "8ee6aa61799aaffab314f2bead4faf194849cbe9949e7bb6ece54950b2a75423"
+    },
+    {
+      "source": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inputs.json",
+      "snapshot": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/static-byte-count-failure/inputs.json.snapshot",
+      "bytes": 49129,
+      "sha256": "e77b9981a2d0c840f3f2b1a852917da5ab75c3a2d497a67fc5a8353aa7013411"
+    }
+  ]
+}

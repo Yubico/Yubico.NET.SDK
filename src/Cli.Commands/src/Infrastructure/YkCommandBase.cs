@@ -2,20 +2,18 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console.Cli;
+using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Commands.Infrastructure;
 
 /// <summary>
 ///     Abstract base class for all <c>yk</c> commands. Handles the common lifecycle:
 ///     <list type="number">
-///         <item>Start YubiKeyManager monitoring.</item>
 ///         <item>Select device (filtered by <see cref="AppletTransports" /> and optional <c>--serial</c>).</item>
-///         <item>Enrich context via ManagementSession (<see cref="YkDeviceContext.Info" />).</item>
-///         <item>Delegate to <see cref="ExecuteCommandAsync" /> with the enriched context.</item>
-///         <item>Shut down YubiKeyManager on exit.</item>
+///         <item>Carry selection metadata into <see cref="YkDeviceContext.Info" /> without another live read.</item>
+///         <item>Delegate to <see cref="ExecuteCommandAsync" />; commands request live information when required.</item>
 ///     </list>
 /// </summary>
 public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
@@ -27,11 +25,15 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
     /// </summary>
     protected abstract ConnectionType[] AppletTransports { get; }
 
+    // Test seam at the hardware-selection boundary, shared by every actual command endpoint.
+    internal Func<ConnectionType[], int?, ConnectionType?, Task<DeviceSelection?>> SelectDeviceAsync { get; init; } =
+        static (transports, serial, requested) =>
+            new DeviceSelector(transports, NonInteractiveSelection.PreferFirstTransport, serial, requested)
+                .SelectDeviceAsync(CancellationToken.None);
+
     /// <inheritdoc />
     public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
     {
-        YubiKeyManager.StartMonitoring();
-
         try
         {
             if (!TryParseTransport(settings.Transport, out var requestedTransport))
@@ -41,10 +43,10 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
             }
 
             // 1. Device selection
-            YkDeviceSelector selector;
+            DeviceSelection? selection;
             try
             {
-                selector = new YkDeviceSelector(AppletTransports, settings.Serial, requestedTransport);
+                selection = await SelectDeviceAsync(AppletTransports, settings.Serial, requestedTransport);
             }
             catch (ArgumentException ex)
             {
@@ -52,39 +54,24 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
                 return ExitCode.FeatureUnsupported;
             }
 
-            var selection = await selector.SelectDeviceAsync(CancellationToken.None);
-
             if (selection is null)
             {
                 OutputHelpers.WriteError("No YubiKey detected. Insert a YubiKey and try again.");
                 return ExitCode.DeviceNotFound;
             }
 
-            // 2. Best-effort one-shot metadata query; its session/connection end before the command runs.
-            DeviceInfo? deviceInfo = null;
-            try
-            {
-                deviceInfo = await selection.Device.GetDeviceInfoAsync();
-            }
-            catch (Exception ex)
-            {
-                // Non-fatal: display an informational message and continue without the snapshot.
-                // Default-selected transport open/query can fail; absent SmartCard alone is not the cause.
-                // This catch also treats cancellation as missing metadata.
-                OutputHelpers.WriteInfo($"Could not retrieve full device info: {ex.Message}");
-            }
-
+            // Reuse selection's display snapshot; commands read live metadata when their task requires it.
             var deviceContext = new YkDeviceContext
             {
                 Device = selection.Device,
                 Selection = selection,
-                Info = deviceInfo,
+                Info = selection.Info,
                 PreferredConnection = requestedTransport
             };
 
             OutputHelpers.WriteActiveDevice(deviceContext.DisplayBanner);
 
-            // 3. Execute the applet command
+            // 2. Execute the applet command
             return await ExecuteCommandAsync(context, settings, deviceContext);
         }
         catch (OperationCanceledException)
@@ -96,14 +83,10 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
             OutputHelpers.WriteError(ex.Message);
             return ExitCode.GenericError;
         }
-        finally
-        {
-            await YubiKeyManager.ShutdownAsync();
-        }
     }
 
     /// <summary>
-    ///     Executes the command-specific logic with a fully-enriched device context.
+    ///     Executes command-specific logic with the selected device and its best-effort display metadata.
     /// </summary>
     /// <param name="context">The Spectre.Console.Cli command context.</param>
     /// <param name="settings">Typed settings including all global flags.</param>

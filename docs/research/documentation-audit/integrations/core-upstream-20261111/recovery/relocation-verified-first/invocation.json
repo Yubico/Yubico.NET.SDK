@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/verify-recovery.py"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "exit_code": 0,
+  "stdout_sha256": "583d88a1ceb98a77f71315f00c61fef5fcff1d5994908347dcd2bffd757f92f2",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "utc": "2026-11-11T18:36:03.064127+00:00"
+}

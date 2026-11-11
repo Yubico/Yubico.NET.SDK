@@ -1,0 +1,33 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-preserved.py"
+  ],
+  "cwd": "/tmp/opencode/core-upstream-20261111",
+  "started": "2026-11-11T18:15:22.621681+00:00",
+  "logger": {
+    "path": "/tmp/opencode/core-upstream-20261111/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+    "bytes": 12045,
+    "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "status": "passed",
+  "exit_code": 0,
+  "error": null,
+  "finished": "2026-11-11T18:15:23.355033+00:00",
+  "retained": [],
+  "streams": [
+    {
+      "path": "/tmp/opencode/core-upstream-20261111/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands/resolved-preservation/stdout.log",
+      "bytes": 661,
+      "sha256": "f13e0e9843973aaadd72e5e7d254b793793fbb8a14cc32ec01f9edf56f38d27f"
+    },
+    {
+      "path": "/tmp/opencode/core-upstream-20261111/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands/resolved-preservation/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

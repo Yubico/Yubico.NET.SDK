@@ -1,0 +1,8 @@
+{
+  "status": "preserved-record-generation-failure",
+  "error_type": "ValueError",
+  "error": "'docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-preserved-relocated.py' is not in the subpath of '/home/rupicola/Code/y/yubikit-core-docs-integration'",
+  "cause": "The generator compared a relative owned-tool path with an absolute repository root. Resolve the owned path before producing the manifest-relative identity.",
+  "partial_output": "process-final.json was successfully written; evidence-manifest.json had not been created.",
+  "scope": "Record generation only; no source, SDK or runtime operation."
+}

@@ -1,0 +1,11 @@
+test_architecture_writers_accept_quoted_ordinary_paths (__main__.WriterPatchTests.test_architecture_writers_accept_quoted_ordinary_paths) ... ok
+test_docs_update_preserves_both_valid_artifacts_in_index_and_working_tree (__main__.WriterPatchTests.test_docs_update_preserves_both_valid_artifacts_in_index_and_working_tree) ... ok
+test_docs_update_rejects_second_artifact_without_reverting_first (__main__.WriterPatchTests.test_docs_update_rejects_second_artifact_without_reverting_first) ... ok
+test_migration_writers_keep_the_four_artifact_boundary (__main__.WriterPatchTests.test_migration_writers_keep_the_four_artifact_boundary) ... ok
+test_ordinary_patches_preserve_files_and_existing_modes (__main__.WriterPatchTests.test_ordinary_patches_preserve_files_and_existing_modes) ... ok
+test_unsafe_patches_are_rejected_before_application (__main__.WriterPatchTests.test_unsafe_patches_are_rejected_before_application) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 7.866s
+
+OK

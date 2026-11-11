@@ -1,0 +1,10 @@
+var device = await YubiKeyManager.FindFirstAsync();
+if (device.CachedDeviceInfo is { } info)
+{
+    Console.WriteLine($"Last observed firmware: {info.FirmwareVersion}");
+    Console.WriteLine($"Last observed USB capabilities: {info.UsbEnabled}");
+}
+else
+{
+    Console.WriteLine("Device metadata is unavailable.");
+}

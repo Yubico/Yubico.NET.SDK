@@ -1,0 +1,2 @@
+# Preserve raw command streams, actual toolchain text and receipts byte-for-byte.
+* -text

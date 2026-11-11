@@ -1,0 +1,1376 @@
+{
+  "scope": "Source-only generated-document inspection; no SDK or compiler-proof execution",
+  "root_cause": "Unqualified ElementTree Import lookup ignored the default MSBuild XML namespace.",
+  "projects": [
+    {
+      "project": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj",
+      "status": "not restored at this context; no import claim"
+    },
+    {
+      "project": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj",
+      "status": "not restored at this context; no import claim"
+    },
+    {
+      "project": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj",
+      "status": "not restored at this context; no import claim"
+    },
+    {
+      "project": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+      "status": "not restored at this context; no import claim"
+    },
+    {
+      "project": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.Probe/obj/project.assets.json",
+        "bytes": 118601,
+        "sha256": "06cab567511e25457516ce0eb5bb6e7d1329177fb149b94fe0dca598eab04121"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.Probe/obj/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj.nuget.g.props",
+            "bytes": 1814,
+            "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.Probe/obj/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj.nuget.g.targets",
+            "bytes": 1367,
+            "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/project.assets.json",
+        "bytes": 130899,
+        "sha256": "d4f2eee693c60a0a8bb99611af4199c0d76ce42dc441bf74651f6eed534ce68a"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Yubico.YubiKit.Cli.Commands.csproj.nuget.g.props",
+            "bytes": 1814,
+            "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Yubico.YubiKit.Cli.Commands.csproj.nuget.g.targets",
+            "bytes": 1367,
+            "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/project.assets.json",
+        "bytes": 120457,
+        "sha256": "2138434271539f0e3a22ca85209c26ad830e4f85df252f6893edd831f3b3a347"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Yubico.YubiKit.Cli.Shared.csproj.nuget.g.props",
+            "bytes": 1814,
+            "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Yubico.YubiKit.Cli.Shared.csproj.nuget.g.targets",
+            "bytes": 1367,
+            "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/project.assets.json",
+        "bytes": 124448,
+        "sha256": "6098d74e778be7b1fba60147db3f88c24e40e7178377865aac027e2696570d4b"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Yubico.YubiKit.Core.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Yubico.YubiKit.Core.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/project.assets.json",
+        "bytes": 175428,
+        "sha256": "767e6d88dfbc98f8c6287889812fcc10c76559f311dca895af4a9765c4f36bd8"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/FidoTool.csproj.nuget.g.props",
+            "bytes": 2159,
+            "sha256": "edc5627d9175127b2d91fa10fd500fc0c285f566f6ebf6e44a308d5de31be4ea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/FidoTool.csproj.nuget.g.targets",
+            "bytes": 2061,
+            "sha256": "1521da646bc994c2b0201c67c02cc7f3b0071f9639377755a621d7ac19624474"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/project.assets.json",
+        "bytes": 126809,
+        "sha256": "e8d76a821eb3d19f972d0234da523070f2c245edb63050b4c873fe4031978518"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Yubico.YubiKit.Ctap2.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Yubico.YubiKit.Ctap2.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/project.assets.json",
+        "bytes": 175179,
+        "sha256": "440ab97da25aa27da655c6ef907f7a537d804516a119f059bff76c8cccf5d4c2"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/ManagementTool.csproj.nuget.g.props",
+            "bytes": 2159,
+            "sha256": "edc5627d9175127b2d91fa10fd500fc0c285f566f6ebf6e44a308d5de31be4ea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/ManagementTool.csproj.nuget.g.targets",
+            "bytes": 2061,
+            "sha256": "1521da646bc994c2b0201c67c02cc7f3b0071f9639377755a621d7ac19624474"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/project.assets.json",
+        "bytes": 124803,
+        "sha256": "d533278f1070dae5f3941c17e1389675b73e99908ea0755950cc089db581f050"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Yubico.YubiKit.Management.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Yubico.YubiKit.Management.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/project.assets.json",
+        "bytes": 191601,
+        "sha256": "d64b9f3e96b96a895cf6d080362b6e749c00c0577c43d24534bafd8c90093517"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.props",
+            "bytes": 3100,
+            "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.targets",
+            "bytes": 2863,
+            "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Oath/examples/OathTool/OathTool.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/project.assets.json",
+        "bytes": 175229,
+        "sha256": "aeb7dfdb439c8c952a05b9408ac86a7528baf40125c1b88df20d5f78b0778be9"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/OathTool.csproj.nuget.g.props",
+            "bytes": 2159,
+            "sha256": "edc5627d9175127b2d91fa10fd500fc0c285f566f6ebf6e44a308d5de31be4ea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/OathTool.csproj.nuget.g.targets",
+            "bytes": 2061,
+            "sha256": "1521da646bc994c2b0201c67c02cc7f3b0071f9639377755a621d7ac19624474"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/project.assets.json",
+        "bytes": 124767,
+        "sha256": "a54c1568d7488163ea45ec3a3de2fb24e4cbedefa6999c9e77a9d2d232b8b6d8"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Yubico.YubiKit.Oath.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Yubico.YubiKit.Oath.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/project.assets.json",
+        "bytes": 175659,
+        "sha256": "3a5362fda3cf25588b6bc54c4e81a3231540957663f6af7876895752c5b6d2c5"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/OpenPgpTool.csproj.nuget.g.props",
+            "bytes": 2159,
+            "sha256": "edc5627d9175127b2d91fa10fd500fc0c285f566f6ebf6e44a308d5de31be4ea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/OpenPgpTool.csproj.nuget.g.targets",
+            "bytes": 2061,
+            "sha256": "1521da646bc994c2b0201c67c02cc7f3b0071f9639377755a621d7ac19624474"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/project.assets.json",
+        "bytes": 124785,
+        "sha256": "950d89823f3c0c9924bc2c1996cbe72d543e62d7747f4fd2350fca2edf75caa8"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Yubico.YubiKit.OpenPgp.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Yubico.YubiKit.OpenPgp.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Piv/examples/PivTool/PivTool.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/project.assets.json",
+        "bytes": 130619,
+        "sha256": "6fd92301aa6609b22819a73e8c2eb0715fb0f4f82e90fe61d2497c715782e558"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/PivTool.csproj.nuget.g.props",
+            "bytes": 1814,
+            "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/PivTool.csproj.nuget.g.targets",
+            "bytes": 1367,
+            "sha256": "935a5d9f568e29ec879150d15321fcc1fa330421a2b2e958ee9cb9dd01220dea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/project.assets.json",
+        "bytes": 124761,
+        "sha256": "75f1dc1d6eb8b3f05bcc56c90cbc15ec9ea4e0f536bf1a26f1de1b640aa4d6a4"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Yubico.YubiKit.Piv.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Yubico.YubiKit.Piv.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/project.assets.json",
+        "bytes": 124827,
+        "sha256": "34db93a2e8b5921f0b79cf17a54fb33d5946bb0487c1fd22ef862905df7c1892"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Yubico.YubiKit.SecurityDomain.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Yubico.YubiKit.SecurityDomain.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Tests.Shared/obj/project.assets.json",
+        "bytes": 149512,
+        "sha256": "10dde4b169068edf8e4ac69f067a8ea8dfc28a100466987b6f8b30c6a2d7a8b5"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Tests.Shared/obj/Yubico.YubiKit.Tests.Shared.csproj.nuget.g.props",
+            "bytes": 1979,
+            "sha256": "017c2bff61a5200bdaa3b3381438e29d027bed948511b2d82c44744a01977c1f"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Tests.Shared/obj/Yubico.YubiKit.Tests.Shared.csproj.nuget.g.targets",
+            "bytes": 1881,
+            "sha256": "2ad0605e3fcd6ac85d80ad1674c573b3ed36028a1ddfd85bda1b78b667a4d65f"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/project.assets.json",
+        "bytes": 127071,
+        "sha256": "69a45ff5acb4111442fd1439329026c7f37988a6787f7fe2230c9dd4d999ff5c"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Yubico.YubiKit.WebAuthn.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Yubico.YubiKit.WebAuthn.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/project.assets.json",
+        "bytes": 175458,
+        "sha256": "89c943af0f30e29644ae3167f979bcfb2f30aeaaf068e7f2dee32fe6054361dc"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/HsmAuthTool.csproj.nuget.g.props",
+            "bytes": 2159,
+            "sha256": "edc5627d9175127b2d91fa10fd500fc0c285f566f6ebf6e44a308d5de31be4ea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/HsmAuthTool.csproj.nuget.g.targets",
+            "bytes": 2061,
+            "sha256": "1521da646bc994c2b0201c67c02cc7f3b0071f9639377755a621d7ac19624474"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/project.assets.json",
+        "bytes": 124785,
+        "sha256": "80671d11fa0a3283a6239d1592bd86063f7a033163d2007ceaa4065e428d3a64"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Yubico.YubiKit.YubiHsm.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Yubico.YubiKit.YubiHsm.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/project.assets.json",
+        "bytes": 175434,
+        "sha256": "bd4918c278cd9b8eb3d6e6b8e6123ac6c1913dfcfcb4197ab915f2437b27f0f8"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/OtpTool.csproj.nuget.g.props",
+            "bytes": 2159,
+            "sha256": "edc5627d9175127b2d91fa10fd500fc0c285f566f6ebf6e44a308d5de31be4ea"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/OtpTool.csproj.nuget.g.targets",
+            "bytes": 2061,
+            "sha256": "1521da646bc994c2b0201c67c02cc7f3b0071f9639377755a621d7ac19624474"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj",
+      "status": "existing generated imports structurally verified",
+      "assets": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/project.assets.json",
+        "bytes": 124785,
+        "sha256": "422fd022d89e90b9c14b4837fde0472b6a8f6b104b1aecf17ae07fb0acf263a9"
+      },
+      "documents": [
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Yubico.YubiKit.YubiOtp.csproj.nuget.g.props",
+            "bytes": 2790,
+            "sha256": "fb172bae68d60a48038067605c5cce7c906b9d9852b5c267932abe67637623ae"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.props",
+            "bytes": 3677,
+            "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+          },
+          "normalization": "None: original expressions already match exactly."
+        },
+        {
+          "document": {
+            "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Yubico.YubiKit.YubiOtp.csproj.nuget.g.targets",
+            "bytes": 1680,
+            "sha256": "56800e272564b364a5c329ddaece315429a854c30af18d949b04e78f02e40d68"
+          },
+          "namespace": "http://schemas.microsoft.com/developer/msbuild/2003",
+          "old_unqualified_import_matches": 0,
+          "canonical_matching_imports": 1,
+          "project_expression": "$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+          "exact_exists_condition": "Exists('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets')",
+          "parent_condition": " '$(ExcludeRestorePackageImports)' != 'true' ",
+          "installed_import": {
+            "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.targets",
+            "bytes": 90446,
+            "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+          },
+          "normalization": "None: original expressions already match exactly."
+        }
+      ],
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "bytes": 2495248,
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "bytes": 129808,
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        }
+      ]
+    },
+    {
+      "project": "verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "status": "not restored at this context; no import claim"
+    },
+    {
+      "project": "verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+      "status": "not restored at this context; no import claim"
+    },
+    {
+      "project": "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+      "status": "not restored at this context; no import claim"
+    }
+  ]
+}

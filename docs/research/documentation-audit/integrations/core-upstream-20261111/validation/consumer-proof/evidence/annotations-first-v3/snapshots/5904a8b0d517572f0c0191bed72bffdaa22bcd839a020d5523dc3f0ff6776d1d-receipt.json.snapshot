@@ -1,0 +1,140 @@
+{
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "build",
+    "--project",
+    "Yubico.YubiKit.AuditIntegration20261111.Annotations",
+    "--clean"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T19:40:26.677135+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [
+    "build"
+  ],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-annotations-build-first",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/command-journals/consumer-annotations-build-first",
+  "qualification_faults": [],
+  "exit_code": 0,
+  "status": "passed",
+  "errors": [],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 3044287,
+    "sid": 3044287,
+    "leader_start_ticks": 80381651,
+    "before": {
+      "members": [],
+      "escaped": []
+    },
+    "signals": [],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": {
+    "targets": [
+      "test-infrastructure-qa",
+      "native-aot-contract-qa",
+      "build"
+    ],
+    "projects": 0,
+    "executed": 0,
+    "skipped": 0,
+    "failed": 0,
+    "warnings": 0
+  },
+  "retained": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204026-935-build/01-clean-AuditIntegration20261111.Annotations.log",
+        "bytes": 7145,
+        "sha256": "038ca0a6b159ca4302b8057f34f41cb4cfe616685420e4c13a5123a956ff5f70"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-annotations-build-first/toolchain/20261111-204026-935-build/01-clean-AuditIntegration20261111.Annotations.log",
+        "bytes": 7145,
+        "sha256": "038ca0a6b159ca4302b8057f34f41cb4cfe616685420e4c13a5123a956ff5f70"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204026-935-build/02-build-AuditIntegration20261111.Annotations.log",
+        "bytes": 1159,
+        "sha256": "0ec8ac3a0eea9eff1529e24cf3100d06dbc738fb1b243394b6ffa7f2d61b3307"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-annotations-build-first/toolchain/20261111-204026-935-build/02-build-AuditIntegration20261111.Annotations.log",
+        "bytes": 1159,
+        "sha256": "0ec8ac3a0eea9eff1529e24cf3100d06dbc738fb1b243394b6ffa7f2d61b3307"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204026-935-build/result.json",
+        "bytes": 743,
+        "sha256": "ab2f82f425bc94ffa4834a1710b04004db90e11ef2b6daf81655cc5433f3f466"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-annotations-build-first/toolchain/20261111-204026-935-build/result.json",
+        "bytes": 743,
+        "sha256": "ab2f82f425bc94ffa4834a1710b04004db90e11ef2b6daf81655cc5433f3f466"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204026-935-build/result.txt",
+        "bytes": 468,
+        "sha256": "f4e0974ff9b72179ef28d75117d70bc8efe2693788334adc5e9dc8c93d20536c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-annotations-build-first/toolchain/20261111-204026-935-build/result.txt",
+        "bytes": 468,
+        "sha256": "f4e0974ff9b72179ef28d75117d70bc8efe2693788334adc5e9dc8c93d20536c"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204026-935-build/run.log",
+        "bytes": 2319,
+        "sha256": "abce4e9784d3af351475b8dc71bd6aed0fb3cac041b0af9428bb2e9e15d0ee3c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-annotations-build-first/toolchain/20261111-204026-935-build/run.log",
+        "bytes": 2319,
+        "sha256": "abce4e9784d3af351475b8dc71bd6aed0fb3cac041b0af9428bb2e9e15d0ee3c"
+      }
+    }
+  ],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-annotations-build-first/stdout.log",
+      "bytes": 1945,
+      "sha256": "ecf0f50a365ab12951d6d496deec9a925a485954138588961b9552a6835f04f1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-annotations-build-first/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finished": "2026-11-11T19:40:29.719511+00:00"
+}

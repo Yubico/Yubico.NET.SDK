@@ -1,0 +1,71 @@
+{
+  "version": 2,
+  "dgSpecHash": "zF1viYjH478=",
+  "success": false,
+  "projectFilePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+  "expectedPackageFiles": [],
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "message": "Your request could not be authenticated by the GitHub Packages service. Please ensure your access token is valid and has the appropriate scopes configured.",
+      "projectPath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "message": "Your request could not be authenticated by the GitHub Packages service. Please ensure your access token is valid and has the appropriate scopes configured.",
+      "projectPath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "message": "Your request could not be authenticated by the GitHub Packages service. Please ensure your access token is valid and has the appropriate scopes configured.",
+      "projectPath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "message": "Your request could not be authenticated by the GitHub Packages service. Please ensure your access token is valid and has the appropriate scopes configured.",
+      "projectPath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "message": "Your request could not be authenticated by the GitHub Packages service. Please ensure your access token is valid and has the appropriate scopes configured.",
+      "projectPath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "message": "Your request could not be authenticated by the GitHub Packages service. Please ensure your access token is valid and has the appropriate scopes configured.",
+      "projectPath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Failed to retrieve information about 'Yubico.NativeShims' from remote source 'https://nuget.pkg.github.com/Yubico/download/yubico.nativeshims/index.json'.\n  Response status code does not indicate success: 401 (Unauthorized).",
+      "projectPath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "filePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "targetGraphs": []
+    }
+  ]
+}

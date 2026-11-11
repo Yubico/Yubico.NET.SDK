@@ -1,0 +1,97 @@
+{
+  "Mode": "--native",
+  "Baseline": "3de42bb54c5e8c986364f0f04398d4e85a66a596",
+  "SourceHash": "90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa",
+  "Runtime": ".NET 10.0.15",
+  "Kernel": "Omarchy",
+  "KernelRelease": "7.2.15-1-omarchy",
+  "DynamicCode": true,
+  "Checks": [
+    "libc-failed-open-negative-fd-and-errno-ENOENT",
+    "libc-real-eventfd-write",
+    "libc-real-eventfd-read",
+    "libc-eventfd-checked-close",
+    "libc-fd-zero-fixture-child-stdin-closed",
+    "libc-real-fd-zero-valid-and-checked-close",
+    "reactor-real-registration-pending-readiness",
+    "reactor-explicit-eventfd-signal-not-data",
+    "reactor-real-poll-readiness-generation",
+    "reactor-removal-eventfd-wake",
+    "reactor-quiescence-owner-release-before-checked-close",
+    "reactor-idle-registration-activated",
+    "reactor-shutdown-eventfd-wake-actual-quiescence",
+    "reactor-shutdown-reference-release-checked-close",
+    "reactor-real-eventfd-control-syscalls-observed",
+    "reactor-held-internal-read-callback-entered",
+    "reactor-no-false-quiescence-while-callback-held",
+    "reactor-early-reference-release-rejected",
+    "reactor-held-callback-real-exit-quiescence-release-close",
+    "fd-reuse-predecessor-close-proven",
+    "fd-reuse-real-same-integer-descriptor",
+    "fd-reuse-stale-token-generation-isolation",
+    "fd-reuse-successor-and-sentinel-drained-close",
+    "owner-output-entered-report-seam",
+    "owner-report-entry-off-caller-and-returned-task-still-pending",
+    "owner-one-pending-output-no-replacement-worker",
+    "owner-real-native-input-await-is-pending",
+    "owner-held-output-cannot-stall-other-input-progress",
+    "owner-owned-output-copy-production-L1-zero-ID-framing-no-drop",
+    "owner-40-owned-input-buffers-no-drop-reorder-or-reuse",
+    "owner-pending-reader-cancel-detaches",
+    "owner-cancel-recovery-real-reactor",
+    "owner-dispose-read-was-pending",
+    "owner-dispose-terminalizes-real-pending-read",
+    "owner-actual-quiescence-worker-release-checked-close",
+    "owner-original-output-worker-performs-checked-close",
+    "owner-after-pending-dispose-reopen-real-reactor-read",
+    "owner-reopened-checked-close"
+  ],
+  "Measurements": [
+    {
+      "Name": "reactor-shutdown",
+      "CallerReturnMs": 1.0208,
+      "TotalMs": 1.4295,
+      "AllocatedBytes": 0
+    },
+    {
+      "Name": "synthetic-owner-open",
+      "CallerReturnMs": 2.3062,
+      "TotalMs": 3.4789,
+      "AllocatedBytes": 16144
+    },
+    {
+      "Name": "synthetic-held-output",
+      "CallerReturnMs": 0.4517,
+      "TotalMs": 3.2134,
+      "AllocatedBytes": null
+    },
+    {
+      "Name": "synthetic-owner-dispose",
+      "CallerReturnMs": 0.9705,
+      "TotalMs": 1.2487,
+      "AllocatedBytes": 0
+    }
+  ],
+  "NativeProbes": [
+    {
+      "Name": "synthetic-descriptor-production-L1-report-call-excludes-held-seam",
+      "ReadCalls": 45,
+      "WriteCalls": 1,
+      "PendingAtBarrier": 1,
+      "OutputWorker": 20,
+      "CloseWorker": 20,
+      "ReportWriteCallMs": 0.375134
+    }
+  ],
+  "Idle": [
+    {
+      "Scope": "whole-process-with-one-live-synthetic-owner-and-reactor",
+      "WallMs": 250.9946,
+      "CpuMs": 1.618,
+      "ThreadDelta": 0,
+      "AllocatedBytes": 24600
+    }
+  ],
+  "Failure": null,
+  "Outcome": "PASSED"
+}

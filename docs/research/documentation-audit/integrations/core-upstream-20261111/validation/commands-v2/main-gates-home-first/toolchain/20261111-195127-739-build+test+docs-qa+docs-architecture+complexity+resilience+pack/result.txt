@@ -1,0 +1,31 @@
+RESULT: PASSED  (dotnet toolchain.cs -- build test docs-qa docs-architecture complexity resilience pack --clean --fast --complexity-args "--base f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa" --package-version 2.0.0-alpha.2)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      8.6s
+  ✓ test                      82.4s
+  ✓ docs-qa                    0.3s
+  ✓ docs-architecture          0.3s
+  ✓ complexity                 1.7s
+  ✓ resilience                25.5s
+  ✓ pack                       7.2s
+Projects (test):
+  ✓ PASS      Cli.Commands.UnitTests    48 executed, 1 skipped
+  ✓ PASS      Cli.Shared.UnitTests      78 executed, 0 skipped
+  ✓ PASS      Core.UnitTests            2065 executed, 4 skipped
+  ✓ PASS      Ctap2.UnitTests           495 executed, 0 skipped
+  ✓ PASS      Management.UnitTests      96 executed, 0 skipped
+  ✓ PASS      Oath.UnitTests            436 executed, 0 skipped
+  ✓ PASS      OpenPgp.UnitTests         193 executed, 0 skipped
+  ✓ PASS      Piv.UnitTests             289 executed, 0 skipped
+  ✓ PASS      PublicApi.UnitTests       25 executed, 0 skipped
+  ✓ PASS      SecurityDomain.UnitTests  50 executed, 0 skipped
+  ✓ PASS      WebAuthn.UnitTests        371 executed, 0 skipped
+  ✓ PASS      YubiHsm.UnitTests         91 executed, 0 skipped
+  ✓ PASS      YubiOtp.UnitTests         205 executed, 0 skipped
+Projects (resilience):
+  ✓ PASS      Core.UnitTests  197 executed, 0 skipped
+Totals: projects: 14 passed, 0 failed, 0 with no tests executed; tests: 4639 executed, 0 failed, 5 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

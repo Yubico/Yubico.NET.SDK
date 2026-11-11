@@ -140,10 +140,146 @@ close retains the owner and physical claim rather than allowing unsafe reopen. T
 wake and registry/discovery claim transfer belong to this same connection lifetime.
 `FidoHidProtocol.Configure` performs local setup only; `ApplicationSession` awaits FIDO
 channel initialization. Public lower-level `IHidConnection` compatibility remains
-synchronous; the typed macOS OTP path uses a separate worker, and Windows/Linux HID
-behavior must not be inferred from either macOS path. See
+synchronous; the typed macOS OTP path uses a separate worker. Linux has its own FIDO/OTP
+owners described below; Windows/custom HID retains the compatibility adapters. See
 [retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
 for public entry points and known limits.
+
+### Linux native report boundary (L1)
+
+`ILinuxHidReportApi` is the internal, synchronous borrowed-payload
+seam used by Linux FIDO and OTP report connections; it does not itself supply a reactor or lifetime
+worker. Direct IO metadata/read capacity follows bounded unnumbered descriptor sizes; direct IO
+and feature SET preserve caller payload length. The L3 FIDO owner enforces typed64 at Send/Receive;
+the L4 typed OTP owner enforces Send8/Receive8 separately.
+`LinuxHidReportApi` adds native zero report-ID framing, rejects short writes/feature transfers,
+and clears owned stack/pool framing in `finally`. Feature GET retains OTP8 payload / 9 native bytes.
+Its parser retains the existing YubiKey last-main-item behavior, with bounded arithmetic; it is not
+a general HID parser. See [L1 source evidence and limits](../../docs/research/linux-native-report-access.md).
+
+libc descriptors are **int**, not pointer-width handles: `open`/`eventfd` imports return `int` and
+initialize a preallocated SafeHandle; fd 0 is valid. Do not use the default SafeHandle return
+marshaller here (its unmanaged representation is `IntPtr`). Native calls retain managed handles.
+`LinuxFileSafeHandle.CloseOnce` disposes once and observes cached release evidence: pending native
+references or an unexecuted release give **no release proof**. After reference drain, successful
+close or Linux EINTR/EIO proves release (with diagnostic error preserved); EBADF and unexpected
+errors do not. Never retry native close. Future owners must inspect this outcome before releasing
+a physical claim. L3/L4 apply this evidence in separate FIDO and OTP owners.
+
+### Linux read-reactor infrastructure (L2)
+
+`ILinuxHidReadReactor` supplies internal readiness registration, not a typed connection or factory
+migration. `LinuxHidReadReactor.Shared` lazily runs one poller while registrations exist and exits
+when idle; instance disposal permanently shuts it down. Registrations retain SafeHandle references
+through snapshot/callback drain and identify callbacks by registration identity plus generation.
+Only bounded nonblocking reads belong in those internal callbacks; no application callbacks or
+open/write/ioctl/close may run on the poller. Consumer TCS continuations must run asynchronously.
+Every published Register returns a token, with immutable Activation outcome separate from actual
+Quiescence. RequestRemoval reports wake failure but the same Quiescence remains observable for late
+drain; neither terminal notification nor failed shutdown acknowledges it. Only after Quiescence may
+the existing native owner worker synchronously ReleaseReference, then inspect L1 CloseOnce before
+claim release. There are no registration/run cleanup tasks. The poller retires its private local
+eventfd after poll exits; pending admissions cannot create replacements before that retirement
+finishes. No timeout or cross-thread close pretends to recover a live snapshot. See
+[L2 handoff and evidence](../../docs/research/linux-read-reactor.md).
+
+### Linux FIDO owner seam (L3)
+
+`LinuxFidoHidConnection.OpenAsync(path, reportApi, reactor, cancellationToken, physicalClaim)`
+constructs/root-pins `LinuxFidoHidNativeOwner` before native acquisition. One dedicated background
+worker owns open, descriptor ioctl, output, reactor activation wait, actual quiescence wait,
+reference release and checked close. One ordinary raw operation is admitted; there is no backlog,
+per-operation Task.Run or worker replacement. Send copies caller memory and cannot complete while
+native output is held. Pending receive cancellation detaches only that reader, not native input.
+Its TCS task is the actual public task (no async wrapper), so terminal disposal cannot overtake it.
+The reactor only performs bounded nonblocking reads (32 attempts, four EINTR maximum); its
+160-report queue faults on overflow, clears abandoned data and requests removal to avoid spinning.
+
+Shutdown requests removal even during held output and waits for the exact token's true Quiescence
+on the original worker before ReleaseReference/CloseOnce. EINTR/EIO close diagnostics are reported
+after releasing the original claim; lack of release proof quarantines it and retains the GC root.
+The facade finalizer only requests shutdown and never waits. A broken wake can leave shutdown
+pending indefinitely; no replacement worker or timeout claims otherwise.
+
+Unexpected worker-loop failure closes admission under the owner lock, terminalizes the public
+reader and any accepted open/send completion, clears queued output and requests reactor removal.
+The still-available original worker then performs true-quiescence/checked-close cleanup. Native
+release proof still releases the original claim, but the first loop error remains in the shared
+disposal outcome. Interrupted/failed cleanup quarantines uncertain state without retries. Event
+retirement uses the same admission lock as all setters, and the finalizer request cannot throw.
+
+`LinuxHidIOReportConnection` is now the synchronous expert facade over this same owner. It keeps
+descriptor metadata, exact actual raw input lengths, arbitrary supported SET lengths and indefinite
+reads (no imported macOS timeout). EOF is deliberately terminal rather than an empty success.
+Public `IHidInterface`/`IHidConnection` signatures are unchanged. L5 routes typed opens and
+discovery/registry transfer to this owner (below). No shared worker framework was added.
+See [L3 contract, evidence and limits](../../docs/research/linux-fido-async-lifetime.md).
+
+### Linux OTP owner seam (L4)
+
+`LinuxOtpHidConnection.OpenAsync(path, reportApi, cancellationToken, physicalClaim)` implements
+`IOtpHidConnection` over a separate `LinuxOtpHidNativeOwner`. Rooting precedes native acquisition;
+one context-suppressed dedicated worker owns open, feature GET/SET and checked close. Exactly one
+ordinary raw call is admitted; there is no backlog, per-call Task.Run, replay or reactor involvement.
+Send owns a copy before publication and clears it before task completion. Receive allocates eight
+bytes on the worker, clears failed/partial output, and transfers successful storage to the caller.
+Pre-dispatch cancellation submits nothing; after native dispatch cancellation cannot detach GET/SET.
+
+Shutdown stops admission and shares one outcome across sync/async callers, after any admitted native
+call returns. EINTR/EIO release the original claim with diagnostics; unknown release retains and
+quarantines the rooted owner/claim. Unexpected worker failure stops admissions, faults actual pending
+open/send/receive tasks, clears staging and attempts checked cleanup on that original worker. The
+initial error survives successful cleanup. Signal retirement shares the setter lock. Finalization
+only requests nonblocking, nonthrowing shutdown, even after worker failure/event retirement.
+
+`LinuxHidFeatureReportConnection` is the synchronous expert facade over the same OTP owner:
+metadata/GET remain8; direct SET retains supported caller lengths, rather than imposing typed8.
+L1 still supplies native framing, exact-count checking and scoped zeroing. No factory/discovery
+routing or adapter-registry rows change in L4. L5 routing is described below.
+See [L4 handoff](../../docs/research/linux-otp-async-lifetime.md).
+
+### Linux public factory and discovery routing (L5)
+
+`HidConnectionSlot.OwnsNativeLifetime` describes built-in macOS **or Linux** HID; it is not a
+platform-wide async-provider abstraction. Linux slots call `LinuxFidoHidConnection.OpenAsync` /
+`LinuxOtpHidConnection.OpenAsync`, bypassing the synchronous `IHidConnection` adapters. The internal
+slot accepts optional `ILinuxHidReportApi` / `ILinuxHidReadReactor` seams, alongside its existing macOS
+seams; `LinuxHidInterface` has an internal descriptor constructor for no-hardware route tests.
+Direct `IHidInterface.ConnectTo*Reports` methods remain synchronous expert facades.
+
+`YubiKeyDevice` claims every known physical member before open, then transfers that exact registration
+to the native owner instead of wrapping it. The requested transport must still match the selected slot.
+`SharedDeviceInfoRead` resolves the same owned slot for direct and published-composite providers and
+transfers the per-interface discovery lease before invoking open (even if it later throws). Once
+transferred, only the native owner releases it: neither a caller timeout nor a disposal exception is
+release proof. EINTR/EIO report disposal diagnostics **after** releasing the original claim; unknown
+release retains/quarantines it. Windows/custom adapters and PC/SC paths keep their prior behavior.
+`DiscoveryDeviceInfoReader` bounds the caller's wait; `SharedDeviceInfoRead` owns admission, the lease,
+worker, connection, and read pipeline. `ProtocolDeviceInfo.ReadAsync` only borrows an already-open
+connection and owns the matching protocol, not discovery scheduling or connection teardown.
+
+`LinuxHidRoutingTests` exercises real public typed connection and raw-session factories, grouped claims,
+held open/report/close, canceled/failed opens, unknown release, late discovery cleanup, replacement evidence,
+and borrowed idle/active session reuse under fake native seams. Preserve worker priority, evidence epochs,
+one-connection/one-session admission, and no transport fallback. L6a adds managed public applet journeys
+and bounded registry links (below); hardware/native acceptance remains L6b work. See
+[L5 routing handoff](../../docs/research/linux-hid-routing.md).
+
+### Bounded managed Linux acceptance (L6a)
+
+`AdapterContractRegistry` independently requires 43 operations / 76 runnable profile links, including 16
+Linux typed/direct operations / 27 links; `PublicSyncBoundaryRegistry` independently requires 23 public
+reachability entries, including 8 retained Linux synchronous paths. These are links, not native attestation.
+`LinuxDirectFacadeAcceptanceTests` checks sync facade failure, held output, true-quiescence and close drain.
+Applet tests `Ctap2SessionLinuxCrossLayerTests` and `YubiOtpSessionLinuxCrossLayerTests` use actual
+`LinuxHidInterface`/`HidConnectionSlot`/`YubiKeyDevice` and the production owners, faking only report/reactor
+seams. They preserve borrowed idle reuse, cancellation recovery, terminal presence ownership, and an
+owned pending CTAP exchange's claim through drain. OTP Configure is unchanged: public initialization
+awaits status first. `PcscConnectionLifetimeTests.LiveRegisteredConnection_*` holds disconnect and context
+release independently and isolates rooted live release-failure/quarantine probes using `PcscIsolatedProbe`.
+L6a changed no shipping source sites; its historical 219-site snapshot remains documented/outstanding.
+The current merged inventory incorporates upstream discovery/monitor changes; see the boundary-inventory README. See
+[managed evidence and remaining L6b scope](../../docs/research/linux-managed-acceptance.md).
 
 ### Listener and Native Retry Loops
 
@@ -321,7 +457,7 @@ Conversion traps, in the order they bite:
 | `bool` parameters/returns | Not blittable. Annotate `[MarshalAs(UnmanagedType.U1)]` (or `.I4` — match the C header), or change the signature to the native integer type. |
 | Delegate callbacks | Not marshalled at all by the generator. Use `delegate* unmanaged[Cdecl]<...>` with an `[UnmanagedCallersOnly]` target, as `Native/MacOS/HidInput/HidInput.Interop.cs` does. A function pointer also avoids the per-instance thunk and the "keep the delegate alive" `GCHandle` dance. |
 | `string` return values | Needs an explicit marshaller (`Utf8StringMarshaller`) or return `nint` and convert. Silent ownership bugs live here — say who frees the buffer in a comment. |
-| `SafeHandle` | **Is** supported, including as a return type. Keep the existing `LinuxUdevSafeHandle`-style pattern; do not downgrade to `nint` during conversion. |
+| `SafeHandle` | Supported for pointer-width native handles, including returns such as `LinuxUdevSafeHandle`. Its default unmanaged representation is `IntPtr`, **not** an `int` file descriptor. For libc `open`/`eventfd`, return native `int` into a preallocated managed SafeHandle, retaining SafeHandle ownership and references on caller APIs. |
 | `SetLastError = true` | Keep it only where a caller actually reads `errno`/`GetLastError`. It is not free. |
 | Array parameters | Delete `[MarshalAs(UnmanagedType.LPArray, SizeParamIndex = n)]` outright. Do **not** replace it with `[MarshalUsing(CountElementName = ...)]` — leave the parameter as a bare `byte[]`/`IntPtr[]`. See the note below on why that is safe, not merely tidier. |
 
@@ -393,22 +529,65 @@ several interfaces at once (CCID, HID FIDO, HID OTP), and discovery returns one 
 interfaces in `AvailableConnections`. Use `SupportsConnection(...)` and the typed `ConnectAsync<TConnection>()`
 to select an interface; the parameterless `ConnectAsync()` throws on a multi-interface device. One grouped
 physical key admits one live connection across all known interfaces. Applet session extensions choose exactly
-one transport via a documented default order plus an optional `preferredConnection` override; connection or
+one transport via a documented default order plus an optional `SessionCreationOptions.PreferredConnectionType` override; connection or
 initialization failure does not try another interface. Read-only metadata types (`DeviceInfo`, `FormFactor`,
 `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`, `VersionQualifierType`) are Core-owned
 (`Yubico.YubiKit.Core.Devices`); mutating operations stay in Management. Full reference:
 [Physical Device Model](../../docs/architecture/physical-device-model.md). What grouping of a physical key's interfaces does and does not guarantee - per platform, with every guarantee pinned to a named test - is in [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md). Read it before changing `CompositeDeviceMerger`, `FindYubiKeys`, or the topology resolver: the merge tiers are an evidence hierarchy that never guesses, and several conservative-looking outcomes are documented bounds with pinning tests, not defects.
 
-The repository retains a published object only while its interface and connection sets remain unchanged and
+The change feed retains a published object only while its interface and connection sets remain unchanged and
 fresh known serial evidence does not contradict it. A different known serial on the same interface set proves
-substitution and emits `Removed` for the predecessor followed by `Added` for a new successor object. Unknown
+substitution and emits `DeviceRemoved` for the predecessor followed by `DeviceAdded` for a new successor object. Unknown
 serials never trigger identity-based republication. If no listener event invalidates discovery caches and no scan
 observes absence, same-interface substitution remains unknowable from cached evidence.
 
-Use `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` when absence is exceptional and
-`FindFirstOrDefaultAsync(predicate, cancellationToken)` when it is not. They are thin, one-shot selections over
-cached `FindAllAsync`; they do not wait for insertion, and callers must not treat discovery order as stable. The
-token is passed to discovery, but a cached result may complete without observing cancellation.
+`IYubiKey.CachedDeviceInfo` exposes the existing nullable Core `DeviceInfo` snapshot without I/O; its default
+interface implementation returns `null` for custom implementations. `YubiKeyDevice` delegates directly to
+`DeviceInfo`, whose getter reads the atomically published `DeviceInfoSnapshot` reference. Do not introduce a
+second cache or infer freshness from this property. Discovery/change-feed updates replace the
+snapshot and emit `DeviceUpdated` when metadata differs; null updates preserve the last successful value. Retained objects can
+expose stale metadata after configuration changes or disconnect. `ManagementSession.GetDeviceInfoAsync` is
+the live-read API and does not promise to update discovery metadata. The independent `SerialNumber` latch
+and identity contract remain unchanged, even if a newer metadata snapshot omits its serial. No-hardware
+coverage is in `YubiKeyDeviceTests` (no connection on access, snapshot replacement, default implementations,
+serial independence) and `SnapshotDiffTests` (retention and replacement isolation).
+
+Use `YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken)` when absence is exceptional and
+`FindFirstOrDefaultAsync` when it is not. They select after one independent fresh `FindAllAsync` operation;
+they do not wait for insertion, and callers must not treat discovery order as stable. Use the named
+`cancellationToken:` argument; there are no token-only forwarding overloads.
+
+`YubiKeyManager.FindAllAsync(interfaces, cancellationToken)` is always one-shot, not a monitor rescan.
+It constructs `FindYubiKeys.CreateForInterfaces` per call with an immutable concrete scope; no manager/cache,
+feed publication, watcher events, or monitor lifecycle participates. Keep `FindYubiKeys.Create()`
+all-interface and `IFindYubiKeys.FindAllAsync(type, ...)` a post-merge result filter. Never reuse a finder
+across different scopes: its cache eviction treats unobserved members as absent. Excluded backend
+factories are not called. Filter HID by concrete type before slot creation/topology/protocol reads;
+OTP and FIDO necessarily share OS descriptor enumeration. Ignore undefined scope bits like `Matches`.
+Do not reinterpret partial scope as PID completeness or import sibling slots from prior scans.
+
+One-shot exit terminally retires its read scope in `finally`, including cancellation and budget expiry.
+This cancels queued identity admission and prevents later opens; already-open native work keeps its
+worker and registry lease until teardown. Do not dispose admission/lease owners at the wait boundary.
+Transport enumeration waits run concurrently with the shared `DiscoveryBudgets.Enumeration` budget
+(five seconds). For one-shot discovery a timeout logs a warning and omits that transport for
+this call; for the monitor's `IMonitoredDiscovery.FindAllAsync` it throws so a partial scan is never
+published. Caller cancellation abandons the wait immediately. Abandoned enumeration completes independently and its result
+or failure is observed at Debug level. The absence of post-cancellation slots/probes is pinned by
+`FindAllAsync_CancellationDuringEnumeration_AbandonsEnumerationAndSkipsSlotsAndProbes`;
+`FindYubiKeysEnumerationBudgetTests` pins timeout isolation and late completion for both transports.
+No global registry identity aliases are added: all/scoped views exclude connections only when their
+known member-ID sets overlap; disjoint CCID/FIDO views remain uncoordinated even with matching serials.
+`FindYubiKeysScopeTests` pins filtering, partial same-PID grouping, evidence isolation, retirement, and
+the ownership bound; `YubiKeyManagerStaticTests` pins no initialization/publication/monitor interference.
+`FindAllAsync_ReturnedViewCanConnectSequentiallyAfterDiscoveryScopeRetires` additionally pins that retiring
+one-shot discovery does not retire the returned view's public connection slots. The public hardware
+companion is `ScopedDiscoveryReadOnlyTests` in Management's integration project (the appropriate place
+for its live-read dependency), not Core's unit tests. It uses all attached authorized serial-bearing USB
+fixtures, permits conservative fragments, and compares metadata over sequential concrete connections.
+Keep native disjoint-view races out of hardware coverage; use the deterministic ownership vectors above.
+Fixture requirements and the explicit read-only filter are in
+[device discovery testing](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
 handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by production discovery.
@@ -422,43 +601,85 @@ one-to-one mapping between operating-system interfaces and physical USB interfac
 
 `ConnectionType` is a `[Flags]` enum with explicit values. `HidFido`, `HidOtp`, and `SmartCard` represent concrete discovered device interfaces. `Hid` is a group filter that includes both HID FIDO and HID OTP interfaces when used with discovery/cache filtering APIs. `Unknown` matches no devices.
 
-### Device Event Delivery
+### Device change delivery
 
-One public surface over one internal pipeline, both BCL-typed:
+manager watch creates a producer; monitor watch subscribes to an existing one.
 
-- `YubiKeyManager.WatchAsync(ct)` — `IAsyncEnumerable<DeviceEvent>`. There is no observable surface;
-  `DeviceChanges` was removed outright and has no replacement shim.
+`YubiKeyManager.WatchAsync(ct)` lazily creates a private monitor per enumeration and disposes it on exit.
 
-One internal type backs it:
+`YubiKeyManager.CreateMonitorAsync(ct)` creates a new initialized `YubiKeyMonitor`, the sole
+composition/teardown owner of its change feed, listeners, and sequential scan loop. There is no global manager/cache,
+static Start/Stop/Shutdown, `ScanAsync`, or `forceRescan` alias. Short commands and most applet tests
+use one-shot discovery; tracking consumers explicitly own/share a monitor. Old result filters must be
+applied locally after All discovery where callers need full composite slots. The factory starts listeners
+first and awaits the loop's own initial scan-and-publication signal, not a separate manual rescan.
+Empty success is ready; initial scan or
+publication failure is propagated and disposes partial ownership. Creation cancellation cancels the wait
+and triggers cleanup; the monitor's lifetime token is independent of the creation token after return.
+Each monitor is initialized once, runs once, and is disposed once by its public owner. There are no manual
+rescans, stop/start modes, interval replacement, restarts, or monitor generations. Initial, listener-driven,
+and fallback scans all await full feed publication inside one sequential loop. No scan semaphore or
+publication gate is needed because no second producer exists. The production fallback interval
+remains five seconds. Internal `RescanScheduler` owns initial, interval, and coalesced hotplug triggers
+on `TimeProvider`; its 200 ms quiet window and one-second cap are tested with `FakeTimeProvider`.
 
-- `DeviceEventHub` — asynchronous fan-out, owned by `YubiKeyDeviceRepository`. Copy-on-write watcher
-  array; `Publish` reads a lock-free snapshot and only ever calls `TryWrite` on a per-watcher bounded
-  channel (256, `AllowSynchronousContinuations = false`). Mutations take a short lock.
+`DeviceChangeFeed` holds one snapshot dictionary, a scan revision, and copy-on-write subscriptions.
+Only the sequential producer calls `Apply`. `SnapshotDiff` computes a successor map outside the feed's
+gate; published dictionaries are never mutated. It groups removals before additions before metadata
+updates, retaining the original device unless connection flags or contradicting known serials prove
+replacement. `DeviceInfo` has value equality, so equal metadata produces no update notification.
 
-The load-bearing property is that **no consumer code ever runs on the publication path**. That is
-what lets the monitor hold `_publishGate` across `UpdateCache` without a slow, abandoned, or throwing
-watcher wedging device monitoring — and it is why the lifecycle tests that need an in-flight
-publication use the `PublishAdmittedForTest` seam rather than a blocking subscriber.
+`YubiKeyMonitor.WatchAsync` delegates directly to `DeviceChangeFeed.Subscribe`. On first `MoveNextAsync`,
+snapshot capture and subscription registration share the publication gate. Replay happens outside the
+gate as `DeviceAdded` records followed by one `SnapshotComplete`, even for empty membership. Later
+changes stream from that subscription's bounded channel. Revision increments once per applied scan;
+changes sharing a revision came from one scan. Maintain a consumer
+projection from the stream or use independent `FindAllAsync` discovery.
 
-Contracts worth knowing before editing:
+No consumer code or logging runs under the publication gate. Each subscription has a 256-change buffer
+with asynchronous continuations; `TryWrite` overflow faults only that subscriber rather than dropping
+changes. Recovery clears the consumer projection and re-enumerates the same monitor. Cancellation and
+disposal of an enumeration unregister only that subscription. Replay does not occupy buffer capacity.
 
-- **`WatchAsync` subscribes on first enumeration**, not when it is called. Events raised in the gap
-  are not observed.
-- **Every watcher is independent.** Overflow, cancellation, abandonment, and a consumer that throws
-  out of its own loop terminate only that watcher. The publisher and the other watchers continue.
-- **Overflow faults rather than drops**, because `DeviceEvent` is a delta and a dropped event
-  permanently desynchronises the consumer's device list. Recover by re-enumerating and calling
-  `FindAllAsync`.
-- **Repository disposal ends active watchers normally** — not faulted, not cancelled.
-- **Enumerating after completion** ends immediately rather than throwing or hanging.
-- **Ordering across concurrent `Publish` calls belongs to the producer.** The monitor's publication
-  gate provides it. `Publish` after `Complete` is a silent no-op.
+`Fault` records the first terminal error and faults current and later subscriptions with a wrapped
+`InvalidOperationException`. `Complete` is idempotent and ends healthy subscribers normally; later
+subscriptions end empty. Already captured replay and queued changes may drain after termination.
+`Apply` after either terminal state throws. The owner must stop the producer before completing the feed.
+Disposal stops listeners, cancels and awaits the loop without a drain timeout, retires discovery, then
+completes the feed; native discovery budgets bound waits rather than abandoning the managed loop.
+`SnapshotDiffTests`, `DeviceChangeFeedTests`, and monitor tests pin these contracts without hardware.
 
 ### Listener Event Semantics
 
-HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diagnostic only and are never public physical-device truth. `YubiKeyManager.WatchAsync` must remain repository-diffed output after a rescan. Unknown HID removals still trigger a rescan fallback rather than being suppressed, because the removed interface may be the only native signal for a physical-device diff.
+Transport listeners implement `IDeviceChangeListener` with payload-less `Changed` callbacks. Set the
+callback before `Start()` and never stop or dispose inside it. HID hint details stay internal to the
+listener's Trace logging; callbacks are diagnostic rescan hints, never physical-device truth.
+`YubiKeyMonitor.WatchAsync` remains snapshot-diffed output after a rescan. Unknown HID removals still
+trigger a rescan rather than being suppressed: they may be the only native signal for a device diff.
 
-`YubiKeyDeviceMonitorService` logs hint details at ingress and carries only a capacity-one occurrence signal into its single-reader loop; payloads are not queued. Startup is best-effort and degrades gracefully: each listener is started independently, and a listener that throws or reports a post-`Start()` status other than `Started` is logged, individually stopped/disposed, and skipped — it never aborts the other listener or the monitoring loop. Monitoring always starts (worst case, with no listeners at all, it relies solely on the interval fallback rescan), because device truth comes from the full `FindAllAsync` + repository diff, not from listeners. When a transport's *service* is simply unavailable (for example, no PC/SC service, no PC/SC native library, or no readers), that transport enumerates to empty and the other transports are still scanned and diffed every interval, so a transport whose listener is unavailable is still detected. This mirrors canonical yubikit (Rust/Python), where a transport that fails to enumerate is skipped and discovery continues with the others. Listeners are therefore optional latency accelerators, not correctness dependencies. One narrower case is not yet fully isolated at the scan layer: if PC/SC *enumeration itself throws* (discovery-worker saturation, or an `SCardGetStatusChange` error), `FindYubiKeys.FindAllAsync` aborts that single scan before HID is enumerated — deliberately, so a failed PC/SC probe is never committed as a false-empty snapshot that would emit spurious removals — and the monitor's `RescanSafelyAsync` retries on the next interval. Making HID still enumerate when PC/SC enumeration throws (per-transport scan isolation, without reintroducing false removals) is tracked for the polling-migration follow-up. `StartMonitoring` does not throw for listener unavailability (only for an invalid interval or a disposed service). Individually failed listeners are still cleaned up so no partial resources leak, and each listener callback captures its attempt's signal so a detached/stale callback cannot enqueue into a later monitoring run. The loop consumes one occurrence per wake-up before checking debounce/max-coalesce time, so continuously refilled signals cannot starve the deadline check.
+`HotplugSignals` owns listener creation and teardown and carries transport hints in a capacity-one
+drop-write channel into the monitor's single-reader loop. Each listener starts independently. A listener
+that throws or reports a post-`Start()` status other than `Started` is logged, stopped/disposed, and skipped,
+without aborting the other listener or loop. With no listeners the loop relies on its interval fallback.
+These are optional latency accelerators; discovery plus snapshot diffs supply device truth.
+
+A simply unavailable transport service (no PC/SC service/library/readers) can enumerate empty while other
+transports are scanned. This is best-effort partial discovery, not proof that all OS interfaces were
+accessible. If PC/SC enumeration itself throws (worker saturation or `SCardGetStatusChange` error), the
+scan fails rather than committing false-empty removals. In-scope PC/SC and HID enumeration waits start
+together with a five-second budget. One-shot discovery logs an enumeration timeout and omits that
+transport for that call. Monitored discovery instead throws rather than publishing a timeout-induced
+partial snapshot: initial creation propagates the failure and tears down partial ownership; later scans
+retain the last publication and retry on the next trigger.
+
+Creation tolerates listener unavailability but the public factory still requires the first
+successful scan/publication. Hints during initialization remain pending for an ordered follow-up scan.
+`RescanScheduler` consumes transport hints and combines them until the quiet window or coalesce cap.
+The monitor globally invalidates finder evidence once, with the combined transport flags, immediately
+before each hotplug-triggered scan. Discovery serializes evidence invalidation and retirement internally.
+Disposing `HotplugSignals` clears all callbacks, stops all listeners, disposes all listeners, then completes
+its channel. Read-scope retirement cancels internal queued admission waits without releasing native leases
+early. The scheduler checks elapsed time after each occurrence so refilled signals cannot starve the cap.
 
 ## Session Base Class
 
@@ -542,6 +763,17 @@ var result = await protocol.SelectAsync(ApplicationIds.Piv, CancellationToken.No
 // Verify commands sent
 Assert.Single(fakeConnection.SentCommands);
 ```
+
+### Discovery hardware contracts
+
+Management's `OwnedMonitorReadOnlyTests` uses Core's public factory and stream with at least two
+attached allow-listed serial-bearing USB fixtures. It reads initial replay through `SnapshotComplete`
+after return, without polling away partial discovery, then checks object retention, subscriber
+cancellation, disposal/recreate, convenience selection/no-match, and sequential live metadata comparisons
+only after monitor disposal. `ScopedDiscoveryReadOnlyTests` covers concrete/combined scopes independently;
+its complete serial-less-bystander readiness behavior must remain intact. No prompts, UV/UP, hotplug,
+resets, or writes are in this unattended filter. Required attended removal/reinsertion/event-lifetime acceptance remains separate and pending until
+the user is present. See the [explicit test filters](../../docs/usage/device-discovery.md#read-only-scoped-discovery-hardware-checks).
 
 ### Integration Test Base
 
@@ -650,10 +882,13 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 - **Cancellation is checked at entry only.** Once an exchange claims the guard, constituent transmits use `CancellationToken.None` so chained APDU, CTAP/OTP frame, and SCP state cannot be stranded.
 - **The guard is protocol-instance scoped.** An SCP wrapper shares its base PC/SC guard, but independently created raw protocol instances over one connection are not coordinated. The supported contract prevents that shape by admitting one `ApplicationSession` per connection; connection-wide raw protocol ownership is a separate API decision.
 - **Discovery/connection ownership is atomic.** A connection to a grouped physical key claims every known stable member interface ID before native open. A second connection through any member throws `ConnectionInUseException` immediately. Claims are sorted, deduplicated, rolled back on failure, and released only after physical teardown. Standalone records use one-element scopes when discovery cannot prove grouping. Discovery remains per-interface and nonblocking; connections may wait cancellably for active discovery, while waiting connections retain priority. One level down, `ConnectionSessionGuard` allows one live `ApplicationSession` per connection and supports sequential reuse. In-process only — cross-process contention is not covered.
-- **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently within one finder. A finder owns one atomic evidence epoch containing identity cache, metadata cache, and read scope; transport activity terminally retires that scope and replaces the whole evidence object, so stale completion writes only into unreachable caches and a replacement manager cannot join its predecessor's reads. Superseded reads that have not yet opened their interface fail fast, including queued admission waits behind hung workers. Cache entries also record the PID observed at read time so a hit under a different PID is a miss. Eviction is deliberately not transport-scoped because a composite swap's events can arrive on one transport first, and retained sibling evidence would mix two keys. Without monitoring running there are no listener events and staleness detection degrades to scan-observed absence — see the identity-cache section of `docs/architecture/device-discovery-guarantees.md`.
-- **Monitor lifecycle is an epoch model, not a state machine.** Each `StartMonitoring` builds an immutable `MonitorGeneration` (`{ Id, ScanGate, Signal, Cts }`) held in one field; the loop, manual rescans, and listener callbacks capture that reference once, so a torn gate/generation pair is not representable. Publication is where safety is enforced: all publications from all generations are mutually exclusive under the never-disposed `_publishGate`, held across the admission check and `UpdateCache`, and a snapshot is admitted only if its generation is still current and the service undisposed. Superseded snapshots — including a scan hung in native I/O that returns long after its generation was retired — are discarded. Because publications never interleave, a successor's snapshot is serialized strictly after any in-flight predecessor's, so newer truth always lands last. This currently relies on `UpdateCache` enqueuing into every watcher's buffer synchronously and finishing before it returns — publication is ordered at enqueue time, not at delivery time, so a slow consumer cannot reorder a successor's snapshot ahead of its predecessor's. Lifecycle operations take only the small `_publishLock`, never `_publishGate`, so a stalled publication cannot wedge start/stop/dispose, and restart after an abandoned stop always succeeds. Nothing disposes a semaphore anyone can still acquire: scan gates live in their generation and are never disposed, and an abandoned generation is unreachable garbage. `DisposeAsync` drains `_publishGate` with the shutdown bound and, on timeout, warns and abandons — a publication already admitted may then complete after `DisposeAsync` returns, which the manager's subsequent repository disposal silences. That is a documented contract, not an accident. When editing this file, keep the three primitives one-job-each; the design collapsed a four-concept state machine and re-merging their responsibilities is what previously produced the races.
-  Safety is not liveness: after abandoning a hung scan, discovery *liveness* is owned by `FindYubiKeys` (its `_scanLock` wait takes the loop's token, so blocked generations do not accumulate) and recovers when the upstream time-bounds release. The epoch model neither causes nor cures a PC/SC enumeration hang.
-- **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Existing HID registered-wrapper release behavior is unchanged.
+- **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently within one finder. A finder owns one atomic evidence epoch containing identity cache, metadata cache, and read scope; transport activity terminally retires that scope and replaces the whole evidence object, so stale completion writes only into unreachable caches and a successor monitor cannot join its predecessor's reads. Superseded reads that have not yet opened their interface fail fast, including queued admission waits behind hung workers. Cache entries also record the PID observed at read time so a hit under a different PID is a miss. Eviction is deliberately not transport-scoped because a composite swap's events can arrive on one transport first, and retained sibling evidence would mix two keys. Within a monitor, absent listener hints degrade staleness detection to scan-observed absence. Public Find calls instead use fresh evidence per invocation and retire their scope on exit — see `docs/architecture/device-discovery-guarantees.md`.
+- **Potentially sibling discovery reads do not overlap.** Before worker admission, USB reads take a process-wide PID gate; an unknown USB PID takes all known PID gates atomically. Eligibility checks, complete grants, and releases share one short lock. Ineligible requests await a release notification without reserving any gates, so a pending unknown-PID request cannot spread a held PID's stall to unrelated PIDs, even in a live finder after its caller's budget expires. This conservative policy also serializes distinct same-PID keys, but known different PIDs and NFC remain independent. It changes no merge evidence or public connection claims. `FindYubiKeys` registers in-scope candidates in its read scope for both identity and metadata reads. The granted admission transfers to the discovery registry lease before native open and follows native release, including retained/quarantined built-in owners. Never release it at a bounded wait, cancellation, scope retirement, or merely because failed native disposal completed its task. Queued admission observes epoch retirement without occupying a native worker. `DiscoveryReadSchedulingTests` pins disposal, abandonment, retirement, and independent-PID progress with a live unknown-PID waiter; `PcscDiscoveryLifetimeTests` pins failed native-release retention.
+- **The monitor is a single owned lifetime with one producer.** `YubiKeyMonitor` owns listeners and sequential
+  scans/publications; `DeviceChangeFeed` owns membership, identity retention, and isolated subscriptions.
+  Disposal stops listeners, cancels and awaits the loop without a timeout, retires discovery, then completes
+  the feed; bounded native waits do not release native leases before actual teardown.
+- **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Built-in macOS/Linux HID transfer claims to their native owners before open; Windows/custom HID registered-wrapper release behavior is unchanged. Linux EINTR/EIO close diagnostics still release proven-closed descriptors' original claims.
 
 ## Known Gotchas
 

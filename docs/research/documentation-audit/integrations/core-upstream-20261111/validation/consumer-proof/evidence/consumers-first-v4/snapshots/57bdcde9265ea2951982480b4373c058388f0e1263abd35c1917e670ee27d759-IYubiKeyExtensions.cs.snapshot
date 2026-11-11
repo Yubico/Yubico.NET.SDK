@@ -1,0 +1,85 @@
+// Copyright Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.WebAuthn.Client;
+
+namespace Yubico.YubiKit.WebAuthn;
+
+/// <summary>
+/// Extension methods for creating WebAuthn clients from YubiKey devices.
+/// </summary>
+public static class IYubiKeyExtensions
+{
+    extension(IYubiKey yubiKey)
+    {
+        /// <summary>
+        /// Creates a WebAuthn client for the YubiKey asynchronously.
+        /// </summary>
+        /// <param name="origin">The WebAuthn origin for client data JSON.</param>
+        /// <param name="clientOptions">
+        /// Required configuration for the client itself (application RP validity and authorization,
+        /// credential prompt, prompt-attempt limit), forwarded to the created
+        /// <see cref="WebAuthnClient"/>. Unrelated to <paramref name="sessionOptions"/>, which
+        /// configures the session rather than the client.
+        /// </param>
+        /// <param name="sessionOptions">
+        /// Optional settings for the underlying CTAP2 session (SCP key parameters, protocol
+        /// configuration, preferred transport, firmware override). When no preferred connection is
+        /// specified, the CTAP2 default order applies (<see cref="ConnectionType.HidFido"/>, then
+        /// <see cref="ConnectionType.SmartCard"/>), except that SCP key parameters select SmartCard
+        /// automatically. Explicit SmartCard selection is also supported; explicit HID with SCP is not.
+        /// CTAP2 requires the FIDO AID for SmartCard and applies its USB firmware gate (5.8.0+);
+        /// NFC can use SmartCard without that USB restriction. SCP is available only on SmartCard.
+        /// Transport selection does not retry another connection after an opening failure.
+        /// </param>
+        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
+        /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying CTAP2 session.</returns>
+        /// <remarks>
+        /// <see cref="WebAuthnClientOptions.RpIdValidator"/> owns RP syntax validity and origin/RP authorization and is invoked
+        /// before each ceremony's device I/O, not during session creation (which has no requested RP ID).
+        /// The SDK checks only nonempty, faithfully UTF-8 encodable RP text, not domain/URI syntax or binding policy.
+        /// This method adds no independent session-creation logic; <paramref name="sessionOptions"/> is
+        /// validated and applied by the underlying CTAP2 <c>CreateCtap2SessionAsync</c>, while
+        /// <paramref name="clientOptions"/> is forwarded to the returned <see cref="WebAuthnClient"/>.
+        /// </remarks>
+        public async Task<WebAuthnClient> CreateWebAuthnClientAsync(
+            WebAuthnOrigin origin,
+            WebAuthnClientOptions clientOptions,
+            SessionCreationOptions? sessionOptions = null,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(origin);
+            ArgumentNullException.ThrowIfNull(clientOptions);
+            // Force the runtime guard before session creation can open a device connection.
+            _ = clientOptions.RpIdValidator;
+
+            var ctap2Session = await yubiKey.CreateCtap2SessionAsync(sessionOptions, cancellationToken)
+                .ConfigureAwait(false);
+
+            try
+            {
+                return new WebAuthnClient(ctap2Session, origin, clientOptions);
+            }
+            catch
+            {
+                await ctap2Session.DisposeAsync().ConfigureAwait(false);
+                throw;
+            }
+        }
+    }
+}

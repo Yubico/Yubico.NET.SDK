@@ -157,7 +157,7 @@ public class SmartCardConnectionFactoryTests
 
         if (discovery)
         {
-            _ = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => ProtocolDeviceInfo.ReadBoundedAsync(
+            _ = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => DiscoveryDeviceInfoReader.ReadBoundedAsync(
                 device,
                 ConnectionType.SmartCard,
                 TimeSpan.FromSeconds(5),

@@ -87,7 +87,7 @@ public class ReconfigurationDiscoveryInvariantTests
             var scans = 0;
             while (DateTime.UtcNow < deadline)
             {
-                var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+                var devices = await YubiKeyManager.FindAllAsync();
                 scans++;
                 AssertIdentityInvariants(devices, serial);
             }
@@ -102,8 +102,8 @@ public class ReconfigurationDiscoveryInvariantTests
             Assert.Equal(originalUsbEnabled, restored.UsbEnabled);
         }
 
-        // Check the identity invariants once more after restoration; this does not assert interface completeness.
-        var settled = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+        // Check identity invariants once more after restoration; interface completeness requires separate evidence.
+        var settled = await YubiKeyManager.FindAllAsync();
         AssertIdentityInvariants(settled, serial);
     }
 
@@ -208,7 +208,7 @@ public class ReconfigurationDiscoveryInvariantTests
         IReadOnlyList<IYubiKey> devices;
         try
         {
-            devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+            devices = await YubiKeyManager.FindAllAsync();
         }
         catch
         {

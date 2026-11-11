@@ -3,7 +3,6 @@
 
 using Spectre.Console;
 using Yubico.YubiKit.Cli.Shared.Cli;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Menus;
 
@@ -27,8 +26,6 @@ AnsiConsole.MarkupLine("[grey]YubiHSM Auth Tool - SDK Example Application[/]");
 AnsiConsole.MarkupLine("[grey]Run with --help for non-interactive usage.[/]");
 AnsiConsole.WriteLine();
 
-YubiKeyManager.StartMonitoring();
-
 using var cts = CommandHelper.CreateConsoleCts();
 
 var exitCode = await InteractiveMenuBuilder.Create("What would you like to do?")
@@ -43,8 +40,6 @@ var exitCode = await InteractiveMenuBuilder.Create("What would you like to do?")
     .AddItem("Get Management Key Retries", ct => ManagementKeyMenu.GetRetriesAsync(ct))
     .AddItem("Factory Reset", ct => ResetMenu.RunAsync(ct))
     .RunAsync(cts.Token);
-
-await YubiKeyManager.ShutdownAsync();
 
 return exitCode;
 

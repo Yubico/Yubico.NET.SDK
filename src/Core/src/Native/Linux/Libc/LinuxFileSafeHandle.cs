@@ -20,14 +20,61 @@ namespace Yubico.YubiKit.Core.Native.Linux.Libc;
 // open.
 internal class LinuxFileSafeHandle : SafeHandle
 {
+    private readonly Func<int, LinuxCloseResult>? _close;
+    private LinuxReleaseOutcome _releaseOutcome;
+    private int _releaseRecorded;
+
     public LinuxFileSafeHandle()
         : base(new IntPtr(-1), true)
     {
     }
 
-    // On Linux, open() returns -1 on failure.
-    // We also treat 0 as invalid since fd 0 is stdin.
-    public override bool IsInvalid => handle == new IntPtr(-1) || handle == IntPtr.Zero;
+    internal LinuxFileSafeHandle(Func<int, LinuxCloseResult> close) : this() => _close = close;
 
-    protected override bool ReleaseHandle() => NativeMethods.close(handle) == 0;
+    // fd 0 is valid: open can return it when stdin is closed.
+    public override bool IsInvalid => handle == new IntPtr(-1);
+
+    internal void Initialize(int descriptor) => SetHandle(descriptor);
+
+    internal LinuxReleaseOutcome CloseOnce()
+    {
+        Dispose();
+        return Volatile.Read(ref _releaseRecorded) == 1 ? _releaseOutcome : default;
+    }
+
+    protected override bool ReleaseHandle()
+    {
+        try
+        {
+            LinuxCloseResult result;
+            if (_close is not null)
+            {
+                result = _close(handle.ToInt32());
+            }
+            else
+            {
+                int nativeResult = NativeMethods.CloseNative(handle.ToInt32());
+                int error = Marshal.GetLastPInvokeError();
+                result = new LinuxCloseResult(nativeResult, error);
+            }
+
+            // Linux releases the descriptor even on EINTR/EIO. Never retry close: the fd
+            // number may already belong to another owner. EBADF is an ownership violation,
+            // not release proof; all other errors are conservative unknown-release outcomes.
+            bool released = result.Result == 0 || (result.Result == -1 && result.Error is 4 or 5);
+            _releaseOutcome = new LinuxReleaseOutcome(true, released, result.Result, result.Error);
+            Volatile.Write(ref _releaseRecorded, 1);
+            return released;
+        }
+        catch
+        {
+            // Finalization must not throw. No executed/released proof is published.
+            return false;
+        }
+    }
 }
+
+internal readonly record struct LinuxCloseResult(int Result, int Error);
+
+// Executed=false is not proof of release (e.g. Dispose while a native reference is held).
+internal readonly record struct LinuxReleaseOutcome(bool Executed, bool Released, int NativeResult, int Error);

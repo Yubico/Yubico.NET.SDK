@@ -1,0 +1,11 @@
+Preparation failure, before merge; Python 3.14; process exit 1.
+
+The original source is retained as capture-inputs-v1.py.snapshot. It selected parents[6], one
+directory above the checkout, and failed at the initial Git HEAD assertion before writing evidence.
+The corrected current source selects parents[5]. No compiler or SDK operation ran.
+
+Raw diagnostic excerpts from the original invocation:
+
+fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+subprocess.CalledProcessError: Command '['git', 'rev-parse', 'HEAD']' returned non-zero exit status 128.

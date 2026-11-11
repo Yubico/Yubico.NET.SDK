@@ -1,0 +1,13 @@
+// Find all devices
+var allDevices = await YubiKeyManager.FindAllAsync();
+
+// Enumerate/probe only SmartCard interfaces (no HID slots are returned).
+var smartCardDevices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
+
+// Find only HID-connected devices (FIDO2, OTP)
+var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+
+// Find one device. The predicate is optional.
+var firstDevice = await YubiKeyManager.FindFirstAsync();
+var firstSmartCardDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
+    device => device.SupportsConnection(ConnectionType.SmartCard));

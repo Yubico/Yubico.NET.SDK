@@ -1,0 +1,233 @@
+[
+  {
+    "path": "CLAUDE.md",
+    "resolved_blob": "88019472ff5b12480fd6fca88b6a1c1ae2e8cfd2",
+    "equals_parent": []
+  },
+  {
+    "path": "README.md",
+    "resolved_blob": "cb5c70e089d80dcd24fcba3a8a2111079083e88f",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/TESTING.md",
+    "resolved_blob": "39470688fea556e62af140535ffe5d250a4c04f8",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/architecture/connection-ownership-and-contention.md",
+    "resolved_blob": "8f94867140effc39671ddf5377faff6adf03b2d5",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/architecture/device-discovery-guarantees.md",
+    "resolved_blob": "e6f5133f8a83cb820ff00baa49d88266d68586d7",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/architecture/images/image-manifest.txt",
+    "resolved_blob": "3d33caae0454502b568b201bfae66ce75ece9802",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/architecture/physical-device-model.md",
+    "resolved_blob": "7f1a5cd17f367f40031f18e8a30c40c6d1c53f78",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "resolved_blob": "91981383dc1d2fe20eed8fcbf734509777d7ab7d",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/architecture/sdk-architecture-diagrams.md",
+    "resolved_blob": "c638d56b2e2ff0fe9a75b6f28807a6ecfcff52bc",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/migration/v1-to-v2-gaps.md",
+    "resolved_blob": "6eb3aee891f95e55dd051ff615ccd4d8ad33cb16",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/migration/v1-to-v2-map.yml",
+    "resolved_blob": "5539ffd7c357aaea0bcc73a80d5a28341b71294d",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/migration/v1-to-v2.md",
+    "resolved_blob": "d692a2ad8231bf818d3d150be9e4d1c9b5de3b7c",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/v1-to-v2-comparison.md",
+    "resolved_blob": "859a1d2215f39cd327cb720e5cad1d1e168d8c4b",
+    "equals_parent": []
+  },
+  {
+    "path": "docs/v2-highlights.md",
+    "resolved_blob": "64b606d7e5db5c3ae57fcb38cd1e08793cd6b128",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "resolved_blob": "5d3fa55da09f23501814b9453fefeeaabff79957",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+    "resolved_blob": "54f110181656e0792aa375ae428431ec3c81fcbd",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Cli.Commands/src/Management/ManagementConfigCommand.cs",
+    "resolved_blob": "4c341d094fb50c10c7ba4e64734e6e84e0569655",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+    "resolved_blob": "2168fcda73282e6c9bd35220607f8a451357fdc8",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "resolved_blob": "1b98f97c9ee8bb798530c93600cfec86640cbd4d",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Core/README.md",
+    "resolved_blob": "0b8672e6ff4029163022cf51c9cd9c64901ea6a1",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Core/src/PublicAPI.Unshipped.txt",
+    "resolved_blob": "e16b5c9b2127e5e48056919d361b0821b49b40af",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Ctap2/CLAUDE.md",
+    "resolved_blob": "bd4acf31b6d9cbdf6836bf4074b58b5bf270790c",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+    "resolved_blob": "14173b89750ff3b421a5b4e58add555ff4b86eb2",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs",
+    "resolved_blob": null,
+    "equals_parent": [
+      "incoming"
+    ]
+  },
+  {
+    "path": "src/Ctap2/examples/FidoTool/Program.cs",
+    "resolved_blob": "215c8fb0a81dce26a2c6a989bcc6f38fe26ecfee",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Management/CLAUDE.md",
+    "resolved_blob": "2fe5acf844f95d04025dcb354959033c7b67c4e3",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Management/README.md",
+    "resolved_blob": "b16a6dc3a24c20d519595ba37d6ab02d5e6268ee",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+    "resolved_blob": "59decdbeb97f45fc4926c86b80c80e58c21fe1c6",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Program.cs",
+    "resolved_blob": "dff5489f64396fe180bb9f1c9ee5c52a9b3c7c92",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Management/tests/CLAUDE.md",
+    "resolved_blob": "faec23d62bc7c17fe29d114b6a3ce348baf2680f",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+    "resolved_blob": "39f1539bcd7bcf72948bedfe2572192d06869cee",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+    "resolved_blob": "598ad5856e8da0ba5eff7dc8141375fd6e34aa5b",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+    "resolved_blob": "ea824f660d6166a0303caa13d3e51da07fe17d96",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Oath/examples/OathTool/Program.cs",
+    "resolved_blob": "e10ac3e5774ea5661e0c2ebf132ed34cf33bb361",
+    "equals_parent": []
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+    "resolved_blob": "dedf1326410650217b9770d0a77e49eacb3849ad",
+    "equals_parent": []
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/OpenPgpDeviceSelector.cs",
+    "resolved_blob": null,
+    "equals_parent": [
+      "incoming"
+    ]
+  },
+  {
+    "path": "src/Piv/CLAUDE.md",
+    "resolved_blob": "c0fe7ae78d67c3098f45be386acb7a6069724936",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Piv/README.md",
+    "resolved_blob": "04319dad513257e4992e771373c01dc41711f1eb",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+    "resolved_blob": "eed0152966b89f8627c4749daa359d2c65b92f59",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+    "resolved_blob": "92b6cb47e3864e53b70c602dc9c5a2eab71d7d09",
+    "equals_parent": []
+  },
+  {
+    "path": "src/Tests.TestProject/Controllers/DiTestController.cs",
+    "resolved_blob": null,
+    "equals_parent": [
+      "incoming"
+    ]
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+    "resolved_blob": "22a1adacb1758f9f738272a46ad8f05c02bb78bd",
+    "equals_parent": []
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+    "resolved_blob": "ce4fea8d8c978cbf6ed464e5aa77b69164c8900a",
+    "equals_parent": []
+  },
+  {
+    "path": "src/YubiOtp/CLAUDE.md",
+    "resolved_blob": "000c03345dd56f5bdeb9ed9b70fd57b088dbf2ef",
+    "equals_parent": []
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+    "resolved_blob": "90fdb0ca2cc713441df7c09b79c87eef237a01f8",
+    "equals_parent": []
+  }
+]

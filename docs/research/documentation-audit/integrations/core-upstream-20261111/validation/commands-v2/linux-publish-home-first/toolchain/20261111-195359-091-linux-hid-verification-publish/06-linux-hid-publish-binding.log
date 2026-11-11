@@ -1,0 +1,2 @@
+$ python3 verification/LinuxHidRouteVerification/publish_contract.py seal
+BOUND SOURCEHASH=90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa INPUTHASH=a509bb8ab2cb61c1b27e27af7f4a27dc893fcf66106fb4ddd423307005a021f7 artifacts=223

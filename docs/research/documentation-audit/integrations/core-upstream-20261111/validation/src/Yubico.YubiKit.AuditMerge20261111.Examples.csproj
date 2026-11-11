@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Yubico.YubiKit.AuditMerge20261111.Examples</AssemblyName>
+    <RootNamespace>Yubico.YubiKit.AuditMerge20261111.Examples</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../../../../../src/Core/src/Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="../../../../../../../src/Management/src/Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="../../../../../../../src/Piv/src/Yubico.YubiKit.Piv.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+</Project>

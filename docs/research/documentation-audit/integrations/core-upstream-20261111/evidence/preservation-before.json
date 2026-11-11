@@ -1,0 +1,533 @@
+{
+  "utc": "2026-11-11T17:54:37.530634+00:00",
+  "primary": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "integration_checkout": "/tmp/opencode/core-upstream-20261111",
+  "campaign": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+  "incoming": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+  "archives": [
+    {
+      "path": "docs/research/documentation-audit/record-manifest.json",
+      "sha256": "a15061df202536b7894c257e7dfbee6578240747f69d86d1e40d9534630df905",
+      "artifacts": 784
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/record-manifest.json",
+      "sha256": "b562b58457fb384dea05e7cadf8b32d64f1abcc56ab2e56abd0b96d906655fe1",
+      "artifacts": 534
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/record-manifest.json",
+      "sha256": "49c18caac492aac9afa0d7bcede415f96422e98a3cc85692c3bb2bfa90bff139",
+      "artifacts": 402
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/record-manifest.json",
+      "sha256": "71698c428044b99165fb68759a2e47b6af701187f0ddb7b5838e5bc3278bf7ee",
+      "artifacts": 607
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/record-manifest.json",
+      "sha256": "8ebe4ad00860d44ae06dd05a0ab3ade5f294ffdc42337b3cce5dcf5ec7179318",
+      "artifacts": 1965
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/record-manifest.json",
+      "sha256": "791f112af52904b167ec87c5f70a526f625ccf6524c9daf8a09a68f8cf364ac2",
+      "artifacts": 164
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/record-manifest.json",
+      "sha256": "9a32ac8f9d2443a65864dbe44432c6d4b1dd40ad7f00b676a6c0ecae950631dc",
+      "artifacts": 477
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/record-manifest.json",
+      "sha256": "d310ba77bb04a0b0052baa6afd32a0355510018267cef391a02963fcdd555d0d",
+      "artifacts": 433
+    }
+  ],
+  "artifact_total": 5366,
+  "prior_integration_files": {
+    "commit": "727fe43afc430c5d8364d868a6436de50626e476",
+    "files": [
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/example-preparation.md",
+        "sha256": "64170ae8ecc3ab25fe136ada7d837dc6be5fb9722a2b4a1c9f143140d8e9e5c0"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/examples-build-toolchain/01-clean-AuditPiv745Integration.Examples.log",
+        "sha256": "1eafd598f4a532a1b28cf825cc7ace193c32896d70b33ac446432217cc8af1c7"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/examples-build-toolchain/02-build-AuditPiv745Integration.Examples.log",
+        "sha256": "6a9bf8c967b43648053beb9b7e303c8fac005c191b1550040d594cc6ffa5b940"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/examples-build-toolchain/result.json",
+        "sha256": "8005cc807298a0322433e5afbd7551c7d09111f02ccdde496970512e08e38540"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/examples-build-toolchain/result.txt",
+        "sha256": "c2facd659e9f946792e933566841b25efe2fe58ad4feac6311ce9644da5af00d"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/examples-build-toolchain/run.log",
+        "sha256": "9727de05aba875dd172ca55bb32dce4c58cf08502af31419520566aaa7c67eac"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/examples-build.log",
+        "sha256": "16fbff0f9332b076ffa735fa60c8730a989906478bc236511e3937e4222169b4"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/format-conflicts.log",
+        "sha256": "9f3abc9d0b4601f1693b0b48af502b056986142003d4ffe1edc899a54d419635"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/format-final.log",
+        "sha256": "8bbd924ff7ad95cb5ac45cb4d58fa0a1533fbcff8a471a1bc23939cca71462c6"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/format-fixture.log",
+        "sha256": "cfcf5b8aa2c173858e9f50932cf1623572e11eb2af32e3abbc787b33417d7d1b"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-toolchain/01-clean.log",
+        "sha256": "d2598087dd4ee68aae1e3699f52b889b2a7b3c3ef32c33e9a7908bea654e197d"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-toolchain/02-build.log",
+        "sha256": "4c94a257908a46b7681a8d2e9e01e0fa3f822efaccba8d0e1d6f70a7cad8b2b8"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-toolchain/result.json",
+        "sha256": "7a1d589a2bb67e557e154ff6698ea5a9d4fc2c9ddcb85b0acbeb02625ed691ed"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-toolchain/result.txt",
+        "sha256": "6effab312cf014f3fdf7d12888e923e2ab43837df551099165a47e682eb7662f"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-toolchain/run.log",
+        "sha256": "76ad0c3decea416b4cfc612d66f21aee58d813c80a1bf7df4a68d43527e719e3"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/01-clean.log",
+        "sha256": "940585d91d693e0bcb5cc351296edd520edb2c8f321d87206cdb6f35660d9c00"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/02-build.log",
+        "sha256": "198e3afd5274e295f35b2f3e8f1ed859feebf906920166ac749b7e743cef0ad2"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/03-test-Cli.Commands.UnitTests.log",
+        "sha256": "a4d3b781778624d788f0d21b7dc3e27636e7591b6ff7dfdaa25f21ca982f7ae0"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/04-test-Cli.Shared.UnitTests.log",
+        "sha256": "c7d20506c4669037201d79004c35f8b8e89a510c9d5adfee815e368223c78330"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/05-test-Core.UnitTests.log",
+        "sha256": "e365f30eb5d225b79855b8e9d28dad7ec651047166ac3c2589bc362fa2765d4b"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/06-test-Ctap2.UnitTests.log",
+        "sha256": "baa87fd9735a74f1b1a27ddd22399c204a6489c529c6d65417abdf35ea57f852"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/07-test-Management.UnitTests.log",
+        "sha256": "3442d220ede888942ea97bff738eb2b3380a1e938bd1e3f210e0167c6ecd161b"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/08-test-Oath.UnitTests.log",
+        "sha256": "a7f79fd73068eea1b01c69ad407357e8f082ec6f18be8611f54b754d927c3c49"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/09-test-OpenPgp.UnitTests.log",
+        "sha256": "95b771c19ec73d04efb999246e1ed41c16f969939e3661a694a829062bf85b34"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/10-test-Piv.UnitTests.log",
+        "sha256": "fd53767d8f782d39939464d133e245f22b4fdfdc2067a04040fdf4f367bd8366"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/11-test-PublicApi.UnitTests.log",
+        "sha256": "38812026b8e71c48a5ca2c1cc297c2c2d5c8d3adba90f07f497a407ca5d5ce5a"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/12-test-SecurityDomain.UnitTests.log",
+        "sha256": "b0883d6bbb98e44cfbbc18e5c25ab1153bd6b9715d7dd969ddf12694ad62e0c4"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/13-test-WebAuthn.UnitTests.log",
+        "sha256": "b20669c794590706a35d71a8ad5d0fd855883364b1ecf86f55dedc7e7942e8a2"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/14-test-YubiHsm.UnitTests.log",
+        "sha256": "1957d4deecbb815da1221e336ab28464df62d61c63f9aff1ca94d985efad2d36"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/15-test-YubiOtp.UnitTests.log",
+        "sha256": "1e5521df30a1918bfce765522c0d0c426d1a8350eda1ad99bea66dfa650bc186"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/result.json",
+        "sha256": "5c7663a7bffb4b0dd2b9a52a8d09ff5434e996bd466e4e27ad84e80d121a0249"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/result.txt",
+        "sha256": "62e81664f8a1bcd44071c02349efeedf30d1b8f984a85c0de0129c390e7f0bcc"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2-toolchain/run.log",
+        "sha256": "a7bf5cde48bdc5d73f6040793f5f152e4af134108a11ae02cd1c81a11a393864"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates-v2.log",
+        "sha256": "cb993d204f77f6decad035f501b8212436c67315d96171c08c694fbd0c73a3aa"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/integration-gates.log",
+        "sha256": "3584ea6eeebdc8fd5c5c67cffce0804f4870c09a6fc3019fe5b97e9e90e51008"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/merge-watch-history.jsonl",
+        "sha256": "e6f442d578afed309bdc86fdeb0fc54d3a8efe9ceaeea99c124bbd8a4221cc93"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/piv-agent-status.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/preservation-before.json",
+        "sha256": "9153fc2b51ccd5b11b96960cbc4d0e2ad4d047d2af4a32b61356c4c78da48e7c"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/primary-status.txt",
+        "sha256": "4ae76b12ac7b4e491226483e9cb7bfe034012fff768b7bc8890ab1fd511f5e05"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/resolution.md",
+        "sha256": "511650915e1c4f5557883449044eda42dda9473f563b2846ad58237ce2433cdf"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/review.md",
+        "sha256": "8812e24ffdbfc995782b25160e1e10b06eed4dedb425792704789de1bca8fb70"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/run.py",
+        "sha256": "06c37339b340134b0ad361eeb8d31026cb4fd629971ed776bd6071d492b2f757"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/evidence/worktrees.txt",
+        "sha256": "18be2b30258a46137e21f5a4f12496c2dd48705772594cdc97c09e68c7221b2f"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/integration.md",
+        "sha256": "65a4bb92b1efb3eb92f4e99c491c8986d2cef403b4ed37062c901e4b1f5ca7e6"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/planning/2026-11-05-piv-docs-delegation.md",
+        "sha256": "941a03b23ad8c66ec1cf66a0bee5ede110e936fc04d274af4b2098a1c6071b9c"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/planning/2026-11-05-piv-docs-pass-1.md",
+        "sha256": "f3c2c2523968517ab52d155615daf1d89d0b171dd883cf87fc88b96a53e3755b"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/planning/2026-11-05-piv-pr745-watch.md",
+        "sha256": "3b4ab91ae18d8a37be24e1db2839464f6a9e3edc65b4ff33e85148b876055b89"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/planning/watch/activation.json",
+        "sha256": "b665e45d5db0a84313fc891cd0c04981a98dcc7e3a057875e0ab77a559781ff1"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/planning/watch/check.py",
+        "sha256": "b82dc91df7179ee7bebcf61fb3e4fbb90084f6592f61f0f9b59d765f05a14bff"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/planning/watch/observations.jsonl",
+        "sha256": "e6f442d578afed309bdc86fdeb0fc54d3a8efe9ceaeea99c124bbd8a4221cc93"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/planning/watch/resumption.md",
+        "sha256": "a0e9473a9feb5c60838f6853c48253fa757803c2bea82447e68d4a342acd9f0e"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/planning/watch/verification.json",
+        "sha256": "07e48d3d7081b38b4738652b2c33857bce95e6cf8bfff97ed1b04d3f488bd3fc"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/Directory.Build.props",
+        "sha256": "f777d850a1cc77707154624b5cc54da311bd6a2072f1e4175ca7488342b5b339"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/Directory.Build.targets",
+        "sha256": "857fd6e9414e29ee2617da820ca8cfec6c24708838d4be59171939c2d2c2b360"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/examples.py.snapshot",
+        "sha256": "7a8a4327642048a1e121a37ce02891d25ddff25227ec8232aba2b3949e63374f"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/invocation.json",
+        "sha256": "c7d29a21a965521a9442bc178b95b8e44ec1c8b8fd54160cd57c48d943549b77"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/invocation.stderr.txt",
+        "sha256": "21dc587a318bcbb3fc6e682537554d49f59f84ebec5ce6d0d7b93369122268dc"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/invocation.stdout.txt",
+        "sha256": "309bca494a22b5eefb69a2f19e7629d0e48293a3605f3be812a063a33c62dd96"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/manifest.json.snapshot",
+        "sha256": "6fa660fa570161a5d3035c2492b27651aea306bd9a882f858bdd2ace6f7a37d1"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v1-failure/policy-final.txt.snapshot",
+        "sha256": "ef072cb30326126d990698ef12c8beb1ded11e8e55222abc8c098b5acdbc7404"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v2-receipt.json",
+        "sha256": "515fb8fe99037b8e2e56357938f38a56be8bffcd383064c28df6f675653b2926"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/capture-v2.py",
+        "sha256": "d90813c10acb7803fa4931cfd8d57d60387b198aa97a90397fbd10ae076fd55e"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/.editorconfig.snapshot",
+        "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/Directory.Build.props.snapshot",
+        "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/Directory.Build.targets.snapshot",
+        "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/Directory.Packages.props.snapshot",
+        "sha256": "ded8231c044eb391385a69766db674d124176fd11e0c69cacaedbaa78aca68a3"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/adapted-capture-source.py.snapshot",
+        "sha256": "d09ae1a5dc68fc5e015d08494ac0bc3e778b2dff2c5b80cb58f4173f53ad8c93"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzer-config/630a8659fc5b-.editorconfig.snapshot",
+        "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzer-config/749b21d56304-Yubico.YubiKit.AuditPiv745Integration.Examples.GeneratedMSBuildEditorConfig.editorconfig.snapshot",
+        "sha256": "749b21d56304e54d886b786bd4eacbf8011832dd56abfbc722b24a120efe547e"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzer-config/eac2678eed1c-analysislevelstyle_all.globalconfig.snapshot",
+        "sha256": "eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzer-configs.txt",
+        "sha256": "a20d1556ac0726473c2cb235a2cc58044c00ce61f1c6bc65ae84d8e607cc2b1b"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/analyzers.txt",
+        "sha256": "31c3136ec8d0d2bdda67abd2120194e35c98b38d89b54c538fb0d11a2c34c03b"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/compile-inputs.txt",
+        "sha256": "1d7e458bc7f6b9dd0632f88142ffa735575bc948a84f3a4c099e260465908e09"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/csc-command-line.txt",
+        "sha256": "b7e44784f742421767d1b2d9f96024a800cdc6addaa5fcae111c3d97c5ae8803"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/global.json.snapshot",
+        "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/host.csproj.snapshot",
+        "sha256": "6285a6de09ff22ecddec398d48b30c01af5cece3d9b063233c4b6b05cc16ec68"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/manifest.json",
+        "sha256": "7a3488479387a8f08f2cae9ceae4bc3fad294fe083d2c49e21cda57936ac6ea1"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/policy-final.txt",
+        "sha256": "ef072cb30326126d990698ef12c8beb1ded11e8e55222abc8c098b5acdbc7404"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/project.assets.json",
+        "sha256": "cc687e8a5e7b29b8c289c6ce8f875681fd4353c99507a3cf096a3442df84fba0"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/resolved-references.txt",
+        "sha256": "3d30326d82d51ad8295830a649bcbebe33a577dcf66f396115f7a68a1f6c1ee4"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/sdk-projects/Yubico.YubiKit.Core.AssemblyInfo.cs.snapshot",
+        "sha256": "c3c17f13eed272dc56b2c90f966a8735f9a39f2faf01465a8526bf32a6a8bddb"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/sdk-projects/Yubico.YubiKit.OpenPgp.AssemblyInfo.cs.snapshot",
+        "sha256": "ef071f080e7ccd2c81b567538a76618dcaff5680bdf5931b3f6999666eb10503"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/sdk-projects/Yubico.YubiKit.SecurityDomain.AssemblyInfo.cs.snapshot",
+        "sha256": "9a4b716a05e1e1621917fa4262803aa3932618a210593a05d16176feca95eb59"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/149fcfce5994-Yubico.YubiKit.AuditPiv745Integration.Examples.AssemblyInfo.cs.snapshot",
+        "sha256": "149fcfce59947f3ac739e8ee3169e8b2858b7e6e9cb0b78d9986f3ca53fb2502"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/5923a9e63643-OpenPgpExamples.cs.snapshot",
+        "sha256": "5923a9e63643f13480fa16dbdc9cda461a28b4c904f28cc319fa900dd56360db"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/8f86a2cbf00f-Yubico.YubiKit.AuditPiv745Integration.Examples.GlobalUsings.g.cs.snapshot",
+        "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/f79c1ad9a9fc-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot",
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/compiler-evidence-v2/source/ff8620114a43-SecurityDomainExamples.cs.snapshot",
+        "sha256": "ff8620114a43604b6b0dfa49a0526e46ec319dda10b2f20bf8222f0ee620007f"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/examples.py",
+        "sha256": "7a8a4327642048a1e121a37ce02891d25ddff25227ec8232aba2b3949e63374f"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/manifest.json",
+        "sha256": "6fa660fa570161a5d3035c2492b27651aea306bd9a882f858bdd2ace6f7a37d1"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/preparation.md",
+        "sha256": "3219fb08c5002d2e9ef2a82ef4e1f0f9589dc9ab7fb665a070ceca0257fc1051"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.AttestGeneratedKey.cs.txt",
+        "sha256": "13023e0a198b307520c8060c4e9b271467aeddadcadc47ad127893952a708335"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.ChangeCredentials.cs.txt",
+        "sha256": "7ee760b780601580a24306e600e47871a9c24d3b92d318a38ddd95c68abf09aa"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.ConfigureInitialKdf.cs.txt",
+        "sha256": "35c5b8c7782d30e9e026fce4f7b5921390b70dd56151c9d1175edaa25c4d56e7"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.ConfigureSigningPolicy.cs.txt",
+        "sha256": "0823dc3a40e008e70a56579670018d53f610299bde0fdf1efa5d2d871a937aee"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.DecipherAndConsume.cs.txt",
+        "sha256": "754cbe59c499c0360b6c4f6697e1b4c3a54043c5dc808dcd8bebe8af94be32d3"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.GenerateP256SigningKey.cs.txt",
+        "sha256": "466855eb966f95e968297f8c853781f54467dc60ef262726f370547b3782d1c2"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.ImportRsaSigningKey.cs.txt",
+        "sha256": "a3485ea5b6911f8e4f6602037a075a0a8e5fd8c50771f6a8e02bfc1602a17eec"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.ReadOnlySession.cs.txt",
+        "sha256": "5542ca500da6f1a37c534e01082300f70d3b8f51744c3fe47e6af0f20007a9c3"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.RecoverUserPin.cs.txt",
+        "sha256": "96e614e3c4c87c063a6d0a1474d866d3a8f806a7569a7348b5c2d6a96a7db884"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.ResetAndInspect.cs.txt",
+        "sha256": "64afa4ae312015f8bf4c44aeb8cbab9998bdd6fc9b6b05b2e7b1cd1015136c18"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.ShowKeyMetadata.cs.txt",
+        "sha256": "4e52f02f04741ebf00edfbd5a991fdff34530e67f0336e307c8cfab09fcb525a"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.SignAndVerifyP256.cs.txt",
+        "sha256": "bfb83f253bd0bc29efbf837e2e471fd2388b92b2cc26db1a5a4c3c6c4189ef76"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/OpenPgp.StoreAndReadCertificate.cs.txt",
+        "sha256": "7f232c1692697178f18b10a4113bc056dfb43b84bce378ac8ccf6f0e182f37d3"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/SecurityDomain.Authenticate.cs.txt",
+        "sha256": "dfde857b3cf0f57084842e3127b19395112f2c53bc5b293bfb32e0ab6c0ac32c"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/SecurityDomain.Generate.cs.txt",
+        "sha256": "d163e7e387b55c547cf5ed292b16858423a18afab0ba0d6e5a39bc63b82a33a6"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/SecurityDomain.Import.cs.txt",
+        "sha256": "8882b8656838d2417cb7f6bfe146f88883bc06694410069fcaf224f235eaa5ef"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/SecurityDomain.OpenScp11.cs.txt",
+        "sha256": "2ea389e5e0e5abf22221078c95e047f756fe9725d2a5f96953d244988171791d"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/SecurityDomain.ReadOnly.cs.txt",
+        "sha256": "d4408cea0f39447dbe1eb119ff58745dced737a923b96a1885d1453a1e1bd5f8"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/raw/SecurityDomain.Reset.cs.txt",
+        "sha256": "99d8dde3f77b1aa8f602ce10e0684fc7a3dccc3965eac6a618da2c74c64f1f94"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/src/OpenPgpExamples.cs",
+        "sha256": "5923a9e63643f13480fa16dbdc9cda461a28b4c904f28cc319fa900dd56360db"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/src/SecurityDomainExamples.cs",
+        "sha256": "ff8620114a43604b6b0dfa49a0526e46ec319dda10b2f20bf8222f0ee620007f"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/src/Yubico.YubiKit.AuditPiv745Integration.Examples.csproj",
+        "sha256": "6285a6de09ff22ecddec398d48b30c01af5cece3d9b063233c4b6b05cc16ec68"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105/validation/version-evaluation.md",
+        "sha256": "c2340e4ac3cc8dd0d3cded3b8924e9fec03f26cb88a64b32b4013afba3c51eda"
+      }
+    ]
+  },
+  "original_user_files": [
+    {
+      "path": "docs/research/audit-v2-closeout-review.md",
+      "bytes": 100083,
+      "sha256": "5d202be1fac5d44639e2397a52fed4012750969f821bb2949e09037ee6e3b59f"
+    },
+    {
+      "path": "docs/research/audit-v2-execution.md",
+      "bytes": 13698,
+      "sha256": "25314620a507cf38ed23c3496830b38c03224f5c96572de3b0931ca2499cf75e"
+    },
+    {
+      "path": "docs/research/audit-v2-jira-traceability.md",
+      "bytes": 9964,
+      "sha256": "fffe230424d3983bf8f6c89ebfee41851bc677e84db4bb89f268820b8a35ea71"
+    },
+    {
+      "path": "mise.toml",
+      "bytes": 22,
+      "sha256": "f7acb0a4b4f38b5ea99bc9310145cfcc93bd74f6ff7bcdde41a21706889bb91d"
+    }
+  ]
+}

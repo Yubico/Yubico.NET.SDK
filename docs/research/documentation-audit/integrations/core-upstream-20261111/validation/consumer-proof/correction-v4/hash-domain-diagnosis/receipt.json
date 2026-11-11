@@ -1,0 +1,16 @@
+{
+  "status": "draft read-only collector failure retained; no SDK/capture/product failure",
+  "draft_source_sha256": "89c889cd10425134aa4061ce90b27235220d923d9e3789eb83bd97295d1af617",
+  "failed_report_sha256": "4b827d112c330b543ae04af8e69040f57b80349ff6704b4c25297e9bad45e011",
+  "catalog_content_hash": "bxsHJDYsOBbOO/UnDDm6zG4Osn5EOW7bk8VBmCRH4r4RBkD5KerbNxYFFk2Pw7uRhqOaXACel0IoancPxgig4w==",
+  "installed_metadata": {
+    "version": 2,
+    "contentHash": "bxsHJDYsOBbOO/UnDDm6zG4Osn5EOW7bk8VBmCRH4r4RBkD5KerbNxYFFk2Pw7uRhqOaXACel0IoancPxgig4w==",
+    "source": "https://api.nuget.org/v3/index.json"
+  },
+  "stored_signed_archive_hash": "dCRuO3McIYAtevwTUa2sbCxAu0ckBHElMekY0gye4871a7/zySLD2lP2pUVHMvCSvT9WngI14uKWDkGwRQVsSQ==",
+  "actual_archive_sha512": "dCRuO3McIYAtevwTUa2sbCxAu0ckBHElMekY0gye4871a7/zySLD2lP2pUVHMvCSvT9WngI14uKWDkGwRQVsSQ==",
+  "archive_matches_stored_hash": true,
+  "source_consulted": "https://github.com/NuGet/NuGet.Client/blob/dev/src/NuGet.Core/NuGet.Packaging/PackageExtractor.cs",
+  "source_fact": "PackageExtractor writes packageHash to nupkg.sha512, but GetContentHash unsigned content to NupkgMetadataFile.ContentHash. They are distinct domains."
+}

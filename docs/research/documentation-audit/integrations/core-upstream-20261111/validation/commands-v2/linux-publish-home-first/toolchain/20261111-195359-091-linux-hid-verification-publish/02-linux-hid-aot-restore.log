@@ -1,0 +1,6 @@
+$ dotnet restore verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj -r linux-x64 -p:Configuration=Release -p:SelfContained=true -p:PublishAot=true --artifacts-path artifacts/linux-hid-verification/build/aot
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj (in 216 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj (in 216 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj (in 216 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj (in 216 ms).

@@ -1,0 +1,317 @@
+{
+  "algorithm_sources": [
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/capture-v4.py",
+      "bytes": 11690,
+      "sha256": "9ef86a2392bc223494d77b5caea8b056d42422248a5f2a025f5017cbd29d27e3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/compiler_policy.py",
+      "bytes": 8093,
+      "sha256": "05e770178e831ed64b5d8f77deba38954740445885341cf8b153b31557a20c5d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/project_graph_v4.py",
+      "bytes": 14196,
+      "sha256": "ca60cd1e4f2b2e1cc580a8c9000e504d074e2b7e71eacdff62328ca9bcbeb76c"
+    }
+  ],
+  "adaptation": "Independent bounded implementation: exact Csc sets, package-supplied analyzers, restored direct/transitive graph, text snapshots and external binary identities. No historical module is imported/executed; no SDK-version or graph-count constants copied.",
+  "annotation_source_context": {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+    "bytes": 1012,
+    "sha256": "93ea2bdb47ff78f9dbfba2840976a708d3cb32e9fda3736f31187a250cd1c156"
+  },
+  "preserved_inputs": [
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-01.cs.txt",
+      "bytes": 216,
+      "sha256": "90d2cab3dfb5db287da8b68441b1bedf1e8a60635bb49c0a20786e02de7579aa"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-01.cs",
+      "bytes": 707,
+      "sha256": "e772645f61f439f5450948366e0adfd4b8d64b46a0596cd4a70c4f192b8b8348"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-02.cs.txt",
+      "bytes": 260,
+      "sha256": "d2d783917b37647871ce1fb2aca9eea19d0b47822fde9f3aef1d372adafcb35f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-02.cs",
+      "bytes": 794,
+      "sha256": "e8dbec5195b9c477ce7bbd8f821622859b638698e15db3176d3f768d5af6683c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-03.cs.txt",
+      "bytes": 600,
+      "sha256": "07ee58b51eb4b1048246bb8ee21864a2c7beac1a65da523d8fdb391220a907a6"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-03.cs",
+      "bytes": 1183,
+      "sha256": "f7e2232ad1d50bff050e4b859da1f3da316d3bf646582b70b89e8c58f2718ca6"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-04.cs.txt",
+      "bytes": 939,
+      "sha256": "24bb8dd79e188660f1754ee91964aa1a82d39b5283f50efaf298fdcd9801d190"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-04.cs",
+      "bytes": 1522,
+      "sha256": "3f978f1d55c8ac80651d8279f4e12c410387f50fa85baf372c8dba17b7a5710c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-05.cs.txt",
+      "bytes": 315,
+      "sha256": "68c3a91d60d3e1c7e581823d8db3ca1785f27607f92bee71ce596cc059ab5f1a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-05.cs",
+      "bytes": 881,
+      "sha256": "8b8ab33f97c73e7d43bd330b9a30101adb80acfb6bfd92fbf51542fe0b6d0c08"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-06.cs.txt",
+      "bytes": 614,
+      "sha256": "7e996315ccdbc1594fd5d5644414ba702383bf66970f8c1815101f5a7c725c3c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-06.cs",
+      "bytes": 1162,
+      "sha256": "ee58647899af31e09aafa4ce390d45bcc8ff91463cd12af6d095f9c10739d150"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-07.cs.txt",
+      "bytes": 767,
+      "sha256": "eb95a765658f5a24d16ff3cdad6eccb35495f55b430d09b5231cf0e1422ac052"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-07.cs",
+      "bytes": 1275,
+      "sha256": "ba711b1876d0c38a01c2b1527fa0be7624c13b9df6e568001f4a4bbfd588e117"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-08.cs.txt",
+      "bytes": 785,
+      "sha256": "f5384f828de00df6275eadf2b1b61661678970274471c856226d34948c91a5a1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-08.cs",
+      "bytes": 1333,
+      "sha256": "0976af60d47ba68f695c85abcf64031fa94e5f029d0b80e04f5966d35391f97a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-09.cs.txt",
+      "bytes": 324,
+      "sha256": "b41c71d99a45a5b6a5a341bc1da037a1a67dcb8eaa0867d19599a4d080429dbd"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-09.cs",
+      "bytes": 707,
+      "sha256": "498ba8d1a9c87345662842d11a71f4ff6dc20418912857a9d1ff7205221a5f3a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-10.cs.txt",
+      "bytes": 324,
+      "sha256": "a3325c13e18af8776c8faa6284b9e4c39e4a1aefc777a0b65d48d97e337b8fc1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-10.cs",
+      "bytes": 907,
+      "sha256": "4d389fdebc9fdd88ead1a983f90a6d25220b589f7097a2e76dbb2f9965775fb9"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-11.cs.txt",
+      "bytes": 194,
+      "sha256": "a33acbf1f1ea3314beea7b9070c45064144e7a71c865fc22c4faf2c355ab2211"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-11.cs",
+      "bytes": 545,
+      "sha256": "5d60414ecf549f8acd8cc7585213b880538638104620e15b2ed7ed3fbff8278d"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-12.cs.txt",
+      "bytes": 597,
+      "sha256": "2d787d65101738f9812ba6917a9268a5ccfb33162ab707227327f7be66a9c253"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-12.cs",
+      "bytes": 1013,
+      "sha256": "41f6b4e7eb26f9a949b6369c996694719b2cde50a2477e6d894f9599153cc87c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-13.cs.txt",
+      "bytes": 263,
+      "sha256": "36919ee52199f01ea271cafc2533cc8079ec8b4e760a86a02f10198c2479ff36"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-13.cs",
+      "bytes": 846,
+      "sha256": "68eac8ba4e957b7e81d9087cf404ddf679fd68fb515c7aa629f190e66c1d187f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-14.cs.txt",
+      "bytes": 151,
+      "sha256": "a95ce875742421cc42117b44eb2ccb969602f325fafcbd4124b8e7299396db2b"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-14.cs",
+      "bytes": 734,
+      "sha256": "526f266c5c83e3f179ea1d9da0ba4c65a7d1492f179931eef2eda5c39413dfb9"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-15.cs.txt",
+      "bytes": 257,
+      "sha256": "2b6e0220f981b623808a9e780598f1d86f68f75b7dbc22ab5367a6096a9541a9"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-15.cs",
+      "bytes": 840,
+      "sha256": "2c44c2023110d25ee16b14cfc01ade946f90c92aac135c1a13d55f0c4d7cc6ba"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-16.cs.txt",
+      "bytes": 147,
+      "sha256": "e2481dca75a02fadb2ec4ab663637e2620e9ff59fc24dfaf90ffca1008e27f70"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-16.cs",
+      "bytes": 713,
+      "sha256": "a1ede6e616f7fcbcb7d7ddc41e83eb33a30cd3895a9e2fc1ca4e0db275827fea"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-17.cs.txt",
+      "bytes": 192,
+      "sha256": "dcd0265322dd87993b13f72d8481f427e31027d830580327d059abf0847e5ad2"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-17.cs",
+      "bytes": 775,
+      "sha256": "9649b07ee7589ef0b92497754fe7cbabddf5d20c94ceea7a5389f196689d3911"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-18.cs.txt",
+      "bytes": 449,
+      "sha256": "c31e086f65b6cbc2bde8f4b894e43f26b4635eb4acd326d4e4620ad526c2c30a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-18.cs",
+      "bytes": 1032,
+      "sha256": "44d861022306878352d946f402b89b03dee4ff842cde7537ac9f676eed09b339"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-19.cs.txt",
+      "bytes": 825,
+      "sha256": "37dca89b6b82231a9acecda8eac356e671f943e08c62b1a3f3cab99599f18a58"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-19.cs",
+      "bytes": 1346,
+      "sha256": "1e3a8ea82ee78ef041ff854100c5f09aced20d500d7691de49cb2c2f1d4f9c18"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-20.cs.txt",
+      "bytes": 270,
+      "sha256": "553a93efc9cc924b261e7445188a66e5d0ae0e695063cc4371237f22e1a5b834"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-20.cs",
+      "bytes": 853,
+      "sha256": "a222833217a9431cb4c686c556352bd3039ca8a04e189363d3ea841710d7f0fa"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-21.cs.txt",
+      "bytes": 78,
+      "sha256": "bf10cc7eaddcb4ef545cf23efc3eeee598bb5096e75010292acc74f7256bc465"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-21.cs",
+      "bytes": 661,
+      "sha256": "e4b382ccdc73e69e981d33abf68e1bcf70637e59c4394857d82e7dc5fcc14b14"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-22.cs.txt",
+      "bytes": 169,
+      "sha256": "ef57ee04943204b3e4bcf75026476ce8c5db23735a98a154db89c8307e80560f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-22.cs",
+      "bytes": 719,
+      "sha256": "2d0d52df5544f69ecf7b0a97faba862c17eb9594016922cd5ecef32994850490"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-23.cs.txt",
+      "bytes": 182,
+      "sha256": "cd305fc4e140df869a9e31a0931840f470bbd604057a5e888be0f6dcd695ac71"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-23.cs",
+      "bytes": 713,
+      "sha256": "a829e77021c4f519029e8e617be291620559671b09d489cb06d8409df021dd24"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-24.cs.txt",
+      "bytes": 409,
+      "sha256": "7b544ce3ca58d8f8a697dae8db593c6f2c61ad3a80b28b42178fa19f1a5c76bd"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-24.cs",
+      "bytes": 907,
+      "sha256": "193a831b4c67de8a145e55ce879325bfd894d3b667f830fad621e866758f0089"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/raw/migration-25.cs.txt",
+      "bytes": 520,
+      "sha256": "4ea6694233fa1571fee366fc13025b9e0e0722fd8e09b68d94d428a930310d96"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/migration-25.cs",
+      "bytes": 1103,
+      "sha256": "cfbcf128d5a198adcb9302f0b0e28a8aed95e54984cdab7f489546b11eef566f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/prepare-examples.py",
+      "bytes": 9173,
+      "sha256": "de45734e7f3d8773cd67202226d999037c074fa8b79e1766b4f517e0ae1fabfd"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/examples-manifest.json",
+      "bytes": 23077,
+      "sha256": "5d24efec3722b3490fc3106d281bfe530516553f4290aef5d9d9687e8e4c6ffd"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/Directory.Build.props",
+      "bytes": 607,
+      "sha256": "9c5fca842b737bb63d89aefcb9b9b065ddfce9e93e31336a2dd1e23f0f98842d"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/Yubico.YubiKit.AuditMerge20261111.Examples.csproj",
+      "bytes": 699,
+      "sha256": "85c567fa3a449e33d73fa95b8c6216e425780b443aafcde619c2365865929407"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumers/src/Yubico.YubiKit.AuditMerge20261111.Consumers.csproj",
+      "bytes": 1517,
+      "sha256": "490a44c8d1f2490e22f1112424d56dd1bf110de3bcba982559b9d29bf72d4fe7"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/mac-comparison/src/Yubico.YubiKit.AuditMerge20261111.MacComparison.csproj",
+      "bytes": 608,
+      "sha256": "59879e77be8d9c250038b7066da32460f55955bb4e098101170bca2607cd8183"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/review.md",
+      "bytes": 21099,
+      "sha256": "a39efdd36e08261d571457f42b1144f2522542df65dc40612f3b96348197a36d"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/evidence/format-preservation.json",
+      "bytes": 6306,
+      "sha256": "513bf4c420f19a181fa0ae0fc27c60f278c9bc9dbddfd7fe0c1947966ffb7067"
+    }
+  ]
+}

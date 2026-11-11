@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Devices;
-
 namespace Yubico.YubiKit.Cli.Shared.Cli;
 
 /// <summary>
-/// Provides YubiKeyManager lifecycle helpers and CancellationTokenSource setup.
+/// Provides CancellationTokenSource setup for console commands.
 /// Shared boilerplate for CLI tool entry points.
 /// </summary>
 public static class CommandHelper
@@ -38,20 +36,4 @@ public static class CommandHelper
         return cts;
     }
 
-    /// <summary>
-    /// Starts YubiKeyManager monitoring for device events.
-    /// Call <see cref="ShutdownAsync"/> when done.
-    /// </summary>
-    public static void StartMonitoring()
-    {
-        YubiKeyManager.StartMonitoring();
-    }
-
-    /// <summary>
-    /// Shuts down YubiKeyManager monitoring gracefully.
-    /// </summary>
-    public static async Task ShutdownAsync()
-    {
-        await YubiKeyManager.ShutdownAsync();
-    }
 }

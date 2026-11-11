@@ -52,16 +52,21 @@ away without it.
 
 ## Device events without reactive dependencies
 
-`YubiKeyManager.WatchAsync` exposes device arrivals and removals as an
-`IAsyncEnumerable`, with no Reactive Extensions dependency and the same async
-model as the rest of the SDK. Call `StartMonitoring` first, and start the
-`await foreach` before the action you expect to produce an event — a watcher
-subscribes on first enumeration, not when the method is called.
+`YubiKeyManager.WatchAsync(ct)` owns a private monitor per enumeration.
+`await YubiKeyManager.CreateMonitorAsync(ct)` instead returns an initialized `YubiKeyMonitor` to share
+and dispose with `await using`. Both streams expose `DeviceAdded` replay, `SnapshotComplete` (even
+when empty), then live `DeviceAdded`, `DeviceRemoved`, and `DeviceUpdated` records with scan revisions,
+as `IAsyncEnumerable<DeviceChange>` without a Reactive Extensions dependency. Each subscription
+atomically captures membership and registers on its first move.
+
+manager watch creates a producer; monitor watch subscribes to an existing one.
 
 Each watcher has its own bounded buffer, so consumers do not block or
 interfere with one another. If a consumer falls too far behind, its stream
-faults instead of silently dropping device state; call `FindAllAsync` to
-resynchronise.
+faults instead of silently dropping device state; clear its projection and
+re-enumerate the same monitor to resynchronize. Build membership from replay, or use `FindAllAsync`
+for a one-off. Every `Find…Async` performs independent fresh discovery. A monitor has one lifetime;
+dispose and create a new one instead of restarting. Last-known metadata is not live configuration.
 
 ## One physical key, safely owned
 

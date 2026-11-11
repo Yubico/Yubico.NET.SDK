@@ -1,0 +1,69 @@
+{
+  "status": "qualified-disposable-python-cases",
+  "cases": [
+    {
+      "case": "nonzero",
+      "wrapper_exit": 1,
+      "child_exit": 7,
+      "quiescent": true,
+      "durable_external_receipt": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/journals/nonzero/final.json",
+      "signals": []
+    },
+    {
+      "case": "orphan",
+      "wrapper_exit": 1,
+      "child_exit": 9,
+      "quiescent": true,
+      "durable_external_receipt": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/journals/orphan/final.json",
+      "signals": [
+        "SIGTERM",
+        "SIGKILL"
+      ]
+    },
+    {
+      "case": "retention",
+      "wrapper_exit": 1,
+      "child_exit": 0,
+      "quiescent": true,
+      "durable_external_receipt": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/journals/retention/final.json",
+      "signals": []
+    },
+    {
+      "case": "receipt",
+      "wrapper_exit": 1,
+      "child_exit": 0,
+      "quiescent": true,
+      "durable_external_receipt": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/journals/receipt/final.json",
+      "signals": []
+    }
+  ],
+  "atomic_overwrite_rejected": true,
+  "failed_fsync_preserved_partial_without_publishing": true,
+  "historical_parser_counts": {
+    "targets": [
+      "test-infrastructure-qa",
+      "native-aot-contract-qa",
+      "build",
+      "test",
+      "docs-qa",
+      "docs-architecture",
+      "complexity"
+    ],
+    "projects": 13,
+    "executed": 4124,
+    "skipped": 5,
+    "failed": 0,
+    "warnings": 0
+  },
+  "fail_closed_parser_rejections": [
+    "exit",
+    "target",
+    "warnings",
+    "membership",
+    "zero-execution",
+    "failed-test"
+  ],
+  "logger_sha256": "d44dfe05fe38c75527ac8c0bfcfd8b87225f1246e8cc2f738638057ba28c82f0",
+  "qualifier_sha256": "ebbf75d9282832974e90a5c09e76c341fd74db66d03c6f98bef5208a9c655f8a",
+  "limits": "Python process/I/O qualification and historical parser replay only; no SDK build/test/native/device execution."
+}

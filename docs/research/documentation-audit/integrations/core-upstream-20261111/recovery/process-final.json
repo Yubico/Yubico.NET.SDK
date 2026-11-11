@@ -1,0 +1,6 @@
+{
+  "integration_dotnet_logger_processes": [],
+  "original_build_pid_exists": false,
+  "original_toolchain_pid_exists": false,
+  "scope": "Read-only process/cwd/descriptor inventory; no process signal. Disposable logger qualification groups were separately stopped and reaped as recorded."
+}

@@ -1,0 +1,30 @@
+# dotnet toolchain.cs -- linux-hid-verification-publish
+# started:   2026-11-11 19:53:59 +01:00
+# directory: /home/rupicola/Code/y/yubikit-core-docs-integration
+# git:       yubikit-core-docs-integration @ f0ba9687e (uncommitted changes)
+# runtime:   .NET 10.0.15 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: linux-hid-verification-publish  (log: artifacts/toolchain/runs/20261111-195359-091-linux-hid-verification-publish/run.log)
+
+▶ target: linux-hid-verification-publish
+▶ RUN dotnet restore verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj -r linux-x64 -p:Configuration=Release -p:SelfContained=true -p:PublishAot=false --artifacts-path artifacts/linux-hid-verification/build/jit
+  output: artifacts/toolchain/runs/20261111-195359-091-linux-hid-verification-publish/01-linux-hid-jit-restore.log
+▶ RUN dotnet restore verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj -r linux-x64 -p:Configuration=Release -p:SelfContained=true -p:PublishAot=true --artifacts-path artifacts/linux-hid-verification/build/aot
+  output: artifacts/toolchain/runs/20261111-195359-091-linux-hid-verification-publish/02-linux-hid-aot-restore.log
+▶ RUN python3 verification/LinuxHidRouteVerification/publish_contract.py begin
+Publish input snapshot recorded; previous stamp invalidated
+▶ RUN dotnet publish verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj -c Release -r linux-x64 --self-contained --no-restore -p:PublishAot=false --artifacts-path artifacts/linux-hid-verification/build/jit -o artifacts/linux-hid-verification/jit
+  output: artifacts/toolchain/runs/20261111-195359-091-linux-hid-verification-publish/04-linux-hid-jit-publish.log
+▶ RUN dotnet publish verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj -c Release -r linux-x64 --self-contained --no-restore -p:PublishAot=true --artifacts-path artifacts/linux-hid-verification/build/aot -o artifacts/linux-hid-verification/aot
+  output: artifacts/toolchain/runs/20261111-195359-091-linux-hid-verification-publish/05-linux-hid-aot-publish.log
+▶ RUN python3 verification/LinuxHidRouteVerification/publish_contract.py seal
+BOUND SOURCEHASH=90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa INPUTHASH=a509bb8ab2cb61c1b27e27af7f4a27dc893fcf66106fb4ddd423307005a021f7 artifacts=223
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- linux-hid-verification-publish)
+Targets:
+  ✓ linux-hid-verification-publish    21.9s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261111-195359-091-linux-hid-verification-publish/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

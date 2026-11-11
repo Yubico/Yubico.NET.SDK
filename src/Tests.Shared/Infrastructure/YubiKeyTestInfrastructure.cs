@@ -190,9 +190,10 @@ internal static class YubiKeyTestInfrastructure
 
         try
         {
-            // Discover all devices
+            // This harness owns its lazy run-local fixture list, not a background monitor.
+            // Discover All before filtering so applet tests keep every composite connection slot.
             var allDevices = TransientScanRetry
-                .ScanAsync(() => YubiKeyManager.FindAllAsync())
+                .ScanAsync(() => YubiKeyManager.FindAllAsync(interfaces: ConnectionType.All))
                 .GetAwaiter()
                 .GetResult();
             Console.WriteLine($"[YubiKey Infrastructure] Found {allDevices.Count} device(s)");

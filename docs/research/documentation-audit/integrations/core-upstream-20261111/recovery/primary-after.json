@@ -1,0 +1,26 @@
+{
+  "head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+  "branch": "refs/heads/yubikit-docs-audit",
+  "user_files": [
+    {
+      "path": "docs/research/audit-v2-closeout-review.md",
+      "bytes": 100083,
+      "sha256": "5d202be1fac5d44639e2397a52fed4012750969f821bb2949e09037ee6e3b59f"
+    },
+    {
+      "path": "docs/research/audit-v2-execution.md",
+      "bytes": 13698,
+      "sha256": "25314620a507cf38ed23c3496830b38c03224f5c96572de3b0931ca2499cf75e"
+    },
+    {
+      "path": "docs/research/audit-v2-jira-traceability.md",
+      "bytes": 9964,
+      "sha256": "fffe230424d3983bf8f6c89ebfee41851bc677e84db4bb89f268820b8a35ea71"
+    },
+    {
+      "path": "mise.toml",
+      "bytes": 22,
+      "sha256": "f7acb0a4b4f38b5ea99bc9310145cfcc93bd74f6ff7bcdde41a21706889bb91d"
+    }
+  ]
+}

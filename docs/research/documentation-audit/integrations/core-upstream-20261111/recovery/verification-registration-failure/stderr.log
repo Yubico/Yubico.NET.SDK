@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/verify-recovery.py", line 113, in <module>
+    main()
+    ~~~~^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/verify-recovery.py", line 72, in main
+    assert backlinks.keys() == current_links.keys()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

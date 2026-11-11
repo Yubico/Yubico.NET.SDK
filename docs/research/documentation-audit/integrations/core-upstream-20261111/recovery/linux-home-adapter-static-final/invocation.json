@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/linux-evidence-gates-home.py",
+    "--check-source"
+  ],
+  "exit_code": 0,
+  "stdout_sha256": "9fecbc3dc14525e06770e7cc563a9419c4e8d157114e357f383e6471b0fb9fc6",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,211 @@
+// Copyright Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.LargeBlobs;
+using Yubico.YubiKit.Ctap2.Pin;
+
+namespace Yubico.YubiKit.WebAuthn.Client;
+
+/// <summary>
+/// Internal abstraction over CTAP2 operations for testability.
+/// </summary>
+/// <remarks>
+/// This interface allows WebAuthn Client logic to be tested with mock implementations
+/// while the production implementation delegates to ICtap2Session.
+/// </remarks>
+internal interface IWebAuthnBackend : IAsyncDisposable
+{
+    /// <summary>
+    /// Gets cached authenticator info (does not require user presence).
+    /// </summary>
+    Task<AuthenticatorInfo> GetCachedInfoAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The PIN/UV auth protocol this backend speaks with the authenticator. Available before and without
+    /// a token: extensions such as hmac-secret need it for key agreement even when no PIN is involved.
+    /// </summary>
+    IPinUvAuthProtocol Protocol { get; }
+
+    /// <summary>
+    /// Performs CTAP2.3 §6.5.5.4 getKeyAgreement and protocol-specific encapsulation, returning the
+    /// platform key plus shared secret. The concrete backend uses protocol 2 (§6.5.7), without protocol
+    /// negotiation. The caller owns the result and disposes it to zero the secret.
+    /// </summary>
+    Task<PinUvSharedSecret> EncapsulateAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Per-credential large-blob storage over authenticatorLargeBlobs (CTAP §6.10). With a token (which
+    /// must carry LargeBlobWrite) the storage can write; without one it is read-only.
+    /// </summary>
+    ILargeBlobStorage CreateLargeBlobStorage(PinUvAuthTokenSession? token);
+
+    /// <summary>
+    /// Obtains a PIN/UV auth token with the specified permissions.
+    /// </summary>
+    /// <param name="method">The authentication method (PIN or UV).</param>
+    /// <param name="permissions">The requested token permissions.</param>
+    /// <param name="rpId">Optional RP ID to bind the token to (required for some permissions).</param>
+    /// <param name="pinBytes">PIN bytes (UTF-8 encoded) when method is PIN, otherwise null.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A session holding the PIN/UV auth token and protocol instance.</returns>
+    Task<PinUvAuthTokenSession> GetPinUvTokenAsync(
+        PinUvAuthMethod method,
+        PinUvAuthTokenPermissions permissions,
+        string? rpId,
+        ReadOnlyMemory<byte>? pinBytes,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the number of PIN attempts remaining before the authenticator blocks the PIN.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>
+    /// The remaining attempt count, or <c>null</c> when the authenticator does not
+    /// report one. Used to populate credential prompts after a rejected PIN, so a
+    /// failure to read it must not fail the surrounding operation.
+    /// </returns>
+    Task<int?> GetPinRetriesAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Creates a new credential via CTAP2 MakeCredential.
+    /// </summary>
+    Task<MakeCredentialResponse> MakeCredentialAsync(
+        BackendMakeCredentialRequest request,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Performs CTAP2 GetAssertion to authenticate with a credential.
+    /// </summary>
+    Task<GetAssertionResponse> GetAssertionAsync(
+        BackendGetAssertionRequest request,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Retrieves the next assertion when multiple credentials are available.
+    /// </summary>
+    Task<GetAssertionResponse> GetNextAssertionAsync(CancellationToken cancellationToken);
+}
+
+/// <summary>
+/// Authentication method for PIN/UV token acquisition.
+/// </summary>
+internal enum PinUvAuthMethod
+{
+    /// <summary>
+    /// Use PIN for authentication.
+    /// </summary>
+    Pin,
+
+    /// <summary>
+    /// Use built-in user verification (biometric, etc.).
+    /// </summary>
+    Uv
+}
+
+/// <summary>
+/// Request parameters for CTAP2 MakeCredential via backend.
+/// </summary>
+internal sealed record class BackendMakeCredentialRequest
+{
+    /// <summary>
+    /// Hash of the client data JSON.
+    /// </summary>
+    public required ReadOnlyMemory<byte> ClientDataHash { get; init; }
+
+    /// <summary>
+    /// Relying party information.
+    /// </summary>
+    public required PublicKeyCredentialRpEntity Rp { get; init; }
+
+    /// <summary>
+    /// User information.
+    /// </summary>
+    public required PublicKeyCredentialUserEntity User { get; init; }
+
+    /// <summary>
+    /// Supported public key credential parameters.
+    /// </summary>
+    public required IReadOnlyList<PublicKeyCredentialParameters> PubKeyCredParams { get; init; }
+
+    /// <summary>
+    /// Credentials to exclude (already registered).
+    /// </summary>
+    public IReadOnlyList<PublicKeyCredentialDescriptor>? ExcludeList { get; init; }
+
+    /// <summary>
+    /// Raw CBOR-encoded extensions map prepared by extension processors and passed through unchanged.
+    /// </summary>
+    public ReadOnlyMemory<byte>? Extensions { get; init; }
+
+    /// <summary>
+    /// Authenticator options (e.g., rk, uv).
+    /// </summary>
+    public IReadOnlyDictionary<string, bool>? Options { get; init; }
+
+    /// <summary>
+    /// PIN/UV auth parameter (signature over clientDataHash).
+    /// </summary>
+    public ReadOnlyMemory<byte>? PinUvAuthParam { get; init; }
+
+    /// <summary>
+    /// PIN/UV auth protocol version (1 or 2).
+    /// </summary>
+    public byte? PinUvAuthProtocol { get; init; }
+}
+
+/// <summary>
+/// Request parameters for CTAP2 GetAssertion via backend.
+/// </summary>
+internal sealed record class BackendGetAssertionRequest
+{
+    /// <summary>
+    /// Hash of the client data JSON.
+    /// </summary>
+    public required ReadOnlyMemory<byte> ClientDataHash { get; init; }
+
+    /// <summary>
+    /// Relying party identifier.
+    /// </summary>
+    public required string RpId { get; init; }
+
+    /// <summary>
+    /// List of allowed credential descriptors.
+    /// </summary>
+    /// <remarks>
+    /// If null or empty, the authenticator will search for discoverable credentials.
+    /// </remarks>
+    public IReadOnlyList<PublicKeyCredentialDescriptor>? AllowList { get; init; }
+
+    /// <summary>
+    /// Raw CBOR-encoded extensions map (opaque passthrough).
+    /// </summary>
+    public ReadOnlyMemory<byte>? Extensions { get; init; }
+
+    /// <summary>
+    /// Authenticator options (e.g., up, uv).
+    /// </summary>
+    public IReadOnlyDictionary<string, bool>? Options { get; init; }
+
+    /// <summary>
+    /// PIN/UV auth parameter (signature over clientDataHash).
+    /// </summary>
+    public ReadOnlyMemory<byte>? PinUvAuthParam { get; init; }
+
+    /// <summary>
+    /// PIN/UV auth protocol version (1 or 2).
+    /// </summary>
+    public byte? PinUvAuthProtocol { get; init; }
+}

@@ -1,0 +1,2 @@
+# Storage-recovery snapshots and failed streams retain their exact captured bytes.
+* -text

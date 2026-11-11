@@ -1,0 +1,3 @@
+// After closing the competing client; expectedSerialNumber is the serial you want to find.
+IYubiKey? matchingDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
+    key => key.SerialNumber == expectedSerialNumber, cancellationToken: cancellationToken);

@@ -1,0 +1,24 @@
+{
+  "count": 17,
+  "content": 14,
+  "modify_delete": 3,
+  "paths": [
+    "docs/architecture/connection-ownership-and-contention.md",
+    "docs/architecture/images/image-manifest.txt",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+    "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs",
+    "src/Management/CLAUDE.md",
+    "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Management/examples/ManagementTool/Program.cs",
+    "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+    "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+    "src/Oath/examples/OathTool/Program.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/OpenPgpDeviceSelector.cs",
+    "src/Tests.TestProject/Controllers/DiTestController.cs",
+    "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+    "src/YubiOtp/examples/OtpTool/DeviceHelper.cs"
+  ]
+}

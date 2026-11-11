@@ -1,0 +1,63 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/linux-evidence-gates-home.py",
+    "artifacts/linux-hid-verification/evidence/20261111T185446Z"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T18:56:07.235687+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-evidence-gates-home-first",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/command-journals/linux-evidence-gates-home-first",
+  "qualification_faults": [],
+  "exit_code": 0,
+  "status": "passed",
+  "errors": [],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 2957293,
+    "sid": 2957293,
+    "leader_start_ticks": 80115706,
+    "before": {
+      "members": [],
+      "escaped": []
+    },
+    "signals": [],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": null,
+  "retained": [],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-evidence-gates-home-first/stdout.log",
+      "bytes": 614,
+      "sha256": "9fecbc3dc14525e06770e7cc563a9419c4e8d157114e357f383e6471b0fb9fc6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-evidence-gates-home-first/stderr.log",
+      "bytes": 131,
+      "sha256": "45b5f7aef8a6776f721fdc9111a53ea143adc257d302c8d00faccddc88aab876"
+    }
+  ],
+  "finished": "2026-11-11T18:56:55.518133+00:00"
+}

@@ -1,0 +1,89 @@
+{
+  "status": "No observed source/generator/reference-API input change; implementation/PDB bytes are explicitly different",
+  "core_comparisons": [
+    {
+      "capture": "probe-first-v3",
+      "only_core_argument_difference": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/probe-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "fixture_argument": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/fixture-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "other_arguments_identical": true,
+      "generated_sources_identical": true,
+      "generated_source_count": 1,
+      "reference_assembly_sha256": [
+        "a0a6f20a6c6eadd8ca1085929d22bd47366691c0029f7e0f88b7f4fe64b0b624"
+      ]
+    },
+    {
+      "capture": "examples-first-v3",
+      "only_core_argument_difference": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/examples-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "fixture_argument": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/fixture-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "other_arguments_identical": true,
+      "generated_sources_identical": true,
+      "generated_source_count": 1,
+      "reference_assembly_sha256": [
+        "a0a6f20a6c6eadd8ca1085929d22bd47366691c0029f7e0f88b7f4fe64b0b624"
+      ]
+    },
+    {
+      "capture": "annotations-first-v3",
+      "only_core_argument_difference": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/annotations-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "fixture_argument": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/fixture-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "other_arguments_identical": true,
+      "generated_sources_identical": true,
+      "generated_source_count": 1,
+      "reference_assembly_sha256": [
+        "a0a6f20a6c6eadd8ca1085929d22bd47366691c0029f7e0f88b7f4fe64b0b624"
+      ]
+    },
+    {
+      "capture": "consumers-first-v4",
+      "only_core_argument_difference": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/consumers-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "fixture_argument": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/fixture-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "other_arguments_identical": true,
+      "generated_sources_identical": true,
+      "generated_source_count": 1,
+      "reference_assembly_sha256": [
+        "a0a6f20a6c6eadd8ca1085929d22bd47366691c0029f7e0f88b7f4fe64b0b624"
+      ]
+    },
+    {
+      "capture": "fixture-first-v5",
+      "only_core_argument_difference": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/fixture-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "fixture_argument": [
+        "/generatedfilesout:/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/fixture-first/raw/Yubico.YubiKit.Core/generated"
+      ],
+      "other_arguments_identical": true,
+      "generated_sources_identical": true,
+      "generated_source_count": 1,
+      "reference_assembly_sha256": [
+        "a0a6f20a6c6eadd8ca1085929d22bd47366691c0029f7e0f88b7f4fe64b0b624"
+      ]
+    }
+  ],
+  "capture_build_started": {
+    "probe-first-v3": "2026-11-11T19:09:12.306121+00:00",
+    "examples-first-v3": "2026-11-11T19:40:21.945113+00:00",
+    "annotations-first-v3": "2026-11-11T19:40:26.677135+00:00",
+    "consumers-first-v4": "2026-11-11T19:40:31.560860+00:00",
+    "fixture-first-v5": "2026-11-11T20:13:46.866342+00:00",
+    "mac-comparison-restore-isolated-first-v5": "2026-11-11T21:06:22.228134+00:00"
+  },
+  "boundary": "Emission directory is the only recorded Core compiler-argument difference; no assertion that differing implementation bytes are byte/runtime equivalent. Exact older compiled outputs remain mandatory retained artifacts."
+}

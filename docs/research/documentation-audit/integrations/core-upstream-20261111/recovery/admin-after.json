@@ -1,0 +1,92 @@
+{
+  "root_mode": 493,
+  "entries": [
+    {
+      "path": "AUTO_MERGE",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 41,
+      "sha256": "7b1374f151e49ed5ce449b5df5b92cec7db6e4a1b2b78bf165cb003ef6521442"
+    },
+    {
+      "path": "HEAD",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 46,
+      "sha256": "821cb4a068ef874e010c0a70435cfb4660c6a89036077dbe74f851b8e0eced1b"
+    },
+    {
+      "path": "MERGE_HEAD",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 41,
+      "sha256": "e134c05e644aab26fd27c871ed7634f3eca197284b2b5e57bb44373920978350"
+    },
+    {
+      "path": "MERGE_MODE",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 5,
+      "sha256": "5940fba849655f7fd20878b451607d8f40866326bde6753ac71ebc855b646a55"
+    },
+    {
+      "path": "MERGE_MSG",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 1093,
+      "sha256": "b14b1b2d956c44862f9687fd7e98b5368d792aeb29a36359ded201bb969df9ea"
+    },
+    {
+      "path": "MERGE_RR",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 1342,
+      "sha256": "2125a519b9654b0c8904686029620653239613ac3cc627a3b2f7084de75f57cd"
+    },
+    {
+      "path": "ORIG_HEAD",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 41,
+      "sha256": "fb407a50ba115e5143f9f19cc1c5d34f5d297dd750ca28fe84fbb3adfbb5dca5"
+    },
+    {
+      "path": "commondir",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 6,
+      "sha256": "340ddcb67a6204f742cd1e28e5b462622dde7daaa8ee36001897196aacdc6d47"
+    },
+    {
+      "path": "gitdir",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 57,
+      "sha256": "d109cefb859975bc054f89f22684609368c10fea8444784f09d350107f7a8301"
+    },
+    {
+      "path": "index",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 1431008,
+      "sha256": "bec87214c74b7d3ac356cf973521837aa269c521efffb85a7ec193e5c6f34251"
+    },
+    {
+      "path": "logs",
+      "mode": 493,
+      "kind": "directory"
+    },
+    {
+      "path": "logs/HEAD",
+      "mode": 420,
+      "kind": "file",
+      "bytes": 298,
+      "sha256": "b75d2e0bb93e4c267f02894414a58146100397c3d557b04a3c8959dfb135530d"
+    },
+    {
+      "path": "refs",
+      "mode": 493,
+      "kind": "directory"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+$ dotnet clean docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj -c Release
+Build started 11/11/2026 9:37:08 PM.
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Creating directory "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.MacComparison/obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj" (2:2) on node 1 (Clean target(s)).
+     2>CoreClean:
+         Creating directory "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/Release/net10.0/".
+     2>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj" (Clean target(s)).
+     1>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.27

@@ -1,0 +1,3 @@
+// Explicit compatibility opt-in, before any discovery or monitoring:
+SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;
+var devices = await YubiKeyManager.FindAllAsync();

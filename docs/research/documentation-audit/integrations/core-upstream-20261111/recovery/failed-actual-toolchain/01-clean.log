@@ -1,0 +1,180 @@
+$ dotnet clean Yubico.YubiKit.sln -c Release
+Build started 11/11/2026 7:20:56 PM.
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" on node 1 (Clean target(s)).
+     1>ValidateSolutionConfiguration:
+         Building solution configuration "Release|Any CPU".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Oath/examples/OathTool/OathTool.csproj" (6) on node 5 (Clean target(s)).
+     6>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Ctap2/examples/FidoTool/FidoTool.csproj" (3) on node 9 (Clean target(s)).
+     3>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj" (4) on node 4 (Clean target(s)).
+     4>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj" (2) on node 10 (Clean target(s)).
+     2>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Management/examples/ManagementTool/ManagementTool.csproj" (5) on node 18 (Clean target(s)).
+     5>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" (10) on node 6 (Clean target(s)).
+    10>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/YubiOtp/examples/OtpTool/OtpTool.csproj" (13) on node 13 (Clean target(s)).
+    13>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Piv/examples/PivTool/PivTool.csproj" (11) on node 7 (Clean target(s)).
+    11>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (9) on node 15 (Clean target(s)).
+     9>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Cli/YkTool/Yubico.YubiKit.Cli.YkTool.csproj" (8) on node 12 (Clean target(s)).
+     8>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj" (14) on node 3 (Clean target(s)).
+    14>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj" (7) on node 17 (Clean target(s)).
+     7>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj" (19) on node 19 (Clean target(s)).
+    19>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj" (12) on node 8 (Clean target(s)).
+    12>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" (20) on node 11 (Clean target(s)).
+    20>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj" (18) on node 16 (Clean target(s)).
+    18>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj" (15) on node 14 (Clean target(s)).
+    15>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj" (17) on node 20 (Clean target(s)).
+    17>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj" (16) on node 2 (Clean target(s)).
+    16>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Oath/src/Yubico.YubiKit.Oath.csproj" (21:9) on node 5 (Clean target(s)).
+    21>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj" (22) on node 20 (Clean target(s)).
+    22>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj" (25) on node 3 (Clean target(s)).
+    25>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Piv/src/Yubico.YubiKit.Piv.csproj" (23:9) on node 9 (Clean target(s)).
+    23>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj" (27) on node 14 (Clean target(s)).
+    27>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (24:13) on node 4 (Clean target(s)).
+    24>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj" (26) on node 17 (Clean target(s)).
+    26>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj" (29) on node 8 (Clean target(s)).
+    29>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" (28:12) on node 19 (Clean target(s)).
+    28>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj" (33) on node 15 (Clean target(s)).
+    33>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj" (30) on node 12 (Clean target(s)).
+    30>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj" (34) on node 7 (Clean target(s)).
+    34>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj" (32) on node 1 (Clean target(s)).
+    32>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj" (39) on node 20 (Clean target(s)).
+    39>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj" (40) on node 16 (Clean target(s)).
+    40>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj" (36:9) on node 13 (Clean target(s)).
+    36>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Management/src/Yubico.YubiKit.Management.csproj" (35:19) on node 18 (Clean target(s)).
+    35>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (31:12) on node 6 (Clean target(s)).
+    31>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj" (38) on node 3 (Clean target(s)).
+    38>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj" (41) on node 5 (Clean target(s)).
+    41>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     2>Project "/tmp/opencode/core-upstream-20261111/src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj" (2) is building "/tmp/opencode/core-upstream-20261111/src/Core/src/Yubico.YubiKit.Core.csproj" (37:32) on node 10 (Clean target(s)).
+    37>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj" (42) on node 11 (Clean target(s)).
+    42>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    37>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Core/src/Yubico.YubiKit.Core.csproj" (Clean target(s)).
+    23>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Piv/src/Yubico.YubiKit.Piv.csproj" (Clean target(s)).
+     9>Done Building Project "/tmp/opencode/core-upstream-20261111/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (Clean target(s)).
+    28>Done Building Project "/tmp/opencode/core-upstream-20261111/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" (Clean target(s)).
+    39>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj" (Clean target(s)).
+    19>Done Building Project "/tmp/opencode/core-upstream-20261111/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj" (Clean target(s)).
+    22>Done Building Project "/tmp/opencode/core-upstream-20261111/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj" (Clean target(s)).
+    21>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Oath/src/Yubico.YubiKit.Oath.csproj" (Clean target(s)).
+    24>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (Clean target(s)).
+    34>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj" (Clean target(s)).
+    31>Done Building Project "/tmp/opencode/core-upstream-20261111/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (Clean target(s)).
+    35>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Management/src/Yubico.YubiKit.Management.csproj" (Clean target(s)).
+    41>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj" (Clean target(s)).
+    36>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj" (Clean target(s)).
+     4>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj" (Clean target(s)).
+    29>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj" (Clean target(s)).
+    33>Done Building Project "/tmp/opencode/core-upstream-20261111/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj" (Clean target(s)).
+    30>Done Building Project "/tmp/opencode/core-upstream-20261111/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj" (Clean target(s)).
+    26>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj" (Clean target(s)).
+    10>Done Building Project "/tmp/opencode/core-upstream-20261111/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" (Clean target(s)).
+    17>Done Building Project "/tmp/opencode/core-upstream-20261111/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj" (Clean target(s)).
+    15>Done Building Project "/tmp/opencode/core-upstream-20261111/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj" (Clean target(s)).
+    40>Done Building Project "/tmp/opencode/core-upstream-20261111/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj" (Clean target(s)).
+    18>Done Building Project "/tmp/opencode/core-upstream-20261111/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj" (Clean target(s)).
+    12>Done Building Project "/tmp/opencode/core-upstream-20261111/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj" (Clean target(s)).
+    25>Done Building Project "/tmp/opencode/core-upstream-20261111/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj" (Clean target(s)).
+    38>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj" (Clean target(s)).
+     1>Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (1) is building "/tmp/opencode/core-upstream-20261111/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj" (43) on node 2 (Clean target(s)).
+    43>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    14>Done Building Project "/tmp/opencode/core-upstream-20261111/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj" (Clean target(s)).
+    32>Done Building Project "/tmp/opencode/core-upstream-20261111/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj" (Clean target(s)).
+    42>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj" (Clean target(s)).
+    20>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" (Clean target(s)).
+    43>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj" (Clean target(s)).
+    16>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj" (Clean target(s)).
+     8>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Cli/YkTool/Yubico.YubiKit.Cli.YkTool.csproj" (Clean target(s)).
+     3>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Ctap2/examples/FidoTool/FidoTool.csproj" (Clean target(s)).
+     6>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Oath/examples/OathTool/OathTool.csproj" (Clean target(s)).
+     2>Done Building Project "/tmp/opencode/core-upstream-20261111/src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj" (Clean target(s)).
+    13>Done Building Project "/tmp/opencode/core-upstream-20261111/src/YubiOtp/examples/OtpTool/OtpTool.csproj" (Clean target(s)).
+     5>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Management/examples/ManagementTool/ManagementTool.csproj" (Clean target(s)).
+    11>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Piv/examples/PivTool/PivTool.csproj" (Clean target(s)).
+     7>Done Building Project "/tmp/opencode/core-upstream-20261111/src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj" (Clean target(s)).
+    27>Done Building Project "/tmp/opencode/core-upstream-20261111/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj" (Clean target(s)).
+     1>Done Building Project "/tmp/opencode/core-upstream-20261111/Yubico.YubiKit.sln" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.77

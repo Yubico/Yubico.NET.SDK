@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- build --project Yubico.YubiKit.Management.IntegrationTests --clean",
+  "started": "2026-11-11T21:13:47.1269137+01:00",
+  "durationSeconds": 5.5,
+  "runDirectory": "artifacts/toolchain/runs/20261111-211347-126-build",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "durationSeconds": 5.4,
+      "error": null
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

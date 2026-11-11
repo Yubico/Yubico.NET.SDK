@@ -1,0 +1,18 @@
+{
+  "Mode": "--sensitivity-quiescence",
+  "Baseline": "3de42bb54c5e8c986364f0f04398d4e85a66a596",
+  "SourceHash": "90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa",
+  "Runtime": ".NET 10.0.15",
+  "Kernel": "Omarchy",
+  "KernelRelease": "7.2.15-1-omarchy",
+  "DynamicCode": true,
+  "Checks": [
+    "reactor-held-internal-read-callback-entered",
+    "reactor-held-callback-real-exit-quiescence-release-close"
+  ],
+  "Measurements": [],
+  "NativeProbes": [],
+  "Idle": [],
+  "Failure": "System.InvalidOperationException: reactor-no-false-quiescence-while-callback-held\n   at LinuxHidRouteVerification.Evidence.Check(Boolean condition, String name) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/Evidence.cs:line 31\n   at LinuxHidRouteVerification.NativeScenarios.HeldCallbackAsync(Evidence evidence, Boolean falseAcknowledgement) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 105\n   at LinuxHidRouteVerification.NativeScenarios.HeldCallbackAsync(Evidence evidence, Boolean falseAcknowledgement) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 118\n   at LinuxHidRouteVerification.NativeScenarios.HeldCallbackAsync(Evidence evidence, Boolean falseAcknowledgement) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 118\n   at LinuxHidRouteVerification.NativeScenarios.QuiescenceControlAsync(Evidence evidence) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 304\n   at Program.\u003CMain\u003E$(String[] args) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/Program.cs:line 65",
+  "Outcome": "FAILED"
+}

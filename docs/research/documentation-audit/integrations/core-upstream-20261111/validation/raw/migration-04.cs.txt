@@ -1,0 +1,14 @@
+// Every YubiKey reachable as a smart card (CCID); HID is never enumerated.
+var smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
+
+// Every YubiKey reachable over FIDO HID. HID descriptors are enumerated, but only FIDO interfaces are probed.
+var fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
+
+// Every YubiKey on every interface, still without publishing into a monitor feed.
+var allYubiKeys = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+
+// Either family can discover the selected physical key. No OTP slots/protocol probes are admitted.
+var selected = await YubiKeyManager.FindFirstAsync(
+    predicate: key => key.SerialNumber == serial,
+    interfaces: ConnectionType.SmartCard | ConnectionType.HidFido,
+    cancellationToken: cancellationToken);

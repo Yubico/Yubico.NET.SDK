@@ -1,0 +1,9 @@
+<Project>
+  <Import Project="../../../../../../Directory.Build.props" />
+  <PropertyGroup>
+    <IntegrationValidationWorkspace Condition="'$(IntegrationValidationWorkspace)' == ''">/tmp/opencode/core-upstream-20261111-validation</IntegrationValidationWorkspace>
+    <BaseIntermediateOutputPath>$(IntegrationValidationWorkspace)/$(MSBuildProjectName)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(IntegrationValidationWorkspace)/$(MSBuildProjectName)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,55 @@
+{
+  "scope": "FR-1 exact retained text classification only",
+  "review": {
+    "path": "final-review.md",
+    "sha256": "7e53e938c3d396bba6ea8173e89696398408e3696d57a991c602fd23bb83b71f"
+  },
+  "original_checker": {
+    "path": "validation/check-records.py",
+    "sha256": "e287c3e35d6fec35d125c870125201816dc4d9822ae78ba94d7c0da167eeb3e4"
+  },
+  "exceptions": [
+    {
+      "path": "validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "bytes": 24344,
+      "sha256": "23caffbc15f5f4d313e2174f55866854b9b132327805310ab83cfaff6c6e7da0",
+      "text_kind": "utf8-json-object"
+    },
+    {
+      "path": "validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+      "bytes": 118048,
+      "sha256": "3850e6a352628733cfb3bb2ff2f8f400cbdd4ecb9c512f223f690cf9b688d399",
+      "text_kind": "utf8-json-object"
+    },
+    {
+      "path": "validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "bytes": 88,
+      "sha256": "68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784",
+      "text_kind": "utf8-base64-sha512"
+    },
+    {
+      "path": "validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+      "bytes": 178,
+      "sha256": "2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c",
+      "text_kind": "utf8-json-object"
+    },
+    {
+      "path": "validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "bytes": 88,
+      "sha256": "68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784",
+      "text_kind": "utf8-base64-sha512"
+    },
+    {
+      "path": "validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+      "bytes": 178,
+      "sha256": "79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3",
+      "text_kind": "utf8-json-object"
+    },
+    {
+      "path": "validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+      "bytes": 88,
+      "sha256": "927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55",
+      "text_kind": "utf8-base64-sha512"
+    }
+  ]
+}

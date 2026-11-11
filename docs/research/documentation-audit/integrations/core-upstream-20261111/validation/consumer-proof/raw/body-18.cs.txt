@@ -1,0 +1,11 @@
+await foreach (DeviceChange change in YubiKeyManager.WatchAsync())
+{
+    Console.WriteLine(change switch
+    {
+        DeviceAdded added => $"Added: serial {added.Device.SerialNumber}",
+        DeviceRemoved removed => $"Removed: serial {removed.Device.SerialNumber}",
+        DeviceUpdated updated => $"Updated: serial {updated.Device.SerialNumber}",
+        SnapshotComplete => "Initial snapshot complete",
+        _ => "Unknown change"
+    });
+}

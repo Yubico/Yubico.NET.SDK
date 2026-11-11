@@ -1,0 +1,172 @@
+CLAUDE.md:527:    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);
+README.md:46:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+README.md:55:For continuous presence tracking, use `YubiKeyManager.WatchAsync(ct)`, or share a `YubiKeyMonitor` from
+benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs:324:                var devices = await YubiKeyManager.FindAllAsync();
+benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs:87:        var devices = await YubiKeyManager.FindAllAsync()
+benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs:104:    public async Task Setup() => _monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs:118:        var devices = await YubiKeyManager.FindAllAsync()
+benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs:126:        var monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+docs/LOGGING.md:9:var devices = await YubiKeyManager.FindAllAsync();
+docs/LOGGING.md:29:var devices = await YubiKeyManager.FindAllAsync();
+docs/LOGGING.md:70:var devices = await YubiKeyManager.FindAllAsync();
+docs/NATIVE-AOT.md:99:2. Runs `YubiKeyManager.FindAllAsync` through Core.
+docs/TESTING.md:381:var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+docs/TESTING.md:461:- Tests that call `YubiKeyManager.FindAllAsync()` expecting results
+docs/TESTING.md:480:1. If the test calls `YubiKeyManager.FindAllAsync()` or opens device connections:
+docs/architecture/device-discovery-guarantees.md:115:`YubiKeyManager.FindAllAsync(interfaces, cancellationToken)` creates a fresh finder per call. Its immutable scope
+docs/architecture/event-driven-device-discovery.md:9:`YubiKeyManager.WatchAsync(ct)` creates and disposes a private monitor per enumeration, starting on the
+docs/architecture/physical-device-model.md:61:var devices = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.All);
+docs/architecture/physical-device-model.md:77:var fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido);
+docs/architecture/physical-device-model.md:100:await using var monitor = await YubiKeyManager.CreateMonitorAsync(cancellationToken);
+docs/architecture/sdk-architecture-diagrams.md:295:    Watch(["await foreach YubiKeyManager.WatchAsync()"])
+docs/architecture/sdk-architecture-diagrams.md:296:    Create(["await YubiKeyManager.CreateMonitorAsync()"])
+docs/architecture/sdk-architecture-diagrams.md:334:drain timeout exists. `YubiKeyManager.WatchAsync` owns a private monitor for one enumeration;
+docs/architecture/sdk-architecture-diagrams.md:400:- **Monitoring:** `await foreach (var change in YubiKeyManager.WatchAsync(ct))` is the one-line path:
+docs/migration/v1-to-v2-changelog.md:7:- Documented `YubiKeyManager.WatchAsync` private ownership and shared monitor subscriptions:
+docs/migration/v1-to-v2-changelog.md:64:- Clarified that v2 HID listener hints are rescan triggers only; public `YubiKeyManager.WatchAsync` remains repository-diffed Added/Removed truth.
+docs/migration/v1-to-v2-changelog.md:174:- Strengthened `hid-listener-rescan-hints`: added evidence for the new internal `DeviceEventBroadcaster`/`DeviceEventStream` split and the `YubiKeyManager.WatchAsync` addition (`refactor(core): remove System.Reactive dependency`, `feat(core): add WatchAsync async-enumerable device event stream`) that back `v1-to-v2.md`'s existing Rx/`IObservable` clarification sentence, and noted the new `WatchAsync` entry point in the guide text. Bumped `last_reviewed_commit`.
+docs/migration/v1-to-v2-changelog.md:213:- Added `core-find-first-discovery-helpers`: `feat(core): add first-key discovery helpers` (`6cb3875f`, merged via PR #661/#663) adds `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` (throws `InvalidOperationException` when no device matches) and `FindFirstOrDefaultAsync(predicate, cancellationToken)` (returns `null`) as one-shot convenience queries over `FindAllAsync`. The same commit had already updated the Common Migration Recipes' Device Info snippet to use `FindFirstAsync`, but left that change without a backing map entry; this update adds the entry and cross-references it from both the Device Discovery and Device Info recipes in `v1-to-v2.md`.
+docs/migration/v1-to-v2-gaps.md:79:**Verified API parity/improvement, no gap**: device discovery/hot-plug (owned `YubiKeyMonitor.WatchAsync` for `await foreach` after awaited `YubiKeyManager.CreateMonitorAsync`, with initial replay and no third-party dependency; current lifecycle changes still require attended hardware acceptance); USB HID/CCID/NFC transports; Windows/macOS/Linux platform interop; APDU chaining (`ApduException` gains `FromResponse`/`FromStatusWord` factories); crypto key-handling types (RSA/EC/Curve25519, ASN.1, HKDF) fully ported plus new COSE/ARKG types; `SCardException`/`PlatformApiException` parity.
+docs/migration/v1-to-v2.md:32:V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived` and `Removed` events (`EventHandler<HidDeviceEventArgs>`) carrying the affected `IHidDevice`. V1 YubiKey-level monitoring used `YubiKeyDeviceListener.Arrived`/`Removed` and the `YubiKeyDevice.FindAll()` cache. V2 transport listeners implement `IDeviceChangeListener` with an `Action? Changed` callback: a payload-less rescan hint, not authoritative physical-device state. Applications should consume `YubiKeyManager.WatchAsync(ct)`, or share an owned monitor from `CreateMonitorAsync` and consume `monitor.WatchAsync(ct)`. Both emit `DeviceAdded` replay, `SnapshotComplete` (even when empty), then live `DeviceAdded`, `DeviceRemoved`, and `DeviceUpdated` records with scan revisions.
+docs/migration/v1-to-v2.md:248:var devices = await YubiKeyManager.FindAllAsync(
+docs/migration/v1-to-v2.md:260:  and replace static monitoring/shutdown with `await using var monitor = await YubiKeyManager.CreateMonitorAsync(ct)`.
+docs/migration/v1-to-v2.md:265:- For the common "just get one matching device" case, prefer `YubiKeyManager.FindFirstAsync(predicate, cancellationToken: ct)` (throws `InvalidOperationException` when none match) or `FindFirstOrDefaultAsync(...)` (returns `null`) over `FindAllAsync(...).First()`. Use named cancellation arguments; token-only overloads were removed. See `core-find-first-discovery-helpers` in `v1-to-v2-map.yml` and `docs/usage/device-discovery.md`.
+docs/migration/v1-to-v2.md:273:| Static `StartMonitoring` / process-global watch | `YubiKeyManager.WatchAsync(ct)` for a private producer, or share `CreateMonitorAsync` and `monitor.WatchAsync(ct)` |
+docs/migration/v1-to-v2.md:310:var device = await YubiKeyManager.FindFirstAsync(cancellationToken: cancellationToken);
+docs/migration/v1-to-v2.md:327:- The snippet uses `YubiKeyManager.FindFirstAsync(...)`, the one-shot single-device discovery helper; see `core-find-first-discovery-helpers` in `v1-to-v2-map.yml`.
+docs/usage/device-discovery.md:13:var devices = await YubiKeyManager.FindAllAsync();
+docs/usage/device-discovery.md:48:| One device-change consumer | `YubiKeyManager.WatchAsync(ct)`; enumeration owns the monitor |
+docs/usage/device-discovery.md:59:var allDevices = await YubiKeyManager.FindAllAsync();
+docs/usage/device-discovery.md:62:var smartCardDevices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
+docs/usage/device-discovery.md:65:var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+docs/usage/device-discovery.md:68:var firstDevice = await YubiKeyManager.FindFirstAsync();
+docs/usage/device-discovery.md:69:var firstSmartCardDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
+docs/usage/device-discovery.md:83:var smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
+docs/usage/device-discovery.md:86:var fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
+docs/usage/device-discovery.md:89:var allYubiKeys = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+docs/usage/device-discovery.md:92:var selected = await YubiKeyManager.FindFirstAsync(
+docs/usage/device-discovery.md:146:var device = await YubiKeyManager.FindFirstAsync();
+docs/usage/device-discovery.md:236:await foreach (var change in YubiKeyManager.WatchAsync(ct))
+docs/usage/device-discovery.md:267:await foreach (var change in YubiKeyManager.WatchAsync(ct))
+docs/usage/device-discovery.md:296:await using var monitor = await YubiKeyManager.CreateMonitorAsync();
+docs/usage/device-discovery.md:352:    await foreach (var change in YubiKeyManager.WatchAsync(ct))
+docs/usage/device-discovery.md:365:    var devices = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+docs/usage/device-discovery.md:482:        var devices = await YubiKeyManager.FindAllAsync();
+docs/v1-to-v2-comparison.md:44:- `YubiKeyManager.WatchAsync` and owned `YubiKeyMonitor.WatchAsync` provide device changes,
+docs/v1-to-v2-comparison.md:50:  Await `YubiKeyManager.CreateMonitorAsync` for initialized tracking and dispose that
+docs/v2-highlights.md:55:`YubiKeyManager.WatchAsync(ct)` owns a private monitor per enumeration.
+docs/v2-highlights.md:56:`await YubiKeyManager.CreateMonitorAsync(ct)` instead returns an initialized `YubiKeyMonitor` to share
+src/Cli.Shared/src/Device/DeviceSelector.cs:40:            token => YubiKeyManager.FindAllAsync(cancellationToken: token),
+src/Core/CLAUDE.md:555:Use `YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken)` when absence is exceptional and
+src/Core/CLAUDE.md:560:`YubiKeyManager.FindAllAsync(interfaces, cancellationToken)` is always one-shot, not a monitor rescan.
+src/Core/CLAUDE.md:608:`YubiKeyManager.WatchAsync(ct)` lazily creates a private monitor per enumeration and disposes it on exit.
+src/Core/CLAUDE.md:610:`YubiKeyManager.CreateMonitorAsync(ct)` creates a new initialized `YubiKeyMonitor`, the sole
+src/Core/PACKAGE_README.md:22:Use `await YubiKeyManager.FindFirstAsync(cancellationToken: ct)` for one-off selection.
+src/Core/PACKAGE_README.md:23:Use `await foreach (var change in YubiKeyManager.WatchAsync(ct))` for continuous changes, or share an
+src/Core/PACKAGE_README.md:24:initialized monitor from `await YubiKeyManager.CreateMonitorAsync(ct)` and dispose it with `await using`.
+src/Core/README.md:57:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/Core/README.md:60:foreach (var each in await YubiKeyManager.FindAllAsync())
+src/Core/README.md:82:Create it with `await YubiKeyManager.CreateMonitorAsync(cancellationToken)` and dispose with `await using`.
+src/Core/README.md:119:var smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);
+src/Core/README.md:120:var fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);
+src/Core/README.md:169:IYubiKey? matchingDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
+src/Core/README.md:189:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/Core/README.md:241:IYubiKey first = await YubiKeyManager.FindFirstAsync();
+src/Core/README.md:242:IYubiKey? smartCard = await YubiKeyManager.FindFirstOrDefaultAsync(
+src/Core/README.md:253:await foreach (DeviceChange change in YubiKeyManager.WatchAsync())
+src/Core/src/Devices/FindYubiKeys.cs:489:    ///     HID backends. Prefer <see cref="YubiKeyManager.FindAllAsync"/> unless code needs an injectable
+src/Core/src/Devices/README.md:28:- `YubiKeyManager.FindAllAsync(interfaces, cancellationToken)`: fresh scoped discovery with no tracking.
+src/Core/src/Devices/README.md:29:- `YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken)`: selection when absence is exceptional.
+src/Core/src/Devices/README.md:30:- `YubiKeyManager.FindFirstOrDefaultAsync(predicate, interfaces, cancellationToken)`: selection when absence is expected.
+src/Core/src/Devices/README.md:31:- `YubiKeyManager.WatchAsync(cancellationToken)`: one consumer owns a producer without managing a monitor explicitly.
+src/Core/src/Devices/README.md:32:- `YubiKeyManager.CreateMonitorAsync(cancellationToken)`: several consumers share one initialized producer.
+src/Core/src/Devices/YubiKeyManager.cs:17:/// var key = await YubiKeyManager.FindFirstAsync(
+src/Core/src/Devices/YubiKeyManager.cs:20:/// await using var monitor = await YubiKeyManager.CreateMonitorAsync(ct);
+src/Core/src/Devices/YubiKeyMonitor.cs:26:/// <para>Create one monitor per application through <see cref="YubiKeyManager.CreateMonitorAsync"/> and share
+src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs:75:    /// var devices = await YubiKeyManager.FindAllAsync();
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs:68:            () => YubiKeyManager.FindAllAsync());
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs:93:            () => YubiKeyManager.FindAllAsync());
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs:116:            () => YubiKeyManager.FindAllAsync());
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs:133:            () => YubiKeyManager.FindAllAsync());
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs:135:            () => YubiKeyManager.FindAllAsync());
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs:156:        await using var monitor = await YubiKeyManager.CreateMonitorAsync();
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs:257:            devices = await YubiKeyManager.FindAllAsync();
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs:287:            () => YubiKeyManager.FindAllAsync());
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs:60:        await using var monitor = await YubiKeyManager.CreateMonitorAsync(watching.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:39:        var all = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync(cancellationToken: timeout.Token));
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:42:        var smartCard = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, timeout.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:43:        var hid = await YubiKeyManager.FindAllAsync(ConnectionType.Hid, timeout.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:46:        Assert.Empty(await YubiKeyManager.FindAllAsync(ConnectionType.Unknown, timeout.Token));
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:57:        var all = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync(cancellationToken: timeout.Token));
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:60:        var first = await YubiKeyManager.FindFirstAsync(cancellationToken: timeout.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:62:        Assert.Null(await YubiKeyManager.FindFirstOrDefaultAsync(_ => false, cancellationToken: timeout.Token));
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:63:        await Assert.ThrowsAsync<InvalidOperationException>(() => YubiKeyManager.FindFirstAsync(_ => false, cancellationToken: timeout.Token));
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:70:        var oneShot = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync(cancellationToken: timeout.Token));
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:71:        await using var monitor = await YubiKeyManager.CreateMonitorAsync(timeout.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:86:        await foreach (var change in YubiKeyManager.WatchAsync(timeout.Token))
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:110:        var (again, againComplete) = await ReadSnapshotAsync(YubiKeyManager.WatchAsync(timeout.Token), timeout.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:119:        await using var monitor = await YubiKeyManager.CreateMonitorAsync(timeout.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:143:        var monitor = await YubiKeyManager.CreateMonitorAsync(timeout.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:160:        await using var recreated = await YubiKeyManager.CreateMonitorAsync(timeout.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs:173:        await using var monitor = await YubiKeyManager.CreateMonitorAsync(timeout.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs:81:        await using var monitor = await YubiKeyManager.CreateMonitorAsync(watching.Token);
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs:33:        var devices = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync());
+src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs:67:        await using var monitor = await YubiKeyManager.CreateMonitorAsync(cts.Token);
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs:201:        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(cancellationToken: ct));
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs:202:        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindAllAsync(interfaces: ConnectionType.All, cancellationToken: ct));
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs:203:        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(cancellationToken: ct));
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs:204:        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(predicate: null, cancellationToken: ct));
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs:205:        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstAsync(null, ConnectionType.All, ct));
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs:206:        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(cancellationToken: ct));
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs:207:        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(predicate: null, cancellationToken: ct));
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs:208:        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.FindFirstOrDefaultAsync(null, ConnectionType.All, ct));
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs:209:        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => YubiKeyManager.CreateMonitorAsync(ct));
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerWatchTests.cs:33:        var stream = YubiKeyManager.WatchAsync(fixture.CreateAsync, TestToken);
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerWatchTests.cs:57:        var stream = YubiKeyManager.WatchAsync(fixture.CreateAsync, tokenOnEnumerator ? TestToken : cancellation.Token);
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerWatchTests.cs:76:        await foreach (var change in YubiKeyManager.WatchAsync(fixture.CreateAsync, TestToken))
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerWatchTests.cs:93:        await using var watcher = YubiKeyManager.WatchAsync(fixture.CreateAsync, TestToken).GetAsyncEnumerator(TestToken);
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerWatchTests.cs:113:            await foreach (var change in YubiKeyManager.WatchAsync(fixture.CreateAsync, TestToken))
+src/Ctap2/README.md:54:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/Management/CLAUDE.md:870:var devices = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+src/Management/README.md:55:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/Management/README.md:107:var rebooted = await YubiKeyManager.FindAllAsync(); // Every Find performs fresh discovery.
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs:44:        await using var monitor = await YubiKeyManager.CreateMonitorAsync(timeout.Token);
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs:64:        await using var monitor = await YubiKeyManager.CreateMonitorAsync(creation.Token);
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs:95:        await using var recreated = await YubiKeyManager.CreateMonitorAsync(timeout.Token);
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs:115:            var selected = await YubiKeyManager.FindFirstAsync(predicate: key => key.SerialNumber == serial,
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs:117:            var optional = await YubiKeyManager.FindFirstOrDefaultAsync(predicate: key => key.SerialNumber == serial,
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs:128:        Assert.Null(await YubiKeyManager.FindFirstOrDefaultAsync(predicate: _ => false, cancellationToken: timeout.Token));
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs:130:            YubiKeyManager.FindFirstAsync(predicate: _ => false, cancellationToken: timeout.Token));
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs:141:        await using (var monitor = await YubiKeyManager.CreateMonitorAsync(timeout.Token))
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs:90:                var devices = await YubiKeyManager.FindAllAsync();
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs:106:        var settled = await YubiKeyManager.FindAllAsync();
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs:211:            devices = await YubiKeyManager.FindAllAsync();
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs:156:                ? YubiKeyManager.FindAllAsync(requested, token)
+src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs:157:                : YubiKeyManager.FindAllAsync(cancellationToken: token)));
+src/Oath/README.md:53:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/OpenPgp/README.md:63:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/Piv/README.md:51:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/SecurityDomain/README.md:59:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/Tests.Shared/CLAUDE.md:86:        var devices = await YubiKeyManager.FindAllAsync();
+src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs:196:                .ScanAsync(() => YubiKeyManager.FindAllAsync(interfaces: ConnectionType.All))
+src/Tests.TestProject/Controllers/DiTestController.cs:26:        var yubiKey = await YubiKeyManager.FindFirstOrDefaultAsync(cancellationToken: cancellationToken);
+src/WebAuthn/README.md:76:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/YubiHsm/README.md:59:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+src/YubiOtp/README.md:65:IYubiKey device = await YubiKeyManager.FindFirstAsync();
+verification/LinuxHidRouteVerification/HardwareScenarios.cs:24:        IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
+verification/LinuxHidRouteVerification/OperatorScenarios.cs:67:            IReadOnlyList<IYubiKey> absent = await YubiKeyManager.FindAllAsync();
+verification/LinuxHidRouteVerification/OperatorScenarios.cs:84:            IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(cancellationToken: deadline.Token);
+verification/MacOSHidBoundaryComparison/CurrentProfile.cs:262:            var devices = await YubiKeyManager.FindAllAsync();
+verification/MacOSHidBoundaryComparison/Program.cs:236:            var devices = await YubiKeyManager.FindAllAsync();
+verification/MacOSHidRouteVerification/AcceptanceScenarios.cs:97:        var devices = await YubiKeyManager.FindAllAsync();
+verification/MacOSHidRouteVerification/AcceptanceScenarios.cs:237:                var absent = await YubiKeyManager.FindAllAsync();
+verification/MacOSHidRouteVerification/AcceptanceScenarios.cs:260:            var found = await YubiKeyManager.FindAllAsync(cancellationToken: rescan.Token);
+verification/MacOSHidRouteVerification/ExpertFeatureScenario.cs:15:            IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
+verification/MacOSHidRouteVerification/ExpertIoScenario.cs:16:            IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
+verification/MacOSHidRouteVerification/ListenerDrainScenario.cs:184:        IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
+verification/MacOSHidRouteVerification/Program.cs:107:        IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
+verification/MacOSHidRouteVerification/Program.cs:170:        IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
+verification/MacOSHidRouteVerification/SmartCardScenario.cs:35:        IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
+verification/NativeAotVerification/Program.cs:45:IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(cancellationToken: CancellationToken.None);
+verification/NativeAotVerification/Program.cs:94:        var monitor = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);
+verification/NativeAotVerification/Program.cs:209:        var replacement = await YubiKeyManager.CreateMonitorAsync().ConfigureAwait(false);

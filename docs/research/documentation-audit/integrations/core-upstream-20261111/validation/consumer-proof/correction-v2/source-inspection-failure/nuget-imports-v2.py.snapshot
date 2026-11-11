@@ -1,0 +1,91 @@
+"""Source-only namespace-aware inspection of the observed NuGet MSBuild documents; no evaluator."""
+import hashlib
+import json
+from pathlib import Path
+import xml.etree.ElementTree as ET
+
+HERE = Path(__file__).resolve().parent
+ROOT = next(p for p in HERE.parents if (p / 'toolchain.cs').is_file())
+RUNTIME = Path('/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof')
+NS = 'http://schemas.microsoft.com/developer/msbuild/2003'
+
+
+def require(value, message):
+    if not value:
+        raise ValueError(message)
+
+
+def identity(path):
+    raw = path.read_bytes()
+    return dict(path=str(path), bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest())
+
+
+def generated_msbuild_imports(path):
+    root = ET.parse(path).getroot()
+    require(root.tag == '{' + NS + '}Project', 'Re-adjudicate a different generated NuGet XML namespace')
+    return list(root.iter('{' + NS + '}Import'))
+
+
+def inspect_document(path, package, suffix):
+    root = ET.parse(path).getroot()
+    imports = generated_msbuild_imports(path)
+    needle = ('$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/9.0.0/buildTransitive/'
+              'Microsoft.CodeAnalysis.NetAnalyzers.' + suffix)
+    matches = [node for node in imports if node.attrib.get('Project') == needle]
+    require(len(matches) == 1, 'Expected exactly one canonical generated analyzer import')
+    node = matches[0]
+    require(node.attrib.get('Condition') == f"Exists('{needle}')", 'Exact Exists guard changed')
+    parents = {child: parent for parent in root.iter() for child in parent}
+    parent = parents[node]
+    require(parent.tag == '{' + NS + '}ImportGroup' and
+            parent.attrib.get('Condition', '').strip() == "'$(ExcludeRestorePackageImports)' != 'true'",
+            'Generated restore-import group guard changed')
+    # The only property token admitted is the exact canonical root prefix above. No slash/alias rewrite.
+    installed = package / 'buildTransitive' / ('Microsoft.CodeAnalysis.NetAnalyzers.' + suffix)
+    require(installed.is_file(), 'Canonical installed import file is missing')
+    require(needle[len('$(NuGetPackageRoot)'):] == str(installed.relative_to(package.parent.parent)),
+            'Generated import suffix does not identify its installed package file')
+    if suffix == 'props':
+        roots = [n for n in root.iter('{' + NS + '}NuGetPackageRoot')]
+        require(len(roots) == 1 and Path(roots[0].text).resolve() == package.parent.parent.resolve() and
+                roots[0].attrib.get('Condition', '').strip() == "'$(NuGetPackageRoot)' == ''",
+                'Generated canonical NuGet root declaration changed')
+    return dict(document=identity(path), namespace=NS,
+                old_unqualified_import_matches=len(list(root.iter('Import'))),
+                canonical_matching_imports=len(matches), project_expression=node.attrib['Project'],
+                exact_exists_condition=node.attrib['Condition'], parent_condition=parent.attrib['Condition'],
+                installed_import=identity(installed), normalization='None: original expressions already match exactly.')
+
+
+def main():
+    inputs = json.loads((HERE / 'inputs.json').read_bytes())
+    projects = sorted(set(inputs['declared_graph']) | {row['path'] for row in inputs['hosts']})
+    rows = []
+    for relative in projects:
+        project = ROOT / relative
+        extensions = (RUNTIME / 'hosts' / project.stem / 'obj' if project.is_relative_to(HERE)
+                      else project.parent / 'obj')
+        assets_path = extensions / 'project.assets.json'
+        if not assets_path.is_file():
+            rows.append(dict(project=relative, status='not restored at this context; no import claim'))
+            continue
+        assets = json.loads(assets_path.read_bytes())
+        require(Path(assets['project']['restore']['projectPath']).resolve() == project.resolve(), 'Restore project differs')
+        library = assets['libraries']['Microsoft.CodeAnalysis.NetAnalyzers/9.0.0']
+        packages = [Path(p) / library['path'] for p in assets['packageFolders']]
+        packages = [p for p in packages if p.is_dir()]
+        require(len(packages) == 1, 'Canonical installed analyzer package is ambiguous')
+        package = packages[0]
+        documents = [inspect_document(extensions / (project.name + '.nuget.g.' + suffix), package, suffix)
+                     for suffix in ('props', 'targets')]
+        rows.append(dict(project=relative, status='existing generated imports structurally verified',
+                         assets=identity(assets_path), documents=documents,
+                         canonical_analyzers=[identity(package / 'analyzers/dotnet/cs' / name) for name in
+                            ('Microsoft.CodeAnalysis.NetAnalyzers.dll', 'Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll')]))
+    print(json.dumps(dict(scope='Source-only generated-document inspection; no SDK or compiler-proof execution',
+                          root_cause='Unqualified ElementTree Import lookup ignored the default MSBuild XML namespace.',
+                          projects=rows), indent=2))
+
+
+if __name__ == '__main__':
+    main()

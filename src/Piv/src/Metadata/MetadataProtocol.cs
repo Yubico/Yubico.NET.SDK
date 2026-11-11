@@ -38,7 +38,7 @@ internal static class MetadataProtocol
     private const byte TagIsDefault = 0x05;
     private const byte TagRetries = 0x06;
 
-    private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Metadata.MetadataProtocol");
+    private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(MetadataProtocol));
 
     internal static async Task<PinMetadata> GetPinMetadataAsync(
         IBackend backend,

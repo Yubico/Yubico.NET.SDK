@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v3.py", line 128, in <module>
+    main()
+    ~~~~^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v3.py", line 118, in main
+    base['capture'](args.context, args.attempt, args.build_label)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py#accepted-v2-plus-additional-multiset", line 568, in capture
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py#accepted-v2-plus-additional-multiset", line 483, in compiler_project
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py#accepted-v2-plus-additional-multiset", line 312, in restored_binary_bindings
+KeyError: 'runtime.linux-x64.Microsoft.DotNet.ILCompiler/10.0.15'

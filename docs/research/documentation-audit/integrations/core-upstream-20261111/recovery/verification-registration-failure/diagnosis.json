@@ -1,0 +1,15 @@
+{
+  "exit_code": 1,
+  "source_sha256": "22e36382712c402134fcd57dd30109d429d6a2b5795f122071ceae83543aa5c5",
+  "added_registrations": {
+    "fixture-worktree5": {
+      "bytes": 113,
+      "sha256": "b3f4a5173445b3c0806b12a07f285c34f01d1815132b0b6b9d109871558534e2"
+    }
+  },
+  "removed_registrations": [],
+  "changed_original_registrations": [
+    "core-upstream-20261111"
+  ],
+  "diagnosis": "An unrelated registration appeared after the transfer. Recovery performs no worktree-add operation. Preserve and compare every original backlink; separately report additional registrations without repairing or removing them."
+}

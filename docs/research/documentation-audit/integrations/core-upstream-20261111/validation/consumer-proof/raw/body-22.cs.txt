@@ -1,0 +1,5 @@
+using Yubico.YubiKit.Management;
+
+DeviceInfo info = await device.GetDeviceInfoAsync();
+int? serial = info.SerialNumber;
+FirmwareVersion firmware = info.FirmwareVersion;

@@ -7,6 +7,23 @@ static class BuildTargets
 {
     public static void Register(ToolchainContext ctx)
     {
+        // Opt-in regression gate, explicitly invoked by Linux Native AOT CI. Registering this
+        // action does not publish anything; build/test/default do not depend on this target.
+        TargetRegistry.Define("linux-hid-verification-publish", "Opt-in Linux HID contract host publish (JIT and Native AOT; not part of build)", () =>
+        {
+            const string project = "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj";
+            // Prepare both conditional dependency/import closures before binding inputs. Separate
+            // intermediate trees prevent one runtime's restore from replacing the other's assets.
+            foreach (var (kind, aot) in new[] { ("jit", "false"), ("aot", "true") })
+            {
+                Dotnet.Run($"restore {project} -r linux-x64 -p:Configuration=Release -p:SelfContained=true -p:PublishAot={aot} --artifacts-path artifacts/linux-hid-verification/build/{kind}", $"linux-hid-{kind}-restore");
+            }
+            Exec.RunOrFail("python3", "verification/LinuxHidRouteVerification/publish_contract.py begin", Exec.Display.Stream, "linux-hid-publish-inputs");
+            Dotnet.Run($"publish {project} -c Release -r linux-x64 --self-contained --no-restore -p:PublishAot=false --artifacts-path artifacts/linux-hid-verification/build/jit -o artifacts/linux-hid-verification/jit", "linux-hid-jit-publish");
+            Dotnet.Run($"publish {project} -c Release -r linux-x64 --self-contained --no-restore -p:PublishAot=true --artifacts-path artifacts/linux-hid-verification/build/aot -o artifacts/linux-hid-verification/aot", "linux-hid-aot-publish");
+            Exec.RunOrFail("python3", "verification/LinuxHidRouteVerification/publish_contract.py seal", Exec.Display.Stream, "linux-hid-publish-binding");
+        });
+
         TargetRegistry.Define("clean", "Empty artifacts/ except the run logs in artifacts/toolchain (--clean also runs dotnet clean)", () =>
         {
             PrintHeader("Cleaning");

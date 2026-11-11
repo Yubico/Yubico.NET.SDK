@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "exit_code": 1,
+  "source_sha256": "c00bb364945dcf75d62eef72d3137279fdf036083bdf49c2687b1b3c3224a249",
+  "interpretation": "New static inventory helper parsed two different ElementTree instances and used nodes from one in the other parent map. Original zero-byte generated-import-inspection.json retained. This is a source-inspector implementation error, not another compiler or product failure."
+}

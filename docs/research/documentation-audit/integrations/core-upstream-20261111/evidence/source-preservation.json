@@ -1,0 +1,21 @@
+{
+  "incoming_shipping_core_csharp_exceptions": [
+    {
+      "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+      "resolved": "853dbd8965dca128ee423079f7f2d0561341bd5a",
+      "incoming": "0bfbb9c321873bd6b29ca63cff086320a55cb503",
+      "equals_campaign": true
+    }
+  ],
+  "campaign_oath_csharp_changed_by_integration": [
+    "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+    "src/Oath/examples/OathTool/OathToolApplication.cs",
+    "src/Oath/examples/OathTool/Program.cs"
+  ],
+  "campaign_base32_exact": true,
+  "campaign_base32_tests_exact": true,
+  "unmerged_index_entries": [],
+  "head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+  "merge_head": "5746e72ed9a848d08b5782ddde025aa4a4b522ef"
+}

@@ -43,9 +43,8 @@ ManagementTool/
 │   ├── Output/                   # Output formatting helpers
 │   │   └── OutputHelpers.cs
 │   └── Prompts/                  # User input prompts
-│       ├── DeviceSelector.cs
-│       ├── LockCodePrompt.cs
-│       └── ManagementDeviceSelector.cs  # Three-transport selector, not used by current callers
+│       ├── DeviceSelector.cs       # SmartCard policy over the shared selector
+│       └── LockCodePrompt.cs
 ├── Commands/
 │   ├── InfoCommand.cs             # Read-only device information
 │   └── ConfigCommand.cs           # Read-only configuration
@@ -78,7 +77,7 @@ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.cspro
 The data commands are `info` and `config`. Top-level `-h`, `--help` and `help` print usage. Dispatch uses
 only the first token and ignores extra command arguments, so do not rely on the printed `command --help`
 suggestion: `info --help` can query a device instead of displaying command-specific help. Use the menu
-for configuration changes. Monitoring starts before dispatch, including for top-level help.
+for configuration changes. Selection uses fresh one-shot discovery; top-level help returns before discovery.
 
 ## Configuration tasks and recovery
 
@@ -135,9 +134,11 @@ metadata interpretation, not a claim about a device's certification status.
 
 ## Supported Transports
 
-The current menus and both local command handlers use the static SmartCard-only `DeviceSelector`.
-`ManagementDeviceSelector` permits all three SDK transports but is not wired into those paths. The
-no-device message still lists HID transports; that message does not reflect the active filter.
+The menus and both local command handlers use the static SmartCard-only `DeviceSelector`, a policy
+adapter over `Cli.Shared`. Discovery scans all interfaces before filtering, preserving complete composite
+views. One eligible device auto-selects; multiple devices require an explicit choice. In a noninteractive
+terminal, no match or an unavailable explicit choice returns without prompting. The retry diagnostic
+lists the actual SmartCard eligibility. SDK callers can select HID explicitly through session options.
 
 ## Requirements
 

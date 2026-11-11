@@ -1,0 +1,380 @@
+{
+  "pin": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+  "observed_utc": "2026-11-11T18:05:08.482185+00:00",
+  "machine": "x86_64",
+  "cpu_count": 20,
+  "available_commands": {
+    "dotnet": "/home/rupicola/.local/share/mise/dotnet-root/dotnet",
+    "clang": "/usr/bin/clang",
+    "ld": "/usr/bin/ld",
+    "objcopy": "/usr/bin/objcopy",
+    "python3": "/usr/bin/python3",
+    "bash": "/usr/bin/bash",
+    "pkg-config": "/usr/bin/pkg-config"
+  },
+  "selectors": {
+    "Core": {
+      "build": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj",
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "unit": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "integration": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ]
+    },
+    "Yubico.YubiKit.Core": {
+      "build": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj",
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "unit": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "integration": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ]
+    },
+    "Yubico.YubiKit.Core.UnitTests": {
+      "build": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "unit": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "integration": []
+    },
+    "Yubico.YubiKit.Core.IntegrationTests": {
+      "build": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ],
+      "unit": [],
+      "integration": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ]
+    }
+  },
+  "discovered_unit_projects": [
+    "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj",
+    "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Yubico.YubiKit.Cli.Shared.UnitTests.csproj",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+    "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj",
+    "src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj",
+    "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj",
+    "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj",
+    "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+    "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj"
+  ],
+  "pinned_sources": [
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "CLAUDE.md",
+      "bytes": 32219,
+      "sha256": "1621c3e508c39bcc56b98fa0f6fc3792bdab7f33df3d045857395eb4d50260f4"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "TOOLCHAIN.md",
+      "bytes": 29896,
+      "sha256": "d6db52dd984f8e8a8d30fb2de97fb24ea3bc868ae286a99febf8084137bbfdac"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "global.json",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "Directory.Build.props",
+      "bytes": 8142,
+      "sha256": "e27951c0c26be8796b9bdbe9b80454efb58fc5d3894f757dd0beb67d4e49952c"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "Directory.Build.targets",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "Directory.Packages.props",
+      "bytes": 3177,
+      "sha256": "b23da80b99da850555f2eea923994e748c35e725c1f9d79630df789a89bf3054"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": ".github/workflows/build.yml",
+      "bytes": 3188,
+      "sha256": "a0b482f374f129a994cb343725c42925ba0cf48e1d3971bc2f6f5db14448eb76"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": ".github/workflows/native-aot.yml",
+      "bytes": 3738,
+      "sha256": "dc29a3ae3d83fa326f83189e8af30dabca278cb7f95b925b6745b98628246a01"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/toolchain/Discovery.cs",
+      "bytes": 5896,
+      "sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/toolchain/Context.cs",
+      "bytes": 4681,
+      "sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/toolchain/BuildTargets.cs",
+      "bytes": 19267,
+      "sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/toolchain/TestTargets.cs",
+      "bytes": 14282,
+      "sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/toolchain/RunLog.cs",
+      "bytes": 21004,
+      "sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/toolchain/Results.cs",
+      "bytes": 6826,
+      "sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/toolchain/DocsTargets.cs",
+      "bytes": 14435,
+      "sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/toolchain/CoverageTargets.cs",
+      "bytes": 11548,
+      "sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "verification/LinuxHidRouteVerification/capture.py",
+      "bytes": 10134,
+      "sha256": "eb42b52d21831d35c7e43b707b4c79fb07738c04a33256bf746eeb5e4f2b9575"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "verification/LinuxHidRouteVerification/test_evidence_gates.py",
+      "bytes": 24508,
+      "sha256": "1ef6aaa3c5e8fd60e9f939139146e43ca585c3e2713ab6ce6efe498ed34d003d"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "verification/LinuxHidRouteVerification/publish_contract.py",
+      "bytes": 10880,
+      "sha256": "dc01cf282a6c7656355be0595d80d2442df34567ed6e3add3b393c36f329e562"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/architecture/check-architecture-map.sh",
+      "bytes": 9857,
+      "sha256": "3efef57b848324b396f3080ec1412d7e7ca89a28c05a4871f35dcd31ac4f1cb8"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/architecture/check-architecture-images.sh",
+      "bytes": 4115,
+      "sha256": "523bca13a29488e6ccf31569139be15cbb7ba96e5feba332a1d670ed499a3369"
+    },
+    {
+      "revision": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+      "path": "scripts/docs/test-docs-patches.py",
+      "bytes": 13360,
+      "sha256": "91057a61b23c70c8b687815f9c44937ccb5169f82b8df3b00eaf7330be34d044"
+    }
+  ],
+  "frozen_piv_reuse_sources": [
+    {
+      "revision": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-closeout.md",
+      "bytes": 14764,
+      "sha256": "94c7653606a0a631a9ffc056142c2aec7be8d565b3e2329e7297b46cfb177707"
+    },
+    {
+      "revision": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/snippet-validation.md",
+      "bytes": 6462,
+      "sha256": "c3819f2a30b3109f6cc37f4c0eca022f0045bb1cf01b8adff32e11355c6f4935"
+    },
+    {
+      "revision": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/corrections.md",
+      "bytes": 6342,
+      "sha256": "6cf029fd077ad70eab2cb8c42d8e6ae52a7cf42bcbde18c60693ca6aca74e35c"
+    },
+    {
+      "revision": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/check-preserved.py",
+      "bytes": 2996,
+      "sha256": "a6728406bec18c2aa3d5e7a59a0058b54ff8f8af1ce5c6cadbf0a9d53a607f3d"
+    },
+    {
+      "revision": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/check-records.py",
+      "bytes": 4600,
+      "sha256": "cfd53cbd28d7dee934c0477e3e36dcdfea9d36d1f2197bda84b8868af4d1a8a2"
+    },
+    {
+      "revision": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/capture-v4.py",
+      "bytes": 11690,
+      "sha256": "9ef86a2392bc223494d77b5caea8b056d42422248a5f2a025f5017cbd29d27e3"
+    },
+    {
+      "revision": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/compiler_policy.py",
+      "bytes": 8093,
+      "sha256": "05e770178e831ed64b5d8f77deba38954740445885341cf8b153b31557a20c5d"
+    },
+    {
+      "revision": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/project_graph_v4.py",
+      "bytes": 14196,
+      "sha256": "ca60cd1e4f2b2e1cc580a8c9000e504d074e2b7e71eacdff62328ca9bcbeb76c"
+    },
+    {
+      "revision": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/validation/examples/v4-tools/verify-v4.py",
+      "bytes": 9938,
+      "sha256": "b1b776f233b3ae59a98852facd47642e8b26189eecb0854bdbbd15942ace272d"
+    }
+  ],
+  "diagnostics": [
+    {
+      "command": [
+        "uname",
+        "-a"
+      ],
+      "exit_code": 0,
+      "stdout": "Linux y-omarchy 7.2.15-1-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 02 Nov 2026 10:32:17 +0000 x86_64 GNU/Linux\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "uname",
+        "-m"
+      ],
+      "exit_code": 0,
+      "stdout": "x86_64\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "dotnet",
+        "--info"
+      ],
+      "exit_code": 0,
+      "stdout": ".NET SDK:\n Version:           10.0.404\n Commit:            2ab2854867\n Workload version:  10.0.400-manifests.ad9f6d83\n MSBuild version:   18.9.15+2ab285486\n\nRuntime Environment:\n OS Name:     omarchy\n OS Version:  4.5.0\n OS Platform: Linux\n RID:         linux-x64\n Base Path:   /home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/\n\n.NET workloads installed:\nThere are no installed workloads to display.\nConfigured to use workload sets when installing new manifests.\nNo workload sets are installed. Run \"dotnet workload restore\" to install a workload set.\n\nHost:\n  Version:      10.0.15\n  Architecture: x64\n  Commit:       8e0f8ed231\n\n.NET SDKs installed:\n  9.0.320 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n  10.0.401 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n  10.0.403 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n  10.0.404 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n\n.NET runtimes installed:\n  Microsoft.AspNetCore.App 9.0.22 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.12 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.14 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.15 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.NETCore.App 9.0.22 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.12 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.14 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.15 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n\nOther architectures found:\n  None\n\nEnvironment variables:\n  DOTNET_MULTILEVEL_LOOKUP                 [0]\n  DOTNET_ROOT                              [/home/rupicola/.local/share/mise/dotnet-root]\n\nglobal.json file:\n  /tmp/opencode/core-upstream-20261111/global.json\n\nLearn more:\n  https://aka.ms/dotnet/info\n\nDownload .NET:\n  https://aka.ms/dotnet/download\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "clang",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "clang version 23.1.3\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ld",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "GNU ld (GNU Binutils) 2.47\nCopyright (C) 2026 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) a later version.\nThis program has absolutely no warranty.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "objcopy",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "GNU objcopy (GNU Binutils) 2.47\nCopyright (C) 2026 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) any later version.\nThis program has absolutely no warranty.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "clang",
+        "--print-file-name=crt1.o"
+      ],
+      "exit_code": 0,
+      "stdout": "/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/16/../../../../lib64/crt1.o\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "clang",
+        "--print-file-name=libz.a"
+      ],
+      "exit_code": 0,
+      "stdout": "libz.a\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "pkg-config",
+        "--modversion",
+        "zlib",
+        "libpcsclite",
+        "libudev"
+      ],
+      "exit_code": 0,
+      "stdout": "1.3.2\n2.5.3\n262\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "pacman",
+        "-Q",
+        "clang",
+        "lld",
+        "binutils",
+        "zlib",
+        "glibc",
+        "pcsclite",
+        "systemd-libs"
+      ],
+      "exit_code": 1,
+      "stdout": "clang 23.1.3-4\nbinutils 2.47-4\nzlib 1:1.3.2-4\nglibc 2.44+r50+g1848099f063e-1\npcsclite 2.5.3-1\nsystemd-libs 262.1-1\n",
+      "stderr": "error: package 'lld' was not found\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--name-only",
+        "--diff-filter=U"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "limits": "Availability only; service readiness, AOT linking, tests and native execution await coordinator gates."
+}

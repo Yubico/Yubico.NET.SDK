@@ -1,0 +1,122 @@
+{
+  "status": "all nine previously accepted project observations use the already validated framework-only shape",
+  "projects": [
+    {
+      "accepted_capture": "probe-first-v3",
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj",
+      "manifest_sha256": "2f55b3ad3ddc15d648121074c03e1730193035d9c4ac083afd8c4177f7a352ea",
+      "retained_asset_snapshot": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/probe-first-v3/snapshots/06cab567511e25457516ce0eb5bb6e7d1329177fb149b94fe0dca598eab04121-project.assets.json.snapshot",
+      "retained_assets_sha256": "06cab567511e25457516ce0eb5bb6e7d1329177fb149b94fe0dca598eab04121",
+      "policy_tfm": "net10.0",
+      "target_keys": [
+        "net10.0"
+      ],
+      "catalog_rows_outside_framework_target": [],
+      "limit": "Inspecting original retained metadata only; no successful compiler artifact rebound or SDK replay."
+    },
+    {
+      "accepted_capture": "probe-first-v3",
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "manifest_sha256": "2f55b3ad3ddc15d648121074c03e1730193035d9c4ac083afd8c4177f7a352ea",
+      "retained_asset_snapshot": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/probe-first-v3/snapshots/6098d74e778be7b1fba60147db3f88c24e40e7178377865aac027e2696570d4b-project.assets.json.snapshot",
+      "retained_assets_sha256": "6098d74e778be7b1fba60147db3f88c24e40e7178377865aac027e2696570d4b",
+      "policy_tfm": "net10.0",
+      "target_keys": [
+        "net10.0"
+      ],
+      "catalog_rows_outside_framework_target": [],
+      "limit": "Inspecting original retained metadata only; no successful compiler artifact rebound or SDK replay."
+    },
+    {
+      "accepted_capture": "examples-first-v3",
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj",
+      "manifest_sha256": "4eca9497233e4bf75373a3966d6cba5479fee2ed14b93ccf5104b130b63c4bb1",
+      "retained_asset_snapshot": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/examples-first-v3/snapshots/4d9702e1a8eb4f2198880acb7373dc4711302e55bd97ec4fe3d0c574c22859e7-project.assets.json.snapshot",
+      "retained_assets_sha256": "4d9702e1a8eb4f2198880acb7373dc4711302e55bd97ec4fe3d0c574c22859e7",
+      "policy_tfm": "net10.0",
+      "target_keys": [
+        "net10.0"
+      ],
+      "catalog_rows_outside_framework_target": [],
+      "limit": "Inspecting original retained metadata only; no successful compiler artifact rebound or SDK replay."
+    },
+    {
+      "accepted_capture": "examples-first-v3",
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "manifest_sha256": "4eca9497233e4bf75373a3966d6cba5479fee2ed14b93ccf5104b130b63c4bb1",
+      "retained_asset_snapshot": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/examples-first-v3/snapshots/6098d74e778be7b1fba60147db3f88c24e40e7178377865aac027e2696570d4b-project.assets.json.snapshot",
+      "retained_assets_sha256": "6098d74e778be7b1fba60147db3f88c24e40e7178377865aac027e2696570d4b",
+      "policy_tfm": "net10.0",
+      "target_keys": [
+        "net10.0"
+      ],
+      "catalog_rows_outside_framework_target": [],
+      "limit": "Inspecting original retained metadata only; no successful compiler artifact rebound or SDK replay."
+    },
+    {
+      "accepted_capture": "examples-first-v3",
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj",
+      "manifest_sha256": "4eca9497233e4bf75373a3966d6cba5479fee2ed14b93ccf5104b130b63c4bb1",
+      "retained_asset_snapshot": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/examples-first-v3/snapshots/d533278f1070dae5f3941c17e1389675b73e99908ea0755950cc089db581f050-project.assets.json.snapshot",
+      "retained_assets_sha256": "d533278f1070dae5f3941c17e1389675b73e99908ea0755950cc089db581f050",
+      "policy_tfm": "net10.0",
+      "target_keys": [
+        "net10.0"
+      ],
+      "catalog_rows_outside_framework_target": [],
+      "limit": "Inspecting original retained metadata only; no successful compiler artifact rebound or SDK replay."
+    },
+    {
+      "accepted_capture": "examples-first-v3",
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "manifest_sha256": "4eca9497233e4bf75373a3966d6cba5479fee2ed14b93ccf5104b130b63c4bb1",
+      "retained_asset_snapshot": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/examples-first-v3/snapshots/75f1dc1d6eb8b3f05bcc56c90cbc15ec9ea4e0f536bf1a26f1de1b640aa4d6a4-project.assets.json.snapshot",
+      "retained_assets_sha256": "75f1dc1d6eb8b3f05bcc56c90cbc15ec9ea4e0f536bf1a26f1de1b640aa4d6a4",
+      "policy_tfm": "net10.0",
+      "target_keys": [
+        "net10.0"
+      ],
+      "catalog_rows_outside_framework_target": [],
+      "limit": "Inspecting original retained metadata only; no successful compiler artifact rebound or SDK replay."
+    },
+    {
+      "accepted_capture": "annotations-first-v3",
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj",
+      "manifest_sha256": "c7399492de135ff0daf049c16f80f8176fdea8f1724245103fb057886e32abe6",
+      "retained_asset_snapshot": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/annotations-first-v3/snapshots/fad051e543fb56eed354b044e022125138a467a014e3df7bf23d3dd3107ad108-project.assets.json.snapshot",
+      "retained_assets_sha256": "fad051e543fb56eed354b044e022125138a467a014e3df7bf23d3dd3107ad108",
+      "policy_tfm": "net10.0",
+      "target_keys": [
+        "net10.0"
+      ],
+      "catalog_rows_outside_framework_target": [],
+      "limit": "Inspecting original retained metadata only; no successful compiler artifact rebound or SDK replay."
+    },
+    {
+      "accepted_capture": "annotations-first-v3",
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "manifest_sha256": "c7399492de135ff0daf049c16f80f8176fdea8f1724245103fb057886e32abe6",
+      "retained_asset_snapshot": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/annotations-first-v3/snapshots/6098d74e778be7b1fba60147db3f88c24e40e7178377865aac027e2696570d4b-project.assets.json.snapshot",
+      "retained_assets_sha256": "6098d74e778be7b1fba60147db3f88c24e40e7178377865aac027e2696570d4b",
+      "policy_tfm": "net10.0",
+      "target_keys": [
+        "net10.0"
+      ],
+      "catalog_rows_outside_framework_target": [],
+      "limit": "Inspecting original retained metadata only; no successful compiler artifact rebound or SDK replay."
+    },
+    {
+      "accepted_capture": "annotations-first-v3",
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj",
+      "manifest_sha256": "c7399492de135ff0daf049c16f80f8176fdea8f1724245103fb057886e32abe6",
+      "retained_asset_snapshot": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/annotations-first-v3/snapshots/d533278f1070dae5f3941c17e1389675b73e99908ea0755950cc089db581f050-project.assets.json.snapshot",
+      "retained_assets_sha256": "d533278f1070dae5f3941c17e1389675b73e99908ea0755950cc089db581f050",
+      "policy_tfm": "net10.0",
+      "target_keys": [
+        "net10.0"
+      ],
+      "catalog_rows_outside_framework_target": [],
+      "limit": "Inspecting original retained metadata only; no successful compiler artifact rebound or SDK replay."
+    }
+  ]
+}

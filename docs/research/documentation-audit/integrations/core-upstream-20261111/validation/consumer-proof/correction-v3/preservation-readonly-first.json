@@ -1,0 +1,8 @@
+{
+  "status": "all original and preserved identities agree",
+  "records": 981,
+  "binary_records": 411,
+  "scope": "Read-only conservation of original successful compilation and failed capture; no new capture or SDK execution",
+  "v2_capture_executed": false,
+  "v3_capture_executed": false
+}

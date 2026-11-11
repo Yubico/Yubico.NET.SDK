@@ -1,0 +1,73 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v3.py",
+    "capture",
+    "--context",
+    "consumers",
+    "--attempt",
+    "consumers-first",
+    "--capture-name",
+    "consumers-first-v3",
+    "--build-label",
+    "consumer-consumers-build-first"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T19:40:36.829943+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-consumers-capture-first",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/command-journals/consumer-consumers-capture-first",
+  "qualification_faults": [],
+  "exit_code": 1,
+  "status": "failed",
+  "errors": [
+    "ValueError: Command exited 1"
+  ],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 3044859,
+    "sid": 3044859,
+    "leader_start_ticks": 80382666,
+    "before": {
+      "members": [],
+      "escaped": []
+    },
+    "signals": [],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": null,
+  "retained": [],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-consumers-capture-first/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-consumers-capture-first/stderr.log",
+      "bytes": 1336,
+      "sha256": "badc42f85c03d7510511659f7e40411e95b865ddf7d95c7c36521b9dfe13a7db"
+    }
+  ],
+  "finished": "2026-11-11T19:40:38.161797+00:00"
+}

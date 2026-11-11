@@ -1,0 +1,12 @@
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Backend/FidoHidBackend.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Backend/IManagementBackend.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Backend/OtpBackend.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Backend/SmartCardBackend.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/DeviceConfig.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/IManagementSession.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/IYubiKeyExtensions.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/ManagementSession.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/SetDeviceConfigOptions.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.GlobalUsings.g.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfo.cs

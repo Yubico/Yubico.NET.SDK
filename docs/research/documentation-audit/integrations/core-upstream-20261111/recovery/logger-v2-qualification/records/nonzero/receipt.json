@@ -1,0 +1,65 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "-c",
+    "import sys;print('owned stdout',flush=True);print('owned stderr',file=sys.stderr,flush=True);sys.exit(7)"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 18700,
+    "sha256": "d44dfe05fe38c75527ac8c0bfcfd8b87225f1246e8cc2f738638057ba28c82f0"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T18:31:23.533486+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/nonzero",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/journals/nonzero",
+  "qualification_faults": [],
+  "exit_code": 7,
+  "status": "failed",
+  "errors": [
+    "ValueError: Command exited 7"
+  ],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 2908974,
+    "sid": 2908974,
+    "leader_start_ticks": 79967336,
+    "before": {
+      "members": [],
+      "escaped": []
+    },
+    "signals": [],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": null,
+  "retained": [],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/nonzero/stdout.log",
+      "bytes": 13,
+      "sha256": "706e77e9d3a867b7ffb87aee2ee301e5f392e6e6c24b27f71e3a107d06dfe39b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-first/records/nonzero/stderr.log",
+      "bytes": 13,
+      "sha256": "866a5c36801c723fcd1f155ceb343ad743f764bfec926e1440be5814a6b91ea0"
+    }
+  ],
+  "finished": "2026-11-11T18:31:23.608829+00:00"
+}

@@ -1,0 +1,194 @@
+"""One authorized copy/verify/backlink transaction; preserve the inactive source."""
+import ctypes
+import datetime
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import stat
+import subprocess
+
+OLD = Path('/tmp/opencode/core-upstream-20261111')
+NEW = Path('/home/rupicola/Code/y/yubikit-core-docs-integration')
+PRIMARY = Path('/home/rupicola/Code/y/Yubico.Yubikit.NET')
+ADMIN = PRIMARY / '.git/worktrees/core-upstream-20261111'
+RUNTIME = Path(__file__).resolve().parent
+SAFETY = RUNTIME / 'storage-recovery-first'
+PACKET = Path('docs/research/documentation-audit/integrations/core-upstream-20261111')
+INDEX_SHA = 'bec87214c74b7d3ac356cf973521837aa269c521efffb85a7ec193e5c6f34251'
+CAMPAIGN = 'f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa'
+INCOMING = '5746e72ed9a848d08b5782ddde025aa4a4b522ef'
+ENV = dict(os.environ, GIT_OPTIONAL_LOCKS='0')
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def save(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('x') as out:
+        json.dump(data, out, indent=2)
+        out.write('\n')
+
+
+def git(root, *args):
+    return subprocess.check_output(['git', *args], cwd=root, env=ENV)
+
+
+def manifest(root):
+    rows = []
+    for path in sorted(root.rglob('*')):
+        st = path.lstat()
+        row = dict(path=path.relative_to(root).as_posix(), mode=stat.S_IMODE(st.st_mode))
+        if stat.S_ISLNK(st.st_mode):
+            row.update(kind='symlink', target=os.readlink(path))
+        elif stat.S_ISREG(st.st_mode):
+            raw = path.read_bytes()
+            row.update(kind='file', bytes=len(raw), sha256=sha(raw))
+        elif stat.S_ISDIR(st.st_mode):
+            row.update(kind='directory')
+        else:
+            raise ValueError(f'Unexpected special entry: {path}')
+        rows.append(row)
+    return dict(root_mode=stat.S_IMODE(root.stat().st_mode), entries=rows)
+
+
+def checkout_processes():
+    found = []
+    for proc in Path('/proc').glob('[0-9]*'):
+        try:
+            if proc.stat().st_uid != os.getuid():
+                continue
+            cmd = (proc / 'cmdline').read_bytes().replace(b'\0', b' ').decode(errors='replace')
+            if not any(term in cmd for term in ('dotnet', 'MSBuild', 'VBCSCompiler', 'run-command.py')):
+                continue
+            if cmd.startswith(('python3 -B -', '/usr/bin/bash -c')):
+                continue
+            cwd = os.readlink(proc / 'cwd')
+            descriptors = []
+            for entry in (proc / 'fd').iterdir():
+                try:
+                    link = os.readlink(entry)
+                    if link.startswith(str(OLD) + '/'):
+                        descriptors.append(dict(fd=entry.name, path=link))
+                except OSError:
+                    pass
+            if cwd == str(OLD) or cwd.startswith(str(OLD) + '/') or descriptors:
+                found.append(dict(pid=int(proc.name), command=cmd, cwd=cwd, descriptors=descriptors))
+        except OSError:
+            pass
+    return found
+
+
+def backlinks():
+    return {p.parent.name: dict(bytes=len(p.read_bytes()), sha256=sha(p.read_bytes()))
+            for p in sorted((PRIMARY / '.git/worktrees').glob('*/gitdir'))}
+
+
+def primary_state():
+    data = json.loads((OLD / PACKET / 'evidence/preservation-before.json').read_bytes())
+    return dict(head=git(PRIMARY, 'rev-parse', 'HEAD').decode().strip(),
+        branch=git(PRIMARY, 'symbolic-ref', 'HEAD').decode().strip(),
+        user_files=[dict(path=row['path'], bytes=len((PRIMARY / row['path']).read_bytes()),
+                        sha256=sha((PRIMARY / row['path']).read_bytes())) for row in data['original_user_files']])
+
+
+def main():
+    assert not NEW.exists() and not NEW.is_symlink()
+    assert sha((ADMIN / 'index').read_bytes()) == INDEX_SHA
+    assert git(OLD, 'rev-parse', 'HEAD').decode().strip() == CAMPAIGN
+    assert git(OLD, 'rev-parse', 'MERGE_HEAD').decode().strip() == INCOMING
+    assert not git(OLD, 'ls-files', '--unmerged') and not (ADMIN / 'index.lock').exists()
+    assert (ADMIN / 'gitdir').read_bytes() == (str(OLD / '.git') + '\n').encode()
+    processes = checkout_processes()
+    assert not processes, processes
+    assert not SAFETY.exists()
+    SAFETY.mkdir()
+    original = manifest(OLD)
+    admin_before = manifest(ADMIN)
+    backlink_before = backlinks()
+    primary_before = primary_state()
+    assert primary_before['head'] == CAMPAIGN
+    save(SAFETY / 'checkout-before.json', original)
+    save(SAFETY / 'admin-before.json', admin_before)
+    save(SAFETY / 'backlinks-before.json', backlink_before)
+    save(SAFETY / 'primary-before.json', primary_before)
+    save(SAFETY / 'process-before.json', dict(original_pid_2898163_exists=Path('/proc/2898163').exists(),
+        original_toolchain_pid_2897864_exists=Path('/proc/2897864').exists(), checkout_processes=processes))
+    shutil.copytree(ADMIN, SAFETY / 'private-admin-backup', symlinks=True, copy_function=shutil.copy2)
+    assert manifest(SAFETY / 'private-admin-backup') == admin_before
+    # Preserve the actual failed run and original logger attempt independently, before copying.
+    attempt = OLD / PACKET / 'validation/commands/main-gates-first'
+    run = OLD / 'artifacts/toolchain/runs/20261111-192055-814-build+test+docs-qa+docs-architecture+complexity+resilience+pack'
+    shutil.copytree(attempt, SAFETY / 'failed-logger-attempt', symlinks=True)
+    shutil.copytree(run, SAFETY / 'failed-actual-toolchain', symlinks=True)
+    for name in ('active-run.txt', 'latest.txt'):
+        shutil.copy2(OLD / 'artifacts/toolchain' / name, SAFETY / name)
+    assert not checkout_processes()
+    subprocess.run(['cp', '-a', '--', str(OLD), str(NEW)], check=True, env=ENV)
+    copied = manifest(NEW)
+    assert copied == original, 'Complete relative path/content/mode/symlink comparison failed'
+    assert manifest(OLD) == original, 'Original checkout changed during transfer'
+    assert manifest(ADMIN) == admin_before, 'Private administration changed during copy'
+    save(SAFETY / 'checkout-copied.json', copied)
+    # Documented manual relocation: update this registration's single backlink only.
+    pointer = ADMIN / 'gitdir'
+    assert pointer.read_bytes() == (str(OLD / '.git') + '\n').encode()
+    temporary = ADMIN / 'gitdir.core-relocation-first'
+    with temporary.open('xb') as out:
+        out.write((str(NEW / '.git') + '\n').encode())
+        out.flush()
+        os.fsync(out.fileno())
+    os.replace(temporary, pointer)
+    directory = os.open(ADMIN, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+    admin_after = manifest(ADMIN)
+    before_rows = {row['path']: row for row in admin_before['entries']}
+    after_rows = {row['path']: row for row in admin_after['entries']}
+    assert before_rows.keys() == after_rows.keys()
+    assert [name for name in before_rows if before_rows[name] != after_rows[name]] == ['gitdir']
+    backlink_after = backlinks()
+    assert [name for name in backlink_before if backlink_before[name] != backlink_after[name]] == ['core-upstream-20261111']
+    assert primary_state() == primary_before
+    assert sha((ADMIN / 'index').read_bytes()) == INDEX_SHA
+    assert git(NEW, 'rev-parse', 'HEAD').decode().strip() == CAMPAIGN
+    assert git(NEW, 'rev-parse', 'MERGE_HEAD').decode().strip() == INCOMING
+    assert not git(NEW, 'ls-files', '--unmerged')
+    assert git(OLD, 'ls-files', '--stage', '-z') == git(NEW, 'ls-files', '--stage', '-z')
+    assert manifest(NEW) == original and manifest(OLD) == original
+    save(SAFETY / 'admin-after.json', admin_after)
+    save(SAFETY / 'backlinks-after.json', backlink_after)
+    save(SAFETY / 'primary-after.json', primary_state())
+    receipt = dict(status='copied-verified-and-single-backlink-relocated',
+        utc=datetime.datetime.now(datetime.timezone.utc).isoformat(), old_root=str(OLD), new_root=str(NEW),
+        runtime_root=str(RUNTIME), primary=str(PRIMARY), private_admin=str(ADMIN),
+        private_admin_backup=str(SAFETY / 'private-admin-backup'), head=CAMPAIGN, merge_head=INCOMING,
+        index_sha256=INDEX_SHA, entries=len(original['entries']),
+        checkout_manifest_sha256=sha((SAFETY / 'checkout-before.json').read_bytes()),
+        admin_manifest_sha256=sha((SAFETY / 'admin-before.json').read_bytes()),
+        primary_unchanged=True, other_backlinks_unchanged=True, source_copy_unchanged=True,
+        changed_admin_files=['gitdir'], original_before_sha256='8f45a2c984ab0d741152378d5fcadb4f785a478fca9b47f4ba384139cf7558c9',
+        limits='Storage relocation only. Original tmpfs copy stays inactive and untouched. No build/test/native/device/commit/ref movement. No successful main gate RESULT.')
+    save(SAFETY / 'relocation-receipt.json', receipt)
+    recovery = NEW / PACKET / 'recovery'
+    assert not recovery.exists()
+    recovery.mkdir()
+    for name in ('checkout-before.json', 'checkout-copied.json', 'admin-before.json', 'admin-after.json',
+                 'backlinks-before.json', 'backlinks-after.json', 'primary-before.json', 'primary-after.json',
+                 'process-before.json', 'relocation-receipt.json', 'active-run.txt', 'latest.txt'):
+        shutil.copy2(SAFETY / name, recovery / name)
+    shutil.copytree(SAFETY / 'failed-logger-attempt', recovery / 'failed-logger-attempt')
+    shutil.copytree(SAFETY / 'failed-actual-toolchain', recovery / 'failed-actual-toolchain')
+    shutil.copy2(Path(__file__), recovery / 'transfer.py.snapshot')
+    (RUNTIME / 'tmp').mkdir()
+    (RUNTIME / 'qualification').mkdir()
+    print(json.dumps(receipt, indent=2))
+
+
+if __name__ == '__main__':
+    main()

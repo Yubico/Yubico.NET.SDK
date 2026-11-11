@@ -436,6 +436,14 @@ protocol so its crypto methods reject disposed-instance use; Version/Authenticat
 
 ### Unit Tests (No Hardware)
 
+`Ctap2SessionLinuxCrossLayerTests` complements the macOS HID cross-layer suite using actual Linux
+interfaces/slots, `YubiKeyDevice` and production native owners with report/readiness fakes underneath.
+It pins held creation/GetInfo, a multi-report MakeCredential request followed by exactly one CANCEL,
+terminal presence only after response drain, correlated GetInfo reuse, borrowed idle sessions, and
+owned pending-exchange disposal with claim retention through true quiescence. It does not fake
+`IFidoHidConnection`, operate a device, or attest native Linux/AOT behavior. See
+[L6a managed evidence](../../docs/research/linux-managed-acceptance.md).
+
 ```csharp
 [Fact]
 public void AuthenticatorInfo_Decode_ParsesVersions()

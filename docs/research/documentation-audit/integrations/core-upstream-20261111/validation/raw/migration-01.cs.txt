@@ -1,0 +1,5 @@
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+Console.WriteLine($"Serial {device.SerialNumber}: {device.AvailableConnections}");

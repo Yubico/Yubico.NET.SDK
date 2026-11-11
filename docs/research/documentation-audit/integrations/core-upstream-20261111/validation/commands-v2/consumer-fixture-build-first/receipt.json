@@ -1,0 +1,195 @@
+{
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "build",
+    "--project",
+    "Yubico.YubiKit.Management.IntegrationTests",
+    "--clean"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T20:13:46.866342+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [
+    "build"
+  ],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-fixture-build-first",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/command-journals/consumer-fixture-build-first",
+  "qualification_faults": [],
+  "exit_code": 0,
+  "status": "passed",
+  "errors": [],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 3063501,
+    "sid": 3063501,
+    "leader_start_ticks": 80581670,
+    "before": {
+      "members": [
+        {
+          "pid": 3063580,
+          "state": "S",
+          "ppid": 3063500,
+          "pgid": 3063501,
+          "sid": 3063501,
+          "start_ticks": 80581744
+        },
+        {
+          "pid": 3063581,
+          "state": "S",
+          "ppid": 3063500,
+          "pgid": 3063501,
+          "sid": 3063501,
+          "start_ticks": 80581744
+        },
+        {
+          "pid": 3063670,
+          "state": "S",
+          "ppid": 3063581,
+          "pgid": 3063501,
+          "sid": 3063501,
+          "start_ticks": 80581883
+        }
+      ],
+      "escaped": []
+    },
+    "signals": [
+      {
+        "signal": "SIGTERM",
+        "proven_members": [
+          {
+            "pid": 3063580,
+            "state": "S",
+            "ppid": 3063500,
+            "pgid": 3063501,
+            "sid": 3063501,
+            "start_ticks": 80581744
+          },
+          {
+            "pid": 3063581,
+            "state": "S",
+            "ppid": 3063500,
+            "pgid": 3063501,
+            "sid": 3063501,
+            "start_ticks": 80581744
+          },
+          {
+            "pid": 3063670,
+            "state": "S",
+            "ppid": 3063581,
+            "pgid": 3063501,
+            "sid": 3063501,
+            "start_ticks": 80581883
+          }
+        ]
+      }
+    ],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": {
+    "targets": [
+      "test-infrastructure-qa",
+      "native-aot-contract-qa",
+      "build"
+    ],
+    "projects": 0,
+    "executed": 0,
+    "skipped": 0,
+    "failed": 0,
+    "warnings": 0
+  },
+  "retained": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-211347-126-build/01-clean-Management.IntegrationTests.log",
+        "bytes": 39912,
+        "sha256": "10d2af5e58358fb96d957ada6ac14df4bd2018c15846b9660e4ff68513f84adf"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-fixture-build-first/toolchain/20261111-211347-126-build/01-clean-Management.IntegrationTests.log",
+        "bytes": 39912,
+        "sha256": "10d2af5e58358fb96d957ada6ac14df4bd2018c15846b9660e4ff68513f84adf"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-211347-126-build/02-build-Management.IntegrationTests.log",
+        "bytes": 984,
+        "sha256": "19a111ea5a4a8d382bd94afce87439a62697fba95dc6abf58f8743e7abfa92be"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-fixture-build-first/toolchain/20261111-211347-126-build/02-build-Management.IntegrationTests.log",
+        "bytes": 984,
+        "sha256": "19a111ea5a4a8d382bd94afce87439a62697fba95dc6abf58f8743e7abfa92be"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-211347-126-build/result.json",
+        "bytes": 734,
+        "sha256": "b9df615a8c91bb8c11ed21398b57116c84b48981fd1453e851aa56d1e650c784"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-fixture-build-first/toolchain/20261111-211347-126-build/result.json",
+        "bytes": 734,
+        "sha256": "b9df615a8c91bb8c11ed21398b57116c84b48981fd1453e851aa56d1e650c784"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-211347-126-build/result.txt",
+        "bytes": 459,
+        "sha256": "89917aa4b0783c623b9e20a54189e135de7ff255067ef51ca27588048fe12919"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-fixture-build-first/toolchain/20261111-211347-126-build/result.txt",
+        "bytes": 459,
+        "sha256": "89917aa4b0783c623b9e20a54189e135de7ff255067ef51ca27588048fe12919"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-211347-126-build/run.log",
+        "bytes": 2151,
+        "sha256": "01c8de5ce112627c34e34ecc7f9592498782bc4000605c5f6b8fb687e98282e9"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-fixture-build-first/toolchain/20261111-211347-126-build/run.log",
+        "bytes": 2151,
+        "sha256": "01c8de5ce112627c34e34ecc7f9592498782bc4000605c5f6b8fb687e98282e9"
+      }
+    }
+  ],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-fixture-build-first/stdout.log",
+      "bytes": 1786,
+      "sha256": "08b897b1cf0a5781276e13a89602469db0a293ff5b661c66e2272b6db4d48639"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-fixture-build-first/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finished": "2026-11-11T20:13:52.921500+00:00"
+}

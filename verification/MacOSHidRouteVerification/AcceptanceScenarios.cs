@@ -90,15 +90,11 @@ internal static class AcceptanceScenarios
             Console.Error.WriteLine($"FAIL mode={mode} serial={serial}: {ex}");
             return 1;
         }
-        finally
-        {
-            await YubiKeyManager.ShutdownAsync();
-        }
     }
 
-    private static async Task<IYubiKey> SelectedAsync(int serial, ConnectionType type, bool forceRescan = false)
+    private static async Task<IYubiKey> SelectedAsync(int serial, ConnectionType type)
     {
-        var devices = await YubiKeyManager.FindAllAsync(forceRescan: forceRescan);
+        var devices = await YubiKeyManager.FindAllAsync();
         var matches = devices.Where(d => d.SerialNumber == serial && d.SupportsConnection(type)).ToArray();
         if (matches.Length != 1)
             throw new InvalidOperationException($"Selected serial={serial} matched {matches.Length} {type} devices");
@@ -238,7 +234,7 @@ internal static class AcceptanceScenarios
             catch (InvalidOperationException ex) when (ex.Message == "FIDO input terminated: 1")
             {
                 // A disposal-induced terminal is not evidence of physical removal.
-                var absent = await YubiKeyManager.FindAllAsync(forceRescan: true);
+                var absent = await YubiKeyManager.FindAllAsync();
                 if (absent.Any(d => d.SerialNumber == serial))
                     throw new InvalidOperationException("Selected device was not observed absent after terminal input");
                 observedAbsent = true;
@@ -261,7 +257,7 @@ internal static class AcceptanceScenarios
         using var rescan = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         while (!rescan.IsCancellationRequested)
         {
-            var found = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken: rescan.Token);
+            var found = await YubiKeyManager.FindAllAsync(cancellationToken: rescan.Token);
             var matches = found.Where(d => d.SerialNumber == serial && d.SupportsConnection(ConnectionType.HidFido)).ToArray();
             if (matches.Length > 1)
                 throw new InvalidOperationException("More than one matching replacement device");

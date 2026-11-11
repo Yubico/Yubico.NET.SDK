@@ -1,0 +1,2 @@
+$ python3 verification/LinuxHidRouteVerification/publish_contract.py begin
+Publish input snapshot recorded; previous stamp invalidated

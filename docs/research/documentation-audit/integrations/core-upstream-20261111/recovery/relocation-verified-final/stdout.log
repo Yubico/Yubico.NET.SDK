@@ -1,0 +1,42 @@
+{
+  "status": "verified-relocation-and-accepted-source-binding",
+  "checked_root": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "inactive_original_unchanged": true,
+  "original_entries": 10558,
+  "copied_original_entries_unchanged": true,
+  "private_admin_backup_verified": true,
+  "private_admin_changed_only": [
+    "gitdir"
+  ],
+  "index_sha256": "bec87214c74b7d3ac356cf973521837aa269c521efffb85a7ec193e5c6f34251",
+  "head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+  "merge_head": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+  "accepted_product_tree": "899dade50586c55efad0031e0a001498a11f5a26",
+  "accepted_index_entries": 7196,
+  "independent_review_sha256": "a39efdd36e08261d571457f42b1144f2522542df65dc40612f3b96348197a36d",
+  "primary_unchanged": true,
+  "other_original_backlinks_unchanged": true,
+  "additional_registrations": {
+    "fixture-worktree5": {
+      "bytes": 113,
+      "sha256": "b3f4a5173445b3c0806b12a07f285c34f01d1815132b0b6b9d109871558534e2"
+    },
+    "yubikit-windows-async": {
+      "bytes": 49,
+      "sha256": "d00c8deba335807c5a3f52d0362370bd9ebc631c152f450e51b95cc3b9db1bf6"
+    },
+    "yubikit-windows-w1-contract": {
+      "bytes": 55,
+      "sha256": "91983dbd20a1bdfd882da27a9ce74e05ccd86f45a5ca6b3aa94088823623b65e"
+    },
+    "yubikit-windows-w1-native": {
+      "bytes": 53,
+      "sha256": "c5df3a43922d21002572b59bee6d0c5c72478bb90f2de850001c8e95728a837b"
+    },
+    "yubikit-windows-w1-owner": {
+      "bytes": 52,
+      "sha256": "c8157399a55233be56f8d46cbc730c52000b55980b62b9f48641a593e18c49f7"
+    }
+  },
+  "limits": "Read-only relocation/source identity verification. No build/test/native/device result."
+}

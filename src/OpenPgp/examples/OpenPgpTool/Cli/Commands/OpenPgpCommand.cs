@@ -5,7 +5,6 @@ using Spectre.Console.Cli;
 using System.Buffers;
 using System.Text;
 using Yubico.YubiKit.Core.Credentials;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.OpenPgp.Credentials;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
@@ -27,8 +26,6 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
 {
     public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
     {
-        YubiKeyManager.StartMonitoring();
-
         try
         {
             var selection = await DeviceSelector.SelectDeviceAsync();
@@ -47,10 +44,6 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
         {
             OutputHelpers.WriteError(ex.Message);
             return 1;
-        }
-        finally
-        {
-            await YubiKeyManager.ShutdownAsync();
         }
     }
 

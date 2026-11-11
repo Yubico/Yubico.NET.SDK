@@ -1,0 +1,96 @@
+// Copyright 2026 Yubico AB
+// Licensed under the Apache License, Version 2.0.
+
+using Spectre.Console;
+using Spectre.Console.Cli;
+using System.ComponentModel;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
+
+namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
+
+/// <summary>
+///     Generates a key on the YubiKey (openpgp keys generate).
+/// </summary>
+/// <remarks>
+///     Attribute writing precedes generation and can invalidate an existing key on later failure.
+///     Check slot/algorithm support and ROCA applicability before running; the command adds no ROCA guard.
+///     Use ordinary slots while ATT provisioning is affected by malformed CRT encoding.
+/// </remarks>
+public sealed class KeysGenerateCommand : OpenPgpCommand<KeysGenerateCommand.Settings>
+{
+    public sealed class Settings : CommandSettings
+    {
+        [CommandArgument(0, "<KEY>")]
+        [Description("Key slot (sig, dec, aut).")]
+        public string Key { get; init; } = "";
+
+        [CommandOption("--algorithm <ALG>")]
+        [Description("Algorithm (RSA2048, RSA3072, RSA4096, ECCP256, ECCP384, ECCP521, Ed25519, X25519).")]
+        [DefaultValue("RSA2048")]
+        public string Algorithm { get; init; } = "RSA2048";
+
+        [CommandOption("--admin-pin <PIN>")]
+        [Description("Admin PIN (prompted if not provided).")]
+        public string? AdminPin { get; init; }
+    }
+
+    protected override async Task<int> ExecuteCommandAsync(
+        CommandContext context,
+        Settings settings,
+        IOpenPgpSession session)
+    {
+        var keyRef = ParseKeyRef(settings.Key);
+
+        using var adminPin = GetAdminPin(settings.AdminPin);
+        if (adminPin is null)
+        {
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return 1;
+        }
+
+        await session.VerifyAdminAsync(adminPin.Memory);
+
+        var alg = settings.Algorithm.ToUpperInvariant();
+
+        await AnsiConsole.Status()
+            .StartAsync($"Generating {alg} key in {FormatKeyRef(keyRef)}...", async _ =>
+            {
+                switch (alg)
+                {
+                    case "RSA2048":
+                        await session.GenerateKeyAsync(keyRef, RsaAttributes.Create(RsaSize.Rsa2048));
+                        break;
+                    case "RSA3072":
+                        await session.GenerateKeyAsync(keyRef, RsaAttributes.Create(RsaSize.Rsa3072));
+                        break;
+                    case "RSA4096":
+                        await session.GenerateKeyAsync(keyRef, RsaAttributes.Create(RsaSize.Rsa4096));
+                        break;
+                    case "ECCP256":
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.P256));
+                        break;
+                    case "ECCP384":
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.P384));
+                        break;
+                    case "ECCP521":
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.P521));
+                        break;
+                    case "ED25519":
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.Ed25519));
+                        break;
+                    case "X25519":
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, KeyType.X25519));
+                        break;
+                    default:
+                        throw new ArgumentException(
+                            $"Unsupported algorithm: {settings.Algorithm}. " +
+                            "Use RSA2048, RSA3072, RSA4096, ECCP256, ECCP384, ECCP521, Ed25519, or X25519.");
+                }
+            });
+
+        OutputHelpers.WriteSuccess(
+            $"{alg} key generated in {FormatKeyRef(keyRef)} slot.");
+        return 0;
+    }
+}

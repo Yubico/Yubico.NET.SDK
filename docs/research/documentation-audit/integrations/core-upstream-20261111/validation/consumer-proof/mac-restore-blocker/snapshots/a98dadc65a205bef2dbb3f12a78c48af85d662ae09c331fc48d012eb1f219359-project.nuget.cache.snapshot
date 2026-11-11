@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "w9cH2wnkUWw=",
+  "success": true,
+  "projectFilePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+  "expectedPackageFiles": [
+    "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/microsoft.codeanalysis.netanalyzers.9.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

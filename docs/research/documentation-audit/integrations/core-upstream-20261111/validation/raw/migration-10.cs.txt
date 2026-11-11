@@ -1,0 +1,13 @@
+try
+{
+    var devices = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+}
+catch (OperationCanceledException)
+{
+    // Scan was cancelled
+}
+catch (PlatformInteropException ex)
+{
+    // Platform API error (e.g., SmartCard service not running)
+    Console.WriteLine($"Platform error: {ex.Message}");
+}

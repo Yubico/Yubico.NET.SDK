@@ -1,0 +1,138 @@
+"""Two bounded v5 corrections: direct comparison copy ownership and actual/potential compile distinction."""
+import argparse
+import ast
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import re
+import sys
+
+sys.dont_write_bytecode = True
+HERE = Path(__file__).resolve().parent
+V4_SHA = '0ca001505c2c3b121687146a0660f78639b78d7c5680c6a034bdd47f14719fff'
+ASSETS_SHA = 'f0432cbe6a8a88312c97b29c8f7982ebe62afc8ea45dbf476fbbddbfc3abd7ab'
+
+
+def require(value, message):
+    if not value:
+        raise ValueError(message)
+
+
+def identity(path):
+    raw = path.read_bytes()
+    return dict(path=str(path), bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest())
+
+
+def load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def accepted_v4():
+    require(identity(HERE / 'proof-v4.py')['sha256'] == V4_SHA and
+            identity(HERE / 'correction-v4/assets.py')['sha256'] == ASSETS_SHA, 'Accepted v4 source changed')
+    module = load('accepted_comparison_v4', HERE / 'proof-v4.py')
+    module.check_receipt()
+    return module
+
+
+def effective_collector():
+    accepted_v4()
+    source = (HERE / 'correction-v4/assets.py').read_text()
+    before = "            binding = dict(role='package-copy', package_id=row['package_id'], asset=relative, asset_kinds=kinds)\n        else:"
+    after = ("            binding = dict(role='package-copy', package_id=row['package_id'], asset=relative, asset_kinds=kinds)\n"
+             "        elif is_declared_comparison_copy(project, path):\n"
+             "            binding = declared_comparison_copy_owner(project, policy, path, destination, compiler_bindings, retain)\n"
+             "        else:")
+    transformations = [(before, after, 1),
+        ("require(package_refs == expected_compile, 'Selected package compile assets and actual Csc package reference set differ')",
+         "compile_candidates = compile_candidate_dispositions(project, raw, expected_compile, package_refs, packages, retain)", 1),
+        ("return dict(target_selection=selection, packages=dispositions, compiler_input_bindings=compiler_bindings,",
+         "return dict(target_selection=selection, packages=dispositions, compiler_input_bindings=compiler_bindings, compile_candidate_dispositions=compile_candidates,", 1)]
+    for old, new, count in transformations:
+        require(source.count(old) == count, 'Exact bounded collector correction site changed')
+        source = source.replace(old, new)
+    return source, [dict(before=old, after=new, count=count) for old, new, count in transformations]
+
+
+def check_receipt():
+    path = HERE / 'correction-v5/receipt.json'
+    receipt = json.loads(path.read_bytes())
+    for row in receipt['protected_originals'] + receipt['new_files']:
+        require(identity(Path(row['path'])) == row, 'V5 binding changed: ' + row['path'])
+    source, transformation = effective_collector()
+    require(receipt['collector_transformations'] == transformation and
+            receipt['effective_collector_sha256'] == hashlib.sha256(source.encode()).hexdigest(), 'V5 bounded collector transform differs')
+    return identity(path)['sha256']
+
+
+def collector_namespace():
+    helper = load('declared_comparison_copy_v5', HERE / 'correction-v5/copy-owner.py')
+    candidates = load('selected_compile_candidates_v5', HERE / 'correction-v5/compile-candidates.py')
+    namespace = dict(__name__='v4_collector_plus_declared_Core_copy', __file__=str(HERE / 'correction-v4/assets.py'),
+                     is_declared_comparison_copy=helper.is_declared_comparison_copy,
+                     declared_comparison_copy_owner=helper.declared_comparison_copy_owner,
+                     compile_candidate_dispositions=candidates.compile_candidate_dispositions)
+    source, _ = effective_collector()
+    exec(compile(source, str(HERE / 'correction-v4/assets.py') + '#direct-Core-copy-only', 'exec'), namespace)
+    return namespace
+
+
+def module(capture_name, receipt_sha):
+    v4 = accepted_v4()
+    base = v4.source_namespace(capture_name, receipt_sha)
+    source, _ = v4.effective_source()
+    capture = next(node for node in ast.parse(source).body if isinstance(node, ast.FunctionDef) and node.name == 'capture')
+    capture_source = ast.get_source_segment(source, capture)
+    require(capture_source.count("proof_revision='v4'") == 1, 'Exact capture revision field changed')
+    exec(compile(capture_source.replace("proof_revision='v4'", "proof_revision='v5'"), 'v5-capture-revision-only', 'exec'), base)
+    base['restored_binary_bindings'] = collector_namespace()['restored_binary_bindings']
+    previous_tools, previous_seal = base['tool_identities'], base['check_seal']
+
+    def tools():
+        return previous_tools() + [identity(HERE / path) for path in
+            ('correction-v5/copy-owner.py', 'correction-v5/compile-candidates.py', 'correction-v5/source-cases.py',
+             'correction-v5/preflight-fixture.py', 'correction-v5/lane.sh', 'correction-v5/receipt.json')]
+
+    def seals():
+        previous_seal()
+        check_receipt()
+
+    base['tool_identities'], base['check_seal'] = tools, seals
+    return base
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', choices=('static', 'capture', 'verify'))
+    parser.add_argument('--context', choices=('mac-comparison', 'fixture'))
+    parser.add_argument('--attempt')
+    parser.add_argument('--capture-name')
+    parser.add_argument('--build-label')
+    parser.add_argument('--live', action='store_true')
+    args = parser.parse_args()
+    receipt_sha = check_receipt()
+    if args.action == 'static':
+        base = module('static-not-capture', receipt_sha)
+        print(json.dumps(dict(base['static_check'](), proof_revision='v5', contexts=['mac-comparison', 'fixture'], correction_receipt_sha256=receipt_sha), indent=2))
+        return
+    for value in (args.attempt, args.capture_name):
+        require(value and re.fullmatch(r'[a-z0-9][a-z0-9-]*', value), 'Explicit compiler/capture identity required')
+    require(args.attempt != args.capture_name, 'Keep actual compiler and evidence identities distinct')
+    base = module(args.capture_name, receipt_sha)
+    if args.action == 'capture':
+        require(args.context and args.build_label, 'Actual successful build label and exact context required')
+        base['capture'](args.context, args.attempt, args.build_label)
+    else:
+        manifest = json.loads((HERE / 'evidence' / args.capture_name / 'manifest.json').read_bytes())
+        require(manifest['context'] in ('mac-comparison', 'fixture') and manifest['attempt'] == args.attempt and
+                manifest['capture_name'] == args.capture_name and manifest['proof_revision'] == 'v5' and
+                manifest['correction_receipt_sha256'] == receipt_sha, 'V5 Mac manifest identity differs')
+        base['verify'](args.attempt, args.live)
+
+
+if __name__ == '__main__':
+    main()

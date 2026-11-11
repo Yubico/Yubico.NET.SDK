@@ -1,0 +1,187 @@
+{
+  "status": "source-backed multiset correction and full read-only representative preflight; actual capture/live pending",
+  "base": "Immutable original proof plus accepted v2 namespace/evidence transforms",
+  "classification": "Existing additive AdditionalFiles input multiplicity, not SDK/build failure",
+  "protected_originals": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py",
+      "bytes": 41278,
+      "sha256": "54cb56e12e3b683d2c662c133dc6e23eadef355d7e515f478a87b36a87f25281"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v2.py",
+      "bytes": 5211,
+      "sha256": "78024e05a44e82b309c3ec70a5814c13513f0a9436ccc345c224e0b19380b695"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/nuget-imports-v2.py",
+      "bytes": 5472,
+      "sha256": "2949c4359d893cb600042ba29eb48e7ccadf08e9af6e176c51fc9e1e9c17007f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/run-lane.sh",
+      "bytes": 1847,
+      "sha256": "e28f00a8ff8f0416d7e62f29ff432923fb821e3f4b34d395679a8ea54daa7b2e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/run-lane-v2.sh",
+      "bytes": 1989,
+      "sha256": "34b9bfc6a85276e1db8993302f2d4980b9d200df11850615a3133e63bc31c3d5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/Capture.targets",
+      "bytes": 7800,
+      "sha256": "3242fe01c0f0ac6d7a1d27bd4539da21fb143e4c5b882aaee30e629532f4bf8a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inputs.json",
+      "bytes": 49129,
+      "sha256": "af9a3e6a35388d6d8fc0973a263098aa2eaad573f81a43fd6191873fefd23f83"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/preparation-seal.json",
+      "bytes": 31893,
+      "sha256": "6353150d700c743b6d64fab417acd742f31eea2d984de2eca3a50a301b377980"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/tooling-provenance.json",
+      "bytes": 15107,
+      "sha256": "0b56d25ce523b69848033b41fd676e199e2bc20a6faa607d35e4a188e806cfdb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v2/receipt.json",
+      "bytes": 6815,
+      "sha256": "0b76f9cf9222a69f6b97f6916b0b6a0b93812a999bb7268e07f16e6fb3d6f783"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v2/handoff.md",
+      "bytes": 8066,
+      "sha256": "00ec820628f75b3d4af029d761c4856e9e36e1ac851672cb6a07fb309fd55c66"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v2/independent-review.md",
+      "bytes": 10248,
+      "sha256": "7fbb6ab164b6d5112c0773d56b0598a306191297745a5a8f4dd822826c6c0d51"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v2/failure-preservation/manifest.json",
+      "bytes": 496311,
+      "sha256": "7993195c1d68e4f893f1306a7e3580ac02ece135298593891b060a27840fc1cc"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/probe-first/failure.json",
+      "bytes": 137442,
+      "sha256": "594b2dd49a252c0d09d1acb458224f7c87c38afd6b14a6cdbfac19509289e6ba"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/consumer-validation-preparation.md",
+      "bytes": 16670,
+      "sha256": "3a8204c0e8855590bf62892f7f6b1b55691a88eab42c08f880499bd0f00dbc22"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/Directory.Build.targets",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.publicapianalyzers/5.6.0/buildTransitive/Microsoft.CodeAnalysis.PublicApiAnalyzers.targets",
+      "bytes": 11897,
+      "sha256": "19e0ef5f9198b4cc4239fa738e5a82cc7ef70bfe07f90272b5b1933df06812ad"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Microsoft.Common.targets",
+      "bytes": 3969,
+      "sha256": "e7b0bdb12309142f15fbb751b29f606977a5631097862b0d3635195d8066696a"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Roslyn/Microsoft.CSharp.Core.targets",
+      "bytes": 12655,
+      "sha256": "33a63870665f8eb019f43da5effa450f6c8000089a879bc5373061e870bd3780"
+    }
+  ],
+  "new_files": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v3.py",
+      "bytes": 5800,
+      "sha256": "3be9675df87e5fd8d742948efa8faf632df59ee6df752541d2841a4c624ccccb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/run-lane-v3.sh",
+      "bytes": 1967,
+      "sha256": "20ed91076c58aa57a0cd6280a714d48abbc71d06be8a89f6778651d70fd22f03"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/additional-files.py",
+      "bytes": 8367,
+      "sha256": "8ae4b8b7b9475c68b5775f8d1f6550ccffded54ba10188d4feb0225216decc7f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/handoff.md",
+      "bytes": 8056,
+      "sha256": "bb1af6666ade662c4db4af5fa11ed3d70a45c1f4e275bf320afcd59151ecbfdb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/observed-additional-files.json",
+      "bytes": 13457,
+      "sha256": "49001b16b13ac5cf0d6fa3112004fc3f0e0910cd7200e5b17dc17f036af03a8b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/preflight-entry-failure/preflight.py.snapshot",
+      "bytes": 4300,
+      "sha256": "bd065edd648b217cb5db571203399c2a0cbf67a3ce9933e783524b1de0a95cbe"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/preflight-entry-failure/receipt.json",
+      "bytes": 325,
+      "sha256": "72db4d8483fb9c11102acf2efe72175fca5265c11169ff34973632369820baa1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/preflight-entry-failure/stderr.log",
+      "bytes": 1196,
+      "sha256": "91cd1e0ce4350948d85d4486fe74be6d383abe8b9f118fcc1653a764532b8705"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/preflight-entry-failure/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/preflight-second.json",
+      "bytes": 651009,
+      "sha256": "ed5ae8e08bb6c77f6c391821ea88a35c2d8969fcf5449f3ab86348c95cd6073a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/preflight.py",
+      "bytes": 4331,
+      "sha256": "e1b95f9e685a3193ae32e14e4aa9b50ac395835a3ad92056963aa590be07f8b5"
+    }
+  ],
+  "transformations": [
+    {
+      "before": "additional = items('additional-files.txt')",
+      "after": "additional, additional_proof = additional_file_multiset(project, folder, args, retain)",
+      "count": 1
+    },
+    {
+      "before": "('/analyzerconfig:', configs), ('/additionalfile:', additional)):",
+      "after": "('/analyzerconfig:', configs)):",
+      "count": 1
+    },
+    {
+      "before": "return dict(project=str(project), policy=policy, graph=graph, canonical_analyzers=analyzer,",
+      "after": "return dict(project=str(project), policy=policy, graph=graph, canonical_analyzers=analyzer, additional_file_proof=additional_proof,",
+      "count": 1
+    },
+    {
+      "before": "proof_revision='v2'",
+      "after": "proof_revision='v3'",
+      "count": 1
+    }
+  ],
+  "effective_source_sha256": "ecff32566b0d6335d886ee239a8e63cb510e1320f9115d82b5d1cf3de6085c56",
+  "original_compiler_attempt": "probe-first",
+  "original_successful_build": "consumer-probe-build-first",
+  "proposed_capture_name": "probe-first-v3",
+  "duplicate_allowance": "Only both project-local PublicAPI files exactly twice, backed by canonical root and exact PublicApiAnalyzers 5.6.0 declarations/import guards/order. Other categories retain uniqueness.",
+  "preflight": "Both full compiler_project predicate paths passed using a read-only identity/text collector. No retained files, binary copies, SDK run or compiler manifest."
+}

@@ -1,0 +1,109 @@
+{
+  "scope": "Explicit disposition of all downloadDependencies declarations in the observed consumer target metadata",
+  "declarations": [
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+      "selected_target": "net10.0",
+      "download_declaration": {
+        "name": "Microsoft.AspNetCore.App.Runtime.linux-x64",
+        "version": "[10.0.15, 10.0.15]"
+      },
+      "catalog_matches": [],
+      "observed_compiler_or_copy_matches": [],
+      "disposition": "Restore download declaration retained, not an actual application compiler/runtime/native asset in this RID-neutral build."
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+      "selected_target": "net10.0",
+      "download_declaration": {
+        "name": "Microsoft.NETCore.App.Runtime.linux-x64",
+        "version": "[10.0.15, 10.0.15]"
+      },
+      "catalog_matches": [],
+      "observed_compiler_or_copy_matches": [],
+      "disposition": "Restore download declaration retained, not an actual application compiler/runtime/native asset in this RID-neutral build."
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+      "selected_target": "net10.0",
+      "download_declaration": {
+        "name": "Microsoft.NETCore.App.Runtime.NativeAOT.linux-x64",
+        "version": "[10.0.15, 10.0.15]"
+      },
+      "catalog_matches": [],
+      "observed_compiler_or_copy_matches": [],
+      "disposition": "Restore download declaration retained, not an actual application compiler/runtime/native asset in this RID-neutral build."
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+      "selected_target": "net10.0",
+      "download_declaration": {
+        "name": "runtime.linux-x64.Microsoft.DotNet.ILCompiler",
+        "version": "[10.0.15, 10.0.15]"
+      },
+      "catalog_matches": [
+        {
+          "package_id": "runtime.linux-x64.Microsoft.DotNet.ILCompiler/10.0.15",
+          "target_membership": [
+            "net10.0/linux-x64"
+          ],
+          "disposition": "restore-only downloaded build tool for another target; not an application compile/runtime/native input"
+        }
+      ],
+      "observed_compiler_or_copy_matches": [],
+      "disposition": "Restore download declaration retained, not an actual application compiler/runtime/native asset in this RID-neutral build."
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+      "selected_target": "net10.0",
+      "download_declaration": {
+        "name": "Microsoft.AspNetCore.App.Runtime.linux-x64",
+        "version": "[10.0.15, 10.0.15]"
+      },
+      "catalog_matches": [],
+      "observed_compiler_or_copy_matches": [],
+      "disposition": "Restore download declaration retained, not an actual application compiler/runtime/native asset in this RID-neutral build."
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+      "selected_target": "net10.0",
+      "download_declaration": {
+        "name": "Microsoft.NETCore.App.Runtime.linux-x64",
+        "version": "[10.0.15, 10.0.15]"
+      },
+      "catalog_matches": [],
+      "observed_compiler_or_copy_matches": [],
+      "disposition": "Restore download declaration retained, not an actual application compiler/runtime/native asset in this RID-neutral build."
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+      "selected_target": "net10.0",
+      "download_declaration": {
+        "name": "Microsoft.NETCore.App.Runtime.NativeAOT.linux-x64",
+        "version": "[10.0.15, 10.0.15]"
+      },
+      "catalog_matches": [],
+      "observed_compiler_or_copy_matches": [],
+      "disposition": "Restore download declaration retained, not an actual application compiler/runtime/native asset in this RID-neutral build."
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+      "selected_target": "net10.0",
+      "download_declaration": {
+        "name": "runtime.linux-x64.Microsoft.DotNet.ILCompiler",
+        "version": "[10.0.15, 10.0.15]"
+      },
+      "catalog_matches": [
+        {
+          "package_id": "runtime.linux-x64.Microsoft.DotNet.ILCompiler/10.0.15",
+          "target_membership": [
+            "net10.0/linux-x64"
+          ],
+          "disposition": "restore-only downloaded build tool for another target; not an application compile/runtime/native input"
+        }
+      ],
+      "observed_compiler_or_copy_matches": [],
+      "disposition": "Restore download declaration retained, not an actual application compiler/runtime/native asset in this RID-neutral build."
+    }
+  ]
+}

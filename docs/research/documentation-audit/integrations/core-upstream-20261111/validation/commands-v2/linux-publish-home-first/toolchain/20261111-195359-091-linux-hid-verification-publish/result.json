@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- linux-hid-verification-publish",
+  "started": "2026-11-11T19:53:59.0916674+01:00",
+  "durationSeconds": 21.9,
+  "runDirectory": "artifacts/toolchain/runs/20261111-195359-091-linux-hid-verification-publish",
+  "targets": [
+    {
+      "name": "linux-hid-verification-publish",
+      "status": "passed",
+      "durationSeconds": 21.9,
+      "error": null
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

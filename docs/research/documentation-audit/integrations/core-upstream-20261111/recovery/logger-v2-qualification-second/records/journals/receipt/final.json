@@ -1,0 +1,67 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "-c",
+    "import sys;print('owned stdout',flush=True);print('owned stderr',file=sys.stderr,flush=True);sys.exit(0)"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T18:41:55.097528+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-second/records/receipt",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-second/records/journals/receipt",
+  "qualification_faults": [
+    "receipt"
+  ],
+  "exit_code": 0,
+  "status": "failed",
+  "errors": [
+    "Primary receipt incomplete: OSError: [Errno 122] Injected disposable primary receipt failure"
+  ],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 2922771,
+    "sid": 2922771,
+    "leader_start_ticks": 80030493,
+    "before": {
+      "members": [],
+      "escaped": []
+    },
+    "signals": [],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": null,
+  "retained": [],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-second/records/receipt/stdout.log",
+      "bytes": 13,
+      "sha256": "706e77e9d3a867b7ffb87aee2ee301e5f392e6e6c24b27f71e3a107d06dfe39b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/qualification/logger-v2-second/records/receipt/stderr.log",
+      "bytes": 13,
+      "sha256": "866a5c36801c723fcd1f155ceb343ad743f764bfec926e1440be5814a6b91ea0"
+    }
+  ],
+  "finished": "2026-11-11T18:41:55.173453+00:00"
+}

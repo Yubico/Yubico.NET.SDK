@@ -1,0 +1,12 @@
+$ dotnet build docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj (in 201 ms).
+  1 of 2 projects are up-to-date for restore.
+  MacOSHidBoundaryComparison -> /home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/bin/audit-integration-20261111/build/Release/net10.0/MacOSHidBoundaryComparison.dll
+  Yubico.YubiKit.AuditIntegration20261111.MacComparison -> /home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.MacComparison/bin/Release/net10.0/Yubico.YubiKit.AuditIntegration20261111.MacComparison.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.13

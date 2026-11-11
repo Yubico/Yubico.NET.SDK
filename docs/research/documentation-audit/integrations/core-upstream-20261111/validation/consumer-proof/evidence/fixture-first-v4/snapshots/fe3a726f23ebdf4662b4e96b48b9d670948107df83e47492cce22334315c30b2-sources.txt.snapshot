@@ -1,0 +1,15 @@
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/IntegrationTestBase.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementHidConcurrencyTests.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementLockCodeTests.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionCapabilityTests.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionSimpleTests.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionTests.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadinessTests.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs
+/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.GlobalUsings.g.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.AssemblyInfo.cs

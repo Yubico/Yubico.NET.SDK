@@ -1,0 +1,31 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- build --project Yubico.YubiKit.AuditIntegration20261111.MacComparison --clean",
+  "started": "2026-11-11T21:37:08.7668274+01:00",
+  "durationSeconds": 9.1,
+  "runDirectory": "artifacts/toolchain/runs/20261111-213708-766-build",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "failed",
+      "durationSeconds": 9,
+      "error": "`dotnet build docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261111-213708-766-build/02-build-AuditIntegration20261111.MacComparison.log"
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

@@ -1,0 +1,40 @@
+{
+  "command": [
+    "dotnet",
+    "format",
+    "Yubico.YubiKit.sln",
+    "--include",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+    "src/Cli.Commands/src/Management/ManagementConfigCommand.cs",
+    "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+    "src/Cli.Shared/src/Device/DeviceSelection.cs",
+    "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Ctap2/examples/FidoTool/Program.cs",
+    "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Management/examples/ManagementTool/Program.cs",
+    "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+    "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+    "src/Oath/examples/OathTool/OathToolApplication.cs",
+    "src/Oath/examples/OathTool/Program.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+    "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+    "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+    "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+    "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+    "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+    "--verbosity",
+    "minimal"
+  ],
+  "cwd": "/tmp/opencode/core-upstream-20261111",
+  "started": "2026-11-11T18:20:26.170464+00:00",
+  "logger": {
+    "path": "/tmp/opencode/core-upstream-20261111/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+    "bytes": 12045,
+    "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "status": "started"
+}

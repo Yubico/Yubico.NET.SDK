@@ -1,0 +1,1 @@
+DeviceInfo? lastKnown = device.CachedDeviceInfo; // No I/O or presence check.

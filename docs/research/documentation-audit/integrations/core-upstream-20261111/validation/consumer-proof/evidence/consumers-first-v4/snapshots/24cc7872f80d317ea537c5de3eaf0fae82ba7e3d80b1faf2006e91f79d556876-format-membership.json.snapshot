@@ -1,0 +1,310 @@
+{
+  "status": "static owning-project/default-glob reconciliation only",
+  "scope": {
+    "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/evidence/format-scope.txt",
+    "bytes": 1103,
+    "sha256": "2cd5f7a931e4a8278bbf27db54dcd78c046825a29885730b55a226075f9c0ad5"
+  },
+  "files": [
+    {
+      "source": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "project": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "source_identity": {
+        "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+        "bytes": 4684,
+        "sha256": "939539934beb7561cff5e8a038a002a1b738ded003f6e04fc7ac88a6e9a9b79e"
+      },
+      "project_identity": {
+        "path": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+        "bytes": 1288,
+        "sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+      "project": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "source_identity": {
+        "path": "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+        "bytes": 3340,
+        "sha256": "5f1e05d34147cca9c8f84473c2e008a31694118762d6fcd3cf75176009088136"
+      },
+      "project_identity": {
+        "path": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+        "bytes": 1288,
+        "sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Cli.Commands/src/Management/ManagementConfigCommand.cs",
+      "project": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "source_identity": {
+        "path": "src/Cli.Commands/src/Management/ManagementConfigCommand.cs",
+        "bytes": 3345,
+        "sha256": "d0be64f22e5312471d2e6db725b92584df6952c37d5592f40068a3c36a73740f"
+      },
+      "project_identity": {
+        "path": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+        "bytes": 1288,
+        "sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+      "project": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "source_identity": {
+        "path": "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+        "bytes": 2806,
+        "sha256": "7e7ddcb65cf0afb5afc5ba9d317de3914f096085e662400d863ab56c1498007e"
+      },
+      "project_identity": {
+        "path": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+        "bytes": 1288,
+        "sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Cli.Shared/src/Device/DeviceSelection.cs",
+      "project": "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "source_identity": {
+        "path": "src/Cli.Shared/src/Device/DeviceSelection.cs",
+        "bytes": 2312,
+        "sha256": "3f0fd66c13b68f3b4337e224c9948c87c1929b4add0c6b013d0ccbe32f10b698"
+      },
+      "project_identity": {
+        "path": "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+        "bytes": 901,
+        "sha256": "1711d32fe0e1b18adc6e207a39f76069c98075e2eb4612c5b8b91466254d7c37"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "project": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+      "source_identity": {
+        "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+        "bytes": 1403,
+        "sha256": "bd0e712ac1deb0475d344ebb2274991a1792366bc969235dbdba89c074d0130a"
+      },
+      "project_identity": {
+        "path": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+        "bytes": 1053,
+        "sha256": "3afca1e1da61588d000b80f452ace1649cb16b0168aee625f93bed1b43927af0"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Ctap2/examples/FidoTool/Program.cs",
+      "project": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+      "source_identity": {
+        "path": "src/Ctap2/examples/FidoTool/Program.cs",
+        "bytes": 28387,
+        "sha256": "7a29c587834bdd9cc303162c344ce1ae3d38bb6e0dc46d3952b89b264b23be85"
+      },
+      "project_identity": {
+        "path": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+        "bytes": 1053,
+        "sha256": "3afca1e1da61588d000b80f452ace1649cb16b0168aee625f93bed1b43927af0"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+      "project": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+      "source_identity": {
+        "path": "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+        "bytes": 1285,
+        "sha256": "8f26bd204c7878816faf7da90d84091a7e2a3f0681e6e3be081f14d6588f1030"
+      },
+      "project_identity": {
+        "path": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+        "bytes": 1160,
+        "sha256": "78deac71175dad6ba59d735474387a1610a711bf53066471cc83d78240fd1373"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Management/examples/ManagementTool/Program.cs",
+      "project": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+      "source_identity": {
+        "path": "src/Management/examples/ManagementTool/Program.cs",
+        "bytes": 2795,
+        "sha256": "b5136626522033d891265971f2e4da7af4f677cfe3726f4cc397593cc0f0c9ef"
+      },
+      "project_identity": {
+        "path": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+        "bytes": 1160,
+        "sha256": "78deac71175dad6ba59d735474387a1610a711bf53066471cc83d78240fd1373"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "project": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+      "source_identity": {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+        "bytes": 10500,
+        "sha256": "b6e738070c7d1fb7f0dbd662166b5284d28b2b6da91b055d68610df114330c52"
+      },
+      "project_identity": {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+        "bytes": 1714,
+        "sha256": "625b84748e3f82754db5567822d71e7a313dd6ab0403b8439d30412ddfd177cb"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+      "project": "src/Oath/examples/OathTool/OathTool.csproj",
+      "source_identity": {
+        "path": "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+        "bytes": 1421,
+        "sha256": "4c0bde4131e7d3f5c71feb36a318e5071ca03eacd213887debc789af2cc4fc06"
+      },
+      "project_identity": {
+        "path": "src/Oath/examples/OathTool/OathTool.csproj",
+        "bytes": 963,
+        "sha256": "edd9cd7afd25aa27e5f9d1d827e3260bd9d03023d33ce9ac5eb9e2eefd81f82c"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+      "project": "src/Oath/examples/OathTool/OathTool.csproj",
+      "source_identity": {
+        "path": "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+        "bytes": 5008,
+        "sha256": "039b0377adcd34de71c14313bb04f851b248260b4c530c6cc138ac45623519af"
+      },
+      "project_identity": {
+        "path": "src/Oath/examples/OathTool/OathTool.csproj",
+        "bytes": 963,
+        "sha256": "edd9cd7afd25aa27e5f9d1d827e3260bd9d03023d33ce9ac5eb9e2eefd81f82c"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Oath/examples/OathTool/OathToolApplication.cs",
+      "project": "src/Oath/examples/OathTool/OathTool.csproj",
+      "source_identity": {
+        "path": "src/Oath/examples/OathTool/OathToolApplication.cs",
+        "bytes": 13603,
+        "sha256": "95d89b298679a286e52fe3b638fb8a62e8ff1960b8694d78c94983324a91dbd3"
+      },
+      "project_identity": {
+        "path": "src/Oath/examples/OathTool/OathTool.csproj",
+        "bytes": 963,
+        "sha256": "edd9cd7afd25aa27e5f9d1d827e3260bd9d03023d33ce9ac5eb9e2eefd81f82c"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Oath/examples/OathTool/Program.cs",
+      "project": "src/Oath/examples/OathTool/OathTool.csproj",
+      "source_identity": {
+        "path": "src/Oath/examples/OathTool/Program.cs",
+        "bytes": 499,
+        "sha256": "67da66a1f00ecfc00797778a9b61111bdda589d6dafc33fdb62baf808718f053"
+      },
+      "project_identity": {
+        "path": "src/Oath/examples/OathTool/OathTool.csproj",
+        "bytes": 963,
+        "sha256": "edd9cd7afd25aa27e5f9d1d827e3260bd9d03023d33ce9ac5eb9e2eefd81f82c"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "project": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+      "source_identity": {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+        "bytes": 5180,
+        "sha256": "145fafcbddd198dfbb694d085b856100dbd7ec71d740cf1c8e277222de3c2d67"
+      },
+      "project_identity": {
+        "path": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+        "bytes": 1083,
+        "sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+      "project": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "source_identity": {
+        "path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+        "bytes": 35090,
+        "sha256": "fafa4aef43c7ea20fb5a3a4acae2d35272df34c5db708bf1370a37cc8b4bca60"
+      },
+      "project_identity": {
+        "path": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+        "bytes": 1135,
+        "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "project": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "source_identity": {
+        "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+        "bytes": 19342,
+        "sha256": "f4c01518680646dc7f960a61afb36a43ffbdecdfffe1a1b22633945e77c1aace"
+      },
+      "project_identity": {
+        "path": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+        "bytes": 1135,
+        "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+      "project": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "source_identity": {
+        "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+        "bytes": 1056,
+        "sha256": "f242a37d27a22adba254f7bfc478e07ffea41efda7cf617ba308e12da9b5872a"
+      },
+      "project_identity": {
+        "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+        "bytes": 1027,
+        "sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+      "project": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "source_identity": {
+        "path": "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+        "bytes": 4794,
+        "sha256": "62987192be23a118424e68ceeaf3fa1d85f47fd494507b19da1982a3c8c0dceb"
+      },
+      "project_identity": {
+        "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+        "bytes": 1027,
+        "sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    },
+    {
+      "source": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+      "project": "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+      "source_identity": {
+        "path": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+        "bytes": 2005,
+        "sha256": "861f44c0cbb9384b812f8ebdd0435d6e538d64c7e1d8e7f43552302ab7444414"
+      },
+      "project_identity": {
+        "path": "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+        "bytes": 1019,
+        "sha256": "1085ebedfad2fc0669bab7c600a4ac962cec36d3c237e9f0ff1801ee6f936028"
+      },
+      "admission": "SDK default Compile glob; no matching project removal. Actual Csc check pending."
+    }
+  ]
+}

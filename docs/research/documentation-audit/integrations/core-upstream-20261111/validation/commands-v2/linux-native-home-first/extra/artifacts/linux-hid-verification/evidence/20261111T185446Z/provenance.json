@@ -1,0 +1,130 @@
+{
+  "utc": "20261111T185446Z",
+  "sourceHash": "90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa",
+  "baseline": "3de42bb54c5e8c986364f0f04398d4e85a66a596",
+  "environment": [
+    {
+      "command": [
+        "dotnet",
+        "--info"
+      ],
+      "exit": 0,
+      "stdout": ".NET SDK:\n Version:           10.0.404\n Commit:            2ab2854867\n Workload version:  10.0.400-manifests.ad9f6d83\n MSBuild version:   18.9.15+2ab285486\n\nRuntime Environment:\n OS Name:     omarchy\n OS Version:  4.5.0\n OS Platform: Linux\n RID:         linux-x64\n Base Path:   /home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/\n\n.NET workloads installed:\nThere are no installed workloads to display.\nConfigured to use workload sets when installing new manifests.\nNo workload sets are installed. Run \"dotnet workload restore\" to install a workload set.\n\nHost:\n  Version:      10.0.15\n  Architecture: x64\n  Commit:       8e0f8ed231\n\n.NET SDKs installed:\n  9.0.320 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n  10.0.401 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n  10.0.403 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n  10.0.404 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n\n.NET runtimes installed:\n  Microsoft.AspNetCore.App 9.0.22 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.12 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.14 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.15 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.NETCore.App 9.0.22 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.12 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.14 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.15 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n\nOther architectures found:\n  None\n\nEnvironment variables:\n  DOTNET_MULTILEVEL_LOOKUP                 [0]\n  DOTNET_ROOT                              [/home/rupicola/.local/share/mise/dotnet-root]\n\nglobal.json file:\n  /home/rupicola/Code/y/yubikit-core-docs-integration/global.json\n\nLearn more:\n  https://aka.ms/dotnet/info\n\nDownload .NET:\n  https://aka.ms/dotnet/download\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "uname",
+        "-a"
+      ],
+      "exit": 0,
+      "stdout": "Linux y-omarchy 7.2.15-1-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 02 Nov 2026 10:32:17 +0000 x86_64 GNU/Linux\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "pacman",
+        "-Q",
+        "linux-omarchy",
+        "glibc",
+        "systemd",
+        "pcsclite",
+        "openssl"
+      ],
+      "exit": 0,
+      "stdout": "linux-omarchy 7.2.15-1\nglibc 2.44+r50+g1848099f063e-1\nsystemd 262.1-1\npcsclite 2.5.3-1\nopenssl 3.6.5-1\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ldd",
+        "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/jit/LinuxHidRouteVerification"
+      ],
+      "exit": 0,
+      "stdout": "\tlinux-vdso.so.1 (0x00007f96620f6000)\n\tlibdl.so.2 => /usr/lib/libdl.so.2 (0x00007f96620a5000)\n\tlibpthread.so.0 => /usr/lib/libpthread.so.0 (0x00007f96620a0000)\n\tlibstdc++.so.6 => /usr/lib/libstdc++.so.6 (0x00007f9661c00000)\n\tlibm.so.6 => /usr/lib/libm.so.6 (0x00007f9661f69000)\n\tlibgcc_s.so.1 => /usr/lib/libgcc_s.so.1 (0x00007f9661f3a000)\n\tlibc.so.6 => /usr/lib/libc.so.6 (0x00007f9661800000)\n\t/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007f96620f8000)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ldd",
+        "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/aot/LinuxHidRouteVerification"
+      ],
+      "exit": 0,
+      "stdout": "\tlinux-vdso.so.1 (0x00007f2a829c4000)\n\tlibm.so.6 => /usr/lib/libm.so.6 (0x00007f2a820c9000)\n\tlibpcsclite.so.1 => /usr/lib/libpcsclite.so.1 (0x00007f2a82989000)\n\tlibc.so.6 => /usr/lib/libc.so.6 (0x00007f2a81e00000)\n\t/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007f2a829c6000)\n",
+      "stderr": ""
+    }
+  ],
+  "hardware": {
+    "yubicoUsb": [
+      {
+        "sysfs": "3-1.3",
+        "idVendor": "1050",
+        "idProduct": "0407",
+        "bcdDevice": "0001",
+        "product": "YubiKey OTP+FIDO+CCID",
+        "interfaces": {
+          "3-1.3:1.0": "/sys/bus/usb/drivers/usbhid",
+          "3-1.3:1.1": "/sys/bus/usb/drivers/usbhid",
+          "3-1.3:1.2": null
+        }
+      }
+    ],
+    "hidraw": [
+      {
+        "path": "/dev/hidraw0",
+        "mode": "crw-rw----",
+        "readable": true,
+        "writable": true
+      },
+      {
+        "path": "/dev/hidraw1",
+        "mode": "crw-------",
+        "readable": false,
+        "writable": false
+      },
+      {
+        "path": "/dev/hidraw2",
+        "mode": "crw-------",
+        "readable": false,
+        "writable": false
+      },
+      {
+        "path": "/dev/hidraw3",
+        "mode": "crw-------",
+        "readable": false,
+        "writable": false
+      },
+      {
+        "path": "/dev/hidraw4",
+        "mode": "crw-------",
+        "readable": false,
+        "writable": false
+      },
+      {
+        "path": "/dev/hidraw5",
+        "mode": "crw-rw----",
+        "readable": true,
+        "writable": true
+      }
+    ]
+  },
+  "resolvedNativeShims": [
+    "Yubico.NativeShims/1.18.1"
+  ],
+  "artifacts": {
+    "packages/Yubico.NativeShims/1.18.1/buildTransitive/static/linux-x64/libYubico.NativeShims.a": "c6f09bf5579881df1f689e5f696da2e0dbc2823cce37731f45d84f5fdf28e7fe",
+    "packages/Yubico.NativeShims/1.18.1/runtimes/linux-x64/native/libYubico.NativeShims.so": "e59ad90d6bcca4bd1849d964f7cef276f40d2388b0abde19b3ed8400c4835a3e",
+    "packages/Yubico.NativeShims/1.18.1/yubico.nativeshims.1.18.1.nupkg": "243958f7e87d96e22b33b1d9b469287ea9d6dd3461cd904a292d3342d27d5155",
+    "jit/LinuxHidRouteVerification": "0a6b3bf9e0c68383c62c6faa58e40d479d8451f8a3925acb555a4dacc5535602",
+    "jit/LinuxHidRouteVerification.dll": "f752c6d2769f317afc30ee7cb2b8fab62ee2259f929355ea1fa327a89c54a56f",
+    "jit/Yubico.YubiKit.Core.dll": "aa6ffd4fc319f386bf9b5abf68959762c3f5ad9704b4dc16157f6060608e4b29",
+    "jit/Yubico.YubiKit.Ctap2.dll": "1daff13795fcf48e7193d67aa9393de94d6fa37e90f39565fbc62e22f530dbfa",
+    "jit/Yubico.YubiKit.Management.dll": "bdaaa88bfc66862e7a9c8761eba83a3173162469ba6b122e4b910664a17aeb16",
+    "aot/LinuxHidRouteVerification": "4278278dac1d7d5b47ff5bbb2e4b222819e85599e3eb1b365a132f82a60babac"
+  },
+  "publishManifestSha256": "41a340dc4817d84cf9ad7e10f6d851694c034c6710f55b2b82e4ba8384701f3e",
+  "publishInputHash": "a509bb8ab2cb61c1b27e27af7f4a27dc893fcf66106fb4ddd423307005a021f7",
+  "sourceLabel": "Environment SourceHash is a label only; publish binding was independently verified before execution",
+  "sdkPackageVersion": "2.0.0-alpha.2",
+  "nativeShimsPin": "1.18.1"
+}

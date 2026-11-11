@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.OpenPgp</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.OpenPgp</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>OpenPGP card support for YubiKey devices including key management, raw deciphering and key agreement, signing, authentication, certificates, and PIN administration.</Description>
+    <PackageTags>yubikey;yubico;openpgp;pgp;gpg;encryption;signing;smartcard</PackageTags>
+
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

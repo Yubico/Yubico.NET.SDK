@@ -1,0 +1,14 @@
+$ dotnet build docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj (in 162 ms).
+  3 of 4 projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Piv -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.AuditIntegration20261111.Examples -> /home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.Examples/bin/Release/net10.0/Yubico.YubiKit.AuditIntegration20261111.Examples.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.84

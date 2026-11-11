@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "exit_code": 1,
+  "source_sha256": "bd065edd648b217cb5db571203399c2a0cbf67a3ce9933e783524b1de0a95cbe",
+  "scope": "Read-only preflight entry failed before project predicates: its subdirectory entry point lacked the original proof module directory on sys.path. No compiler proof or SDK execution."
+}

@@ -1,0 +1,87 @@
+{
+  "status": "exact invocation-only safe-path correction verified; no actual creator/checker/SDK/capture execution",
+  "protected_originals": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/inspect.py",
+      "bytes": 10233,
+      "sha256": "2e88ba787532c2623b91b1141aab23900fd3e035259b69207619deebeccb593f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/proposed-lane-v2.sh",
+      "bytes": 2902,
+      "sha256": "d5fa76a207ae2c2d49df0f0b7a9a2132fb87d9459292e2e243d80bd239c9f96e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/routing-v2.py",
+      "bytes": 6024,
+      "sha256": "3a64e73ff0675a65458589aa0478275a6b0a4e1e299b9a1d10ebceb249a60488"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/routing-v2-preparation.json",
+      "bytes": 3266,
+      "sha256": "26d4d855c5eda0e875879e899eb6ec13211afd311d5b557043fbcfb6bd2ac408"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/independent-review.md",
+      "bytes": 9659,
+      "sha256": "c7b2e1e9ab925d2a13994d7379585a1c249590861f6baa829e65e56ba5fe20cf"
+    }
+  ],
+  "new_files": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/proposed-lane-v3.sh",
+      "bytes": 2985,
+      "sha256": "489f94c3403fe8be2f60f7357e12ed6e9fd18dccef3996bbf5d2e857257bb2ba"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/launch-import-correction.md",
+      "bytes": 2713,
+      "sha256": "fa524a93d65c058f4c9f5f2aeab313d5d1a9345b5afd647ed0e49f5353270e53"
+    }
+  ],
+  "exact_changes": [
+    "add -P to only the routing create invocation",
+    "add -P to only the routing check invocation",
+    "retain this caller delta receipt alongside unchanged v2 routing descriptor so actual v3 launcher identity remains build-bound"
+  ],
+  "harmless_actual_cli_probe": {
+    "command": [
+      "/usr/bin/python3",
+      "-P",
+      "-B",
+      "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/routing-v2.py",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: routing-v2.py [-h] --suffix SUFFIX [--core CORE] [--native NATIVE]\n                     [--variant VARIANT]\n                     {create,check}\n\nOne nonsecret Mac routing descriptor and exact post-build profile check; no\nenvironment dump.\n\npositional arguments:\n  {create,check}\n\noptions:\n  -h, --help         show this help message and exit\n  --suffix SUFFIX\n  --core CORE\n  --native NATIVE\n  --variant VARIANT\n",
+    "stderr": ""
+  },
+  "stdlib_inspect": {
+    "path": "/usr/lib/python3.14/inspect.py",
+    "signature_callable": true
+  },
+  "routing_tool_stdlib_imports": [
+    "argparse",
+    "hashlib",
+    "json",
+    "os",
+    "pathlib",
+    "re"
+  ],
+  "untouched_shadow_helper": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/inspect.py",
+    "bytes": 10233,
+    "sha256": "2e88ba787532c2623b91b1141aab23900fd3e035259b69207619deebeccb593f"
+  },
+  "descriptor_absence": {
+    "restore-bound-first": {
+      "descriptor_exists": false,
+      "partial_count": 0
+    },
+    "restore-isolated-first": {
+      "descriptor_exists": false,
+      "partial_count": 0
+    }
+  },
+  "coordinator_reported_failure": "Outside-logger Python 3.14 argparse/colorization/dataclasses import reached local inspect.py and lacked inspect.signature before descriptor/SDK admission; original raw coordinator transcript path not supplied."
+}

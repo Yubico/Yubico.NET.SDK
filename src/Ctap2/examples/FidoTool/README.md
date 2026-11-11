@@ -207,16 +207,19 @@ Prefer HID FIDO for ordinary USB CTAP2 coverage. USB SmartCard CTAP2 is supporte
 
 ## Device Selection
 
-The active `DeviceSelector` admits exposed HID FIDO **or SmartCard** interfaces, not confirmed CTAP/AID
-support; SmartCard-only non-CTAP keys can appear. One candidate auto-selects. Multiple candidates prompt
-in an interactive terminal; noninteractive mode auto-selects HID-capable/first. Duplicate formatted
-labels can resolve to the first matching choice. No-device retry prompts can still occur noninteractively.
-`FidoDeviceSelector` is an unused alternative, not the selector used by Program/menus.
+The active `DeviceSelector` delegates to `Cli.Shared` and admits exposed HID FIDO **or SmartCard**
+interfaces. Session creation subsequently checks the FIDO AID and transport/firmware requirements;
+SmartCard-only non-CTAP keys can appear in selection. One candidate auto-selects. Multiple candidates
+prompt in an interactive terminal; noninteractive mode prefers HID FIDO, then the first eligible key.
+The shared selector identifies choices by index, uses cancellable selection/retry prompts, and returns
+without prompting when a noninteractive scan finds no candidates. It reuses last-known discovery
+metadata or performs one best-effort live fallback per candidate during that selection invocation.
 
-Ctrl+C requests a cancellation token; synchronous menu/PIN/ReadLine prompts do not honor that token
-while blocked. Operation helpers catch general exceptions and return failure results, losing cancellation
-and error provenance. Device-info/support probes can swallow errors, and development Debug output remains.
-No immediate prompt termination, uniform error normalization, safe retry or rollback is guaranteed.
+Ctrl+C requests a cancellation token. Selection and its metadata fallback propagate cancellation;
+synchronous menu/PIN/ReadLine prompts remain blocked until input returns. Operation helpers still catch
+general exceptions and return failure results, losing cancellation and error provenance. Support probes
+can also turn failures into unsupported results. Inspect the operation outcome and device state before
+retrying; cancellation provides no rollback of a sent command.
 
 ## Security Notes
 

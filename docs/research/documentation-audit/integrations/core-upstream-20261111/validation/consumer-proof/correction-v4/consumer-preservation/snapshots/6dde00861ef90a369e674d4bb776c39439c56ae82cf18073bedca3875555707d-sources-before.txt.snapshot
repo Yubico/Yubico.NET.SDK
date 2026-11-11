@@ -1,0 +1,13 @@
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/Backend/HsmAuthBackend.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/Backend/IHsmAuthBackend.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/HsmAuthAlgorithm.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/HsmAuthCredential.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/HsmAuthRetryException.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/HsmAuthSession.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/IHsmAuthSession.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/IYubiKeyExtensions.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/Properties/AssemblyInfo.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/SessionKeys.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.GlobalUsings.g.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.AssemblyInfo.cs

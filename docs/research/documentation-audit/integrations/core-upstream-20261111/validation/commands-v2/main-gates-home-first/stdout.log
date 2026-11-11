@@ -1,0 +1,217 @@
+▶ toolchain: build test docs-qa docs-architecture complexity resilience pack  (log: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet clean Yubico.YubiKit.sln -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/01-clean.log
+▶ RUN dotnet build Yubico.YubiKit.sln -c Release --no-incremental
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/02-build.log
+✓ Built Yubico.YubiKit.sln in Release configuration from scratch
+
+▶ target: test
+
+=== Running unit tests ===
+
+
+=== Testing: Cli.Commands.UnitTests ===
+▶ RUN dotnet run --project src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/03-test-Cli.Commands.UnitTests.log
+✓ PASS (48 executed, 1 skipped)
+
+=== Testing: Cli.Shared.UnitTests ===
+▶ RUN dotnet run --project src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Yubico.YubiKit.Cli.Shared.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/04-test-Cli.Shared.UnitTests.log
+✓ PASS (78 executed, 0 skipped)
+
+=== Testing: Core.UnitTests ===
+▶ RUN dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/05-test-Core.UnitTests.log
+✓ PASS (2065 executed, 4 skipped)
+
+=== Testing: Ctap2.UnitTests ===
+▶ RUN dotnet run --project src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/06-test-Ctap2.UnitTests.log
+✓ PASS (495 executed, 0 skipped)
+
+=== Testing: Management.UnitTests ===
+▶ RUN dotnet run --project src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/07-test-Management.UnitTests.log
+✓ PASS (96 executed, 0 skipped)
+
+=== Testing: Oath.UnitTests ===
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/08-test-Oath.UnitTests.log
+✓ PASS (436 executed, 0 skipped)
+
+=== Testing: OpenPgp.UnitTests ===
+▶ RUN dotnet run --project src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/09-test-OpenPgp.UnitTests.log
+✓ PASS (193 executed, 0 skipped)
+
+=== Testing: Piv.UnitTests ===
+▶ RUN dotnet run --project src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/10-test-Piv.UnitTests.log
+✓ PASS (289 executed, 0 skipped)
+
+=== Testing: PublicApi.UnitTests ===
+▶ RUN dotnet run --project src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/11-test-PublicApi.UnitTests.log
+✓ PASS (25 executed, 0 skipped)
+
+=== Testing: SecurityDomain.UnitTests ===
+▶ RUN dotnet run --project src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/12-test-SecurityDomain.UnitTests.log
+✓ PASS (50 executed, 0 skipped)
+
+=== Testing: WebAuthn.UnitTests ===
+▶ RUN dotnet run --project src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/13-test-WebAuthn.UnitTests.log
+✓ PASS (371 executed, 0 skipped)
+
+=== Testing: YubiHsm.UnitTests ===
+▶ RUN dotnet run --project src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/14-test-YubiHsm.UnitTests.log
+✓ PASS (91 executed, 0 skipped)
+
+=== Testing: YubiOtp.UnitTests ===
+▶ RUN dotnet run --project src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/15-test-YubiOtp.UnitTests.log
+✓ PASS (205 executed, 0 skipped)
+
+▶ target: docs-qa
+
+=== Validating active documentation ===
+
+▶ RUN dotnet msbuild /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj -getProperty:YubiKitDocsBranch -getProperty:PackageProjectUrl -nologo (output captured)
+✓ Validated 74 active documentation file(s)
+✓ Validated 10 package readme(s)
+
+▶ target: docs-architecture
+
+=== Validating architecture diagrams (evidence map + image freshness) ===
+
+▶ RUN bash "scripts/architecture/check-architecture-map.sh"
+architecture map OK: 6 diagram entries, all evidence + project edges resolve; coverage matches 6 diagram heading level(s).
+▶ RUN bash "scripts/architecture/check-architecture-images.sh"
+architecture images OK: 7 diagrams present and fresh (manifest matches source blocks).
+✓ Architecture diagrams validated (map resolves; images present and fresh)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs --base f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa
+  files        73
+  methods      318
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    11    12  new        Yubico.YubiKit.Core.Devices.YubiKeyMonitor.RunAsync
+                         src/Core/src/Devices/YubiKeyMonitor.cs:127-171
+    22     1  new        Yubico.YubiKit.Core.Devices.DeviceInfo.Equals
+                         src/Core/src/Devices/DeviceInfo.cs:77-99
+
+2 of 318 methods exceed a threshold: 2 need action (new or worse), 0 are existing debt.
+For each method that needs action, simplify it or add to the commit message:
+  Complexity-Justification: YubiKeyMonitor.RunAsync: <why this complexity is warranted>
+  Complexity-Justification: DeviceInfo.Equals: <why this complexity is warranted>
+
+▶ target: resilience
+
+=== Running fast runtime resilience gates ===
+
+
+=== Testing: Core.UnitTests ===
+▶ RUN dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release -- --list-tests --filter-trait Category=RuntimeResilience (output captured)
+▶ RUN dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release -- --filter-trait "Category=RuntimeResilience"
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/16-test-Core.UnitTests.log
+✓ PASS (197 executed, 0 skipped)
+✓ Evidence: Core unit tests with Category=RuntimeResilience
+✓ Elapsed: 25.5s
+
+▶ target: pack
+
+=== Creating NuGet packages ===
+
+▶ RUN dotnet pack src/Core/src/Yubico.YubiKit.Core.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/17-pack-Core.log
+✓ Packed Core
+▶ RUN dotnet pack src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/18-pack-Ctap2.log
+✓ Packed Ctap2
+▶ RUN dotnet pack src/Management/src/Yubico.YubiKit.Management.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/19-pack-Management.log
+✓ Packed Management
+▶ RUN dotnet pack src/Oath/src/Yubico.YubiKit.Oath.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/20-pack-Oath.log
+✓ Packed Oath
+▶ RUN dotnet pack src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/21-pack-OpenPgp.log
+✓ Packed OpenPgp
+▶ RUN dotnet pack src/Piv/src/Yubico.YubiKit.Piv.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/22-pack-Piv.log
+✓ Packed Piv
+▶ RUN dotnet pack src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/23-pack-SecurityDomain.log
+✓ Packed SecurityDomain
+▶ RUN dotnet pack src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/24-pack-WebAuthn.log
+✓ Packed WebAuthn
+▶ RUN dotnet pack src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/25-pack-YubiHsm.log
+✓ Packed YubiHsm
+▶ RUN dotnet pack src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  output: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/26-pack-YubiOtp.log
+✓ Packed YubiOtp
+✓ Created 10 package(s) in /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- build test docs-qa docs-architecture complexity resilience pack --clean --fast --complexity-args "--base f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa" --package-version 2.0.0-alpha.2)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      8.6s
+  ✓ test                      82.4s
+  ✓ docs-qa                    0.3s
+  ✓ docs-architecture          0.3s
+  ✓ complexity                 1.7s
+  ✓ resilience                25.5s
+  ✓ pack                       7.2s
+Projects (test):
+  ✓ PASS      Cli.Commands.UnitTests    48 executed, 1 skipped
+  ✓ PASS      Cli.Shared.UnitTests      78 executed, 0 skipped
+  ✓ PASS      Core.UnitTests            2065 executed, 4 skipped
+  ✓ PASS      Ctap2.UnitTests           495 executed, 0 skipped
+  ✓ PASS      Management.UnitTests      96 executed, 0 skipped
+  ✓ PASS      Oath.UnitTests            436 executed, 0 skipped
+  ✓ PASS      OpenPgp.UnitTests         193 executed, 0 skipped
+  ✓ PASS      Piv.UnitTests             289 executed, 0 skipped
+  ✓ PASS      PublicApi.UnitTests       25 executed, 0 skipped
+  ✓ PASS      SecurityDomain.UnitTests  50 executed, 0 skipped
+  ✓ PASS      WebAuthn.UnitTests        371 executed, 0 skipped
+  ✓ PASS      YubiHsm.UnitTests         91 executed, 0 skipped
+  ✓ PASS      YubiOtp.UnitTests         205 executed, 0 skipped
+Projects (resilience):
+  ✓ PASS      Core.UnitTests  197 executed, 0 skipped
+Totals: projects: 14 passed, 0 failed, 0 with no tests executed; tests: 4639 executed, 0 failed, 5 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

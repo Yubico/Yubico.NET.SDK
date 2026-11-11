@@ -1,0 +1,126 @@
+{
+  "status": "static preparation passed; no compilation/capture performed",
+  "groups": 30,
+  "selectors": {
+    "Yubico.YubiKit.AuditIntegration20261111.Probe": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj"
+    ],
+    "Yubico.YubiKit.AuditIntegration20261111.Examples": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj"
+    ],
+    "Yubico.YubiKit.AuditIntegration20261111.Annotations": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj"
+    ],
+    "Yubico.YubiKit.AuditIntegration20261111.Consumers": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj"
+    ],
+    "Yubico.YubiKit.AuditIntegration20261111.MacComparison": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj"
+    ]
+  },
+  "sources": {
+    "src/Ctap2/examples/FidoTool/FidoTool.csproj": 19,
+    "src/Management/examples/ManagementTool/ManagementTool.csproj": 18,
+    "src/Oath/examples/OathTool/OathTool.csproj": 10,
+    "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj": 18,
+    "src/Piv/examples/PivTool/PivTool.csproj": 36,
+    "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj": 21,
+    "src/YubiOtp/examples/OtpTool/OtpTool.csproj": 14
+  },
+  "canonical_unit_rows": [
+    "test:Cli.Commands.UnitTests",
+    "test:Cli.Shared.UnitTests",
+    "test:Core.UnitTests",
+    "test:Ctap2.UnitTests",
+    "test:Management.UnitTests",
+    "test:Oath.UnitTests",
+    "test:OpenPgp.UnitTests",
+    "test:Piv.UnitTests",
+    "test:PublicApi.UnitTests",
+    "test:SecurityDomain.UnitTests",
+    "test:WebAuthn.UnitTests",
+    "test:YubiHsm.UnitTests",
+    "test:YubiOtp.UnitTests"
+  ],
+  "contexts": {
+    "probe": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "examples": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/Piv/src/Yubico.YubiKit.Piv.csproj"
+    ],
+    "annotations": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj"
+    ],
+    "consumers": [
+      "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "src/Management/examples/ManagementTool/ManagementTool.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/Oath/examples/OathTool/OathTool.csproj",
+      "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+      "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+      "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+      "src/Piv/examples/PivTool/PivTool.csproj",
+      "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+      "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+      "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+      "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj",
+      "verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+      "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj"
+    ],
+    "fixture": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+      "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+    ],
+    "mac-comparison": [
+      "verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj"
+    ]
+  },
+  "inputs": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inputs.json",
+    "bytes": 49129,
+    "sha256": "af9a3e6a35388d6d8fc0973a263098aa2eaad573f81a43fd6191873fefd23f83"
+  },
+  "tools": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/format-membership.py",
+      "bytes": 2017,
+      "sha256": "10472129a1fd71276fe547e8e0dd2807d57763c64b63226d97d0ed2228d76140"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inventory.py",
+      "bytes": 3948,
+      "sha256": "84e4613fec154d41857ff9acd3dc24940c9fe98e5d54c0fcc7d5a2014b6bee41"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/prepare.py",
+      "bytes": 15317,
+      "sha256": "8ee6aa61799aaffab314f2bead4faf194849cbe9949e7bb6ece54950b2a75423"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py",
+      "bytes": 38523,
+      "sha256": "d3e85819a2a69c23f9ba71c8fad1483172ee3a66ccceaa3e8767c36145a136e8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/Capture.targets",
+      "bytes": 7241,
+      "sha256": "dd26589f3697f7e07080ec2626e25b74c77a78f8cf92139b02ada5be47a07b26"
+    }
+  ]
+}

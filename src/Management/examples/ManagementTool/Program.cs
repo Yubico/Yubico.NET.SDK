@@ -4,28 +4,17 @@
 using Spectre.Console;
 using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Commands;
 
-// Start monitoring for device events
-YubiKeyManager.StartMonitoring();
-
-try
+if (args.Length > 0)
 {
-    if (args.Length > 0)
-    {
-        // CLI dispatch mode
-        return await DispatchCliAsync(args);
-    }
+    // CLI dispatch mode
+    return await DispatchCliAsync(args);
+}
 
-    // No arguments: interactive menus.
-    return await RunInteractiveAsync();
-}
-finally
-{
-    await YubiKeyManager.ShutdownAsync();
-}
+// Interactive selection performs fresh one-shot discovery on each retry; no tracking is needed.
+return await RunInteractiveAsync();
 
 // --- CLI dispatch ---
 

@@ -1,0 +1,378 @@
+// Copyright 2025 Yubico AB
+// 
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System.Formats.Asn1;
+using System.Globalization;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Utilities;
+
+namespace Yubico.YubiKit.Core.Cryptography;
+
+/// <summary>
+/// A class that converts ASN.1 DER encoded private keys to parameters and values.
+/// </summary>
+internal class AsnPrivateKeyDecoder
+{
+    private const string Rfc5958Version1UnsupportedMessage =
+        "RFC 5958 version value 1 OneAsymmetricKey is valid but unsupported.";
+
+    /// <summary>
+    /// Creates an instance of <see cref="IPrivateKey"/> from a PKCS#8
+    /// ASN.1 DER-encoded private key.
+    /// </summary>
+    /// <param name="pkcs8EncodedKey">
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
+    /// </param>
+    /// <returns>
+    /// A new disposable private-key object that owns its decoded key material.
+    /// </returns>
+    /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the algorithm is not supported</exception>
+    public static IPrivateKey CreatePrivateKey(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    {
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
+        var seqPrivateKeyInfo = reader.ReadSequence();
+
+        // PKCS#8 starts with a version (integer 0)
+        ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
+
+        var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
+        var keyAlgorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+
+        // Each typed decoder validates its AlgorithmIdentifier before reading private material.
+        return keyAlgorithmOid switch
+        {
+            Oids.Rsa => RSAPrivateKey.CreateFromPkcs8(pkcs8EncodedKey),
+            Oids.EcPublicKey => ECPrivateKey.CreateFromPkcs8(pkcs8EncodedKey),
+            Oids.X25519 or Oids.Ed25519 => Curve25519PrivateKey.CreateFromPkcs8(pkcs8EncodedKey),
+            _ => throw new InvalidOperationException($"Unsupported private key algorithm OID '{keyAlgorithmOid}'.")
+        };
+    }
+
+    /// <summary>
+    /// Creates an instance of <see cref="Curve25519PrivateKey"/> from a PKCS#8
+    /// ASN.1 DER-encoded private key.
+    /// </summary>
+    /// <param name="pkcs8EncodedKey">
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
+    /// </param>
+    /// <returns>
+    /// A new disposable private-key object that owns its decoded key material.
+    /// </returns>
+    /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
+    /// <exception cref="ArgumentException">Thrown if the algorithm is not <see cref="Oids.X25519"/> or 
+    /// <see cref="Oids.Ed25519"/></exception>
+    public static Curve25519PrivateKey CreateCurve25519Key(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    {
+        (var privateKey, var keyType) = GetCurve25519PrivateKeyData(pkcs8EncodedKey);
+        using var privateKeyHandle = new DisposableBufferHandle(privateKey);
+        return Curve25519PrivateKey.CreateFromValue(privateKeyHandle.Data, keyType);
+    }
+
+    /// <summary>
+    /// Decodes a Curve25519 private value and its key type from a PKCS#8 private key.
+    /// </summary>
+    /// <param name="pkcs8EncodedKey">
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
+    /// </param>
+    /// <returns>
+    /// A caller-owned 32-byte private-value array and the decoded key type. The caller must clear
+    /// the returned array when it is no longer needed.
+    /// </returns>
+    /// <exception cref="ArgumentException">The algorithm is not X25519 or Ed25519.</exception>
+    /// <exception cref="CryptographicException">The private-key encoding or length is invalid.</exception>
+    public static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
+        GetCurve25519PrivateKeyData(pkcs8EncodedKey, privateKeyDecoded: null);
+
+    // Test observation hook. The callback must not retain or mutate the decoded private value.
+    internal static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(
+        ReadOnlyMemory<byte> pkcs8EncodedKey,
+        Action<byte[]>? privateKeyDecoded)
+    {
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
+        var seqPrivateKeyInfo = reader.ReadSequence();
+        ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
+
+        var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
+        var keyAlgorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        var keyInfo = CryptographicDefinitions.Keys.All.SingleOrDefault(keyInfo =>
+            keyInfo.KeyType.IsCurve25519() && keyInfo.Asn1?.AlgorithmOid == keyAlgorithmOid);
+        if (keyInfo is null)
+        {
+            throw new ArgumentException(
+                "Invalid 25519 key algorithm OID. Must be: " + Oids.X25519 + " or " +
+                Oids.Ed25519);
+        }
+
+        // RFC 8410 section 3: NULL is not interchangeable with absent parameters.
+        seqAlgorithmIdentifier.ThrowIfNotEmpty();
+
+        using var privateKeyDataHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
+        var seqPrivateKey = new AsnReader(privateKeyDataHandle.Data, AsnEncodingRules.DER);
+        var tag = seqPrivateKey.PeekTag();
+        if (tag.TagValue != 4 || tag.TagClass != TagClass.Universal)
+        {
+            throw new CryptographicException("Invalid Curve25519 private key");
+        }
+
+        var privateKey = seqPrivateKey.ReadOctetString();
+        try
+        {
+            privateKeyDecoded?.Invoke(privateKey);
+            if (privateKey.Length != 32)
+            {
+                throw new CryptographicException("Invalid Curve25519 private key: incorrect length");
+            }
+
+            seqPrivateKeyInfo.ThrowIfNotEmpty();
+
+            return (privateKey, keyInfo.KeyType);
+        }
+        catch
+        {
+            // This method owns the array unless it returns it successfully. On any exception the
+            // array is about to become unreachable, so no caller-owned buffer is cleared here.
+            CryptographicOperations.ZeroMemory(privateKey);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Decodes elliptic-curve parameters from a PKCS#8 private key.
+    /// </summary>
+    /// <param name="pkcs8EncodedKey">
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
+    /// </param>
+    /// <returns>
+    /// Parameters containing caller-owned arrays. The caller must clear <see cref="ECParameters.D"/>
+    /// when the parameters are no longer needed.
+    /// </returns>
+    /// <exception cref="CryptographicException">The private-key encoding is invalid.</exception>
+    /// <exception cref="InvalidOperationException">The algorithm or curve is unsupported.</exception>
+    public static ECParameters CreateECParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    {
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
+        var seqPrivateKeyInfo = reader.ReadSequence();
+
+        // PKCS#8 starts with a version (integer 0)
+        ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
+
+        var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
+        var keyAlgorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        if (keyAlgorithmOid != Oids.EcPublicKey)
+        {
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    "Expected an EC private key using id-ecPublicKey, but the algorithm OID was '{0}'.",
+                    keyAlgorithmOid));
+        }
+
+        var curveOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        seqAlgorithmIdentifier.ThrowIfNotEmpty();
+        if (!CryptographicDefinitions.Curves.TryGetByOid(curveOid, out var curveInfo)
+            || curveInfo.Form != CurveForm.ShortWeierstrass)
+        {
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    "Unsupported ordinary EC named-curve OID '{0}'.",
+                    curveOid));
+        }
+
+        using var privateKeyInfoHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
+        seqPrivateKeyInfo.ThrowIfNotEmpty();
+
+        var privateKeyReader = new AsnReader(privateKeyInfoHandle.Data, AsnEncodingRules.BER);
+        var seqEcPrivateKey = privateKeyReader.ReadSequence();
+
+        // EC private key sequence: Version, privateKey, [0] parameters (optional), [1] publicKey (optional)
+        var ecVersion = seqEcPrivateKey.ReadInteger();
+        if (ecVersion != 1)
+        {
+            throw new CryptographicException("Invalid EC private key format: unexpected version");
+        }
+
+        using var privateKeyHandle = new DisposableBufferHandle(seqEcPrivateKey.ReadOctetString());
+
+        // Check for optional parameters and public key
+        ECPoint point = default;
+        while (seqEcPrivateKey.HasData)
+        {
+            var tag = seqEcPrivateKey.PeekTag();
+            if (tag is { TagValue: 1, TagClass: TagClass.ContextSpecific })
+            {
+                ReadOnlyMemory<byte> publicKeyBytes;
+                int unusedBits;
+                if (tag.IsConstructed)
+                {
+                    // RFC 5915 defines publicKey as EXPLICIT [1] BIT STRING, so the constructed
+                    // [1] wrapper holds a universal BIT STRING. This is what every standards
+                    // compliant producer, including .NET, emits.
+                    var seqPublicKey = seqEcPrivateKey.ReadSequence(tag);
+                    publicKeyBytes = seqPublicKey.ReadBitString(out unusedBits);
+                    seqPublicKey.ThrowIfNotEmpty();
+                }
+                else
+                {
+                    // Deliberately permissive. Earlier releases of this SDK wrote the field as a
+                    // primitive, implicitly tagged BIT STRING (0x81), which RFC 5915 does not
+                    // allow. Keys already stored in that form stay readable, so this decoder
+                    // accepts the legacy tag on input even though the encoder only ever emits the
+                    // explicit form above. The point itself is validated identically either way.
+                    publicKeyBytes = seqEcPrivateKey.ReadBitString(out unusedBits, tag);
+                }
+
+                if (unusedBits != 0)
+                {
+                    throw new CryptographicException("Invalid EC public key encoding");
+                }
+
+                AsnUtilities.ValidateDecodedEcPoint(publicKeyBytes.Span, curveOid);
+
+                var coordinateLengthBytes = AsnUtilities.GetDecodedCoordinateLengthBytes(curveOid);
+                var xCoordinate = new byte[coordinateLengthBytes];
+                var yCoordinate = new byte[coordinateLengthBytes];
+
+                publicKeyBytes.Slice(1, coordinateLengthBytes).CopyTo(xCoordinate);
+                publicKeyBytes.Slice(1 + coordinateLengthBytes, coordinateLengthBytes).CopyTo(yCoordinate);
+
+                point = new ECPoint
+                {
+                    X = xCoordinate,
+                    Y = yCoordinate
+                };
+            }
+            else
+            {
+                // Skip other optional fields
+                _ = seqEcPrivateKey.ReadEncodedValue();
+            }
+        }
+
+        return new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(curveOid),
+            D = privateKeyHandle.Data.ToArray(),
+            Q = point
+        };
+    }
+
+    /// <summary>
+    /// Decodes RSA parameters from a PKCS#8 private key.
+    /// </summary>
+    /// <param name="pkcs8EncodedKey">
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
+    /// </param>
+    /// <returns>
+    /// Parameters containing caller-owned arrays. The caller must clear the private parameter
+    /// arrays when they are no longer needed.
+    /// </returns>
+    /// <exception cref="CryptographicException">The private-key encoding is invalid.</exception>
+    /// <exception cref="InvalidOperationException">The algorithm is unsupported.</exception>
+    public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
+        CreateRSAParameters(pkcs8EncodedKey, parametersDecoded: null);
+
+    // Test observation hook. The callback must not retain or mutate the decoded private arrays.
+    internal static RSAParameters CreateRSAParameters(
+        ReadOnlyMemory<byte> pkcs8EncodedKey,
+        Action<RSAParameters>? parametersDecoded)
+    {
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
+        var seqPrivateKeyInfo = reader.ReadSequence();
+
+        // PKCS#8 starts with a version (integer 0)
+        ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
+
+        var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
+        var keyAlgorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        if (keyAlgorithmOid != Oids.Rsa)
+        {
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    "Expected an RSA private key, but the algorithm OID was '{0}'.",
+                    keyAlgorithmOid));
+        }
+
+        // RFC 8017 specifies NULL; preserve the existing absent-parameter input tolerance.
+        if (seqAlgorithmIdentifier.HasData)
+        {
+            seqAlgorithmIdentifier.ReadNull();
+        }
+        seqAlgorithmIdentifier.ThrowIfNotEmpty();
+
+        using var privateKeyDataHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
+        seqPrivateKeyInfo.ThrowIfNotEmpty();
+
+        var privateKeyReader = new AsnReader(privateKeyDataHandle.Data, AsnEncodingRules.DER);
+        var seqRsaPrivateKey = privateKeyReader.ReadSequence();
+
+        // RSA private key sequence: Version, modulus, publicExponent, privateExponent, prime1, prime2, exponent1, exponent2, coefficient
+        var rsaVersion = seqRsaPrivateKey.ReadInteger();
+        if (rsaVersion != 0)
+        {
+            throw new CryptographicException("Invalid RSA private key format: unexpected version");
+        }
+
+        var modulus = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var publicExponent = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var privateExponent = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var prime1 = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var prime2 = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var exponent1 = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var exponent2 = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var coefficient = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+
+        var rsaParameters = new RSAParameters
+        {
+            Modulus = modulus.ToArray(),
+            Exponent = publicExponent.ToArray(),
+            D = privateExponent.ToArray(),
+            P = prime1.ToArray(),
+            Q = prime2.ToArray(),
+            DP = exponent1.ToArray(),
+            DQ = exponent2.ToArray(),
+            InverseQ = coefficient.ToArray()
+        };
+
+        try
+        {
+            parametersDecoded?.Invoke(rsaParameters);
+            return rsaParameters.NormalizeParameters();
+        }
+        finally
+        {
+            // NormalizeParameters returns a deep copy on success. On failure this decoder is
+            // unwinding. Either way, these locally allocated private arrays are not returned.
+            CryptographicOperations.ZeroMemory(rsaParameters.D);
+            CryptographicOperations.ZeroMemory(rsaParameters.P);
+            CryptographicOperations.ZeroMemory(rsaParameters.Q);
+            CryptographicOperations.ZeroMemory(rsaParameters.DP);
+            CryptographicOperations.ZeroMemory(rsaParameters.DQ);
+            CryptographicOperations.ZeroMemory(rsaParameters.InverseQ);
+        }
+    }
+
+    private static void ReadAndValidatePkcs8Version(AsnReader privateKeyInfo)
+    {
+        var version = privateKeyInfo.ReadInteger();
+        if (version != 0)
+        {
+            throw new CryptographicException(version == 1
+                ? Rfc5958Version1UnsupportedMessage
+                : "Invalid PKCS#8 private key format: unexpected version");
+        }
+    }
+}

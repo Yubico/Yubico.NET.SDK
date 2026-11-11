@@ -1,0 +1,15 @@
+using Yubico.YubiKit.Core.Devices;
+
+using var stop = new CancellationTokenSource();
+var ct = stop.Token; // Cancel from the application's shutdown path.
+await foreach (var change in YubiKeyManager.WatchAsync(ct))
+{
+    Console.WriteLine(change switch
+    {
+        DeviceAdded added => $"Connected: {added.Device.DeviceId}",
+        DeviceRemoved removed => $"Removed: {removed.Device.DeviceId}",
+        DeviceUpdated updated => $"Metadata changed: {updated.Device.DeviceId}",
+        SnapshotComplete complete => $"Initial snapshot ready at revision {complete.Revision}",
+        _ => "Unknown change"
+    });
+}

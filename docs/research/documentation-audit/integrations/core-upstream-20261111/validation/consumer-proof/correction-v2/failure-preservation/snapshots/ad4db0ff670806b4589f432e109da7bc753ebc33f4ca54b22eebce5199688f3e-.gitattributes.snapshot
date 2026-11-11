@@ -1,0 +1,4 @@
+*.snapshot -text
+*.cs.txt -text
+*.log -text
+*.txt -text

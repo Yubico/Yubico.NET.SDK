@@ -1,0 +1,23 @@
+{
+  "Mode": "--sensitivity-blocking",
+  "Baseline": "3de42bb54c5e8c986364f0f04398d4e85a66a596",
+  "SourceHash": "90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa",
+  "Runtime": ".NET 10.0.15",
+  "Kernel": "Omarchy",
+  "KernelRelease": "7.2.15-1-omarchy",
+  "DynamicCode": true,
+  "Checks": [],
+  "Measurements": [],
+  "NativeProbes": [],
+  "Idle": [],
+  "Failure": "System.InvalidOperationException: owner-report-entry-off-caller-and-returned-task-still-pending\n   at LinuxHidRouteVerification.Evidence.Check(Boolean condition, String name) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/Evidence.cs:line 31\n   at LinuxHidRouteVerification.NativeScenarios.AssertResponsive(Evidence evidence, Int32 caller, Int32 native, Task operation) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 270\n   at LinuxHidRouteVerification.NativeScenarios.BlockingControlAsync(Evidence evidence) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 291\n   at LinuxHidRouteVerification.NativeScenarios.BlockingControlAsync(Evidence evidence) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 297\n   at LinuxHidRouteVerification.NativeScenarios.BlockingControlAsync(Evidence evidence) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 299\n   at Program.\u003CMain\u003E$(String[] args) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/Program.cs:line 64",
+  "Outcome": "FAILED"
+}
+RESULT: FAILED; checks=0; exit=1
+FAIL System.InvalidOperationException: owner-report-entry-off-caller-and-returned-task-still-pending
+   at LinuxHidRouteVerification.Evidence.Check(Boolean condition, String name) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/Evidence.cs:line 31
+   at LinuxHidRouteVerification.NativeScenarios.AssertResponsive(Evidence evidence, Int32 caller, Int32 native, Task operation) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 270
+   at LinuxHidRouteVerification.NativeScenarios.BlockingControlAsync(Evidence evidence) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 291
+   at LinuxHidRouteVerification.NativeScenarios.BlockingControlAsync(Evidence evidence) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 297
+   at LinuxHidRouteVerification.NativeScenarios.BlockingControlAsync(Evidence evidence) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/NativeScenarios.cs:line 299
+   at Program.<Main>$(String[] args) in /home/rupicola/Code/y/yubikit-core-docs-integration/verification/LinuxHidRouteVerification/Program.cs:line 64

@@ -1,0 +1,13 @@
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/Cli/OathToolServices.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/Cli/Output/OutputHelpers.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/Cli/SessionHelper.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/Commands/AccessCommand.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/Commands/AccountsCommand.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/Commands/InfoCommand.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/Commands/ResetCommand.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/OathToolApplication.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/Program.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.GlobalUsings.g.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.AssemblyInfo.cs

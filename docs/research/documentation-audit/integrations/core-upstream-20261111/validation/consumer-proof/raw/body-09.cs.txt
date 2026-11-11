@@ -1,0 +1,7 @@
+static async Task WatchOnUiAsync(Action<DeviceChange> apply, CancellationToken ct)
+{
+    var ui = SynchronizationContext.Current
+        ?? throw new InvalidOperationException("Start watching from the UI thread.");
+    await foreach (var change in YubiKeyManager.WatchAsync(ct))
+        ui.Post(_ => apply(change), null);
+}

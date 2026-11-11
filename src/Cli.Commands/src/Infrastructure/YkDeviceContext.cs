@@ -13,10 +13,8 @@ namespace Yubico.YubiKit.Cli.Commands.Infrastructure;
 /// <summary>
 ///     Enriched device context available to every <c>yk</c> command after device selection.
 ///     <para>
-///         After selection, a best-effort one-shot Management query populates <see cref="Info" />.
-///         Its temporary session and connection are closed before command execution; this context
-///         holds a metadata snapshot, not an open <see cref="ManagementSession" />.
-///         Selection may already have queried metadata.
+///         Selection metadata is last-known and suitable for display. Commands requiring authoritative
+///         current device state explicitly read Management information rather than relying on <see cref="Info" />.
 ///     </para>
 /// </summary>
 public sealed class YkDeviceContext
@@ -31,10 +29,10 @@ public sealed class YkDeviceContext
     public required DeviceSelection Selection { get; init; }
 
     /// <summary>
-    ///     Device-information snapshot, or <c>null</c> when enrichment fails, for example because the
-    ///     selected default transport is busy/unavailable or the query fails. Management also supports HID;
-    ///     absent SmartCard alone does not imply failure. Current Core FIPS masks have a mapping issue and
-    ///     flagged form factors can miss named enum values; do not infer approval or family eligibility from them.
+    ///     Last-known discovery metadata or selection's best-effort live fallback; null if unavailable.
+    ///     Use a live read for configuration or reset prerequisites. Current Core FIPS masks have a
+    ///     mapping issue and flagged form factors can miss named enum values; establish approval and
+    ///     product-family eligibility independently of those fields.
     /// </summary>
     public DeviceInfo? Info { get; init; }
 
@@ -52,6 +50,24 @@ public sealed class YkDeviceContext
         PreferredConnectionType = PreferredConnection,
         UserPresencePrompt = ConsoleUserPresencePrompt.Instance
     };
+
+    /// <summary>
+    /// Reads authoritative current Management information over the requested session transport.
+    /// A failed read returns null, never the selection snapshot; cancellation propagates.
+    /// </summary>
+    public async Task<DeviceInfo?> ReadLiveInfoAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await Device.GetDeviceInfoAsync(SessionOptions, cancellationToken);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            OutputHelpers.WriteInfo($"Could not retrieve full device info: {ex.Message}");
+            return null;
+        }
+    }
 
     /// <summary>
     ///     Returns a human-readable device banner line, preferring the part number from

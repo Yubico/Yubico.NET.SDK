@@ -75,3 +75,16 @@ jobs:
           printf '%s\n' "$output"
           test "$(printf '%s\n' "$output" | grep -c '^  Linked module entry type: ')" -eq 10
           printf '%s\n' "$output" | grep -Fx 'Found 0 YubiKey(s).'
+
+      - name: Publish Linux native HID contract host (no hardware)
+        if: runner.os == 'Linux'
+        run: dotnet toolchain.cs linux-hid-verification-publish
+
+      - name: Run Linux libc and production-reactor contracts (JIT and AOT, no hardware)
+        if: runner.os == 'Linux'
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          python3 verification/LinuxHidRouteVerification/capture.py --native-only
+          RECORDS="$(find artifacts/linux-hid-verification/evidence -mindepth 1 -maxdepth 1 -type d | sort | tail -1)"
+          python3 verification/LinuxHidRouteVerification/test_evidence_gates.py "$RECORDS"

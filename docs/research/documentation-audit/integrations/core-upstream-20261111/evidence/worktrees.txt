@@ -1,0 +1,229 @@
+worktree /home/rupicola/Code/y/Yubico.Yubikit.NET
+HEAD f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa
+branch refs/heads/yubikit-docs-audit
+
+worktree /home/rupicola/.local/share/windows-sdk/milestones/m3/review-fixes/source-final/fixture-worktree
+HEAD 15fdba8e9be6b1b4687da3f617b7eab534152008
+detached
+
+worktree /home/rupicola/.local/share/windows-sdk/milestones/m3/review-fixes/source-passed/fixture-worktree
+HEAD 8570735521088f1a39175e60478cc2225c64ac45
+detached
+
+worktree /home/rupicola/.local/share/windows-sdk/milestones/m3/review-fixes/source-verified/fixture-worktree
+HEAD 6a0b64b790a29c839d13c328de924183d51dc4d5
+detached
+
+worktree /home/rupicola/.local/share/windows-sdk/milestones/m3/review-fixes/source/fixture-worktree
+HEAD f31b78c11f8f3d144fbba9892528779280e6ad2d
+detached
+
+worktree /home/rupicola/.local/share/windows-sdk/worktrees/m2-pr755-d4f61110a
+HEAD d4f61110a8b49aa50704fafd8a41a48711d1eee9
+detached
+
+worktree /home/rupicola/.local/share/windows-sdk/worktrees/m3-runner
+HEAD 377c12d76e35df2b22a7891fd6ca89f89b3bed8b
+branch refs/heads/yubikit-windows-runner-m3
+
+worktree /home/rupicola/.local/share/windows-sdk/worktrees/pr755-876f22e65
+HEAD 876f22e652e5d5afae6e2f74813b39d35e49348f
+detached
+
+worktree /home/rupicola/.local/share/windows-sdk/worktrees/yubikit-3de42bb54
+HEAD 3de42bb54c5e8c986364f0f04398d4e85a66a596
+detached
+
+worktree /home/rupicola/Code/y/yubikit-audit-closeout-integration
+HEAD 85154611c4c9d013e9c3549029bc084b26acfcd0
+branch refs/heads/yubikit-audit-integration-check
+
+worktree /home/rupicola/Code/y/yubikit-audit-closeout-report
+HEAD 38b1db276343bb79d7bbd095a1e90706fe3533a7
+branch refs/heads/yubikit-audit-closeout-report
+
+worktree /home/rupicola/Code/y/yubikit-audit-hmac-closeout
+HEAD cecc4d2d66bd2bc0e745f64f130d658da05ba83b
+branch refs/heads/yubikit-audit-hmac-closeout
+
+worktree /home/rupicola/Code/y/yubikit-cli-device-selection
+HEAD 467bad3c0aae5d731e65f1211a55e0c01b46ead2
+branch refs/heads/yubikit-cli-device-selection
+
+worktree /home/rupicola/Code/y/yubikit-device-metadata-discovery
+HEAD 467bad3c0aae5d731e65f1211a55e0c01b46ead2
+branch refs/heads/yubikit-device-metadata-discovery
+
+worktree /home/rupicola/Code/y/yubikit-discovery-admission
+HEAD 1b9c6b6c437d8d410fcd742391ade78eee9abda6
+branch refs/heads/yubikit-discovery-admission
+
+worktree /home/rupicola/Code/y/yubikit-linux-async
+HEAD 820c323a815b8f7395a6222da9ef3b5c29bd7333
+branch refs/heads/yubikit-linux-async
+
+worktree /home/rupicola/Code/y/yubikit-monitor-change-feed
+HEAD ddd77b98ee3ae47fda7ef19a8490337c8d891604
+branch refs/heads/yubikit-monitor-change-feed
+
+worktree /home/rupicola/Code/y/yubikit-monitor-worker-simplification
+HEAD c9a59ceffef96140e7820a64c107525240dfcfa1
+branch refs/heads/yubikit-monitor-worker-simplification
+
+worktree /home/rupicola/Code/y/yubikit-owned-monitor
+HEAD b1e6010a82e778f88bdbe80e91ab814515b1e01b
+branch refs/heads/yubikit-owned-monitor
+
+worktree /home/rupicola/Code/y/yubikit-piv-session-consistency
+HEAD f99cf78fe90b257653aa0a3de60bbffe896b34fb
+branch refs/heads/yubikit
+
+worktree /home/rupicola/Code/y/yubikit-session-initialization
+HEAD 5b03885b3bebf1f4f9031e38c376ecd4a1de5fb1
+branch refs/heads/refactor/session-initialization
+
+worktree /home/rupicola/Code/y/yubikit-stack-docs
+HEAD 34e8726e9cb58ba5814d2c952004b47919d3e85d
+branch refs/heads/docs/stack-trunk-detection
+
+worktree /home/rupicola/Code/y/yubikit-toolchain
+HEAD a5ded69ab10264e3d93abdb08063b9e182bc2e48
+branch refs/heads/toolchain/run-logs
+
+worktree /tmp/opencode/audit-closeout/certificate-bundle
+HEAD d1559f7dd00369e8d1c01e173d6ca098a94a32d6
+branch refs/heads/yubikit-audit-certificate-bundle
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/deviceinfo-lengths
+HEAD 331d3dc1cd725cae50a95a3a15fac3a297f562f7
+branch refs/heads/yubikit-audit-deviceinfo-lengths
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/docs-patch-validation
+HEAD 4fa381f8688cf00e14ac4a5ed8b946c7e6fbc766
+branch refs/heads/yubikit-audit-docs-patch-validation
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/factory-reset-docs
+HEAD a330bbc975cee91f7758fa62851d3c1a3425fac0
+branch refs/heads/yubikit-audit-factory-reset-docs
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/migration-ci-split
+HEAD 5621678388c9c473b27bf7a57f5282dbc1857edc
+branch refs/heads/yubikit-audit-migration-ci-split
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/oath-ordering
+HEAD a65af96930a770603c64ddfd3bb21f709dd6e350
+branch refs/heads/yubikit-audit-oath-ordering
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/oath-secret
+HEAD 6ca266dbc045f963b82cd664faed4dc414bc33f0
+branch refs/heads/yubikit-audit-oath-secret
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/openpgp-cert-errors
+HEAD 71e3698529dd7b385a5aa279e720c3d17bec6386
+branch refs/heads/yubikit-audit-openpgp-cert-errors
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/pcsc-exclusive
+HEAD a0693affd3c66c906060e62431b39f4618b4d027
+branch refs/heads/yubikit-audit-pcsc-exclusive
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/pcsc-reader-cleanup
+HEAD 013f3587dc5ac130eff2702f5cba7e209d024e86
+branch refs/heads/yubikit-audit-pcsc-reader-cleanup
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/registration-transports
+HEAD aba4a0ec300af1fb8ab629a9566b4ca9caef44e2
+branch refs/heads/yubikit-audit-registration-transports
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-closeout/rp-validator
+HEAD e57a78df9cfd453b519fa2a3dec7a72146a5697d
+branch refs/heads/yubikit-audit-rp-validator
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/audit-v2-attended
+HEAD 68c253166f7281734904bb74262acf5c21d142c5
+branch refs/heads/audit/v2-fixes
+prunable gitdir file points to non-existent location
+
+worktree /tmp/opencode/core-upstream-20261111
+HEAD f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa
+branch refs/heads/yubikit-core-docs-integration
+
+worktree /tmp/opencode/ctap2-001-edit-a
+HEAD 5b09a9b6942ded3913b5c9340c3e126617e61a82
+detached
+
+worktree /tmp/opencode/ctap2-001-edit-b
+HEAD 5b09a9b6942ded3913b5c9340c3e126617e61a82
+detached
+
+worktree /tmp/opencode/ctap2-001-edit-c
+HEAD 5b09a9b6942ded3913b5c9340c3e126617e61a82
+detached
+
+worktree /tmp/opencode/ctap2-001-edit-d
+HEAD 5b09a9b6942ded3913b5c9340c3e126617e61a82
+detached
+
+worktree /tmp/opencode/ctap2-001-edit-e
+HEAD 5b09a9b6942ded3913b5c9340c3e126617e61a82
+detached
+
+worktree /tmp/opencode/ctap2-001-edit-f
+HEAD 5b09a9b6942ded3913b5c9340c3e126617e61a82
+detached
+
+worktree /tmp/opencode/management-001-edit-a
+HEAD da61d2e6d754b4c155cbb2579202e910986f4b3a
+detached
+
+worktree /tmp/opencode/management-001-edit-b
+HEAD da61d2e6d754b4c155cbb2579202e910986f4b3a
+detached
+
+worktree /tmp/opencode/management-001-edit-c
+HEAD da61d2e6d754b4c155cbb2579202e910986f4b3a
+detached
+
+worktree /tmp/opencode/pr770-clean-publish
+HEAD aea925cb3901d1939c17eea62f1e667ee4a4e978
+detached
+
+worktree /tmp/opencode/yubikit-cryptographic-catalog
+HEAD 8693e9c3dfd009b9ccdb228548dd9b6b0adde54d
+branch refs/heads/yubikit-cryptographic-catalog
+
+worktree /tmp/opencode/yubikit-key-metadata
+HEAD 8de1004bd376b9f2e2d2123057c2b8734fee9d0b
+branch refs/heads/yubikit-key-metadata
+
+worktree /tmp/opencode/yubikit-oath-fix-cli
+HEAD 618adbec44157c83ad31f073ea4d5fd8589bbf29
+branch refs/heads/yubikit-oath-fix-cli
+
+worktree /tmp/opencode/yubikit-oath-fix-inputs
+HEAD 8503fe2dcc324209603f3a0a365d0fc91df53bdd
+branch refs/heads/yubikit-oath-fix-inputs
+
+worktree /tmp/opencode/yubikit-oath-fix-lifecycle
+HEAD d74cdd44f0d00874f93ac4aa462212a8c6dbc90e
+branch refs/heads/yubikit-oath-fix-lifecycle
+
+worktree /tmp/opencode/yubikit-oath-fix-protocol
+HEAD c79e4c1e949fa9c1b080165e59e4c2bc9e831583
+branch refs/heads/yubikit-oath-fix-protocol
+
+worktree /tmp/opencode/yubikit-oath-scp-reference-probe
+HEAD 244df5b168f04ce79a4fbde2de34d6ada3b07517
+branch refs/heads/yubikit-oath-scp-reference-probe
+

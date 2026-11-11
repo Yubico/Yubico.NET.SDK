@@ -1,0 +1,53 @@
+"""Capture immutable Git inputs for independent Phase 0 review; no ref updates."""
+
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+ROOT = Path(__file__).resolve().parents[5]
+OUT = Path(__file__).resolve().parent / "evidence" / "resolver-inputs"
+PARENTS = {
+    "base": "b1362127203beda5e9c797e8648b28e2716c496c",
+    "campaign": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+    "incoming": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+}
+
+
+def git(*args):
+    return subprocess.check_output(["git", *args], cwd=ROOT)
+
+
+def main():
+    assert git("rev-parse", "HEAD").decode().strip() == PARENTS["campaign"]
+    OUT.mkdir(parents=True, exist_ok=True)
+    changed = {}
+    for label in ("campaign", "incoming"):
+        delta = git("diff", "--name-status", "-M", PARENTS["base"], PARENTS[label])
+        (OUT / f"{label}-delta.tsv").write_bytes(delta)
+        changed[label] = set(git("diff", "--name-only", "--no-renames", PARENTS["base"], PARENTS[label]).decode().splitlines())
+    overlaps = sorted(changed["campaign"] & changed["incoming"])
+    rows = []
+    for path in overlaps:
+        row = {"path": path, "parents": {}}
+        for label, revision in PARENTS.items():
+            result = subprocess.run(["git", "show", f"{revision}:{path}"], cwd=ROOT, capture_output=True)
+            if result.returncode:
+                row["parents"][label] = None
+                continue
+            data = result.stdout
+            target = OUT / "blobs" / label / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+            row["parents"][label] = {
+                "blob": git("rev-parse", f"{revision}:{path}").decode().strip(),
+                "sha256": hashlib.sha256(data).hexdigest(),
+                "bytes": len(data),
+            }
+        rows.append(row)
+    (OUT / "overlaps.json").write_text(json.dumps({"pins": PARENTS, "count": len(rows), "paths": rows}, indent=2) + "\n")
+    print(f"Captured {len(rows)} overlapping paths and both complete parent deltas at {OUT}")
+
+
+if __name__ == "__main__":
+    main()

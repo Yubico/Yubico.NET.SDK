@@ -27,7 +27,7 @@ namespace Yubico.YubiKit.Piv.DataObjects;
 /// </summary>
 internal static class TypedDataObjectProtocol
 {
-    private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.DataObjects.TypedDataObjectProtocol");
+    private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(TypedDataObjectProtocol));
 
     internal static async Task<CardholderUniqueId> GetCardholderUniqueIdAsync(
         IBackend backend,

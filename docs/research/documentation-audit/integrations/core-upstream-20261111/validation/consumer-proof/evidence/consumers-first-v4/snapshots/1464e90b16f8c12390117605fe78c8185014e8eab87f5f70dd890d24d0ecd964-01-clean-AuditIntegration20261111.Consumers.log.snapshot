@@ -1,0 +1,1305 @@
+$ dotnet clean docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj -c Release
+Build started 11/11/2026 8:40:32 PM.
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Creating directory "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/Yubico.YubiKit.AuditIntegration20261111.Consumers/obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) on node 4 (Clean target(s)).
+     6>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj" (7:2) on node 2 (Clean target(s)).
+     7>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/ManagementTool.csproj" (5:2) on node 9 (Clean target(s)).
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.runtimeconfig.json".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/OathTool.csproj" (4:2) on node 6 (Clean target(s)).
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj" (8:2) on node 3 (Clean target(s)).
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool.runtimeconfig.json".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/PivTool.csproj" (3:2) on node 8 (Clean target(s)).
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj" (10:2) on node 5 (Clean target(s)).
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.deps.json".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.deps.json".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.runtimeconfig.json".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/OtpTool.csproj" (9:2) on node 7 (Clean target(s)).
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.deps.json".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool.pdb".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.runtimeconfig.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Logging.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Options.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.pdb".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Microsoft.Extensions.Primitives.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool.xml".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Spectre.Console.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool.deps.json".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.runtimeconfig.json".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.xml".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.pdb".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool.runtimeconfig.json".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Spectre.Console.Cli.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/System.Formats.Cbor.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/de/Spectre.Console.Cli.resources.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Binder.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/fr/Spectre.Console.Cli.resources.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.xml".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool.pdb".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.pdb".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.CommandLine.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Binder.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/sv/Spectre.Console.Cli.resources.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool.xml".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/linux-arm64/native/libYubico.NativeShims.so".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.xml".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.FileExtensions.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.CommandLine.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Json.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/linux-x64/native/libYubico.NativeShims.so".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Binder.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Binder.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.FileExtensions.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/osx-arm64/native/libYubico.NativeShims.dylib".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Binder.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.UserSecrets.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.CommandLine.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Json.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.CommandLine.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/osx-x64/native/libYubico.NativeShims.dylib".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.CommandLine.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.UserSecrets.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/win-arm64/native/Yubico.NativeShims.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.FileExtensions.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Json.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.UserSecrets.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.FileExtensions.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/win-x64/native/Yubico.NativeShims.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Json.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Physical.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/runtimes/win-x86/native/Yubico.NativeShims.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.FileExtensions.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.UserSecrets.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.FileSystemGlobbing.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Json.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.UserSecrets.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Physical.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.FileSystemGlobbing.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Physical.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.FileSystemGlobbing.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Physical.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.FileSystemGlobbing.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Configuration.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Console.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Logging.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Physical.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Configuration.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Debug.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.FileSystemGlobbing.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Configuration.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Configuration.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Console.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventLog.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Debug.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventSource.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Options.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Primitives.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Spectre.Console.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Console.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Spectre.Console.Cli.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Console.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Logging.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventSource.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/System.Diagnostics.EventLog.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Debug.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/System.Formats.Cbor.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Options.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Configuration.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventLog.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Microsoft.Extensions.Primitives.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Spectre.Console.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Spectre.Console.Cli.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/System.Diagnostics.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/System.Formats.Cbor.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/de/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/fr/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/sv/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/runtimes/linux-arm64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/runtimes/linux-x64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/runtimes/osx-arm64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/runtimes/osx-x64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/runtimes/win-arm64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/runtimes/win-x64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/runtimes/win-x86/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Debug.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Console.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Debug.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventSource.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventSource.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/de/Spectre.Console.Cli.resources.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Options.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/fr/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/sv/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Microsoft.Extensions.Primitives.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Spectre.Console.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventLog.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Spectre.Console.Cli.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/runtimes/linux-arm64/native/libYubico.NativeShims.so".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/System.Diagnostics.EventLog.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventSource.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Options.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Options.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Microsoft.Extensions.Primitives.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Spectre.Console.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Spectre.Console.Cli.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/System.Diagnostics.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/System.Formats.Cbor.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/de/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/fr/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/sv/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/runtimes/linux-arm64/native/libYubico.NativeShims.so".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/runtimes/linux-x64/native/libYubico.NativeShims.so".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/runtimes/linux-x64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/runtimes/osx-arm64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/runtimes/osx-x64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/runtimes/win-arm64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/runtimes/win-x64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/runtimes/win-x86/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Microsoft.Extensions.Primitives.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Spectre.Console.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/System.Formats.Cbor.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/runtimes/osx-arm64/native/libYubico.NativeShims.dylib".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Spectre.Console.Cli.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/de/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/fr/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/sv/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/System.Diagnostics.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/System.Formats.Cbor.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/de/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/fr/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/sv/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/runtimes/linux-arm64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/runtimes/linux-x64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/runtimes/osx-arm64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/runtimes/osx-x64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/runtimes/win-arm64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/runtimes/win-x64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/runtimes/win-x86/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/runtimes/osx-x64/native/libYubico.NativeShims.dylib".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/runtimes/win-arm64/native/Yubico.NativeShims.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/runtimes/win-x64/native/Yubico.NativeShims.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/runtimes/win-x86/native/Yubico.NativeShims.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/runtimes/linux-arm64/native/libYubico.NativeShims.so".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+     1>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (1) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/FidoTool.csproj" (2:2) on node 1 (Clean target(s)).
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+     4>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.csproj.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/refint/OathTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/OathTool.genruntimeconfig.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/obj/Release/net10.0/ref/OathTool.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool.deps.json".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/runtimes/linux-x64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/runtimes/osx-arm64/native/libYubico.NativeShims.dylib".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.csproj.AssemblyReference.cache".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool.runtimeconfig.json".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/runtimes/osx-x64/native/libYubico.NativeShims.dylib".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool.pdb".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.GeneratedMSBuildEditorConfig.editorconfig".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/runtimes/win-arm64/native/Yubico.NativeShims.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/runtimes/win-x64/native/Yubico.NativeShims.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool.xml".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.AssemblyInfoInputs.cache".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.AssemblyInfo.cs".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/runtimes/win-x86/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.csproj.CoreCompileInputs.cache".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Binder.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.CommandLine.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.EnvironmentVariables.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.FileExtensions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.Json.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Configuration.UserSecrets.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.FileProviders.Physical.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.FileSystemGlobbing.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.sourcelink.json".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpT.81EE99AC.Up2Date".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.csproj.AssemblyReference.cache".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.dll".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.GeneratedMSBuildEditorConfig.editorconfig".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.csproj.CoreCompileInputs.cache".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/Manageme.60B8B8C3.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/refint/ManagementTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.pdb".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+     5>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ManagementTool.genruntimeconfig.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/obj/Release/net10.0/ref/ManagementTool.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.AssemblyInfoInputs.cache".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Logging.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.csproj.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/refint/OtpTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/OtpTool.genruntimeconfig.cache".
+     8>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/refint/OpenPgpTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/OpenPgpTool.genruntimeconfig.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/obj/Release/net10.0/ref/OpenPgpTool.dll".
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/obj/Release/net10.0/ref/OtpTool.dll".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Configuration.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.csproj.AssemblyReference.cache".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Console.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Debug.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Logging.EventSource.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Options.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+     2>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Microsoft.Extensions.Primitives.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Spectre.Console.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Spectre.Console.Cli.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/System.Diagnostics.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/System.Formats.Cbor.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/de/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/fr/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/sv/Spectre.Console.Cli.resources.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.Messages.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/runtimes/win/lib/net10.0/System.Diagnostics.EventLog.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/runtimes/linux-arm64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/runtimes/linux-x64/native/libYubico.NativeShims.so".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/runtimes/osx-arm64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/runtimes/osx-x64/native/libYubico.NativeShims.dylib".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/runtimes/win-arm64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/runtimes/win-x64/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/runtimes/win-x86/native/Yubico.NativeShims.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.csproj.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/refint/FidoTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/FidoTool.genruntimeconfig.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/obj/Release/net10.0/ref/FidoTool.dll".
+     3>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.csproj.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/refint/PivTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/PivTool.genruntimeconfig.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/obj/Release/net10.0/ref/PivTool.dll".
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthT.270C2CA7.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/refint/HsmAuthTool.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/HsmAuthTool.genruntimeconfig.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/obj/Release/net10.0/ref/HsmAuthTool.dll".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/Yubico.YubiKit.Piv.csproj" (14:8) on node 15 (Clean target(s)).
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (13:8) on node 16 (Clean target(s)).
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.deps.json".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.csproj.AssemblyReference.cache".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.GeneratedMSBuildEditorConfig.editorconfig".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.GeneratedMSBuildEditorConfig.editorconfig".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.AssemblyInfoInputs.cache".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.AssemblyInfoInputs.cache".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.AssemblyInfo.cs".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.csproj.CoreCompileInputs.cache".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.csproj.CoreCompileInputs.cache".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.sourcelink.json".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.sourcelink.json".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.Y.AA6D3182.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.Y.DA2F2C9D.Up2Date".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/refint/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.dll".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/refint/Yubico.YubiKit.Piv.dll".
+    13>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiHsm.dll".
+    14>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj" (19:9) on node 11 (Clean target(s)).
+    19>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.Y.4CE3D1A9.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/refint/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (18:9) on node 14 (Clean target(s)).
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.AssemblyInfoInputs.cache".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj" (16:2) on node 18 (Clean target(s)).
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll".
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.AssemblyInfo.cs".
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.pdb".
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.csproj.CoreCompileInputs.cache".
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.sourcelink.json".
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.Y.4E81C14A.Up2Date".
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.csproj.AssemblyReference.cache".
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.GeneratedMSBuildEditorConfig.editorconfig".
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/refint/Yubico.YubiKit.Ctap2.dll".
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.AssemblyInfo.cs".
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.csproj.CoreCompileInputs.cache".
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.sourcelink.json".
+    18>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll".
+    16>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.Y.9E4EFF84.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/refint/Yubico.YubiKit.SecurityDomain.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/ref/Yubico.YubiKit.SecurityDomain.dll".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" (20:2) on node 17 (Clean target(s)).
+    20>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/Yubico.YubiKit.Oath.csproj" (17:8) on node 13 (Clean target(s)).
+    17>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.deps.json".
+    20>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+    17>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+    20>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+    17>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+    20>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+    17>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+    20>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.Y.74B071DD.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/refint/Yubico.YubiKit.WebAuthn.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/obj/Release/net10.0/ref/Yubico.YubiKit.WebAuthn.dll".
+    17>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.Y.F52E7702.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/refint/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/obj/Release/net10.0/ref/Yubico.YubiKit.Oath.dll".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj" (11:9) on node 4 (Clean target(s)).
+    11>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/refint/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (15:8) on node 12 (Clean target(s)).
+    15>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.Y.064A78F6.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/refint/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/obj/Release/net10.0/ref/Yubico.YubiKit.OpenPgp.dll".
+   6:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (6:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" (12:8) on node 10 (Clean target(s)).
+    12>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.Y.4967535B.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/refint/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiOtp.dll".
+   5:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/ManagementTool.csproj" (5:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" (22:7) on node 9 (Clean target(s)).
+    22>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.Y.25DE18DB.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/refint/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Shared.dll".
+   5:2>Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/ManagementTool.csproj" (5:2) is building "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj" (21:7) on node 2 (Clean target(s)).
+    21>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Piv.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Oath.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Oath.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.xml".
+    11>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj" (Clean target(s)).
+    21>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.Y.EAF34B01.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/refint/Yubico.YubiKit.Cli.Commands.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Commands.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Commands.dll".
+    13>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (Clean target(s)).
+    18>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (Clean target(s)).
+    16>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj" (Clean target(s)).
+    14>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/Yubico.YubiKit.Piv.csproj" (Clean target(s)).
+    15>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (Clean target(s)).
+    12>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" (Clean target(s)).
+    20>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" (Clean target(s)).
+    17>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/Yubico.YubiKit.Oath.csproj" (Clean target(s)).
+    19>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj" (Clean target(s)).
+     7>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj" (Clean target(s)).
+     6>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" (Clean target(s)).
+    22>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" (Clean target(s)).
+    21>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj" (Clean target(s)).
+     4>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/OathTool.csproj" (Clean target(s)).
+    10>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj" (Clean target(s)).
+     5>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/ManagementTool.csproj" (Clean target(s)).
+     8>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj" (Clean target(s)).
+     3>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/PivTool.csproj" (Clean target(s)).
+     9>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/OtpTool.csproj" (Clean target(s)).
+     2>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/FidoTool.csproj" (Clean target(s)).
+     1>Done Building Project "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.46

@@ -36,7 +36,7 @@ internal static class CertificateProtocol
     private const int CertificateInfoTlvLength = 3;
     private const int LrcTlvLength = 2;
 
-    private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Certificates.CertificateProtocol");
+    private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(CertificateProtocol));
 
     /// <summary>
     /// Gets the certificate stored in the specified slot.

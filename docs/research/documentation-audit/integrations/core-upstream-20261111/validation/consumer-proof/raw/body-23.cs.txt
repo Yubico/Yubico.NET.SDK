@@ -1,0 +1,6 @@
+using Yubico.YubiKit.Core.Devices;
+
+var devices = await YubiKeyManager.FindAllAsync(
+    ConnectionType.All,
+    cancellationToken: cancellationToken);
+var device = devices.First();

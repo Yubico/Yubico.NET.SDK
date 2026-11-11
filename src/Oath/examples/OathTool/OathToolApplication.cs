@@ -5,7 +5,6 @@ using System.Buffers;
 using System.Globalization;
 using System.Text;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Oath.Examples.OathTool.Commands;
 
@@ -13,7 +12,7 @@ namespace Yubico.YubiKit.Oath.Examples.OathTool;
 
 public static class OathToolApplication
 {
-    // Help and argument errors must return before the callback starts monitoring or opens a device.
+    // Help and argument errors return before the callback discovers or opens a device.
     public static async Task<int> RunAsync(string[] args,
         Func<OathInvocation, CancellationToken, Task<int>> execute,
         CancellationToken cancellationToken = default,
@@ -47,24 +46,17 @@ public static class OathToolApplication
 
     public static async Task<int> ExecuteAsync(OathInvocation invocation, CancellationToken cancellationToken)
     {
-        YubiKeyManager.StartMonitoring();
-        try
+        // Selection performs fresh one-shot discovery; this command owns no tracking lifetime.
+        using var password = EncodePassword(invocation.Value("--password"));
+        using var newPassword = EncodePassword(invocation.Value("--new-password"));
+        return invocation.Command switch
         {
-            using var password = EncodePassword(invocation.Value("--password"));
-            using var newPassword = EncodePassword(invocation.Value("--new-password"));
-            return invocation.Command switch
-            {
-                "info" => await InfoCommand.ExecuteAsync(cancellationToken),
-                "reset" => await ResetCommand.ExecuteAsync(invocation.Flag("--force"), cancellationToken),
-                "access change" => await AccessCommand.ChangeAsync(
-                    password, newPassword, invocation.Flag("--clear"), cancellationToken),
-                _ => await ExecuteAccountAsync(invocation, password, cancellationToken)
-            };
-        }
-        finally
-        {
-            await YubiKeyManager.ShutdownAsync();
-        }
+            "info" => await InfoCommand.ExecuteAsync(cancellationToken),
+            "reset" => await ResetCommand.ExecuteAsync(invocation.Flag("--force"), cancellationToken),
+            "access change" => await AccessCommand.ChangeAsync(
+                password, newPassword, invocation.Flag("--clear"), cancellationToken),
+            _ => await ExecuteAccountAsync(invocation, password, cancellationToken)
+        };
     }
 
     private static async Task<int> ExecuteAccountAsync(OathInvocation invocation,

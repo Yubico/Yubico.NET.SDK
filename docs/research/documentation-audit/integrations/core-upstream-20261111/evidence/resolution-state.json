@@ -1,0 +1,15 @@
+{
+  "head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+  "merge_head": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+  "pending_product_tree": "899dade50586c55efad0031e0a001498a11f5a26",
+  "branch": "yubikit-core-docs-integration",
+  "merge_base": "b1362127203beda5e9c797e8648b28e2716c496c",
+  "unique_histories": "30\t74",
+  "unmerged_entries": 0,
+  "core_files": 515,
+  "core_csharp_files": 498,
+  "api_entries": 1442,
+  "api_removed_incoming": 54,
+  "api_added_incoming": 83,
+  "build_test_formatter_device_execution": "Not run by resolver; pending independent review and coordinator assignment."
+}

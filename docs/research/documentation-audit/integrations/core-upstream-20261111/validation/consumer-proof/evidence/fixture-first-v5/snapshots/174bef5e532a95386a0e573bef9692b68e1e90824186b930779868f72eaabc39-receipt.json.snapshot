@@ -1,0 +1,194 @@
+{
+  "status": "consolidated source corrections and full read-only fixture predicates; actual v5 fixture/live and Mac compile/capture pending review",
+  "protected_originals": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py",
+      "bytes": 41278,
+      "sha256": "54cb56e12e3b683d2c662c133dc6e23eadef355d7e515f478a87b36a87f25281"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v2.py",
+      "bytes": 5211,
+      "sha256": "78024e05a44e82b309c3ec70a5814c13513f0a9436ccc345c224e0b19380b695"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v3.py",
+      "bytes": 5800,
+      "sha256": "3be9675df87e5fd8d742948efa8faf632df59ee6df752541d2841a4c624ccccb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v4.py",
+      "bytes": 5789,
+      "sha256": "0ca001505c2c3b121687146a0660f78639b78d7c5680c6a034bdd47f14719fff"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/nuget-imports-v2.py",
+      "bytes": 5472,
+      "sha256": "2949c4359d893cb600042ba29eb48e7ccadf08e9af6e176c51fc9e1e9c17007f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/additional-files.py",
+      "bytes": 8367,
+      "sha256": "8ae4b8b7b9475c68b5775f8d1f6550ccffded54ba10188d4feb0225216decc7f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/Capture.targets",
+      "bytes": 7800,
+      "sha256": "3242fe01c0f0ac6d7a1d27bd4539da21fb143e4c5b882aaee30e629532f4bf8a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inputs.json",
+      "bytes": 49129,
+      "sha256": "af9a3e6a35388d6d8fc0973a263098aa2eaad573f81a43fd6191873fefd23f83"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/preparation-seal.json",
+      "bytes": 31893,
+      "sha256": "6353150d700c743b6d64fab417acd742f31eea2d984de2eca3a50a301b377980"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/tooling-provenance.json",
+      "bytes": 15107,
+      "sha256": "0b56d25ce523b69848033b41fd676e199e2bc20a6faa607d35e4a188e806cfdb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/assets.py",
+      "bytes": 16581,
+      "sha256": "f0432cbe6a8a88312c97b29c8f7982ebe62afc8ea45dbf476fbbddbfc3abd7ab"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/receipt.json",
+      "bytes": 15419,
+      "sha256": "ac7a9dcc15510dc0dd8814ec5e79b54378c8b03280aff51cdb0b23ebed2d6325"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/independent-review.md",
+      "bytes": 15853,
+      "sha256": "e2f0928dc50e756bf5b66f1c2052ba47b97c8f2a717668eb12ceeaf52afdf140"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/consumer-preservation/manifest.json",
+      "bytes": 4040229,
+      "sha256": "05dc14bd6be66a1f021cd25337cee44d0c6a2ff2debd6c6986d8d6e71f07cc88"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/manifest.json",
+      "bytes": 19520090,
+      "sha256": "e2715d38f1ce0e6a99607e12cc9ba7d06ec0bd0a0a60eafb4f47e44fda129d15"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/fixture-first-v4/failure.json",
+      "bytes": 1058545,
+      "sha256": "eb43212b0bb654c25cb83aca054278d974bce1d6faf03a9fba4352301cd90d9b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "bytes": 1261,
+      "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/Directory.Build.props",
+      "bytes": 570,
+      "sha256": "1e7ffae7e0bca3970a0e0d1f1853ad7023ae586188d752da92e3a7f38391316a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "bytes": 3088,
+      "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+      "bytes": 584,
+      "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/fixture-preservation/manifest.json",
+      "bytes": 1149265,
+      "sha256": "85dedcd2d73156cf1b9eb67e3699ba221e9788d77b2e17f2cef3e2f5b81ca251"
+    }
+  ],
+  "new_files": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v5.py",
+      "bytes": 7022,
+      "sha256": "0c1bb1a6f71718706dc2a168ba66b9d5d83ed15c1addfaa6d2d53cac6eeb2a75"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/copy-owner.py",
+      "bytes": 4770,
+      "sha256": "7f4374db50feafbf3c4c1fb2cc14b7b266a3c1b9010c1f7f0bf415b785dcdf07"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/compile-candidates.py",
+      "bytes": 3389,
+      "sha256": "e82610fffbdb5011ada14dfa401529a887e7ecc9cbf2c4b1213ba43215b3786e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/source-cases.py",
+      "bytes": 8082,
+      "sha256": "1679e588aeebda93170e627d9a86ca0a940b2c1cde8a4b67d427d930b26a78ba"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/preflight-fixture.py",
+      "bytes": 4708,
+      "sha256": "5dab0cda6015809dab074847c096023d719878ed6d68268e2fb1a26f0eff6acb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/preserve-fixture.py",
+      "bytes": 1353,
+      "sha256": "45dd7efda6831af48ac7246763394e850505b1eae8f90da0571752cfa82a0f5d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/lane.sh",
+      "bytes": 1628,
+      "sha256": "9fe65a29122d95eabcfafcc60e00cda53e4ae8f58d53386a8582b7902f17a807"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/handoff.md",
+      "bytes": 10354,
+      "sha256": "f63080ead4c067c9472208b4670559994361564253f8e9dcf573ff839d5ed114"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/fixture-compile-difference.json",
+      "bytes": 4343,
+      "sha256": "9a58c6af94c557923ddab78b5f307f1e3f7853845262888b4c05dc7c86b0796f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/fixture-preflight-first.json",
+      "bytes": 3142556,
+      "sha256": "5cef54af907d875caff6634ff2dfa4488c17b2d9796415db9fbaf3c353df543f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/mac-source-cases-first.json",
+      "bytes": 34317,
+      "sha256": "c192618fb817d7204d79904a7b63f09d35219a711333590e2e0a8fd7df969ba4"
+    }
+  ],
+  "collector_transformations": [
+    {
+      "before": "            binding = dict(role='package-copy', package_id=row['package_id'], asset=relative, asset_kinds=kinds)\n        else:",
+      "after": "            binding = dict(role='package-copy', package_id=row['package_id'], asset=relative, asset_kinds=kinds)\n        elif is_declared_comparison_copy(project, path):\n            binding = declared_comparison_copy_owner(project, policy, path, destination, compiler_bindings, retain)\n        else:",
+      "count": 1
+    },
+    {
+      "before": "require(package_refs == expected_compile, 'Selected package compile assets and actual Csc package reference set differ')",
+      "after": "compile_candidates = compile_candidate_dispositions(project, raw, expected_compile, package_refs, packages, retain)",
+      "count": 1
+    },
+    {
+      "before": "return dict(target_selection=selection, packages=dispositions, compiler_input_bindings=compiler_bindings,",
+      "after": "return dict(target_selection=selection, packages=dispositions, compiler_input_bindings=compiler_bindings, compile_candidate_dispositions=compile_candidates,",
+      "count": 1
+    }
+  ],
+  "effective_collector_sha256": "8f48ef7a9ef476364c063d85b5a6da79289df4a56a97b0bbcb294d8cadc5ff4b",
+  "actual_fixture_compiler_attempt": "fixture-first",
+  "actual_fixture_successful_build": "consumer-fixture-build-first",
+  "proposed_fixture_capture_name": "fixture-first-v5",
+  "mac_status": "not compiled/restored/captured in its assigned context; isolated copy-source cases use retained consumer oracles only",
+  "orthogonal_changes": [
+    "exact declared comparison Core copy/sidecar ownership with actual Csc/source/output identities",
+    "actual consumed package references remain strictly bound; potential unconsumed selected-target assets explicitly retained/disposed rather than required consumed"
+  ],
+  "unchanged": "V4 selected-target model, actual evaluated-item/Csc equality, uniqueness, AdditionalFiles multisets, namespace, analyzer/policy/graph/source/XML/live checks; no SDK/project edits or repeated successful builds."
+}

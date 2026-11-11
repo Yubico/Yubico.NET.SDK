@@ -10,24 +10,24 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.Cli.Commands.Management;
 
 /// <summary>
-///     Displays the context's device-information snapshot: USB/NFC enabled capabilities,
-///     auto-eject timeout, device flags, lock status, and PIN complexity. Does not refresh it in the command body.
+///     Reads and displays current device configuration: USB/NFC enabled capabilities,
+///     auto-eject timeout, device flags, lock status, and PIN complexity.
 /// </summary>
 public sealed class ManagementConfigCommand : YkCommandBase<GlobalSettings>
 {
     protected override ConnectionType[] AppletTransports =>
         [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
 
-    protected override Task<int> ExecuteCommandAsync(
+    protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, GlobalSettings settings, YkDeviceContext deviceContext)
     {
         OutputHelpers.WriteHeader("Device Configuration");
 
-        var info = deviceContext.Info;
+        var info = await deviceContext.ReadLiveInfoAsync();
         if (info is null)
         {
             OutputHelpers.WriteWarning("Could not retrieve device configuration.");
-            return Task.FromResult(ExitCode.Success);
+            return ExitCode.Success;
         }
 
         var deviceInfo = info.Value;
@@ -68,7 +68,7 @@ public sealed class ManagementConfigCommand : YkCommandBase<GlobalSettings>
             OutputHelpers.WriteKeyValue("Reset Blocked", FormatCapabilities(deviceInfo.ResetBlocked));
         }
 
-        return Task.FromResult(ExitCode.Success);
+        return ExitCode.Success;
     }
 
     private static string FormatCapabilities(DeviceCapabilities capabilities) =>

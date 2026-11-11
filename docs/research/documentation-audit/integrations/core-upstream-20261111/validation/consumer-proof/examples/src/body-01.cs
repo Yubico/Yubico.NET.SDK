@@ -1,0 +1,20 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+namespace AuditIntegration20261111.Example01;
+public static class Example
+{
+public static async Task RunAsync()
+{
+
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+Console.WriteLine($"Serial {device.SerialNumber}: {device.AvailableConnections}");
+
+}
+}

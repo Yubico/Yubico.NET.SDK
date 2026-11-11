@@ -49,7 +49,7 @@ internal static class AuthenticationProtocol
     private const int AesBlockSize = 16;
     private static readonly int DesKeyComponentLength = KeyType.TripleDes.GetKeyInfo().KeySizeBytes / 3;
 
-    private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Authentication.AuthenticationProtocol");
+    private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(AuthenticationProtocol));
 
     /// <summary>
     /// Gets the well-known 24-byte factory-default PIV management key value.

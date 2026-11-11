@@ -1,0 +1,898 @@
+{
+  "pins": {
+    "base": "b1362127203beda5e9c797e8648b28e2716c496c",
+    "campaign": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+    "incoming": "5746e72ed9a848d08b5782ddde025aa4a4b522ef"
+  },
+  "count": 45,
+  "paths": [
+    {
+      "path": "CLAUDE.md",
+      "parents": {
+        "base": {
+          "blob": "b9cdeb567616ab0359f7f1dfb2881f6435ada702",
+          "sha256": "2dc087582e4d3edf9376d257e76bfd3e8acfc549b27be721d44ed17a966d44e5",
+          "bytes": 32102
+        },
+        "campaign": {
+          "blob": "dd9956bd417b2751876b87345b6fefa6d5f43553",
+          "sha256": "a04b35ebbbba9bb6b2ecb6ce5f95aa8c734b5635a0243e4b37642ba48374074b",
+          "bytes": 33117
+        },
+        "incoming": {
+          "blob": "a9d7bd1053048602ffb06d22d908344e85a8cacc",
+          "sha256": "1621c3e508c39bcc56b98fa0f6fc3792bdab7f33df3d045857395eb4d50260f4",
+          "bytes": 32219
+        }
+      }
+    },
+    {
+      "path": "README.md",
+      "parents": {
+        "base": {
+          "blob": "362d87f1030c2ada74548c2899e542a5334c20a0",
+          "sha256": "ee91e3afbfbd191abf1aaa2359948a9aec00133b3fb728ae38f319097903ed5c",
+          "bytes": 4454
+        },
+        "campaign": {
+          "blob": "f1f7f1bb89eb49c5841635009406d0fe8df6685f",
+          "sha256": "67b8276779c972fa9b36f199272852867a02987c967dc2d714cb98a058b94db2",
+          "bytes": 4537
+        },
+        "incoming": {
+          "blob": "32055eebe64b58b95f1f77116813a13e92cec296",
+          "sha256": "2d09a67a1337184becd6514c2278ec2b4973c91bfc278f0e50e514195c6ddb86",
+          "bytes": 4897
+        }
+      }
+    },
+    {
+      "path": "docs/TESTING.md",
+      "parents": {
+        "base": {
+          "blob": "0712d72c5f07c50989d329bf352696fc820bc10a",
+          "sha256": "1aa48629ed125ba790fde28916c8e297f51b4c1662dda8d64e93ddfbbf04f8fb",
+          "bytes": 24691
+        },
+        "campaign": {
+          "blob": "45f365632e8ab54f66726b4b8fc8fa50d1f53c2e",
+          "sha256": "418b640233afc281448cad30520d550fc3d90e4ebc468ea46fc8497d7f689c38",
+          "bytes": 25768
+        },
+        "incoming": {
+          "blob": "5af7a9d152504c299dc7913de0f39af6fed4595b",
+          "sha256": "54ee995605e37a3dae2976fffb6159331dc8f64a84a3fe9591e3a665ca901b0e",
+          "bytes": 24613
+        }
+      }
+    },
+    {
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "parents": {
+        "base": {
+          "blob": "9c0aa1dfa32e74dd106c2ba4d5958ed6f60c68cb",
+          "sha256": "a11797a5eccb5ed5ec55a8f41f6767a3672125249877dafa2490931834d1fbf9",
+          "bytes": 13504
+        },
+        "campaign": {
+          "blob": "e455ef227ae2cc5e909bff3376889cb8ae56e795",
+          "sha256": "7dde7422dfeffe2d1464d8a52513340f1f5f6ea7681b581ebca0214a7463cebb",
+          "bytes": 13789
+        },
+        "incoming": {
+          "blob": "eccc49331b3f8c64037a71c6300d5f537e526504",
+          "sha256": "92a9857fd3e92c79067e13f43335c8c642f753de3d8bb7ea2bbdcdcb92333ccf",
+          "bytes": 16783
+        }
+      }
+    },
+    {
+      "path": "docs/architecture/device-discovery-guarantees.md",
+      "parents": {
+        "base": {
+          "blob": "a16a2d1c9c61cf682b56e9d482d5069296096ebd",
+          "sha256": "66f4660cb4e7a721ab6c647bb373a1ce226f31415d065421e7348b9ad932a1f8",
+          "bytes": 25331
+        },
+        "campaign": {
+          "blob": "beed86bd95d235f18177fd018bf0a4a9eb82dbc3",
+          "sha256": "a96bc8ee80a2effd8d3c65b778e9683e5ef447ec13d2475ebc7bfe16b7e6c5f0",
+          "bytes": 25460
+        },
+        "incoming": {
+          "blob": "a8497f6eeea0c1d00bad8dce4e7b8efd3984782b",
+          "sha256": "4a1074c1a674ddb1e1bf700e75fdc4ebbe39bf33f3c72c19f8a927ed57f5de91",
+          "bytes": 34673
+        }
+      }
+    },
+    {
+      "path": "docs/architecture/images/image-manifest.txt",
+      "parents": {
+        "base": {
+          "blob": "5f36bd9374e26ad3c89cfe7d901a65fac63e4c22",
+          "sha256": "4e851b77e12e22760d5f4beca01e7dacb6c9a6d38acd3260885be8bdad70a540",
+          "bytes": 1679
+        },
+        "campaign": {
+          "blob": "29e89c7ab6172a8fb2c30b2f4346a65583e0c1f8",
+          "sha256": "a5b9b595a9b9bbdb5dfd44138e7081dc2428a556e436b0b2bd1d91d14cd2ba71",
+          "bytes": 1679
+        },
+        "incoming": {
+          "blob": "98ae80907114729653fbe3ba6655e49e94aeb7e3",
+          "sha256": "77c9b9cc3232fac757dd89ab9622d6136c93f1f477fdd7fe74a608bcf3388ebf",
+          "bytes": 1679
+        }
+      }
+    },
+    {
+      "path": "docs/architecture/physical-device-model.md",
+      "parents": {
+        "base": {
+          "blob": "09158b98034b9fa0999f3bb2b85925a57bb0c6ce",
+          "sha256": "32770b2bddeb1341ab7f01f7a83539e749b9cb675f407cea021c4f5766f6701c",
+          "bytes": 15877
+        },
+        "campaign": {
+          "blob": "338625740c86e8afd3e95ac3d8657a00b2f0c214",
+          "sha256": "1eb4efa5450d69829d0f7165f5d02b413e5e539e8275611b5b64983af5e43cd9",
+          "bytes": 16568
+        },
+        "incoming": {
+          "blob": "9b578787dc2cd6d474c404f407b0483e018391fd",
+          "sha256": "06b5bf85b4a03bf4c9b7a271c43343ce41d2000d0fd4f4683cbcfcb9d8153658",
+          "bytes": 18857
+        }
+      }
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "parents": {
+        "base": {
+          "blob": "07de88af7f494c946ff4bafb24db5a0fa90e227f",
+          "sha256": "0d773df215380efdd7972d093759b3392d7d74172c181bf145ad275d022bbb1d",
+          "bytes": 21860
+        },
+        "campaign": {
+          "blob": "818be22a523ed02d359ba81dc390f3c6a201396f",
+          "sha256": "9950b492af9334a5f7d37bfe01a0f6d9360b25f384ba27240bacbcd4b2af5a4d",
+          "bytes": 21879
+        },
+        "incoming": {
+          "blob": "972bfd17096aefba247cbddf2705a17f1cf545c5",
+          "sha256": "fc6b48a23f9f61b087ff733fbedc443f02199b3fab9bc6dea7980c24eef614ab",
+          "bytes": 23797
+        }
+      }
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "parents": {
+        "base": {
+          "blob": "cb007c4c51b8277cf8104814f2956445fe0d9841",
+          "sha256": "8776526a9022b864495f234eeec635d8955058fac4edc2ff5cadbd85da53cf89",
+          "bytes": 18312
+        },
+        "campaign": {
+          "blob": "2a85f00a7a0a7af86ba8a3e6991d3999cd861eef",
+          "sha256": "a38fe512d725b2f405796da6fbc7c2535fa4106fc816d333ad7bc306c69e9701",
+          "bytes": 18893
+        },
+        "incoming": {
+          "blob": "2c1f03997ca19befff4fe525c81e0900aa935bec",
+          "sha256": "c0a7126d63af981e0f588bfabb781fe4f2fcbfcbef005b62f85249f04ada97a1",
+          "bytes": 19865
+        }
+      }
+    },
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "parents": {
+        "base": {
+          "blob": "ae114a1a1841c4d9223f605874ad22de874f8486",
+          "sha256": "6050dd45ed0b12085e97381a4fdb1ec9584830cf4f4a61e7ae4df57af3a99a23",
+          "bytes": 37435
+        },
+        "campaign": {
+          "blob": "38129b0242541a07a3aed10576330aab5695a0f9",
+          "sha256": "cbf6f91795c7cc3125a9bff28e89105a5f29bca5940f03843d056db0bb2ecdd9",
+          "bytes": 41638
+        },
+        "incoming": {
+          "blob": "046d45dd8458561c6817881cd5d91920a8a2db74",
+          "sha256": "22a42113a3509ab115957454c433cf3f4f34e7eaea8e371a027676e9d76135b7",
+          "bytes": 37527
+        }
+      }
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "parents": {
+        "base": {
+          "blob": "66db3551e027bcf06ac3a1a1ef2a9e47e894811c",
+          "sha256": "73b03614515e5b83bc02f497151906511d3e33bed4dda20376929845d2fc60ec",
+          "bytes": 64390
+        },
+        "campaign": {
+          "blob": "36459f2ac2f0efc13929f5047369f62087be7de9",
+          "sha256": "8b04e58ce32954a35c4a2873be095361e1cd27c3e35049e3d254c51d1c432566",
+          "bytes": 64986
+        },
+        "incoming": {
+          "blob": "dbc1e77868ce7e4219273ab535213f60af4ba0aa",
+          "sha256": "6ef76ebdac3b1c6ab4bf0b7355a9e704b12e3231ea313b50923653f4d5173b9c",
+          "bytes": 64983
+        }
+      }
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "parents": {
+        "base": {
+          "blob": "f0dd37af40ee5c2d327b6433910ad28f6e0e661b",
+          "sha256": "66bf636a5895fbdd82842d780d657c25549678740dec143c33164389cd77954b",
+          "bytes": 48478
+        },
+        "campaign": {
+          "blob": "0627b4aa8ce981ccd402c0335c9eeac655b9a0d2",
+          "sha256": "820fff12aff06ed3d509204136b5c926663aa5ab2409d10d4df0a733f2374014",
+          "bytes": 58602
+        },
+        "incoming": {
+          "blob": "c0bc94313b78e6340f2cb5ba082af72f248efba2",
+          "sha256": "f1918971ec9f9f6df2e2b486a46db2ae27a2d06793210a33bf0db902fb5b1a10",
+          "bytes": 51269
+        }
+      }
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "parents": {
+        "base": {
+          "blob": "d72cbc90a97649790a6af7a4e3211aa598cd62be",
+          "sha256": "bb5981fd68abfe33b2a355ea3ab17cba6cbb3a2b5ecab471d8415aaf68cd92d8",
+          "bytes": 10220
+        },
+        "campaign": {
+          "blob": "24181bc6e38c678b5900faa89ba96ec3932b4488",
+          "sha256": "fd293b29198664e52aa1fd46cbe660689469083aa1fd52ae354bff3c52891f4c",
+          "bytes": 11127
+        },
+        "incoming": {
+          "blob": "b101723005cbb3fb345f82dcbdc1ab0fc8a3915b",
+          "sha256": "e1da6834e4f6c0da0e1b27a1c9846244e072840873cc2d2a26f438ab538a7425",
+          "bytes": 10774
+        }
+      }
+    },
+    {
+      "path": "docs/v2-highlights.md",
+      "parents": {
+        "base": {
+          "blob": "0955bce9351b22d101369f167d484790c87b0fe0",
+          "sha256": "f2d4979b3d5acf8fdea778af234a5d50a28e5c7e73ce1332d013b1b7433f95f8",
+          "bytes": 7409
+        },
+        "campaign": {
+          "blob": "3288fef904b28a2e4ff44c2a39a68b5d3a8ea1e8",
+          "sha256": "628c6911d7b2c62861db3c0a2227b734ba009b4312f9da053fb22ed5e12d155f",
+          "bytes": 7695
+        },
+        "incoming": {
+          "blob": "42beb9794ad27f59147fbf1cc48e62c9cb20ead1",
+          "sha256": "000143c40eabb52816b887a7f3bf811debf3b35b6164f9a1e032ccc235239d61",
+          "bytes": 7949
+        }
+      }
+    },
+    {
+      "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "parents": {
+        "base": {
+          "blob": "a7bf7f82cb374f029cc7851d4888dc1143af50e6",
+          "sha256": "60a65f39bdbd676b8176853fc5f99848b1f1ecc4a933ed8ab59156bbe8c60e46",
+          "bytes": 4985
+        },
+        "campaign": {
+          "blob": "714d5f40656587b86647dbdcbc6cd2e6c24c8597",
+          "sha256": "9d51ea48fdeadb008d106445d36f82baad34d5957821da4835f06bd176683c41",
+          "bytes": 5108
+        },
+        "incoming": {
+          "blob": "53fc4f324ea03abae25f69ac668a1c3a0912c0fb",
+          "sha256": "173264b85653c4297ac2df9a15b9fa3dae1a2df99b9f5fc689ac04e81fa2869e",
+          "bytes": 4576
+        }
+      }
+    },
+    {
+      "path": "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+      "parents": {
+        "base": {
+          "blob": "5489abf4d7f6fcb9daa9383050c24f1312c4b59d",
+          "sha256": "5f9e20639f2e3af8021d91b79d86e8b9ddeff8a5feef0fc925b5643ace66cb4d",
+          "bytes": 2701
+        },
+        "campaign": {
+          "blob": "9180c55e89435491953c48912ab349c2abf78f89",
+          "sha256": "674339cf4f3b27770caedc88caa12bf9cc26f2498f30aad9da4c2d6cbf4f9347",
+          "bytes": 2791
+        },
+        "incoming": {
+          "blob": "c73b767445791888a1f5d712c04c6608c7d12359",
+          "sha256": "14e0858e4ce40cccdea6e6d142f96e854c71fe45ccbe3f38e697c659ca28d4e2",
+          "bytes": 3170
+        }
+      }
+    },
+    {
+      "path": "src/Cli.Commands/src/Management/ManagementConfigCommand.cs",
+      "parents": {
+        "base": {
+          "blob": "3a7f238b5a205fd11d804ed0a67e85c2b41cf09d",
+          "sha256": "805362ecd94fdea6c474c08847b16e843535e175e5cac72dbfdad8dd69aded80",
+          "bytes": 3336
+        },
+        "campaign": {
+          "blob": "33d8d8f7eb25724449cc3dde9fa113ff2b967835",
+          "sha256": "9f8398c03dd2d4b11fa998a82abbf09f59363fe66624416eb92ce517980afab6",
+          "bytes": 3396
+        },
+        "incoming": {
+          "blob": "a85f34778d98ffefb62e34028b6961d7ff13806e",
+          "sha256": "4cee2721b58e502e590762ae487bf6cc19d5614d200e5a10315a3b22bdc9800b",
+          "bytes": 3329
+        }
+      }
+    },
+    {
+      "path": "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+      "parents": {
+        "base": {
+          "blob": "3acc7e03aceab540d292bc21c6146548b761e287",
+          "sha256": "9e3d933d86765f49d18a1d134b3e46aef320f3454bd191774585b1a6bfadac22",
+          "bytes": 2591
+        },
+        "campaign": {
+          "blob": "84075ee98602e1dee443b3c0eae4eb7143295655",
+          "sha256": "e55623f6fd7bd6d672bc1e0732f8ee66ace0c3d912ffc6154673649e62fc25e9",
+          "bytes": 2785
+        },
+        "incoming": {
+          "blob": "bc76967c107ad560fee8e33199cdd00d087fdb63",
+          "sha256": "32c91f352a887566ae8cb0ce086f466780d5a620679c018a2da3df13e9474ee0",
+          "bytes": 2612
+        }
+      }
+    },
+    {
+      "path": "src/Core/CLAUDE.md",
+      "parents": {
+        "base": {
+          "blob": "a7b3b9223521ab7d18c73b060482f908179475d1",
+          "sha256": "fc1230d27a9838a6b3f1071ae5d841d3fb00475799a61d6a116a717ff93ec27a",
+          "bytes": 45017
+        },
+        "campaign": {
+          "blob": "9bfdf41f529c3c0b373247279c6489d04d967807",
+          "sha256": "09c3bf89377df83fb15bd929f5ed8038e0d8059e7f36d44cea2e760d729fdaa2",
+          "bytes": 46254
+        },
+        "incoming": {
+          "blob": "c64e31ddfb9079aa8c9077a1de94bee2a24e6fca",
+          "sha256": "9c6e73725cb82d15facda3decdc36fe5f11992799b36fdab3e1866166d9b3d6e",
+          "bytes": 62661
+        }
+      }
+    },
+    {
+      "path": "src/Core/README.md",
+      "parents": {
+        "base": {
+          "blob": "d6f5ed880ccf682c257a0fdad797cb5edc08f944",
+          "sha256": "10f46022d78c6ea192e5cab46bfaad8bd8140709c20e8c1204047a1b84db983f",
+          "bytes": 26524
+        },
+        "campaign": {
+          "blob": "198cd11da928cc0a76d7aa4cb98bdeaf0b5aa97b",
+          "sha256": "51f51d9ebd9976dbff63fe95358f498f7f59892f288338c0d10aa1ae9657bb56",
+          "bytes": 27762
+        },
+        "incoming": {
+          "blob": "5ae20746fcd53fd0593810ae7fc760a4f8260671",
+          "sha256": "9c6bd5004d3db3ff22196240a2484816639ac4629a27601ea71d6b9baf2e7da9",
+          "bytes": 41837
+        }
+      }
+    },
+    {
+      "path": "src/Core/src/PublicAPI.Unshipped.txt",
+      "parents": {
+        "base": {
+          "blob": "55eff451b052725b7c2274a85281a822fa1d1241",
+          "sha256": "e408d78a7b552e86d329d6597882d615974b9a0f4152287764e4827ea445ce9c",
+          "bytes": 155861
+        },
+        "campaign": {
+          "blob": "e6a89c6a87a87e5346f5a6039ab4b33c2c0394d3",
+          "sha256": "2d93b1ca7135838d8537f50258af3754a811787342373551f98b3c0fd01556fc",
+          "bytes": 156119
+        },
+        "incoming": {
+          "blob": "aecd8ad8d1a37d244aa2365d2c881eeebcb6251e",
+          "sha256": "2f042bb5e943caceba46176403e978406493efaf144bef037f0ca914a5f69b19",
+          "bytes": 158816
+        }
+      }
+    },
+    {
+      "path": "src/Ctap2/CLAUDE.md",
+      "parents": {
+        "base": {
+          "blob": "b8f36261636c3a4680cd67521c7ef6eb52fd39ac",
+          "sha256": "34006ddc920bbcd30427b1bacff3a228e19bb2d560927c10d43ac5428111b72e",
+          "bytes": 23814
+        },
+        "campaign": {
+          "blob": "309121a92e1c092bb36527578865081a08101dd5",
+          "sha256": "64670e1d321cee0c26b3ba5b3b59e63df13c65fa41d0d2b56ba7b8f2fcfa42a9",
+          "bytes": 33577
+        },
+        "incoming": {
+          "blob": "d6c9112b1f14eecb2063e5bfa39d0cf76c4ed0ab",
+          "sha256": "c105d24c4aad852a1695e805e69242251cf77f10cfa159dd4c448c7a72e8b7aa",
+          "bytes": 24465
+        }
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "parents": {
+        "base": {
+          "blob": "7e199db36005c6bfc4210dc14a63901c8b12b240",
+          "sha256": "f210d7f24f5516d81f6b8c1cc9d1a1606cd40fbb08fd3caac23d217cba691e06",
+          "bytes": 7221
+        },
+        "campaign": {
+          "blob": "8f9a52d66628950bf47fe458a593ac39e48cb40a",
+          "sha256": "65d3fa4b4b38cd2f8e78577cd2e63e36fd5500d4c7194c7575b563ec0e71f8df",
+          "bytes": 7969
+        },
+        "incoming": {
+          "blob": "7004c7c65458d63afd61b2b694920764237107d9",
+          "sha256": "0122ba44d9d97f6c7a22883bd12ae0fa6fc2a7626261f8c488971a7f42a5363d",
+          "bytes": 1000
+        }
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/FidoDeviceSelector.cs",
+      "parents": {
+        "base": {
+          "blob": "d505bdb70656121857b24012f1a596342e429afa",
+          "sha256": "7116232a0f49979cbcf8ea5adaa9dca0815bbd01fd7e2670db01eee452b782ab",
+          "bytes": 1898
+        },
+        "campaign": {
+          "blob": "bd99825fca65872c694074a478953708028aeaf6",
+          "sha256": "a5431235eafe09f02aa72bb3abe477eb28b6bf21c172fb3b1d8954136db63579",
+          "bytes": 2120
+        },
+        "incoming": null
+      }
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Program.cs",
+      "parents": {
+        "base": {
+          "blob": "c10f2bc66bf53bd9f565fee028bdedae5f6733a2",
+          "sha256": "43e81dbe92211f5cc59cfa4add0d98efe81b204a2a5a45f56fbe3025449e00dd",
+          "bytes": 28226
+        },
+        "campaign": {
+          "blob": "67364eb04a047c555d1ef37b9dedbcc255d54ac1",
+          "sha256": "146bdb4703a47932ee813a6ac5c478f5e571e31b3c1d90b21fced7abb1642855",
+          "bytes": 28534
+        },
+        "incoming": {
+          "blob": "8f53e602804eb3b604c8751a5acdaec84250c164",
+          "sha256": "3587a9b9e736a4e04039513939d5f3bab404c485aea9265a8b1649f7fffad320",
+          "bytes": 28079
+        }
+      }
+    },
+    {
+      "path": "src/Management/CLAUDE.md",
+      "parents": {
+        "base": {
+          "blob": "2e4991834d79e0884e0b4e8c79c6a88243464267",
+          "sha256": "ebb1befd486c3d03114f0b4825347b514f816f4513b923df19f4998c806e7122",
+          "bytes": 32194
+        },
+        "campaign": {
+          "blob": "df01b528c6df63231bc05a85851d7ec3d663fa59",
+          "sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+          "bytes": 41284
+        },
+        "incoming": {
+          "blob": "f2ae4f1be3ec1a8614fa11189d786df0690a37c3",
+          "sha256": "b3087a11542858fa95a6a1138f86ebf7fd97c77b2d5ebaee506f69ff0abecbbf",
+          "bytes": 34669
+        }
+      }
+    },
+    {
+      "path": "src/Management/README.md",
+      "parents": {
+        "base": {
+          "blob": "e1904e0af73fa8b8974ca16f6c34c02424a1d6fe",
+          "sha256": "ee30feec8d9ed6a60dbb1e022b6ad341c1c3f0b855193f5aeb5dc72247d102a5",
+          "bytes": 9496
+        },
+        "campaign": {
+          "blob": "3a187ddde42fb2347a2fdba0d3bc7d2d750b27b6",
+          "sha256": "e5a631ff57ad934ef294e9805ea6039fdace475dbc63613c92d98534bc5c878d",
+          "bytes": 15144
+        },
+        "incoming": {
+          "blob": "032eec00020deab91c59a5231d967fbce0fd0514",
+          "sha256": "0b140e3ca432614f3042d778a56e9a351b2032b360070aafd2e6d5e84361a1e9",
+          "bytes": 10826
+        }
+      }
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+      "parents": {
+        "base": {
+          "blob": "fa3eb08500742997d90d9983059949e920d80ff0",
+          "sha256": "a571f0cd9209aa21428818f10011f610ba324eea7836fd3b17de6c791939d91c",
+          "bytes": 6504
+        },
+        "campaign": {
+          "blob": "19c5bf510388c084aba0f949519f7be0b01525cb",
+          "sha256": "1c0e84d19ce445e00d280a3fd6e2bd3ace13774b39e34d002b6ec8bac997102b",
+          "bytes": 6674
+        },
+        "incoming": {
+          "blob": "3a3a91d7e901554b22c97c5002528e52a590863b",
+          "sha256": "2be84ca28424946d507e6b20ff6a30e4276a70a0335ccb9bfb4342760fb36a56",
+          "bytes": 1250
+        }
+      }
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Program.cs",
+      "parents": {
+        "base": {
+          "blob": "da5beb384b44840fd934b364aa49c56981cbba6f",
+          "sha256": "aa34191b755310470853fd21498cab1a7e1b6061a5ebdd477ec665564e918e82",
+          "bytes": 2936
+        },
+        "campaign": {
+          "blob": "56bfd3cd4b03c873c3bfdf5f2742a43489485cd7",
+          "sha256": "23283fdd6e39c21e15db3d334f39e203c76d2f9987a6ef8f201a6a2d23a2b9f7",
+          "bytes": 2932
+        },
+        "incoming": {
+          "blob": "0e90a1ccb31536d7f3708c8b3c44002fb2d28c01",
+          "sha256": "b5136626522033d891265971f2e4da7af4f677cfe3726f4cc397593cc0f0c9ef",
+          "bytes": 2795
+        }
+      }
+    },
+    {
+      "path": "src/Management/tests/CLAUDE.md",
+      "parents": {
+        "base": {
+          "blob": "5875d00eeaf10800f33a47ee09e6b0dcd4816351",
+          "sha256": "2e5c6ebb751a69c92dcae4ddcaf2a76c6eb0208b749f519c0d9846037017b87a",
+          "bytes": 2871
+        },
+        "campaign": {
+          "blob": "930a2a2a1f8902fa405352c869083d1768746411",
+          "sha256": "9f3c914b0d7a7a979229af212966fda534b10608a4179b8edd9ec66ab77aab36",
+          "bytes": 3821
+        },
+        "incoming": {
+          "blob": "8a49499d96844c280adefaa0e8ab7b8c00f0020d",
+          "sha256": "b6dcd39728c865b2f3e8759b662592abc79d5bbd8cbdf083e009ce3c4e3d1af0",
+          "bytes": 3651
+        }
+      }
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "parents": {
+        "base": {
+          "blob": "d6c246c285376a1685937896ffd143c7b4eb2a15",
+          "sha256": "e13e52d9041a951f0baf08307faaecd18e679590d33cfea095380e489d180526",
+          "bytes": 10788
+        },
+        "campaign": {
+          "blob": "f8c130b79c3f598e0f12ad03a14ae4a405e57725",
+          "sha256": "8ed9364d1a90ee1331d9573ecbcbc0dd7748463775cb13832b43332b2fc4f213",
+          "bytes": 10609
+        },
+        "incoming": {
+          "blob": "e8ed7be55647222b826466bf7b1b35ac6803a10c",
+          "sha256": "d7ada46ff63c1f7fb131c3961f6dfe747580468803ef468b1962110ec6ff84d4",
+          "bytes": 10677
+        }
+      }
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+      "parents": {
+        "base": {
+          "blob": "9a863b17be01a45e4cf8f5c4c900eb8b2cb24a58",
+          "sha256": "0d0f5e51c63358b8b2ad6e83db6dd777bf4cc4a2fdfd61db7bc9ceabbbbb715e",
+          "bytes": 6824
+        },
+        "campaign": {
+          "blob": "62e354ae3ad8962bfba70d24be2ed98647627968",
+          "sha256": "e5696ac83267831b9b30ceefa728ccc74d5415559db2af20556c187b82daeeba",
+          "bytes": 7917
+        },
+        "incoming": {
+          "blob": "e15c7e7ae4ff02d830d7e97fd3f3bb404b0d0fb9",
+          "sha256": "5e9786261c83bd1b4ecffd249d5933b64a73a180a8a839228d68871377e1b297",
+          "bytes": 816
+        }
+      }
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+      "parents": {
+        "base": {
+          "blob": "213948dcae164a6121b3994bbc4c3f3a99aef868",
+          "sha256": "64f806bd1c424b9469916f7d1b5a210a290d5217ebb8512bb2c5ee30f6cd2fdf",
+          "bytes": 3559
+        },
+        "campaign": {
+          "blob": "9d57fbac2f738cebbba4e3e3a157639b19685150",
+          "sha256": "039b0377adcd34de71c14313bb04f851b248260b4c530c6cc138ac45623519af",
+          "bytes": 5008
+        },
+        "incoming": {
+          "blob": "9b92da2508cfbffacd0caa341c52ee801c113d78",
+          "sha256": "b418775eb01a6e5414529fa261cd24ab86f47f827b639be55babb89356792e82",
+          "bytes": 3593
+        }
+      }
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Program.cs",
+      "parents": {
+        "base": {
+          "blob": "ed0a6cded5f63fd6123a2247fa7b704bbd4dce06",
+          "sha256": "8602142c8ba5b665ea24f15e7f85bbc5c95a096ffb4db34bdfff5c0a646f43b3",
+          "bytes": 12391
+        },
+        "campaign": {
+          "blob": "83bd690a4bf054c906b1aea224498e01f3f0fc97",
+          "sha256": "67da66a1f00ecfc00797778a9b61111bdda589d6dafc33fdb62baf808718f053",
+          "bytes": 499
+        },
+        "incoming": {
+          "blob": "1d49bf90bd42c76cfa8ed262545c56c50c4298cf",
+          "sha256": "0a5a82f7b4d54a3c628f6fa5937af7626affa5ca31e61dbb4a597266ae510ed7",
+          "bytes": 12255
+        }
+      }
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "parents": {
+        "base": {
+          "blob": "6eaf06b508a75fb481e0776f0a2519ce1330d298",
+          "sha256": "f1bab4a3fbcc6601e1e2702ff89ee98eb54a6c4e0837b029f2cd082ba676d26a",
+          "bytes": 4617
+        },
+        "campaign": {
+          "blob": "42f4cba2747168d16619355fff88fa22f545f4ed",
+          "sha256": "ccaaeff365d3abd714ee69bbfc9da26143ceb179b38371bbf9ccf9296eef01f5",
+          "bytes": 5344
+        },
+        "incoming": {
+          "blob": "2d97fba3d4156611a9a1f87e7425bf36a12610ec",
+          "sha256": "4f8cb3efdfc10a12f7e32a96640a3d7c25de288a8ef652a299c724e735baa728",
+          "bytes": 4453
+        }
+      }
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/OpenPgpDeviceSelector.cs",
+      "parents": {
+        "base": {
+          "blob": "9b4860072d3cd4a803012086fc11e17634074ec6",
+          "sha256": "e7dce92dcf927dd2c6526750528d28418d7bde58dffc27480844969dd587ae73",
+          "bytes": 2459
+        },
+        "campaign": {
+          "blob": "c862a93e21d406f2d08967a20439443e1d0f64a2",
+          "sha256": "56edaf32eb3d3ca0015c67d03115e6cc0f555a30b68a88bb5c8cb26365c93423",
+          "bytes": 2573
+        },
+        "incoming": null
+      }
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "parents": {
+        "base": {
+          "blob": "6bae2d788026aa3bdedc5085b520dc46f951ccef",
+          "sha256": "54facf850d3ce72617a3a7a26f020df1b600f27866c5d09f44311ec8aab4c45a",
+          "bytes": 13096
+        },
+        "campaign": {
+          "blob": "69568919c05582d0e315a0e8e971abd018d2cd74",
+          "sha256": "f97b64c75b941c90e339f9b9b9e6b51a269f4bafeaae3d58e3a5bc2d22578d65",
+          "bytes": 14494
+        },
+        "incoming": {
+          "blob": "85ae202ebc88c900fe4815c49801b9796c546ba1",
+          "sha256": "1aa884dcf20a4c27243d01b76ce8fa5460451c7b713fc38a446094fb3534e91e",
+          "bytes": 13732
+        }
+      }
+    },
+    {
+      "path": "src/Piv/README.md",
+      "parents": {
+        "base": {
+          "blob": "9192db07c706478b5a0bcacfdfe2307fb9c9e9a9",
+          "sha256": "dd9d4cf813eb6a0f654137ace7e270409238b730e084572704534a85768448c4",
+          "bytes": 11632
+        },
+        "campaign": {
+          "blob": "771332b68431d1f2f66d5e8b2f3335575a686f63",
+          "sha256": "1725cae8c82139750743613680a256160f5691955473bef2bee02a49a54599b8",
+          "bytes": 27614
+        },
+        "incoming": {
+          "blob": "60e93ef3611b7de74f5c626c3588917fc83b9ebf",
+          "sha256": "29f3f2e4e8155f5542ebd5928408026dc0d9f0013bd2aa7707b929abc164f64c",
+          "bytes": 11988
+        }
+      }
+    },
+    {
+      "path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+      "parents": {
+        "base": {
+          "blob": "9c44970a6a7242e0de5c930e26f97dbf091b60ef",
+          "sha256": "54445e7059fedd59adc0ab6bc896d744e81a99f489139a6c8dd413ea8c666adb",
+          "bytes": 34845
+        },
+        "campaign": {
+          "blob": "d2ea82921bd06e2f34f9e9e4c0bd33ce4d609279",
+          "sha256": "77576173cc494cc5ebac63ad4987a0e84585ee443f1924b238d76a5d208c3fdc",
+          "bytes": 35118
+        },
+        "incoming": {
+          "blob": "526c5da214546c1655ab8f36e2f7e95831cfdbf0",
+          "sha256": "6754e4e8a8dfa54eb9043034f7c887510f76831ee108ccbafaf4f2dd65675b2f",
+          "bytes": 34817
+        }
+      }
+    },
+    {
+      "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "parents": {
+        "base": {
+          "blob": "6ee3de4b8374dadb2a30f6479693255a3711d7a5",
+          "sha256": "a7f46ccbe9bf1d2f8839fb7403f5344a07bd700eb4da3b9e021b75ce4245066a",
+          "bytes": 19379
+        },
+        "campaign": {
+          "blob": "3f6f7b072301f91d335954da60ff7c7e39408981",
+          "sha256": "03bc6bb6a8a0bfacefa07317064a7487133df1bf21e2cef2d54fb440f5ac25cb",
+          "bytes": 19368
+        },
+        "incoming": {
+          "blob": "a973a7ac2f66104b1c4dd0b9e08d438b886002e1",
+          "sha256": "5686f68d3a6654553de385e7498b7300e482fb6588fac3c1084497ed07c14a08",
+          "bytes": 19353
+        }
+      }
+    },
+    {
+      "path": "src/Tests.TestProject/Controllers/DiTestController.cs",
+      "parents": {
+        "base": {
+          "blob": "2ef74a97883552ef23d47538753dd265f89d114b",
+          "sha256": "29f12f7cb64c52b644515349dbe90aa8c4d3bd7149bbf40a90a6398d14a6d072",
+          "bytes": 1438
+        },
+        "campaign": {
+          "blob": "5057f682c9567311c2bb62a94f3bebabffec2ed6",
+          "sha256": "04a8512e064c5df5794aa2aec7ac5061552d0abe01db5e8ca3f4a8f82b71a77f",
+          "bytes": 1647
+        },
+        "incoming": null
+      }
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+      "parents": {
+        "base": {
+          "blob": "049ca2b3f96d163600d4a83dde913bd0b2451c91",
+          "sha256": "ea44fb48243ebd3a6d48254cda2d3e098f0d24d53732238529e0e40183dc859a",
+          "bytes": 6707
+        },
+        "campaign": {
+          "blob": "4bc84d139c1e3cf4029f6db9ac797a0d93d275a4",
+          "sha256": "c62ac460a3aa27285dfebfd76740630d3f2f3e9ceec021462ed13ca390e7ddb5",
+          "bytes": 6905
+        },
+        "incoming": {
+          "blob": "bb025bdd5413488360288c783338d1b2198d4fdd",
+          "sha256": "ded7da8ba81a5ac762b40619a38d2140ff754b22e3d68392adea7c1e1a100bc1",
+          "bytes": 830
+        }
+      }
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+      "parents": {
+        "base": {
+          "blob": "5f37a7e1db86ad3cf0a64dc7fd342e9a91b6e52b",
+          "sha256": "25e17a7c103ad241659fdd5206023cb92781783c576495583215ded6c24261bc",
+          "bytes": 4595
+        },
+        "campaign": {
+          "blob": "b6cb139cbfb5844482b2813cceb9697e09111ef8",
+          "sha256": "352cbe36851f136cfbe6e30e40808893330b5fe801ab677727c8027682ca59f6",
+          "bytes": 4903
+        },
+        "incoming": {
+          "blob": "50995266b438482f2ab4e42b99f4283797335893",
+          "sha256": "d401ff6afa3c4367b01518542264ea45d811600fe61c748ecdd89375df54e5a7",
+          "bytes": 4486
+        }
+      }
+    },
+    {
+      "path": "src/YubiOtp/CLAUDE.md",
+      "parents": {
+        "base": {
+          "blob": "aaaa89871aae56800f4895444cbb87abeaa7e648",
+          "sha256": "a089f9d30a9b22fd0a9ca6c648e38f28042696b71fa4d496a0a4f129701465a8",
+          "bytes": 7770
+        },
+        "campaign": {
+          "blob": "cc3e1cf161ade932535132f1571c3643aa8ca987",
+          "sha256": "24c603f4339e7f410dbe9a04ae0ba817c6a8cfb289a5d445705eeda878dd2145",
+          "bytes": 12511
+        },
+        "incoming": {
+          "blob": "201637c24273fed918bfdce43e81b6f29a92f087",
+          "sha256": "217ac68cc7bcd70d2efbf06deeb5e56e10dde4e4790e0037e66525aa02356a4e",
+          "bytes": 8483
+        }
+      }
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+      "parents": {
+        "base": {
+          "blob": "0b6d5be2048bf33741a16b64d6d70058b09a5fe4",
+          "sha256": "426c1cb7f4a859a1e50e42cd0307eba681533c15d42bacbbec2ed37dbff5f4bd",
+          "bytes": 11145
+        },
+        "campaign": {
+          "blob": "0462cada902fbf9525ca96d8f142e3aff8e9b5d4",
+          "sha256": "fb5f7a55bd35972d30f98ec017e2c3527d38e87fbc678984d3d4db66d56d48cb",
+          "bytes": 11666
+        },
+        "incoming": {
+          "blob": "e8b5e1838b11ae0000f802346362fe51ea71edd6",
+          "sha256": "9421c911843b2e481fb773ad02d728c5c8af1cf4b041eeabdbb5f2f9433e39a1",
+          "bytes": 1472
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+<Project>
+  <Target Name="AddGlobalAnalyzerConfigForPackage_MicrosoftCodeAnalysisPublicApiAnalyzers" BeforeTargets="CoreCompile" Condition="'$(SkipGlobalAnalyzerConfigForPackage)' != 'true'">
+    <!-- PropertyGroup to compute global analyzer config file to be used -->
+    <PropertyGroup>
+      <!-- Set the default analysis mode, if not set by the user -->
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers>$(AnalysisLevelSuffix)</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers>
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers Condition="'$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers)' == ''">$(AnalysisMode)</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers>
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers Condition="'$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers)' == 'AllEnabledByDefault'">All</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers>
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers Condition="'$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers)' == 'AllDisabledByDefault'">None</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers>
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers Condition="'$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers)' == ''">Default</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers>
+
+      <!-- Default 'EffectiveCodeAnalysisTreatWarningsAsErrors' to 'CodeAnalysisTreatWarningsAsErrors' for escalating relevant code analysis warnings to errors. -->
+      <!-- We use a separate property to allow users to override 'CodeAnalysisTreatWarningsAsErrors' implementation from .NET7 or older SDK, which had a known issue: https://github.com/dotnet/roslyn-analyzers/issues/6281 -->
+      <EffectiveCodeAnalysisTreatWarningsAsErrors Condition="'$(EffectiveCodeAnalysisTreatWarningsAsErrors)' == ''">$(CodeAnalysisTreatWarningsAsErrors)</EffectiveCodeAnalysisTreatWarningsAsErrors>
+      <!-- Choose GlobalAnalyzerConfig file with '_warnaserror' suffix if 'EffectiveCodeAnalysisTreatWarningsAsErrors' is 'true'. -->
+      <_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers_WarnAsErrorSuffix Condition="'$(EffectiveCodeAnalysisTreatWarningsAsErrors)' == 'true'">_warnaserror</_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers_WarnAsErrorSuffix>
+
+      <!-- GlobalAnalyzerConfig file name based on user specified package version 'MicrosoftCodeAnalysisPublicApiAnalyzersRulesVersion', if any. We replace '.' with '_' to map the version string to file name suffix. -->
+      <_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers Condition="'$(MicrosoftCodeAnalysisPublicApiAnalyzersRulesVersion)' != ''">AnalysisLevel_$(MicrosoftCodeAnalysisPublicApiAnalyzersRulesVersion.Replace(".","_"))_$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzers)$(_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers_WarnAsErrorSuffix).globalconfig</_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers>
+      <_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers>$(_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers.ToLowerInvariant())</_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers>
+
+      <_GlobalAnalyzerConfigDir_MicrosoftCodeAnalysisPublicApiAnalyzers Condition="'$(_GlobalAnalyzerConfigDir_MicrosoftCodeAnalysisPublicApiAnalyzers)' == ''">$(MSBuildThisFileDirectory)config</_GlobalAnalyzerConfigDir_MicrosoftCodeAnalysisPublicApiAnalyzers>
+      <_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisPublicApiAnalyzers Condition="'$(_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers)' != ''">$(_GlobalAnalyzerConfigDir_MicrosoftCodeAnalysisPublicApiAnalyzers)\$(_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzers)</_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisPublicApiAnalyzers>
+    </PropertyGroup>
+
+    <ItemGroup Condition="Exists('$(_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisPublicApiAnalyzers)')">
+      <EditorConfigFiles Include="$(_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisPublicApiAnalyzers)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="AddGlobalAnalyzerConfigForPackage_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign" BeforeTargets="CoreCompile" AfterTargets="AddGlobalAnalyzerConfigForPackage_MicrosoftCodeAnalysisPublicApiAnalyzers" Condition="'$(SkipGlobalAnalyzerConfigForPackage)' != 'true' and ('$(AnalysisLevelApiDesign)' != '' or '$(AnalysisModeApiDesign)' != '')">
+    <!-- PropertyGroup to compute global analyzer config file to be used -->
+    <PropertyGroup>
+      <!-- Set the default analysis mode, if not set by the user -->
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>$(AnalysisLevelSuffixApiDesign)</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign Condition="'$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)' == ''">$(AnalysisModeApiDesign)</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign Condition="'$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)' == 'AllEnabledByDefault'">All</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign Condition="'$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)' == 'AllDisabledByDefault'">None</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>
+      <_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign Condition="'$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)' == ''">Default</_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>
+
+      <!-- Default 'EffectiveCodeAnalysisTreatWarningsAsErrors' to 'CodeAnalysisTreatWarningsAsErrors' for escalating relevant code analysis warnings to errors. -->
+      <!-- We use a separate property to allow users to override 'CodeAnalysisTreatWarningsAsErrors' implementation from .NET7 or older SDK, which had a known issue: https://github.com/dotnet/roslyn-analyzers/issues/6281 -->
+      <EffectiveCodeAnalysisTreatWarningsAsErrors Condition="'$(EffectiveCodeAnalysisTreatWarningsAsErrors)' == ''">$(CodeAnalysisTreatWarningsAsErrors)</EffectiveCodeAnalysisTreatWarningsAsErrors>
+      <!-- Choose GlobalAnalyzerConfig file with '_warnaserror' suffix if 'EffectiveCodeAnalysisTreatWarningsAsErrors' is 'true'. -->
+      <_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign_WarnAsErrorSuffix Condition="'$(EffectiveCodeAnalysisTreatWarningsAsErrors)' == 'true'">_warnaserror</_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign_WarnAsErrorSuffix>
+
+      <!-- GlobalAnalyzerConfig file name based on user specified package version 'MicrosoftCodeAnalysisPublicApiAnalyzersApiDesignRulesVersion', if any. We replace '.' with '_' to map the version string to file name suffix. -->
+      <_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign Condition="'$(MicrosoftCodeAnalysisPublicApiAnalyzersApiDesignRulesVersion)' != ''">AnalysisLevelApiDesign_$(MicrosoftCodeAnalysisPublicApiAnalyzersApiDesignRulesVersion.Replace(".","_"))_$(_GlobalAnalyzerConfigAnalysisMode_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)$(_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign_WarnAsErrorSuffix).globalconfig</_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>
+      <_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>$(_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign.ToLowerInvariant())</_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>
+
+      <_GlobalAnalyzerConfigDir_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign Condition="'$(_GlobalAnalyzerConfigDir_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)' == ''">$(MSBuildThisFileDirectory)config</_GlobalAnalyzerConfigDir_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>
+      <_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign Condition="'$(_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)' != ''">$(_GlobalAnalyzerConfigDir_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)\$(_GlobalAnalyzerConfigFileName_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)</_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign>
+    </PropertyGroup>
+
+    <ItemGroup Condition="Exists('$(_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)')">
+      <EditorConfigFiles Include="$(_GlobalAnalyzerConfigFile_MicrosoftCodeAnalysisPublicApiAnalyzersApiDesign)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- MSBuild properties to thread to the analyzers as options -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="TargetFramework" />
+    <CompilerVisibleProperty Include="TargetFrameworkIdentifier" />
+    <CompilerVisibleProperty Include="TargetFrameworkVersion" />
+    <CompilerVisibleProperty Include="TargetPlatformMinVersion" />
+    <CompilerVisibleProperty Include="UsingMicrosoftNETSdkWeb" />
+    <CompilerVisibleProperty Include="ProjectTypeGuids" />
+    <CompilerVisibleProperty Include="InvariantGlobalization" />
+    <CompilerVisibleProperty Include="PlatformNeutralAssembly" />
+    <CompilerVisibleProperty Include="EnforceExtendedAnalyzerRules" />
+  </ItemGroup>
+
+  <!-- MSBuild item metadata to thread to the analyzers as options -->
+  <PropertyGroup>
+    <_SupportedPlatformList>@(SupportedPlatform, ',')</_SupportedPlatformList>
+  </PropertyGroup>
+
+  <!-- MSBuild properties to thread to the analyzers as options -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="_SupportedPlatformList" />
+  </ItemGroup>
+
+  <!--
+    Design-time target to handle 'CodeAnalysisTreatWarningsAsErrors = false' for the CA rule ids implemented in this package.
+    Note that a similar 'WarningsNotAsErrors' property group is present in the generated props file to ensure this functionality on command line builds.
+  -->
+  <Target Name="_CodeAnalysisTreatWarningsAsErrors" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' == 'true' OR '$(BuildingProject)' != 'true'">
+    <PropertyGroup>
+      <EffectiveCodeAnalysisTreatWarningsAsErrors Condition="'$(EffectiveCodeAnalysisTreatWarningsAsErrors)' == ''">$(CodeAnalysisTreatWarningsAsErrors)</EffectiveCodeAnalysisTreatWarningsAsErrors>
+      <WarningsNotAsErrors Condition="'$(EffectiveCodeAnalysisTreatWarningsAsErrors)' == 'false' and '$(TreatWarningsAsErrors)' == 'true'">$(WarningsNotAsErrors);$(CodeAnalysisRuleIds)</WarningsNotAsErrors>
+    </PropertyGroup>
+  </Target>
+
+
+  <!-- Workaround for https://github.com/dotnet/roslyn/issues/4655 -->
+  <ItemGroup Condition="Exists('$(MSBuildProjectDirectory)\PublicAPI.Shipped.txt')" >
+	<AdditionalFiles Include="PublicAPI.Shipped.txt" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('$(MSBuildProjectDirectory)\PublicAPI.Unshipped.txt')" >
+	<AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+</Project>

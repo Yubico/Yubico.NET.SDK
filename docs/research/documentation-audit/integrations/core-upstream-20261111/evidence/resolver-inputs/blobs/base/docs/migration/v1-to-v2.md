@@ -1,0 +1,728 @@
+# YubiKey SDK v1 to YubiKit v2 Migration Guide
+
+This document reflects the v2 SDK state on branch `yubikit` as of commit `e348013685d92a6a665cd0b8bd7e8b05850fddd5`. Later pull requests targeting `yubikit` update this guide incrementally.
+
+This is an initial migration snapshot. It records high-confidence migration areas and marks low-level or behavior-sensitive cases for manual review.
+
+## Package and Namespace Split
+
+The v2 SDK uses `Yubico.YubiKit.*` packages and namespaces instead of the v1 `Yubico.YubiKey.*` and `Yubico.Core` shape.
+
+High-level package guidance:
+
+- Core device, transport, connection, APDU, logging, and platform infrastructure move to `Yubico.YubiKit.Core`.
+- Management interfaces move to `Yubico.YubiKit.Management`.
+- Application features are split by applet: `Yubico.YubiKit.Piv`, `Yubico.YubiKit.Ctap2`, `Yubico.YubiKit.Oath`, `Yubico.YubiKit.YubiOtp`, `Yubico.YubiKit.OpenPgp`, `Yubico.YubiKit.SecurityDomain`, and `Yubico.YubiKit.YubiHsm`.
+
+Treat package and namespace changes as assisted migrations until the specific v1 type or member mapping is present in `v1-to-v2-map.yml`.
+
+## Device Discovery and Connections
+
+V2 separates device discovery, device identity, connection factories, and protocol handling more explicitly than v1. Migration work usually starts by replacing direct v1 device enumeration or static discovery calls with the v2 device repository and connection abstractions in `Yubico.YubiKit.Core`.
+
+Review code that assumes:
+
+- One global device discovery entry point.
+- A fixed transport for all operations.
+- A device object that directly owns all applet operations.
+- Synchronous connection setup for operations that are async in v2.
+
+### HID Listener Callbacks
+
+V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived` and `Removed` events (`EventHandler<HidDeviceEventArgs>`) carrying the affected `IHidDevice`. V1 YubiKey-level monitoring used `YubiKeyDeviceListener.Arrived`/`Removed` and the `YubiKeyDevice.FindAll()` cache. In v2, the low-level `Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent` callback is `Action<HidDeviceRescanHint>?`: a diagnostic rescan hint with `HidDeviceChangeKind` plus optional platform identifier/path. It is not authoritative physical-device state. Applications that need real YubiKey arrivals and removals should use `YubiKeyManager.WatchAsync`, which emits after the device repository rescans and diffs the discovered device set.
+
+Earlier v2 alphas also exposed these events as an `IObservable<DeviceEvent>` (`YubiKeyManager.DeviceChanges`), briefly with Rx-style `Subscribe(Action<T>)` and query operators appearing transitively. That property has been removed outright, with no shim: `WatchAsync` is the only device-change stream. Filtering that used `Where` becomes an `if` inside the `await foreach`, and each `await foreach` is an independent watcher, so several parts of an application can consume the stream concurrently.
+
+### Physical Device Correlation
+
+V1 had no built-in way to answer "are these two device references the same physical key?" across discovery events; callers either opened a session and compared `DeviceInfo.SerialNumber`, or compared per-transport device paths. V2's `IYubiKey` now exposes `SerialNumber` (`int?`, populated by discovery without opening a session, `null` until a read succeeds and possibly forever on devices like the Security Key series that never report one) and `SameDeviceAs(IYubiKey other)`, which returns a tri-state `DeviceCorrelation` (`Unknown`/`Same`/`Different`) rather than a plain `bool`. `Unknown` means "cannot correlate", not "different" or "same" - do not coerce it to either for deduplication or collection equality. See `core-device-serial-and-correlation` in `v1-to-v2-map.yml`; this complements, not replaces, the `recipe-management-device-info` Management-session path for `FirmwareVersion` and the rest of `DeviceInfo`.
+
+### HID Interface Type Classification
+
+V1's `IHidDevice.UsagePage` (`HidUsagePage`: `Unknown`, `Fido`, `Keyboard`) classified a device from the HID UsagePage field alone; `Keyboard = 1` was actually the Generic Desktop usage page, not specifically a keyboard, so v1 code paired it with `Usage` to detect the YubiKey OTP interface. V2 classifies from the full UsagePage+Usage pair through `IHidInterface.InterfaceType` (`HidInterfaceType`: `Unknown`, `Fido`, `Otp`). Migrate `UsagePage == HidUsagePage.Fido` to `InterfaceType == HidInterfaceType.Fido`, and `UsagePage == HidUsagePage.Keyboard` (v1's OTP-interface check) to `InterfaceType == HidInterfaceType.Otp`. See `hid-usage-page-to-interface-type` in `v1-to-v2-map.yml`. Most applications should prefer `YubiKeyManager`/`IYubiKey` discovery and `ConnectionType` over raw `IHidInterface` classification.
+
+### Secure Channel (SCP) Session Construction
+
+`ProtocolFactory`, `ISmartCardProtocol`, and `PcscProtocolScp` are internal implementation machinery in v2.
+Most applications should pass SCP key parameters to the applet's `Create{Applet}SessionAsync(...)` entry point.
+Advanced callers that intentionally work below applet semantics can establish SCP through
+`RawSmartCardSession`:
+
+```csharp
+using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
+await using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(
+    scpParameters,
+    firmwareVersion,
+    protocolConfiguration,
+    cancellationToken);
+```
+
+Raw SCP configuration is applied before channel establishment and cannot be changed afterward. The raw session
+reuses Core's SCP processor and exchange guard. Do not log real keys or sensitive APDU payloads.
+See [Raw Access Tiers](../architecture/raw-access-tiers.md) for ownership and recovery rules.
+
+## Session Lifecycle
+
+PIV preview vocabulary now uses `Yubico.YubiKit.Piv.Slot`, standalone public `Piv.Features`, and shared
+`Core.Cryptography.KeyType` rather than `PivSlot`, `PivFeatures`, or `PivAlgorithm`. Import returns `Task`;
+the caller already owns `IPrivateKey.KeyType`. Slot and management-key metadata's nullable `KeyType`,
+`RawAlgorithmId`, and complete `RawData` preserve unknown device
+algorithms. Consumers may query `IApplicationSession.IsSupported`; `EnsureSupports` is protected implementation
+machinery, and operations enforce their own gates. See [PIV preview migration](../../src/Piv/README.md#preview-api-migration)
+for retry/error behavior and compatibility-override details.
+
+V2 application sessions are applet-specific and commonly own connection/protocol state. Prefer the v2 session factory or constructor pattern documented by each applet package rather than carrying v1 session setup forward mechanically.
+
+Migration review is required for code that:
+
+- Constructs sessions directly from v1 device objects.
+- Relies on synchronous disposal where v2 uses async cleanup.
+- Reuses one connection across multiple applet sessions.
+- Depends on implicit transport selection.
+
+Every v2 applet package exposes an `IYubiKey.Create{Applet}SessionAsync(...)` extension method (for example `CreatePivSessionAsync`, `CreateCtap2SessionAsync`, `CreateOathSessionAsync`, `CreateOpenPgpSessionAsync`, `CreateSecurityDomainSessionAsync`, `CreateHsmAuthSessionAsync`, `CreateYubiOtpSessionAsync`) and `Yubico.YubiKit.Management` exposes `CreateManagementSessionAsync`. These are the preferred v2 entry points: they open the correct connection/transport and construct the session in one call. Treat the underlying connection handling, transport selection defaults, and SCP key parameter plumbing as assisted rather than automatic until the specific v1 call site is reviewed.
+
+Creation policy is grouped in `SessionCreationOptions`. Applet dependency-injection registration methods and
+session-factory delegates from earlier v2 alphas were removed; call the static factory or `IYubiKey` extension.
+`SessionCreationOptions.UserPresencePrompt` carries one `IUserPresencePrompt` implementation across PIV,
+FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. This is touch notification only; PIN, PUK, password,
+and key parameters remain explicit unless an applet documents a separate credential-prompt or retry helper.
+
+`UserPresenceContext` also carries `Operation` (a stable per-applet identifier from `UserPresenceOperations`,
+always set on SDK-created contexts) and `Intent` (optional application-supplied text attached with
+`UserPresenceIntent.BeginScope("...")` around the SDK call). Neither has a v1 equivalent; adopting them when
+migrating a v1 touch callback is optional. See `user-presence-operation-and-intent` in `v1-to-v2-map.yml` and
+`docs/usage/user-interaction.md`.
+
+### 2.0.0-alpha.1 -> 2.0.0-alpha.2 applet API normalization
+
+These are source and, where noted, binary breaks between v2 alpha packages. Apply the mechanical replacements
+below before diagnosing behavior changes.
+
+| alpha.1 API or behavior | alpha.2 replacement |
+|---|---|
+| `OathSession.PutCredentialAsync(data, requireTouch, cancellationToken)` | Set `CredentialData.RequireTouch`; for URI input use `CredentialData.ParseUri(uri, requireTouch)`, then call `PutCredentialAsync(data, cancellationToken)`. |
+| `OpenPgpSession.ResetPinAsync(resetCode, newPin, useAdmin, cancellationToken)` | Use `ResetPinUsingResetCodeAsync(resetCode, newPin, cancellationToken)` or `ResetPinUsingAdminAuthenticationAsync(newPin, cancellationToken)`. |
+| `GenerateRsaKeyAsync(...)` / `GenerateEcKeyAsync(...)` | `GenerateKeyAsync(KeyRef, AlgorithmAttributes, cancellationToken)` with `RsaAttributes` or `EcAttributes`. |
+| `YubiOtpSession.GetSerialAsync(...)` | `GetSerialNumberAsync(...)`. |
+| `SecurityDomainSession.GetCaIdentifiersAsync(includeKloc, includeKlcc, cancellationToken)` | `GetCaIdentifiersAsync(CaIdentifierType, cancellationToken)`, combining `Kloc` and `Klcc` flags when needed. `None` or unknown bits now throw `ArgumentOutOfRangeException`, replacing `ArgumentException`; this exception-type change is silent at compile time. |
+| `PivSession.StoreCertificateAsync(slot, certificate, compress, cancellationToken)` | Pass `CertificateCompression.Automatic` or `CertificateCompression.Always`. |
+| `PivSession.VerifyUvAsync(requestTemporaryPin, checkOnly, cancellationToken)` | Pass `UserVerification.Verify`, `VerifyAndRequestTemporaryPin`, or `CheckOnly`. The old `(true, true)` input had no distinct meaning: check-only won. |
+| `PivSession.ImportKeyAsync(slot, key, pinPolicy, touchPolicy, cancellationToken)` | Put policies in `KeyCreationOptions` and pass it as the third argument; await completion, without a returned enum. |
+| PIV/YubiHSM alpha `TouchNotificationCallback` / `OnTouchRequired` | Set `SessionCreationOptions.UserPresencePrompt` to an `IUserPresencePrompt`. The alpha callbacks were removed outright; there is no compatibility adapter. |
+| `ManagementSession.Transport` | Use inherited `ConnectionType`. |
+| `SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken)` | Pass `new SetDeviceConfigOptions { Reboot = ..., CurrentLockCode = ..., NewLockCode = ... }`. |
+| Any of the eight `XSession.CreateAsync(connection, configuration, scpKeyParams[, firmwareVersion], cancellationToken)` factories | `XSession.CreateAsync(connection, SessionCreationOptions?, cancellationToken)`. The eight applets are Management, PIV, FIDO2, OATH, OpenPGP, Security Domain, YubiOTP, and YubiHSM Auth. |
+| Security Domain's fourth positional `firmwareVersion` factory argument | Set `SessionCreationOptions.FirmwareVersionOverride`. Security Domain cannot detect firmware, so this remains its only exact version source. |
+| FIDO2 Phase-38 compatibility factory overload | Use the single normalized `CreateAsync(connection, options, cancellationToken)` factory. |
+| `CreateWebAuthnClientAsync(origin, isPublicSuffix, enterpriseRpIds, scpKeyParams, configuration, preferredConnection, cancellationToken)` | Pass `new WebAuthnClientOptions { RpIdValidator = applicationValidator }` after `origin`; the application now owns RP syntax validity and the complete origin/RP authorization decision, including any overrides. Pass cross-cutting settings through optional `SessionCreationOptions? sessionOptions`. |
+| WebAuthn Phase-38 compatibility overload ending in `scpKeyParams, configuration, cancellationToken` | Removed. Call the single normalized `CreateWebAuthnClientAsync(origin, clientOptions, sessionOptions, cancellationToken)` signature. |
+| `CalculateAllAsync` / `CalculateAllOathCodesAsync` returning `Dictionary<Credential, Code?>` | Consume `IReadOnlyDictionary<Credential, Code?>`. |
+| One-shot `SetDeviceConfigAsync` / `PutConfigurationAsync` returning `ValueTask` | Await the returned `Task`. This is binary-breaking even though normal `await` source often remains unchanged. |
+| `GetSecurityDomainKeyInfoAsync(scpKeyParams, cancellationToken)` / `ListHsmAuthCredentialsAsync(scpKeyParams, cancellationToken)` | Pass `new SessionCreationOptions { ScpKeyParameters = scpKeyParams }` as the optional second-level creation policy. |
+| A direct applet factory with a mismatched `SessionCreationOptions.PreferredConnectionType` | All eight direct factories now throw `ArgumentException` before device input/output. |
+| Public `DeviceConfig.GetBytes(reboot, currentLockCode, newLockCode)` | Removed. Pass `SetDeviceConfigOptions` to `SetDeviceConfigAsync`; wire encoding is session implementation detail. |
+| Named PIV arguments `ChangePukAsync(pukUtf8: ...)`, `RecoverPinOnlyModeAsync(pin: ...)`, or `SetPinOnlyModeAsync(pin: ...)` | Rename them to `currentPukUtf8:` or `pinUtf8:` as appropriate. |
+| Named OpenPGP `Kdf.Process(..., pinUtf8Bytes: ...)` argument | Rename it to `pin:`. The parameter is `ReadOnlySpan<byte> pin`; it carries UTF-8 bytes but does not use the `Utf8` suffix. |
+
+The following dependency-injection APIs were removed rather than replaced. Call the normalized static factory or
+the corresponding `IYubiKey.CreateXSessionAsync` extension directly:
+
+| Removed file/API family | Direct replacement |
+|---|---|
+| Management `DependencyInjection`, `ManagementSessionFactory`, `AddYubiKeyManager` | `ManagementSession.CreateAsync` or `CreateManagementSessionAsync` |
+| FIDO2 `DependencyInjection`, `FidoSessionFactoryDelegate`, `SmartCardFidoSessionFactoryDelegate`, `AddYubiKeyFido2` | `Ctap2Session.CreateAsync` or `CreateCtap2SessionAsync` |
+| OATH `DependencyInjection`, `OathSessionFactory`, `AddOath` | `OathSession.CreateAsync` or `CreateOathSessionAsync` |
+| OpenPGP `DependencyInjection`, `OpenPgpSessionFactory`, `AddOpenPgp` | `OpenPgpSession.CreateAsync` or `CreateOpenPgpSessionAsync` |
+| Security Domain `DependencyInjection`, `SecurityDomainSessionFactory`, `AddYubiKeySecurityDomain` | `SecurityDomainSession.CreateAsync` or `CreateSecurityDomainSessionAsync` |
+| YubiOTP `DependencyInjection`, `YubiOtpSessionFactory`, `AddYubiOtp` | `YubiOtpSession.CreateAsync` or `CreateYubiOtpSessionAsync` |
+| YubiHSM Auth `DependencyInjection`, `HsmAuthSessionFactory`, `AddHsmAuth` | `HsmAuthSession.CreateAsync` or `CreateHsmAuthSessionAsync` |
+
+### 2.0.0-alpha.2 -> 2.0.0-alpha.3 deferred API resolutions
+
+These are source breaks between v2 alpha packages. Apply the mechanical replacements below before diagnosing
+behavior changes.
+
+| alpha.2 API or behavior | alpha.3 replacement |
+|---|---|
+| The one-shot conveniences `GetDeviceInfoAsync`, `SetDeviceConfigAsync`, `GetFidoInfoAsync`, `ListOathCredentialsAsync`, `CalculateAllOathCodesAsync`, `GetConfigStateAsync`, `PutConfigurationAsync`, and `CalculateHmacSha1Async` ended with a cancellation token and did not expose session creation policy. | Each now takes an optional `SessionCreationOptions?` immediately before its cancellation token. Callers that passed the cancellation token positionally must name it as `cancellationToken:`. |
+| `SetDeviceConfigAsync(DeviceConfig config, SetDeviceConfigOptions? options = null, CancellationToken cancellationToken = default)` | `SetDeviceConfigAsync(DeviceConfig config, SetDeviceConfigOptions? options = null, SessionCreationOptions? sessionOptions = null, CancellationToken cancellationToken = default)`. `options` controls the configuration operation (`Reboot`, `CurrentLockCode`, and `NewLockCode`); `sessionOptions` controls creation of the temporary Management session. |
+| `ApplicationIds` was a record with public static `byte[]` fields. | `ApplicationIds` is a static class whose members are `ReadOnlyMemory<byte>` properties. Most APIs consuming application identifiers already accept `ReadOnlyMemory<byte>`, so most call sites need no change; use `.ToArray()` only when an array is required. |
+| A type derived from `SlotConfiguration` could write the protected `_fixed`, `_uid`, `_key`, and `_fixedSize` fields or call protected static `ProcessHmacKey(ReadOnlySpan<byte> hmacKey, Span<byte> key, Span<byte> uid)`. | The fields are private and derived classes use the protected copy-in methods `SetFixed`, `SetUid`, and `SetKey`. `ProcessHmacKey` is replaced by protected `SetHmacKey(ReadOnlySpan<byte> hmacKey, ushort initialMovingFactor)`. This affects only consumers deriving from `SlotConfiguration` outside the SDK. |
+| `CreateWebAuthnClientAsync(origin, isPublicSuffix, WebAuthnClientOptions? options = null, SessionCreationOptions? sessionOptions = null, cancellationToken)` | Supply required `WebAuthnClientOptions.RpIdValidator`, taking `(WebAuthnOrigin origin, string rpId)` and returning bool, pass the non-null options as `clientOptions`, and keep optional `sessionOptions` and `cancellationToken`. The standalone checker parameter and nullable/default options were removed. |
+
+For example, a positional cancellation token passed to a one-shot convenience must become named:
+
+```csharp
+// alpha.2
+var info = await yubiKey.GetFidoInfoAsync(cancellationToken);
+
+// alpha.3
+var info = await yubiKey.GetFidoInfoAsync(cancellationToken: cancellationToken);
+```
+
+The alpha.2/alpha.3 names above are historical. In the current CTAP2 surface, use
+`GetCtap2InfoAsync(cancellationToken: cancellationToken)`; see `ctap2-semantic-rename`
+in `v1-to-v2-map.yml` for the related package, session, factory, and operation-string renames.
+
+Copy an application identifier only when an API specifically requires an array:
+
+```csharp
+byte[] pivApplicationId = ApplicationIds.Piv.ToArray();
+```
+
+External `SlotConfiguration` subclasses must use the copy-in setters instead of retaining access to the backing
+key array:
+
+```csharp
+// alpha.2
+public sealed class CustomSlotConfiguration : SlotConfiguration
+{
+    public CustomSlotConfiguration(ReadOnlySpan<byte> key) => key.CopyTo(_key);
+}
+
+// alpha.3
+public sealed class CustomSlotConfiguration : SlotConfiguration
+{
+    public CustomSlotConfiguration(ReadOnlySpan<byte> key) => SetKey(key);
+}
+```
+
+### Current public return-contract migration
+
+The current v2 source makes key listings explicit and prevents callers from mutating parsed OpenPGP collection
+storage. These changes are not assigned to a later alpha release label.
+
+| Before | Current replacement |
+|---|---|
+| `SecurityDomainSession.GetKeyInfoAsync(cancellationToken)` / `ISecurityDomainSession.GetKeyInfoAsync(cancellationToken)` | `ListKeyInformationAsync(cancellationToken)` on the session or interface. The returned element type remains `KeyInfo`. |
+| `device.GetSecurityDomainKeyInfoAsync(options, cancellationToken)` | `device.ListKeyInformationAsync(options, cancellationToken)`. This deliberately has no applet qualifier; qualify `Yubico.YubiKit.SecurityDomain.IYubiKeyExtensions.ListKeyInformationAsync(...)` or use an explicit session if another imported extension becomes equally applicable. |
+| `OpenPgpSession.GetKeyInformationAsync(cancellationToken)` / `IOpenPgpSession.GetKeyInformationAsync(cancellationToken)` | `ListKeyInformationAsync(cancellationToken)`. |
+| `OpenPgpSession.GetFingerprintsAsync(cancellationToken)` / `IOpenPgpSession.GetFingerprintsAsync(cancellationToken)` | `GetKeyFingerprintsAsync(cancellationToken)`. |
+| `OpenPgpSession.SetFingerprintAsync(keyRef, fingerprint, cancellationToken)` / `IOpenPgpSession.SetFingerprintAsync(keyRef, fingerprint, cancellationToken)` | `SetKeyFingerprintAsync(keyRef, fingerprint, cancellationToken)`. |
+| `Fingerprints` | `KeyFingerprints`. |
+| `DiscretionaryDataObjects.Fingerprints` | `DiscretionaryDataObjects.KeyFingerprints`. |
+| `DiscretionaryDataObjects.CaFingerprints` | `DiscretionaryDataObjects.CaKeyFingerprints`. |
+| `DiscretionaryDataObjects.KeyInfo` | `DiscretionaryDataObjects.KeyInformation`. |
+| `KeyRefExtensions.FingerprintDo(keyRef)` / `keyRef.FingerprintDo()` | `KeyRefExtensions.KeyFingerprintDo(keyRef)` / `keyRef.KeyFingerprintDo()`. Protocol tag identifiers such as `DataObject.Fingerprints`, `DataObject.CaFingerprints`, and the individual `DataObject.Fingerprint*` values retain their specification names. |
+| Public parameterless construction, dictionary collection initializers, and inherited mutators on `KeyInformation`, `Fingerprints`, and `GenerationTimes` | `KeyInformation`, `KeyFingerprints`, and `GenerationTimes` are sealed `IReadOnlyDictionary` implementations with no public constructors or mutators. Values come from parsed session results; indexing, `ContainsKey`, `TryGetValue`, keys, values, count, enumeration, and missing-key behavior remain available. |
+
+#### Result-contract migration
+
+Several current v2 return shapes changed before release. Migrate callers as follows:
+
+| Before | Current replacement |
+|---|---|
+| `IReadOnlyList<RelyingPartyInfo> rps = await credentialManagement.EnumerateRelyingPartiesAsync()` | `RelyingPartyEnumerationResult result = ...`; read `result.RelyingParties` and the first response's optional total from `result.ReportedTotal`. |
+| `IReadOnlyList<StoredCredentialInfo> credentials = await credentialManagement.EnumerateCredentialsAsync(rpIdHash)` | `using CredentialEnumerationResult result = await ...`; read `result.Credentials` and `result.ReportedTotal` within that lifetime. No credentials produces an empty collection and a null total. The result disposes its entries, whose complete raw response clones can contain secret fields. Direct `StoredCredentialInfo.Decode` callers must dispose the returned entry. |
+| `(pinRetries, powerCycleRequired) = await clientPin.GetPinRetriesAsync()` | Store the returned `PinRetryStatus`, then read `RetriesRemaining` and `PowerCycleRequired`. |
+| `(uvRetries, powerCycleRequired) = await clientPin.GetUvRetriesAsync()` | Store the returned `UserVerificationRetryStatus`, then read `RetriesRemaining` and `PowerCycleRequired`. |
+| `GetAlgorithmInformationAsync()` returning `(KeyRef, AlgorithmAttributes)` tuples | `GetSupportedAlgorithmsAsync()` returning `SupportedAlgorithm` entries with `KeyRef` and `Attributes`. Treat it as an ordered list: a key slot can occur more than once. |
+| Positional construction of `RegistrationExtensionOutputs` or `AuthenticationExtensionOutputs` | Use parameterless construction with named object-initializer properties. All members remain optional and default to null. |
+| `MatchedCredential.RequiresSelection` | Removed. Inspect the `IReadOnlyList<MatchedCredential>.Count`; call `SelectAsync` on the chosen item. |
+
+## Common Migration Recipes
+
+These examples show the shape of common v1 code and the closest v2 pattern. They are intentionally small and source-backed. Treat examples that write applet state, credential material, keys, PINs, PUKs, access codes, or slot configuration as human-reviewed migrations even when the session or member mapping is clear.
+
+### Device Discovery
+
+V1 discovery returned v1 device objects synchronously:
+
+```csharp
+using Yubico.YubiKey;
+
+var devices = YubiKeyDevice.FindByTransport(Transport.All).ToList();
+var device = devices.First();
+```
+
+V2 discovery is async and returns physical `IYubiKey` instances with explicit available connections:
+
+```csharp
+using Yubico.YubiKit.Core.Devices;
+
+var devices = await YubiKeyManager.FindAllAsync(
+    ConnectionType.All,
+    forceRescan: true,
+    cancellationToken: cancellationToken);
+var device = devices.First();
+```
+
+Migration notes:
+
+- Replace synchronous enumeration assumptions with async flow and cancellation support.
+- V2 models one physical YubiKey with one or more available connections. Avoid assuming that the discovered object is a single transport handle.
+- If v1 code filtered by `Transport.HidFido`, `Transport.UsbSmartCard`, or NFC-specific behavior, review the v2 `ConnectionType` choice rather than applying a mechanical enum rename.
+- For the common "just get one matching device" case, prefer `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` (throws `InvalidOperationException` when none match) or `FindFirstOrDefaultAsync(...)` (returns `null`) over `FindAllAsync(...).First()`. See `core-find-first-discovery-helpers` in `v1-to-v2-map.yml` and `docs/usage/device-discovery.md`.
+
+### Device Info
+
+V1 code often read device metadata directly from the discovered device:
+
+```csharp
+using Yubico.YubiKey;
+
+var device = YubiKeyDevice.FindAll().First();
+Console.WriteLine(device.SerialNumber);
+Console.WriteLine(device.FirmwareVersion);
+```
+
+V2 exposes detailed device information through the Management package:
+
+```csharp
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Management;
+
+var device = await YubiKeyManager.FindFirstAsync(cancellationToken: cancellationToken);
+await using var session = await device.CreateManagementSessionAsync(
+    cancellationToken: cancellationToken);
+
+var info = await session.GetDeviceInfoAsync(cancellationToken);
+Console.WriteLine(info.SerialNumber);
+Console.WriteLine(info.VersionName);
+```
+
+Migration notes:
+
+- Use a Management session when you need rich device metadata, capability flags, form factor, FIPS state, or configuration state.
+- Some v1 metadata properties moved into richer v2 fields. For example, v1 `FirmwareVersion` often corresponds to `DeviceInfo.FirmwareVersion` for comparisons and `DeviceInfo.VersionName` for display.
+- Reuse one session for multiple Management operations instead of creating repeated one-shot sessions.
+- Configuration changes are persistent and may reboot the device; keep read-only device-info migrations separate from configuration migrations.
+- The snippet uses `YubiKeyManager.FindFirstAsync(...)`, the one-shot single-device discovery helper; see `core-find-first-discovery-helpers` in `v1-to-v2-map.yml`.
+
+### Applet Session Creation
+
+V1 applet sessions were commonly constructed directly from the v1 device object:
+
+```csharp
+using Yubico.YubiKey.Piv;
+
+using var piv = new PivSession(device);
+```
+
+V2 uses async applet-specific extension methods on `IYubiKey`:
+
+```csharp
+using Yubico.YubiKit.Piv;
+
+await using var piv = await device.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);
+```
+
+Migration notes:
+
+- Prefer `Create{Applet}SessionAsync(...)` over manually opening a connection and constructing the session.
+- Use `await using` because v2 sessions and owned connections are async-disposable.
+- Review transport selection for applets that can use more than one connection type, especially FIDO2 and YubiOTP.
+
+### PIV: Generate a Key Pair
+
+V1 generated a PIV key pair through `PivSession.GenerateKeyPair(...)`:
+
+```csharp
+using Yubico.YubiKey.Piv;
+
+using var piv = new PivSession(device);
+piv.KeyCollector = keyCollector;
+
+var publicKey = piv.GenerateKeyPair(
+    PivSlot.Authentication,
+    PivAlgorithm.EccP256,
+    PivPinPolicy.Default,
+    PivTouchPolicy.Default);
+```
+
+V2 uses async PIV operations and explicit caller-owned sensitive buffers:
+
+```csharp
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Piv;
+
+await using var piv = await device.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);
+
+byte[] managementKey = GetManagementKeyBytes();
+try
+{
+    await piv.AuthenticateAsync(managementKey, cancellationToken);
+
+    var publicKey = await piv.GenerateKeyAsync(
+        Slot.Authentication,
+        KeyType.P256,
+        new KeyCreationOptions
+        {
+            PinPolicy = PinPolicy.Default,
+            TouchPolicy = TouchPolicy.Default
+        },
+        cancellationToken);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+}
+```
+
+Migration notes:
+
+- This is a state-mutating operation and requires management-key authentication in v2.
+- Replace v1 key-collector assumptions with explicit credential collection and zeroing around the v2 call site.
+- Review algorithm, slot, PIN policy, and touch policy values manually; names and defaults are not guaranteed to be one-to-one.
+
+### FIDO2: Read Authenticator Info
+
+V1 exposed authenticator info from the constructed session:
+
+```csharp
+using Yubico.YubiKey.Fido2;
+
+using var fido = new Fido2Session(device);
+var info = fido.AuthenticatorInfo;
+```
+
+V2 reads fresh authenticator info asynchronously:
+
+```csharp
+using Yubico.YubiKit.Ctap2;
+
+var info = await device.GetCtap2InfoAsync(cancellationToken: cancellationToken);
+```
+
+For several FIDO2 operations, keep the session open:
+
+```csharp
+await using var fido = await device.CreateCtap2SessionAsync(
+    cancellationToken: cancellationToken);
+
+var info = await fido.GetInfoAsync(cancellationToken);
+```
+
+Migration notes:
+
+- V2 does not treat authenticator info as a cached session property; call `GetInfoAsync(...)` when fresh data matters.
+- USB FIDO normally uses HID FIDO first. If v1 code depended on smart-card FIDO2 or SCP, set `PreferredConnectionType` and `ScpKeyParameters` in `SessionCreationOptions` explicitly.
+- Operations such as make credential, get assertion, reset, and credential management still need flow-specific review for PIN/UV, user presence, and extension behavior.
+
+### OATH: Add and Calculate Credentials
+
+V1 OATH code used synchronous credential APIs and string-based secrets:
+
+```csharp
+using Yubico.YubiKey.Oath;
+
+using var oath = new OathSession(device);
+oath.KeyCollector = keyCollector;
+
+var credential = new Credential
+{
+    Issuer = "Yubico",
+    AccountName = "alice@example.com",
+    Type = CredentialType.Totp,
+    Secret = "JBSWY3DPEHPK3PXP",
+    Digits = 6
+};
+
+oath.AddCredential(credential);
+var codes = oath.CalculateAllCredentials();
+```
+
+V2 separates credential data, async storage, and async calculation:
+
+```csharp
+using Yubico.YubiKit.Oath;
+
+await using var oath = await device.CreateOathSessionAsync(
+    cancellationToken: cancellationToken);
+
+using var credentialData = CredentialData.ParseUri(
+    "otpauth://totp/Yubico:alice@example.com?secret=JBSWY3DPEHPK3PXP&issuer=Yubico&algorithm=SHA1&digits=6&period=30");
+
+await oath.PutCredentialAsync(credentialData, cancellationToken: cancellationToken);
+var codes = await oath.CalculateAllAsync(cancellationToken: cancellationToken);
+```
+
+Migration notes:
+
+- `CredentialData.ParseUri(...)` decodes the OATH URI into v2 credential data and clears its temporary decoded bytes. Dispose the returned instance after use. URI/Base32 strings are immutable and cannot be cleared.
+- If you construct `CredentialData` manually, supply decoded bytes to `Secret`. Initialization makes a private owned copy; always clear the original input in a `finally`, including construction and PUT failure paths.
+- If the OATH applet is password-protected, derive and validate the access key explicitly with byte buffers that can be zeroed.
+- Adding, deleting, renaming, or setting keys mutates persistent OATH state and should be reviewed manually.
+
+#### Credential secret ownership (v2 alpha breaking change)
+
+`CredentialData.Secret` changed from `byte[]` to `ReadOnlyMemory<byte>`. Existing assignments from byte arrays still
+work, but no longer transfer ownership: mutating or clearing that input does not change the credential's private seed.
+Do not rely on PUT or credential disposal to clear your input array. PUT now preserves the owned seed on both success
+and failure, allowing the same `CredentialData` to be used by `AuthenticateAndRetryAsync`.
+
+For reads, replace array indexing with `credentialData.Secret.Span[index]` and pass `Secret` directly to consumers
+accepting `ReadOnlyMemory<byte>`. The getter returns a borrowed view without allocating. Keep the credential alive
+until all consumers and async operations complete; do not use it or its views after disposal, or mutate extracted
+backing storage. Disposal clears all borrowed views. If an API truly requires an independent array, explicitly copy
+and clear it yourself:
+
+```csharp
+byte[] copy = credentialData.Secret.ToArray();
+try
+{
+    // Pass copy to the array-only consumer; await completion before clearing it.
+}
+finally
+{
+    System.Security.Cryptography.CryptographicOperations.ZeroMemory(copy);
+}
+```
+
+See the [decoded-byte example](../../src/Oath/README.md#add-a-credential-from-decoded-bytes) for input-buffer cleanup.
+
+### YubiOTP: HMAC-SHA1 Challenge-Response
+
+V1 used OTP operation builders for slot programming and calculation:
+
+```csharp
+using Yubico.YubiKey.Otp;
+
+using var otp = new OtpSession(device);
+
+otp.ConfigureChallengeResponse(Slot.LongPress)
+    .UseHmacSha1()
+    .UseKey(hmacKey)
+    .UseSmallChallenge()
+    .Execute();
+
+var response = otp.CalculateChallengeResponse(Slot.LongPress)
+    .UseYubiOtp(false)
+    .UseChallenge(challenge)
+    .GetDataBytes();
+```
+
+V2 uses explicit slot configuration objects and async session methods:
+
+```csharp
+using System.Security.Cryptography;
+using Yubico.YubiKit.YubiOtp;
+
+await using var otp = await device.CreateYubiOtpSessionAsync(
+    cancellationToken: cancellationToken);
+
+try
+{
+    using var config = new HmacSha1SlotConfiguration(hmacKey);
+    config.UseShortChallenge();
+
+    await otp.PutConfigurationAsync(
+        Slot.Two,
+        config,
+        cancellationToken: cancellationToken);
+
+    var response = await otp.CalculateHmacSha1Async(
+        Slot.Two,
+        challenge,
+        cancellationToken);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(hmacKey);
+    CryptographicOperations.ZeroMemory(challenge);
+}
+```
+
+Migration notes:
+
+- Slot mapping is semantic, not textual: v1 `ShortPress` and `LongPress` map to v2 `Slot.One` and `Slot.Two` respectively.
+- Programming a slot overwrites persistent device state. Prefer slot 2 for examples and tests unless a human explicitly chooses otherwise.
+- Review touch, access-code, short-challenge, update, and NDEF behavior manually before migrating production slot code.
+
+### PIV: Enable PIN-Only Management Key Mode
+
+V1 set PIN-only mode through the session, collecting the PIN and management key via `KeyCollector`:
+
+```csharp
+using Yubico.YubiKey.Piv;
+
+using var piv = new PivSession(device);
+piv.KeyCollector = keyCollector;
+
+piv.SetPinOnlyMode(PivPinOnlyMode.PinProtected, PivAlgorithm.Aes192);
+```
+
+V2 requires the management key to already be authenticated, and takes the PIN and management key explicitly:
+
+```csharp
+using System.Security.Cryptography;
+using Yubico.YubiKit.Piv;
+
+await using var piv = await device.CreatePivSessionAsync(
+    cancellationToken: cancellationToken);
+
+byte[] managementKey = GetManagementKeyBytes();
+byte[] pin = GetPinBytes();
+try
+{
+    await piv.AuthenticateAsync(managementKey, cancellationToken);
+    await piv.SetPinOnlyModeAsync(
+        PinOnlyMode.PinProtected,
+        pin,
+        managementKey,
+        cancellationToken);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(managementKey);
+    CryptographicOperations.ZeroMemory(pin);
+}
+```
+
+Migration notes:
+
+- Only `PinOnlyMode.PinProtected` can be newly enabled in v2. V1's `PinDerived` mode is a deprecated, weaker mechanism; v2 can still detect and recover an existing PIN-derived configuration (`GetPinOnlyModeAsync`/`RecoverPinOnlyModeAsync`) but cannot enable a new one.
+- The caller must authenticate the management key explicitly before calling `SetPinOnlyModeAsync`; v1's `KeyCollector` handled this implicitly.
+- Enabling blocks the PUK and is state-mutating; treat this as a human-reviewed migration like other PIV write operations.
+
+### OATH: Check Password Protection and Retry a Locked Operation
+
+V1 exposed a persistent `IsPasswordProtected` flag and relied on `KeyCollector` for transparent retry:
+
+```csharp
+using Yubico.YubiKey.Oath;
+
+using var oath = new OathSession(device);
+oath.KeyCollector = keyCollector;
+
+if (oath.IsPasswordProtected)
+{
+    var codes = oath.CalculateAllCredentials();
+}
+```
+
+V2 exposes the same persistent signal and an explicit, module-appropriate retry helper instead of a global `KeyCollector`:
+
+```csharp
+using Yubico.YubiKit.Oath;
+
+await using var oath = await device.CreateOathSessionAsync(
+    cancellationToken: cancellationToken);
+
+if (oath.IsPasswordProtected)
+{
+    var codes = await oath.AuthenticateAndRetryAsync(
+        ct => oath.CalculateAllAsync(cancellationToken: ct),
+        ct => GetPasswordBytesAsync(ct),
+        cancellationToken);
+}
+```
+
+Migration notes:
+
+- `IsPasswordProtected` reflects whether the device has a password configured at all, independent of `IsLocked`'s per-session unlock state.
+- `AuthenticateAndRetryAsync` retries the wrapped operation exactly once after a successful `ValidateAsync`; it is not an unbounded retry loop like v1's `KeyCollector`.
+- Catch the dedicated `OathException` and branch on `OathException.Reason` (`Locked` or `WrongPassword`) instead of v1's `SecurityException`.
+
+## Application Sections
+
+### PIV
+
+Use `Yubico.YubiKit.Piv` for PIV operations. Review authentication, PIN/PUK handling, key import/generation, certificate management, and APDU-level customization manually because lifecycle and security-sensitive buffer handling can differ between v1 and v2.
+
+PIN-only management-key mode (`IPivSession.GetPinOnlyModeAsync`/`SetPinOnlyModeAsync`/`RecoverPinOnlyModeAsync`) and typed CHUID/CCC/AdminData/KeyHistory data objects (`Yubico.YubiKit.Piv.DataObjects`) were restored after an initial v2 gap; see `piv-pin-only-mode` and `piv-typed-data-objects` in `v1-to-v2-map.yml`. Enabling a new PIN-derived (as opposed to PIN-protected) management key is not supported in v2.
+
+Migrate v1 touch notification and the removed alpha `PivSession.OnTouchRequired` callback to
+`SessionCreationOptions.UserPresencePrompt`. This does not collect or retry a PIN, PUK, or management key.
+
+### FIDO2
+
+Use `Yubico.YubiKit.Ctap2` for FIDO2 authenticator operations over CTAP2. Review transport selection, PIN/UV flows, credential management, and authenticator state assumptions manually. See `ctap2-semantic-rename` in `v1-to-v2-map.yml` for the current package/session/factory rename.
+
+Touch notification uses `SessionCreationOptions.UserPresencePrompt`. FIDO HID can report the live
+`DeviceWaiting` signal; smart-card FIDO uses policy-based notification. PIN and UV input remain separate.
+
+Typed response models now preserve the original CBOR envelope for fields this SDK version does not yet model: `AuthenticatorInfo.RawData`, `FingerprintSensorInfo.RawData`, `EnrollmentSampleResult.RawData`, `CredentialMetadata.RawData`, and `RelyingPartyInfo.RawData`. This does not change any typed member; it is a forward-compatibility escape hatch for code that previously had to reach for ad hoc CBOR parsing to read a field the typed model omitted. See `fido2-forward-compat-raw-data` in `v1-to-v2-map.yml`.
+
+### WebAuthn
+
+Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new package built on top of `Yubico.YubiKit.Ctap2` (`ICtap2Session`); v1 had no equivalent package. `WebAuthnClient` accepts an optional `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) that supplies a PIN on demand instead of requiring `pinBytes` up front, and owns a bounded retry loop instead of v1 FIDO2 code's global, unbounded `KeyCollector` pattern; see `webauthn-credential-prompt` in `v1-to-v2-map.yml`.
+
+WebAuthn touch notification is the separate `IUserPresencePrompt` supplied in the FIDO session's
+`SessionCreationOptions`; over FIDO HID it receives the authenticator's live wait signal.
+
+Client configuration uses a required `WebAuthnClientOptions` record (`RpIdValidator`, `MaxPromptAttempts`, `CredentialPrompt`) passed to `WebAuthnClient`'s constructor or `IYubiKeyExtensions.CreateWebAuthnClientAsync`. YESDK-1623 / audit 15 removes the earlier `PublicSuffixChecker`, `EnterpriseRpIds`, and `WebAuthnOrigin.IsRpIdValid` APIs outright. Supply one synchronous `RpIdValidator(WebAuthnOrigin origin, string rpId)` delegate owning RP validity (including domain/URI syntax) AND the application's complete caller/RP authorization policy, not just the old public-suffix predicate. Both ceremonies present wire-valid RP text unchanged to it before device I/O; false or non-cancellation exceptions fail with `Security`, and callback cancellation propagates. The SDK rejects only null/empty RP IDs and invalid UTF-16 that cannot be encoded faithfully as UTF-8 with `InvalidRequest`; it does not parse domain/URI syntax, perform IDNA conversion, or impose browser syntax/binding policy. A callback from an earlier development build that checked only authorization must now also own RP validity; the former independent syntax gate was removed. Passing the callback is an application decision, not a blanket browser-conformance claim. Carry forward optional `CredentialPrompt` and `MaxPromptAttempts`. See [WebAuthn RP authorization](../../src/WebAuthn/README.md#rp-authorization-belongs-to-the-application) for exact-RP, allowlist, application-service examples, RP-server checks, and the unchanged HTTPS/HTTP-localhost origin representation limit.
+
+Earlier v2 alphas also exposed a streaming ceremony-status API (`WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync`, returning `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed`); it was removed outright with no shim, leaving the plain async `MakeCredentialAsync`/`GetAssertionAsync` as the only ceremony entry points. See `webauthn-client-construction-and-streams` in `v1-to-v2-map.yml`.
+
+### OATH
+
+Use `Yubico.YubiKit.Oath` for TOTP/HOTP credential management and code calculation. Review credential naming, secret handling, password flows, and time-source assumptions manually.
+
+`IOathSession.IsPasswordProtected` (device-password state independent of session unlock state), `AuthenticateAndRetryAsync` (module-appropriate authenticate-and-retry), and the dedicated `OathException`/`OathFailureReason` type were restored after an initial v2 gap; see `oath-password-protection-state`, `oath-authenticate-and-retry`, and `oath-exception` in `v1-to-v2-map.yml`.
+
+Touch-required credential calculations notify `SessionCreationOptions.UserPresencePrompt` from policy evidence.
+
+### YubiOTP
+
+Use `Yubico.YubiKit.YubiOtp` for Yubico OTP configuration and slot operations. Review slot numbering, configuration flags, and write/update behavior manually.
+
+A keyboard-layout-aware `StaticPasswordSlotConfiguration(string, KeyboardLayout)` constructor and Yubico-OTP-algorithm challenge-response (`YubicoOtpChallengeResponseSlotConfiguration`/`CalculateYubicoOtpAsync`) were restored after an initial v2 gap; see `yubiotp-static-password-keyboard` and `yubiotp-yubico-otp-challenge-response` in `v1-to-v2-map.yml`. HMAC-SHA1 and Yubico OTP key inputs of invalid length now fail before any device I/O instead of being silently hashed or padded.
+
+Migrate v1 `UseTouchNotifier` to `SessionCreationOptions.UserPresencePrompt`. OTP HID reports a live
+`DeviceWaiting` signal; smart-card challenge-response notification is policy-based.
+
+### OpenPGP
+
+Use `Yubico.YubiKit.OpenPgp` for OpenPGP card operations. Review key slots, PIN policy, management key behavior, and command-level assumptions manually.
+
+PIN verification failures throw a dedicated `OpenPgpInvalidPinException` with a typed `RetriesRemaining`; see `openpgp-exception` in `v1-to-v2-map.yml`.
+
+OpenPGP user-interaction-flag policy notifies `SessionCreationOptions.UserPresencePrompt`; cached or unknown
+policy is advisory and may not result in a device wait.
+
+### Security Domain
+
+Use `Yubico.YubiKit.SecurityDomain` for SCP03 and security domain key management. Treat all secure channel, cryptographic key, and diversification migrations as manual until a specific high-confidence mapping exists.
+
+Secure-channel handshake/authentication failures (during session creation or post-reset reinitialization) throw a dedicated `SecureChannelException` that preserves the original failure as `InnerException`; see `securitydomain-exception` in `v1-to-v2-map.yml`. Per-operation failures after a channel is open are unchanged.
+
+### YubiHSM
+
+Use `Yubico.YubiKit.YubiHsm` for YubiHSM 2 workflows. Review connector/session creation, authentication, object identifiers, capabilities, and command behavior manually.
+
+A dedicated `HsmAuthRetryException.RetriesRemaining` was restored after an initial v2 gap. Migrate v1 touch
+notification, or the removed alpha `HsmAuthSession.OnTouchRequired` callback, to
+`SessionCreationOptions.UserPresencePrompt`; known touch-required credentials produce a required policy
+notification, an unknown touch value or LIST failure is advisory, and a credential absent from a successful
+LIST remains silent. See `yubihsm-retry-exception`,
+`yubihsm-touch-notify`, and `user-presence-prompt` in `v1-to-v2-map.yml`. `HsmAuthCredential.Counter` was
+hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics;
+see `yubihsm-credential-retries-remaining-rename`.
+
+Credential passwords moved from `string` to UTF-8 `ReadOnlyMemory<byte>` across nine `IHsmAuthSession`/`HsmAuthSession` members, closing a v1 regression rather than introducing one, since v1's equivalent path already used byte-based passwords; see `yubihsm-credential-password-bytes` in `v1-to-v2-map.yml`. The parameters are named plainly — `credentialPassword`, `derivationPassword`, `currentPassword`, `newPassword`, and `password` — with no `Utf8` suffix; `refactor(fido2,openpgp,oath)!: drop Utf8 param suffix from secret parameters` (`5af953f6`) applied the same convention to FIDO2, OpenPGP, and OATH. PIV is the exception and still uses `pinUtf8`, `pukUtf8`, and friends.
+
+## Manual Low-Level Command Cases
+
+Manual migration is required for code that builds APDUs, parses raw responses, relies on status-word behavior, preserves unknown protocol fields, or sends vendor-specific commands directly. These cases should be migrated against v2 command/session abstractions where possible. If direct command access remains necessary, verify byte-level behavior against both v1 and v2 sources.
+
+## Automation Note
+
+Migration documentation is maintained by automation on the `yubikit` branch. Pull requests targeting `yubikit` receive migration-impact preview comments. Pushes to `yubikit` open documentation update pull requests and advance `docs/migration/.state.yml` only after migration artifacts are updated.
+
+Weekly scheduled reconciliation requires a wrapper workflow on the repository default branch, because GitHub only runs scheduled workflows from the default branch. The wrapper checks out `yubikit`, runs the same reconciliation logic, and opens documentation pull requests back into `yubikit`.
+
+## How This Document Grows
+
+This guide is intended to mature over the v2 development cycle rather than be written in one final pass.
+
+1. Pull requests targeting `yubikit` get preview comments that identify migration impact without editing files.
+2. Merges into `yubikit` trigger documentation update pull requests for the newly analyzed commit range.
+3. Weekly reconciliation catches missed or stale migration guidance.
+4. Monthly synthesis reorganizes accumulated notes into clearer release-ready sections.
+
+The human review responsibility is intentionally narrow: review the generated migration documentation pull requests for truthfulness, confidence level, and usefulness. The automation should preserve uncertainty as manual-review items instead of inventing mappings.
+
+## Release Readiness Tracker
+
+This initial snapshot is not release-complete. Future automated updates should improve these areas:
+
+- Core/device discovery: package, namespace, physical device, and transport model guidance.
+- Session lifecycle: direct v1 constructors to v2 async factories and async disposal.
+- Applet recipes: before/after examples for common PIV, FIDO2, OATH, YubiOTP, OpenPGP, Security Domain, and YubiHSM tasks.
+- Manual migration cases: raw APDU, custom command classes, exception behavior, and security-sensitive credential flows.
+- Tooling foundation: structured map entries precise enough to support a future scanner or analyzer.

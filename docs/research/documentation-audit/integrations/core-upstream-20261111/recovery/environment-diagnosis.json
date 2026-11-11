@@ -1,0 +1,74 @@
+{
+  "uid_quota": {
+    "operation": "read-only quotactl_fd Q_GETQUOTA USRQUOTA",
+    "uid": 1000,
+    "syscall": 443,
+    "syscall_header_sha256": "e50d3b06f6bab1aec8dc27ff229e560c5b7af965e6db575c88aa1141d3ad717d",
+    "hard_bytes": 13316681728,
+    "current_bytes": 13316681728,
+    "remaining_bytes": 0,
+    "inode_hardlimit": 0,
+    "current_inodes": 163286
+  },
+  "diagnostics": [
+    {
+      "command": [
+        "findmnt",
+        "-T",
+        "/tmp",
+        "-o",
+        "TARGET,SOURCE,FSTYPE,OPTIONS"
+      ],
+      "exit_code": 0,
+      "stdout": "TARGET SOURCE FSTYPE OPTIONS\n/tmp   tmpfs  tmpfs  rw,nosuid,nodev,nr_inodes=1048576,inode64,huge=advise,usrquota\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "findmnt",
+        "-T",
+        "/home/rupicola/Code/y/yubikit-core-docs-integration",
+        "-o",
+        "TARGET,SOURCE,FSTYPE,OPTIONS"
+      ],
+      "exit_code": 0,
+      "stdout": "TARGET SOURCE                           FSTYPE OPTIONS\n/home  /dev/mapper/omarchy_root[/@home] btrfs  rw,noatime,compress=zstd:3,ssd,space_cache=v2,subvolid=257,subvol=/@home\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "df",
+        "-h",
+        "/tmp",
+        "/home/rupicola/Code/y/yubikit-core-docs-integration"
+      ],
+      "exit_code": 0,
+      "stdout": "Filesystem                Size  Used Avail Use% Mounted on\ntmpfs                      16G   13G  3.2G  80% /tmp\n/dev/mapper/omarchy_root  395G  146G  249G  37% /home\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "df",
+        "-i",
+        "/tmp",
+        "/home/rupicola/Code/y/yubikit-core-docs-integration"
+      ],
+      "exit_code": 0,
+      "stdout": "Filesystem                Inodes  IUsed  IFree IUse% Mounted on\ntmpfs                    1048576 163486 885090   16% /tmp\n/dev/mapper/omarchy_root       0      0      0     - /home\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "id"
+      ],
+      "exit_code": 0,
+      "stdout": "uid=1000(rupicola) gid=1000(rupicola) groups=1000(rupicola),966(docker),990(kvm),998(wheel)\n",
+      "stderr": ""
+    }
+  ],
+  "original_error": "Coordinator reported Python errno 122 (EDQUOT); actual build log records disk-quota copy failures.",
+  "source_error_stack": "Unavailable in the partial original records; no stack is reconstructed.",
+  "original_build_pid_2898163_exists": false,
+  "original_toolchain_pid_2897864_exists": false,
+  "policy": "Original source and all other tmpfs worktrees/evidence remain untouched. Quota/config/install changes: none."
+}

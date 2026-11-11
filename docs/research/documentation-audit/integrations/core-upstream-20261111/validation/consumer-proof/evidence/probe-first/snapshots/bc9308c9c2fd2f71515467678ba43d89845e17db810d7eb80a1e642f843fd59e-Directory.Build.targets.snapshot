@@ -1,0 +1,52 @@
+<Project>
+  <!--
+    Native AOT support surface (SDK libraries only).
+
+    IsYubiKitSdkLibrary is an explicit per-project opt-in, set in every published SDK library
+    .csproj. It defaults to false (Directory.Build.props) so CLI tools, example apps, and test
+    projects are never silently pulled into the AOT support envelope. The opt-in is not optional:
+    `dotnet toolchain.cs native-aot-contract-qa` discovers the SDK libraries from the
+    src/<Module>/src/*.csproj layout and fails the build naming any that lacks it.
+
+    This block lives in Directory.Build.targets, not Directory.Build.props: props files are
+    imported before a project's own <PropertyGroup>, so a project-level
+    `<IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>` opt-in would not yet be visible to a
+    conditional block evaluated that early. Targets files are imported after the project body, so
+    the flag is guaranteed to be set by the time this condition is evaluated.
+
+    Setting IsAotCompatible=true also enables the trimming, AOT, and single-file analyzers.
+
+    VerifyReferenceAotCompatibility=true surfaces IL3058 for a referenced managed dependency that
+    lacks AOT-compatibility metadata. The repository does not suppress that diagnostic.
+  -->
+  <PropertyGroup Condition="'$(IsYubiKitSdkLibrary)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+    <VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>
+  </PropertyGroup>
+
+  <!-- Add common analyzer packages to all projects -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsYubiKitSdkLibrary)' == 'true'">
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <AdditionalFiles Include="$(MSBuildProjectDirectory)/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="$(MSBuildProjectDirectory)/PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+  <!-- Shared Internals Visibility for non-test projects -->
+  <ItemGroup Condition="'$(IsTestProject)' != 'true'">
+    <InternalsVisibleTo Include="$(AssemblyName).UnitTests" />
+    <InternalsVisibleTo Include="$(AssemblyName).IntegrationTests" />
+    <!-- Legacy compatibility -->
+    <InternalsVisibleTo Include="Yubico.YubiKit.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.IntegrationTests" />
+  </ItemGroup>
+</Project>

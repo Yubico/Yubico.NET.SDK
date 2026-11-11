@@ -1,0 +1,91 @@
+{
+  "command": [
+    "python3",
+    "-P",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/routing-v2.py",
+    "check",
+    "--suffix",
+    "restore-isolated-first"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T21:06:24.671029+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/command-journals/consumer-mac-comparison-restore-profile-restore-isolated-first",
+  "qualification_faults": [],
+  "exit_code": 0,
+  "status": "passed",
+  "errors": [],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 3098461,
+    "sid": 3098461,
+    "leader_start_ticks": 80897450,
+    "before": {
+      "members": [],
+      "escaped": []
+    },
+    "signals": [],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": null,
+  "retained": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+        "bytes": 24344,
+        "sha256": "23caffbc15f5f4d313e2174f55866854b9b132327805310ab83cfaff6c6e7da0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+        "bytes": 24344,
+        "sha256": "23caffbc15f5f4d313e2174f55866854b9b132327805310ab83cfaff6c6e7da0"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+        "bytes": 118048,
+        "sha256": "3850e6a352628733cfb3bb2ff2f8f400cbdd4ecb9c512f223f690cf9b688d399"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+        "bytes": 118048,
+        "sha256": "3850e6a352628733cfb3bb2ff2f8f400cbdd4ecb9c512f223f690cf9b688d399"
+      }
+    }
+  ],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/stdout.log",
+      "bytes": 1052,
+      "sha256": "7b22ae23d295e7166310dcfac87039e3f8c3308a13218c964136f4ddac3b64df"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finished": "2026-11-11T21:06:24.786413+00:00"
+}

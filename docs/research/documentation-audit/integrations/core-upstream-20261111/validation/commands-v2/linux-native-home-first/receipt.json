@@ -1,0 +1,268 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "verification/LinuxHidRouteVerification/capture.py",
+    "--native-only"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T18:54:41.260779+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/command-journals/linux-native-home-first",
+  "qualification_faults": [],
+  "exit_code": 0,
+  "status": "passed",
+  "errors": [],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 2951637,
+    "sid": 2951637,
+    "leader_start_ticks": 80107109,
+    "before": {
+      "members": [],
+      "escaped": []
+    },
+    "signals": [],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": null,
+  "retained": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-native.json",
+        "bytes": 3289,
+        "sha256": "52a7a501ebf493fbfc2e5875aa9cd957de3b323088b8eb03c0080dca9261093f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-native.json",
+        "bytes": 3289,
+        "sha256": "52a7a501ebf493fbfc2e5875aa9cd957de3b323088b8eb03c0080dca9261093f"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-native.log",
+        "bytes": 5600,
+        "sha256": "5e10d776c7009e95bc08623f018cc96dc8083bc3633c80e1025c919fef5e939b"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-native.log",
+        "bytes": 5600,
+        "sha256": "5e10d776c7009e95bc08623f018cc96dc8083bc3633c80e1025c919fef5e939b"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-sensitivity-blocking.json",
+        "bytes": 1141,
+        "sha256": "c7b742e151689ec2716a7200b003154aced029afdaf553679a7e3be7c4ca9c20"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-sensitivity-blocking.json",
+        "bytes": 1141,
+        "sha256": "c7b742e151689ec2716a7200b003154aced029afdaf553679a7e3be7c4ca9c20"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-sensitivity-blocking.log",
+        "bytes": 1828,
+        "sha256": "791343609ebc8e2fe925f683b42233e32a038ba0822fa69615b1ebdf4f18c2c2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-sensitivity-blocking.log",
+        "bytes": 1828,
+        "sha256": "791343609ebc8e2fe925f683b42233e32a038ba0822fa69615b1ebdf4f18c2c2"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-sensitivity-quiescence.json",
+        "bytes": 1397,
+        "sha256": "fd36f3e56511de2c490889b57791c1ca128c586c000b23ee9113d375a9fb4bfe"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-sensitivity-quiescence.json",
+        "bytes": 1397,
+        "sha256": "fd36f3e56511de2c490889b57791c1ca128c586c000b23ee9113d375a9fb4bfe"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-sensitivity-quiescence.log",
+        "bytes": 2327,
+        "sha256": "50a5fe6d349b0f2c746833969a29a5691e40d8374cdeb4c7966bd5b6a9bf2f7b"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/aot-sensitivity-quiescence.log",
+        "bytes": 2327,
+        "sha256": "50a5fe6d349b0f2c746833969a29a5691e40d8374cdeb4c7966bd5b6a9bf2f7b"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-native.json",
+        "bytes": 3286,
+        "sha256": "10fa0175429493e559b9bef1a12dc0210e68dc5aba18c2b299e3425863149754"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-native.json",
+        "bytes": 3286,
+        "sha256": "10fa0175429493e559b9bef1a12dc0210e68dc5aba18c2b299e3425863149754"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-native.log",
+        "bytes": 5597,
+        "sha256": "054b9b0b8f05f4ebacf93d10bcfdd15d1aad54544798cb3e1ef364d49477aac4"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-native.log",
+        "bytes": 5597,
+        "sha256": "054b9b0b8f05f4ebacf93d10bcfdd15d1aad54544798cb3e1ef364d49477aac4"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-sensitivity-blocking.json",
+        "bytes": 1743,
+        "sha256": "94d57a1ea45fa71b57eb611519fbd36f63baee091ce6d34c6b50faa48ccb38d3"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-sensitivity-blocking.json",
+        "bytes": 1743,
+        "sha256": "94d57a1ea45fa71b57eb611519fbd36f63baee091ce6d34c6b50faa48ccb38d3"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-sensitivity-blocking.log",
+        "bytes": 3100,
+        "sha256": "18c618f0caa3f643a15b80f88236093df1de78c34c173bfe946b303bb52bd226"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-sensitivity-blocking.log",
+        "bytes": 3100,
+        "sha256": "18c618f0caa3f643a15b80f88236093df1de78c34c173bfe946b303bb52bd226"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-sensitivity-quiescence.json",
+        "bytes": 1891,
+        "sha256": "76470ad7aa7d0b782413d275dac760b349be6657fae914aef37a2d2db4b41446"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-sensitivity-quiescence.json",
+        "bytes": 1891,
+        "sha256": "76470ad7aa7d0b782413d275dac760b349be6657fae914aef37a2d2db4b41446"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-sensitivity-quiescence.log",
+        "bytes": 3400,
+        "sha256": "8be224caffd414d972a076d39ee2823d104577fa99fe10497a962642be9e118e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/jit-sensitivity-quiescence.log",
+        "bytes": 3400,
+        "sha256": "8be224caffd414d972a076d39ee2823d104577fa99fe10497a962642be9e118e"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/provenance.json",
+        "bytes": 7187,
+        "sha256": "5596f9c8c0dedb7cb9f57dd1d7c37b29b6bf98057589905abfb203f5cdac2794"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/provenance.json",
+        "bytes": 7187,
+        "sha256": "5596f9c8c0dedb7cb9f57dd1d7c37b29b6bf98057589905abfb203f5cdac2794"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/publish-manifest.json",
+        "bytes": 664844,
+        "sha256": "41a340dc4817d84cf9ad7e10f6d851694c034c6710f55b2b82e4ba8384701f3e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/publish-manifest.json",
+        "bytes": 664844,
+        "sha256": "41a340dc4817d84cf9ad7e10f6d851694c034c6710f55b2b82e4ba8384701f3e"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/sha256.json",
+        "bytes": 1549,
+        "sha256": "078f64364b7f07450c344b8c6e39ba4d19b16271fe428c43ddd69add58ac40e7"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/sha256.json",
+        "bytes": 1549,
+        "sha256": "078f64364b7f07450c344b8c6e39ba4d19b16271fe428c43ddd69add58ac40e7"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/source-manifest.json",
+        "bytes": 201640,
+        "sha256": "9c950c12b9fe67577f8189e1940298e1161383950c12f7a228b0385989f866ec"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/source-manifest.json",
+        "bytes": 201640,
+        "sha256": "9c950c12b9fe67577f8189e1940298e1161383950c12f7a228b0385989f866ec"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/linux-hid-verification/evidence/20261111T185446Z/summary.json",
+        "bytes": 2583,
+        "sha256": "39e2e3bfa5ea55901d40fd75547c6420776b60ece5aa9922942038343e75aab8"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/extra/artifacts/linux-hid-verification/evidence/20261111T185446Z/summary.json",
+        "bytes": 2583,
+        "sha256": "39e2e3bfa5ea55901d40fd75547c6420776b60ece5aa9922942038343e75aab8"
+      }
+    }
+  ],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/stdout.log",
+      "bytes": 1645,
+      "sha256": "72298afcee6197ddef669c435177e1326e8e340b27340bf7908f10f81e3a04bb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/linux-native-home-first/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finished": "2026-11-11T18:55:58.748165+00:00"
+}

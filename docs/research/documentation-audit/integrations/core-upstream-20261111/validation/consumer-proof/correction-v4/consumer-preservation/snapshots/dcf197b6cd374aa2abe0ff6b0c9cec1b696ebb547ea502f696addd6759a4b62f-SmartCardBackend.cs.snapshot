@@ -1,0 +1,240 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Sessions;
+
+namespace Yubico.YubiKit.YubiOtp.Backend;
+
+/// <summary>
+/// Backend implementation for YubiOTP operations over SmartCard (CCID/NFC).
+/// Encodes operations as ISO 7816 APDUs with programming sequence validation.
+/// </summary>
+internal sealed class SmartCardBackend : IYubiOtpBackend
+{
+    private static readonly ILogger Logger =
+        YubiKitLogging.LoggerFactory.CreateLogger<SmartCardBackend>();
+
+    private static readonly FirmwareVersion Firmware500 = new(5, 0, 0);
+    private static readonly FirmwareVersion Firmware550 = new(5, 5, 0);
+
+    private readonly ISmartCardProtocol _protocol;
+    private readonly FirmwareVersion _firmwareVersion;
+    private byte _lastProgSeq;
+
+    public SmartCardBackend(
+        ISmartCardProtocol protocol,
+        FirmwareVersion firmwareVersion,
+        byte initialProgSeq)
+    {
+        ArgumentNullException.ThrowIfNull(protocol);
+        _protocol = protocol;
+        _firmwareVersion = firmwareVersion;
+        _lastProgSeq = initialProgSeq;
+    }
+
+    public static async ValueTask<YubiOtpInitialization> ReadInitialStateAsync(
+        ISmartCardProtocol protocol,
+        CancellationToken cancellationToken)
+    {
+        FirmwareVersion? managementVersion = null;
+
+        try
+        {
+            var mgmtResponse = await protocol
+                .SelectAsync(ApplicationIds.Management, cancellationToken)
+                .ConfigureAwait(false);
+
+            managementVersion = FirmwareVersion.FromSelectResponse(mgmtResponse.Span);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Logger.LogDebug(ex, "Could not get version from Management SELECT, continuing with OTP SELECT.");
+        }
+
+        var status = await protocol
+            .SelectAsync(ApplicationIds.Otp, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (status.Length < YubiOtpConstants.StatusBytesLength)
+        {
+            throw new BadResponseException(
+                $"OTP SELECT returned {status.Length} bytes, expected at least {YubiOtpConstants.StatusBytesLength}.");
+        }
+
+        var otpVersion = new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
+
+        var firmwareVersion = managementVersion is not null && otpVersion.Major == 3
+            ? (managementVersion > otpVersion ? managementVersion : otpVersion)
+            : managementVersion ?? otpVersion;
+
+        return new YubiOtpInitialization(firmwareVersion, status);
+    }
+
+    public async ValueTask<ReadOnlyMemory<byte>> WriteUpdateAsync(
+        ConfigSlot slot,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken)
+    {
+        var apdu = new ApduCommand
+        {
+            Cla = 0,
+            Ins = YubiOtpConstants.InsConfig,
+            P1 = (byte)slot,
+            P2 = 0,
+            Data = data
+        };
+
+        Logger.LogDebug("SmartCardBackend WriteUpdate: slot={Slot}", slot);
+
+        var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        var statusBytes = response.Data;
+
+        // A short write response needs a separate status read. The validator below currently does not
+        // reject a fallback that is still short; successful return is not complete malformed-status validation.
+        if (statusBytes.Length < YubiOtpConstants.StatusBytesLength)
+        {
+            statusBytes = await ReadStatusAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        ValidateProgrammingSequence(statusBytes.Span);
+
+        return statusBytes;
+    }
+
+    public async ValueTask<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+        ConfigSlot slot,
+        ReadOnlyMemory<byte> data,
+        int expectedLength,
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(userPresenceNotification);
+
+        Logger.LogDebug("SmartCardBackend SendAndReceive: slot={Slot}, expectedLength={Length}", slot, expectedLength);
+
+        Exception? primaryException = null;
+        var outcome = UserPresenceOutcome.Failed;
+        ReadOnlyMemory<byte> responseData = default;
+        var responseTransferred = false;
+
+        try
+        {
+            await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
+
+            var apdu = new ApduCommand
+            {
+                Cla = 0,
+                Ins = YubiOtpConstants.InsConfig,
+                P1 = (byte)slot,
+                P2 = 0,
+                Data = data
+            };
+
+            var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+            responseData = response.Data;
+
+            if (responseData.Length < expectedLength)
+            {
+                throw new BadResponseException(
+                    $"Expected {expectedLength} bytes from slot {slot}, got {responseData.Length}.");
+            }
+
+            outcome = UserPresenceOutcome.Completed;
+            await userPresenceNotification.ResolveAsync(outcome).ConfigureAwait(false);
+            responseTransferred = true;
+            return responseData[..expectedLength];
+        }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            outcome = UserPresenceOutcome.Cancelled;
+            primaryException = ex;
+            throw;
+        }
+        catch (Exception ex)
+        {
+            primaryException = ex;
+            throw;
+        }
+        finally
+        {
+            await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+            if (!responseTransferred && !responseData.IsEmpty)
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(responseData).Span);
+            }
+        }
+    }
+
+    private async Task<ReadOnlyMemory<byte>> ReadStatusAsync(CancellationToken cancellationToken)
+    {
+        var apdu = new ApduCommand
+        {
+            Cla = 0,
+            Ins = YubiOtpConstants.InsYk2Status,
+            P1 = 0,
+            P2 = 0
+        };
+
+        var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return response.Data;
+    }
+
+    /// <summary>
+    /// Checks the sequence when status is long enough. Current exceptions are an effective firmware
+    /// interval of 5.0.0 inclusive to 5.5.0 exclusive, and any returned zero. These permissive checks
+    /// do not establish that every malformed status or rejected device write is detected.
+    /// </summary>
+    private void ValidateProgrammingSequence(ReadOnlySpan<byte> statusBytes)
+    {
+        if (statusBytes.Length < YubiOtpConstants.StatusBytesLength)
+        {
+            return;
+        }
+
+        var newProgSeq = statusBytes[3];
+
+        // The current compatibility bypass covers all 5.0.0 <= version < 5.5.0.
+        if (_firmwareVersion >= Firmware500
+            && _firmwareVersion < Firmware550)
+        {
+            _lastProgSeq = newProgSeq;
+            return;
+        }
+
+        // Accept the increment, or zero after any predecessor (not only a 255-to-0 rollover).
+        var expectedProgSeq = (byte)((_lastProgSeq + 1) & 0xFF);
+
+        if (newProgSeq != 0 && newProgSeq != expectedProgSeq)
+        {
+            throw new InvalidOperationException(
+                $"Programming sequence validation failed. Expected {expectedProgSeq}, got {newProgSeq}. " +
+                "The YubiKey may have rejected the configuration.");
+        }
+
+        _lastProgSeq = newProgSeq;
+    }
+
+}

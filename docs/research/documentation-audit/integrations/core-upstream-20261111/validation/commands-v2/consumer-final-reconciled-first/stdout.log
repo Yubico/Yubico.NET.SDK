@@ -1,0 +1,50 @@
+[
+  {
+    "context": "probe",
+    "retained": true,
+    "scoped": true,
+    "strict_live": false,
+    "live_drift": 7,
+    "unapproved": 0
+  },
+  {
+    "context": "examples",
+    "retained": true,
+    "scoped": true,
+    "strict_live": false,
+    "live_drift": 17,
+    "unapproved": 0
+  },
+  {
+    "context": "annotations",
+    "retained": true,
+    "scoped": true,
+    "strict_live": false,
+    "live_drift": 12,
+    "unapproved": 0
+  },
+  {
+    "context": "consumers",
+    "retained": true,
+    "scoped": true,
+    "strict_live": false,
+    "live_drift": 108,
+    "unapproved": 0
+  },
+  {
+    "context": "fixture",
+    "retained": true,
+    "scoped": true,
+    "strict_live": true,
+    "live_drift": 0,
+    "unapproved": 0
+  },
+  {
+    "context": "mac-comparison",
+    "retained": true,
+    "scoped": true,
+    "strict_live": true,
+    "live_drift": 0,
+    "unapproved": 0
+  }
+]

@@ -1,0 +1,8 @@
+{"kind": "jit", "mode": "--native", "expectedExit": 0, "exit": 0, "matched": true, "validationError": null, "checks": 38, "raw": "jit-native.json", "rawSha256": "10fa0175429493e559b9bef1a12dc0210e68dc5aba18c2b299e3425863149754"}
+{"kind": "jit", "mode": "--sensitivity-blocking", "expectedExit": 1, "exit": 1, "matched": true, "validationError": null, "checks": 0, "raw": "jit-sensitivity-blocking.json", "rawSha256": "94d57a1ea45fa71b57eb611519fbd36f63baee091ce6d34c6b50faa48ccb38d3"}
+{"kind": "jit", "mode": "--sensitivity-quiescence", "expectedExit": 1, "exit": 1, "matched": true, "validationError": null, "checks": 2, "raw": "jit-sensitivity-quiescence.json", "rawSha256": "76470ad7aa7d0b782413d275dac760b349be6657fae914aef37a2d2db4b41446"}
+{"kind": "aot", "mode": "--native", "expectedExit": 0, "exit": 0, "matched": true, "validationError": null, "checks": 38, "raw": "aot-native.json", "rawSha256": "52a7a501ebf493fbfc2e5875aa9cd957de3b323088b8eb03c0080dca9261093f"}
+{"kind": "aot", "mode": "--sensitivity-blocking", "expectedExit": 1, "exit": 1, "matched": true, "validationError": null, "checks": 0, "raw": "aot-sensitivity-blocking.json", "rawSha256": "c7b742e151689ec2716a7200b003154aced029afdaf553679a7e3be7c4ca9c20"}
+{"kind": "aot", "mode": "--sensitivity-quiescence", "expectedExit": 1, "exit": 1, "matched": true, "validationError": null, "checks": 2, "raw": "aot-sensitivity-quiescence.json", "rawSha256": "fd36f3e56511de2c490889b57791c1ca128c586c000b23ee9113d375a9fb4bfe"}
+Evidence directory: artifacts/linux-hid-verification/evidence/20261111T185446Z
+SOURCEHASH=90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa

@@ -1,3 +1,5 @@
+*Historical: `YubiKeyMonitorWorker`, `YubiKeyDeviceRepository`, `DeviceEvent` and `CurrentDevices` were replaced by `YubiKeyMonitor`, `DeviceChangeFeed` and `DeviceChange` records; see docs/usage/device-discovery.md.*
+
 # Native AOT Readiness Assessment — Yubico.NET.SDK
 
 **Status:** Historical assessment with follow-up verification. The resulting support contract lives
@@ -183,7 +185,7 @@ None of the above surfaced an architectural blocker in this assessment — they 
 - Status: **Closed — resolved by removal.** The dependency was dropped rather than suppressed.
   `System.Reactive`'s `Subject<DeviceEvent>` is replaced by internal machinery. The observable
   surface was initially preserved as a BCL `IObservable<DeviceEvent>`; it has since been removed
-  outright, leaving `YubiKeyManager.WatchAsync` (`IAsyncEnumerable<DeviceEvent>`) as the only device
+  outright, leaving owned `YubiKeyMonitor.WatchAsync` (`IAsyncEnumerable<DeviceEvent>`) as the only device
   change stream, backed by one internal `DeviceEventHub`. No third-party dependency either way.
 - Why removal rather than an upstream fix: Rx cannot carry the metadata yet. The `IsAotCompatible`
   assembly attribute was introduced in .NET 10, and Rx 7.0.0 — the current release — targets at most

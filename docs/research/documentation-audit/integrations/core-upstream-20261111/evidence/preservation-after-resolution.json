@@ -1,0 +1,50 @@
+{
+  "archives": [
+    {
+      "path": "docs/research/documentation-audit/record-manifest.json",
+      "manifest_sha256": "a15061df202536b7894c257e7dfbee6578240747f69d86d1e40d9534630df905",
+      "artifacts": 784
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/record-manifest.json",
+      "manifest_sha256": "b562b58457fb384dea05e7cadf8b32d64f1abcc56ab2e56abd0b96d906655fe1",
+      "artifacts": 534
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/record-manifest.json",
+      "manifest_sha256": "49c18caac492aac9afa0d7bcede415f96422e98a3cc85692c3bb2bfa90bff139",
+      "artifacts": 402
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/record-manifest.json",
+      "manifest_sha256": "71698c428044b99165fb68759a2e47b6af701187f0ddb7b5838e5bc3278bf7ee",
+      "artifacts": 607
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/record-manifest.json",
+      "manifest_sha256": "8ebe4ad00860d44ae06dd05a0ab3ade5f294ffdc42337b3cce5dcf5ec7179318",
+      "artifacts": 1965
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/record-manifest.json",
+      "manifest_sha256": "791f112af52904b167ec87c5f70a526f625ccf6524c9daf8a09a68f8cf364ac2",
+      "artifacts": 164
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/record-manifest.json",
+      "manifest_sha256": "9a32ac8f9d2443a65864dbe44432c6d4b1dd40ad7f00b676a6c0ecae950631dc",
+      "artifacts": 477
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/record-manifest.json",
+      "manifest_sha256": "d310ba77bb04a0b0052baa6afd32a0355510018267cef391a02963fcdd555d0d",
+      "artifacts": 433
+    }
+  ],
+  "artifact_total": 5366,
+  "prior_integration_files": 114,
+  "original_user_files": 4,
+  "primary_head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+  "failures": [],
+  "scope": "Exact filesystem bytes; read-only inspection of primary user files and HEAD. No device/compiler execution."
+}

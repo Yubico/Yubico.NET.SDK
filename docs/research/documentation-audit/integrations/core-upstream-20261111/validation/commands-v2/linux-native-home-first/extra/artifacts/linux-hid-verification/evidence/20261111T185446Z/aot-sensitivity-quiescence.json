@@ -1,0 +1,18 @@
+{
+  "Mode": "--sensitivity-quiescence",
+  "Baseline": "3de42bb54c5e8c986364f0f04398d4e85a66a596",
+  "SourceHash": "90b0e9ab7582316099d37d9bc8e93beca1dd64fe8ce9c44e7edb32042b7533aa",
+  "Runtime": ".NET 10.0.15",
+  "Kernel": "Omarchy",
+  "KernelRelease": "7.2.15-1-omarchy",
+  "DynamicCode": false,
+  "Checks": [
+    "reactor-held-internal-read-callback-entered",
+    "reactor-held-callback-real-exit-quiescence-release-close"
+  ],
+  "Measurements": [],
+  "NativeProbes": [],
+  "Idle": [],
+  "Failure": "System.InvalidOperationException: reactor-no-false-quiescence-while-callback-held\n   at LinuxHidRouteVerification.Evidence.Check(Boolean, String) \u002B 0x90\n   at LinuxHidRouteVerification.NativeScenarios.\u003CHeldCallbackAsync\u003Ed__4.MoveNext() \u002B 0x501\n--- End of stack trace from previous location ---\n   at LinuxHidRouteVerification.NativeScenarios.\u003CHeldCallbackAsync\u003Ed__4.MoveNext() \u002B 0x64b\n--- End of stack trace from previous location ---\n   at LinuxHidRouteVerification.NativeScenarios.\u003CHeldCallbackAsync\u003Ed__4.MoveNext() \u002B 0x827\n--- End of stack trace from previous location ---\n   at LinuxHidRouteVerification.NativeScenarios.\u003CQuiescenceControlAsync\u003Ed__12.MoveNext() \u002B 0x4d\n--- End of stack trace from previous location ---\n   at Program.\u003C\u003CMain\u003E$\u003Ed__0.MoveNext() \u002B 0x978",
+  "Outcome": "FAILED"
+}

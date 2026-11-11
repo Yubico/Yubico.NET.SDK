@@ -1,0 +1,220 @@
+{
+  "status": "static preparation passed; no compilation/capture performed",
+  "groups": 30,
+  "selectors": {
+    "Yubico.YubiKit.AuditIntegration20261111.Probe": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj"
+    ],
+    "Yubico.YubiKit.AuditIntegration20261111.Examples": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj"
+    ],
+    "Yubico.YubiKit.AuditIntegration20261111.Annotations": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj"
+    ],
+    "Yubico.YubiKit.AuditIntegration20261111.Consumers": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj"
+    ],
+    "Yubico.YubiKit.AuditIntegration20261111.MacComparison": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj"
+    ]
+  },
+  "sources": {
+    "src/Ctap2/examples/FidoTool/FidoTool.csproj": 19,
+    "src/Management/examples/ManagementTool/ManagementTool.csproj": 18,
+    "src/Oath/examples/OathTool/OathTool.csproj": 10,
+    "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj": 18,
+    "src/Piv/examples/PivTool/PivTool.csproj": 36,
+    "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj": 21,
+    "src/YubiOtp/examples/OtpTool/OtpTool.csproj": 14
+  },
+  "canonical_unit_rows": [
+    "test:Cli.Commands.UnitTests",
+    "test:Cli.Shared.UnitTests",
+    "test:Core.UnitTests",
+    "test:Ctap2.UnitTests",
+    "test:Management.UnitTests",
+    "test:Oath.UnitTests",
+    "test:OpenPgp.UnitTests",
+    "test:Piv.UnitTests",
+    "test:PublicApi.UnitTests",
+    "test:SecurityDomain.UnitTests",
+    "test:WebAuthn.UnitTests",
+    "test:YubiHsm.UnitTests",
+    "test:YubiOtp.UnitTests"
+  ],
+  "formatted_source_owners": {
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+    "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+    "src/Cli.Commands/src/Management/ManagementConfigCommand.cs": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+    "src/Cli.Commands/src/Management/ManagementResetCommand.cs": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+    "src/Cli.Shared/src/Device/DeviceSelection.cs": "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+    "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+    "src/Ctap2/examples/FidoTool/Program.cs": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+    "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+    "src/Management/examples/ManagementTool/Program.cs": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+    "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+    "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs": "src/Oath/examples/OathTool/OathTool.csproj",
+    "src/Oath/examples/OathTool/Cli/SessionHelper.cs": "src/Oath/examples/OathTool/OathTool.csproj",
+    "src/Oath/examples/OathTool/OathToolApplication.cs": "src/Oath/examples/OathTool/OathTool.csproj",
+    "src/Oath/examples/OathTool/Program.cs": "src/Oath/examples/OathTool/OathTool.csproj",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+    "src/Piv/src/Authentication/AuthenticationProtocol.cs": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+    "src/Piv/src/Cryptography/PrivateKeyOperations.cs": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+    "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+    "src/YubiHsm/examples/HsmAuthTool/Program.cs": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+    "src/YubiOtp/examples/OtpTool/DeviceHelper.cs": "src/YubiOtp/examples/OtpTool/OtpTool.csproj"
+  },
+  "contexts": [
+    "mac-comparison",
+    "fixture"
+  ],
+  "inputs": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inputs.json",
+    "bytes": 49129,
+    "sha256": "af9a3e6a35388d6d8fc0973a263098aa2eaad573f81a43fd6191873fefd23f83"
+  },
+  "tools": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/format-membership.py",
+      "bytes": 2017,
+      "sha256": "10472129a1fd71276fe547e8e0dd2807d57763c64b63226d97d0ed2228d76140"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inventory.py",
+      "bytes": 3948,
+      "sha256": "84e4613fec154d41857ff9acd3dc24940c9fe98e5d54c0fcc7d5a2014b6bee41"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/nuget-imports-v2.py",
+      "bytes": 5472,
+      "sha256": "2949c4359d893cb600042ba29eb48e7ccadf08e9af6e176c51fc9e1e9c17007f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/prepare.py",
+      "bytes": 15317,
+      "sha256": "8ee6aa61799aaffab314f2bead4faf194849cbe9949e7bb6ece54950b2a75423"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/preserve-capture-failure-v2.py",
+      "bytes": 6324,
+      "sha256": "a94c26f965cfeb51c766824aaab35043072574dd6fdfd11dc138d61e3d51ffbd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v2.py",
+      "bytes": 5211,
+      "sha256": "78024e05a44e82b309c3ec70a5814c13513f0a9436ccc345c224e0b19380b695"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v3.py",
+      "bytes": 5800,
+      "sha256": "3be9675df87e5fd8d742948efa8faf632df59ee6df752541d2841a4c624ccccb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v4.py",
+      "bytes": 5789,
+      "sha256": "0ca001505c2c3b121687146a0660f78639b78d7c5680c6a034bdd47f14719fff"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v5.py",
+      "bytes": 7022,
+      "sha256": "0c1bb1a6f71718706dc2a168ba66b9d5d83ed15c1addfaa6d2d53cac6eeb2a75"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py",
+      "bytes": 41278,
+      "sha256": "54cb56e12e3b683d2c662c133dc6e23eadef355d7e515f478a87b36a87f25281"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/Capture.targets",
+      "bytes": 7800,
+      "sha256": "3242fe01c0f0ac6d7a1d27bd4539da21fb143e4c5b882aaee30e629532f4bf8a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/run-lane.sh",
+      "bytes": 1847,
+      "sha256": "e28f00a8ff8f0416d7e62f29ff432923fb821e3f4b34d395679a8ea54daa7b2e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/run-lane-v2.sh",
+      "bytes": 1989,
+      "sha256": "34b9bfc6a85276e1db8993302f2d4980b9d200df11850615a3133e63bc31c3d5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v2/receipt.json",
+      "bytes": 6815,
+      "sha256": "0b76f9cf9222a69f6b97f6916b0b6a0b93812a999bb7268e07f16e6fb3d6f783"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/run-lane-v3.sh",
+      "bytes": 1967,
+      "sha256": "20ed91076c58aa57a0cd6280a714d48abbc71d06be8a89f6778651d70fd22f03"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/receipt.json",
+      "bytes": 10788,
+      "sha256": "dfebeb48ffd2cacc2c82d1ea7625f294bf84e8e08ae92961172b271adab2cab2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/additional-files.py",
+      "bytes": 8367,
+      "sha256": "8ae4b8b7b9475c68b5775f8d1f6550ccffded54ba10188d4feb0225216decc7f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v3/preflight.py",
+      "bytes": 4331,
+      "sha256": "e1b95f9e685a3193ae32e14e4aa9b50ac395835a3ad92056963aa590be07f8b5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/assets.py",
+      "bytes": 16581,
+      "sha256": "f0432cbe6a8a88312c97b29c8f7982ebe62afc8ea45dbf476fbbddbfc3abd7ab"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/preflight.py",
+      "bytes": 8694,
+      "sha256": "d735cd4ade996cdaf8f9e3d63cf3fba19fcce7229b49d84685181e227f94d963"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/lane.sh",
+      "bytes": 1740,
+      "sha256": "e4f1937a52e38aa660ebaee6bfe71dcb349bab7ab391b1ac046ad3590dd3bfb1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/receipt.json",
+      "bytes": 15419,
+      "sha256": "ac7a9dcc15510dc0dd8814ec5e79b54378c8b03280aff51cdb0b23ebed2d6325"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/copy-owner.py",
+      "bytes": 4770,
+      "sha256": "7f4374db50feafbf3c4c1fb2cc14b7b266a3c1b9010c1f7f0bf415b785dcdf07"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/compile-candidates.py",
+      "bytes": 3389,
+      "sha256": "e82610fffbdb5011ada14dfa401529a887e7ecc9cbf2c4b1213ba43215b3786e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/source-cases.py",
+      "bytes": 8082,
+      "sha256": "1679e588aeebda93170e627d9a86ca0a940b2c1cde8a4b67d427d930b26a78ba"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/preflight-fixture.py",
+      "bytes": 4708,
+      "sha256": "5dab0cda6015809dab074847c096023d719878ed6d68268e2fb1a26f0eff6acb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/lane.sh",
+      "bytes": 1628,
+      "sha256": "9fe65a29122d95eabcfafcc60e00cda53e4ae8f58d53386a8582b7902f17a807"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/receipt.json",
+      "bytes": 12123,
+      "sha256": "174bef5e532a95386a0e573bef9692b68e1e90824186b930779868f72eaabc39"
+    }
+  ],
+  "proof_revision": "v5",
+  "correction_receipt_sha256": "174bef5e532a95386a0e573bef9692b68e1e90824186b930779868f72eaabc39"
+}

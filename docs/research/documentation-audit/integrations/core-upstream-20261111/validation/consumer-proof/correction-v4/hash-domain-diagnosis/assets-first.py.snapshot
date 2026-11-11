@@ -1,0 +1,225 @@
+"""Bind observed compiler/copy inputs to one actual TFM/RID target, not the global restore catalog."""
+import json
+from pathlib import Path
+import re
+import xml.etree.ElementTree as ET
+
+
+def require(value, message):
+    if not value:
+        raise ValueError(message)
+
+
+def lines(path):
+    return [line.strip() for line in path.read_text(encoding='utf-8-sig').splitlines() if line.strip()]
+
+
+def resolve(project, value):
+    return (project.parent / value.strip('"').replace('\\', '/')).resolve()
+
+
+def select_target(project, policy, raw, assets, retain):
+    tfm = policy['TargetFramework']
+    frameworks = [(key, value) for key, value in assets['project']['frameworks'].items()
+                  if tfm in (key, value.get('targetAlias'), value.get('framework'))]
+    require(len(frameworks) == 1, 'Actual Csc TFM does not select exactly one restored framework')
+    framework_key, framework = frameworks[0]
+    restore_frameworks = assets['project']['restore']['frameworks']
+    require(framework_key in restore_frameworks and
+            tfm in assets['project']['restore']['originalTargetFrameworks'], 'Restored framework/alias metadata differs')
+    target_path = resolve(project, policy['TargetPath'])
+    deps_path = target_path.with_suffix('.deps.json')
+    deps = json.loads(deps_path.read_bytes())
+    name = deps['runtimeTarget']['name']
+    moniker, separator, rid = name.partition('/')
+    attribute_files = [resolve(project, value) for value in lines(raw / 'sources.txt') if value.endswith('.AssemblyAttributes.cs')]
+    attributes = [(path, value) for path in attribute_files for value in
+                  re.findall(r'TargetFrameworkAttribute\("([^"]+)"', path.read_text())]
+    require(len(attributes) == 1 and attributes[0][1] == moniker, 'Csc-generated TFM attribute and emitted dependency target differ')
+    expected_tail = (tfm, rid) if separator else (tfm,)
+    for key in ('IntermediateOutputPath', 'OutputPath'):
+        require(tuple(Path(policy[key]).parts[-len(expected_tail):]) == expected_tail,
+                'Actual compiler output path does not corroborate emitted TFM/RID')
+    selected = tfm + ('/' + rid if separator else '')
+    require(selected in assets['targets'] and name in deps['targets'], 'Actual TFM/RID target missing from restore/output metadata')
+    roots = [key for key, node in deps['targets'][name].items()
+             if key.rsplit('/', 1)[0] == target_path.stem and target_path.name in node.get('runtime', {})]
+    require(len(roots) == 1 and deps['libraries'][roots[0]]['type'] == 'project', 'Emitted dependency document belongs to another output')
+    sdk = Path(policy['MSBuildSDKsPath']).parent
+    wiring = sdk / 'Sdks/Microsoft.NET.Sdk/targets/Microsoft.PackageDependencyResolution.targets'
+    text = wiring.read_text()
+    require('TargetFramework="$(TargetFramework)"' in text and 'RuntimeIdentifier="$(RuntimeIdentifier)"' in text,
+            'Selected SDK ResolvePackageAssets input wiring changed')
+    proof = dict(actual_tfm=tfm, actual_rid=rid or None, selected_target=selected,
+                 available_targets=list(assets['targets']), declared_restore_frameworks=list(restore_frameworks),
+                 original_target_frameworks=assets['project']['restore']['originalTargetFrameworks'],
+                 framework_metadata=framework, emitted_runtime_target=name, emitted_root_library=roots[0],
+                 evidence=[retain.keep(path, 'actual-target-selection') for path in (deps_path, attributes[0][0], wiring)],
+                 bound='RID is corroborated by the actual emitted deps/TFM attribute/output paths, not guessed from host OS or a restore-only RID.')
+    return assets['targets'][selected], framework, proof
+
+
+def restored_binary_bindings(project, references, raw, assets, retain):
+    policy = dict(line.split('=', 1) for line in lines(raw / 'policy.txt'))
+    target, framework, selection = select_target(project, policy, raw, assets, retain)
+    catalog = assets['libraries']
+    require(all(key in catalog and node['type'] == catalog[key]['type'] for key, node in target.items()),
+            'Selected target references missing/inconsistent catalog metadata')
+    packages, by_id = [], {}
+    for key, library in catalog.items():
+        if library['type'] != 'package':
+            continue
+        roots = [(Path(root) / library['path']).resolve() for root in assets['packageFolders']]
+        installed = [root for root in roots if root.is_dir()]
+        require(len(installed) <= 1, 'Ambiguous restored package root: ' + key)
+        require(key not in target or len(installed) == 1, 'Selected package is not installed: ' + key)
+        row = dict(package_id=key, sha512=library['sha512'], library=library,
+                   root=str(installed[0]) if installed else None,
+                   selected_target_node=target.get(key),
+                   target_membership=[name for name, nodes in assets['targets'].items() if key in nodes])
+        by_id[key] = row
+        packages.append(row)
+
+    def owner(path):
+        matches = [row for row in packages if row['root'] and path.is_relative_to(Path(row['root']))]
+        require(len(matches) <= 1, 'Ambiguous package owner for actual input: ' + str(path))
+        if not matches:
+            return None
+        row = matches[0]
+        require(row['selected_target_node'] is not None, 'Actual input belongs only to another restored target: ' + str(path))
+        relative = str(path.relative_to(Path(row['root'])))
+        require(relative in row['library']['files'], 'Actual input missing from package content catalog: ' + str(path))
+        return row, relative
+
+    outputs = {}
+    for line in lines(raw / 'resolved-project-references.txt'):
+        output, source, *_ = line.split('|')
+        require(source and source not in outputs, 'Ambiguous actual resolved project output')
+        outputs[source] = resolve(project, output)
+    framework_cache = {}
+    sdk = Path(policy['MSBuildSDKsPath']).parent
+    packs = (sdk.parent.parent / 'packs').resolve()
+
+    def framework_input(path, kind):
+        require(path.is_relative_to(packs), 'Unclassified actual compiler input: ' + str(path))
+        parts = path.relative_to(packs).parts
+        require(len(parts) >= 4, 'Incomplete framework-pack identity')
+        pack = packs / parts[0] / parts[1]
+        if pack not in framework_cache:
+            manifest = pack / 'data/FrameworkList.xml'
+            tree = ET.parse(manifest).getroot()
+            require(tree.attrib['FrameworkName'] in framework.get('frameworkReferences', {}), 'Actual pack is not a restored framework reference')
+            require(tree.attrib['TargetFrameworkIdentifier'] + ',Version=v' + tree.attrib['TargetFrameworkVersion'] ==
+                    selection['emitted_runtime_target'].split('/', 1)[0], 'Actual reference pack TFM differs')
+            entries = {node.attrib['Path']: dict(node.attrib) for node in tree.findall('File')}
+            require(len(entries) == len(tree.findall('File')), 'Duplicate framework-pack file identity')
+            framework_cache[pack] = (entries, retain.keep(manifest, 'framework-pack-manifest'))
+        entries, manifest = framework_cache[pack]
+        relative = str(path.relative_to(pack))
+        require(relative in entries and entries[relative]['Type'] == ('Analyzer' if kind == 'analyzer' else 'Managed'),
+                'Actual compiler input not admitted by the selected framework-pack manifest')
+        return dict(role='framework-' + kind, framework_manifest=manifest, file=entries[relative],
+                    binary=retain.keep(path, 'actual-framework-' + kind, True))
+
+    compiler_bindings, package_refs = [], set()
+    for kind, values in (('reference', sorted(references)), ('analyzer', lines(raw / 'analyzers.txt'))):
+        for value in values:
+            path = resolve(project, value)
+            owned = owner(path)
+            if owned:
+                row, relative = owned
+                if kind == 'reference':
+                    require(relative in row['selected_target_node'].get('compile', {}), 'Actual Csc package reference is not a selected compile asset')
+                    package_refs.add(str(path))
+                else:
+                    require(relative.startswith('analyzers/') and path.suffix == '.dll', 'Actual analyzer is not a package analyzer file')
+                compiler_bindings.append(dict(role='package-' + kind, package_id=row['package_id'], asset=relative,
+                                              binary=retain.keep(path, 'actual-package-' + kind, True)))
+                continue
+            project_matches = [(source, output) for source, output in outputs.items() if kind == 'reference' and
+                               path.name == output.name and path.is_relative_to(Path(source).parent / 'obj')]
+            if project_matches:
+                require(len(project_matches) == 1, 'Ambiguous Csc project reference')
+                source, output = project_matches[0]
+                compiler_bindings.append(dict(role='project-reference', source_project=source,
+                                              binary=retain.keep(path, 'actual-project-reference', True)))
+                continue
+            if kind == 'reference' and policy.get('BoundaryCorePath') and path == Path(policy['BoundaryCorePath']).resolve():
+                declared = [node for node in ET.parse(project).iter('Reference') if node.attrib.get('Include') == 'Yubico.YubiKit.Core']
+                require(len(declared) == 1 and declared[0].findtext('HintPath') == '$(BoundaryCorePath)', 'Direct comparison DLL lacks its declared binding')
+                compiler_bindings.append(dict(role='declared-comparison-Core-DLL', binary=retain.keep(path, 'actual-direct-Core-reference', True)))
+                continue
+            compiler_bindings.append(framework_input(path, kind))
+    expected_compile = {str((Path(row['root']) / asset).resolve()) for row in packages if row['selected_target_node']
+                        for asset in row['selected_target_node'].get('compile', {}) if asset.endswith('.dll')}
+    require(package_refs == expected_compile, 'Selected package compile assets and actual Csc package reference set differ')
+
+    copy_bindings, resolved = [], {}
+    target_dir = Path(policy['TargetDir']).resolve()
+    for name in ('copy-local.txt', 'native-assets.txt'):
+        for line in lines(raw / name):
+            source, subdirectory, subpath = line.split('|')
+            path = resolve(project, source)
+            relative_output = subpath or str(Path(subdirectory.replace('\\', '/')) / path.name)
+            destination = (target_dir / relative_output).resolve()
+            require(destination.is_relative_to(target_dir), 'Resolved copy escapes output directory')
+            require(str(path) not in resolved or resolved[str(path)] == destination, 'Conflicting copy destinations')
+            resolved[str(path)] = destination
+    for source, destination in sorted(resolved.items()):
+        path = Path(source)
+        owned = owner(path)
+        if owned:
+            row, relative = owned
+            kinds = [name for name in ('runtime', 'native', 'runtimeTargets', 'resource', 'compile')
+                     if relative in row['selected_target_node'].get(name, {})]
+            require(kinds, 'Resolved package output is not an asset of the actual selected target')
+            binding = dict(role='package-copy', package_id=row['package_id'], asset=relative, asset_kinds=kinds)
+        else:
+            matches = [(p, output) for p, output in outputs.items() if path.parent == output.parent and
+                       path.stem == output.stem and path.suffix in ('.dll', '.pdb', '.xml')]
+            require(len(matches) == 1, 'Resolved non-package copy lacks its actual project-output identity: ' + source)
+            binding = dict(role='project-output-copy', source_project=matches[0][0])
+        input_record = retain.keep(path, 'actual-resolved-copy-source', True)
+        output_record = retain.keep(destination, 'actual-resolved-copy-output', True)
+        require(input_record['sha256'] == output_record['sha256'], 'Resolved source and actual output bytes differ')
+        copy_bindings.append(dict(binding, source=input_record, output=output_record))
+
+    used = {row['package_id'] for row in compiler_bindings + copy_bindings if 'package_id' in row}
+    dispositions = []
+    for row in packages:
+        key = row['package_id']
+        package_name, version = key.rsplit('/', 1)
+        downloads = [node for node in framework.get('downloadDependencies', []) if node['name'].lower() == package_name.lower()]
+        node = row['selected_target_node']
+        if key in used:
+            disposition = 'actual selected-target compiler/analyzer/copy input'
+        elif node is not None:
+            disposition = 'selected-target build/metadata-only or unused candidate; not an observed compiler/runtime input'
+        elif downloads and row['library'].get('hasTools'):
+            require(len(downloads) == 1 and downloads[0]['version'].replace(' ', '') == f'[{version},{version}]',
+                    'Restore-only tool download identity differs')
+            disposition = 'restore-only downloaded build tool for another target; not an application compile/runtime/native input'
+        else:
+            require(row['target_membership'], 'Unexplained catalog row outside every restored target')
+            disposition = 'catalog entry for other restored target(s); unused by this actual compilation'
+        metadata = []
+        if row['root'] and node is None:
+            package = Path(row['root'])
+            sha_files = list(package.glob('*.nupkg.sha512'))
+            require(len(sha_files) == 1 and sha_files[0].read_text().strip() == row['sha512'], 'Unused package catalog SHA512 metadata differs')
+            metadata.append(retain.keep(sha_files[0], 'restore-only-package-identity'))
+            metadata.extend(retain.keep(path, 'restore-only-package-metadata') for path in sorted(package.glob('*.nuspec')))
+        dispositions.append(dict(row, disposition=disposition, download_declarations=downloads, retained_package_metadata=metadata))
+    native_count = sum(row['package_id'].startswith('Yubico.NativeShims/') for row in packages if row['selected_target_node'])
+    if native_count != 1:
+        refs = list(ET.parse(project).iter('ProjectReference'))
+        require(native_count == 0 and project.stem in
+                ('Yubico.YubiKit.AuditIntegration20261111.Consumers', 'Yubico.YubiKit.AuditIntegration20261111.MacComparison')
+                and refs and all(node.attrib.get('ReferenceOutputAssembly') == 'false' for node in refs),
+                'Actual SDK consumer target lacks the real NativeShims package')
+    return dict(target_selection=selection, packages=dispositions, compiler_input_bindings=compiler_bindings,
+                actual_runtime_native_bindings=copy_bindings,
+                complete_restore_catalog=retain.keep(resolve(project, policy['ProjectAssetsFile']), 'complete-restore-catalog'),
+                limits='No catalog-to-target bijection assumed. Every observed compiler/copy input classified; '
+                       'catalog-only tools are not loaded, linked, executed or counted as application assets. '
+                       'No RID selection guessed from host OS and no native/platform qualification.')

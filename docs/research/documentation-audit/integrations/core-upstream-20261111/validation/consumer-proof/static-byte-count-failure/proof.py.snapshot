@@ -1,0 +1,652 @@
+"""Bounded post-build compiler proof. Capture/verify are coordinator-only, never build or execute code."""
+import argparse
+import ast
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import sys
+import textwrap
+import xml.etree.ElementTree as ET
+import prepare as preparation
+
+sys.dont_write_bytecode = True
+HERE = Path(__file__).resolve().parent
+V = HERE.parent
+ROOT = next(p for p in HERE.parents if (p / 'toolchain.cs').is_file())
+RUNTIME = Path('/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof')
+NAMES = ('before.txt', 'sources.txt', 'references.txt', 'analyzers.txt', 'configs.txt',
+         'additional-files.txt', 'imports.txt', 'project-references.txt',
+         'resolved-project-references.txt', 'copy-local.txt', 'native-assets.txt', 'csc.txt', 'policy.txt')
+
+
+def require(value, message):
+    if not value:
+        raise ValueError(message)
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def identity(path):
+    require(path.is_file() and not path.is_symlink(), 'Require regular input: ' + str(path))
+    raw = path.read_bytes()
+    return dict(path=str(path), bytes=len(raw), sha256=sha(raw))
+
+
+def load(path):
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            require(key not in result, 'Duplicate JSON key: ' + key)
+            result[key] = value
+        return result
+    return json.loads(path.read_bytes(), object_pairs_hook=unique)
+
+
+def lines(path):
+    return [line.strip() for line in path.read_text(encoding='utf-8-sig').splitlines() if line.strip()]
+
+
+def unique(values, label):
+    require(len(values) == len(set(values)), 'Duplicate ' + label)
+    return set(values)
+
+
+def resolve(project, value):
+    return (project.parent / value.strip('"').replace('\\', '/')).resolve()
+
+
+def current_inputs():
+    data = load(HERE / 'inputs.json')
+    require(data['root'] == str(ROOT) and data['runtime'] == str(RUNTIME), 'Active-root identity mismatch')
+    provenance = load(HERE / 'tooling-provenance.json')
+    rows = (data['source_documents'] + data['hosts'] + data['graph_projects'] +
+            [row[kind] for row in data['groups'] for kind in ('raw', 'generated')] +
+            provenance['preserved_inputs'] + provenance['algorithm_sources'] +
+            [provenance['annotation_source_context']])
+    for row in rows:
+        actual = identity(ROOT / row['path'])
+        require(actual['bytes'] == row['bytes'] and actual['sha256'] == row['sha256'],
+                'Accepted preparation input changed: ' + row['path'])
+    graph_paths = [row['path'] for row in data['graph_projects']]
+    require(unique(graph_paths, 'declared graph project') == set(data['declared_graph']), 'Declared graph identities differ')
+    for path, edges in data['declared_graph'].items():
+        require(sorted(unique(edges, 'declared graph edge')) == preparation.direct(ROOT / path),
+                'Current XML edges differ from accepted declaration: ' + path)
+    for row in data['source_documents']:
+        require((HERE / 'source-documents' / (row['path'] + '.snapshot')).read_bytes() ==
+                (ROOT / row['path']).read_bytes(), 'Full current document snapshot differs')
+    if (HERE / 'format-membership.json').exists():
+        for row in load(HERE / 'format-membership.json')['files']:
+            for kind in ('source', 'project'):
+                actual = identity(ROOT / row[kind])
+                require(actual['sha256'] == row[kind + '_identity']['sha256'], 'Formatted source/project identity changed')
+    for row in data['groups']:
+        raw, _ = (preparation.xml_body(row['source'], row['xml_code']) if 'xml_code' in row
+                  else preparation.markdown(row['source'], row['fence']))
+        number = int(row['id'].rsplit('-', 1)[1])
+        require((ROOT / row['raw']['path']).read_bytes() == raw.encode(), 'Complete current extraction differs')
+        require((ROOT / row['generated']['path']).read_text() == preparation.wrapper(number, raw),
+                'Wrapper differs from its explicit complete-body transformation')
+    require((HERE / 'probe/src/body-01.cs').read_bytes() ==
+            (HERE / 'examples/src/body-01.cs').read_bytes(), 'Representative body differs from full context')
+    return data
+
+
+def closure(graph, roots):
+    seen, pending = set(), list(roots)
+    while pending:
+        node = pending.pop()
+        if node not in seen:
+            require(node in graph, 'Missing declared graph node: ' + node)
+            seen.add(node)
+            pending.extend(graph[node])
+    return seen
+
+
+def static_check():
+    if (HERE / 'preparation-seal.json').exists():
+        check_seal()
+    data = current_inputs()
+    for path in HERE.glob('*.py'):
+        ast.parse(path.read_text(), filename=str(path))
+    ET.parse(HERE / 'Capture.targets')
+    ET.parse(HERE / 'Directory.Build.props')
+    projects = sorted(ROOT.rglob('*.csproj'))
+    selectors = {}
+    for row in data['hosts']:
+        project = ROOT / row['path']
+        matches = [str(p.relative_to(ROOT)) for p in projects if project.stem.lower() in p.stem.lower()]
+        require(matches == [row['path']], 'Derivative selector collision: ' + project.stem)
+        require('core' not in project.stem.lower(), 'Derivative changes Core filename selection')
+        require('/tmp/' not in project.read_text(), 'Derivative has obsolete tmp routing')
+        selectors[project.stem] = matches
+    require(len(data['groups']) == 30, 'Current complete-body inventory changed')
+    names = [Path(p).stem for p in data['declared_graph']]
+    unique(names, 'graph filename stem')
+    require('/tmp/' not in (HERE / 'Directory.Build.props').read_text(), 'Output routing still uses tmp')
+    unit = sorted('test:' + p.stem.removeprefix('Yubico.YubiKit.') for p in projects
+                  if '/tests/' in str(p) and '.UnitTests' in str(p) and 'Yubico.YubiKit.' in str(p) and '/.claude/' not in str(p))
+    expected_unit = sorted(load(V / 'expected-unit-projects.json'))
+    require(unit == expected_unit, 'Canonical unit membership changed')
+    return dict(status='static preparation passed; no compilation/capture performed',
+                groups=len(data['groups']), selectors=selectors,
+                sources={p: len(source_files(ROOT / p)) for p in data['actual_samples']},
+                canonical_unit_rows=unit,
+                contexts={k: sorted(closure(data['declared_graph'], v)) for k, v in data['contexts'].items()},
+                inputs=identity(HERE / 'inputs.json'), tools=tool_identities())
+
+
+def source_files(project):
+    # Actual Csc equality below is authoritative; this rejects omission of any real sample source.
+    return {str(p.resolve()) for p in project.parent.rglob('*.cs')
+            if not any(part in ('bin', 'obj') for part in p.relative_to(project.parent).parts)}
+
+
+def tool_identities():
+    return [identity(p) for p in sorted(HERE.glob('*.py'))] + [identity(HERE / 'Capture.targets')]
+
+
+def active_build_guard():
+    marker = ROOT / 'artifacts/toolchain/active-run.txt'
+    if marker.is_file():
+        pid = int(marker.read_text().split('\t', 1)[0])
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return
+        raise ValueError(f'Toolchain PID {pid} is live; do not capture during a build')
+
+
+class Retainer:
+    def __init__(self, destination, binaries):
+        self.destination, self.binaries, self.records = destination, binaries, []
+
+    def keep(self, path, kind, binary=False):
+        row = dict(identity(path), kind=kind)
+        raw = path.read_bytes()
+        name = row['sha256'] + '-' + path.name
+        if binary:
+            target = self.binaries / name
+        else:
+            raw.decode('utf-8-sig')
+            require(b'\0' not in raw, 'Unexpected binary in text snapshot: ' + str(path))
+            target = self.destination / 'snapshots' / (name + '.snapshot')
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if target.exists():
+            require(target.read_bytes() == raw, 'Retained content-address collision')
+        else:
+            with target.open('xb') as output:
+                output.write(raw)
+        row['retained'] = str(target) if binary else str(target.relative_to(self.destination))
+        row['binary'] = binary
+        self.records.append(row)
+        return row
+
+
+def analyzer_proof(policy, project, analyzers, assets, retain):
+    version = '9.0.0'
+    key = 'Microsoft.CodeAnalysis.NetAnalyzers/' + version
+    library = assets['libraries'][key]
+    require(library['type'] == 'package' and library['path'] == 'microsoft.codeanalysis.netanalyzers/' + version,
+            'Canonical explicit analyzer restore identity changed')
+    paths = [Path(root) / library['path'] for root in assets['packageFolders']]
+    paths = [p for p in paths if p.is_dir()]
+    require(len(paths) == 1, 'Ambiguous canonical analyzer package root')
+    package = paths[0]
+    expected = {str(package / 'analyzers/dotnet/cs' / name) for name in
+                ('Microsoft.CodeAnalysis.NetAnalyzers.dll', 'Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll')}
+    require(expected <= analyzers and {p for p in analyzers if Path(p).name.endswith('NetAnalyzers.dll')} == expected,
+            'Actual Csc lacks the exact two package-supplied canonical analyzers')
+    require(policy['EnableNETAnalyzers'] == 'false', 'Re-adjudicate changed canonical analyzer-selection policy')
+    props, disable, targets = [package / ('buildTransitive/' + name) for name in
+        ('Microsoft.CodeAnalysis.NetAnalyzers.props', 'DisableNETAnalyzersForNuGetPackage.props',
+         'Microsoft.CodeAnalysis.NetAnalyzers.targets')]
+    require([n.text for n in ET.parse(disable).iter('EnableNETAnalyzers')] == ['false'],
+            'Package built-in-analyzer disable assignment changed')
+    require([n.text for n in ET.parse(disable).iter('_NETAnalyzersNuGetAssemblyVersion')] == [version],
+            'Analyzer package assembly version assignment changed')
+    require(any(n.attrib.get('Project') == disable.name for n in ET.parse(props).iter('Import')),
+            'Package no longer imports the exact built-in-disable props')
+    extensions = resolve(project, policy['MSBuildProjectExtensionsPath'])
+    generated = [extensions / (project.name + '.nuget.g.' + suffix) for suffix in ('props', 'targets')]
+    for path, suffix in zip(generated, ('props', 'targets')):
+        needle = f'$(NuGetPackageRoot)microsoft.codeanalysis.netanalyzers/{version}/buildTransitive/Microsoft.CodeAnalysis.NetAnalyzers.{suffix}'
+        matches = [n for n in ET.parse(path).iter('Import') if n.attrib.get('Project') == needle]
+        require(len(matches) == 1 and matches[0].attrib.get('Condition') == f"Exists('{needle}')",
+                'Generated NuGet analyzer import identity changed')
+    sdk = Path(policy['MSBuildSDKsPath']).parent
+    common = sdk / 'Current/Microsoft.Common.props'
+    text = common.read_text()
+    early, late = '<Import Project="$(DirectoryBuildPropsPath)"', '<Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.props"'
+    require(early in text and late in text and text.index(early) < text.index(late), 'SDK props import ordering changed')
+    sources = [ROOT / p for p in ('Directory.Build.props', 'Directory.Build.targets', 'Directory.Packages.props')]
+    sources += [props, disable, targets, common] + generated
+    return dict(package=key, package_sha512=library['sha512'],
+                source_inputs=[retain.keep(p, 'analyzer-policy') for p in sources],
+                assemblies=sorted(expected), effective_builtin_analyzers=policy['EnableNETAnalyzers'])
+
+
+def graph_proof(project, policy, references, raw, data, assets, retain):
+    relative = str(project.relative_to(ROOT))
+    graph = data['declared_graph']
+    expected = closure(graph, [relative]) - {relative}
+    restored_direct = set(assets['project']['restore']['frameworks']['net10.0'].get('projectReferences', {}))
+    restored_direct = {str(resolve(project, p).relative_to(ROOT)) for p in restored_direct}
+    require(restored_direct == set(graph[relative]), 'Declared/restored direct graph mismatch: ' + relative)
+    nodes, by_name = {}, {}
+    target = assets['targets']['net10.0']
+    for key, library in assets['libraries'].items():
+        if library['type'] != 'project':
+            continue
+        path = resolve(project, library['msbuildProject'])
+        require(path.is_relative_to(ROOT), 'Restored project escapes active source')
+        path = str(path.relative_to(ROOT))
+        name = key.rsplit('/', 1)[0]
+        require(path not in nodes and name not in by_name, 'Duplicate restored project path/name')
+        require(target[key]['type'] == 'project', 'Restored target project identity changed')
+        nodes[path] = dict(project_id=key, library=library, target=target[key])
+        by_name[name] = path
+    require(set(nodes) == expected, 'Restored transitive closure differs from declared graph: ' + relative)
+    late = [str(resolve(project, line.split('|')[0]).relative_to(ROOT)) for line in lines(raw / 'project-references.txt')]
+    require(unique(late, 'late project reference') == expected, 'Late ProjectReference closure differs')
+    outputs = {}
+    for line in lines(raw / 'resolved-project-references.txt'):
+        output, source, *_ = line.split('|')
+        require(source, 'Resolved project output lacks source identity')
+        source = str(resolve(project, source).relative_to(ROOT))
+        require(source not in outputs, 'Duplicate resolved project output')
+        outputs[source] = resolve(project, output)
+    require(set(outputs) == expected, 'Resolved output closure differs')
+    result = []
+    for path in sorted(nodes):
+        node = nodes[path]
+        edges = {by_name[name] for name in node['target'].get('dependencies', {}) if name in by_name}
+        require(edges == set(graph[path]), 'Restored/XML graph edge mismatch: ' + path)
+        compile_names = [Path(p).name for p in node['target'].get('compile', {}) if p.endswith('.dll')]
+        require(len(compile_names) == 1, 'Require one restored project compile assembly')
+        matches = [Path(p) for p in references if Path(p).name == compile_names[0]]
+        require(len(matches) == 1, 'Csc project-reference assembly identity ambiguous/missing')
+        owner = (ROOT / path).parent
+        require(matches[0].is_relative_to(owner / 'obj'), 'Csc reference does not belong to its own project obj')
+        require(outputs[path].name == compile_names[0] and outputs[path].is_relative_to(owner / 'bin'),
+                'Resolved project output does not belong to its own project bin')
+        result.append(dict(project=retain.keep(ROOT / path, 'graph-project'), **node,
+                           edges=sorted(edges), csc_reference=retain.keep(matches[0], 'project-reference', True),
+                           resolved_output=retain.keep(outputs[path], 'project-output', True)))
+    unique([n['project_id'] for n in result], 'project ID')
+    return dict(direct=sorted(restored_direct), closure=sorted(expected), nodes=result)
+
+
+def restored_binary_bindings(project, references, raw, assets, retain):
+    target = assets['targets']['net10.0']
+    packages, compile_assets = [], set()
+    for key, library in assets['libraries'].items():
+        if library['type'] != 'package':
+            continue
+        roots = [Path(root) / library['path'] for root in assets['packageFolders']]
+        roots = [root.resolve() for root in roots if root.is_dir()]
+        require(len(roots) == 1, 'Ambiguous/missing restored package root: ' + key)
+        root = roots[0]
+        node = target[key]
+        expected = {str((root / p).resolve()) for p in node.get('compile', {}) if p.endswith('.dll')}
+        compile_assets |= expected
+        packages.append(dict(package_id=key, sha512=library['sha512'], root=str(root), target=node,
+                             library=library, compile_assets=sorted(expected)))
+    actual_package_refs = {p for p in references if any(Path(p).is_relative_to(Path(row['root'])) for row in packages)}
+    require(actual_package_refs == compile_assets, 'Restored package compile assets and actual Csc package references differ')
+    resolved = {}
+    target_dir = Path(raw_policy(raw)['TargetDir']).resolve()
+    for name in ('copy-local.txt', 'native-assets.txt'):
+        for line in lines(raw / name):
+            source, subdirectory, subpath = line.split('|')
+            path = str(resolve(project, source))
+            relative = subpath or str(Path(subdirectory.replace('\\', '/')) / Path(path).name)
+            destination = (target_dir / relative).resolve()
+            require(destination.is_relative_to(target_dir), 'Copy destination escapes target directory')
+            require(path not in resolved or resolved[path] == destination, 'Conflicting resolved copy destinations')
+            resolved[path] = destination
+    bindings = []
+    for path in sorted(resolved):
+        owners = [row for row in packages if Path(path).is_relative_to(Path(row['root']))]
+        if not owners:
+            continue  # Actual project outputs are bound separately by source-project identity.
+        require(len(owners) == 1, 'Ambiguous restored runtime/native asset owner')
+        owner = owners[0]
+        relative = str(Path(path).relative_to(Path(owner['root'])))
+        admitted = set().union(*(set(owner['target'].get(kind, {})) for kind in
+                                 ('compile', 'runtime', 'native', 'runtimeTargets', 'resource')))
+        require(relative in admitted and relative in owner['library']['files'],
+                'Resolved runtime/native library is not in its restored target/package file list')
+        require(identity(Path(path))['sha256'] == identity(resolved[path])['sha256'],
+                'Resolved restored asset differs from its actual output copy')
+        bindings.append(dict(package_id=owner['package_id'], asset=relative,
+                             binary=retain.keep(Path(path), 'restored-runtime/native-binding', True),
+                             output=retain.keep(resolved[path], 'actual-runtime/native-output', True)))
+    native = [row for row in packages if row['package_id'].startswith('Yubico.NativeShims/')]
+    require(len(native) == 1, 'Actual restore must contain the NativeShims package identity')
+    return dict(packages=packages, actual_runtime_native_bindings=bindings,
+                note='Selected actual copy-local/native assets only; no native loading or RID/runtime qualification.')
+
+
+def raw_policy(folder):
+    return dict(line.split('=', 1) for line in lines(folder / 'policy.txt'))
+
+
+def compiler_project(folder, data, retain):
+    policies = lines(folder / 'policy.txt')
+    keys = [line.split('=', 1)[0] for line in policies]
+    unique(keys, 'policy property')
+    policy = dict(line.split('=', 1) for line in policies)
+    project = Path(policy['MSBuildProjectFullPath']).resolve()
+    require(project.is_relative_to(ROOT), 'Compiler project belongs to inactive/foreign checkout')
+    args = lines(folder / 'csc.txt')
+    require(args and policy['TargetFramework'] == 'net10.0' and policy['Configuration'] == 'Release' and
+            policy['LangVersion'] in ('14', '14.0'), 'Actual compiler context changed')
+    require(policy['NETCoreSdkVersion'] == '10.0.404', 'Record/review a different selected SDK explicitly')
+    require(policy['TreatWarningsAsErrors'] == 'true' and policy['WarningLevel'] == '9999' and
+            '/warnaserror+' in args and '/warn:9999' in args, 'Compiler warnings are not strict')
+    require(policy['RunAnalyzersDuringBuild'] == 'true' and policy['RunAnalyzers'].lower() != 'false' and
+            policy['SkipAnalyzers'].lower() != 'true' and policy['SkipCompilerExecution'].lower() != 'true' and
+            policy['DesignTimeBuild'].lower() != 'true' and not any('/skipanalyzers' in a.lower() for a in args),
+            'Compiler/analyzers skipped; command-line extraction alone is not compilation')
+    require(policy['WarningsNotAsErrors'] == '', 'Warnings were exempted from errors')
+    # Root props selects Recommended EARLY for names containing Test. Tests.Shared later sets
+    # IsTestProject=false without undoing that analysis mode; annotations sets true before root import.
+    expected_mode = ('Recommended' if 'Test' in project.stem or project.stem.endswith('.Annotations')
+                     else 'AllEnabledByDefault')
+    require(policy['AnalysisMode'] == expected_mode, 'Unexpected per-project effective analysis mode')
+    require(Path(policy['CustomAfterMicrosoftCommonTargets']).resolve() == HERE / 'Capture.targets', 'Foreign capture hook')
+
+    def items(name):
+        values = [str(resolve(project, line.split('|')[0])) for line in lines(folder / name)]
+        return unique(values, name)
+
+    def switches(prefix):
+        values = [str(resolve(project, a[len(prefix):])) for a in args if a.startswith(prefix)]
+        return unique(values, prefix)
+
+    source_args = [str(resolve(project, a)) for a in args if a.endswith('.cs') and not re.match(r'^/[A-Za-z]+:', a)]
+    sources = items('sources.txt')
+    references, analyzers, configs = items('references.txt'), items('analyzers.txt'), items('configs.txt')
+    additional = items('additional-files.txt')
+    require(sources and unique(source_args, 'Csc source argument') == sources, 'Csc/Compile source sets differ')
+    for prefix, values in (('/reference:', references), ('/analyzer:', analyzers),
+                           ('/analyzerconfig:', configs), ('/additionalfile:', additional)):
+        require(switches(prefix) == values, 'Csc/item set mismatch: ' + prefix)
+    relative = str(project.relative_to(ROOT))
+    if relative in data['actual_samples']:
+        require(source_files(project) <= sources, 'A complete real sample source was omitted')
+    for group in data['groups']:
+        path = str(ROOT / group['generated']['path'])
+        if Path(path).parent == project.parent:
+            require(path in sources, 'A complete example body was omitted from actual Csc')
+    for row in load(HERE / 'format-membership.json')['files']:
+        if row['project'] == relative:
+            require(str(ROOT / row['source']) in sources, 'Formatted product source missing from its actual Csc')
+    if relative.endswith('.Annotations.csproj'):
+        require(any('xunit.analyzers' in p.lower() for p in analyzers), 'Real xUnit analyzers missing')
+    for name in NAMES:
+        retain.keep(folder / name, 'compiler-text')
+    for kind, paths, binary in (('source', sources, False), ('reference', references, True),
+                                ('analyzer', analyzers, True), ('analyzer-config', configs, False),
+                                ('additional-file', additional, False)):
+        for name in sorted(paths):
+            retain.keep(Path(name), kind, binary)
+    generated = Path(policy['CompilerGeneratedFilesOutputPath'])
+    require(generated.is_relative_to(RUNTIME), 'Generated-source output escapes home workspace')
+    for path in sorted(generated.rglob('*')):
+        if path.is_file():
+            retain.keep(path, 'generator-output')
+    assets_path = resolve(project, policy['ProjectAssetsFile'])
+    assets = load(assets_path)
+    require(Path(assets['project']['restore']['projectPath']).resolve() == project, 'Restored project identity mismatch')
+    retain.keep(assets_path, 'restore-assets')
+    for name in sorted(set(lines(folder / 'imports.txt'))):
+        retain.keep(resolve(project, name), 'import')
+    for suffix in ('.nuget.g.props', '.nuget.g.targets', '.nuget.dgspec.json'):
+        retain.keep(assets_path.parent / (project.name + suffix), 'restore-import')
+    analyzer = analyzer_proof(policy, project, analyzers, assets, retain)
+    # SDK/compiler versions and SDK library/package versions are deliberately independent properties.
+    sdk = Path(policy['MSBuildSDKsPath']).parent
+    compiler = sdk / 'Roslyn/bincore'
+    require(not policy['CscToolPath'] or Path(policy['CscToolPath']).resolve() == compiler.resolve(),
+            'Custom CscToolPath requires explicit compiler provenance review')
+    require(not policy['CscToolExe'] or policy['CscToolExe'] in ('csc.dll', 'csc'),
+            'Custom CscToolExe requires explicit compiler provenance review')
+    for path in sorted(compiler.iterdir()):
+        if path.is_file() and (path.suffix == '.dll' or path.name.startswith('csc.')):
+            retain.keep(path, 'compiler-binary', True)
+    for path in (sdk / 'Roslyn/Microsoft.CSharp.Core.targets',
+                 sdk / 'Sdks/Microsoft.NET.Sdk/targets/Microsoft.PackageDependencyResolution.targets'):
+        retain.keep(path, 'sdk-compiler-input')
+    target = resolve(project, policy['TargetPath'])
+    retain.keep(target, 'compiled-output', True)
+    outputs = [resolve(project, a[len('/out:'):]) for a in args if a.startswith('/out:')]
+    require(len(outputs) == 1 and identity(outputs[0])['sha256'] == identity(target)['sha256'],
+            'Actual Csc output and resolved target DLL bytes differ')
+    retain.keep(outputs[0], 'actual-csc-output', True)
+    for argument in args:
+        if argument.startswith('/refout:'):
+            retain.keep(resolve(project, argument[len('/refout:'):]), 'actual-csc-ref-output', True)
+        elif argument.startswith(('/resource:', '/linkresource:')):
+            retain.keep(resolve(project, argument.split(':', 1)[1].split(',', 1)[0]), 'compiler-resource', True)
+        elif argument.startswith('/sourcelink:'):
+            retain.keep(resolve(project, argument[len('/sourcelink:'):]), 'compiler-sourcelink')
+    assembly_info = [Path(p) for p in sources if p.endswith('.AssemblyInfo.cs')]
+    require(len(assembly_info) == 1 and f'AssemblyVersionAttribute("{policy["AssemblyVersion"]}")' in assembly_info[0].read_text(),
+            'Actual generated assembly version does not match effective host property')
+    for path in sorted(Path(policy['TargetDir']).rglob('*')):
+        if path.is_file():
+            retain.keep(path, 'output-tree', True)
+    emitted_xml = []
+    if relative == 'src/Core/src/Yubico.YubiKit.Core.csproj':
+        xml_path = target.with_suffix('.xml')
+        retain.keep(xml_path, 'actual-shipping-xml-documentation')
+        members = ET.parse(xml_path).getroot().findall('./members/member')
+        for group in [row for row in data['groups'] if 'xml_code' in row]:
+            expected_code = textwrap.dedent((ROOT / group['raw']['path']).read_text()).strip()
+            matches = [(member.attrib['name'], code) for member in members
+                       for code in member.findall('./example/code')
+                       if textwrap.dedent(''.join(code.itertext())).strip() == expected_code]
+            require(len(matches) == 1, 'Current complete example is missing/ambiguous in actual emitted Core XML')
+            emitted_xml.append(dict(body=group['id'], actual_member=matches[0][0],
+                                    emitted_code_sha256=sha(''.join(matches[0][1].itertext()).encode()),
+                                    comparison='Full body equality after XML entity decoding/common indentation only.'))
+    for name in ('copy-local.txt', 'native-assets.txt'):
+        for path in sorted(items(name)):
+            retain.keep(Path(path), 'resolved-copy/native', True)
+    restored_binaries = (restored_binary_bindings(project, references, folder, assets, retain)
+                         if relative in data['declared_graph'] else
+                         dict(disposition='aggregation host; raw assets retained, referenced real consumers proved separately'))
+    retain.keep(project, 'compiled-project')
+    if relative in data['declared_graph']:
+        graph = graph_proof(project, policy, references, folder, data, assets, retain)
+    else:
+        # Traversal hosts only trigger the real projects. Their complete raw compiler/assets inputs
+        # are retained, but graph/binding acceptance is on every actual referenced consumer above.
+        require(project in [ROOT / row['path'] for row in data['hosts']], 'Unexpected compiler project')
+        graph = dict(disposition='aggregation host; actual referenced projects independently proved')
+    if relative.startswith('verification/MacOSHidBoundaryComparison/'):
+        expected = ROOT / 'src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll'
+        require(Path(policy['BoundaryCorePath']).resolve() == expected and str(expected) in references,
+                'Mac boundary comparison did not bind the actual current Core DLL')
+        require(policy['BoundaryNativeVersion'] == '1.18.1' and
+                policy['BoundaryComparisonVariant'] == 'audit-integration-20261111', 'Comparison profile changed')
+    return dict(project=str(project), policy=policy, graph=graph, canonical_analyzers=analyzer,
+                restored_binaries=restored_binaries,
+                emitted_xml_examples=emitted_xml,
+                counts=dict(sources=len(sources), references=len(references), analyzers=len(analyzers),
+                            configs=len(configs), additional_files=len(additional)),
+                csc_sets=dict(sources=sorted(sources), references=sorted(references), analyzers=sorted(analyzers),
+                              configs=sorted(configs), additional=sorted(additional)))
+
+
+def build_receipt(label, context, data):
+    path = V / 'commands-v2' / label / 'receipt.json'
+    receipt = load(path)
+    require(receipt['status'] == 'passed' and receipt['exit_code'] == 0 and receipt['quiescent'] and
+            receipt['stream_complete'] and receipt['retention_complete'], 'Build logger did not establish success/quiescence')
+    require(receipt['cwd'] == str(ROOT), 'Build belongs to inactive checkout')
+    host = (ROOT / data['contexts']['fixture'][0] if context == 'fixture' else
+            next(ROOT / row['path'] for row in data['hosts'] if Path(row['path']).stem.endswith('.' +
+                {'probe': 'Probe', 'examples': 'Examples', 'annotations': 'Annotations',
+                 'consumers': 'Consumers', 'mac-comparison': 'MacComparison'}[context])))
+    expected = ['dotnet', 'toolchain.cs', '--', 'build', '--project', host.stem, '--clean']
+    require(receipt['command'] == expected and receipt['expected_targets'] == ['build'] and
+            receipt['expected_projects'] == [], 'Build selector/target/project expectation mismatch')
+    runs = list((path.parent / 'toolchain').glob('*/result.json'))
+    require(len(runs) == 1, 'Require one actual retained build result')
+    result = load(runs[0])
+    require(result['status'] == 'passed' and result['warningCount'] == 0 and not result['warnings'] and
+            result['projects'] == [], 'Build RESULT failed or warning/project membership differs')
+    # Build targets do not emit test-project rows. Verify the one selected build STEP instead.
+    logs = list(runs[0].parent.glob('*build-*.log'))
+    require(len(logs) == 1 and '--no-incremental' in (runs[0].parent / 'run.log').read_text(),
+            'Fresh actual selected build step/log missing')
+    for row in receipt['retained']:
+        require(identity(Path(row['retained']['path'])) == row['retained'], 'Canonical retained build text changed')
+    return path, host
+
+
+def capture(context, attempt, label):
+    active_build_guard()
+    check_seal()
+    data = current_inputs()
+    receipt, host = build_receipt(label, context, data)
+    raw = RUNTIME / 'attempts' / attempt / 'raw'
+    require(raw.is_dir(), 'Actual compiler observation directory missing')
+    destination = HERE / 'evidence' / attempt
+    destination.mkdir(parents=True, exist_ok=False)
+    retain = Retainer(destination, RUNTIME / 'attempts' / attempt / 'binaries')
+    try:
+        # Retain exact tools and even incomplete raw inputs before making any acceptance checks.
+        for path in tool_identities():
+            retain.keep(Path(path['path']), 'capture-tool')
+        for path in sorted(raw.rglob('*')):
+            if path.is_file():
+                retain.keep(path, 'original-compiler-observation')
+        expected = closure(data['declared_graph'], data['contexts'][context]) | {str(host.relative_to(ROOT))}
+        folders = sorted(p for p in raw.iterdir() if p.is_dir())
+        actual = []
+        for folder in folders:
+            policy = dict(line.split('=', 1) for line in lines(folder / 'policy.txt'))
+            actual.append(str(Path(policy['MSBuildProjectFullPath']).relative_to(ROOT)))
+        require(unique(actual, 'captured project') == expected, 'Actual Csc project closure differs from accepted context')
+        retain.keep(receipt, 'build-receipt')
+        for row in load(receipt)['retained']:
+            retain.keep(Path(row['retained']['path']), 'retained-build-text')
+        for path in (HERE / 'inputs.json', HERE / 'tooling-provenance.json', HERE / 'Directory.Build.props'):
+            retain.keep(path, 'accepted-preparation')
+        for name in ('Directory.Build.props', 'Directory.Build.targets', 'Directory.Packages.props', 'global.json', '.editorconfig'):
+            retain.keep(ROOT / name, 'canonical-root-input')
+        projects = [compiler_project(folder, data, retain) for folder in folders]
+        result = dict(status='captured-current-compiler-inputs', context=context, attempt=attempt,
+                      build_label=label, inputs=identity(HERE / 'inputs.json'), tools=tool_identities(),
+                      projects=projects, records=retain.records,
+                      limits='Clean compiler binding only. No example, xUnit method, applet, native host or device executed.')
+        with (destination / 'manifest.json').open('x') as output:
+            json.dump(result, output, indent=2)
+            output.write('\n')
+        print(f'PASS: retained actual Csc proof for {len(projects)} projects; binaries external.')
+    except Exception as error:
+        with (destination / 'failure.json').open('x') as output:
+            json.dump(dict(error=str(error), type=type(error).__name__, records=retain.records), output, indent=2)
+            output.write('\n')
+        raise
+
+
+def verify(attempt, live):
+    active_build_guard()
+    check_seal()
+    current_inputs()
+    destination = HERE / 'evidence' / attempt
+    data = load(destination / 'manifest.json')
+    require(data['tools'] == tool_identities(), 'Capture tools changed; preserve and explicitly review a derivative')
+    for row in data['records']:
+        retained = Path(row['retained']) if row['binary'] else destination / row['retained']
+        actual = identity(retained)
+        require(actual['bytes'] == row['bytes'] and actual['sha256'] == row['sha256'], 'Retained byte identity changed')
+        if live:
+            current = identity(Path(row['path']))
+            require(current['bytes'] == row['bytes'] and current['sha256'] == row['sha256'],
+                    'Live input/output binding changed: ' + row['path'])
+    for project in data['projects']:
+        nodes = project['graph'].get('nodes', [])
+        unique([node['project']['path'] for node in nodes], 'graph node path')
+        unique([node['project_id'] for node in nodes], 'graph node ID')
+    print(f'PASS: {attempt}: retained identities' + (' and all current live input/output bindings.' if live else '.'))
+
+
+def seal():
+    current_inputs()
+    rows = [identity(p) for p in sorted(HERE.rglob('*')) if p.is_file() and
+            not p.is_relative_to(HERE / 'evidence') and p.name != 'preparation-seal.json' and
+            not p.name.startswith('static-')]
+    handoff = HERE.parent.parent / 'consumer-validation-preparation.md'
+    require(handoff.is_file(), 'Finish the coordinator handoff before sealing preparation')
+    rows.append(identity(handoff))
+    with (HERE / 'preparation-seal.json').open('x') as output:
+        json.dump(dict(status='static inputs sealed; SDK execution pending', files=rows), output, indent=2)
+        output.write('\n')
+    print('Sealed current static preparation; no build or compiler capture executed.')
+
+
+def check_seal():
+    data = load(HERE / 'preparation-seal.json')
+    for row in data['files']:
+        require(identity(Path(row['path'])) == row, 'Sealed preparation changed: ' + row['path'])
+
+
+def retain_failure(attempt, label):
+    active_build_guard()
+    check_seal()
+    raw = RUNTIME / 'attempts' / attempt / 'raw'
+    destination = HERE / 'evidence' / (attempt + '-failed-build')
+    destination.mkdir(parents=True, exist_ok=False)
+    retain = Retainer(destination, RUNTIME / 'attempts' / attempt / 'failure-binaries')
+    receipt = V / 'commands-v2' / label / 'receipt.json'
+    require(load(receipt)['status'] == 'failed', 'This operation retains failed builds only')
+    retain.keep(receipt, 'failed-build-receipt')
+    for row in tool_identities():
+        retain.keep(Path(row['path']), 'failure-tool')
+    for path in sorted(raw.rglob('*')):
+        if path.is_file():
+            retain.keep(path, 'partial-compiler-observation')
+    with (destination / 'failure.json').open('x') as output:
+        json.dump(dict(status='failed build retained; no compiler-proof acceptance',
+                       attempt=attempt, label=label, records=retain.records), output, indent=2)
+        output.write('\n')
+    print('Retained failed build observation/tools. This is not a passed compilation gate.')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', choices=('static', 'seal', 'capture', 'verify', 'retain-failure'))
+    parser.add_argument('--context', choices=('probe', 'examples', 'annotations', 'consumers', 'mac-comparison', 'fixture'))
+    parser.add_argument('--attempt')
+    parser.add_argument('--build-label')
+    parser.add_argument('--live', action='store_true')
+    args = parser.parse_args()
+    if args.action == 'static':
+        print(json.dumps(static_check(), indent=2))
+        return
+    if args.action == 'seal':
+        seal()
+        return
+    require(args.attempt and re.fullmatch(r'[a-z0-9][a-z0-9-]*', args.attempt), 'Fresh simple attempt name required')
+    if args.action == 'capture':
+        require(args.context and args.build_label, 'Capture needs its exact context and build logger label')
+        capture(args.context, args.attempt, args.build_label)
+    elif args.action == 'retain-failure':
+        require(args.build_label, 'Failure retention needs the original failed build label')
+        retain_failure(args.attempt, args.build_label)
+    else:
+        verify(args.attempt, args.live)
+
+
+if __name__ == '__main__':
+    main()

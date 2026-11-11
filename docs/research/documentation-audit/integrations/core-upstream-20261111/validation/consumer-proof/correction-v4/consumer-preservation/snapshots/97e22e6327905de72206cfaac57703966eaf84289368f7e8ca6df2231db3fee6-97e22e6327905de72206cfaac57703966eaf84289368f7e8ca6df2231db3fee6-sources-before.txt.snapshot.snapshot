@@ -1,0 +1,17 @@
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Cli/ArgumentParser.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Cli/CommandHelper.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Cli/InteractiveMenuBuilder.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Cli/SessionHelper.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Device/ConnectionTypeFormatter.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Device/DeviceSelection.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Device/DeviceSelector.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Device/FormFactorFormatter.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Device/NonInteractiveSelection.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Output/ConfirmationPrompts.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Output/ConsoleUserPresencePrompt.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Output/OutputHelpers.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Output/PinPrompt.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Output/SecureCredential.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.GlobalUsings.g.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/obj/Release/net10.0/Yubico.YubiKit.Cli.Shared.AssemblyInfo.cs

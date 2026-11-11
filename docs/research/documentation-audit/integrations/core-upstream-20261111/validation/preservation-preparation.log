@@ -1,0 +1,23 @@
+{
+  "before_sha256": "8f45a2c984ab0d741152378d5fcadb4f785a478fca9b47f4ba384139cf7558c9",
+  "checkouts": [
+    {
+      "role": "integration",
+      "root": "/tmp/opencode/core-upstream-20261111",
+      "head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "manifests": 8,
+      "frozen_artifacts": 5366,
+      "piv_integration_files": 114,
+      "original_user_files": 0
+    },
+    {
+      "role": "primary",
+      "root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+      "head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "manifests": 8,
+      "frozen_artifacts": 5366,
+      "piv_integration_files": 114,
+      "original_user_files": 4
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "tools": [
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+      "bytes": 19060,
+      "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/qualify-logger-v2.py",
+      "bytes": 8216,
+      "sha256": "60040169cb713d1da60d9486ba7af820622af7980371455350807b3e932ab46a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-preserved-relocated.py",
+      "bytes": 2689,
+      "sha256": "56fcd7721f1e72016100d77c2e05c96eded80a6ab5abdbf144d59362e720b4ba"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/linux-evidence-gates-home.py",
+      "bytes": 1999,
+      "sha256": "79be7c80e83c6c3c122aa59a0c0bbad02df177f40a10245408dff9472fc8eaf5"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/verify-recovery.py",
+      "bytes": 5976,
+      "sha256": "4161b0fa37612b1ea5ea2f6337d4b32cc254c175d6bfb2fcd7543bbd79f09887"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/capture-evidence.py",
+      "bytes": 6478,
+      "sha256": "0abdb3044cbefc41a3d008a4e8f2c3bb271f00935d017e0880bd474555b7779d"
+    }
+  ],
+  "checks": [
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-preserved-relocated.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "325d673072b49954a80512ab7b2a0afbb1af8179323c51f9f4229b46ed212c80",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/verify-recovery.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "2ce982a2e47f7c6aeabdcfb1277f463750bdb6bbc58f541e195bb3f3540fa55e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/linux-evidence-gates-home.py",
+        "--check-source"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "9fecbc3dc14525e06770e7cc563a9419c4e8d157114e357f383e6471b0fb9fc6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "supersedes_for_current_source": "tooling-provenance.json",
+  "preserved_first_provenance_sha256": "cba305b4d1ba10510cfb26d1a2cd190fe48855f0622ad4f4402e2c46668ee5ee",
+  "qualified_current_logger_sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15",
+  "qualification_report_sha256": "de2cc81def1b9575b6fafc81a584a32233f45580aeda726e3b7580d63d1c1fef",
+  "positive_capture_receipt_sha256": "931cefaf255ca972f274413a0a02abbd08975424ac448bef68d1a29aa83dd92c",
+  "subreaper_definition": "#define PR_SET_CHILD_SUBREAPER\t36",
+  "subreaper_header_sha256": "87e50dc83d684b8d78087b8a0ff0e5100c453ac1bba4480853374049362702dc",
+  "linux_adapter_original_source_sha256": "1ef6aaa3c5e8fd60e9f939139146e43ca585c3e2713ab6ce6efe498ed34d003d",
+  "no_sdk_build_test_native_device": true
+}

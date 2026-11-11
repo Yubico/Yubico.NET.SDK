@@ -1,0 +1,92 @@
+$ dotnet build Yubico.YubiKit.sln -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/Yubico.YubiKit.Oath.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/Yubico.YubiKit.Management.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj (in 334 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/OathTool.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli/YkTool/Yubico.YubiKit.Cli.YkTool.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/FidoTool.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/OtpTool.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/ManagementTool.csproj (in 333 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj (in 8 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj (in 29 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj (in 33 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj (in 31 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj (in 33 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/Yubico.YubiKit.Piv.csproj (in 19 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj (in 44 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj (in 33 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj (in 50 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj (in 43 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj (in 44 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj (in 52 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj (in 47 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj (in 51 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj (in 27 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj (in 52 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj (in 46 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj (in 47 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/PivTool.csproj (in 39 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj (in 55 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj (in 50 ms).
+  Restored /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj (in 56 ms).
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.YubiOtp -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll
+  Yubico.YubiKit.YubiHsm -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.Piv -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Management.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Management.UnitTests.dll
+  Yubico.YubiKit.Cli.Shared -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Ctap2 -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll
+  Yubico.YubiKit.SecurityDomain -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+  Yubico.YubiKit.YubiHsm.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.UnitTests.dll
+  Yubico.YubiKit.Core.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.dll
+  Yubico.YubiKit.YubiOtp.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.IntegrationTests.dll
+  Yubico.YubiKit.Management.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.dll
+  Yubico.YubiKit.Piv.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll
+  Yubico.YubiKit.SecurityDomain.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.dll
+  Yubico.YubiKit.Piv.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Piv.UnitTests.dll
+  Yubico.YubiKit.Ctap2.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll
+  Yubico.YubiKit.OpenPgp.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.IntegrationTests.dll
+  Yubico.YubiKit.OpenPgp.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.UnitTests.dll
+  Yubico.YubiKit.Cli.Commands -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll
+  Yubico.YubiKit.YubiHsm.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.IntegrationTests.dll
+  Yubico.YubiKit.Core.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll
+  Yubico.YubiKit.SecurityDomain.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.UnitTests.dll
+  Yubico.YubiKit.Ctap2.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.dll
+  Yubico.YubiKit.Cli.YkTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Cli/YkTool/bin/Release/net10.0/yk.dll
+  Yubico.YubiKit.WebAuthn -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll
+  OpenPgpTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool.dll
+  ManagementTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll
+  HsmAuthTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.dll
+  OathTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.dll
+  OtpTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool.dll
+  FidoTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool.dll
+  Yubico.YubiKit.WebAuthn.IntegrationTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.dll
+  Yubico.YubiKit.PublicApi.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/bin/Release/net10.0/Yubico.YubiKit.PublicApi.UnitTests.dll
+  Yubico.YubiKit.YubiOtp.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.UnitTests.dll
+  PivTool -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.dll
+  Yubico.YubiKit.Oath.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll
+  Yubico.YubiKit.WebAuthn.UnitTests -> /home/rupicola/Code/y/yubikit-core-docs-integration/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.UnitTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:07.31

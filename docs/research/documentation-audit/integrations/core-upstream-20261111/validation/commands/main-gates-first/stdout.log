@@ -1,0 +1,23 @@
+▶ toolchain: build test docs-qa docs-architecture complexity resilience pack  (log: artifacts/toolchain/runs/20261111-192055-814-build+test+docs-qa+docs-architecture+complexity+resilience+pack/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet clean Yubico.YubiKit.sln -c Release
+  output: artifacts/toolchain/runs/20261111-192055-814-build+test+docs-qa+docs-architecture+complexity+resilience+pack/01-clean.log
+▶ RUN dotnet build Yubico.YubiKit.sln -c Release --no-incremental
+  output: artifacts/toolchain/runs/20261111-192055-814-build+test+docs-qa+docs-architecture+complexity+resilience+pack/02-build.log

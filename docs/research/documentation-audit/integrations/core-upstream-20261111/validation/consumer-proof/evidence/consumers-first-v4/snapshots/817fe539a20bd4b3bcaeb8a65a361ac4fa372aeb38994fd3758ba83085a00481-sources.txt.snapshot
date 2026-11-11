@@ -1,0 +1,14 @@
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/Backend/ISecurityDomainBackend.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/Backend/SecurityDomainBackend.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/CaIdentifier.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/CaIdentifierType.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/ISecurityDomainSession.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/IYubiKeyExtensions.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/KeyInfo.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/SecureChannelException.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/SecurityDomainKeyMaterial.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/SecurityDomainSession.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/SecurityDomainTlvEncoding.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.GlobalUsings.g.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/yubikit-core-docs-integration/src/SecurityDomain/src/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.AssemblyInfo.cs

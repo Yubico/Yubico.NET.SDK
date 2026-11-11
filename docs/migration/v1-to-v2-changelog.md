@@ -1,4 +1,27 @@
-# V1 to V2 Migration Documentation Changelog
+# V1 to v2 migration documentation changelog
+
+## 2026-11-10 - Snapshot-and-change streams
+
+- Documented `DeviceChange` records with revisions, replay completion, metadata updates, and single-lifetime
+  disposal. Earlier monitor cache access is replaced by a replay projection or one-off `FindAllAsync`.
+- Documented `YubiKeyManager.WatchAsync` private ownership and shared monitor subscriptions:
+  manager watch creates a producer; monitor watch subscribes to an existing one.
+- Transport listeners now share payload-less `IDeviceChangeListener.Changed`; token-only Find overloads
+  are removed (use `cancellationToken:`). This documentation pass does not advance `.state.yml`.
+
+## 2026-11-05 - Independent Find and explicitly owned monitoring
+
+- Updated current guide/map/highlights for `Find…Async(predicate, interfaces, cancellationToken)` with fresh
+  per-call evidence, and `CreateMonitorAsync` returning an initialized, disposable `YubiKeyMonitor`.
+  Current API: `WatchAsync` supplies atomic `DeviceAdded` replay, `SnapshotComplete`, and live changes;
+  consumers build membership projections rather than reading a monitor cache property.
+- Documented earlier-prerelease migration away from `ScanAsync`, `forceRescan`, and static monitoring/
+  shutdown. Old result filters need All plus local filtering where full composite slots are required.
+  Overflow recovery re-enumerates the same monitor rather than pairing independent Find with an event tail.
+- Clarified optional last-known metadata versus live Management reads and independent object lifetimes.
+  Added targeted two-key read-only hardware coverage; attended removal/reinsertion acceptance remains a
+  separate pending pass gate. Historical changelog entries and `.state.yml` are unchanged; this is not a
+  claim that the follow-up feature has merged.
 
 ## 2026-10-31 - Application-owned WebAuthn RP authorization
 
@@ -37,7 +60,7 @@
 
 ## 2026-07-06 - HID listener rescan hint migration note
 
-- Added `hid-listener-rescan-hints` migration guidance for the change from v1 `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived`/`Removed` events (`EventHandler<HidDeviceEventArgs>`) to the v2 low-level `HidDeviceListener.DeviceEvent` callback carrying `HidDeviceRescanHint` diagnostics.
+- Added `hid-listener-rescan-hints` migration guidance for the change from v1 `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived`/`Removed` events (`EventHandler<HidDeviceEventArgs>`) to rescan hints. Current v2 listeners use `IDeviceChangeListener.Changed` (`Action?`); hint details are internal.
 - Clarified that v2 HID listener hints are rescan triggers only; public `YubiKeyManager.WatchAsync` remains repository-diffed Added/Removed truth.
 
 ## 2026-07-28 - SCP protocol construction closure
@@ -137,7 +160,7 @@
 - Added `webauthn-client-construction-and-streams` and updated the `webauthn-credential-prompt` notes/evidence to match: `WebAuthnClient`'s constructors and `IYubiKeyExtensions.CreateWebAuthnClientAsync` replaced positional `enterpriseRpIds`/`prompt` parameters with a single `WebAuthnClientOptions` record (`MaxPromptAttempts` now caller-configurable, default 3; `CredentialPrompt`; `EnterpriseRpIds`), and `refactor(webauthn)!: remove the ceremony status streams` (`485330e0`) deleted `WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync` and the public `WebAuthnStatus` type family outright, with no shim. Both are v2-internal evolution of an alpha-only, no-v1-equivalent package, recorded because they change shapes this guide had already documented. Updated the WebAuthn section of `v1-to-v2.md` to match.
 - Corrected the `yubihsm-credential-password-bytes` map entry, which had gone stale: its `v2` line still said the credential-password parameters were "renamed with the `...Utf8` suffix", but `refactor(yubihsm,core): drop Utf8 param suffix and split prompt types` (`c5dc3aec`, in this range) dropped that suffix in favor of plain names (`credentialPassword`, `derivationPassword`, `currentPassword`, `newPassword`, `password`), matching the parallel Fido2/OpenPgp/Oath rename already recorded in the 2026-09-05 entry below. The changelog prose itself was already correct; only the map entry's `v2` line and notes needed the fix. No guide prose change was needed.
 - Confirmed no new migration-relevant content in this range for YubiHSM Auth or the Fido2/OpenPgp/Oath `...Utf8` parameter rename beyond the map correction above: the diff in this range is those same already-documented changes (2026-08-31, 2026-09-03, 2026-09-05 entries) landing on `yubikit` later than they were manually written up, not new substance.
-- No-impact items confirmed in this range that need no guide or map changes: the previously-public `IYubiKeyFactory`/`YubiKeyFactory` types (`src/Core/src/Devices/YubiKeyFactory.cs`) were deleted in favor of construction exclusively through the internal `YubiKeyDeviceManager` reached via the public static `YubiKeyManager` facade - this guide never referenced the factory types, and the architecture docs already describe `YubiKeyManager` as the sole discovery entry point, so there was no stale reference to correct; `CompositeYubiKey`/`HidYubiKey`/`PcscYubiKey` were already `internal` and are replaced by a new `internal` `YubiKeyDevice`, and `DeviceEventBroadcaster`/`DeviceEventStream` were already `internal` and are collapsed into a new `internal` `DeviceEventHub` - both are invisible to any public consumer; `ICredentialPrompt.cs` split `CredentialKind`/`CredentialPromptContext` into their own files with byte-for-byte identical content (pure code motion); `IWebAuthnBackend`/`PinUvAuthTokenSession`/the renamed `WebAuthnBackend` (formerly a differently-shaped session backend) all flipped `public` to `internal` or were already internal, consistent with the house style that backend/protocol machinery stays internal; and the `...Utf8`-suffix `paramName` threading fix for `ClientPin.ValidatePin` (Fido2) was already recorded in the 2026-09-05 entry.
+- No-impact items confirmed in this range that need no guide or map changes: the previously-public `IYubiKeyFactory`/`YubiKeyFactory` types (`src/Core/src/Devices/YubiKeyFactory.cs`) were deleted in favor of internal construction reached via the public static `YubiKeyManager` facade - this guide never referenced the factory types; `CompositeYubiKey`/`HidYubiKey`/`PcscYubiKey` were already `internal` and are replaced by `internal` `YubiKeyDevice`, while the already-internal `DeviceEventBroadcaster`/`DeviceEventStream` publication responsibilities now live in `DeviceChangeFeed` - these implementation types are invisible to public consumers; `ICredentialPrompt.cs` split `CredentialKind`/`CredentialPromptContext` into their own files with byte-for-byte identical content (pure code motion); `IWebAuthnBackend`/`PinUvAuthTokenSession`/the renamed `WebAuthnBackend` (formerly a differently-shaped session backend) all flipped `public` to `internal` or were already internal, consistent with the house style that backend/protocol machinery stays internal; and the `...Utf8`-suffix `paramName` threading fix for `ClientPin.ValidatePin` (Fido2) was already recorded in the 2026-09-05 entry.
 - `api-added.txt`/`api-removed.txt`/`public-api-candidates.txt` only surfaced an unrelated test-method rename (`DeviceChanges_DetectsRemoval` to `WatchAsync_DetectsRemoval` in `YubiKeyManagerStaticTests.cs`, following the `DeviceChanges` removal already documented in the 2026-09-04 entry); `namespace-changes.txt` and `package-changes.txt` were empty for this range.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `277920d9de48d4aedad7ecc5d00201a015b5a297`.
 

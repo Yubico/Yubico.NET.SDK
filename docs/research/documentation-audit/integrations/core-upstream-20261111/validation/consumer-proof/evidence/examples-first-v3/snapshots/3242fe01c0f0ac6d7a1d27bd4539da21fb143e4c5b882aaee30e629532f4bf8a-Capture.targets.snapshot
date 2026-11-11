@@ -1,0 +1,84 @@
+<Project>
+  <!-- Optional observation hook only. Never sets warning, analyzer, restore or compile-skip policy. -->
+  <PropertyGroup Condition="'$(AuditConsumerAttempt)' != '' and '$(MSBuildProjectName)' != 'toolchain' and $([System.String]::Copy('$(MSBuildProjectFullPath)').StartsWith('/home/rupicola/Code/y/yubikit-core-docs-integration/'))">
+    <_AuditConsumerEnabled>true</_AuditConsumerEnabled>
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <_AuditConsumerFolder>/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/attempts/$(AuditConsumerAttempt)/raw/$(MSBuildProjectName)</_AuditConsumerFolder>
+    <CompilerGeneratedFilesOutputPath>$(_AuditConsumerFolder)/generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+  <Target Name="AuditIntegration20261111BeforeCompiler" BeforeTargets="CoreCompile"
+          Condition="'$(_AuditConsumerEnabled)' == 'true'">
+    <Error Condition="Exists('$(_AuditConsumerFolder)/policy.txt')" Text="Preserve the previous consumer capture; select a fresh attempt." />
+    <MakeDir Directories="$(_AuditConsumerFolder)" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/before.txt" Lines="$(MSBuildProjectFullPath)" Overwrite="false" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/sources-before.txt" Lines="@(Compile-&gt;'%(FullPath)')" Overwrite="false" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/references-before.txt" Lines="@(ReferencePathWithRefAssemblies-&gt;'%(FullPath)')" Overwrite="false" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/analyzers-before.txt" Lines="@(Analyzer-&gt;'%(FullPath)')" Overwrite="false" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/configs-before.txt" Lines="@(EditorConfigFiles-&gt;'%(FullPath)')" Overwrite="false" />
+  </Target>
+  <Target Name="AuditIntegration20261111AfterCompiler" AfterTargets="CoreCompile"
+          Condition="'$(_AuditConsumerEnabled)' == 'true'">
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/sources.txt" Lines="@(Compile-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/references.txt" Lines="@(ReferencePathWithRefAssemblies-&gt;'%(FullPath)|%(MSBuildSourceProjectFile)|%(ReferenceSourceTarget)|%(FusionName)')" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/analyzers.txt" Lines="@(Analyzer-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/configs.txt" Lines="@(EditorConfigFiles-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/additional-files.txt" Lines="@(AdditionalFiles-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/imports.txt" Lines="$(MSBuildAllProjects)" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/project-references.txt" Lines="@(ProjectReference-&gt;'%(FullPath)|%(ReferenceOutputAssembly)|%(AdditionalProperties)|%(PrivateAssets)')" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/resolved-project-references.txt" Lines="@(_ResolvedProjectReferencePaths-&gt;'%(FullPath)|%(MSBuildSourceProjectFile)|%(OriginalProjectReferenceItemSpec)')" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/copy-local.txt" Lines="@(ReferenceCopyLocalPaths-&gt;'%(FullPath)|%(DestinationSubDirectory)|%(DestinationSubPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/native-assets.txt" Lines="@(NativeCopyLocalItems-&gt;'%(FullPath)|%(DestinationSubDirectory)|%(DestinationSubPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/csc.txt" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+    <ItemGroup>
+      <_AuditConsumerPolicy Include="NETCoreSdkVersion=$(NETCoreSdkVersion)" />
+      <_AuditConsumerPolicy Include="MSBuildVersion=$(MSBuildVersion)" />
+      <_AuditConsumerPolicy Include="MSBuildSDKsPath=$(MSBuildSDKsPath)" />
+      <_AuditConsumerPolicy Include="MSBuildToolsPath=$(MSBuildToolsPath)" />
+      <_AuditConsumerPolicy Include="CscToolPath=$(CscToolPath)" />
+      <_AuditConsumerPolicy Include="CscToolExe=$(CscToolExe)" />
+      <_AuditConsumerPolicy Include="RoslynTargetsPath=$(RoslynTargetsPath)" />
+      <_AuditConsumerPolicy Include="RoslynCompilerType=$(RoslynCompilerType)" />
+      <_AuditConsumerPolicy Include="UseSharedCompilation=$(UseSharedCompilation)" />
+      <_AuditConsumerPolicy Include="MSBuildProjectFullPath=$(MSBuildProjectFullPath)" />
+      <_AuditConsumerPolicy Include="TargetFramework=$(TargetFramework)" />
+      <_AuditConsumerPolicy Include="Configuration=$(Configuration)" />
+      <_AuditConsumerPolicy Include="LangVersion=$(LangVersion)" />
+      <_AuditConsumerPolicy Include="Nullable=$(Nullable)" />
+      <_AuditConsumerPolicy Include="WarningLevel=$(WarningLevel)" />
+      <_AuditConsumerPolicy Include="TreatWarningsAsErrors=$(TreatWarningsAsErrors)" />
+      <_AuditConsumerPolicy Include="WarningsAsErrors=$([System.String]::Copy('$(WarningsAsErrors)').Replace(';', ','))" />
+      <_AuditConsumerPolicy Include="WarningsNotAsErrors=$([System.String]::Copy('$(WarningsNotAsErrors)').Replace(';', ','))" />
+      <_AuditConsumerPolicy Include="NoWarn=$([System.String]::Copy('$(NoWarn)').Replace(';', ','))" />
+      <_AuditConsumerPolicy Include="AnalysisMode=$(AnalysisMode)" />
+      <_AuditConsumerPolicy Include="AnalysisLevel=$(AnalysisLevel)" />
+      <_AuditConsumerPolicy Include="EnableNETAnalyzers=$(EnableNETAnalyzers)" />
+      <_AuditConsumerPolicy Include="RunAnalyzersDuringBuild=$(RunAnalyzersDuringBuild)" />
+      <_AuditConsumerPolicy Include="RunAnalyzers=$(RunAnalyzers)" />
+      <_AuditConsumerPolicy Include="SkipAnalyzers=$(_SkipAnalyzers)" />
+      <_AuditConsumerPolicy Include="SkipCompilerExecution=$(SkipCompilerExecution)" />
+      <_AuditConsumerPolicy Include="DesignTimeBuild=$(DesignTimeBuild)" />
+      <_AuditConsumerPolicy Include="ProvideCommandLineArgs=$(ProvideCommandLineArgs)" />
+      <_AuditConsumerPolicy Include="EmitCompilerGeneratedFiles=$(EmitCompilerGeneratedFiles)" />
+      <_AuditConsumerPolicy Include="CompilerGeneratedFilesOutputPath=$(CompilerGeneratedFilesOutputPath)" />
+      <_AuditConsumerPolicy Include="ProjectAssetsFile=$(ProjectAssetsFile)" />
+      <_AuditConsumerPolicy Include="MSBuildProjectExtensionsPath=$(MSBuildProjectExtensionsPath)" />
+      <_AuditConsumerPolicy Include="BaseIntermediateOutputPath=$(BaseIntermediateOutputPath)" />
+      <_AuditConsumerPolicy Include="IntermediateOutputPath=$(IntermediateOutputPath)" />
+      <_AuditConsumerPolicy Include="BaseOutputPath=$(BaseOutputPath)" />
+      <_AuditConsumerPolicy Include="OutputPath=$(OutputPath)" />
+      <_AuditConsumerPolicy Include="TargetPath=$(TargetPath)" />
+      <_AuditConsumerPolicy Include="TargetDir=$(TargetDir)" />
+      <_AuditConsumerPolicy Include="Version=$(Version)" />
+      <_AuditConsumerPolicy Include="AssemblyVersion=$(AssemblyVersion)" />
+      <_AuditConsumerPolicy Include="YubiKitVersion=$(YubiKitVersion)" />
+      <_AuditConsumerPolicy Include="IsTestProject=$(IsTestProject)" />
+      <_AuditConsumerPolicy Include="OutputType=$(OutputType)" />
+      <_AuditConsumerPolicy Include="CustomAfterMicrosoftCommonTargets=$(CustomAfterMicrosoftCommonTargets)" />
+      <_AuditConsumerPolicy Include="BoundaryCorePath=$(BoundaryCorePath)" />
+      <_AuditConsumerPolicy Include="BoundaryNativeVersion=$(BoundaryNativeVersion)" />
+      <_AuditConsumerPolicy Include="BoundaryComparisonVariant=$(BoundaryComparisonVariant)" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(_AuditConsumerFolder)/policy.txt" Lines="@(_AuditConsumerPolicy)" Overwrite="true" />
+  </Target>
+</Project>

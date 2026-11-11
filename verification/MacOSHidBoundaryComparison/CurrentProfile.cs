@@ -259,7 +259,7 @@ internal static class CurrentProfile
         if (!OperatingSystem.IsMacOS() || serial <= 0 || mode is not ("normal" or "idle")) return 2;
         try
         {
-            var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido, forceRescan: true);
+            var devices = await YubiKeyManager.FindAllAsync();
             var matches = devices.Where(d => d.SerialNumber == serial && d.SupportsConnection(ConnectionType.HidFido)).ToArray();
             if (matches.Length != 1) return 4;
             var row = mode == "normal" ? await MeasureNormal(matches[0]) : await MeasureIdle(matches[0]);
@@ -271,7 +271,6 @@ internal static class CurrentProfile
             Console.Error.WriteLine(exception.GetType().Name);
             return 6;
         }
-        finally { await YubiKeyManager.ShutdownAsync(); }
     }
 
     private static async Task<Row> MeasureNormal(IYubiKey device)

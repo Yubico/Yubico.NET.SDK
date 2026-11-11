@@ -1,0 +1,140 @@
+{
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "build",
+    "--project",
+    "Yubico.YubiKit.AuditIntegration20261111.Examples",
+    "--clean"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T19:40:21.945113+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [
+    "build"
+  ],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-examples-build-first",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/command-journals/consumer-examples-build-first",
+  "qualification_faults": [],
+  "exit_code": 0,
+  "status": "passed",
+  "errors": [],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 3044079,
+    "sid": 3044079,
+    "leader_start_ticks": 80381177,
+    "before": {
+      "members": [],
+      "escaped": []
+    },
+    "signals": [],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": {
+    "targets": [
+      "test-infrastructure-qa",
+      "native-aot-contract-qa",
+      "build"
+    ],
+    "projects": 0,
+    "executed": 0,
+    "skipped": 0,
+    "failed": 0,
+    "warnings": 0
+  },
+  "retained": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204022-205-build/01-clean-AuditIntegration20261111.Examples.log",
+        "bytes": 10451,
+        "sha256": "9f8ae7e6f249761eeb39b1ff7a30b4d2382772710676fe5ae636fe079b42c4ba"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-examples-build-first/toolchain/20261111-204022-205-build/01-clean-AuditIntegration20261111.Examples.log",
+        "bytes": 10451,
+        "sha256": "9f8ae7e6f249761eeb39b1ff7a30b4d2382772710676fe5ae636fe079b42c4ba"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204022-205-build/02-build-AuditIntegration20261111.Examples.log",
+        "bytes": 1269,
+        "sha256": "fd204feb3157bb859686510877c88efa3ec1f00c2683ebabf11d0eb5752cb07e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-examples-build-first/toolchain/20261111-204022-205-build/02-build-AuditIntegration20261111.Examples.log",
+        "bytes": 1269,
+        "sha256": "fd204feb3157bb859686510877c88efa3ec1f00c2683ebabf11d0eb5752cb07e"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204022-205-build/result.json",
+        "bytes": 740,
+        "sha256": "56cee605eef63700eab5b7641d0511571b9ec2f1cc4a01b226dc256eaaba8538"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-examples-build-first/toolchain/20261111-204022-205-build/result.json",
+        "bytes": 740,
+        "sha256": "56cee605eef63700eab5b7641d0511571b9ec2f1cc4a01b226dc256eaaba8538"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204022-205-build/result.txt",
+        "bytes": 465,
+        "sha256": "f57ee2ce7327f139456cc39f09e07d5646554b9c3fb3231c7f10cf30f5afaa46"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-examples-build-first/toolchain/20261111-204022-205-build/result.txt",
+        "bytes": 465,
+        "sha256": "f57ee2ce7327f139456cc39f09e07d5646554b9c3fb3231c7f10cf30f5afaa46"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-204022-205-build/run.log",
+        "bytes": 2289,
+        "sha256": "0edfbfc4a060a7276079f17393f47bf61bc8909b7285c9fc70b7ea905b47e1dd"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-examples-build-first/toolchain/20261111-204022-205-build/run.log",
+        "bytes": 2289,
+        "sha256": "0edfbfc4a060a7276079f17393f47bf61bc8909b7285c9fc70b7ea905b47e1dd"
+      }
+    }
+  ],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-examples-build-first/stdout.log",
+      "bytes": 1918,
+      "sha256": "8a371c6cb27ea9e1b2deb9747b86d70c08550deb23b2dbc613ed8bd0fea42fb9"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-examples-build-first/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finished": "2026-11-11T19:40:24.965534+00:00"
+}

@@ -1,0 +1,9 @@
+<Project>
+  <Import Project="../../Directory.Build.props" />
+  <!-- Keep the two runner restore/compile outputs separate; referenced Core builds in their own checkouts. -->
+  <PropertyGroup>
+    <BoundaryComparisonVariant Condition="'$(BoundaryComparisonVariant)' == ''">local</BoundaryComparisonVariant>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj/$(BoundaryComparisonVariant)/</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)bin/$(BoundaryComparisonVariant)/build/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

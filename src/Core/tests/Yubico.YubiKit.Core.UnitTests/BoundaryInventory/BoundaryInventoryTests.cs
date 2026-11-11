@@ -219,11 +219,12 @@ public class BoundaryInventoryTests
     {
         var root = BoundaryScanner.CoreSourceRoot();
         var sites = BoundaryScanner.ScanDirectory(root);
-        Assert.Equal(206, sites.Count);
+        // Upstream's 205 sites plus the independently retained 13-site Linux delta.
+        Assert.Equal(218, sites.Count);
         Assert.Equal(sites.Count, sites.Select(site => site.Id).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(134, sites.Count(site => site.Kind == "native-import"));
-        Assert.Equal(25, sites.Count(site => site.Kind == "blocking-wait"));
-        Assert.Equal(15, sites.Count(site => site.Kind == "scheduling"));
+        Assert.Equal(132, sites.Count(site => site.Kind == "native-import"));
+        Assert.Equal(36, sites.Count(site => site.Kind == "blocking-wait"));
+        Assert.Equal(18, sites.Count(site => site.Kind == "scheduling"));
         Assert.Equal(21, sites.Count(site => site.Kind == "dispatch-gap"));
         Assert.Equal(6, sites.Count(site => site.Kind == "callback-registration"));
         Assert.Equal(0, sites.Count(site => site.Kind == "callback-conversion"));
@@ -236,7 +237,8 @@ public class BoundaryInventoryTests
         Assert.Equal(1, manifest.Version);
         Assert.All(manifest.Families, family => Assert.Contains("outstanding", family.Status));
         Assert.All(manifest.Families, family => Assert.DoesNotContain("verified", family.Status));
-        Assert.Empty(BoundaryManifest.Validate(sites, manifest));
+        var errors = BoundaryManifest.Validate(sites, manifest);
+        Assert.True(errors.Count == 0, string.Join(Environment.NewLine, errors));
         Assert.Equal(sites.Count, manifest.Families.Sum(family => family.Entries.Length));
     }
 

@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/verify-recovery.py"
+  ],
+  "exit_code": 0,
+  "stdout_sha256": "2ce982a2e47f7c6aeabdcfb1277f463750bdb6bbc58f541e195bb3f3540fa55e",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

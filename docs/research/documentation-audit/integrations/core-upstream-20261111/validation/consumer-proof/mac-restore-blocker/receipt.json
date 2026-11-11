@@ -1,0 +1,49 @@
+{
+  "status": "read-only diagnosis and unexecuted nonsecret property-routing proposal",
+  "files": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/inspect.py",
+      "bytes": 10233,
+      "sha256": "2e88ba787532c2623b91b1141aab23900fd3e035259b69207619deebeccb593f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/report.json",
+      "bytes": 18536,
+      "sha256": "aa03a288a11e72145d90ecb3fe146b84c0519b1be0475d89ebbaa6f74ab48259"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/credential-presence-supplement.json",
+      "bytes": 2099,
+      "sha256": "4cb809fbaf9961aa1e4e65fb75786f7d766cdf871333d22cb5007acd3d269375"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/proposed-lane.sh",
+      "bytes": 644,
+      "sha256": "f2b645b8694c1aedcec8c7d779ffb8fd939fb288ee23e6de28ee4d6cdf73211a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/handoff.md",
+      "bytes": 7576,
+      "sha256": "eeed5f8086e230f56656ad6e6041bae74b1e71bc6ed1762db35272067df42a7b"
+    }
+  ],
+  "accepted_v5_review": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/independent-review.md",
+    "bytes": 14912,
+    "sha256": "bec3855a4deb03b874aa5c0bc717a6864e0daee29f4f2d3fbc49db41ffd96b49"
+  },
+  "accepted_v5_receipt": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/receipt.json",
+    "bytes": 12123,
+    "sha256": "174bef5e532a95386a0e573bef9692b68e1e90824186b930779868f72eaabc39"
+  },
+  "original_failed_build_receipt": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-build-first/receipt.json",
+    "bytes": 6089,
+    "sha256": "7c907ffc1d2536aaaf4d1a73987fcd906da9ac191a1bb875d1b2eb82e34b4f68"
+  },
+  "preserved_records": 30,
+  "raw_configs_or_credentials_copied": false,
+  "sdk_or_auth_operation_executed": false,
+  "expected_next_evaluation": "Desired 1.18.1 override and audit-integration-20261111 restore variant must be observed before any compilation/capture is accepted."
+}

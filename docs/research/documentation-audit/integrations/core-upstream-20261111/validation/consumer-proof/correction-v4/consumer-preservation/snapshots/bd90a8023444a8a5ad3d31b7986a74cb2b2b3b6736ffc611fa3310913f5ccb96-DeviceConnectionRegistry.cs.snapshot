@@ -1,0 +1,411 @@
+// Copyright 2026 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System.Collections.Concurrent;
+using Yubico.YubiKit.Core.Abstractions;
+
+namespace Yubico.YubiKit.Core.Devices;
+
+/// <summary>
+///     Process-wide ownership coordinator keyed by stable member interface IDs. A physical-device connection
+///     claims all known member IDs; discovery takes one nonblocking per-interface lease.
+/// </summary>
+/// <remarks>
+///     <para>
+///         The lease belongs to the CONNECTION, not to a session: it is acquired before physical connection
+///         creation and released if creation fails or when that connection is disposed. Sessions come and go
+///         over a connection without touching it.
+///     </para>
+///     <para>
+///         A grouped physical YubiKey admits one live connection across CCID, FIDO HID, and OTP HID. A second
+///         acquisition through any known member is refused immediately with
+///         <see cref="ConnectionInUseException" />; it never waits for an unbounded holder to end.
+///     </para>
+///     <para>
+///         Discovery holds its exclusive lease across physical connect, device-info exchange, and connection
+///         disposal. Waiting connections have priority over a later discovery attempt so repeated scans cannot
+///         starve a session.
+///     </para>
+///     <para>
+///         LIMITATION: in-process only. A different process holding the card can still interfere; that is
+///         outside what this registry can see. Keyed by the PER-INTERFACE DeviceId (reader name / HID path
+///         based), which is stable across scans while the device stays plugged, so registrations made through
+///         devices from one scan are visible to readers created in later scans. For a composite,
+///         <see cref="ResolveInterfaceId" /> resolves the requested connection to a member instead of using
+///         the composite DeviceId, which names the evidence tier and is not stable across scans. Standalone
+///         devices use their own DeviceId. Idle coordinator entries are retained
+///         for the process lifetime: this is bounded by unique interface IDs observed and avoids unsafe
+///         remove/recreate races between lease acquisition and dictionary eviction.
+///     </para>
+///     <para>
+///         Exclusion requires an overlapping member ID. YubiKeys from disjoint scoped scans (for example
+///         CCID-only and FIDO-only) have disjoint claims, even if they report the same serial or topology key.
+///         No global physical-identity alias is registered; callers must coordinate such YubiKeys themselves.
+///     </para>
+/// </remarks>
+internal static class DeviceConnectionRegistry
+{
+    private static readonly ConcurrentDictionary<string, InterfaceOwnership> Interfaces = new();
+
+    /// <summary>Whether this process currently holds at least one live connection to the interface.</summary>
+    public static bool IsInUse(string deviceId) =>
+        Interfaces.TryGetValue(deviceId, out var ownership) && ownership.HasConnections;
+
+    /// <summary>
+    ///     Whether the interface of <paramref name="device" /> that would serve <paramref name="connection" />
+    ///     is in use. Published-device slots are resolved through
+    ///     <see cref="YubiKeyDevice.TryResolveSlot" />, the same routing a connect uses, so the check
+    ///     matches the interface a read would actually open.
+    /// </summary>
+    public static bool IsInterfaceInUse(IYubiKey device, ConnectionType connection) =>
+        IsInUse(ResolveInterfaceId(device, connection));
+
+    /// <summary>
+    ///     Resolves the member interface ID serving <paramref name="connection" />. Discovery uses this to
+    ///     coordinate one interface; grouped public connections acquire the complete member lease scope.
+    /// </summary>
+    public static string ResolveInterfaceId(IYubiKey device, ConnectionType connection)
+    {
+        if (device is not YubiKeyDevice published)
+            return device.DeviceId;
+
+        return published.TryResolveSlot(connection, out var slot)
+            ? slot.InterfaceId
+            : device.DeviceId;
+    }
+    /// <summary>
+    ///     Acquires every known interface lease for one physical YubiKey as a single logical registration,
+    ///     before physical connection creation. Interface ids are de-duplicated and acquired in ordinal
+    ///     order; partial acquisition rolls back in reverse order. Waits while discovery owns an interface;
+    ///     cancellation applies only while waiting. Standalone devices pass a one-element scope.
+    /// </summary>
+    /// <exception cref="ConnectionInUseException">Any member ID already has a live connection.</exception>
+    public static async ValueTask<IDisposable> AcquireConnectionAsync(
+        IReadOnlyCollection<string> interfaceIds,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(interfaceIds);
+        if (interfaceIds.Count == 0)
+            throw new ArgumentException("At least one interface id is required.", nameof(interfaceIds));
+
+        var uniqueIds = new HashSet<string>(interfaceIds, StringComparer.Ordinal);
+        var orderedIds = new string[uniqueIds.Count];
+        uniqueIds.CopyTo(orderedIds);
+        Array.Sort(orderedIds, StringComparer.Ordinal);
+
+        var acquired = new List<IDisposable>(orderedIds.Length);
+        try
+        {
+            foreach (var id in orderedIds)
+            {
+                acquired.Add(await GetOwnership(id)
+                    .AcquireConnectionAsync(id, cancellationToken)
+                    .ConfigureAwait(false));
+            }
+
+            return new CompositeRegistration(acquired);
+        }
+        catch
+        {
+            for (var i = acquired.Count - 1; i >= 0; i--)
+                acquired[i].Dispose();
+            throw;
+        }
+    }
+
+    /// <summary>
+    ///     Attempts to acquire exclusive discovery ownership without waiting. Returns <c>null</c> while any
+    ///     connection owns or is already waiting for the interface. Throws a fresh
+    ///     <see cref="UnrecoveredConnectionException" /> when an earlier native owner has not proven release.
+    /// </summary>
+    public static IDisposable? TryAcquireDiscovery(string deviceId, IDisposable? nativeAdmission = null) =>
+        GetOwnership(deviceId).TryAcquireDiscovery(nativeAdmission);
+
+    /// <summary>
+    ///     Nonblocking precheck for <see cref="TryAcquireDiscovery" />: whether discovery could take the
+    ///     interface right now, meaning no discovery lease, live connection, or waiting connection holds it.
+    ///     An interface this process has never registered is available. The answer can change before the
+    ///     caller acts on it; only <see cref="TryAcquireDiscovery" /> claims the interface atomically.
+    /// </summary>
+    /// <exception cref="UnrecoveredConnectionException">
+    ///     An earlier native owner of the interface has not proven release.
+    /// </exception>
+    internal static bool IsDiscoveryAvailable(string deviceId) =>
+        !Interfaces.TryGetValue(deviceId, out var ownership) || ownership.IsDiscoveryAvailable;
+
+    internal static Task WaitForRecoveryForTest(string deviceId) =>
+        GetOwnership(deviceId).WaitForRecovery();
+
+    private static InterfaceOwnership GetOwnership(string deviceId) =>
+        Interfaces.GetOrAdd(deviceId, static id => new InterfaceOwnership(id));
+
+    private enum LeaseKind
+    {
+        Connection,
+        Discovery
+    }
+
+    private sealed class InterfaceOwnership(string deviceId)
+    {
+        private readonly Lock _sync = new();
+        private int _connectionCount;
+        private int _waitingConnections;
+        private bool _discoveryActive;
+        private TaskCompletionSource? _discoveryReleased;
+        private Exception? _unrecoveredFailure;
+        private TaskCompletionSource? _recoveryCompletion;
+
+        /// <summary>At least one live connection lease is held.</summary>
+        public bool HasConnections
+        {
+            get
+            {
+                lock (_sync)
+                    return _connectionCount > 0;
+            }
+        }
+
+        /// <summary>No discovery lease, live connection, or waiting connection holds this interface.</summary>
+        /// <exception cref="UnrecoveredConnectionException">An earlier native owner has not proven release.</exception>
+        public bool IsDiscoveryAvailable
+        {
+            get
+            {
+                lock (_sync)
+                {
+                    ThrowIfUnrecovered();
+                    return !_discoveryActive && _connectionCount == 0 && _waitingConnections == 0;
+                }
+            }
+        }
+
+        public async ValueTask<IDisposable> AcquireConnectionAsync(
+            string deviceId,
+            CancellationToken cancellationToken)
+        {
+            Task discoveryReleased;
+            lock (_sync)
+            {
+                ThrowIfUnrecovered();
+
+                if (!_discoveryActive)
+                    return Claim(deviceId);
+
+                _waitingConnections++;
+                discoveryReleased = _discoveryReleased?.Task
+                    ?? throw new InvalidOperationException("Discovery ownership has no release signal.");
+            }
+
+            try
+            {
+                await discoveryReleased.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                lock (_sync)
+                    _waitingConnections--;
+                throw;
+            }
+
+            lock (_sync)
+            {
+                _waitingConnections--;
+                if (_discoveryActive)
+                    throw new InvalidOperationException("Discovery ownership was reacquired ahead of a waiting connection.");
+
+                ThrowIfUnrecovered();
+
+                return Claim(deviceId);
+            }
+        }
+
+        /// <summary>Takes the lease, or refuses when the interface is already held.</summary>
+        private IDisposable Claim(string deviceId)
+        {
+            ThrowIfUnrecovered();
+
+            if (_connectionCount > 0)
+                throw new ConnectionInUseException(
+                    $"This YubiKey already has a live connection in this process (held interface: '{deviceId}'). " +
+                    "A physical YubiKey supports one live connection at a time across all interfaces. " +
+                    "Dispose the existing connection first; connections are reused sequentially, not in parallel.");
+
+            _connectionCount++;
+            return new Registration(this, LeaseKind.Connection);
+        }
+
+        /// <summary>
+        ///     Records that native work on this interface has not proven release. Later acquisitions throw
+        ///     <see cref="UnrecoveredConnectionException" />. If a discovery lease is held, the state clears when
+        ///     that lease is released (its native teardown finished late) and a connection already waiting for
+        ///     the lease fails now; otherwise it lasts for the process. The first failure is kept.
+        /// </summary>
+        public void MarkUnrecovered(Exception failure)
+        {
+            TaskCompletionSource? releaseSignal;
+            UnrecoveredConnectionException? waitingFailure = null;
+            lock (_sync)
+            {
+                _unrecoveredFailure ??= failure;
+                _recoveryCompletion ??= new TaskCompletionSource(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
+                releaseSignal = _discoveryActive ? _discoveryReleased : null;
+                if (releaseSignal is not null)
+                    waitingFailure = CreateUnrecoveredFailure();
+            }
+
+            if (releaseSignal is not null)
+                releaseSignal.TrySetException(waitingFailure!);
+        }
+
+        /// <summary>Completes when a discovery-lease release clears an unrecovered state; already complete if none.</summary>
+        public Task WaitForRecovery()
+        {
+            lock (_sync)
+                return _recoveryCompletion?.Task ?? Task.CompletedTask;
+        }
+
+        /// <summary>Takes the discovery lease without waiting, or returns <c>null</c> while anything else holds or awaits the interface.</summary>
+        /// <exception cref="UnrecoveredConnectionException">An earlier native owner has not proven release.</exception>
+        public IDisposable? TryAcquireDiscovery(IDisposable? nativeAdmission)
+        {
+            lock (_sync)
+            {
+                ThrowIfUnrecovered();
+                if (_discoveryActive || _connectionCount > 0 || _waitingConnections > 0)
+                    return null;
+
+                _discoveryActive = true;
+                _discoveryReleased = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                return new Registration(this, LeaseKind.Discovery, nativeAdmission);
+            }
+        }
+
+        private void ThrowIfUnrecovered()
+        {
+            if (_unrecoveredFailure is not null)
+                throw CreateUnrecoveredFailure();
+        }
+
+        private UnrecoveredConnectionException CreateUnrecoveredFailure() =>
+            new(
+                $"A previous native operation for interface '{deviceId}' was not proven released.",
+                _unrecoveredFailure ?? throw new InvalidOperationException("No unrecovered failure was recorded."));
+
+        /// <summary>
+        ///     Returns one lease. Releasing the discovery lease also clears an unrecovered state and wakes
+        ///     waiting connections.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">No matching lease is held.</exception>
+        public void Release(LeaseKind kind)
+        {
+            TaskCompletionSource? releaseSignal = null;
+            TaskCompletionSource? recoverySignal = null;
+            lock (_sync)
+            {
+                if (kind == LeaseKind.Connection)
+                {
+                    if (_connectionCount <= 0)
+                        throw new InvalidOperationException("Connection ownership was released without a matching acquisition.");
+
+                    _connectionCount--;
+                    return;
+                }
+
+                if (!_discoveryActive)
+                    throw new InvalidOperationException("Discovery ownership was released without a matching acquisition.");
+
+                _discoveryActive = false;
+                _unrecoveredFailure = null;
+                recoverySignal = _recoveryCompletion;
+                _recoveryCompletion = null;
+                releaseSignal = _discoveryReleased;
+                _discoveryReleased = null;
+            }
+
+            releaseSignal?.TrySetResult();
+            recoverySignal?.TrySetResult();
+        }
+    }
+
+    private interface IUnrecoveredRegistration : IDisposable
+    {
+        void MarkUnrecovered(Exception failure);
+    }
+
+    private sealed class Registration(
+        InterfaceOwnership ownership,
+        LeaseKind kind,
+        IDisposable? nativeAdmission = null) : IUnrecoveredRegistration
+    {
+        private readonly Lock _sync = new();
+        private int _disposed;
+
+        public void Dispose()
+        {
+            lock (_sync)
+            {
+                if (_disposed != 0)
+                    return;
+
+                _disposed = 1;
+                ownership.Release(kind);
+                nativeAdmission?.Dispose();
+            }
+        }
+
+        public void MarkUnrecovered(Exception failure)
+        {
+            lock (_sync)
+            {
+                if (_disposed != 0)
+                    return;
+
+                ownership.MarkUnrecovered(failure);
+            }
+        }
+    }
+
+    private sealed class CompositeRegistration(IReadOnlyList<IDisposable> registrations) : IUnrecoveredRegistration
+    {
+        private int _disposed;
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+                return;
+
+            for (var i = registrations.Count - 1; i >= 0; i--)
+                registrations[i].Dispose();
+        }
+
+        public void MarkUnrecovered(Exception failure)
+        {
+            foreach (var registration in registrations)
+                ((IUnrecoveredRegistration)registration).MarkUnrecovered(failure);
+        }
+    }
+
+    /// <summary>Marks the interfaces behind a registration from this registry as unrecovered.</summary>
+    /// <exception cref="InvalidCastException"><paramref name="registration" /> did not come from this registry.</exception>
+    internal static void MarkUnrecovered(IDisposable registration, Exception failure) =>
+        ((IUnrecoveredRegistration)registration).MarkUnrecovered(failure);
+
+    /// <summary>Like <see cref="MarkUnrecovered" />, but ignores registrations from elsewhere.</summary>
+    internal static void TryMarkUnrecovered(IDisposable registration, Exception failure)
+    {
+        if (registration is IUnrecoveredRegistration tracked)
+            tracked.MarkUnrecovered(failure);
+    }
+}

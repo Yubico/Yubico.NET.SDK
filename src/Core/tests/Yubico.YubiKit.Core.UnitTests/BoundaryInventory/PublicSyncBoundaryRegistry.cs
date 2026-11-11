@@ -11,6 +11,14 @@ internal static class PublicSyncBoundaryRegistry
     // Independent of the rows: removing an entry cannot silently reduce the supported scope.
     private static readonly (string Entry, string PublicType, string PublicSymbol, string Owner, string Symbol)[] Required =
     [
+        ("linux input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidInterface", "ConnectToIOReports"),
+        ("linux input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "GetReport"),
+        ("linux input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "SetReport"),
+        ("linux input dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "Dispose"),
+        ("linux feature open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToFeatureReports", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidInterface", "ConnectToFeatureReports"),
+        ("linux feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "GetReport"),
+        ("linux feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "SetReport"),
+        ("linux feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "Dispose"),
         ("input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidInterface", "ConnectToIOReports"),
         ("input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "GetReport"),
         ("input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "SetReport"),
@@ -25,13 +33,20 @@ internal static class PublicSyncBoundaryRegistry
         ("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose"),
         ("listener start", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start"),
         ("listener stop", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop"),
-        ("manager shutdown", "Yubico.YubiKit.Core.Devices.YubiKeyManager", "Shutdown", "Yubico.YubiKit.Core.Devices.YubiKeyManager", "Shutdown"),
         ("HID scan dispatch", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync")
     ];
 
     // These are reachability links, not assertions of native drain. Behavioral evidence is run separately.
     internal static readonly PublicSyncBoundaryRow[] Rows =
     [
+        new("linux input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidInterface", "ConnectToIOReports", "LinuxDirectFacadeAcceptanceTests.InputOpen_MetadataFailureClosesPartialOwner"),
+        new("linux input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "GetReport", "LinuxFidoHidConnectionTests.DirectFacade_DescriptorSizesAndArbitraryOutputLengthSurviveSharedOwner"),
+        new("linux input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "SetReport", "LinuxDirectFacadeAcceptanceTests.InputSet_HeldWriteBlocksSyncCallerAndDrainsBeforeClose"),
+        new("linux input dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "Dispose", "LinuxDirectFacadeAcceptanceTests.InputDispose_HeldQuiescenceBlocksSyncDisposeAndSharesCheckedClose"),
+        new("linux feature open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToFeatureReports", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidInterface", "ConnectToFeatureReports", "LinuxDirectFacadeAcceptanceTests.FeatureOpen_FailurePreservesOriginalWithoutClosingUnacquiredDescriptor"),
+        new("linux feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "GetReport", "LinuxOtpHidConnectionTests.DirectFeatureFacade_PreservesNonEightSetLengthAndFixedGetMetadata"),
+        new("linux feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "SetReport", "LinuxDirectFacadeAcceptanceTests.FeatureSet_HeldIoctlBlocksSyncCallerAndPreservesExpertLength"),
+        new("linux feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidFeatureReportConnection", "Dispose", "LinuxDirectFacadeAcceptanceTests.FeatureDispose_HeldCloseBlocksSyncDisposeAndSharesOutcome"),
         new("input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidInterface", "ConnectToIOReports", "MacOSHidIOCompatibilityTests.FailedConstructorPreservesOpenFailureAndReleasesDevice"),
         new("input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "GetReport", "MacOSHidIOCompatibilityTests.TimeoutDetachesReadAndLateReportIsAvailableOnRetry"),
         new("input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "SetReport", "MacOSHidIOCompatibilityTests.ArbitraryOutputRetainsBorrowUntilWorkerReturnsAndIsCleared"),
@@ -46,8 +61,6 @@ internal static class PublicSyncBoundaryRegistry
         new("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_SynchronousDispose_DrainsHeldNativeTransmitBeforeReleasingContext"),
         new("listener start", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start", "MacOSHidListenerLifetimeTests.Start_RegistersAndSchedulesBeforeOpen_ThenRunsAndClosesBeforeRelease"),
         new("listener stop", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop", "MacOSHidListenerLifetimeTests.CallbackSelfStop_DoesNotJoinItself_AndDrainsBeforeRelease"),
-        // A parked publication proves late results are silenced after bounded disposal, not native drain.
-        new("manager shutdown", "Yubico.YubiKit.Core.Devices.YubiKeyManager", "Shutdown", "Yubico.YubiKit.Core.Devices.YubiKeyManager", "Shutdown", "YubiKeyDeviceManagerTests.DisposeAsync_WithAPublicationResumingAfterDisposeReturned_EmitsNothing"),
         // Task.Run is a per-call dispatch, not a bounded executor or a cancellable native operation.
         new("HID scan dispatch", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync", "FindHidInterfacesBoundaryTests.WithheldScanReturnsPendingWithoutBlockingInvocationAndCancellationWaitsForEnumeration")
     ];
@@ -57,24 +70,24 @@ internal static class PublicSyncBoundaryRegistry
         var rows = input.ToArray();
         var errors = new List<string>();
         var core = typeof(UsbSmartCardConnection).Assembly;
-        foreach (var required in Required)
+        foreach (var (Entry, PublicType, PublicSymbol, Owner, Symbol) in Required)
         {
-            var matches = rows.Where(row => row.Entry == required.Entry).ToArray();
+            var matches = rows.Where(row => row.Entry == Entry).ToArray();
             if (matches.Length != 1)
             {
-                errors.Add($"missing entry: {required.Entry} (found {matches.Length})");
+                errors.Add($"missing entry: {Entry} (found {matches.Length})");
                 continue;
             }
             var row = matches[0];
-            if (row.PublicType != required.PublicType || row.PublicSymbol != required.PublicSymbol)
+            if (row.PublicType != PublicType || row.PublicSymbol != PublicSymbol)
                 errors.Add($"wrong public symbol: {row.Entry}");
-            if (row.Owner != required.Owner || row.Symbol != required.Symbol)
+            if (row.Owner != Owner || row.Symbol != Symbol)
                 errors.Add($"wrong owner: {row.Entry}");
-            var publicType = Type.GetType(required.PublicType) ?? core.GetType(required.PublicType);
-            var ownerType = core.GetType(required.Owner);
-            if (!HasMethod(publicType, required.PublicSymbol))
+            var publicType = Type.GetType(PublicType) ?? core.GetType(PublicType);
+            var ownerType = core.GetType(Owner);
+            if (!HasMethod(publicType, PublicSymbol))
                 errors.Add($"missing public symbol: {row.Entry}");
-            if (!HasMethod(ownerType, required.Symbol))
+            if (!HasMethod(ownerType, Symbol))
                 errors.Add($"missing internal owner symbol: {row.Entry}");
             if (publicType is not null && ownerType is not null && !publicType.IsAssignableFrom(ownerType))
                 errors.Add($"owner does not implement public contract: {row.Entry}");

@@ -1,0 +1,56 @@
+{
+  "source": "scripts/toolchain/Context.cs and Discovery.cs; filesystem emulation, no toolchain invocation",
+  "build_selectors": {
+    "Core": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+    ],
+    "Yubico.YubiKit.Core": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+    ],
+    "AuditMerge20261111.Examples": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/src/Yubico.YubiKit.AuditMerge20261111.Examples.csproj"
+    ],
+    "AuditMerge20261111.Consumers": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumers/src/Yubico.YubiKit.AuditMerge20261111.Consumers.csproj"
+    ],
+    "AuditMerge20261111.MacComparison": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/mac-comparison/src/Yubico.YubiKit.AuditMerge20261111.MacComparison.csproj"
+    ]
+  },
+  "unit_selectors": {
+    "Yubico.YubiKit.Core.UnitTests": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+    ],
+    "Yubico.YubiKit.Cli.Shared.UnitTests": [
+      "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Yubico.YubiKit.Cli.Shared.UnitTests.csproj"
+    ],
+    "Yubico.YubiKit.Cli.Commands.UnitTests": [
+      "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj"
+    ],
+    "Yubico.YubiKit.Oath.UnitTests": [
+      "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj"
+    ],
+    "Core": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+    ]
+  },
+  "all_unit_projects": [
+    "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj",
+    "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Yubico.YubiKit.Cli.Shared.UnitTests.csproj",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+    "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj",
+    "src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj",
+    "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj",
+    "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj",
+    "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+    "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj"
+  ]
+}

@@ -34,7 +34,7 @@ internal static class BioProtocol
     private const byte TagVerifyUv = 0x03;
     private const int TemporaryPinLength = 16;
     private const int ShortTlvHeaderLength = 2;
-    private static ILogger Logger => YubiKitLogging.CreateLogger("Yubico.YubiKit.Piv.Bio.BioProtocol");
+    private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(BioProtocol));
 
     internal static async Task<BioMetadata> GetBioMetadataAsync(IBackend backend, CancellationToken cancellationToken = default)
     {

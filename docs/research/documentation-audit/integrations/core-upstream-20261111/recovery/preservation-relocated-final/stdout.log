@@ -1,0 +1,33 @@
+{
+  "before_sha256": "8f45a2c984ab0d741152378d5fcadb4f785a478fca9b47f4ba384139cf7558c9",
+  "checkouts": [
+    {
+      "role": "integration",
+      "root": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+      "head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "manifests": 8,
+      "frozen_artifacts": 5366,
+      "piv_integration_files": 114,
+      "original_user_files": 0
+    },
+    {
+      "role": "primary",
+      "root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+      "head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+      "manifests": 8,
+      "frozen_artifacts": 5366,
+      "piv_integration_files": 114,
+      "original_user_files": 4
+    }
+  ],
+  "relocation": {
+    "receipt_sha256": "0da550fd99ca719dc1de1c91ee32bf5569e824cc27905d9f606830fea74e791c",
+    "original_algorithm_sha256": "0581b55098c6c9f3276c9e0766a0bef88a4a3a4380ee7282e2a136f4eac82dfc",
+    "adapted_algorithm_sha256": "2ae635a12564b2659f3f03c8dd05a0371fe482ad87c81a2d16ee169d1a64f599",
+    "old_expression": "((\"integration\", data[\"integration_checkout\"]), (\"primary\", data[\"primary\"]))",
+    "new_expression": "((\"integration\", RELOCATED_ROOT), (\"primary\", data[\"primary\"]))",
+    "old_root": "/tmp/opencode/core-upstream-20261111",
+    "checked_integration_root": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+    "original_before_unchanged": true
+  }
+}

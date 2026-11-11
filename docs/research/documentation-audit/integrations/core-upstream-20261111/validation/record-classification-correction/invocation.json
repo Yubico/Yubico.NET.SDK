@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/record-classification-correction/verify.py"
+  ],
+  "exit_code": 0,
+  "stdout_sha256": "07db6d523c87751ed98c8a75a5c711529b6fe8f9e4fcfdee3f5603db412df721",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

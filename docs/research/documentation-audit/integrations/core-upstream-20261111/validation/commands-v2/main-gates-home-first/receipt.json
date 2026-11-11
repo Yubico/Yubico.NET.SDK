@@ -1,0 +1,464 @@
+{
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "build",
+    "test",
+    "docs-qa",
+    "docs-architecture",
+    "complexity",
+    "resilience",
+    "pack",
+    "--clean",
+    "--fast",
+    "--complexity-args",
+    "--base f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+    "--package-version",
+    "2.0.0-alpha.2"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "logger": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+    "bytes": 19060,
+    "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-11T18:51:25.701444+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [
+    "build",
+    "test",
+    "docs-qa",
+    "docs-architecture",
+    "complexity",
+    "resilience",
+    "pack"
+  ],
+  "expected_projects": [
+    "resilience:Core.UnitTests",
+    "test:Cli.Commands.UnitTests",
+    "test:Cli.Shared.UnitTests",
+    "test:Core.UnitTests",
+    "test:Ctap2.UnitTests",
+    "test:Management.UnitTests",
+    "test:Oath.UnitTests",
+    "test:OpenPgp.UnitTests",
+    "test:Piv.UnitTests",
+    "test:PublicApi.UnitTests",
+    "test:SecurityDomain.UnitTests",
+    "test:WebAuthn.UnitTests",
+    "test:YubiHsm.UnitTests",
+    "test:YubiOtp.UnitTests"
+  ],
+  "primary_output": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/command-journals/main-gates-home-first",
+  "qualification_faults": [],
+  "exit_code": 0,
+  "status": "passed",
+  "errors": [],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 2941713,
+    "sid": 2941713,
+    "leader_start_ticks": 80087553,
+    "before": {
+      "members": [],
+      "escaped": []
+    },
+    "signals": [],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": {
+    "targets": [
+      "test-infrastructure-qa",
+      "native-aot-contract-qa",
+      "build",
+      "test",
+      "docs-qa",
+      "docs-architecture",
+      "complexity",
+      "resilience",
+      "pack"
+    ],
+    "projects": 14,
+    "executed": 4639,
+    "skipped": 5,
+    "failed": 0,
+    "warnings": 0
+  },
+  "retained": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/01-clean.log",
+        "bytes": 496,
+        "sha256": "40516bdc7aef8d0caa5368256f7123272f5d176a5c70d353f563703ba5c87268"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/01-clean.log",
+        "bytes": 496,
+        "sha256": "40516bdc7aef8d0caa5368256f7123272f5d176a5c70d353f563703ba5c87268"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/02-build.log",
+        "bytes": 13708,
+        "sha256": "7cbf221250285a27be9cf9c5aae4283310856db7df2cb313b17637ff851bc3b4"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/02-build.log",
+        "bytes": 13708,
+        "sha256": "7cbf221250285a27be9cf9c5aae4283310856db7df2cb313b17637ff851bc3b4"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/03-test-Cli.Commands.UnitTests.log",
+        "bytes": 723,
+        "sha256": "1e7d8544382279e97681482025d1989ddc7202c1b5c01a59adce3974b2200ff8"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/03-test-Cli.Commands.UnitTests.log",
+        "bytes": 723,
+        "sha256": "1e7d8544382279e97681482025d1989ddc7202c1b5c01a59adce3974b2200ff8"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/04-test-Cli.Shared.UnitTests.log",
+        "bytes": 505,
+        "sha256": "c8aab539bcbcf7c05a24da4c34817c5bd130b770ac921a725263dc95e886e140"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/04-test-Cli.Shared.UnitTests.log",
+        "bytes": 505,
+        "sha256": "c8aab539bcbcf7c05a24da4c34817c5bd130b770ac921a725263dc95e886e140"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/05-test-Core.UnitTests.log",
+        "bytes": 4706,
+        "sha256": "03a5b2d77d1835de6047cd946745c9b9fc02cfeb658b0dc6df12588224b97ca5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/05-test-Core.UnitTests.log",
+        "bytes": 4706,
+        "sha256": "03a5b2d77d1835de6047cd946745c9b9fc02cfeb658b0dc6df12588224b97ca5"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/06-test-Ctap2.UnitTests.log",
+        "bytes": 477,
+        "sha256": "95558858d115dffc92bf573d133664da5c1ec6d766ddb7aebfaabd03ed04eb6d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/06-test-Ctap2.UnitTests.log",
+        "bytes": 477,
+        "sha256": "95558858d115dffc92bf573d133664da5c1ec6d766ddb7aebfaabd03ed04eb6d"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/07-test-Management.UnitTests.log",
+        "bytes": 505,
+        "sha256": "d054f4a3509f8f7fe94cec75503c371b4f7fb8711cbea99fa7bf6202b1bd94e3"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/07-test-Management.UnitTests.log",
+        "bytes": 505,
+        "sha256": "d054f4a3509f8f7fe94cec75503c371b4f7fb8711cbea99fa7bf6202b1bd94e3"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/08-test-Oath.UnitTests.log",
+        "bytes": 39219,
+        "sha256": "7bf01f1dca5ecccf3d9c91936db9b0484a58c470070075b604d49b424087890f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/08-test-Oath.UnitTests.log",
+        "bytes": 39219,
+        "sha256": "7bf01f1dca5ecccf3d9c91936db9b0484a58c470070075b604d49b424087890f"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/09-test-OpenPgp.UnitTests.log",
+        "bytes": 489,
+        "sha256": "ea9c06928c9ba810496c22232831dd0376808e28ee86465d21332301be66ffd5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/09-test-OpenPgp.UnitTests.log",
+        "bytes": 489,
+        "sha256": "ea9c06928c9ba810496c22232831dd0376808e28ee86465d21332301be66ffd5"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/10-test-Piv.UnitTests.log",
+        "bytes": 465,
+        "sha256": "a597ba24327442c8b97a580048d0c8687e497e85794e5392a219274d69eff2c3"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/10-test-Piv.UnitTests.log",
+        "bytes": 465,
+        "sha256": "a597ba24327442c8b97a580048d0c8687e497e85794e5392a219274d69eff2c3"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/11-test-PublicApi.UnitTests.log",
+        "bytes": 499,
+        "sha256": "d8546ed1de51b42a162feca04f60f0ff54555c71844f7b3e9b44a3e3bf917622"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/11-test-PublicApi.UnitTests.log",
+        "bytes": 499,
+        "sha256": "d8546ed1de51b42a162feca04f60f0ff54555c71844f7b3e9b44a3e3bf917622"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/12-test-SecurityDomain.UnitTests.log",
+        "bytes": 529,
+        "sha256": "10974f42b8c4fa45dded266229b50e024686464af26289c388ad6d0fb2263336"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/12-test-SecurityDomain.UnitTests.log",
+        "bytes": 529,
+        "sha256": "10974f42b8c4fa45dded266229b50e024686464af26289c388ad6d0fb2263336"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/13-test-WebAuthn.UnitTests.log",
+        "bytes": 495,
+        "sha256": "8d96f91f9e42911863c2a5a09323e1c3939f212abc39048c7a77faf41f98f71f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/13-test-WebAuthn.UnitTests.log",
+        "bytes": 495,
+        "sha256": "8d96f91f9e42911863c2a5a09323e1c3939f212abc39048c7a77faf41f98f71f"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/14-test-YubiHsm.UnitTests.log",
+        "bytes": 487,
+        "sha256": "d1f2ac2b30ae83e495abb06c05b71bd36e08adc791582a4e90e4de1f94514a06"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/14-test-YubiHsm.UnitTests.log",
+        "bytes": 487,
+        "sha256": "d1f2ac2b30ae83e495abb06c05b71bd36e08adc791582a4e90e4de1f94514a06"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/15-test-YubiOtp.UnitTests.log",
+        "bytes": 489,
+        "sha256": "45c719199ad687a993bafc46a8f7c808f931eb04bf425ad852b4adf815c10665"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/15-test-YubiOtp.UnitTests.log",
+        "bytes": 489,
+        "sha256": "45c719199ad687a993bafc46a8f7c808f931eb04bf425ad852b4adf815c10665"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/16-test-Core.UnitTests.log",
+        "bytes": 2004,
+        "sha256": "acc5e3c9cd341b5aeba02a28662ae1bd56abf9bc609a1585d04e38504f820873"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/16-test-Core.UnitTests.log",
+        "bytes": 2004,
+        "sha256": "acc5e3c9cd341b5aeba02a28662ae1bd56abf9bc609a1585d04e38504f820873"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/17-pack-Core.log",
+        "bytes": 502,
+        "sha256": "58cda7562655018553a395418e10638c07dcdae3bdc059cd61eba4134a5f2adf"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/17-pack-Core.log",
+        "bytes": 502,
+        "sha256": "58cda7562655018553a395418e10638c07dcdae3bdc059cd61eba4134a5f2adf"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/18-pack-Ctap2.log",
+        "bytes": 506,
+        "sha256": "a0b6bb20fe5ba27b41ee2e4ccd32bb6bb547c7e8cb858248a2d9d70a0415692a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/18-pack-Ctap2.log",
+        "bytes": 506,
+        "sha256": "a0b6bb20fe5ba27b41ee2e4ccd32bb6bb547c7e8cb858248a2d9d70a0415692a"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/19-pack-Management.log",
+        "bytes": 526,
+        "sha256": "363b5891ad3ba0a26b41fc7dcbb97439751dd4559f4078561aabd673782a10a8"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/19-pack-Management.log",
+        "bytes": 526,
+        "sha256": "363b5891ad3ba0a26b41fc7dcbb97439751dd4559f4078561aabd673782a10a8"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/20-pack-Oath.log",
+        "bytes": 502,
+        "sha256": "14b8fd05e667d8b1f019db901de590671fdad17ae0287012aec556de075828fb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/20-pack-Oath.log",
+        "bytes": 502,
+        "sha256": "14b8fd05e667d8b1f019db901de590671fdad17ae0287012aec556de075828fb"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/21-pack-OpenPgp.log",
+        "bytes": 514,
+        "sha256": "5bae58f8571c41fe10b1fc79fcf6d2e9f2323898321b4bb3d67df102f91e7f7f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/21-pack-OpenPgp.log",
+        "bytes": 514,
+        "sha256": "5bae58f8571c41fe10b1fc79fcf6d2e9f2323898321b4bb3d67df102f91e7f7f"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/22-pack-Piv.log",
+        "bytes": 498,
+        "sha256": "43f80c7ca6ca4214a6909509ffd58e99e9d9316103dabd466fed6a0b68d7533a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/22-pack-Piv.log",
+        "bytes": 498,
+        "sha256": "43f80c7ca6ca4214a6909509ffd58e99e9d9316103dabd466fed6a0b68d7533a"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/23-pack-SecurityDomain.log",
+        "bytes": 542,
+        "sha256": "cd90b2c545e071d8d89daf96416399eb2640742d21f3e43f59aa4df802e98f2e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/23-pack-SecurityDomain.log",
+        "bytes": 542,
+        "sha256": "cd90b2c545e071d8d89daf96416399eb2640742d21f3e43f59aa4df802e98f2e"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/24-pack-WebAuthn.log",
+        "bytes": 518,
+        "sha256": "94be0fdcf83bcdff7a42a833d9c822cabdc3222e52791cd7f635b8f402db35c6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/24-pack-WebAuthn.log",
+        "bytes": 518,
+        "sha256": "94be0fdcf83bcdff7a42a833d9c822cabdc3222e52791cd7f635b8f402db35c6"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/25-pack-YubiHsm.log",
+        "bytes": 514,
+        "sha256": "c7faadbc69bb6ef54d289bd425f1ea60559c36404448404e030d83649b62983b"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/25-pack-YubiHsm.log",
+        "bytes": 514,
+        "sha256": "c7faadbc69bb6ef54d289bd425f1ea60559c36404448404e030d83649b62983b"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/26-pack-YubiOtp.log",
+        "bytes": 514,
+        "sha256": "9a2be136d32844981e3666e60a1ad2b9aa1a9f3975a1fc0051e1cd1fe32ab8d9"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/26-pack-YubiOtp.log",
+        "bytes": 514,
+        "sha256": "9a2be136d32844981e3666e60a1ad2b9aa1a9f3975a1fc0051e1cd1fe32ab8d9"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/result.json",
+        "bytes": 7018,
+        "sha256": "90becccda025ab09f8a9cdb35dfb5586042cab17c2c7e67a7f824795cd7b548f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/result.json",
+        "bytes": 7018,
+        "sha256": "90becccda025ab09f8a9cdb35dfb5586042cab17c2c7e67a7f824795cd7b548f"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/result.txt",
+        "bytes": 1913,
+        "sha256": "771195f52dd97327f73f89a56b494c9a7e7e5b20769c53bc59c5cc1eae3492d9"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/result.txt",
+        "bytes": 1913,
+        "sha256": "771195f52dd97327f73f89a56b494c9a7e7e5b20769c53bc59c5cc1eae3492d9"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/toolchain/runs/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/run.log",
+        "bytes": 14869,
+        "sha256": "22362278751a1924a44273bd5cb67d35e8ef034f6e922745f3a7624bcfb1c93a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/toolchain/20261111-195127-739-build+test+docs-qa+docs-architecture+complexity+resilience+pack/run.log",
+        "bytes": 14869,
+        "sha256": "22362278751a1924a44273bd5cb67d35e8ef034f6e922745f3a7624bcfb1c93a"
+      }
+    }
+  ],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/stdout.log",
+      "bytes": 14392,
+      "sha256": "4def9cd8d6942d877903d12a3f50d63a851d36ce17984b6037d33b4b91b2fac6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/main-gates-home-first/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finished": "2026-11-11T18:53:34.136880+00:00"
+}

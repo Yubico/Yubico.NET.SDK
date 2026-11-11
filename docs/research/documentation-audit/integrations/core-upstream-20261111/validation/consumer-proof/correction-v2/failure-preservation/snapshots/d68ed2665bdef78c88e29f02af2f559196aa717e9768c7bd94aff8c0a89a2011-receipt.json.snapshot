@@ -1,0 +1,29 @@
+{
+  "status": "Static input correction, not a compiler failure. Probe is Core-only; remove its unused Management using directive without changing the extracted body. Original resolver inputs are unaffected.",
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/prepare.py",
+      "snapshot": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/preparation-before-probe-import-correction/prepare.py.snapshot",
+      "bytes": 15070,
+      "sha256": "431987a841333566624ee1b82f23b129386a10ff05b4e6b1486c225797d1e352"
+    },
+    {
+      "source": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inputs.json",
+      "snapshot": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/preparation-before-probe-import-correction/inputs.json.snapshot",
+      "bytes": 48072,
+      "sha256": "01c638c2fffde658c1b04b893d0fa3e374b2e2dea326befa4c5b78c2d0df4fb8"
+    },
+    {
+      "source": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/body-01.cs",
+      "snapshot": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/preparation-before-probe-import-correction/probe--src--body-01.cs.snapshot",
+      "bytes": 564,
+      "sha256": "c89f42ce6df5c8b4ea06a889e3464868a192de02281ddb01736f03e3f705879d"
+    },
+    {
+      "source": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-01.cs",
+      "snapshot": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/preparation-before-probe-import-correction/examples--src--body-01.cs.snapshot",
+      "bytes": 564,
+      "sha256": "c89f42ce6df5c8b4ea06a889e3464868a192de02281ddb01736f03e3f705879d"
+    }
+  ]
+}

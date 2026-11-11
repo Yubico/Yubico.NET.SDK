@@ -1,0 +1,3 @@
+# Preserve captured native/tool sources and full command streams byte-for-byte.
+*.snapshot -text
+commands/** -text

@@ -1,0 +1,56 @@
+{
+  "status": "source-only routing provenance checks passed; no creator/checker/SDK/capture executed",
+  "new_files": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/routing-v2.py",
+      "bytes": 6024,
+      "sha256": "3a64e73ff0675a65458589aa0478275a6b0a4e1e299b9a1d10ebceb249a60488"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/proposed-lane-v2.sh",
+      "bytes": 2902,
+      "sha256": "d5fa76a207ae2c2d49df0f0b7a9a2132fb87d9459292e2e243d80bd239c9f96e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/routing-v2-handoff.md",
+      "bytes": 4462,
+      "sha256": "33d7bee08dc2eae03c19d2a2fbec4b3fb777d2fc7042e3c5b538a9f790a8e0bd"
+    }
+  ],
+  "protected_originals": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/proposed-lane.sh",
+      "bytes": 644,
+      "sha256": "f2b645b8694c1aedcec8c7d779ffb8fd939fb288ee23e6de28ee4d6cdf73211a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/lane.sh",
+      "bytes": 1628,
+      "sha256": "9fe65a29122d95eabcfafcc60e00cda53e4ae8f58d53386a8582b7902f17a807"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/independent-review.md",
+      "bytes": 9659,
+      "sha256": "c7b2e1e9ab925d2a13994d7379585a1c249590861f6baa829e65e56ba5fe20cf"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/receipt.json",
+      "bytes": 2990,
+      "sha256": "6dea02b4bd9f7c7e0e830dcfb8322b33f5cc07d9009bb0c59298dcb3705b10cf"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/receipt.json",
+      "bytes": 12123,
+      "sha256": "174bef5e532a95386a0e573bef9692b68e1e90824186b930779868f72eaabc39"
+    }
+  ],
+  "source_identity_transforms": [
+    "canonical SDK selector and capture/live command fragments identical to sealed v5 lane",
+    "readonly exact three properties -> exclusive/fsynced/no-clobber attempt descriptor -> export same values",
+    "actual build logger adds --retain-text for exact root-relative descriptor path",
+    "logged actual restore-profile gate precedes capture; no arbitrary environment or credentials recorded"
+  ],
+  "original_failed_snapshot_pairs_verified": 30,
+  "actual_routing_descriptor_created": false,
+  "reserved_suffix": "restore-bound-first"
+}

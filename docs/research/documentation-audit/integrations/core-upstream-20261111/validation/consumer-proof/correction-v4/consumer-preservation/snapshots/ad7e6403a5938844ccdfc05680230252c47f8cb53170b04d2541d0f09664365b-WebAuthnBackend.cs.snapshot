@@ -1,0 +1,294 @@
+// Copyright Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.LargeBlobs;
+using Yubico.YubiKit.Ctap2.Pin;
+using Yubico.YubiKit.WebAuthn.Util;
+
+namespace Yubico.YubiKit.WebAuthn.Client;
+
+/// <summary>
+/// Concrete implementation of IWebAuthnBackend that wraps ICtap2Session.
+/// </summary>
+/// <remarks>
+/// This adapter owns the Ctap2Session lifetime and manages the PinUvAuthProtocolV2 instance.
+/// It does not negotiate protocol 1 from GetInfo. Legacy token-command fallback still uses protocol 2.
+/// </remarks>
+internal sealed class WebAuthnBackend : IWebAuthnBackend
+{
+    private readonly ICtap2Session _session;
+    private PinUvAuthProtocolV2? _protocol;
+    private AuthenticatorInfo? _cachedInfo;
+    private bool _disposed;
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="WebAuthnBackend"/>.
+    /// </summary>
+    /// <param name="session">The FIDO session (ownership transferred to this backend).</param>
+    public WebAuthnBackend(ICtap2Session session)
+    {
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+    }
+
+    /// <inheritdoc/>
+    public async Task<AuthenticatorInfo> GetCachedInfoAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (_cachedInfo is null)
+        {
+            _cachedInfo = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return _cachedInfo;
+    }
+
+    /// <inheritdoc/>
+    public IPinUvAuthProtocol Protocol
+    {
+        get
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            EnsureProtocolInitialized();
+            return _protocol!;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<PinUvSharedSecret> EncapsulateAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        EnsureProtocolInitialized();
+        var clientPin = new ClientPin(_session, _protocol!);
+        var authenticatorKey = await clientPin.GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
+        var (keyAgreement, sharedSecret) = _protocol!.Encapsulate(authenticatorKey);
+        return new PinUvSharedSecret(keyAgreement, sharedSecret);
+    }
+
+    /// <inheritdoc/>
+    public ILargeBlobStorage CreateLargeBlobStorage(PinUvAuthTokenSession? token)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return token is null
+            ? new LargeBlobStorage(_session)
+            : new LargeBlobStorage(_session, token.Protocol, token.Token);
+    }
+
+    /// <inheritdoc/>
+    public async Task<int?> GetPinRetriesAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        EnsureProtocolInitialized();
+        var clientPin = new ClientPin(_session, _protocol!);
+
+        var status = await clientPin.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
+        return status.RetriesRemaining;
+    }
+
+    /// <inheritdoc/>
+    public async Task<PinUvAuthTokenSession> GetPinUvTokenAsync(
+        PinUvAuthMethod method,
+        PinUvAuthTokenPermissions permissions,
+        string? rpId,
+        ReadOnlyMemory<byte>? pinBytes,
+        CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        EnsureProtocolInitialized();
+        var clientPin = new ClientPin(_session, _protocol!);
+
+        // ClientPin allocates and returns the decrypted token to this single caller and keeps no
+        // reference to it, so ownership passes straight to the session below. Copying it here (or
+        // in the session) would leave a second live plaintext token that nothing zeroes.
+        byte[] token = method switch
+        {
+            PinUvAuthMethod.Pin when pinBytes is not null =>
+                await clientPin.GetPinUvAuthTokenUsingPinAsync(pinBytes.Value, permissions, rpId, cancellationToken)
+                    .ConfigureAwait(false),
+
+            PinUvAuthMethod.Uv =>
+                await clientPin.GetPinUvAuthTokenUsingUvAsync(permissions, rpId, cancellationToken)
+                    .ConfigureAwait(false),
+
+            PinUvAuthMethod.Pin =>
+                throw new ArgumentNullException(nameof(pinBytes), "PIN bytes required when method is PIN"),
+
+            _ => throw new ArgumentOutOfRangeException(nameof(method), method, "Invalid PIN/UV auth method")
+        };
+
+        // Ownership transfer: the session zeroes this array when the caller disposes it.
+        return new PinUvAuthTokenSession(_protocol!, token);
+    }
+
+    /// <inheritdoc/>
+    public async Task<MakeCredentialResponse> MakeCredentialAsync(
+        BackendMakeCredentialRequest request,
+        CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Build options
+        var options = new MakeCredentialOptions
+        {
+            ExcludeList = request.ExcludeList?.Select(desc => new PublicKeyCredentialDescriptor(
+                desc.Id,
+                desc.Type,
+                desc.Transports
+            )).ToList(),
+
+            // Absent stays absent, as in GetAssertionAsync: an explicit "uv": false is still the uv
+            // option key, which CTAP §6.1 forbids next to pinUvAuthParam.
+            ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true ? rk : null,
+            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true ? uv : null
+        };
+
+        // Add PIN/UV auth if provided
+        if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
+        {
+            // The copy is load-bearing, not defensive: the finally below zeroes whatever is in
+            // options, and the parameter belongs to the caller, which zeroes it once the ceremony
+            // is done with it. Without the copy this method would be destroying a buffer it does
+            // not own. Unlike GetAssertionAsync there is no multi-call reuse to protect here -
+            // registration builds a fresh request per attempt and sends it once - so ownership,
+            // not reuse, is what makes the copy necessary.
+            options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
+            options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
+        }
+
+        if (request.Extensions is not null)
+        {
+            options.Extensions = request.Extensions;
+        }
+
+        try
+        {
+            return await _session.MakeCredentialAsync(
+                request.ClientDataHash,
+                request.Rp,
+                request.User,
+                request.PubKeyCredParams,
+                options,
+                cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<GetAssertionResponse> GetAssertionAsync(
+        BackendGetAssertionRequest request,
+        CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Build options
+        var options = new GetAssertionOptions();
+
+        // Map allow list if provided
+        if (request.AllowList is not null && request.AllowList.Count > 0)
+        {
+            options.AllowList = request.AllowList;
+        }
+
+        // Set user verification option
+        if (request.Options?.TryGetValue("uv", out var uv) == true)
+        {
+            options.UserVerification = uv;
+        }
+
+        if (request.Options?.TryGetValue("up", out var up) == true)
+        {
+            options.UserPresence = up;
+        }
+
+        // Add PIN/UV auth if provided
+        if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
+        {
+            // Load-bearing copy: see the note in MakeCredentialAsync. CredentialFilter probes
+            // several exclude-list chunks with one pinUvAuthParam, so this method must not zero
+            // the caller's buffer.
+            options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
+            options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
+        }
+
+        if (request.Extensions is not null)
+        {
+            options.Extensions = request.Extensions;
+        }
+
+        try
+        {
+            return await _session.GetAssertionAsync(
+                request.RpId,
+                request.ClientDataHash,
+                options,
+                cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<GetAssertionResponse> GetNextAssertionAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        return await _session.GetNextAssertionAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        if (!_disposed)
+        {
+
+            _protocol?.Dispose();
+            _protocol = null;
+
+            if (_session is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+            }
+            else if (_session is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+
+            _disposed = true;
+        }
+    }
+
+    private void EnsureProtocolInitialized()
+    {
+        if (_protocol is null)
+        {
+            _protocol = new PinUvAuthProtocolV2();
+            // The protocol object is stateless. ClientPin performs key agreement per operation;
+            // constructing this object does not start asynchronous authenticator initialization.
+        }
+    }
+}

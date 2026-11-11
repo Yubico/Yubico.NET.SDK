@@ -1,0 +1,146 @@
+"""Read-only full project predicates across the actual consumer observations, plus pending-context shapes."""
+import argparse
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import sys
+import traceback
+import xml.etree.ElementTree as ET
+
+sys.dont_write_bytecode = True
+HERE = Path(__file__).resolve().parent
+PROOF = HERE.parent
+sys.path.insert(0, str(PROOF))
+
+
+def load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class ReadOnlyCollector:
+    def __init__(self, base):
+        self.base, self.records = base, []
+
+    def keep(self, path, kind, binary=False):
+        row = dict(self.base['identity'](path), kind=kind)
+        raw = path.read_bytes()
+        if not binary:
+            raw.decode('utf-8-sig')
+            self.base['require'](b'\0' not in raw, 'Unexpected binary in text input')
+        row.update(binary=binary, retained=None, read_only=True)
+        self.records.append(row)
+        return row
+
+
+def pending_shapes(base, data):
+    rows = []
+    for context in ('mac-comparison', 'fixture'):
+        for relative in data['contexts'][context]:
+            project = base['ROOT'] / relative
+            tree = ET.parse(project).getroot()
+            assets = project.parent / 'obj/project.assets.json'
+            row = dict(context=context, project=base['identity'](project),
+                       declarations={name: [n.text for n in tree.iter(name)] for name in
+                                     ('TargetFramework', 'TargetFrameworks', 'OutputType', 'IsTestProject', 'GenerateDocumentationFile', 'BoundaryNativeVersion')},
+                       project_references=[dict(n.attrib) for n in tree.iter('ProjectReference')],
+                       references=[dict(n.attrib, hint_path=n.findtext('HintPath')) for n in tree.iter('Reference')],
+                       status='not captured in an executed consumer lane; declaration/available restore only')
+            if context == 'mac-comparison':
+                host = next(base['ROOT'] / value['path'] for value in data['hosts'] if value['path'].endswith('.MacComparison.csproj'))
+                row['prepared_host'] = dict(project=base['identity'](host), references=[dict(node.attrib) for node in ET.parse(host).iter('ProjectReference')],
+                                            limit='Prepared AdditionalProperties override the historical default; no compile or binding claimed.')
+            if assets.is_file():
+                value = base['load'](assets)
+                row.update(available_assets=base['identity'](assets), target_keys=list(value['targets']),
+                           restore_frameworks=list(value['project']['restore']['frameworks']),
+                           downloads={name: f.get('downloadDependencies', []) for name, f in value['project']['frameworks'].items()},
+                           build_packages={key: node.get('build') for key, node in value['targets'].get('net10.0', {}).items() if node.get('build')})
+                row['build_content_declarations'] = []
+                for key, node in value['targets'].get('net10.0', {}).items():
+                    if not key.startswith('xunit.runner.visualstudio/'):
+                        continue
+                    library = value['libraries'][key]
+                    package = next(Path(root) / library['path'] for root in value['packageFolders'] if (Path(root) / library['path']).is_dir())
+                    for asset in node.get('build', {}):
+                        path = package / asset
+                        tree = ET.parse(path).getroot()
+                        declarations = [dict(element.attrib, kind=element.tag.rsplit('}', 1)[-1],
+                                             children={child.tag.rsplit('}', 1)[-1]: child.text for child in element})
+                                        for element in tree.iter() if element.tag.rsplit('}', 1)[-1] in ('None', 'Content')]
+                        row['build_content_declarations'].append(dict(package_id=key, source=base['identity'](path), declarations=declarations,
+                            limit='Literal build-content copies are not normal compile/runtime assets. No fixture Csc/copy observation exists in this lane yet.'))
+            else:
+                row['available_assets'] = None
+            rows.append(row)
+    return rows
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--mode', choices=('v3', 'v4'), required=True)
+    parser.add_argument('--output', required=True)
+    args = parser.parse_args()
+    output = HERE / args.output
+    if output.parent != HERE or output.exists():
+        raise ValueError('Use a new local report name')
+    if args.mode == 'v3':
+        adapter = load('consumer_readonly_v3', PROOF / 'proof-v3.py')
+        adapter.check_receipt()
+        base = adapter.source_namespace('readonly-not-capture', 'readonly-not-receipt')
+    else:
+        adapter = load('consumer_readonly_v4', PROOF / 'proof-v4.py')
+        base = adapter.source_namespace('readonly-not-capture', 'readonly-not-receipt')
+    base['active_build_guard']()
+    data = base['current_inputs']()
+    build_receipt, host = base['build_receipt']('consumer-consumers-build-first', 'consumers', data)
+    raw = base['RUNTIME'] / 'attempts/consumers-first/raw'
+    folders = sorted(p for p in raw.iterdir() if p.is_dir())
+    actual = [str(Path(base['raw_policy'](p)['MSBuildProjectFullPath']).relative_to(base['ROOT'])) for p in folders]
+    expected = base['closure'](data['declared_graph'], data['contexts']['consumers']) | {str(host.relative_to(base['ROOT']))}
+    base['require'](base['unique'](actual, 'observed compiler project') == expected, 'Consumer compiler closure differs')
+    collector = ReadOnlyCollector(base)
+    passed, failures, independent_graph = [], [], []
+    for folder in folders:
+        try:
+            result = base['compiler_project'](folder, data, collector)
+            passed.append(result)
+        except Exception as error:
+            failures.append(dict(project=base['raw_policy'](folder)['MSBuildProjectFullPath'],
+                                 error=str(error), type=type(error).__name__, traceback=traceback.format_exc()))
+        # Always validate the graph independently too, so a preceding asset-model failure does not
+        # leave the original graph predicates unexplored during this read-only diagnosis.
+        policy = base['raw_policy'](folder)
+        project = Path(policy['MSBuildProjectFullPath'])
+        if str(project.relative_to(base['ROOT'])) in data['declared_graph']:
+            try:
+                references = {str(base['resolve'](project, line.split('|')[0])) for line in base['lines'](folder / 'references.txt')}
+                result = base['graph_proof'](project, policy, references, folder, data, base['load'](Path(policy['ProjectAssetsFile'])), collector)
+                independent_graph.append(dict(project=str(project), status='passed', nodes=len(result['nodes'])))
+            except Exception as error:
+                failures.append(dict(project=str(project), phase='independent graph', error=str(error), traceback=traceback.format_exc()))
+    report = dict(status='read-only full consumer predicates passed' if not failures else 'read-only diagnosis has failures',
+                  mode=args.mode, scope='No SDK/build/capture/test/native/device/formatter execution. '
+                  'Identity/text-only collector creates no retained artifacts; only this report is written.',
+                  compiler_attempt='consumers-first', build_receipt=base['identity'](build_receipt),
+                  real_projects=len(data['contexts']['consumers']), actual_compiler_projects=len(folders),
+                  projects=passed, failures=failures, independent_graph=independent_graph,
+                  pending_contexts=pending_shapes(base, data), read_only_records=collector.records)
+    report['tool_sources'] = [base['identity'](path) for path in
+                              (Path(__file__), PROOF / ('proof-' + args.mode + '.py'))]
+    if args.mode == 'v4':
+        report['tool_sources'].append(base['identity'](HERE / 'assets.py'))
+    report['effective_base_source_sha256'] = hashlib.sha256(adapter.effective_source()[0].encode()).hexdigest()
+    with output.open('x') as stream:
+        json.dump(report, stream, indent=2)
+        stream.write('\n')
+    print(f'{args.mode}: {len(passed)}/{len(folders)} complete predicates; {len(failures)} failures; {output}')
+    if failures:
+        raise SystemExit(1)
+
+
+if __name__ == '__main__':
+    main()

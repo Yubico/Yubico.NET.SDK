@@ -1,0 +1,4 @@
+// Explicitly accept shared access for this factory only:
+// Coordinate discovery/monitoring and all other connections to this key before opening directly.
+var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);
+await using var connection = await factory.CreateAsync(reader, cancellationToken);

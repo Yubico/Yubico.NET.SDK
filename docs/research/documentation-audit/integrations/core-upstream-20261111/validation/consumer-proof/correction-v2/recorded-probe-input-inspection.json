@@ -1,0 +1,87 @@
+{
+  "scope": "Read-only inspection of existing actual compiler text; not a new compiler-proof capture or SDK execution",
+  "projects": [
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj",
+      "sdk": "10.0.404",
+      "policy": {
+        "TreatWarningsAsErrors": "true",
+        "WarningLevel": "9999",
+        "RunAnalyzersDuringBuild": "true",
+        "RunAnalyzers": "",
+        "SkipAnalyzers": "",
+        "SkipCompilerExecution": "",
+        "EnableNETAnalyzers": "false",
+        "AnalysisMode": "AllEnabledByDefault"
+      },
+      "actual_argument_flags": {
+        "warnaserror": true,
+        "warn9999": true,
+        "skip_analyzers": false
+      },
+      "recorded_counts": {
+        "sources": 4,
+        "references": 178,
+        "analyzers": 10,
+        "configs": 3
+      },
+      "exact_set_equality_no_duplicates": {
+        "sources": true,
+        "references": true,
+        "analyzers": true,
+        "configs": true
+      },
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        }
+      ]
+    },
+    {
+      "project": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "sdk": "10.0.404",
+      "policy": {
+        "TreatWarningsAsErrors": "true",
+        "WarningLevel": "9999",
+        "RunAnalyzersDuringBuild": "true",
+        "RunAnalyzers": "",
+        "SkipAnalyzers": "",
+        "SkipCompilerExecution": "",
+        "EnableNETAnalyzers": "false",
+        "AnalysisMode": "AllEnabledByDefault"
+      },
+      "actual_argument_flags": {
+        "warnaserror": true,
+        "warn9999": true,
+        "skip_analyzers": false
+      },
+      "recorded_counts": {
+        "sources": 315,
+        "references": 177,
+        "analyzers": 14,
+        "configs": 3
+      },
+      "exact_set_equality_no_duplicates": {
+        "sources": true,
+        "references": true,
+        "analyzers": true,
+        "configs": true
+      },
+      "canonical_analyzers": [
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+          "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+        },
+        {
+          "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+          "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+        }
+      ]
+    }
+  ]
+}

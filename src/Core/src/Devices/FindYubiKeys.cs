@@ -14,75 +14,72 @@
 
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using System.Text;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
+/// <summary>Discovers connected YubiKeys. Implemented by <see cref="FindYubiKeys"/>; fake it to test code that discovers keys.</summary>
 public interface IFindYubiKeys
 {
-    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    ///     Signals that hotplug activity was observed on a transport, so cached identity and metadata
-    ///     evidence may describe hardware that is no longer present.
-    /// </summary>
-    /// <param name="transport">
-    ///     The transport family the activity was observed on — <see cref="ConnectionType.SmartCard" /> or
-    ///     <see cref="ConnectionType.Hid" />.
+    /// <summary>Runs one discovery scan and returns the YubiKeys that expose any of the requested connections.</summary>
+    /// <param name="type">
+    ///     Result filter applied after interfaces are grouped into YubiKeys; <see cref="ConnectionType.Hid"/>
+    ///     matches FIDO or OTP and <see cref="ConnectionType.Unknown"/> returns nothing.
     /// </param>
-    /// <remarks>
-    ///     <para>
-    ///         Scan-time eviction alone cannot catch a swap that completes <em>between</em> scans: a key
-    ///         unplugged and a same-model key plugged into the same slot can reuse the same per-interface
-    ///         identifier (PC/SC reader names are slot-derived), so the interface is never observed absent
-    ///         and a cached serial from the old key would be attributed to the new one. For an SDK whose
-    ///         consumers bind sessions to serial-derived identity, that is key substitution, not a stale
-    ///         cache entry. Hotplug events are the signal that physical topology changed; implementations
-    ///         discard cached identity and metadata evidence, supersede in-flight reads, and re-read on the
-    ///         next scan. The transport is diagnostic context, not an eviction scope: a composite key's
-    ///         swap can surface its events on one transport first, so evicting only that transport would
-    ///         mix two keys' evidence.
-    ///     </para>
-    ///     <para>
-    ///         Default is a no-op so that test fakes and custom implementations without an identity cache
-    ///         are unaffected. Callers must not rely on any synchronous effect.
-    ///     </para>
-    /// </remarks>
-    void NotifyTransportActivity(ConnectionType transport)
-    {
-    }
+    /// <param name="cancellationToken">Cancels discovery waits, not already-dispatched native work.</param>
+    /// <returns>The matching YubiKeys, in unspecified order, or an empty list.</returns>
+    /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
 }
-public class FindYubiKeys : IFindYubiKeys
+/// <summary>
+///     Discovers physical YubiKeys with bounded native enumeration and read waits. Await scans and pass a
+///     cancellation token to cancel their waits. Enumeration timeouts omit only the affected transport;
+///     caller cancellation throws <see cref="OperationCanceledException" />, and other enumeration failures propagate.
+/// </summary>
+public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FindYubiKeys>();
 
-    private readonly IFindPcscDevices findPcscService;
-    private readonly IFindHidInterfaces findHidService;
+    private readonly IFindPcscDevices? findPcscService;
+    private readonly IFindHidInterfaces? findHidService;
     private readonly Func<IDevice, IYubiKeyConnectionSlot> createSlot;
+    private readonly ConnectionType _interfaces;
+    private readonly TimeSpan _enumerationBudget;
     private readonly Lock _evidenceLock = new();
 
     // Tier-1 evidence source. Optional by contract: the no-topology resolver on macOS/Linux, and on Windows
     // any per-interface read failure simply yields no key for that interface.
     private readonly IDeviceTopologyResolver _topologyResolver;
 
+    /// <summary>Creates a finder limited to <paramref name="interfaces"/>. Callers must retire its read scope when discovery ends.</summary>
+    /// <param name="findPcscService">Enumerator required when <paramref name="interfaces"/> includes smart cards.</param>
+    /// <param name="findHidService">Enumerator required when <paramref name="interfaces"/> includes HID.</param>
+    /// <param name="createSlot">Creates a connection slot for each included interface.</param>
+    /// <param name="interfaces">Interfaces to enumerate and probe; <see cref="ConnectionType.Hid"/> expands to FIDO and OTP.</param>
+    /// <param name="topologyResolver">Optional platform topology resolver.</param>
+    /// <param name="enumerationBudget">Maximum wait per transport; defaults to the discovery enumeration budget.</param>
+    /// <exception cref="ArgumentNullException">An enumerator required by <paramref name="interfaces"/> is missing.</exception>
     internal FindYubiKeys(
-        IFindPcscDevices findPcscService,
-        IFindHidInterfaces findHidService,
-        Func<IDevice, IYubiKeyConnectionSlot> createSlot)
+        IFindPcscDevices? findPcscService,
+        IFindHidInterfaces? findHidService,
+        Func<IDevice, IYubiKeyConnectionSlot> createSlot,
+        ConnectionType interfaces = ConnectionType.All,
+        IDeviceTopologyResolver? topologyResolver = null,
+        TimeSpan? enumerationBudget = null)
     {
-        this.findPcscService = findPcscService;
-        this.findHidService = findHidService;
+        _interfaces = interfaces.ToConcreteScope();
+        _enumerationBudget = enumerationBudget ?? DiscoveryBudgets.Enumeration;
+        this.findPcscService = _interfaces.SupportsConnection(ConnectionType.SmartCard)
+            ? findPcscService ?? throw new ArgumentNullException(nameof(findPcscService))
+            : null;
+        this.findHidService = _interfaces.IncludesHidScan()
+            ? findHidService ?? throw new ArgumentNullException(nameof(findHidService))
+            : null;
         this.createSlot = createSlot;
-        _topologyResolver = DeviceTopologyResolver.Create();
+        _topologyResolver = topologyResolver ?? DeviceTopologyResolver.Create();
     }
-
-    // Hard total wall-clock budget for one best-effort metadata read (shared across that device's
-    // transports). Bounded so a busy/locked CCID cannot stall discovery; reads run concurrently across
-    // keys so total added scan latency is at most ~one budget.
-    private static readonly TimeSpan MetadataReadBudget = TimeSpan.FromSeconds(3);
 
     // Serial-disambiguation identity cache (PID-count>1 / force-serial path), keyed by per-interface DeviceId.
     // Only successful reads are cached, so presence means the interface's identity was read successfully;
@@ -97,7 +94,7 @@ public class FindYubiKeys : IFindYubiKeys
     //  - Hardware: scan-time eviction (EvictAbsentIdentities) only catches interfaces observed absent. A
     //    same-slot swap completing BETWEEN scans reuses the slot-derived interface id, so the old key's
     //    serial would be attributed to the new key - key substitution. Hotplug events are the signal that
-    //    hardware changed; NotifyTransportActivity discards all cached evidence.
+    //    hardware changed; InvalidateEvidence discards all cached evidence.
     private EvidenceEpoch _evidence = new();
 
     /// <summary>A successful identity read plus the evidence context that makes it reusable.</summary>
@@ -110,17 +107,37 @@ public class FindYubiKeys : IFindYubiKeys
     {
         internal ConcurrentDictionary<string, CachedIdentity> IdentityCache { get; } = new();
         internal ConcurrentDictionary<string, MetadataCacheEntry> MetadataCache { get; } = new();
-        internal ProtocolDeviceInfo.ReadScope ReadScope { get; } = ProtocolDeviceInfo.CreateScope();
+        internal DiscoveryReadScope ReadScope { get; } = new DiscoveryReadScope();
     }
 
     // Serializes discovery so two concurrent scans do not open connections to the same interface at once.
     private readonly SemaphoreSlim _scanLock = new(1, 1);
 
-    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(
-        ConnectionType type = ConnectionType.All,
-        CancellationToken cancellationToken = default)
+    // One outstanding native enumeration per transport, guarded by _scanLock. A scan that times out leaves
+    // its enumeration here so the next scan waits on the same work instead of dispatching another native
+    // call behind a hung one; repeated timeouts must not accumulate blocked workers.
+    private readonly OutstandingEnumeration<IPcscDevice> _pcscEnumeration = new();
+    private readonly OutstandingEnumeration<IHidInterface> _hidEnumeration = new();
+
+    private sealed class OutstandingEnumeration<T>
     {
-        if (type == ConnectionType.Unknown)
+        internal Task<IReadOnlyList<T>>? Task;
+    }
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+        ConnectionType type = ConnectionType.All,
+        CancellationToken cancellationToken = default) =>
+        FindAllCoreAsync(type, tolerateEnumerationTimeout: true, cancellationToken);
+
+    // One-shot callers prefer a partial answer now over none. A monitor must not publish a partial scan: with a
+    // previous snapshot to diff against, a stalled transport would surface as removals of every key on it.
+    private async Task<IReadOnlyList<IYubiKey>> FindAllCoreAsync(
+        ConnectionType type,
+        bool tolerateEnumerationTimeout,
+        CancellationToken cancellationToken)
+    {
+        if (type == ConnectionType.Unknown || _interfaces == ConnectionType.Unknown)
             return [];
 
         await _scanLock.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -130,13 +147,10 @@ public class FindYubiKeys : IFindYubiKeys
             lock (_evidenceLock)
                 evidence = _evidence;
 
-            // Enumerate all transports regardless of the requested filter so per-interface devices can be
-            // merged into physical devices; the filter is applied to the merged capability set at the end.
-            var pcscDevices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
-            var hidInterfaces = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
-
-            var interfaces = BuildInterfaces(pcscDevices, hidInterfaces);
+            var interfaces = await EnumerateInterfacesAsync(tolerateEnumerationTimeout, cancellationToken).ConfigureAwait(false);
             EvictAbsentIdentities(evidence, interfaces);
+            foreach (var iface in interfaces.Where(iface => iface.IsUsb))
+                evidence.ReadScope.CoordinateUsbRead(iface.Device.InterfaceId, iface.Pid);
 
             // Reader-name drift: if any USB CCID reader name failed to parse to a known PID, PID correlation
             // is untrustworthy this scan; degrade to serial-based merge for all USB interfaces (ISC-11).
@@ -169,11 +183,91 @@ public class FindYubiKeys : IFindYubiKeys
             var merged = CompositeDeviceMerger.Merge(descriptors, pidCorrelationUntrusted);
             await PopulateMetadataAsync(evidence, merged, interfaces, cancellationToken).ConfigureAwait(false);
 
+            cancellationToken.ThrowIfCancellationRequested();
             return [.. merged.Where(d => type.Matches(d.AvailableConnections))];
         }
         finally
         {
             _scanLock.Release();
+        }
+    }
+
+    private async Task<List<InterfaceCandidate>> EnumerateInterfacesAsync(
+        bool tolerateTimeout,
+        CancellationToken cancellationToken)
+    {
+        // The immutable interface set bounds enumeration and evidence. The requested result filter still
+        // applies only AFTER merging; it never changes this finder's cache/absence interpretation.
+        // Both waits start together so the enumeration stage consumes at most one budget, not two.
+        var pcscTask = findPcscService is { } pcsc
+            ? EnumerateBoundedAsync(_pcscEnumeration, pcsc.FindAllAsync, "PC/SC", tolerateTimeout, cancellationToken)
+            : Task.FromResult<IReadOnlyList<IPcscDevice>>([]);
+        var hidTask = findHidService is { } hid
+            ? EnumerateBoundedAsync(_hidEnumeration, hid.FindAllAsync, "HID", tolerateTimeout, cancellationToken)
+            : Task.FromResult<IReadOnlyList<IHidInterface>>([]);
+        await Task.WhenAll(pcscTask, hidTask).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        return BuildInterfaces(await pcscTask.ConfigureAwait(false), await hidTask.ConfigureAwait(false));
+    }
+
+    private async Task<IReadOnlyList<T>> EnumerateBoundedAsync<T>(
+        OutstandingEnumeration<T> outstanding,
+        Func<CancellationToken, Task<IReadOnlyList<T>>> enumerate,
+        string transport,
+        bool tolerateTimeout,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var reused = outstanding.Task is { IsCompleted: false };
+        var enumeration = reused ? outstanding.Task! : enumerate(cancellationToken);
+        outstanding.Task = enumeration;
+        try
+        {
+            var result = await enumeration.WaitAsync(_enumerationBudget, cancellationToken).ConfigureAwait(false);
+            outstanding.Task = null;
+            return result;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            if (!reused)
+                _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
+            throw;
+        }
+        catch (OperationCanceledException) when (reused)
+        {
+            // The reused enumeration honoured an earlier caller's cancellation; nothing is outstanding now.
+            outstanding.Task = null;
+            return await EnumerateBoundedAsync(outstanding, enumerate, transport, tolerateTimeout, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            if (!reused)
+                _ = ObserveAbandonedEnumerationAsync(enumeration, transport);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!tolerateTimeout)
+            {
+                throw new TimeoutException(
+                    $"{transport} interface enumeration exceeded its {_enumerationBudget} budget; the scan was not published.");
+            }
+
+            Logger.LogWarning(
+                "{Transport} interface enumeration exceeded its {Budget} budget; continuing without its interfaces this scan.",
+                transport, _enumerationBudget);
+            return [];
+        }
+    }
+
+    private static async Task ObserveAbandonedEnumerationAsync(Task enumeration, string transport)
+    {
+        try
+        {
+            await enumeration.ConfigureAwait(false);
+            Logger.LogDebug("Abandoned {Transport} interface enumeration completed.", transport);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogDebug(exception, "Abandoned {Transport} interface enumeration failed.", transport);
         }
     }
 
@@ -205,6 +299,11 @@ public class FindYubiKeys : IFindYubiKeys
                     hidInterface.InterfaceType);
                 continue;
             }
+
+            // OTP and FIDO share descriptor enumeration. Excluded interfaces never become slots, resolve
+            // topology, contribute grouping evidence, or open a connection for identity/metadata reads.
+            if (!_interfaces.SupportsConnection(connection))
+                continue;
 
             var device = createSlot(hidInterface);
             var rawPid = hidInterface.DescriptorInfo.ProductId;
@@ -284,8 +383,10 @@ public class FindYubiKeys : IFindYubiKeys
         return info;
     }
 
-    /// <inheritdoc />
-    public void NotifyTransportActivity(ConnectionType transport)
+    Task<IReadOnlyList<IYubiKey>> IMonitoredDiscovery.FindAllAsync(CancellationToken cancellationToken) =>
+        FindAllCoreAsync(ConnectionType.All, tolerateEnumerationTimeout: false, cancellationToken);
+
+    void IMonitoredDiscovery.InvalidateEvidence(ConnectionType transport)
     {
         // Full eviction, deliberately - the events carry no reliable per-interface identity (the PC/SC
         // listener is payload-less; HID hints are diagnostic-only), and per-transport scoping is unsound
@@ -299,10 +400,24 @@ public class FindYubiKeys : IFindYubiKeys
         // join reads started against the departed topology.
         lock (_evidenceLock)
         {
+            // Retirement is terminal, including callbacks already in flight during listener teardown.
+            if (!_evidence.ReadScope.TryCaptureEpoch(out _))
+                return;
+
             var retired = _evidence;
-            ProtocolDeviceInfo.Retire(retired.ReadScope);
+            retired.ReadScope.Retire();
             _evidence = new EvidenceEpoch();
         }
+    }
+
+    void IMonitoredDiscovery.Retire() => RetireReadScope();
+
+    internal void RetireReadScope()
+    {
+        // A discarded one-shot finder must not leave identity reads queued behind hung native workers.
+        // Retirement prevents new opens; already-open reads keep their admission/lease through teardown.
+        lock (_evidenceLock)
+            _evidence.ReadScope.Retire();
     }
 
     private async Task PopulateMetadataAsync(
@@ -338,7 +453,7 @@ public class FindYubiKeys : IFindYubiKeys
                 return;
 
             var info = await CompositeMetadataReader
-                .TryReadAsync(device, MetadataReadBudget, Logger, cancellationToken, evidence.ReadScope)
+                .TryReadAsync(device, DiscoveryBudgets.MetadataRead, Logger, cancellationToken, evidence.ReadScope)
                 .ConfigureAwait(false);
 
             if (info is { } metadata)
@@ -369,19 +484,34 @@ public class FindYubiKeys : IFindYubiKeys
         }
     }
 
-    public static FindYubiKeys Create()
+    /// <summary>
+    ///     Creates a finder over every interface (smart card, FIDO HID, OTP HID) using this platform's PC/SC and
+    ///     HID backends. Prefer <see cref="YubiKeyManager.FindAllAsync"/> unless code needs an injectable
+    ///     <see cref="IFindYubiKeys"/>.
+    /// </summary>
+    public static FindYubiKeys Create() => CreateForInterfaces(ConnectionType.All);
+
+    /// <summary>Creates a finder that never constructs the backend of an excluded transport.</summary>
+    internal static FindYubiKeys CreateForInterfaces(ConnectionType interfaces)
     {
-        var smartCardConnectionFactory = SmartCardConnectionFactory.CreateDefault();
+        interfaces = interfaces.ToConcreteScope();
+        // Do not even construct excluded transport backends. In particular a HID-only scan must not bind
+        // the PC/SC native API or snapshot its connection policy.
+        var smartCardConnectionFactory = interfaces.SupportsConnection(ConnectionType.SmartCard)
+            ? SmartCardConnectionFactory.CreateDefault()
+            : null;
         return new(
-            FindPcscDevices.Create(),
-            FindHidInterfaces.Create(),
+            interfaces.SupportsConnection(ConnectionType.SmartCard) ? FindPcscDevices.Create() : null,
+            interfaces.IncludesHidScan() ? FindHidInterfaces.Create() : null,
             device => device switch
             {
-                IPcscDevice pcscDevice => new PcscConnectionSlot(pcscDevice, smartCardConnectionFactory),
+                IPcscDevice pcscDevice when smartCardConnectionFactory is not null =>
+                    new PcscConnectionSlot(pcscDevice, smartCardConnectionFactory),
                 IHidInterface hidInterface => new HidConnectionSlot(hidInterface),
                 _ => throw new NotSupportedException(
                     $"Device type {device.GetType().Name} is not supported as a connection slot.")
-            });
+            },
+            interfaces);
     }
 
     private readonly record struct InterfaceCandidate(

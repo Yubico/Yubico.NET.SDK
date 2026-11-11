@@ -1,0 +1,24 @@
+Scope: static Phase 0 consumer preparation only. No SDK/compiler/test/native/device/formatter operation.
+Active cwd: /home/rupicola/Code/y/yubikit-core-docs-integration
+
+Executed static derivation:
+python3 -B docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/prepare.py
+Observed exit 0: Prepared 30 current complete bodies, 5 derivative hosts, 25 graph projects; SDK not invoked.
+Later explicit fixture preparation adds two real project nodes to the final graph; the initial figure is not a final expected compilation count.
+
+Executed read-only caller inventory, retaining stdout in caller-inventory.json:
+python3 -B docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/inventory.py
+Observed exit 0. Both parent guide contents came from read-only git show/cat-file.
+
+Executed read-only owning-project/default-glob inspection, retaining stdout in format-membership.json:
+python3 -B docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/format-membership.py
+Observed exit 0. Actual formatter/Csc execution was not performed.
+
+Static checks:
+python3 -B docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py static
+Initial early check passed before later proof additions. A subsequent byte-count mismatch failed with exit 1.
+static-byte-count-failure/ retains exact checker/input snapshots and a reproduced failed stdout/stderr/receipt before correction.
+The next corrected check passed with exit 0; stdout is static-ready-unsealed.json. Final sealed readiness has its own new output.
+
+Input corrections are preparation-only. Original resolver candidates, original capture scripts, accepted product source, Git index and all historical archives remain unchanged.
+Future actual build/capture/live commands are in run-lane.sh and consumer-validation-preparation.md. Their gates remain coordinator work.

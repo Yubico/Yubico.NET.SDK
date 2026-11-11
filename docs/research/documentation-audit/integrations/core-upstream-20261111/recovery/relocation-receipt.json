@@ -1,0 +1,24 @@
+{
+  "status": "copied-verified-and-single-backlink-relocated",
+  "utc": "2026-11-11T18:27:06.597116+00:00",
+  "old_root": "/tmp/opencode/core-upstream-20261111",
+  "new_root": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "runtime_root": "/home/rupicola/Code/y/.core-docs-audit-runtime",
+  "primary": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "private_admin": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.git/worktrees/core-upstream-20261111",
+  "private_admin_backup": "/home/rupicola/Code/y/.core-docs-audit-runtime/storage-recovery-first/private-admin-backup",
+  "head": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+  "merge_head": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+  "index_sha256": "bec87214c74b7d3ac356cf973521837aa269c521efffb85a7ec193e5c6f34251",
+  "entries": 10558,
+  "checkout_manifest_sha256": "de21391b3676cca4492f0d19ee024a60424d2aaeb86ff327d1ba9e6ef3a62ac0",
+  "admin_manifest_sha256": "dda84538979e8b4a32d82f592f134a016785b93fdd668365a32001df230f1d81",
+  "primary_unchanged": true,
+  "other_backlinks_unchanged": true,
+  "source_copy_unchanged": true,
+  "changed_admin_files": [
+    "gitdir"
+  ],
+  "original_before_sha256": "8f45a2c984ab0d741152378d5fcadb4f785a478fca9b47f4ba384139cf7558c9",
+  "limits": "Storage relocation only. Original tmpfs copy stays inactive and untouched. No build/test/native/device/commit/ref movement. No successful main gate RESULT."
+}

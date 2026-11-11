@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-preserved-relocated.py"
+  ],
+  "cwd": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "exit_code": 0,
+  "stdout_sha256": "325d673072b49954a80512ab7b2a0afbb1af8179323c51f9f4229b46ed212c80",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "utc": "2026-11-11T18:36:02.415743+00:00"
+}

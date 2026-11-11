@@ -18,16 +18,16 @@ public sealed class ManagementInfoCommand : YkCommandBase<GlobalSettings>
     protected override ConnectionType[] AppletTransports =>
         [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
 
-    protected override Task<int> ExecuteCommandAsync(
+    protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, GlobalSettings settings, YkDeviceContext deviceContext)
     {
         OutputHelpers.WriteHeader("Device Information");
 
-        var info = deviceContext.Info;
+        var info = await deviceContext.ReadLiveInfoAsync();
         if (info is null)
         {
             OutputHelpers.WriteWarning("Could not retrieve full device information.");
-            return Task.FromResult(ExitCode.Success);
+            return ExitCode.Success;
         }
 
         var deviceInfo = info.Value;
@@ -35,7 +35,7 @@ public sealed class ManagementInfoCommand : YkCommandBase<GlobalSettings>
         OutputHelpers.WriteKeyValue("Part Number", deviceInfo.PartNumber ?? "Unknown");
         OutputHelpers.WriteKeyValue("Firmware Version", deviceInfo.VersionName);
         OutputHelpers.WriteKeyValue("Serial Number", deviceInfo.SerialNumber?.ToString() ?? "N/A");
-        OutputHelpers.WriteKeyValue("Form Factor", deviceContext.Selection.FormFactor.ToString());
+        OutputHelpers.WriteKeyValue("Form Factor", deviceInfo.FormFactor.ToString());
         OutputHelpers.WriteBoolValue("FIPS Device", deviceInfo.IsFips);
         OutputHelpers.WriteBoolValue("Security Key", deviceInfo.IsSky);
         OutputHelpers.WriteBoolValue("Configuration Locked", deviceInfo.IsLocked);
@@ -58,7 +58,7 @@ public sealed class ManagementInfoCommand : YkCommandBase<GlobalSettings>
             OutputHelpers.WriteKeyValue("FIPS Approved", FormatCapabilities(deviceInfo.FipsApproved));
         }
 
-        return Task.FromResult(ExitCode.Success);
+        return ExitCode.Success;
     }
 
     private static string FormatCapabilities(DeviceCapabilities capabilities) =>

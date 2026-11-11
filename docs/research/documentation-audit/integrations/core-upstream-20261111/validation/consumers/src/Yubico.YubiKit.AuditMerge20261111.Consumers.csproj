@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../../../../../../src/Ctap2/examples/FidoTool/FidoTool.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../../../../../../src/Management/examples/ManagementTool/ManagementTool.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../../../../../../src/Oath/examples/OathTool/OathTool.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../../../../../../src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../../../../../../src/Piv/examples/PivTool/PivTool.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../../../../../../src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../../../../../../src/YubiOtp/examples/OtpTool/OtpTool.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../../../../../../verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../../../../../../verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+{
+  "status": "all fixture preserved bytes and prior retained proofs agree; current source draft supersession explicitly recorded",
+  "fixture_preserved_records": 2079,
+  "prior_retained_records": 23256,
+  "superseded_unsealed_drafts": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v5.py",
+      "preserved_sha256": "2c747ff245efca54a22e587d4b894752cb66d05928d394b8fa9cab7ffdf52d99",
+      "current_sha256": "0c1bb1a6f71718706dc2a168ba66b9d5d83ed15c1addfaa6d2d53cac6eeb2a75",
+      "reason": "Unsealed copy-only v5 draft consolidated for the subsequent user-directed fixture correction before any v5 receipt/capture. Exact earlier draft remains retained."
+    }
+  ],
+  "fixture_v5_capture_executed": false,
+  "mac_v5_capture_executed": false,
+  "scope": "Read-only conservation, not compiler-proof capture or SDK execution"
+}

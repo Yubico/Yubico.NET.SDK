@@ -1,0 +1,3 @@
+IYubiKey first = await YubiKeyManager.FindFirstAsync();
+IYubiKey? smartCard = await YubiKeyManager.FindFirstOrDefaultAsync(
+    device => device.SupportsConnection(ConnectionType.SmartCard));

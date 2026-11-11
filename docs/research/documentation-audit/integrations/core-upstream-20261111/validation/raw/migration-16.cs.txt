@@ -1,0 +1,2 @@
+SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;
+IYubiKey device = await YubiKeyManager.FindFirstAsync();

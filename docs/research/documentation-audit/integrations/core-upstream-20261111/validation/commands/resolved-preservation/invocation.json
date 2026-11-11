@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-preserved.py"
+  ],
+  "cwd": "/tmp/opencode/core-upstream-20261111",
+  "started": "2026-11-11T18:15:22.621681+00:00",
+  "logger": {
+    "path": "/tmp/opencode/core-upstream-20261111/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+    "bytes": 12045,
+    "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "status": "started"
+}

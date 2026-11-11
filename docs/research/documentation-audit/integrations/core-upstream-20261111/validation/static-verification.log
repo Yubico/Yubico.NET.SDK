@@ -1,0 +1,53 @@
+{
+  "status": "static-preparation-verified",
+  "tools": [
+    {
+      "path": "check-preserved.py",
+      "bytes": 5291,
+      "sha256": "0581b55098c6c9f3276c9e0766a0bef88a4a3a4380ee7282e2a136f4eac82dfc"
+    },
+    {
+      "path": "check-records.py",
+      "bytes": 5231,
+      "sha256": "e287c3e35d6fec35d125c870125201816dc4d9822ae78ba94d7c0da167eeb3e4"
+    },
+    {
+      "path": "preflight.py",
+      "bytes": 4844,
+      "sha256": "d2e5b40fc2890bed032cddcac81bea8edd15c8c5f442e77c195c58bd9b9358e3"
+    },
+    {
+      "path": "run-command.py",
+      "bytes": 12045,
+      "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+    },
+    {
+      "path": "verify-preparation.py",
+      "bytes": 3151,
+      "sha256": "47bc23aeede5d70c260673749e858fefd4f5a04fce096264f9f76cb5d07bca67"
+    }
+  ],
+  "pinned_source_identities": 22,
+  "frozen_piv_source_identities": 9,
+  "canonical_unit_projects": 13,
+  "historical_result_parser_replay": {
+    "targets": [
+      "test-infrastructure-qa",
+      "native-aot-contract-qa",
+      "build",
+      "test",
+      "docs-qa",
+      "docs-architecture",
+      "complexity"
+    ],
+    "projects": 13,
+    "executed": 4124,
+    "skipped": 5,
+    "failed": 0,
+    "warnings": 0
+  },
+  "historical_result_sha256": "d54a67f4776827a6119a480d922a65f6cde10aa3a197249af8c49b3158e5fec3",
+  "current_packet_text_records": 231,
+  "normalization_changes": [],
+  "limits": "AST/provenance/filename/attribute inspection plus a frozen historical RESULT parse only. No command logger invocation, build, test, native, device or final staged-byte gate."
+}

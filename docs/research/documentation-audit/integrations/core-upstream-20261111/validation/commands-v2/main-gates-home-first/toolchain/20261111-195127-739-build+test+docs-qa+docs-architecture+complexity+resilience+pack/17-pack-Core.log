@@ -1,0 +1,3 @@
+$ dotnet pack src/Core/src/Yubico.YubiKit.Core.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages /p:Version=2.0.0-alpha.2 /p:GenerateDocumentationFile=false 
+  Successfully created package '/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages/Yubico.YubiKit.Core.2.0.0-alpha.2.nupkg'.
+  Successfully created package '/home/rupicola/Code/y/yubikit-core-docs-integration/artifacts/packages/Yubico.YubiKit.Core.2.0.0-alpha.2.snupkg'.

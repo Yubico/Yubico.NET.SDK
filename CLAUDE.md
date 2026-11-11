@@ -25,7 +25,6 @@ Guidance for AI agents working in this repository. Yubico.NET.SDK (YubiKit) is a
 | `PublicApi/` | Test-only cross-module public API conventions; no shipping assembly |
 | `Cli.Shared/` | Shared CLI infra for example tools |
 | `Tests.Shared/` | Multi-transport test harness |
-| `Tests.TestProject/` | xUnit v3 test project layout |
 
 **Platform interop** lives in `src/Core/src/Native/{Windows,MacOS,Linux,Desktop}/` with the P/Invoke declarations; the managed transport implementations that call them are in `src/Core/src/Transports/`. `UnmanagedDynamicLibrary` + `SafeLibraryHandle` manage native loading; `SdkPlatformInfo` detects runtime platform.
 
@@ -160,7 +159,7 @@ Valid device response data that the SDK does not yet model must not block users.
 
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
-- **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow through one internal `DeviceEventHub` (per-watcher bounded buffers), surfaced as `YubiKeyManager.WatchAsync` (`IAsyncEnumerable`), the only public device change stream. No reactive dependency - see `docs/usage/device-discovery.md`.
+- **Device discovery** — static `YubiKeyManager.Find…Async` uses a fresh scoped finder per call. `WatchAsync` owns a private monitor per enumeration; `CreateMonitorAsync` returns an initialized shared `YubiKeyMonitor`. Both streams emit `DeviceAdded` replay, `SnapshotComplete`, then live `DeviceChange` records. Build a projection or call `FindAllAsync` for a one-off. The ownership rule is: manager watch creates a producer; monitor watch subscribes to an existing one. No reactive dependency; see `docs/usage/device-discovery.md`.
 - **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawCtapHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is explicitly unguarded direct raw-connection access, with framing, sequencing, and recovery left to the caller. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
 - **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
 - **HID vocabulary** — `IYubiKey` is the physical key; `IHidInterface` is an operating-system-exposed report interface enumerated by `FindHidInterfaces`; `IHidConnection` is an opened report connection. Windows `IWindowsHidReportAccess` is the internal report-handle seam, not another physical device.
@@ -312,14 +311,8 @@ public sealed class SmartCardConnection : IConnection
     // ... implementation
 }
 
-// ✅ GOOD - Service/manager implementation type
-internal sealed class YubiKeyDeviceManager
-{
-    private readonly IDeviceRepository _repository;
-    private readonly IYubiKeyFactory _factory;
-    
-    // ... implementation
-}
+// Device monitoring uses the owned YubiKeyMonitor reference type.
+// Create it with YubiKeyManager.CreateMonitorAsync and dispose it with await using.
 ```
 
 #### Special Case: APDU Types

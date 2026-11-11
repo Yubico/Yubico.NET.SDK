@@ -1,0 +1,4 @@
+if (device.CachedDeviceInfo is { } info)
+{
+    Console.WriteLine($"Last observed firmware: {info.FirmwareVersion}, form factor: {info.FormFactor}");
+}

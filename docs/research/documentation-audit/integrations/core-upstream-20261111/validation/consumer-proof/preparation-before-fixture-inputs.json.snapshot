@@ -1,0 +1,1032 @@
+{
+  "status": "static preparation; compilation and capture pending coordinator",
+  "root": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "runtime": "/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof",
+  "groups": [
+    {
+      "id": "body-01",
+      "source": "README.md",
+      "fence": 2,
+      "first_line": 43,
+      "last_line": 47,
+      "original_id": "migration-01",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-01.cs.txt",
+        "bytes": 216,
+        "sha256": "90d2cab3dfb5db287da8b68441b1bedf1e8a60635bb49c0a20786e02de7579aa"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-01.cs",
+        "bytes": 532,
+        "sha256": "376e2fb73494c8a4b9dbec944e530dc98b70e1279db063913473e707986cad8d"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-02",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 1,
+      "first_line": 9,
+      "last_line": 17,
+      "original_id": "migration-02",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-02.cs.txt",
+        "bytes": 260,
+        "sha256": "d2d783917b37647871ce1fb2aca9eea19d0b47822fde9f3aef1d372adafcb35f"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-02.cs",
+        "bytes": 634,
+        "sha256": "ba44aab6959079a59d4ee3d949f2c5d9d50b0c8f8fe35e4676c113de221bd541"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-03",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 2,
+      "first_line": 58,
+      "last_line": 70,
+      "original_id": "migration-03",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-03.cs.txt",
+        "bytes": 600,
+        "sha256": "07ee58b51eb4b1048246bb8ee21864a2c7beac1a65da523d8fdb391220a907a6"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-03.cs",
+        "bytes": 1023,
+        "sha256": "f9fea25bd14e0e58bb066dd289ef9e40f927df2ea3f4da365440a99908a29562"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-04",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 3,
+      "first_line": 82,
+      "last_line": 95,
+      "original_id": "migration-04",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-04.cs.txt",
+        "bytes": 939,
+        "sha256": "24bb8dd79e188660f1754ee91964aa1a82d39b5283f50efaf298fdcd9801d190"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-04.cs",
+        "bytes": 1409,
+        "sha256": "00762c655379acedf516a977e9a4ba838c6df5df13f8463e8c6338acd0e5fc0a"
+      },
+      "parameters": [
+        "CancellationToken cancellationToken",
+        "int serial"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-05",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 4,
+      "first_line": 146,
+      "last_line": 155,
+      "original_id": "migration-05",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-05.cs.txt",
+        "bytes": 315,
+        "sha256": "68c3a91d60d3e1c7e581823d8db3ca1785f27607f92bee71ce596cc059ab5f1a"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-05.cs",
+        "bytes": 738,
+        "sha256": "7e67d798abc617ee6bb2fd58ee45bf9b685b09f1c79c795ded5e394fa72bcdf7"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-06",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 5,
+      "first_line": 232,
+      "last_line": 246,
+      "original_id": "migration-06",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-06.cs.txt",
+        "bytes": 614,
+        "sha256": "7e996315ccdbc1594fd5d5644414ba702383bf66970f8c1815101f5a7c725c3c"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-06.cs",
+        "bytes": 1002,
+        "sha256": "271200588dba3d9462904773a31e5d0fb43cdce9ec1acf2644efb9df19ed31cd"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-07",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 6,
+      "first_line": 259,
+      "last_line": 277,
+      "original_id": "migration-07",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-07.cs.txt",
+        "bytes": 767,
+        "sha256": "eb95a765658f5a24d16ff3cdad6eccb35495f55b430d09b5231cf0e1422ac052"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-07.cs",
+        "bytes": 1115,
+        "sha256": "779da45ec79022f492913295a60349c4cf93aebdfd8740d3fe37efe70757e617"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-08",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 7,
+      "first_line": 292,
+      "last_line": 308,
+      "original_id": "migration-08",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-08.cs.txt",
+        "bytes": 785,
+        "sha256": "f5384f828de00df6275eadf2b1b61661678970274471c856226d34948c91a5a1"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-08.cs",
+        "bytes": 1186,
+        "sha256": "12eade17bd1556064ba0b0f0e25241b77a8f2020c093d46f3dd7c2b7224be993"
+      },
+      "parameters": [
+        "string[] args"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-09",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 8,
+      "first_line": 348,
+      "last_line": 354,
+      "original_id": "migration-09",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-09.cs.txt",
+        "bytes": 324,
+        "sha256": "b41c71d99a45a5b6a5a341bc1da037a1a67dcb8eaa0867d19599a4d080429dbd"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-09.cs",
+        "bytes": 706,
+        "sha256": "bd7d33486e8649b5cfef3ef0069ac9c56cfc1cb4c770e504e830ae564d6c214c"
+      },
+      "parameters": [],
+      "disposition": "complete helper",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-10",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 9,
+      "first_line": 363,
+      "last_line": 375,
+      "original_id": "migration-10",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-10.cs.txt",
+        "bytes": 324,
+        "sha256": "a3325c13e18af8776c8faa6284b9e4c39e4a1aefc777a0b65d48d97e337b8fc1"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-10.cs",
+        "bytes": 782,
+        "sha256": "03745dcb9cea34acdbed656dc87248ddf8df2aab9cdb0864ee44438deedd6748"
+      },
+      "parameters": [
+        "CancellationToken cancellationToken"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-11",
+      "source": "docs/usage/device-discovery.md",
+      "fence": 12,
+      "first_line": 478,
+      "last_line": 486,
+      "original_id": "migration-11",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-11.cs.txt",
+        "bytes": 194,
+        "sha256": "a33acbf1f1ea3314beea7b9070c45064144e7a71c865fc22c4faf2c355ab2211"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-11.cs",
+        "bytes": 544,
+        "sha256": "28611563b9b05bc3aaa89e775b68de8ee50c605657a530b4ef8004d4a099a6e9"
+      },
+      "parameters": [],
+      "disposition": "complete class",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-12",
+      "source": "src/Core/README.md",
+      "fence": 2,
+      "first_line": 48,
+      "last_line": 63,
+      "original_id": "migration-12",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-12.cs.txt",
+        "bytes": 597,
+        "sha256": "2d787d65101738f9812ba6917a9268a5ccfb33162ab707227327f7be66a9c253"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-12.cs",
+        "bytes": 870,
+        "sha256": "bf4f5e864bcb69aab73ca5f98d533ec6eec250902deaf34417688c9c48b86421"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-13",
+      "source": "src/Core/README.md",
+      "fence": 3,
+      "first_line": 119,
+      "last_line": 120,
+      "original_id": "migration-13",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-13.cs.txt",
+        "bytes": 263,
+        "sha256": "36919ee52199f01ea271cafc2533cc8079ec8b4e760a86a02f10198c2479ff36"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-13.cs",
+        "bytes": 721,
+        "sha256": "d86fa991f1a60d3cb4cfeb74c0d9a79b47fe8be3294c65ed4690f7441434de5d"
+      },
+      "parameters": [
+        "CancellationToken cancellationToken"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-14",
+      "source": "src/Core/README.md",
+      "fence": 4,
+      "first_line": 141,
+      "last_line": 144,
+      "original_id": "migration-14",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-14.cs.txt",
+        "bytes": 151,
+        "sha256": "a95ce875742421cc42117b44eb2ccb969602f325fafcbd4124b8e7299396db2b"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-14.cs",
+        "bytes": 578,
+        "sha256": "6f6f11f569ec52dcdd569df0d00543d5d6750372ed5447ae7ce521fa1a40c65e"
+      },
+      "parameters": [
+        "IYubiKey device"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-15",
+      "source": "src/Core/README.md",
+      "fence": 5,
+      "first_line": 168,
+      "last_line": 170,
+      "original_id": "migration-15",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-15.cs.txt",
+        "bytes": 257,
+        "sha256": "2b6e0220f981b623808a9e780598f1d86f68f75b7dbc22ab5367a6096a9541a9"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-15.cs",
+        "bytes": 741,
+        "sha256": "b7369171e21eb46eb1d63138ab8ee286c122efcb2b18158d8a70f5d1af57f92f"
+      },
+      "parameters": [
+        "int expectedSerialNumber",
+        "CancellationToken cancellationToken"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-16",
+      "source": "src/Core/README.md",
+      "fence": 6,
+      "first_line": 188,
+      "last_line": 189,
+      "original_id": "migration-16",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-16.cs.txt",
+        "bytes": 147,
+        "sha256": "e2481dca75a02fadb2ec4ab663637e2620e9ff59fc24dfaf90ffca1008e27f70"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-16.cs",
+        "bytes": 570,
+        "sha256": "f96c470f57609301615240cadc2c2b3b163c0d213d7fa9876516f64ad9405070"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-17",
+      "source": "src/Core/README.md",
+      "fence": 9,
+      "first_line": 241,
+      "last_line": 243,
+      "original_id": "migration-17",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-17.cs.txt",
+        "bytes": 192,
+        "sha256": "dcd0265322dd87993b13f72d8481f427e31027d830580327d059abf0847e5ad2"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-17.cs",
+        "bytes": 615,
+        "sha256": "3aa5e665456ae7cda82f6bc80e7a29a79380f07c31f3a5718590c50ca38e3c3a"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-18",
+      "source": "src/Core/README.md",
+      "fence": 10,
+      "first_line": 253,
+      "last_line": 263,
+      "original_id": "migration-18",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-18.cs.txt",
+        "bytes": 449,
+        "sha256": "c31e086f65b6cbc2bde8f4b894e43f26b4635eb4acd326d4e4620ad526c2c30a"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-18.cs",
+        "bytes": 872,
+        "sha256": "568e84208654df7a814ea7b89be565178c905beae6bd3c2aeff53a751dcdae35"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-19",
+      "source": "docs/architecture/physical-device-model.md",
+      "fence": 1,
+      "first_line": 57,
+      "last_line": 77,
+      "original_id": "migration-19",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-19.cs.txt",
+        "bytes": 825,
+        "sha256": "37dca89b6b82231a9acecda8eac356e671f943e08c62b1a3f3cab99599f18a58"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-19.cs",
+        "bytes": 1186,
+        "sha256": "27d4419aebd4b0d543ac3f4a6db2ae4ea8b2a18b605458ff42f18000b9b982b5"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-20",
+      "source": "docs/architecture/physical-device-model.md",
+      "fence": 2,
+      "first_line": 100,
+      "last_line": 105,
+      "original_id": "migration-20",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-20.cs.txt",
+        "bytes": 270,
+        "sha256": "553a93efc9cc924b261e7445188a66e5d0ae0e695063cc4371237f22e1a5b834"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-20.cs",
+        "bytes": 756,
+        "sha256": "6b95d04af4ee60def306914a80b296810e22d4f841d97a3487972332e56c5dcd"
+      },
+      "parameters": [
+        "CancellationToken cancellationToken",
+        "Action<DeviceChange> Apply"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-21",
+      "source": "docs/architecture/physical-device-model.md",
+      "fence": 4,
+      "first_line": 175,
+      "last_line": 175,
+      "original_id": "migration-21",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-21.cs.txt",
+        "bytes": 78,
+        "sha256": "bf10cc7eaddcb4ef545cf23efc3eeee598bb5096e75010292acc74f7256bc465"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-21.cs",
+        "bytes": 505,
+        "sha256": "589adb82eaa3d5bc82739c8337e94ff2a92e130c3a553cc62b814fc9d7a697a0"
+      },
+      "parameters": [
+        "IYubiKey device"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-22",
+      "source": "docs/architecture/physical-device-model.md",
+      "fence": 5,
+      "first_line": 187,
+      "last_line": 191,
+      "original_id": "migration-22",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-22.cs.txt",
+        "bytes": 169,
+        "sha256": "ef57ee04943204b3e4bcf75026476ce8c5db23735a98a154db89c8307e80560f"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-22.cs",
+        "bytes": 574,
+        "sha256": "1fe745dc3c580ea6dbb4ba76fc83489456d291513617426050f688865cbac505"
+      },
+      "parameters": [
+        "IYubiKey device"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-23",
+      "source": "docs/migration/v1-to-v2.md",
+      "fence": 6,
+      "first_line": 246,
+      "last_line": 251,
+      "original_id": "migration-23",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-23.cs.txt",
+        "bytes": 182,
+        "sha256": "cd305fc4e140df869a9e31a0931840f470bbd604057a5e888be0f6dcd695ac71"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-23.cs",
+        "bytes": 605,
+        "sha256": "b4e14b0c17093a50a8d44d23bd3750223a7fd15d709a53bda94a2cfea53d8436"
+      },
+      "parameters": [
+        "CancellationToken cancellationToken"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-24",
+      "source": "docs/migration/v1-to-v2.md",
+      "fence": 8,
+      "first_line": 307,
+      "last_line": 316,
+      "original_id": "migration-24",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-24.cs.txt",
+        "bytes": 409,
+        "sha256": "7b544ce3ca58d8f8a697dae8db593c6f2c61ad3a80b28b42178fa19f1a5c76bd"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-24.cs",
+        "bytes": 799,
+        "sha256": "f51ea9990c22beb6522f7c637ab065f586b933dea92215092da53ae711165590"
+      },
+      "parameters": [
+        "CancellationToken cancellationToken"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-25",
+      "source": "src/Management/CLAUDE.md",
+      "fence": 29,
+      "first_line": 869,
+      "last_line": 880,
+      "original_id": "migration-25",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-25.cs.txt",
+        "bytes": 520,
+        "sha256": "4ea6694233fa1571fee366fc13025b9e0e0722fd8e09b68d94d428a930310d96"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-25.cs",
+        "bytes": 978,
+        "sha256": "ce2b5f014e682ce93990353e6ff23253a7469bd77f9ebbd35a3f448ca8682254"
+      },
+      "parameters": [
+        "CancellationToken cancellationToken"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-26",
+      "source": "src/Management/README.md",
+      "fence": 4,
+      "first_line": 92,
+      "last_line": 107,
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-26.cs.txt",
+        "bytes": 722,
+        "sha256": "f453bc24ca04c7b99c705952f979108453f50bc36598254e3911f22a5e1583d1"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-26.cs",
+        "bytes": 1160,
+        "sha256": "8f60a0ab85acaff13d2a65a7674ac285adda2cb833ebd51fd4c32f7e388c4d4d"
+      },
+      "parameters": [
+        "IYubiKey device"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-27",
+      "source": "src/Core/src/Devices/YubiKeyManager.cs",
+      "xml_code": 1,
+      "extraction": "Strip XML-documentation prefix; retain full code element.",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-27.cs.txt",
+        "bytes": 325,
+        "sha256": "bf9496c2e4015ea92cc8490d9cd56bb604f776799ca36b0d9d4055b927673848"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-27.cs",
+        "bytes": 808,
+        "sha256": "4133921570e115568fee7feb07c963b53f3b5d573d07a7bebc5a0a2637d9140a"
+      },
+      "parameters": [
+        "int serial",
+        "CancellationToken ct",
+        "Action<DeviceChange> Apply"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-28",
+      "source": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "xml_code": 1,
+      "extraction": "Strip XML-documentation prefix; retain full code element.",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-28.cs.txt",
+        "bytes": 211,
+        "sha256": "f81e72af902c93c1a47a263dbc1085f4045202670d4ba965a115213e618f776f"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-28.cs",
+        "bytes": 634,
+        "sha256": "df82dcbf9ea1f2a2e68adc17e0df92d9ecbe324cbf054d98c61d717eff0a0fa4"
+      },
+      "parameters": [],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-29",
+      "source": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "xml_code": 2,
+      "extraction": "Strip XML-documentation prefix; retain full code element.",
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-29.cs.txt",
+        "bytes": 310,
+        "sha256": "11a00f2b382a26e4030ded91378ddd2f78934da21d9181fd97e461acedf97329"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-29.cs",
+        "bytes": 788,
+        "sha256": "a9f3a0c3f697aa849f86c817829b9f14176a0ed2159c66f55cf2f0816f18ef44"
+      },
+      "parameters": [
+        "IPcscDevice reader",
+        "CancellationToken cancellationToken"
+      ],
+      "disposition": "composable full body with explicit typed caller prerequisites",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    },
+    {
+      "id": "body-30",
+      "source": "CLAUDE.md",
+      "fence": 14,
+      "first_line": 517,
+      "last_line": 529,
+      "raw": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/raw/body-30.cs.txt",
+        "bytes": 684,
+        "sha256": "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b"
+      },
+      "generated": {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/body-30.cs",
+        "bytes": 1169,
+        "sha256": "f453be9d91c835b49fa663a8d39cc02f3cb1047b83b0e1f0101688c593b2872f"
+      },
+      "parameters": [],
+      "disposition": "complete method in genuine xUnit v3 context; compile only",
+      "transform": "Relocate using directives, add namespace/class/method only. No SDK call or body rewrite. Body 08 retains MonitorLifetime outside the wrapper method. No injected await."
+    }
+  ],
+  "hosts": [
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj",
+      "bytes": 286,
+      "sha256": "e70a4b37a2fb7ca9fa87005c5dcf79e68ecdc18fac6032d1daf621ef9e178852"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj",
+      "bytes": 563,
+      "sha256": "7feef7c68512e73a55d5a7aa87513e062bc9ff0f797d44502dd15a539d9f746c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj",
+      "bytes": 742,
+      "sha256": "876e63dfa67fd69252f90fd81108f425e57f3c6eb3226bbe2363a17d37b57f35"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/consumers/src/Yubico.YubiKit.AuditIntegration20261111.Consumers.csproj",
+      "bytes": 1518,
+      "sha256": "e418fd34645d88151702802071075fa152e86ed18f12f5d04df075697b47e717"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-comparison/src/Yubico.YubiKit.AuditIntegration20261111.MacComparison.csproj",
+      "bytes": 584,
+      "sha256": "4d0d6ca30469a27d6fd23b19ca12c890f08855840d86862e290097d72c2443ed"
+    }
+  ],
+  "contexts": {
+    "probe": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj"
+    ],
+    "examples": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj"
+    ],
+    "annotations": [
+      "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj"
+    ],
+    "consumers": [
+      "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+      "src/Management/examples/ManagementTool/ManagementTool.csproj",
+      "src/Oath/examples/OathTool/OathTool.csproj",
+      "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+      "src/Piv/examples/PivTool/PivTool.csproj",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+      "verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+      "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj"
+    ],
+    "mac-comparison": [
+      "verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj"
+    ]
+  },
+  "declared_graph": {
+    "verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj": [],
+    "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+      "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+      "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+      "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+      "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+    ],
+    "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "src/Core/src/Yubico.YubiKit.Core.csproj": [],
+    "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj": [
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+    ],
+    "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "src/Piv/src/Yubico.YubiKit.Piv.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "src/Oath/src/Yubico.YubiKit.Oath.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "src/Management/src/Yubico.YubiKit.Management.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ],
+    "verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj"
+    ],
+    "src/YubiOtp/examples/OtpTool/OtpTool.csproj": [
+      "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+    ],
+    "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj"
+    ],
+    "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj": [
+      "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+      "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+      "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+      "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+    ],
+    "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj": [
+      "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj"
+    ],
+    "src/Piv/examples/PivTool/PivTool.csproj": [
+      "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/Piv/src/Yubico.YubiKit.Piv.csproj"
+    ],
+    "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj": [
+      "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+    ],
+    "src/Oath/examples/OathTool/OathTool.csproj": [
+      "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/Oath/src/Yubico.YubiKit.Oath.csproj"
+    ],
+    "src/Management/examples/ManagementTool/ManagementTool.csproj": [
+      "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj"
+    ],
+    "src/Ctap2/examples/FidoTool/FidoTool.csproj": [
+      "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj"
+    ],
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj": [
+      "src/Management/src/Yubico.YubiKit.Management.csproj"
+    ],
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "src/Piv/src/Yubico.YubiKit.Piv.csproj"
+    ],
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj": [
+      "src/Core/src/Yubico.YubiKit.Core.csproj"
+    ]
+  },
+  "graph_projects": [
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/annotations/src/Yubico.YubiKit.AuditIntegration20261111.Annotations.csproj",
+      "bytes": 742,
+      "sha256": "876e63dfa67fd69252f90fd81108f425e57f3c6eb3226bbe2363a17d37b57f35"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/Yubico.YubiKit.AuditIntegration20261111.Examples.csproj",
+      "bytes": 563,
+      "sha256": "7feef7c68512e73a55d5a7aa87513e062bc9ff0f797d44502dd15a539d9f746c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/probe/src/Yubico.YubiKit.AuditIntegration20261111.Probe.csproj",
+      "bytes": 286,
+      "sha256": "e70a4b37a2fb7ca9fa87005c5dcf79e68ecdc18fac6032d1daf621ef9e178852"
+    },
+    {
+      "path": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "bytes": 1288,
+      "sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb"
+    },
+    {
+      "path": "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "bytes": 901,
+      "sha256": "1711d32fe0e1b18adc6e207a39f76069c98075e2eb4612c5b8b91466254d7c37"
+    },
+    {
+      "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "bytes": 3088,
+      "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+      "bytes": 1053,
+      "sha256": "3afca1e1da61588d000b80f452ace1649cb16b0168aee625f93bed1b43927af0"
+    },
+    {
+      "path": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "bytes": 1366,
+      "sha256": "9648863ec979a242a2f1c9ccb6be0d005309a53764a8e07b53e3605b7954c747"
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+      "bytes": 1160,
+      "sha256": "78deac71175dad6ba59d735474387a1610a711bf53066471cc83d78240fd1373"
+    },
+    {
+      "path": "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "bytes": 932,
+      "sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/OathTool.csproj",
+      "bytes": 963,
+      "sha256": "edd9cd7afd25aa27e5f9d1d827e3260bd9d03023d33ce9ac5eb9e2eefd81f82c"
+    },
+    {
+      "path": "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+      "bytes": 911,
+      "sha256": "c435652e278028500459d4dc6a0db1472c78b811269eac65725628ceaa4b3110"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+      "bytes": 1083,
+      "sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b"
+    },
+    {
+      "path": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+      "bytes": 865,
+      "sha256": "0eddc3bde1e97e6eae9445e9191420cfd3a774f1d1c04fb813083d6cbc4376c5"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/PivTool.csproj",
+      "bytes": 950,
+      "sha256": "9bbf0a5851a7d034d04d379c5349201ad64e14cfcd5d65cbf88f439f7b4e4349"
+    },
+    {
+      "path": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "bytes": 1135,
+      "sha256": "4bc5ec4021cf385709d73cc17eb1ff3af5f9e4a581d336fc00b0612586af9978"
+    },
+    {
+      "path": "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+      "bytes": 856,
+      "sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0"
+    },
+    {
+      "path": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "bytes": 1051,
+      "sha256": "b921fa801d7425bc87fd67beda89f2135b243affe1aa77ced1c464250c5e430d"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "bytes": 1027,
+      "sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed"
+    },
+    {
+      "path": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+      "bytes": 888,
+      "sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+      "bytes": 1019,
+      "sha256": "1085ebedfad2fc0669bab7c600a4ac962cec36d3c237e9f0ff1801ee6f936028"
+    },
+    {
+      "path": "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj",
+      "bytes": 936,
+      "sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "bytes": 1261,
+      "sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+      "bytes": 807,
+      "sha256": "157320cf1d1254f00dc482e2b70fc8415f518b755c767022e3a03a540b7453f3"
+    },
+    {
+      "path": "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+      "bytes": 2221,
+      "sha256": "82b206fda06085a97765b4c8f4511b52d07a11b070456e38eb49be4ed049b9fc"
+    }
+  ],
+  "source_documents": [
+    {
+      "path": "CLAUDE.md",
+      "bytes": 33159,
+      "sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4980,
+      "sha256": "64e9b92eae3bb689f364f6a13fef2b35bdc7d954b7636b0f5275a616d5314543"
+    },
+    {
+      "path": "docs/architecture/physical-device-model.md",
+      "bytes": 19549,
+      "sha256": "b38d5053935ca3e26cc2821c0487e7dbf43bc764eb6bc1b11cc2156b6911a482"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "bytes": 61393,
+      "sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280"
+    },
+    {
+      "path": "docs/usage/device-discovery.md",
+      "bytes": 29141,
+      "sha256": "360a2a8be9ccdd6b5f30dc015c6ae9ef90c0ebee56842003e832c182436b6a7f"
+    },
+    {
+      "path": "src/Core/README.md",
+      "bytes": 43093,
+      "sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyManager.cs",
+      "bytes": 8839,
+      "sha256": "23d965dbe0ed71a1ef857815ad366e6b8d4d6d29707cadf7f91da42f907b8090"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "bytes": 7655,
+      "sha256": "891ed9acdf57c4436707ed8ec847e8df9f796261c4b3951c0876774f982a2e48"
+    },
+    {
+      "path": "src/Management/CLAUDE.md",
+      "bytes": 43759,
+      "sha256": "551365b8af3253fbfb5490bd8c9f38b19a1cdcabc31904743c825b6ea5850326"
+    },
+    {
+      "path": "src/Management/README.md",
+      "bytes": 16474,
+      "sha256": "0c40ec645647c3aecabaf1df6829790b2da5ce5b7b35791d25ade2f41784de16"
+    }
+  ],
+  "actual_samples": [
+    "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+    "src/Management/examples/ManagementTool/ManagementTool.csproj",
+    "src/Oath/examples/OathTool/OathTool.csproj",
+    "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+    "src/Piv/examples/PivTool/PivTool.csproj",
+    "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+    "src/YubiOtp/examples/OtpTool/OtpTool.csproj"
+  ],
+  "verification_hosts": [
+    "verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+    "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj"
+  ],
+  "notes": "All example/helper bodies are uncalled. Annotations executable is compiled only. No original archive host or source is built. No platform/runtime qualification."
+}

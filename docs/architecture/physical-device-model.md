@@ -21,7 +21,7 @@ See also: [device identity and physical-device correlation](./device-identity.md
 `IYubiKey` (defined in `src/Core/src/Abstractions/IYubiKey.cs`) is intentionally small:
 
 - `string DeviceId` — a human-readable correlation identifier. Once a device object is published through
-  `YubiKeyManager`, its `DeviceId` remains stable for that uninterrupted physical presence while its
+  an owned `YubiKeyMonitor` repository, its `DeviceId` remains stable for that uninterrupted physical presence while its
   physical interface identity and `AvailableConnections` remain unchanged. The repository retains the
   originally published object across evidence-tier flips so its eventual `Removed` event correlates with
   the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
@@ -32,6 +32,11 @@ See also: [device identity and physical-device correlation](./device-identity.md
   `SmartCard`, `HidFido`, and `HidOtp`. It never contains the `Hid` group flag or `All`.
   This is the union of observed transport interfaces, not proof that every applet is enabled on every
   interface or that every combination is safe to use concurrently.
+- `int? SerialNumber` — discovery's independently latched durable hardware identity, when known; see
+  [device identity](device-identity.md). It is not derived from the latest metadata snapshot.
+- `DeviceInfo? CachedDeviceInfo` — last-known read-only metadata, available without I/O. It can be null or
+  stale; existing discovery/repository updates may replace it without a device event. The default interface
+  implementation returns null for custom implementations.
 - `bool SupportsConnection(ConnectionType)` — whether a given interface is present on this device. The
   concrete values (`SmartCard`, `HidFido`, `HidOtp`) test a specific openable interface; the `Hid` group
   flag returns true when either HID interface is present; `Unknown`, `All`, and mixed/combined values
@@ -53,7 +58,7 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 
 // One IYubiKey per physical device, even when CCID + HID FIDO + HID OTP are all present.
-var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+var devices = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.All);
 
 foreach (var device in devices)
 {
@@ -65,8 +70,11 @@ foreach (var device in devices)
     }
 }
 
-// Filters return physical devices capable of the requested connection, not per-interface rows.
-var fidoCapable = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
+// Keep full composite slots, then select physical keys capable of FIDO.
+var fidoCapable = devices.Where(key => key.SupportsConnection(ConnectionType.HidFido));
+
+// Or intentionally discover only FIDO interfaces; these YubiKeys have no CCID/OTP slots.
+var fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido);
 ```
 
 In the common case, discovery merges the interfaces of a single physical key by USB Product ID parsed from
@@ -80,18 +88,43 @@ name cannot be parsed for its Product ID, or when a serial number needed to disa
 keys cannot be read. In those cases interfaces are left unmerged rather than risk wrongly collapsing two
 distinct keys, so one physical key can surface as more than one row.
 
-`FindAllAsync(forceRescan: false)` returns the repository cache after its first populated scan;
-`forceRescan: true` performs discovery and reconciles the result into that cache. Successful identity and
-metadata reads are cached while their interface set remains present, but activity observed on any transport
-globally invalidates both caches; the observed transport is diagnostic context, not an eviction scope.
-Discovery populates best-effort metadata for every published device shape, including one-interface USB and
-NFC records. Grouping does not depend on those metadata results, but the bounded reads are awaited and may
-delay scan completion by up to their budget. When a later scan obtains metadata for an otherwise unchanged
-physical device, the repository copies it onto the object it originally published without emitting `Added`
-or `Removed`. Request fresh Management data explicitly when current device configuration matters.
-`WatchAsync` events are emitted from repository diffs after a full rescan, not directly from native listener
-hints. These APIs inherit the conservative grouping bounds in
-[Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
+Every `FindAllAsync`, `FindFirstAsync`, and `FindFirstOrDefaultAsync` call performs independent one-shot
+discovery with fresh per-call evidence, including after an earlier empty result. First-result methods
+select after discovery; they do not wait for insertion. There is no global repository or tracking lifetime.
+Discovery populates best-effort metadata for every device shape, including one-interface USB and NFC
+records. Grouping does not depend on those results, but bounded reads are awaited and may delay completion.
+
+For tracking, explicitly own a ready monitor:
+
+```csharp
+await using var monitor = await YubiKeyManager.CreateMonitorAsync(cancellationToken);
+await foreach (var change in monitor.WatchAsync(cancellationToken))
+{
+    // DeviceAdded replay, SnapshotComplete (even if empty), then live DeviceChange records.
+    Apply(change);
+}
+```
+
+manager watch creates a producer; monitor watch subscribes to an existing one.
+
+The monitor's finder retains successful identity/metadata evidence until observed interface absence,
+PID change, or listener activity invalidates it. When a later scan obtains metadata for an unchanged
+physical device, the diff updates its retained object and emits `DeviceUpdated` if metadata changed.
+This is last-known data, not continuously refreshed configuration. Request live Management data when
+current configuration matters. `WatchAsync` changes come from snapshot diffs, not native hints.
+These APIs inherit [Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
+
+One-shot `interfaces` limits enumeration/probes and returned connection slots, not just result selection.
+SmartCard-only skips HID, HID-only skips PC/SC, and OTP/FIDO share descriptor enumeration but not excluded
+interface probes. A view contains only observed in-scope interfaces; partial scope does not relax the
+PID-completeness rule. Existing monitors run unchanged. See
+[independent scoped scans](../usage/device-discovery.md#independent-scoped-scans) for examples and lifetime
+bounds. Connections exclude other device views only through overlapping known member interface IDs:
+YubiKeys from disjoint scopes cannot promise physical-key exclusion even with matching serials. Coordinate them explicitly.
+Monitor disposal releases its tracking resources, not caller-owned sessions/connections or returned
+descriptors. Build membership from stream replay, or call `FindAllAsync` for a one-off; new subscriptions
+after disposal end empty. Disposal sequentially stops listeners, cancels/awaits the loop, retires discovery,
+and completes the feed, without a separate timeout. Discovery waits are bounded by the discovery budgets.
 
 ### Platform Support For HID Discovery
 
@@ -135,8 +168,20 @@ interface device, use the typed overload above or an applet session extension (b
 
 Read-only physical-device metadata lives in **Core** (`Yubico.YubiKit.Core.Devices`): `DeviceInfo`,
 `FormFactor`, `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`, and `VersionQualifierType`. This lets
-Core describe a physical device without depending on the Management module. Reading the metadata from a
-device uses the Management extension, which opens a transient session:
+Core describe a physical device without depending on the Management module. `IYubiKey.CachedDeviceInfo`
+exposes `YubiKeyDevice`'s existing atomically published snapshot, not a second cache:
+
+```csharp
+DeviceInfo? lastKnown = device.CachedDeviceInfo; // No I/O or presence check.
+```
+
+Null means unavailable. Failed metadata reads do not clear a successful snapshot, and returned values do
+not change when a later discovery/change-feed update replaces it. The data is not guaranteed current and
+can remain historical on retained objects after configuration changes or disconnection. A replacement
+object does not inherit its predecessor's snapshot. `SerialNumber` keeps its independent identity contract
+even if the latest snapshot has no serial. See [cached device metadata](../usage/device-discovery.md#cached-device-metadata).
+
+A live read uses the Management extension, which opens a transient session:
 
 ```csharp
 using Yubico.YubiKit.Management;
@@ -145,6 +190,9 @@ DeviceInfo info = await device.GetDeviceInfoAsync();
 int? serial = info.SerialNumber;
 FirmwareVersion firmware = info.FirmwareVersion;
 ```
+
+`ManagementSession.GetDeviceInfoAsync` and the convenience extension above do not promise to update
+discovery metadata.
 
 **Mutating** operations — device configuration, reset, lock, reboot, and mode changes — remain owned by the
 Management module (`ManagementSession`). Core owns only read-only metadata and the connection/discovery

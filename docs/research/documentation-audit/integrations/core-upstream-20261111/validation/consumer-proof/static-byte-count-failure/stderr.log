@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 652, in <module>
+    main()
+    ~~~~^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 635, in main
+    print(json.dumps(static_check(), indent=2))
+                     ~~~~~~~~~~~~^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 113, in static_check
+    data = current_inputs()
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 72, in current_inputs
+    require(actual['bytes'] == row['bytes'] and actual['sha256'] == row['sha256'],
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            'Accepted preparation input changed: ' + row['path'])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof.py", line 26, in require
+    raise ValueError(message)
+ValueError: Accepted preparation input changed: docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/examples/src/body-01.cs

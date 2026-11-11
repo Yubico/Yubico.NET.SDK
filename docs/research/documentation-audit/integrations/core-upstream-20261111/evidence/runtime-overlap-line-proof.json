@@ -1,0 +1,69 @@
+{
+  "policy": "Remove whole // comment lines only; normalize line endings and EOF terminator through splitlines. This is narrower than a C# lexer and changes no executable lines.",
+  "paths": [
+    {
+      "path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Cli.Commands/src/Management/ManagementConfigCommand.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Program.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Program.cs",
+      "same_noncomment_lines_as_incoming": true
+    },
+    {
+      "path": "src/Cli.Shared/src/Device/DeviceSelection.cs",
+      "same_noncomment_lines_as_incoming": true
+    }
+  ]
+}

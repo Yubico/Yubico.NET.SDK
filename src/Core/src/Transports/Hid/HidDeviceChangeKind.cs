@@ -17,7 +17,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid;
 /// <summary>
 /// Describes the type of HID topology change reported by a platform listener.
 /// </summary>
-public enum HidDeviceChangeKind
+internal enum HidDeviceChangeKind
 {
     /// <summary>
     /// The listener could not classify the HID topology change.

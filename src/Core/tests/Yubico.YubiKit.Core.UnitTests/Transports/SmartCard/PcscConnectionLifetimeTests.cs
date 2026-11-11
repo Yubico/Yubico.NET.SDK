@@ -27,6 +27,133 @@ public class PcscConnectionLifetimeTests
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     [Fact]
+    public async Task LiveRegisteredConnection_DisposalAndClaimWaitForDisconnectAndContextReturn()
+    {
+        var api = new ControlledSCardConnectionApi { HoldDisconnect = true, HoldReleaseContext = true };
+        var device = PcscTestDevices.Create(api);
+        var connection = await device.ConnectAsync<ISmartCardConnection>(Ct);
+        var first = connection.DisposeAsync().AsTask();
+        var second = connection.DisposeAsync().AsTask();
+        try
+        {
+            await api.DisconnectEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            Assert.False(first.IsCompleted);
+            Assert.False(second.IsCompleted);
+            Assert.Equal(0, api.ReleaseContextCalls);
+            await Assert.ThrowsAsync<ConnectionInUseException>(() => device.ConnectAsync<ISmartCardConnection>(Ct));
+            api.ReleaseDisconnect.Set();
+            await api.ReleaseContextEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            Assert.False(first.IsCompleted);
+            Assert.False(second.IsCompleted);
+            await Assert.ThrowsAsync<ConnectionInUseException>(() => device.ConnectAsync<ISmartCardConnection>(Ct));
+        }
+        finally
+        {
+            api.ReleaseDisconnect.Set();
+            api.ReleaseContextReturn.Set();
+            await Task.WhenAll(first, second).WaitAsync(TimeSpan.FromSeconds(5), Ct);
+        }
+        await connection.DisposeAsync();
+        Assert.Equal(1, api.DisconnectCalls);
+        Assert.Equal(1, api.ReleaseContextCalls);
+        Assert.Single(api.NativeThreadIds.Distinct());
+        await using var reopened = await device.ConnectAsync<ISmartCardConnection>(Ct);
+    }
+
+    [Fact]
+    public Task LiveRegisteredConnection_ReleaseFailureSharesOutcomeAndRetainsQuarantine() =>
+        PcscIsolatedProbe.RunAsync("live-release-quarantine", typeof(PcscConnectionLifetimeTests),
+            nameof(LiveRegisteredConnection_ReleaseFailureSharesOutcomeAndRetainsQuarantine), RunLiveReleaseQuarantineAsync);
+
+    private static async Task RunLiveReleaseQuarantineAsync()
+    {
+        var (api, device) = await ExerciseLiveReleaseQuarantineAsync();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        Assert.True(api.ContextReference?.IsAlive);
+        await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => device.ConnectAsync<ISmartCardConnection>(Ct));
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static async Task<(ControlledSCardConnectionApi Api, YubiKeyDevice Device)> ExerciseLiveReleaseQuarantineAsync()
+    {
+        var api = new ControlledSCardConnectionApi
+        {
+            HoldDisconnect = true,
+            HoldReleaseContext = true,
+            ReleaseContextResult = ErrorCode.SCARD_E_INVALID_HANDLE
+        };
+        var device = PcscTestDevices.Create(api);
+        var connection = await device.ConnectAsync<ISmartCardConnection>(Ct);
+        var first = connection.DisposeAsync().AsTask();
+        var second = connection.DisposeAsync().AsTask();
+        try
+        {
+            await api.DisconnectEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            Assert.False(first.IsCompleted);
+            api.ReleaseDisconnect.Set();
+            await api.ReleaseContextEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            Assert.False(first.IsCompleted);
+            Assert.False(second.IsCompleted);
+            await Assert.ThrowsAsync<ConnectionInUseException>(() => device.ConnectAsync<ISmartCardConnection>(Ct));
+        }
+        finally { api.ReleaseDisconnect.Set(); api.ReleaseContextReturn.Set(); }
+        var failure = await Assert.ThrowsAsync<SCardException>(() => first.WaitAsync(TimeSpan.FromSeconds(5), Ct));
+        Assert.Same(failure, await Assert.ThrowsAsync<SCardException>(() => second.WaitAsync(TimeSpan.FromSeconds(5), Ct)));
+        Assert.Same(failure, await Assert.ThrowsAsync<SCardException>(() => connection.DisposeAsync().AsTask()));
+        await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => device.ConnectAsync<ISmartCardConnection>(Ct));
+        Assert.Equal(1, api.ConnectCalls);
+        Assert.Equal(1, api.DisconnectCalls);
+        Assert.Equal(1, api.ReleaseContextCalls);
+        // Drop the test's strong facade reference before the outer probe collects. Conservatively
+        // retained native/diagnostic closures may retain the facade too; collection is not promised.
+        return (api, device);
+    }
+
+    [Fact]
+    public Task LiveRegisteredConnection_DisconnectFailureRetainsBothNativeRootsWithoutContextRelease() =>
+        PcscIsolatedProbe.RunAsync("live-disconnect-quarantine", typeof(PcscConnectionLifetimeTests),
+            nameof(LiveRegisteredConnection_DisconnectFailureRetainsBothNativeRootsWithoutContextRelease),
+            RunLiveDisconnectQuarantineAsync);
+
+    private static async Task RunLiveDisconnectQuarantineAsync()
+    {
+        var (api, device) = await ExerciseLiveDisconnectQuarantineAsync();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        Assert.True(api.ContextReference?.IsAlive);
+        Assert.True(api.CardReference?.IsAlive);
+        await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => device.ConnectAsync<ISmartCardConnection>(Ct));
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static async Task<(ControlledSCardConnectionApi Api, YubiKeyDevice Device)> ExerciseLiveDisconnectQuarantineAsync()
+    {
+        var api = new ControlledSCardConnectionApi { HoldDisconnect = true, DisconnectResult = ErrorCode.SCARD_E_INVALID_HANDLE };
+        var device = PcscTestDevices.Create(api);
+        var connection = await device.ConnectAsync<ISmartCardConnection>(Ct);
+        var first = connection.DisposeAsync().AsTask();
+        var second = connection.DisposeAsync().AsTask();
+        try
+        {
+            await api.DisconnectEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            Assert.False(first.IsCompleted);
+            Assert.False(second.IsCompleted);
+            await Assert.ThrowsAsync<ConnectionInUseException>(() => device.ConnectAsync<ISmartCardConnection>(Ct));
+        }
+        finally { api.ReleaseDisconnect.Set(); }
+        var failure = await Assert.ThrowsAsync<SCardException>(() => first.WaitAsync(TimeSpan.FromSeconds(5), Ct));
+        Assert.Same(failure, await Assert.ThrowsAsync<SCardException>(() => second.WaitAsync(TimeSpan.FromSeconds(5), Ct)));
+        Assert.Same(failure, await Assert.ThrowsAsync<SCardException>(() => connection.DisposeAsync().AsTask()));
+        await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => device.ConnectAsync<ISmartCardConnection>(Ct));
+        Assert.Equal(1, api.DisconnectCalls);
+        Assert.Equal(0, api.ReleaseContextCalls);
+        return (api, device);
+    }
+
+    [Fact]
     public async Task AsyncTransaction_ExternalSyncOnlyImplementation_UsesDefaultFallback()
     {
         ISmartCardConnection connection = new SyncOnlyTransactionConnection();
@@ -537,9 +664,9 @@ public class PcscConnectionLifetimeTests
         finally
         {
             api.ReleaseBegin.Set();
-            var result = await begin.WaitAsync(TimeSpan.FromSeconds(5), Ct);
-            using var scope = result.Scope;
-            nativeExitedOnReturn = result.NativeExited;
+            var (Scope, NativeExited) = await begin.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            using var scope = Scope;
+            nativeExitedOnReturn = NativeExited;
             await connection.DisposeAsync();
         }
 
@@ -800,10 +927,10 @@ public class PcscConnectionLifetimeTests
         return new WeakReference(connection);
     }
 
-    private sealed class SyncOnlyTransactionConnection : ISmartCardConnection
+    private sealed class SyncOnlyTransactionConnection(Action? onBegin = null) : ISmartCardConnection
     {
-        private readonly Action? _onBegin;
-        public SyncOnlyTransactionConnection(Action? onBegin = null) => _onBegin = onBegin;
+        private readonly Action? _onBegin = onBegin;
+
         public int BeginCalls { get; private set; }
         public ConnectionType Type => ConnectionType.SmartCard;
         public Transport Transport => Transport.Usb;

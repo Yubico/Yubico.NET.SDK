@@ -55,10 +55,9 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
         _hidOtp = hidOtp;
         DeviceInfo = deviceInfo;
         IdentityReadBudgetConsumedThisScan = identityReadBudgetConsumedThisScan;
-        InterfaceIds = Slots()
+        InterfaceIds = [.. Slots()
             .Select(slot => slot.InterfaceId)
-            .OrderBy(id => id, StringComparer.Ordinal)
-            .ToArray();
+            .OrderBy(id => id, StringComparer.Ordinal)];
         PhysicalIdentityKey = EncodeInterfaceIds(InterfaceIds);
 
         var connections = ConnectionType.Unknown;
@@ -72,6 +71,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     }
     public string DeviceId { get; }
 
+    /// <inheritdoc />
     public ConnectionType AvailableConnections { get; }
 
     internal IReadOnlyList<string> InterfaceIds { get; }
@@ -102,6 +102,9 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
             }
         }
     }
+
+    /// <inheritdoc />
+    public DeviceInfo? CachedDeviceInfo => DeviceInfo;
 
     /// <summary>
     ///     The latched hardware serial number per the <see cref="IYubiKey.SerialNumber" /> contract:
@@ -170,13 +173,12 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     }
 
     /// <summary>
-    ///     Built-in PC/SC and macOS HID connections take the registry claim before native open and release it
+    ///     Built-in PC/SC, macOS HID and Linux HID connections take the registry claim before native open and release it
     ///     themselves after proven teardown; every other slot is wrapped in a registered connection.
     /// </summary>
     private static bool TransfersOwnership(ConnectionType requested, IYubiKeyConnectionSlot slot) =>
         (requested == ConnectionType.SmartCard && slot is PcscConnectionSlot) ||
-        (requested == ConnectionType.HidFido && slot is HidConnectionSlot { IsBuiltInMacFido: true }) ||
-        (requested == ConnectionType.HidOtp && slot is HidConnectionSlot { IsBuiltInMacOtp: true });
+        (requested == slot.ConnectionType && slot is HidConnectionSlot { OwnsNativeLifetime: true });
 
     private static async Task<IConnection> OpenSlotAsync(
         IYubiKeyConnectionSlot slot,
@@ -299,7 +301,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     {
         var builder = new StringBuilder();
         foreach (var id in sortedInterfaceIds)
-            builder.Append(id.Length).Append(':').Append(id);
+            _ = builder.Append(id.Length).Append(':').Append(id);
         return builder.ToString();
     }
 

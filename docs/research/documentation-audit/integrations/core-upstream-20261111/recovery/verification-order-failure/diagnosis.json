@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/verify-recovery.py"
+  ],
+  "exit_code": 1,
+  "source_sha256": "1dbb490fd38b841c5a256732fb9a2b291eb4b4ff1609e8f5e2ee9fc0dd6ebc3c",
+  "baseline_count": 10558,
+  "current_count": 10558,
+  "same_unique_membership": true,
+  "first_order_difference": {
+    "baseline": ".claude/skills/docs-write-agent/SKILL.md",
+    "string_sorted": ".claude/skills/docs-write-agent-claudecode"
+  },
+  "diagnosis": "Path-object sorting compares components; string sorting compares slash/dot characters. Membership is identical; compare unique sets, then every full identity as already implemented. No original tree modification."
+}

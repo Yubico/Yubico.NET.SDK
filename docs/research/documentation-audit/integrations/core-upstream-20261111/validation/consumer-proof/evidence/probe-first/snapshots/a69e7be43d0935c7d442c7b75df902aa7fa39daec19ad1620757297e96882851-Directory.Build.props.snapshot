@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <IsTestProject Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.AuditIntegration20261111.Annotations'">true</IsTestProject>
+  </PropertyGroup>
+  <Import Project="../../../../../../../Directory.Build.props" />
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/$(MSBuildProjectName)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>/home/rupicola/Code/y/.core-docs-audit-runtime/consumer-proof/hosts/$(MSBuildProjectName)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

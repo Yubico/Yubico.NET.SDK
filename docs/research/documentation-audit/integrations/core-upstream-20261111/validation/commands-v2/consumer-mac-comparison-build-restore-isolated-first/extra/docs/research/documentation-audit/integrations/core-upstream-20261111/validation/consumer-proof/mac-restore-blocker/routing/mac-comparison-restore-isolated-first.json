@@ -1,0 +1,41 @@
+{
+  "kind": "nonsecret MacComparison restore/build routing admission",
+  "active_checkout_root": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+  "compiler_attempt": "mac-comparison-restore-isolated-first",
+  "build_label": "consumer-mac-comparison-build-restore-isolated-first",
+  "environment_properties": {
+    "BoundaryCorePath": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+    "BoundaryNativeVersion": "1.18.1",
+    "BoundaryComparisonVariant": "audit-integration-20261111"
+  },
+  "core_dll_at_admission": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+    "bytes": 816128,
+    "sha256": "632e9be7906fdf5dcffde4658b31f6a38af5d0457847a72ac0da017717d5e817"
+  },
+  "launcher_original": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/proposed-lane.sh",
+    "bytes": 644,
+    "sha256": "f2b645b8694c1aedcec8c7d779ffb8fd939fb288ee23e6de28ee4d6cdf73211a"
+  },
+  "sealed_lane_original": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v5/lane.sh",
+    "bytes": 1628,
+    "sha256": "9fe65a29122d95eabcfafcc60e00cda53e4ae8f58d53386a8582b7902f17a807"
+  },
+  "launcher_derivative": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/proposed-lane-v2.sh",
+    "bytes": 2902,
+    "sha256": "d5fa76a207ae2c2d49df0f0b7a9a2132fb87d9459292e2e243d80bd239c9f96e"
+  },
+  "descriptor_creator": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/routing-v2.py",
+    "bytes": 6024,
+    "sha256": "3a64e73ff0675a65458589aa0478275a6b0a4e1e299b9a1d10ebceb249a60488"
+  },
+  "approved_routing_review": {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/independent-review.md",
+    "bytes": 9659,
+    "sha256": "c7b2e1e9ab925d2a13994d7379585a1c249590861f6baa829e65e56ba5fe20cf"
+  }
+}

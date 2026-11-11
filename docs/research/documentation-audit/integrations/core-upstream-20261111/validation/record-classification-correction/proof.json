@@ -1,0 +1,490 @@
+{
+  "status": "FR-1-short-scope-verified",
+  "adapter_sha256": "598d79ea82eb3de86afd9f1b9376f453ca20742a5e222863427d8005f8f5364f",
+  "verifier_sha256": "28a00f09177524eb1f71267bbf3c7209d28d7b3ca77dca409d1d33662284a254",
+  "proof": {
+    "original_sha256": "e287c3e35d6fec35d125c870125201816dc4d9822ae78ba94d7c0da167eeb3e4",
+    "receipt_sha256": "eeb2b9a302f57d57569e77d9fd7a844735cc7867edbcc07d97d908cdc9c21d36",
+    "review_sha256": "7e53e938c3d396bba6ea8173e89696398408e3696d57a991c602fd23bb83b71f",
+    "adapted_source_sha256": "6a8be98b003b21e0ef68ed14803255d3d18d704a01b7198ecd7997f424007916",
+    "transformations": [
+      {
+        "old": "    require(not forbidden.intersection(path.relative_to(PACKET).parts), f\"Generated directory: {path}\")\n",
+        "new": "    require(not forbidden.intersection(path.relative_to(PACKET).parts) or reviewed_text(path), f\"Generated directory: {path}\")\n"
+      },
+      {
+        "old": "    require(not any(suffix.lower() in {\".dll\", \".exe\", \".pdb\", \".so\", \".a\", \".o\", \".dylib\", \".pyc\", \".nupkg\", \".zip\"}\n                    for suffix in path.suffixes), f\"Binary/cache artifact: {path}\")\n",
+        "new": "    require(not any(suffix.lower() in {\".dll\", \".exe\", \".pdb\", \".so\", \".a\", \".o\", \".dylib\", \".pyc\", \".nupkg\", \".zip\"}\n                    for suffix in path.suffixes) or reviewed_text(path), f\"Binary/cache artifact: {path}\")\n"
+      }
+    ],
+    "root": "/home/rupicola/Code/y/yubikit-core-docs-integration",
+    "original_file_context": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-records.py",
+    "exceptions": [
+      {
+        "path": "validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+        "bytes": 24344,
+        "sha256": "23caffbc15f5f4d313e2174f55866854b9b132327805310ab83cfaff6c6e7da0",
+        "text_kind": "utf8-json-object"
+      },
+      {
+        "path": "validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+        "bytes": 118048,
+        "sha256": "3850e6a352628733cfb3bb2ff2f8f400cbdd4ecb9c512f223f690cf9b688d399",
+        "text_kind": "utf8-json-object"
+      },
+      {
+        "path": "validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+        "bytes": 88,
+        "sha256": "68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784",
+        "text_kind": "utf8-base64-sha512"
+      },
+      {
+        "path": "validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+        "bytes": 178,
+        "sha256": "2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c",
+        "text_kind": "utf8-json-object"
+      },
+      {
+        "path": "validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+        "bytes": 88,
+        "sha256": "68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784",
+        "text_kind": "utf8-base64-sha512"
+      },
+      {
+        "path": "validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+        "bytes": 178,
+        "sha256": "79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3",
+        "text_kind": "utf8-json-object"
+      },
+      {
+        "path": "validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+        "bytes": 88,
+        "sha256": "927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55",
+        "text_kind": "utf8-base64-sha512"
+      }
+    ]
+  },
+  "accepted": [
+    {
+      "path": "validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "bytes": 24344,
+      "sha256": "23caffbc15f5f4d313e2174f55866854b9b132327805310ab83cfaff6c6e7da0",
+      "text_kind": "utf8-json-object",
+      "staged_oid": "3ea6b0589646296edcca7b5d6f4645c13e16155e",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      }
+    },
+    {
+      "path": "validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+      "bytes": 118048,
+      "sha256": "3850e6a352628733cfb3bb2ff2f8f400cbdd4ecb9c512f223f690cf9b688d399",
+      "text_kind": "utf8-json-object",
+      "staged_oid": "41ffaf61108bee7d69c53dca12d52ee9b5b00c35",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      }
+    },
+    {
+      "path": "validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "bytes": 88,
+      "sha256": "68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784",
+      "text_kind": "utf8-base64-sha512",
+      "staged_oid": "8091dfb63dfefa1e6d550ec00c343e0909c24c97",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      }
+    },
+    {
+      "path": "validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+      "bytes": 178,
+      "sha256": "2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c",
+      "text_kind": "utf8-json-object",
+      "staged_oid": "15b0295f50ee636b78e6861f6f70fddcb7f9c459",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      }
+    },
+    {
+      "path": "validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "bytes": 88,
+      "sha256": "68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784",
+      "text_kind": "utf8-base64-sha512",
+      "staged_oid": "8091dfb63dfefa1e6d550ec00c343e0909c24c97",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      }
+    },
+    {
+      "path": "validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+      "bytes": 178,
+      "sha256": "79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3",
+      "text_kind": "utf8-json-object",
+      "staged_oid": "63016d1f58bc5aabaae0479cd3c0c8f4bbdf1413",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      }
+    },
+    {
+      "path": "validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+      "bytes": 88,
+      "sha256": "927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55",
+      "text_kind": "utf8-base64-sha512",
+      "staged_oid": "7f7912c456608868e0891a89dea69109f463de14",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      }
+    }
+  ],
+  "rejected": [
+    {
+      "case": "changed-hash:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json"
+    },
+    {
+      "case": "changed-size:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json"
+    },
+    {
+      "case": "missing:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "error_type": "FileNotFoundError",
+      "message": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json"
+    },
+    {
+      "case": "unlisted-same-kind-and-bytes:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "error_type": "ValueError",
+      "message": "Generated directory: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/unlisted-MacOSHidBoundaryComparison.csproj.nuget.dgspec.json"
+    },
+    {
+      "case": "symlink:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json"
+    },
+    {
+      "case": "escaping-root:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json"
+    },
+    {
+      "case": "change-between-classification-and-record:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json",
+      "error_type": "ValueError",
+      "message": "Reviewed text changed between classification and record capture"
+    },
+    {
+      "case": "changed-hash:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json"
+    },
+    {
+      "case": "changed-size:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json"
+    },
+    {
+      "case": "missing:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+      "error_type": "FileNotFoundError",
+      "message": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json"
+    },
+    {
+      "case": "unlisted-same-kind-and-bytes:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+      "error_type": "ValueError",
+      "message": "Generated directory: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/unlisted-project.assets.json"
+    },
+    {
+      "case": "symlink:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json"
+    },
+    {
+      "case": "escaping-root:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json"
+    },
+    {
+      "case": "change-between-classification-and-record:validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/project.assets.json",
+      "error_type": "ValueError",
+      "message": "Reviewed text changed between classification and record capture"
+    },
+    {
+      "case": "changed-hash:validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "changed-size:validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "missing:validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "FileNotFoundError",
+      "message": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "unlisted-same-kind-and-bytes:validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Binary/cache artifact: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/hash-domain-diagnosis/unlisted-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "symlink:validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "escaping-root:validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "change-between-classification-and-record:validation/consumer-proof/correction-v4/hash-domain-diagnosis/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text changed between classification and record capture"
+    },
+    {
+      "case": "changed-hash:validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "changed-size:validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "missing:validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+      "error_type": "FileNotFoundError",
+      "message": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "unlisted-same-kind-and-bytes:validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Binary/cache artifact: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/snapshots/unlisted-2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "symlink:validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "escaping-root:validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "change-between-classification-and-record:validation/consumer-proof/evidence/consumers-first-v4/snapshots/2df486b4e4685229e1b40378f459c1b582a062fe3d79272b4d3aae6c80dc666c-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text changed between classification and record capture"
+    },
+    {
+      "case": "changed-hash:validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "changed-size:validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "missing:validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "FileNotFoundError",
+      "message": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "unlisted-same-kind-and-bytes:validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Binary/cache artifact: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/snapshots/unlisted-68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "symlink:validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "escaping-root:validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "change-between-classification-and-record:validation/consumer-proof/evidence/consumers-first-v4/snapshots/68d567d75f9427b9050a6c508c9cf834c0da69f4ee38d87f53cc271bff55e784-runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.15.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text changed between classification and record capture"
+    },
+    {
+      "case": "changed-hash:validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "changed-size:validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "missing:validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+      "error_type": "FileNotFoundError",
+      "message": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "unlisted-same-kind-and-bytes:validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Binary/cache artifact: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/snapshots/unlisted-79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "symlink:validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "escaping-root:validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "change-between-classification-and-record:validation/consumer-proof/mac-restore-blocker/snapshots/79051e7e70ceadab418c5cf33df794e95c5f5301625919ae0e209c92e529ecf3-.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text changed between classification and record capture"
+    },
+    {
+      "case": "changed-hash:validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "changed-size:validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text identity changed: validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "missing:validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+      "error_type": "FileNotFoundError",
+      "message": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "unlisted-same-kind-and-bytes:validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Binary/cache artifact: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/snapshots/unlisted-927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "symlink:validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "escaping-root:validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Escaping/symlinked record: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot"
+    },
+    {
+      "case": "change-between-classification-and-record:validation/consumer-proof/mac-restore-blocker/snapshots/927426e971d4f66595f2dfcf65f28eab9505270cc7f6d025036ab47d05b19e55-yubico.nativeshims.1.18.1.nupkg.sha512.snapshot",
+      "error_type": "ValueError",
+      "message": "Reviewed text changed between classification and record capture"
+    },
+    {
+      "case": "unlisted-content-guard:NUL",
+      "error_type": "ValueError",
+      "message": "Runtime/binary content: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/ordinary-unlisted-text.txt"
+    },
+    {
+      "case": "unlisted-content-guard:MZ",
+      "error_type": "ValueError",
+      "message": "Runtime/binary content: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/ordinary-unlisted-text.txt"
+    },
+    {
+      "case": "unlisted-content-guard:ELF",
+      "error_type": "ValueError",
+      "message": "Runtime/binary content: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/ordinary-unlisted-text.txt"
+    },
+    {
+      "case": "unlisted-content-guard:invalid-UTF8",
+      "error_type": "UnicodeDecodeError",
+      "message": "'utf-8' codec can't decode byte 0xff in position 0: invalid start byte"
+    },
+    {
+      "case": "unlisted-coarse-rule:new.nupkg",
+      "error_type": "ValueError",
+      "message": "Binary/cache artifact: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/new.nupkg"
+    },
+    {
+      "case": "unlisted-coarse-rule:new.zip",
+      "error_type": "ValueError",
+      "message": "Binary/cache artifact: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/new.zip"
+    },
+    {
+      "case": "unlisted-coarse-rule:new.dll",
+      "error_type": "ValueError",
+      "message": "Binary/cache artifact: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/new.dll"
+    },
+    {
+      "case": "unlisted-coarse-rule:new.nupkg.metadata.snapshot",
+      "error_type": "ValueError",
+      "message": "Binary/cache artifact: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/new.nupkg.metadata.snapshot"
+    },
+    {
+      "case": "unlisted-coarse-rule:obj/unlisted.json",
+      "error_type": "ValueError",
+      "message": "Generated directory: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/obj/unlisted.json"
+    },
+    {
+      "case": "unlisted-coarse-rule:bin/unlisted.json",
+      "error_type": "ValueError",
+      "message": "Generated directory: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/bin/unlisted.json"
+    },
+    {
+      "case": "unlisted-coarse-rule:__pycache__/unlisted.json",
+      "error_type": "ValueError",
+      "message": "Generated directory: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/__pycache__/unlisted.json"
+    },
+    {
+      "case": "unlisted-coarse-rule:node_modules/unlisted.json",
+      "error_type": "ValueError",
+      "message": "Generated directory: /home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/node_modules/unlisted.json"
+    },
+    {
+      "case": "mandatory-population-missing-even-before-enumeration",
+      "error_type": "FileNotFoundError",
+      "message": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/commands-v2/consumer-mac-comparison-restore-profile-restore-isolated-first/extra/verification/MacOSHidBoundaryComparison/obj/audit-integration-20261111/MacOSHidBoundaryComparison.csproj.nuget.dgspec.json"
+    },
+    {
+      "case": "receipt-pin",
+      "error_type": "ValueError",
+      "message": "Checker/exception receipt identity changed"
+    },
+    {
+      "case": "original-source-pin",
+      "error_type": "ValueError",
+      "message": "Checker/exception receipt identity changed"
+    },
+    {
+      "case": "review-pin",
+      "error_type": "ValueError",
+      "message": "Pinned FR-1 review identity changed"
+    }
+  ],
+  "index_sha256_before_and_after": "da6c0a626cc282347be2e4b5e3452aae5dacb8ad1ee3024c437620bd7e90ed14",
+  "original_checker_and_seven_inputs_unchanged": true,
+  "scope": "Seven actual read-only record() checks and process-local path/content shadows only. No full packet snapshot, index mutation, SDK build/test/capture/native/device gate."
+}

@@ -1,0 +1,72 @@
+{
+  "status": "all six original retained-verifier/source paths pass under exact reviewed tool scope; four strict-live differences remain explicit; coordinator verification pending independent review",
+  "files": [
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/final-reconciliation/matrix.py",
+      "bytes": 6438,
+      "sha256": "6f83352efc537d354dd3827c7f157eab80476c44bc2603bfebc00d48ebb697bd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/final-reconciliation/reconcile.py",
+      "bytes": 7712,
+      "sha256": "dff0d4dad280a81cebd721e5baf2c9839d9dc208def68cef197930bf80c20a11"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/final-reconciliation/scope.json",
+      "bytes": 61490,
+      "sha256": "d6b559e263ed217de91bb9f0dd6a92a9fd0b1d51f198d7a26566fcfde30ce491"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/final-reconciliation/matrix-first.json",
+      "bytes": 139484,
+      "sha256": "fae5e5687c4639a8ff41506ff7ed1989d9aef094a20bc1a6e483f5f48255a07f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/final-reconciliation/preflight-first.json",
+      "bytes": 128721,
+      "sha256": "8e112eaf2bdeadbe93e37679d47755461d429f83973c83785a030d8b309ffbd6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/final-reconciliation/output-drift-evidence.json",
+      "bytes": 4181,
+      "sha256": "c047e602479f05cce1f8f81d408f0fc0430cdde928c78dac20b3a6e0fbb6b6fe"
+    },
+    {
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/final-reconciliation/handoff.md",
+      "bytes": 8183,
+      "sha256": "8576a204b67a3b3b77d248e5290b18517896cecab6bb27a0b3fa5a5cbdb4a04f"
+    }
+  ],
+  "scope_semantics": "Current source and exact original retained compiled outputs. Original strict all-current-path status remains separate. Only reviewed exact shared binary replacements are admitted in the scoped result.",
+  "matrix_totals": {
+    "contexts": 6,
+    "original_record_occurrences": 21965,
+    "changed_or_missing_captured_tools": 0,
+    "missing_or_changed_retained_records": 0,
+    "live_binary_drift_occurrences": 144,
+    "distinct_live_drift_paths": 7,
+    "strict_live_contexts_passing": 2,
+    "scoped_contexts_passing": 6,
+    "unapproved_drift": 0
+  },
+  "actual_tool_additions_by_context": {
+    "probe": [
+      "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v4.py",
+      "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v5.py"
+    ],
+    "examples": [
+      "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v4.py",
+      "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v5.py"
+    ],
+    "annotations": [
+      "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v4.py",
+      "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v5.py"
+    ],
+    "consumers": [
+      "/home/rupicola/Code/y/yubikit-core-docs-integration/docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/proof-v5.py"
+    ],
+    "fixture": [],
+    "mac-comparison": []
+  },
+  "operation": "Read-only preflight only; no SDK/capture/test/native/device/formatter/product/index/commit/delegation operation. Original final-probe failure preserved."
+}

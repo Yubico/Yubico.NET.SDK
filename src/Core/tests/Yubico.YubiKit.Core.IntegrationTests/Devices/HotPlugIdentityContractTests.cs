@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
@@ -39,10 +39,12 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
 {
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.Discovery)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task RemoveAndReinsert_RemovalRetainsSerial_ReinsertionPublishesNewCorrelatedObject()
     {
@@ -70,14 +72,15 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         }
 
         var removedTcs = new TaskCompletionSource<IYubiKey>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var arrivals = new ConcurrentDictionary<IYubiKey, TaskCompletionSource>(ReferenceEqualityComparer.Instance);
+        TaskCompletionSource Arrival(IYubiKey key) => arrivals.GetOrAdd(key,
+            static _ => new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously));
 
         using var watching = new CancellationTokenSource();
 
-        // WatchAsync subscribes on the first MoveNextAsync, and that call runs the iterator up to its
-        // first suspension point before returning. Taking the enumerator and starting that first move
-        // here on the test thread — before StartMonitoring — is what stops the initial scan racing
-        // ahead of the watcher.
-        var enumerator = YubiKeyManager.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
+        await using var monitor = await YubiKeyManager.CreateMonitorAsync(watching.Token);
+        // Initial replay and subsequent changes share the monitor's publication boundary.
+        var enumerator = monitor.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
         var firstMove = enumerator.MoveNextAsync();
         var pump = Task.Run(
             async () =>
@@ -88,10 +91,11 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
                     while (await move)
                     {
                         var evt = enumerator.Current;
-                        Note($"EVENT {evt.Action,-7} {evt.Device.DeviceId} connections={evt.Device.AvailableConnections} " +
-                             $"serialAtEvent={evt.Device.SerialNumber?.ToString() ?? "null"} ref={evt.Device.GetHashCode():x8}");
-                        if (evt.Action == DeviceAction.Removed)
-                            removedTcs.TrySetResult(evt.Device);
+                        Note($"CHANGE {evt}");
+                        if (evt is DeviceRemoved removed)
+                            removedTcs.TrySetResult(removed.Device);
+                        else if (evt is DeviceAdded added)
+                            Arrival(added.Device).TrySetResult();
 
                         move = enumerator.MoveNextAsync();
                     }
@@ -103,14 +107,13 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
             },
             CancellationToken.None);
 
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
-        Note("monitoring started (1 s interval)");
+        Note("owned monitor initialized (5 s fallback interval)");
 
         // Establish one published key with a known serial before the operator removes it.
         IYubiKey? original = null;
         while (clock.Elapsed < TimeSpan.FromSeconds(20))
         {
-            var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
+            var devices = await MonitorSnapshot.ReadAsync(monitor, watching.Token);
             if (devices is [{ SerialNumber: not null } sole])
             {
                 original = sole;
@@ -126,6 +129,8 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
             $"Run this protocol on a single-key USB rig.{Environment.NewLine}{Timeline()}");
         var originalSerial = original.SerialNumber!.Value;
         Assert.Equal(authorizedSerial, originalSerial);
+        // Initial replay or a legitimate replacement during convergence must deliver this exact object.
+        await Arrival(original).Task.WaitAsync(TimeSpan.FromSeconds(10));
         Note($"BASELINE {original.DeviceId} connections={original.AvailableConnections} serial={originalSerial}");
 
         // The operator unplugs the key. Poll the repository snapshot alongside the event
@@ -135,7 +140,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         var phase2Deadline = clock.Elapsed + TimeSpan.FromSeconds(120);
         while (clock.Elapsed < phase2Deadline && !removedTcs.Task.IsCompleted)
         {
-            var snapshot = await YubiKeyManager.FindAllAsync(ConnectionType.All);
+            var snapshot = await MonitorSnapshot.ReadAsync(monitor, watching.Token);
             if (snapshot.Count == 0 && !snapshotEmptied)
             {
                 snapshotEmptied = true;
@@ -163,7 +168,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         var phase3Deadline = clock.Elapsed + TimeSpan.FromSeconds(120);
         while (clock.Elapsed < phase3Deadline)
         {
-            var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
+            var devices = await MonitorSnapshot.ReadAsync(monitor, watching.Token);
             if (devices is [{ SerialNumber: not null } sole])
             {
                 reinserted = sole;
@@ -186,20 +191,16 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         Assert.Equal(originalSerial, reinserted.SerialNumber);
         Assert.Equal(DeviceCorrelation.Same, original.SameDeviceAs(reinserted));
         Assert.Equal(DeviceCorrelation.Same, reinserted.SameDeviceAs(original));
+        await Arrival(reinserted).Task.WaitAsync(TimeSpan.FromSeconds(10));
 
-        await watching.CancelAsync();
-
-        // Cancellation is the intended way this pump ends, but a session this long can also end by hub
-        // completion or an overflowed buffer. Every assertion that matters has already run, so record
-        // the terminal outcome rather than attributing an unrelated ending to a hot-plug failure.
-        var terminal = await Record.ExceptionAsync(() => pump);
+        // A successful identity ceremony must also leave a healthy event lifetime. Do not suppress
+        // overflow or another stream failure merely because the snapshot assertions succeeded.
+        await monitor.DisposeAsync();
+        await pump.WaitAsync(TimeSpan.FromSeconds(10));
 
         // Full captured timeline for the hardware-evidence record.
         output.WriteLine("Hot-plug protocol timeline:");
         output.WriteLine(Timeline());
-        output.WriteLine(
-            terminal is null
-                ? "watcher pump ended normally"
-                : $"watcher pump ended with {terminal.GetType().Name}: {terminal.Message}");
+        output.WriteLine("watcher pump completed normally after owned monitor disposal");
     }
 }

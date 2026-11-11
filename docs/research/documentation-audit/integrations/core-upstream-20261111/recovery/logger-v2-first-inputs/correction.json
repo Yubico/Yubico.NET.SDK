@@ -1,0 +1,15 @@
+{
+  "preserved": [
+    {
+      "path": "run-command-v2.py",
+      "sha256": "d44dfe05fe38c75527ac8c0bfcfd8b87225f1246e8cc2f738638057ba28c82f0",
+      "bytes": 18700
+    },
+    {
+      "path": "qualify-logger-v2.py",
+      "sha256": "ebbf75d9282832974e90a5c09e76c341fd74db66d03c6f98bef5208a9c655f8a",
+      "bytes": 7768
+    }
+  ],
+  "reason": "Make receipt stream completeness include actual pipe EOF and finalization errors, rather than only write-loop errors. Keep the first qualified source/evidence intact; requalify the narrow field correction under a fresh attempt."
+}

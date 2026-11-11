@@ -1,0 +1,17 @@
+{
+  "scope": "Source identities before adding report provenance fields; v3 diagnosis and both v4 drafts remain unchanged",
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/preflight.py",
+      "bytes": 6595,
+      "sha256": "95d5ab6b42de1c6554af209d54fd2d413975a865b9e1e9e7e4047e8bb1354513",
+      "snapshot": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/initial-diagnostic-sources/preflight.py.snapshot"
+    },
+    {
+      "source": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/assets.py",
+      "bytes": 16581,
+      "sha256": "f0432cbe6a8a88312c97b29c8f7982ebe62afc8ea45dbf476fbbddbfc3abd7ab",
+      "snapshot": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/correction-v4/initial-diagnostic-sources/assets.py.snapshot"
+    }
+  ]
+}

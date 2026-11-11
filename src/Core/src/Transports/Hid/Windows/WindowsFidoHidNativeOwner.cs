@@ -202,6 +202,11 @@ internal sealed class WindowsFidoHidNativeOwner
         catch (Exception error)
         {
             lock (_sync) { _stopping = true; _failure ??= error; }
+            if (_request is { Operation.PreparationFailedBeforeNativeDispatch: true } preparation)
+            {
+                FailPreparation(preparation, error);
+                return;
+            }
             // An interrupted wait can still drain on this original worker. Unknown Submit state or
             // failed retirement cannot be retried or treated as release proof.
             if (_request is null || _request.CanDrainAfterFailure)
@@ -228,6 +233,17 @@ internal sealed class WindowsFidoHidNativeOwner
             _signal.WaitOne();
         }
         Close();
+    }
+
+    private void FailPreparation(Request request, Exception error)
+    {
+        // Allocation has unwound without dispatch. Drain the recorder outside its admission lock.
+        request.Registration.Dispose();
+        // A retained BCL pin is not active payload access. Zero bytes, but retain request/API/root:
+        // no returned pointer is not proof of BCL cleanup, so neither Retire nor Close is permitted.
+        CryptographicOperations.ZeroMemory(request.Operation.NativeReport);
+        lock (_sync) request.Completion.TrySetException(error);
+        FailUnreleased(_failure ?? error); // Actual operation terminalization precedes shared shutdown.
     }
 
     private bool Advance(Request request)

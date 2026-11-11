@@ -28,6 +28,14 @@ internal sealed class WindowsHidOverlappedOperation
     internal unsafe NativeOverlapped* NativeOverlapped { get; set; }
     internal bool RetirementStarted { get; set; }
 
+    /// <summary>Gets or sets the allocator-only failure fact: report dispatch was never reached.</summary>
+    /// <remarks>
+    /// Set only when overlapped allocation throws, before ReadFile/WriteFile. This proves no report
+    /// payload access or callback is pending, not that BCL allocation resources were released.
+    /// A null native pointer alone proves neither fact. Retain uncertain resources even after zeroing.
+    /// </remarks>
+    internal bool PreparationFailedBeforeNativeDispatch { get; set; }
+
     /// <summary>Creates a request with its bounded internal owner completion recorder.</summary>
     public WindowsHidOverlappedOperation(
         WindowsHidReportDirection direction,

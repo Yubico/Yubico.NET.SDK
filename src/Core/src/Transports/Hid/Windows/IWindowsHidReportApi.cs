@@ -37,6 +37,10 @@ internal interface IWindowsHidReportApi
     /// ReadFile/WriteFile requests receive none. Never synthesize immediate-success completion.
     /// Native outcomes are data; this method must not throw after accepted submission. Unexpected
     /// failure with unknown dispatch state requires quarantine, never assumed rejection or retirement.
+    /// An allocator-only throw marks PreparationFailedBeforeNativeDispatch and rethrows the original
+    /// error. Known non-dispatch permits zeroing and operation failure, but BCL allocation cleanup
+    /// remains unproven: retain the operation, binding, handle and owner claim without Retire/Close.
+    /// A null pointer is not release proof. A retained pin does not imply active report payload access.
     /// </remarks>
     WindowsHidSubmission Submit(WindowsHidOverlappedOperation operation);
 
@@ -57,6 +61,8 @@ internal interface IWindowsHidReportApi
     /// This resource barrier is not proof of physical callback-stack return; deployed Windows
     /// JIT/AOT runtime validation is still required. Use runtime-owned overlapped retirement,
     /// not direct native free. The owner clears its array only after retirement.
+    /// A marked preparation exception is not a returned rejection and must not enter this path;
+    /// its array may be cleared after allocator unwind while uncertain allocation resources remain held.
     /// </remarks>
     void Retire(WindowsHidOverlappedOperation operation);
 

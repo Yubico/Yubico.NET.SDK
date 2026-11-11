@@ -180,6 +180,7 @@ public sealed class WindowsFidoHidNativeOwnerTests
                 Assert.True(Assert.IsType<Thread>(api.Worker).Join(TimeSpan.FromSeconds(5)));
                 Assert.False(send.IsCompleted);
                 Assert.False(owner.ShutdownAsync().IsCompleted);
+                Assert.Equal(0, api.CancelCount);
                 Assert.Equal(0, api.RetireCount);
                 Assert.Equal(0, claim.Releases);
                 Assert.False(api.Closing.Task.IsCompleted);

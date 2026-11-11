@@ -102,7 +102,15 @@ internal sealed class WindowsHidReportApi : IWindowsHidReportApi
         }
 
         _activeOperation = operation;
-        operation.NativeOverlapped = binding.UnsafeAllocateNativeOverlapped(OnCompleted, operation, operation.NativeReport);
+        try
+        {
+            operation.NativeOverlapped = binding.UnsafeAllocateNativeOverlapped(OnCompleted, operation, operation.NativeReport);
+        }
+        catch
+        {
+            operation.PreparationFailedBeforeNativeDispatch = true;
+            throw;
+        }
         operation.NativeOverlapped->EventHandle = 0;
         // Default completion modes: TRUE also queues a callback. Never synthesize one or enable
         // FILE_SKIP_COMPLETION_PORT_ON_SUCCESS. BCL's allocation starts Windows thread-pool tracking.

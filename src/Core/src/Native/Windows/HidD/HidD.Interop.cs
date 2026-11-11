@@ -19,6 +19,15 @@ namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 
 internal static partial class NativeMethods
 {
+    // Synchronous feature calls borrow the pinned array; the caller retains the handle explicitly.
+    [LibraryImport(Libraries.Hid, EntryPoint = "HidD_GetFeature", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial byte GetHidFeature(nint handle, byte[] report, uint reportLength);
+
+    [LibraryImport(Libraries.Hid, EntryPoint = "HidD_SetFeature", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial byte SetHidFeature(nint handle, byte[] report, uint reportLength);
+
     // HID BOOLEAN is one byte (unlike Kernel32 BOOL). The caller retains the handle explicitly.
     [LibraryImport(Libraries.Hid, EntryPoint = "HidD_GetPreparsedData", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

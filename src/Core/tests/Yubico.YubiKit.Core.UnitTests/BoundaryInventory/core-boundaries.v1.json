@@ -2,6 +2,56 @@
   "version": 1,
   "families": [
     {
+      "path": "Native/Windows/HidD/HidD.Interop.cs", "reviewOwner": "Core maintainers",
+      "rationale": "New byte-returning HID BOOLEAN imports are synchronous boundaries. The independent Windows FIDO and OTP owners direct acquisition and checked release; declaration coverage is not Windows native verification.",
+      "evidence": ["Native/Windows/HidD/HidD.Interop.cs:GetHidFeature/SetHidFeature/GetHidPreparsedData/FreeHidPreparsedData; Transports/Hid/Windows/WindowsHidFeatureReportApi.cs:Open/Transfer/ReleaseResources and WindowsHidReportApi.cs:Open/ReleasePreparsedData retain explicit handle references and record partial metadata ownership."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "FreeHidPreparsedData#9FA06925D621#sync-boundary#Synchronous metadata release used by both native APIs on their original owner workers after report drain. Failed free is not full native-release proof even if the handle closes; no cancellation or retry releases the retained claim.",
+        "GetHidFeature#C3E1DB785748#sync-boundary#OTP worker performs synchronous HidD GET through Transfer with a retained SafeHandle and pinned private descriptor-sized report. Cancellation after dispatch cannot detach it; success supplies no actual byte count. Native staging is cleared after return and successful payload escapes separately.",
+        "GetHidPreparsedData#640769142049#sync-boundary#Synchronous descriptor acquisition on either original native worker, with the handle reference retained and returned preparsed pointer stored before success inspection. Failed or canceled open still requires checked cleanup; token completion is not release evidence.",
+        "SetHidFeature#84E4F91B963A#sync-boundary#OTP worker performs synchronous HidD SET through Transfer, borrowing the owned report-ID-zero array and retained SafeHandle through return. Pre-dispatch cancellation submits nothing; accepted success wins late cancellation and staging is cleared before operation completion."
+      ]
+    },
+    {
+      "path": "Native/Windows/Kernel32/Kernel32.Interop.cs", "reviewOwner": "Core maintainers",
+      "rationale": "Explicit raw-handle Windows imports support the independent FIDO overlapped and OTP synchronous native owners. Import invocation is synchronous even when accepted I/O completes later; Windows driver and JIT/AOT callback-tail acceptance remain pending.",
+      "evidence": ["Native/Windows/Kernel32/Kernel32.Interop.cs:CancelIoEx/CloseHidHandle/CreateHidFile and pointer ReadFile/WriteFile overloads; Native/Windows/Kernel32/WindowsHidSafeHandle.cs:CloseOnce/ReleaseHandle/CloseNative records actual release. Transports/Hid/Windows/WindowsHidReportApi.cs:Open/Submit/Cancel/Retire/CloseOnce; WindowsHidFeatureReportApi.cs:Open uses zero desired access."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "CancelIoEx#C932FC471486#sync-boundary#Original FIDO worker requests cancellation for the exact accepted OVERLAPPED only after Submit returns. Success or ERROR_NOT_FOUND is not terminal evidence; retain pointer, report and handle until callback resource last use. Other errors stop admission but do not authorize early release.",
+        "CloseHidHandle#78118050AA89#sync-boundary#WindowsHidSafeHandle synchronously records actual CloseHandle success after owner-directed drain and reference release. Managed IsClosed, pending references, failed close or completed shutdown are not release proof; uncertain native lifetime retains the original owner and claim without retry.",
+        "CreateHidFile#18A41F695C3B#sync-boundary#Synchronous CreateFileW runs on the original native worker: FIDO requests read/write plus OVERLAPPED; OTP uses zero desired access and NORMAL flags. Preallocated SafeHandle records acquisition before later fallible setup. Opening cancellation waits for checked cleanup and ends authority at atomic success publication.",
+        "ReadFile#2DDA30B7D5F0#sync-boundary#FIDO worker submits a pointer-based read using ThreadPoolBoundHandle-owned OVERLAPPED and pinned private input storage. Immediate TRUE and IO_PENDING both require the real callback under default completion modes; rejection requires Submit return before retirement. Cancellation cannot detach accepted storage; typed input requires exactly 65 native bytes and report ID zero.",
+        "WriteFile#1BB8749BD701#sync-boundary#FIDO worker submits a pointer-based write over its copied report-ID-zero output. Accepted immediate or pending writes join Submit return with callback resource last use before BCL retirement, zeroing and task completion; cancellation/not-found cannot substitute for completion. Allocation-only failure faults the operation but retains uncertain BCL resources."
+      ]
+    },
+    {
+      "path": "Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs", "reviewOwner": "Core maintainers",
+      "rationale": "Independent rooted W1 FIDO lifetime: one original worker directs open, submission, cancellation, retirement and checked close; callbacks only record and signal. Routing and Windows-native acceptance are separate work.",
+      "evidence": ["Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs:Start/Drain/Dispose/Advance/CompleteRequest/FailPreparation; WindowsFidoHidConnection.cs:Dispose delegates to this synchronous drain. WindowsHidReportApi.cs:Submit/OnCompleted and WindowsHidOverlappedOperation.cs:Complete define the BCL callback resource-last-use handoff, not physical callback-stack return."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "Dispose#77AFDAAEBA04#sync-boundary#Synchronous Dispose rejects original-worker self-wait, then blocks on the same shutdown task as asynchronous disposal. Accepted I/O must join Submit return and callback resource last use before checked close; missing completion can hold this caller indefinitely. A preparation-only fault can complete shutdown exceptionally while retaining BCL resources, owner root and claim.",
+        "Drain#06CADF27FC43#worker#AutoResetEvent.WaitOne parks only the original worker for work, cancellation or completion signals. One request owns the slot; cancellation and terminal wake merely request CancelIoEx after submission returns. No timeout, replacement worker or force close supplies missing completion evidence. Preparation failure before dispatch clears payload and faults public work while retaining uncertain allocation resources without Retire/Close.",
+        "Start#88B50FCA3DCD#worker#Already-suppressed execution-context branch starts the sole background FIDO worker after rooting and claim transfer. It owns all native API calls and one ordinary request slot; this is not per-operation offload. Failure to start releases only the never-acquired lifetime.",
+        "Start#5B47DFD43C09#worker#Alternative branch suppresses execution-context flow around the same sole worker start; mutually exclusive with the first Start site. Native completion uses the BCL callback recorder, not application continuations; success publication retires opening-token authority and native-release proof controls claim release."
+      ]
+    },
+    {
+      "path": "Transports/Hid/Windows/WindowsOtpHidNativeOwner.cs", "reviewOwner": "Core maintainers",
+      "rationale": "Independent W3 zero-access OTP worker owns synchronous feature GET/SET and checked close. Cancellation cannot abandon dispatched native work; source classification and managed evidence do not establish Windows native acceptance or public factory routing.",
+      "evidence": ["Transports/Hid/Windows/WindowsOtpHidNativeOwner.cs:OpenAsync/StartOpen/WorkLoop/Send/Receive/Dispose/Close; WindowsOtpHidConnection.cs:OpenAsync enforces native feature length 9 and Dispose forwards synchronous drain. WindowsHidFeatureReportApi.cs:Open/Transfer/ReleaseResources preserves zero-access open, synchronous borrowing and checked release."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "Dispose#77E7955F510A#sync-boundary#Synchronous Dispose rejects worker self-wait and blocks on shared shutdown after any admitted feature call returns and checked close runs. A held GET/SET can hold disposal indefinitely; cancellation does not detach the native call. Unproven release faults shutdown while retaining the root and original claim.",
+        "OpenAsync#B3C85413316E#async-blocked#Owner-construction failure synchronously calls the transferred IDisposable physical claim before this task-returning method can return. No worker or native acquisition exists yet, but interface-dispatched claim cleanup cost is unresolved; constructor and release errors are preserved together. This exceptional dispatch gap is not an ordinary native-open offload.",
+        "StartOpen#5ADD14FA5090#worker#Already-suppressed context branch starts one rooted background OTP worker with its opening action installed. This original worker owns zero-access open, synchronous feature calls and checked close; one ordinary slot has no backlog or per-call Task.Run.",
+        "StartOpen#8ADCC2CC694E#worker#Alternative branch suppresses execution-context flow around the same worker start, mutually exclusive with the first Start site. Thread-start failure releases the never-acquired claim; opening cancellation loses authority atomically at success publication. No replacement worker cleans up a held native call.",
+        "WorkLoop#FAF3B18D7C74#worker#AutoResetEvent.WaitOne parks the original OTP worker between admitted actions. GET/SET borrow only owned framed arrays through native return; pre-dispatch cancellation submits nothing and late cancellation cannot detach accepted work. Worker failure terminalizes pending public tasks and attempts checked close on this same worker; unproven release retains the rooted claim."
+      ]
+    },
+    {
       "path": "Transports/Hid/Linux/LinuxHidReadReactor.cs", "reviewOwner": "Core maintainers",
       "rationale": "", "evidence": ["docs/research/linux-read-reactor.md; LinuxHidReadReactorTests exercises recoverable published admission, late quiescence, owner-worker reference release, held retirement without replacement/pool jobs, and real Linux eventfd/poll. RetireWake closes only the private local eventfd after poll exits; Linux v6.12 fs/eventfd.c release has no driver wait or flush."],
       "status": ["documented", "outstanding"],

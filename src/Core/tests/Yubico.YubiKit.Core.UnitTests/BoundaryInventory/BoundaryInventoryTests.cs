@@ -219,13 +219,13 @@ public class BoundaryInventoryTests
     {
         var root = BoundaryScanner.CoreSourceRoot();
         var sites = BoundaryScanner.ScanDirectory(root);
-        // Upstream's 205 sites plus the independently retained 13-site Linux delta.
-        Assert.Equal(218, sites.Count);
+        // Retain the 218-site merged baseline plus 18 Windows native-owner/API sites.
+        Assert.Equal(236, sites.Count);
         Assert.Equal(sites.Count, sites.Select(site => site.Id).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(132, sites.Count(site => site.Kind == "native-import"));
-        Assert.Equal(36, sites.Count(site => site.Kind == "blocking-wait"));
-        Assert.Equal(18, sites.Count(site => site.Kind == "scheduling"));
-        Assert.Equal(21, sites.Count(site => site.Kind == "dispatch-gap"));
+        Assert.Equal(141, sites.Count(site => site.Kind == "native-import"));
+        Assert.Equal(40, sites.Count(site => site.Kind == "blocking-wait"));
+        Assert.Equal(22, sites.Count(site => site.Kind == "scheduling"));
+        Assert.Equal(22, sites.Count(site => site.Kind == "dispatch-gap"));
         Assert.Equal(6, sites.Count(site => site.Kind == "callback-registration"));
         Assert.Equal(0, sites.Count(site => site.Kind == "callback-conversion"));
         Assert.Equal(2, sites.Count(site => site.Kind == "callback-address"));

@@ -14,10 +14,18 @@
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 
+/// <summary>Extracts bounded unnumbered input/output payload-size metadata for the supported YubiKey descriptor shape.</summary>
 internal static class LinuxHidReportSizes
 {
-    // Existing last-main-item parser for the current YubiKey descriptors. Not a generic
-    // HID parser: no collection aggregation, report IDs, or global PUSH/POP support.
+    /// <summary>Gets the last nonzero Input/Output main-item size in bytes, defaulting each direction to 64.</summary>
+    /// <param name="descriptor">Borrowed report descriptor bytes, not report payload or native transfer-count evidence.</param>
+    /// <returns>Input/output metadata with widened bit arithmetic and a 4096-byte bound per recognized main item.</returns>
+    /// <remarks>
+    /// Not a generic HID parser: no collection aggregation or global PUSH/POP support. Numbered
+    /// reports fail explicitly. Retains the descriptor reader's truncation/default behavior rather
+    /// than promising complete malformed-descriptor validation. Actual reads may be shorter, and
+    /// raw output uses caller length instead of requiring a match to this metadata.
+    /// </remarks>
     internal static (int InputSize, int OutputSize) Parse(ReadOnlySpan<byte> descriptor)
     {
         int inputSize = 64;

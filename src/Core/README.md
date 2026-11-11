@@ -357,12 +357,12 @@ Use the existing typed API and dispose connections explicitly; raw sessions borr
 sequentially on the same connection:
 
 ```csharp
-await using var fido = await device.ConnectAsync<IFidoHidConnection>(cancellationToken);
-await using (var raw = await RawCtapHidSession.CreateAsync(fido, cancellationToken))
+await using var fidoHidConnection = await device.ConnectAsync<IFidoHidConnection>(cancellationToken);
+await using (var raw = await RawCtapHidSession.CreateAsync(fidoHidConnection, cancellationToken))
 {
     // CTAP HID initialization is lazy, on the first raw exchange.
 }
-await using var next = await RawCtapHidSession.CreateAsync(fido, cancellationToken);
+await using var next = await RawCtapHidSession.CreateAsync(fidoHidConnection, cancellationToken);
 ```
 
 Run the public factory/discovery/raw-session seam tests with:

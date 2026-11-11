@@ -11,10 +11,18 @@ using NativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 
-// One native lifetime, one worker, one ordinary operation slot. No replacement worker,
-// command queue, cancellation timeout, or cross-thread close can manufacture release proof.
+/// <summary>Owns the shared native lifetime behind typed Linux FIDO and direct synchronous IO-report access.</summary>
+/// <remarks>
+/// Roots the owner before native acquisition and retains the original physical claim through
+/// cleanup. One dedicated worker owns open, metadata, output, activation/drain waits and checked
+/// close; the reactor only performs bounded nonblocking input. Send and receive share one ordinary
+/// operation slot with no backlog. Terminal tasks are not native-release evidence: only actual
+/// registration quiescence followed by checked close permits claim release. Unknown release retains
+/// and quarantines the rooted lifetime, without a replacement worker, close retry or timeout escape.
+/// </remarks>
 internal sealed class LinuxFidoHidNativeOwner
 {
+    /// <summary>Maximum queued owned reports; overflow terminates input rather than silently dropping frames.</summary>
     internal const int ReportCapacity = 160;
     private static long _nextGeneration;
     [ThreadStatic] private static bool _inReadCallback;
@@ -53,9 +61,23 @@ internal sealed class LinuxFidoHidNativeOwner
         _claim = claim;
     }
 
+    /// <summary>Gets bounded descriptor input payload capacity (1..4096), not the actual length of a received report.</summary>
     internal int InputReportSize { get; private set; }
+    /// <summary>Gets bounded descriptor output metadata (1..4096); raw sends need not match this length.</summary>
     internal int OutputReportSize { get; private set; }
 
+    /// <summary>Creates a rooted owner and opens/registers its nonblocking descriptor on the original dedicated worker.</summary>
+    /// <param name="path">hidraw path to open.</param>
+    /// <param name="api">Borrowed synchronous report seam; not disposed by this owner.</param>
+    /// <param name="reactor">Borrowed readiness service; only this owner's registration is removed on shutdown.</param>
+    /// <param name="token">Cancels before acquisition or requests shutdown during preparation; cannot detach a submitted native call.</param>
+    /// <param name="claim">Optional original physical/discovery claim transferred to this lifetime, including failed-open cleanup.</param>
+    /// <returns>The prepared owner after metadata validation and registration activation.</returns>
+    /// <remarks>
+    /// Failed/canceled open awaits cleanup and preserves both open and cleanup failures. Activation
+    /// failure still retains its token until actual drain. Held native work or broken wake can leave
+    /// this task pending indefinitely; caller cancellation is not permission to release the claim.
+    /// </remarks>
     internal static async Task<LinuxFidoHidNativeOwner> OpenAsync(string path, ILinuxHidReportApi api,
         ILinuxHidReadReactor reactor, CancellationToken token, IDisposable? claim = null)
     {
@@ -207,6 +229,15 @@ internal sealed class LinuxFidoHidNativeOwner
         }
     }
 
+    /// <summary>Admits one raw send and copies its payload before returning the actual operation task.</summary>
+    /// <param name="report">Caller-owned payload (0..16383 bytes), not required to match metadata; typed callers enforce 64 bytes.</param>
+    /// <param name="token">Checked at entry and worker dispatch; after dispatch it cannot detach or abort output.</param>
+    /// <returns>A task terminal only after dispatched output returns and the owned copy is cleared, or pre-dispatch cancellation/failure.</returns>
+    /// <remarks>
+    /// Admission takes the owner lock and rejects overlap. The caller retains and clears its source;
+    /// the worker borrows only the owned copy. Native failure is not replayed or proof of no mutation.
+    /// Successful output may succeed despite cancellation requested after dispatch.
+    /// </remarks>
     internal Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -259,6 +290,18 @@ internal sealed class LinuxFidoHidNativeOwner
         }
     }
 
+    /// <summary>Admits one reader for the next exact-length owned report, consuming queued input when available.</summary>
+    /// <param name="typed">Whether delivery must contain exactly 64 bytes; a mismatch clears the report and terminalizes input.</param>
+    /// <param name="token">Checked at entry; cancellation of a pending reader detaches only that reader, not native input.</param>
+    /// <returns>The reader's actual completion task, yielding caller-owned array storage through a read-only view.</returns>
+    /// <remarks>
+    /// Raw input preserves actual read length rather than padding to descriptor capacity. Delivery
+    /// races cancellation exactly once; undelivered reports remain available for a successor. The
+    /// owner clears temporary, rejected and abandoned queued reports, but never a successfully returned
+    /// array, including during shutdown. The view offers no disposal/zeroing API; read-only does not
+    /// mean immutable or automatically erased. Sensitive successful output requires caller-managed
+    /// backing-storage cleanup; copying it does not erase the original. Continuations run asynchronously.
+    /// </remarks>
     internal Task<ReadOnlyMemory<byte>> ReceiveAsync(bool typed, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -364,6 +407,11 @@ internal sealed class LinuxFidoHidNativeOwner
         }
     }
 
+    /// <summary>Stops input/admission, clears queued reports and faults a pending reader with the first terminal cause.</summary>
+    /// <remarks>
+    /// Requests registration removal without waiting. Does not abort accepted output, close the
+    /// descriptor, release the claim or prove quiescence; <see cref="ShutdownAsync"/> still owns cleanup.
+    /// </remarks>
     internal void Terminal(Exception error)
     {
         lock (_sync) { TerminalLocked(error); }
@@ -384,6 +432,13 @@ internal sealed class LinuxFidoHidNativeOwner
         _ = reader.TrySetException(_terminal);
     }
 
+    /// <summary>Synchronously drains the same checked shutdown outcome used by asynchronous disposal.</summary>
+    /// <remarks>
+    /// Retained for the synchronous expert facade and IDisposable compatibility, not the async
+    /// golden path. Prefer awaiting <see cref="ShutdownAsync"/>. This can block indefinitely on native
+    /// work or true reactor drain. Worker/read-callback and all reactor-thread calls are rejected to
+    /// prevent self-drain; do not invoke while holding a resource needed by the operation being drained.
+    /// </remarks>
     internal void Dispose()
     {
         if (_inReadCallback || LinuxHidReadReactor.IsReactorThread || Environment.CurrentManagedThreadId == Volatile.Read(ref _workerId))
@@ -391,13 +446,23 @@ internal sealed class LinuxFidoHidNativeOwner
         ShutdownAsync().GetAwaiter().GetResult();
     }
 
-    // Finalizers only publish shutdown; they never wait for the worker/reactor/native call.
+    /// <summary>Requests shutdown for facade finalization without waiting for native cleanup or propagating exceptions.</summary>
+    /// <remarks>Takes the admission lock; this is not a lock-free request or release acknowledgement.</remarks>
     internal void RequestShutdown()
     {
         try { _ = ShutdownAsync(); }
         catch { /* Finalizer backstop: never throw or manufacture native release proof. */ }
     }
 
+    /// <summary>Closes admission, terminalizes a pending reader and returns the shared checked native-cleanup outcome.</summary>
+    /// <remarks>
+    /// Requests removal even during held output. The original worker finishes accepted work, waits
+    /// for the exact registration's actual quiescence, releases its reference and inspects checked
+    /// close before releasing the original claim. No timeout frees a live lifetime. Released EINTR/EIO
+    /// close still faults with diagnostics after claim release; unproven release faults while retaining
+    /// the root/claim in quarantine. Repeated calls share the result and never retry close. Public read
+    /// terminality precedes cleanup, but does not itself prove native quiescence or close.
+    /// </remarks>
     internal Task ShutdownAsync()
     {
         lock (_sync)

@@ -21,13 +21,22 @@ using NativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 
+/// <summary>Adapts synchronous hidraw syscalls to borrowed unnumbered payloads with checked native framing/counts.</summary>
+/// <param name="native">Borrowed syscall seam; calls retain handles only for their synchronous native use.</param>
+/// <remarks>
+/// Does not schedule work, own a connection lifetime or enforce typed FIDO/OTP send lengths.
+/// Native framing is scoped and zeroed on every exit; caller storage remains caller-owned.
+/// See <see cref="ILinuxHidReportApi"/> for blocking, sizing and checked-release contracts.
+/// </remarks>
 internal sealed class LinuxHidReportApi(ILinuxHidNativeApi native) : ILinuxHidReportApi
 {
     private const int MaxNativeReportSize = 16384; // Linux HID_MAX_BUFFER_SIZE.
     private const int MaxNativeFeatureSize = (1 << 14) - 1; // Generic ioctl size field.
 
+    /// <summary>Gets the stateless production report adapter; connection owners retain their own descriptors and claims.</summary>
     internal static ILinuxHidReportApi Instance { get; } = new LinuxHidReportApi(new LinuxHidNativeApi());
 
+    /// <inheritdoc />
     public LinuxFileSafeHandle Open(string path, NativeMethods.OpenFlags flags)
     {
         var handle = native.Open(path, flags | NativeMethods.OpenFlags.O_CLOEXEC);
@@ -38,6 +47,7 @@ internal sealed class LinuxHidReportApi(ILinuxHidNativeApi native) : ILinuxHidRe
         throw new PlatformApiException("open", error, "Failed to open Linux HID report descriptor.");
     }
 
+    /// <inheritdoc />
     public (int InputSize, int OutputSize) GetReportSizes(LinuxFileSafeHandle handle)
     {
         Span<byte> sizeBuffer = stackalloc byte[4];
@@ -71,6 +81,7 @@ internal sealed class LinuxHidReportApi(ILinuxHidNativeApi native) : ILinuxHidRe
         }
     }
 
+    /// <inheritdoc />
     public LinuxReadResult TryRead(LinuxFileSafeHandle handle, Span<byte> payload)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(payload.Length, MaxNativeReportSize);
@@ -91,9 +102,11 @@ internal sealed class LinuxHidReportApi(ILinuxHidNativeApi native) : ILinuxHidRe
         return new LinuxReadResult(disposition, result.Count > 0 ? (int)result.Count : 0, result.Error);
     }
 
+    /// <inheritdoc />
     public void Write(LinuxFileSafeHandle handle, ReadOnlySpan<byte> payload) =>
         SendFramedReport(handle, payload, feature: false);
 
+    /// <inheritdoc />
     public void GetFeature(LinuxFileSafeHandle handle, Span<byte> payload)
     {
         RequireSize(payload.Length, 8);
@@ -114,13 +127,14 @@ internal sealed class LinuxHidReportApi(ILinuxHidNativeApi native) : ILinuxHidRe
         }
     }
 
+    /// <inheritdoc />
     public void SetFeature(LinuxFileSafeHandle handle, ReadOnlySpan<byte> payload) =>
         SendFramedReport(handle, payload, feature: true);
 
     private void SendFramedReport(LinuxFileSafeHandle handle, ReadOnlySpan<byte> payload, bool feature)
     {
         // Direct synchronous facades historically forward the caller's payload length.
-        // Future typed FIDO/OTP owners enforce 64/8 separately; this seam supplies only bounded
+        // Typed FIDO/OTP connections enforce 64/8 separately; this seam supplies only bounded
         // native framing. Feature length must also fit the ioctl's 14-bit size field.
         int maxNativeSize = feature ? MaxNativeFeatureSize : MaxNativeReportSize;
         ArgumentOutOfRangeException.ThrowIfGreaterThan(payload.Length, maxNativeSize - 1);
@@ -151,6 +165,7 @@ internal sealed class LinuxHidReportApi(ILinuxHidNativeApi native) : ILinuxHidRe
         }
     }
 
+    /// <inheritdoc />
     public LinuxReleaseOutcome CloseOnce(LinuxFileSafeHandle handle) => handle.CloseOnce();
 
     private static void RequireSize(int actual, int expected)

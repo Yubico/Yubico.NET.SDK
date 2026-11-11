@@ -77,7 +77,7 @@ internal sealed class HidConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryConn
             _hidInterface.DescriptorInfo.ProductId);
 
         if (OwnsNativeLifetime)
-            return OpenBuiltInConnectionAsync(null, cancellationToken);
+            return OpenBuiltInConnectionAsync(physicalClaim: null, cancellationToken);
 
         // Windows and custom interfaces retain the synchronous compatibility adapters.
         return Task.FromResult<IConnection>(ConnectionType == ConnectionType.HidFido
@@ -88,24 +88,40 @@ internal sealed class HidConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryConn
     /// <summary>The built-in connection accepts its claim before acquiring native resources.</summary>
     internal bool OwnsNativeLifetime => _hidInterface is MacOSHidInterface or LinuxHidInterface;
 
-    internal Task<IConnection> OpenRegisteredConnectionAsync(IDisposable registration, CancellationToken token) =>
-        OpenBuiltInConnectionAsync(registration, token);
+    /// <summary>Transfers a registry connection or discovery claim to the built-in native owner before open.</summary>
+    /// <param name="physicalClaim">
+    /// The opaque release token acquired by <see cref="YubiKeyDevice" /> or discovery. The native owner,
+    /// not the caller, releases it after proven native cleanup, including failed or canceled opens;
+    /// uncertain release retains the claim. It is not the connection being opened.
+    /// </param>
+    /// <param name="cancellationToken">Requests cancellation without detaching native acquisition or cleanup.</param>
+    /// <returns>The opened connection after the owner has accepted responsibility for the claim.</returns>
+    internal Task<IConnection> OpenRegisteredConnectionAsync(IDisposable physicalClaim, CancellationToken cancellationToken) =>
+        OpenBuiltInConnectionAsync(physicalClaim, cancellationToken);
 
-    // Do not short-circuit cancellation here: after transfer the native owner alone releases the claim,
-    // including a pre-canceled open. Raw callers checked cancellation before reaching this route.
-    private async Task<IConnection> OpenBuiltInConnectionAsync(IDisposable? registration, CancellationToken token) =>
+    /// <summary>Opens a built-in macOS/Linux connection with an optional transferred physical claim.</summary>
+    /// <param name="physicalClaim">
+    /// Registry/discovery release token, or <see langword="null" /> for an unregistered raw open.
+    /// Forwarded unchanged: the registry encapsulates concrete token types and quarantine handling.
+    /// </param>
+    /// <param name="cancellationToken">Passed to the native owner even when already canceled.</param>
+    /// <remarks>
+    /// Do not short-circuit cancellation here: after transfer the native owner alone releases the claim,
+    /// including a pre-canceled open. Raw callers checked cancellation before reaching this route.
+    /// </remarks>
+    private async Task<IConnection> OpenBuiltInConnectionAsync(IDisposable? physicalClaim, CancellationToken cancellationToken) =>
         (_hidInterface, ConnectionType) switch
         {
             (MacOSHidInterface device, ConnectionType.HidFido) =>
-                await MacOSFidoHidConnection.OpenAsync(device.EntryId, _inputBridge ?? new NativeHidInputBridge(), token, registration).ConfigureAwait(false),
+                await MacOSFidoHidConnection.OpenAsync(device.EntryId, _inputBridge ?? new NativeHidInputBridge(), cancellationToken, physicalClaim).ConfigureAwait(false),
             (MacOSHidInterface device, ConnectionType.HidOtp) =>
-                await MacOSOtpHidConnection.OpenAsync(device.EntryId, _otpLifetime ?? IOKitDeviceLifetime.Instance, token, registration).ConfigureAwait(false),
+                await MacOSOtpHidConnection.OpenAsync(device.EntryId, _otpLifetime ?? IOKitDeviceLifetime.Instance, cancellationToken, physicalClaim).ConfigureAwait(false),
             (LinuxHidInterface device, ConnectionType.HidFido) =>
                 await LinuxFidoHidConnection.OpenAsync(device.ReaderName, _linuxReportApi ?? LinuxHidReportApi.Instance,
-                    _linuxReadReactor ?? LinuxHidReadReactor.Shared, token, registration).ConfigureAwait(false),
+                    _linuxReadReactor ?? LinuxHidReadReactor.Shared, cancellationToken, physicalClaim).ConfigureAwait(false),
             (LinuxHidInterface device, ConnectionType.HidOtp) =>
                 await LinuxOtpHidConnection.OpenAsync(device.ReaderName, _linuxReportApi ?? LinuxHidReportApi.Instance,
-                    token, registration).ConfigureAwait(false),
+                    cancellationToken, physicalClaim).ConfigureAwait(false),
             _ => throw new InvalidOperationException("Only built-in macOS and Linux HID own their claims before native open.")
         };
 

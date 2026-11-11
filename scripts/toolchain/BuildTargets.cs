@@ -7,7 +7,9 @@ static class BuildTargets
 {
     public static void Register(ToolchainContext ctx)
     {
-        TargetRegistry.Define("linux-hid-verification-publish", "Publish standalone Linux HID native contract host (JIT and Native AOT)", () =>
+        // Opt-in regression gate, explicitly invoked by Linux Native AOT CI. Registering this
+        // action does not publish anything; build/test/default do not depend on this target.
+        TargetRegistry.Define("linux-hid-verification-publish", "Opt-in Linux HID contract host publish (JIT and Native AOT; not part of build)", () =>
         {
             const string project = "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj";
             // Prepare both conditional dependency/import closures before binding inputs. Separate

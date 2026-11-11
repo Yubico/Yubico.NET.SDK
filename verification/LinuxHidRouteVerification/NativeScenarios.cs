@@ -271,7 +271,7 @@ internal static class NativeScenarios
 
     internal static async Task<int> BlockingControlAsync(Evidence evidence)
     {
-        // The real retained legacy adapter enters GetReport before returning its Task (L0 control).
+        // The retained synchronous compatibility adapter enters GetReport before returning its Task (L0 control).
         // A held assertion fixture makes this visible without relying on a speed threshold.
         using var report = new BlockingReportConnection();
         await using var legacy = new FidoHidConnection(report);

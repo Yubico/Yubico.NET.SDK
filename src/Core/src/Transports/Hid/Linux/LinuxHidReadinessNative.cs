@@ -17,19 +17,26 @@ using Yubico.YubiKit.Core.Native.Linux.Libc;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 
-// Small syscall seam: fault tests can withhold poll without replacing registration mechanics.
+/// <summary>Synchronous poll/eventfd seam allowing readiness fault injection without replacing registration mechanics.</summary>
+/// <remarks>These are native calls, not async or hard wall-clock-bounded operations. Results capture errno immediately.</remarks>
 internal interface ILinuxHidReadinessNative
 {
-    // Must return a private owned non-semaphore eventfd, never a borrowed device fd.
-    // Only this local notification resource may be retired by the poller after poll exits.
+    /// <summary>Creates a private owned nonblocking, close-on-exec, non-semaphore eventfd or throws.</summary>
+    /// <remarks>Never returns a borrowed device fd. Only this local notification resource may be retired on the poller after poll exits.</remarks>
     LinuxFileSafeHandle CreateWake();
+    /// <summary>Waits indefinitely for readiness and updates the borrowed descriptors' revents; returns ready count or native failure.</summary>
+    /// <remarks>The reactor retains device references across the snapshot. No descriptor array is retained after return.</remarks>
     LinuxIoResult Poll(NativeMethods.PollFd[] descriptors);
+    /// <summary>Attempts one eight-byte increment of the borrowed wake eventfd; caller interprets EAGAIN/EINTR and count.</summary>
     LinuxIoResult WriteWake(LinuxFileSafeHandle wake);
+    /// <summary>Attempts one eight-byte non-semaphore read to drain the wake counter; caller validates count and errno.</summary>
     LinuxIoResult ReadWake(LinuxFileSafeHandle wake);
 }
 
+/// <summary>Production libc poll/eventfd adapter used by <see cref="LinuxHidReadReactor"/>.</summary>
 internal sealed class LinuxHidReadinessNative : ILinuxHidReadinessNative
 {
+    /// <inheritdoc />
     public LinuxFileSafeHandle CreateWake()
     {
         var wake = NativeMethods.EventFd(0, NativeMethods.EFD_NONBLOCK | NativeMethods.EFD_CLOEXEC);
@@ -40,12 +47,14 @@ internal sealed class LinuxHidReadinessNative : ILinuxHidReadinessNative
         throw new IOException($"eventfd failed (errno {error}).");
     }
 
+    /// <inheritdoc />
     public LinuxIoResult Poll(NativeMethods.PollFd[] descriptors)
     {
         int count = NativeMethods.Poll(descriptors, descriptors.Length, -1);
         return new LinuxIoResult(count, Marshal.GetLastPInvokeError());
     }
 
+    /// <inheritdoc />
     public LinuxIoResult WriteWake(LinuxFileSafeHandle wake)
     {
         Span<byte> value = stackalloc byte[8];
@@ -54,6 +63,7 @@ internal sealed class LinuxHidReadinessNative : ILinuxHidReadinessNative
         return new LinuxIoResult(count, Marshal.GetLastPInvokeError());
     }
 
+    /// <inheritdoc />
     public LinuxIoResult ReadWake(LinuxFileSafeHandle wake)
     {
         Span<byte> value = stackalloc byte[8];

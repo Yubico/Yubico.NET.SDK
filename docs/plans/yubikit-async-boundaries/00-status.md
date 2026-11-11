@@ -1,5 +1,39 @@
 # Status: YubiKit async boundaries
 
+## Human review follow-up — PR 770
+
+The 39 human review threads were checked against implementation and call sites.
+The response adds member documentation for the Linux report/reactor seams,
+native owners and typed/direct facades, including buffer ownership, framing,
+cancellation, synchronous compatibility and actual native-release milestones.
+Stale factory-migration wording was replaced with the current routing contract.
+`IHidConnection` now documents the common contract without imposing exclusive
+array ownership on custom providers.
+
+The routing parameter is named `physicalClaim`, including an explicit named
+`null` on unregistered raw opens. Its `IDisposable` type remains the registry's
+opaque transferred token; generics would not add a stronger ownership contract.
+The Linux verifier publish target remains an explicit, opt-in CI regression gate,
+not an ordinary build/test/default dependency. Registry assertions retain their
+independent totals, now explained as baseline **27 operations / 49 links** plus
+Linux **16 / 27**, giving **43 / 76**. The intentionally blocking compatibility
+negative control remains, with misleading "legacy" wording removed.
+
+Independent specification/quality reviews accepted these responses. Public
+signatures and transport behavior are unchanged. Integrated run
+`20261111-155210-497-build+test+docs-qa+native-aot-contract-qa+complexity` passed
+**4,082 executed, zero failures, five skips and zero warnings**. Its preceding
+attempt hit the previously reproduced baseline PIV pooled-buffer assertion;
+that failed run was archived, with no PIV change or test exclusion.
+
+The human draft review and thread resolution remain under the reviewer's control.
+The pre-existing cross-platform consumed-report storage cleanup gap needs a
+separate ownership-aware security-hardening decision; these documentation changes
+do not fix it or grant permission to mutate arbitrary providers' read-only memory.
+Earlier native/hardware captures below retain their exact recorded source and
+HEAD; changed C# documentation also changes the strict source binding. No old
+capture is relabeled as evidence for this review follow-up.
+
 ## Published review checkpoint — PR 770
 
 [PR 770](https://github.com/Yubico/Yubico.NET.SDK/pull/770) targets `yubikit`.

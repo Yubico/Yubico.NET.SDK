@@ -14,6 +14,9 @@ public class AdapterContractRegistryTests
     public void Migrated_routes_have_resolved_nonempty_contract_profiles()
     {
         var rows = Load();
+        // Independent acceptance totals, not values derived from the manifest under test:
+        // baseline 27 operations / 49 profile links + Linux 16 operations / 27 links.
+        // Linux: FIDO 4/10, OTP 4/9, direct input 4/4, direct feature 4/4 (operations/links).
         Assert.Equal(43, rows.Length);
         Assert.Equal(76, rows.Sum(row => row.Profiles.Length));
         Assert.Empty(AdapterContractRegistry.Validate(rows));

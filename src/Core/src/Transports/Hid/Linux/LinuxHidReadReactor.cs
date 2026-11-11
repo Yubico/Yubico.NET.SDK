@@ -16,6 +16,13 @@ using Yubico.YubiKit.Core.Native.Linux.Libc;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 
+/// <summary>Multiplexes internal nonblocking input readiness on one lazy poller with explicit activation/drain barriers.</summary>
+/// <remarks>
+/// Retains registration references until explicit owner-worker release after quiescence. Idle runs
+/// retire only their private eventfd after poll exits; a failed wake or retirement never fabricates
+/// drain or starts overlapping replacement resources. Does not own device close or physical claims.
+/// See <see cref="ILinuxHidReadReactor"/> and <see cref="ILinuxHidReadRegistration"/> for consumer obligations.
+/// </remarks>
 internal sealed class LinuxHidReadReactor : ILinuxHidReadReactor
 {
     private const short TerminalFlags = NativeMethods.POLLERR | NativeMethods.POLLHUP | NativeMethods.POLLNVAL;
@@ -31,12 +38,16 @@ internal sealed class LinuxHidReadReactor : ILinuxHidReadReactor
     private Exception? _failure;
     private Task? _shutdownTask;
 
+    /// <summary>Gets the process-shared lazy reactor; its poller exists only while a run needs service.</summary>
     internal static LinuxHidReadReactor Shared => SharedInstance.Value;
+    /// <summary>Gets whether this thread is executing any reactor instance, for owner self-drain guards.</summary>
     internal static bool IsReactorThread => _onReactorThread;
 
+    /// <summary>Creates an idle reactor using the borrowed injected syscall seam or the production libc implementation.</summary>
     internal LinuxHidReadReactor(ILinuxHidReadinessNative? native = null) =>
         _native = native ?? new LinuxHidReadinessNative();
 
+    /// <inheritdoc />
     public ILinuxHidReadRegistration Register(LinuxFileSafeHandle handle, long generation,
         Action<long, short> onReady, Action<Exception> onTerminal)
     {
@@ -97,6 +108,13 @@ internal sealed class LinuxHidReadReactor : ILinuxHidReadReactor
         }
     }
 
+    /// <summary>Permanently stops admission and requests removal, sharing one shutdown outcome across callers.</summary>
+    /// <remarks>
+    /// Successful completion covers registration quiescence and poller wake retirement, not owner
+    /// reference release or device close. Failure may precede actual drain; keep observing each token's
+    /// Quiescence independently. A broken wake can leave shutdown pending indefinitely. Invocation
+    /// takes the reactor lock; never synchronously wait for shutdown from a reactor callback.
+    /// </remarks>
     public ValueTask DisposeAsync()
     {
         lock (_gate)
@@ -404,17 +422,24 @@ internal sealed class LinuxHidReadReactor : ILinuxHidReadReactor
             QuiesceRemoved();
     }
 
+    /// <summary>One poller run's private notification resource and retirement completion, not a device lifetime.</summary>
     private sealed class Run
     {
+        /// <summary>Accepts ownership of the private wake eventfd and captures its descriptor under a temporary lease.</summary>
         internal Run(LinuxFileSafeHandle wake)
         {
             Wake = wake;
             SetWake(wake);
         }
+        /// <summary>Gets the owned local eventfd, never a borrowed hidraw descriptor.</summary>
         internal LinuxFileSafeHandle Wake { get; private set; }
+        /// <summary>Gets the eventfd number used in this run's poll snapshots.</summary>
         internal int Descriptor { get; private set; }
+        /// <summary>Gets or sets whether poll has exited and admissions must await eventfd retirement.</summary>
         internal bool Retiring { get; set; }
+        /// <summary>Gets the asynchronously continued outcome of run retirement, independent of owner device release.</summary>
         internal TaskCompletionSource Completion { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        /// <summary>Installs the initial wake or a replacement only after prior notification-resource retirement.</summary>
         internal void SetWake(LinuxFileSafeHandle wake)
         {
             Wake = wake;
@@ -423,9 +448,11 @@ internal sealed class LinuxHidReadReactor : ILinuxHidReadReactor
         }
     }
 
+    /// <summary>Unique callback identity retaining one SafeHandle reference until explicit post-quiescence release.</summary>
     private sealed class Registration : ILinuxHidReadRegistration
     {
         private readonly LinuxHidReadReactor _owner;
+        /// <summary>Retains the owner's handle and immutable identity/callback metadata before publication.</summary>
         internal Registration(LinuxHidReadReactor owner, LinuxFileSafeHandle handle, int descriptor,
             long generation, Action<long, short> onReady, Action<Exception> onTerminal)
         {
@@ -439,21 +466,37 @@ internal sealed class LinuxHidReadReactor : ILinuxHidReadReactor
             _owner = owner;
         }
 
+        /// <inheritdoc />
         public long Generation { get; }
+        /// <inheritdoc />
         public Task<Exception?> Activation => Activated.Task;
+        /// <inheritdoc />
         public Task Quiescence => Quiesced.Task;
+        /// <summary>Gets the owner's handle with this registration's independent retained reference.</summary>
         internal LinuxFileSafeHandle Handle { get; }
+        /// <summary>Gets the immutable fd number; reuse is forbidden until this identity's reference is released.</summary>
         internal int Descriptor { get; }
+        /// <summary>Gets the bounded internal readiness mechanics, never an application event handler.</summary>
         internal Action<long, short> OnReady { get; }
+        /// <summary>Gets the contained terminal notification whose return is part of quiescence.</summary>
         internal Action<Exception> OnTerminal { get; }
+        /// <summary>Gets or sets removal eligibility under the reactor lock; this flag alone is not drain acknowledgement.</summary>
         internal bool Removing { get; set; }
+        /// <summary>Gets or sets whether an explicit removal request has captured its stable wake outcome.</summary>
         internal bool RemovalRequested { get; set; }
+        /// <summary>Gets or sets the first explicit removal wake error, independently of late quiescence.</summary>
         internal Exception? RemovalError { get; set; }
+        /// <summary>Exactly-once reference-release state: 0 not started, 1 in progress, 2 completed, 3 failed without retry.</summary>
         internal int ReleaseState;
+        /// <summary>Gets the immutable admission-result producer; its task never faults.</summary>
         internal TaskCompletionSource<Exception?> Activated { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        /// <summary>Gets the nonfaulting actual snapshot/ready/terminal-callback drain producer, not close evidence.</summary>
         internal TaskCompletionSource Quiesced { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        /// <inheritdoc />
         public void Signal() => _owner.Signal(this);
+        /// <inheritdoc />
         public Exception? RequestRemoval() => _owner.Remove(this);
+        /// <inheritdoc />
         public void ReleaseReference() => _owner.Release(this);
     }
 }

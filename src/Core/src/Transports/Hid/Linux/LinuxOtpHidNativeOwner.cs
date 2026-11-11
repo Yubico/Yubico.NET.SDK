@@ -10,8 +10,14 @@ using NativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 
-// Feature ioctls belong to this lifetime's original worker, never the read reactor.
-// One admitted operation, no backlog, replacement worker, replay or native abort promise.
+/// <summary>Owns the native lifetime shared by typed Linux OTP and direct synchronous feature-report access.</summary>
+/// <remarks>
+/// Roots itself before native acquisition and retains the original physical claim through checked
+/// release. One dedicated worker performs open, feature GET/SET and close; feature ioctls never run
+/// on the read reactor. Send and receive share one ordinary slot, with no backlog, replacement worker
+/// or replay. Operation task completion is not close proof. Unknown native/claim release retains and
+/// quarantines the rooted lifetime rather than allowing timeout-based release or a native-close retry.
+/// </remarks>
 internal sealed class LinuxOtpHidNativeOwner
 {
     private readonly ILinuxHidReportApi _api;
@@ -40,6 +46,13 @@ internal sealed class LinuxOtpHidNativeOwner
         _claim = claim;
     }
 
+    /// <summary>Creates a rooted owner and opens its descriptor on the original dedicated worker.</summary>
+    /// <param name="path">hidraw path to open.</param>
+    /// <param name="api">Borrowed synchronous report seam; not disposed by this owner.</param>
+    /// <param name="token">Checked before/after native open; cancellation requests shutdown but cannot detach submitted open.</param>
+    /// <param name="claim">Optional original physical/discovery claim transferred to this lifetime, including failed-open cleanup.</param>
+    /// <returns>The opened owner; failed/canceled preparation awaits cleanup before propagating its error.</returns>
+    /// <remarks>Preserves both open and cleanup failures. A held open/close can keep this task and the original claim pending indefinitely.</remarks>
     internal static async Task<LinuxOtpHidNativeOwner> OpenAsync(string path, ILinuxHidReportApi api,
         CancellationToken token, IDisposable? claim = null)
     {
@@ -181,6 +194,15 @@ internal sealed class LinuxOtpHidNativeOwner
         }
     }
 
+    /// <summary>Admits one feature SET and owns a payload copy before returning its actual operation task.</summary>
+    /// <param name="report">Caller-owned payload (0..16382 bytes); typed callers separately enforce eight bytes.</param>
+    /// <param name="token">Checked at entry and dispatch; cannot detach or abort a submitted ioctl.</param>
+    /// <returns>A task terminal after owned-copy clearing and native return, or pre-dispatch cancellation/failure.</returns>
+    /// <remarks>
+    /// Admission takes the owner lock and rejects overlap. Caller source storage is never cleared by
+    /// the owner. Native SET is attempted at most once, without replay or suffix retry; success may
+    /// still succeed after token cancellation. The worker borrows only the owned copy.
+    /// </remarks>
     internal Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -218,6 +240,16 @@ internal sealed class LinuxOtpHidNativeOwner
         }
     }
 
+    /// <summary>Admits one feature GET into worker-allocated eight-byte storage and returns its actual completion task.</summary>
+    /// <param name="token">Checked at entry and dispatch; cancellation cannot detach a submitted GET or free its operation slot.</param>
+    /// <returns>Caller-owned exact eight-byte array storage exposed through a read-only view after a complete native GET.</returns>
+    /// <remarks>
+    /// Failed/partial staging is cleared before failure. Successfully returned storage is transferred
+    /// to the caller and never cleared by this owner, including at shutdown. The view provides no
+    /// disposal/zeroing API; sensitive output requires caller-managed backing-storage cleanup, and a
+    /// copy alone does not erase the original. A successful GET can complete successfully despite
+    /// cancellation after dispatch. Admission is locked, overlap is rejected, and continuations run asynchronously.
+    /// </remarks>
     internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -268,6 +300,13 @@ internal sealed class LinuxOtpHidNativeOwner
 
     private LinuxFileSafeHandle Handle => _handle ?? throw new InvalidOperationException("No Linux OTP handle.");
 
+    /// <summary>Synchronously drains the same checked shutdown outcome used by asynchronous disposal.</summary>
+    /// <remarks>
+    /// Retained for the synchronous expert facade and IDisposable compatibility. Prefer awaiting
+    /// <see cref="ShutdownAsync"/>; submitted native work or close can block this indefinitely. Calls
+    /// on the owner worker are rejected to prevent self-drain. Do not hold resources required by the
+    /// operation being drained. Returning with an exception is not proof of descriptor/claim release.
+    /// </remarks>
     internal void Dispose()
     {
         if (Environment.CurrentManagedThreadId == Volatile.Read(ref _workerId))
@@ -275,12 +314,22 @@ internal sealed class LinuxOtpHidNativeOwner
         ShutdownAsync().GetAwaiter().GetResult();
     }
 
+    /// <summary>Requests shutdown for facade finalization without waiting for native work or propagating exceptions.</summary>
+    /// <remarks>Takes the admission lock; does not promise lock-free invocation or acknowledge release.</remarks>
     internal void RequestShutdown()
     {
         try { _ = ShutdownAsync(); }
-        catch { /* Nonblocking, nonthrowing finalizer backstop; never assert native release. */ }
+        catch { /* Nonthrowing finalizer backstop with no drain wait; never assert native release. */ }
     }
 
+    /// <summary>Stops admission and returns the shared result of original-worker drain and checked release.</summary>
+    /// <remarks>
+    /// An admitted GET/SET reaches native return and public task terminality before checked close.
+    /// Only proven native release permits original-claim disposal/root removal. Linux EINTR/EIO still
+    /// report diagnostics after releasing the claim; unknown release or failed claim disposal retains
+    /// and quarantines the lifetime. There is no timeout, native abort or close retry, and repeated
+    /// calls share the same outcome. A hung native call may leave shutdown pending indefinitely.
+    /// </remarks>
     internal Task ShutdownAsync()
     {
         lock (_sync)

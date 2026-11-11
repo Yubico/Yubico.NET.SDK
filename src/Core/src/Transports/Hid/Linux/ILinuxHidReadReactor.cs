@@ -36,6 +36,11 @@ internal interface ILinuxHidReadReactor : IAsyncDisposable
     /// Admission while the local wake fd is retiring waits in Activation on that same poller;
     /// no replacement wake fd/thread or cleanup job is created before retirement finishes.
     /// </remarks>
+    /// <param name="handle">Owner's live descriptor; a separate SafeHandle reference is retained until explicit release after drain.</param>
+    /// <param name="generation">Immutable owner generation returned with readiness, in addition to the unique token identity.</param>
+    /// <param name="onReady">Bounded internal nonblocking input mechanics, receiving generation and native readiness flags.</param>
+    /// <param name="onTerminal">Contained internal terminal notification; its return is included in actual quiescence.</param>
+    /// <returns>The published identity, even when activation fails; retain it through quiescence and reference release.</returns>
     ILinuxHidReadRegistration Register(LinuxFileSafeHandle handle, long generation,
         Action<long, short> onReady, Action<Exception> onTerminal);
 }
@@ -51,9 +56,16 @@ internal interface ILinuxHidReadReactor : IAsyncDisposable
 /// </remarks>
 internal interface ILinuxHidReadRegistration
 {
+    /// <summary>Gets the immutable connection generation supplied at registration.</summary>
     long Generation { get; }
+    /// <summary>Gets the nonfaulting, immutable admission result: null on activation, otherwise the initial activation/removal error.</summary>
+    /// <remarks>Readiness may start immediately after activation. Neither success nor failure proves callback drain.</remarks>
     Task<Exception?> Activation { get; }
+    /// <summary>Gets the nonfaulting barrier completed only after this identity's snapshots and ready/terminal callbacks have drained.</summary>
+    /// <remarks>Does not release the retained reference or prove descriptor close; a broken wake can leave it pending indefinitely.</remarks>
     Task Quiescence { get; }
+    /// <summary>Publishes removal and returns the stable first wake error, or null; neither outcome acknowledges drain.</summary>
+    /// <remarks>Safe to request within a callback, but never synchronously wait there for <see cref="Quiescence"/>.</remarks>
     Exception? RequestRemoval();
     /// <summary>Release exactly once on the native owner worker after Quiescence; never on a reactor thread.</summary>
     /// <remarks>Early, concurrent, and reactor-thread calls throw. Repeated completed release is a no-op.</remarks>

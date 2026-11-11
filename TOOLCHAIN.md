@@ -121,7 +121,7 @@ dotnet toolchain.cs clean build
 | `Results.cs` | `ProjectResult`/`Outcome`, `TestCounts`, `FailedTest` (parses failing tests from runner output), and the shared pass/fail gates |
 | `TargetRegistry.cs` | Registers Bullseye targets and records them for `--help` |
 | `Usage.cs` | Validates targets and options before anything runs; suggests the closest name for a typo |
-| `BuildTargets.cs` | `clean`, `restore`, `build`, `test-infrastructure-qa`, `native-aot-contract-qa` |
+| `BuildTargets.cs` | `clean`, `restore`, `build`, `test-infrastructure-qa`, `native-aot-contract-qa`, opt-in `linux-hid-verification-publish` |
 | `TestTargets.cs` | `test`, `resilience`, `--filter` translation for xUnit v2/v3 |
 | `CoverageTargets.cs` | `coverage`, `crap`, `complexity` |
 | `BenchmarkTargets.cs` | `benchmark` |
@@ -254,7 +254,7 @@ This means you don't need to manually update the build script when adding new pr
 
 ## Native AOT Publish Verification
 
-Native AOT publishing is **not** a `dotnet toolchain.cs` target — it is verified independently via
+The all-module Native AOT publish is verified independently via
 [`.github/workflows/native-aot.yml`](.github/workflows/native-aot.yml), which runs
 `dotnet publish -p:PublishAot=true` directly against
 [`verification/NativeAotVerification`](verification/NativeAotVerification), a minimal internal
@@ -268,6 +268,22 @@ dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerifi
 
 The normal `build` target also validates that the exact ten supported SDK projects opt in and that
 the verification host references and anchors each one.
+
+Linux additionally has an **opt-in** `linux-hid-verification-publish` target for the standalone
+[`LinuxHidRouteVerification`](verification/LinuxHidRouteVerification) host. It is not a dependency
+of `build`, `test`, or `default`, and the host is outside the solution. Linux Native AOT CI invokes
+it explicitly to retain no-hardware libc/reactor regression coverage in both JIT and AOT; this is
+not a one-off local acceptance capture or a replacement for the all-module publish above.
+
+```bash
+dotnet toolchain.cs linux-hid-verification-publish
+python3 verification/LinuxHidRouteVerification/capture.py --native-only
+```
+
+The target restores isolated JIT/AOT dependency trees, records inputs, publishes both without
+implicit restore, and seals the unchanged inputs and resulting artifacts. Keep that transaction
+intact: the capture rejects stale or unbound binaries. Publishing requires the Linux Native AOT
+toolchain; it does not run hardware scenarios.
 
 ## Code Coverage
 

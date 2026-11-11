@@ -323,6 +323,11 @@ jobs:
         with:
           global-json-file: "./global.json"
 
+      # docfx restores the projects itself; on main, resolve NativeShims the same way as build-artifacts.
+      - name: Force-evaluate NativeShims lockfile (main only)
+        if: github.ref == 'refs/heads/main'
+        run: dotnet restore Yubico.NET.SDK.sln --force-evaluate --verbosity minimal
+
       # Build the documentation
       - name: Build docs
         run: |

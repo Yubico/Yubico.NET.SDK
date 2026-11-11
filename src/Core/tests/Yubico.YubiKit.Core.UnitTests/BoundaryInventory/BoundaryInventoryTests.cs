@@ -219,11 +219,11 @@ public class BoundaryInventoryTests
     {
         var root = BoundaryScanner.CoreSourceRoot();
         var sites = BoundaryScanner.ScanDirectory(root);
-        // Retain the 236-site baseline plus three resolved Windows runtime completion sites.
-        Assert.Equal(239, sites.Count);
+        // Retain every 239-site entry and classify six Windows synchronous facade waits.
+        Assert.Equal(245, sites.Count);
         Assert.Equal(sites.Count, sites.Select(site => site.Id).Distinct(StringComparer.Ordinal).Count());
         Assert.Equal(141, sites.Count(site => site.Kind == "native-import"));
-        Assert.Equal(40, sites.Count(site => site.Kind == "blocking-wait"));
+        Assert.Equal(46, sites.Count(site => site.Kind == "blocking-wait"));
         Assert.Equal(22, sites.Count(site => site.Kind == "scheduling"));
         Assert.Equal(22, sites.Count(site => site.Kind == "dispatch-gap"));
         Assert.Equal(7, sites.Count(site => site.Kind == "callback-registration"));

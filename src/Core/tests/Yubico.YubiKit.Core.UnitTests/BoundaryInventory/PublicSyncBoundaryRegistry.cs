@@ -11,6 +11,14 @@ internal static class PublicSyncBoundaryRegistry
     // Independent of the rows: removing an entry cannot silently reduce the supported scope.
     private static readonly (string Entry, string PublicType, string PublicSymbol, string Owner, string Symbol)[] Required =
     [
+        ("windows input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidInterface", "ConnectToIOReports"),
+        ("windows input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "GetReport"),
+        ("windows input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "SetReport"),
+        ("windows input dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "Dispose"),
+        ("windows feature open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToFeatureReports", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidInterface", "ConnectToFeatureReports"),
+        ("windows feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "GetReport"),
+        ("windows feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "SetReport"),
+        ("windows feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "Dispose"),
         ("linux input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidInterface", "ConnectToIOReports"),
         ("linux input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "GetReport"),
         ("linux input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "SetReport"),
@@ -39,6 +47,14 @@ internal static class PublicSyncBoundaryRegistry
     // These are reachability links, not assertions of native drain. Behavioral evidence is run separately.
     internal static readonly PublicSyncBoundaryRow[] Rows =
     [
+        new("windows input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidInterface", "ConnectToIOReports", "WindowsFidoDirectFacadeTests.Constructor_HeldOpenOrFailedOpenCleanupBlocksOnIndependentOwner"),
+        new("windows input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "GetReport", "WindowsFidoDirectFacadeTests.DirectReports_DescriptorSizedPayloadAndNativeZeroFramingSurviveDispose"),
+        new("windows input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "SetReport", "WindowsFidoDirectFacadeTests.DirectCall_HeldNativeLastUseBlocksCallerAndSharedDisposal"),
+        new("windows input dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "Dispose", "WindowsFidoDirectFacadeTests.SyncDispose_HeldReportAndCheckedClose_DrainsBeforeReturningSharedOutcome"),
+        new("windows feature open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToFeatureReports", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidInterface", "ConnectToFeatureReports", "WindowsOtpDirectFacadeTests.Constructor_HeldOpenOrFailedOpenCleanupBlocksOnIndependentOwner"),
+        new("windows feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "GetReport", "WindowsOtpDirectFacadeTests.DirectReports_DescriptorSizedPayloadAndNativeZeroFramingSurviveDispose"),
+        new("windows feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "SetReport", "WindowsOtpDirectFacadeTests.DirectCall_HeldNativeLastUseBlocksCallerAndSharedDisposal"),
+        new("windows feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "Dispose", "WindowsOtpDirectFacadeTests.SyncDispose_HeldReportAndCheckedClose_DrainsBeforeReturningSharedOutcome"),
         new("linux input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidInterface", "ConnectToIOReports", "LinuxDirectFacadeAcceptanceTests.InputOpen_MetadataFailureClosesPartialOwner"),
         new("linux input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "GetReport", "LinuxFidoHidConnectionTests.DirectFacade_DescriptorSizesAndArbitraryOutputLengthSurviveSharedOwner"),
         new("linux input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "SetReport", "LinuxDirectFacadeAcceptanceTests.InputSet_HeldWriteBlocksSyncCallerAndDrainsBeforeClose"),
@@ -114,7 +130,7 @@ internal static class PublicSyncBoundaryRegistry
 
         var testType = typeof(PublicSyncBoundaryRegistryTests).Assembly.GetTypes()
             .SingleOrDefault(type => type.Name == evidence[..separator]);
-        return testType?.GetMethod(evidence[(separator + 1)..])?.GetCustomAttributes<FactAttribute>()
+        return testType is { IsAbstract: false } && testType.GetMethod(evidence[(separator + 1)..])?.GetCustomAttributes<FactAttribute>()
             .Any(AdapterContractRegistry.IsRunnable) == true;
     }
 }

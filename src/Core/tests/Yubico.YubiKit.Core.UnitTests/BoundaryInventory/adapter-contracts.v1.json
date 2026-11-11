@@ -1,4 +1,48 @@
 [
+  { "route": "Windows HID FIDO", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidConnection", "symbol": "OpenAsync", "profiles": [
+    { "role": "pending", "method": "Yubico.YubiKit.Core.UnitTests.Devices.WindowsFidoHidRoutingTests.PublicOpen_HeldNativeOpenAndCloseRetainClaimAndReopenUsesFreshApi" },
+    { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoHidNativeOwnerTests.Open_HeldNativeAcquisition_RetainsClaimThroughCanceledOrFailedCleanup" },
+    { "role": "cancel before", "method": "Yubico.YubiKit.Core.UnitTests.Devices.WindowsFidoHidRoutingTests.PreCanceledRegisteredOpen_ReleasesExactClaimWithoutNativeOpen" }
+  ] },
+  { "route": "Windows HID FIDO", "operation": "send", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidConnection", "symbol": "SendAsync", "profiles": [
+    { "role": "native drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoHidNativeOwnerTests.Send_CallbackBeforeSubmitReturn_RetainsStorageAndPublicTask" },
+    { "role": "cancel before", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoHidNativeOwnerTests.Send_CanceledAfterAdmissionBeforeDispatch_SubmitsNothing" },
+    { "role": "submitted cancellation", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoHidNativeOwnerTests.Send_CanceledDuringHeldSubmit_CancelRunsOnlyAfterAcceptedReturn" }
+  ] },
+  { "route": "Windows HID FIDO", "operation": "receive", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidConnection", "symbol": "ReceiveAsync", "profiles": [
+    { "role": "terminal", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoHidNativeOwnerTests.Receive_Removal_StopsAdmissionAndDrainsBeforeClose" },
+    { "role": "failure cleanup", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoHidNativeOwnerTests.Receive_RejectionOrInvalidNativeReport_RetiresOnceAndClears" },
+    { "role": "submitted cancellation", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoHidNativeOwnerTests.Receive_CancellationWaitsForCompletion_ValidSuccessWins" }
+  ] },
+  { "route": "Windows HID FIDO", "operation": "dispose", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidConnection", "symbol": "DisposeAsync", "profiles": [
+    { "role": "claim drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoHidNativeOwnerTests.Shutdown_PendingReceiveAndHeldClose_SettlesActualTaskBeforeRelease" },
+    { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Devices.WindowsFidoHidRoutingTests.UncertainClose_PublicAndDiscoveryKeepOriginalClaimsQuarantined" }
+  ] },
+  { "route": "Windows HID OTP", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsOtpHidConnection", "symbol": "OpenAsync", "profiles": [
+    { "role": "pending", "method": "Yubico.YubiKit.Core.UnitTests.Devices.WindowsOtpHidRoutingTests.PublicOpen_HeldNativeOpenAndCloseRetainClaimAndReopenUsesFreshApi" },
+    { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpHidNativeOwnerTests.FailedOrCancelledOpen_KeepsClaimThroughCheckedClose" },
+    { "role": "cancel before", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpHidNativeOwnerTests.PreCancelledOpen_ReleasesTransferredClaimWithoutNativeAcquisition" }
+  ] },
+  { "route": "Windows HID OTP", "operation": "send", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsOtpHidConnection", "symbol": "SendAsync", "profiles": [
+    { "role": "owned output", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpHidNativeOwnerTests.Send_CopiesCallerAndClearsFramedStorageAfterNativeReturn" },
+    { "role": "submitted cancellation", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpHidNativeOwnerTests.CancellationAfterDispatch_DrainsFeatureBeforePublicCompletionAndClose" }
+  ] },
+  { "route": "Windows HID OTP", "operation": "receive", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsOtpHidConnection", "symbol": "ReceiveAsync", "profiles": [
+    { "role": "failure cleanup", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpHidNativeOwnerTests.Get_ClearsNativeStagingAndTransfersSeparateSuccessfulPayload" },
+    { "role": "cancel before", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpHidNativeOwnerTests.CancellationBeforeDispatch_SkipsNativeAndRestoresAdmission" }
+  ] },
+  { "route": "Windows HID OTP", "operation": "dispose", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsOtpHidConnection", "symbol": "DisposeAsync", "profiles": [
+    { "role": "claim drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpHidNativeOwnerTests.HeldNativeCall_ReturnsPendingAndRetainsOriginalClaim" },
+    { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpLifetimeTests.UnknownRelease_QuarantinesOriginalRegistryClaimAndRetainsRoot" }
+  ] },
+  { "route": "Windows direct input (sync)", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "symbol": ".ctor", "profiles": [ { "role": "partial open failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoDirectFacadeTests.Constructor_HeldOpenOrFailedOpenCleanupBlocksOnIndependentOwner" } ] },
+  { "route": "Windows direct input (sync)", "operation": "get", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "symbol": "GetReport", "profiles": [ { "role": "descriptor sized input", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoDirectFacadeTests.DirectReports_DescriptorSizedPayloadAndNativeZeroFramingSurviveDispose" } ] },
+  { "route": "Windows direct input (sync)", "operation": "set", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "symbol": "SetReport", "profiles": [ { "role": "native drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoDirectFacadeTests.DirectCall_HeldNativeLastUseBlocksCallerAndSharedDisposal" } ] },
+  { "route": "Windows direct input (sync)", "operation": "dispose", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "symbol": "Dispose", "profiles": [ { "role": "shared close drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsFidoDirectFacadeTests.SyncDispose_HeldReportAndCheckedClose_DrainsBeforeReturningSharedOutcome" } ] },
+  { "route": "Windows direct feature (sync)", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "symbol": ".ctor", "profiles": [ { "role": "partial open failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpDirectFacadeTests.Constructor_HeldOpenOrFailedOpenCleanupBlocksOnIndependentOwner" } ] },
+  { "route": "Windows direct feature (sync)", "operation": "get", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "symbol": "GetReport", "profiles": [ { "role": "descriptor sized input", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpDirectFacadeTests.DirectReports_DescriptorSizedPayloadAndNativeZeroFramingSurviveDispose" } ] },
+  { "route": "Windows direct feature (sync)", "operation": "set", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "symbol": "SetReport", "profiles": [ { "role": "native drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpDirectFacadeTests.DirectCall_HeldNativeLastUseBlocksCallerAndSharedDisposal" } ] },
+  { "route": "Windows direct feature (sync)", "operation": "dispose", "owner": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "symbol": "Dispose", "profiles": [ { "role": "shared close drain", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Windows.WindowsOtpDirectFacadeTests.SyncDispose_HeldReportAndCheckedClose_DrainsBeforeReturningSharedOutcome" } ] },
   { "route": "Linux HID FIDO", "operation": "open", "owner": "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "symbol": "OpenAsync", "profiles": [
     { "role": "pending", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.Open_ReturnsInvocationWhileNativeIsHeld" },
     { "role": "failure", "method": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxFidoHidConnectionTests.MetadataFailure_PreservesOriginalAndCloseFailure" },

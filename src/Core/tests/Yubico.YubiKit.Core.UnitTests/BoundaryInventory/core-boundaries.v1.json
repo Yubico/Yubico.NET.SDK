@@ -2,6 +2,30 @@
   "version": 1,
   "families": [
     {
+      "path": "Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+      "reviewOwner": "Core maintainers",
+      "rationale": "Retained synchronous expert IO facade drains the independent FIDO native owner without a timeout.",
+      "evidence": ["WindowsHidIOReportConnection constructor/GetReport/SetReport; WindowsFidoDirectFacadeTests holds native last use and checked close beneath the actual facade. Managed evidence only."],
+      "status": ["documented", "implemented", "outstanding"],
+      "entries": [
+        "WindowsHidIOReportConnection#525C2106723E#sync-boundary#Constructor waits for owner-directed open and metadata, including checked failed-open cleanup. Direct opens acquire no grouped claim.",
+        "GetReport#DBBE818A3360#sync-boundary#Caller waits for descriptor-sized input through accepted overlapped completion and retirement; cancellation is not native release proof.",
+        "SetReport#D5A5E4BAA664#sync-boundary#Caller waits for exact descriptor-sized output through submit return and callback resource last use; the independent owner retains staging until retirement."
+      ]
+    },
+    {
+      "path": "Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+      "reviewOwner": "Core maintainers",
+      "rationale": "Retained synchronous expert feature facade drains the separate OTP worker without a timeout.",
+      "evidence": ["WindowsHidFeatureReportConnection constructor/GetReport/SetReport; WindowsOtpDirectFacadeTests holds feature return and checked close beneath the actual facade. Managed evidence only."],
+      "status": ["documented", "implemented", "outstanding"],
+      "entries": [
+        "WindowsHidFeatureReportConnection#1F33B2649FC3#sync-boundary#Constructor waits for zero-desired-access open and metadata on the owner worker, including checked failed-open cleanup.",
+        "GetReport#F12A75B4A9D2#sync-boundary#Caller waits for synchronous feature GET on the owner worker; native staging survives through return and successful caller payload storage is separate.",
+        "SetReport#E20A59A54665#sync-boundary#Caller waits for exact descriptor-sized feature SET and staging cleanup after native return; no cancellation or timeout detaches accepted work."
+      ]
+    },
+    {
       "path": "Native/Windows/HidD/HidD.Interop.cs", "reviewOwner": "Core maintainers",
       "rationale": "New byte-returning HID BOOLEAN imports are synchronous boundaries. The independent Windows FIDO and OTP owners direct acquisition and checked release; declaration coverage is not Windows native verification.",
       "evidence": ["Native/Windows/HidD/HidD.Interop.cs:GetHidFeature/SetHidFeature/GetHidPreparsedData/FreeHidPreparsedData; Transports/Hid/Windows/WindowsHidFeatureReportApi.cs:Open/Transfer/ReleaseResources and WindowsHidReportApi.cs:Open/ReleasePreparsedData retain explicit handle references and record partial metadata ownership."],

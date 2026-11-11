@@ -1,0 +1,21 @@
+{
+  "source_run": "artifacts/toolchain/runs/20261111-230616-669-docs-qa",
+  "files": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/startup-validation/result.json",
+      "bytes": 425,
+      "sha256": "88623b258cbbe1afbcb2ebf07ee88cc1eb19c422e8ac4442c1fc60536e72da7d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/startup-validation/result.txt",
+      "bytes": 311,
+      "sha256": "2e95e0d29b42abdf0e20be814dc027a225ad3c957912d0b8c948a550a406a279"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/startup-validation/run.log",
+      "bytes": 1085,
+      "sha256": "e9a90d4db3a562a18791360d02c9a3eadf6299bde8a4675a974129aca4356980"
+    }
+  ],
+  "scope": "Startup record/index documentation QA only; no SDK tests or device execution"
+}

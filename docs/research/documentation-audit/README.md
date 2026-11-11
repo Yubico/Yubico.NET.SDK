@@ -31,9 +31,7 @@ remains the editorial reference. Repository and module instructions still govern
 | YubiHSM Auth | Complete, committed/pushed at `e053386a`: `yubihsm-001`; YubiKey-only evidence and compatibility findings retained | Deferred until the campaign's second sweep | [YubiHSM handoff](yubihsm.md) |
 | OpenPGP | Complete, committed/pushed at `84715ee1`: `openpgp-001`; 49 integration methods passed, scoped probe failures retained | Deferred until the campaign's second sweep | [OpenPGP handoff](openpgp.md) |
 | PIV | Complete, committed/pushed at `bf0c0207`: `piv-001`, post-PR745; 86 canonical methods passed, scoped signing failures and physical-test deferral retained | Deferred until the campaign's second sweep | [PIV handoff](piv.md) |
-| PIV | Reserved for the final part of the first sweep | Deferred until the campaign's second sweep | Scope/inventory at selection |
-| Core | Final target; detailed scope and per-applet cross-module boundary reviews to be planned then | Discovery/SCP follow-ups retain their separate scope | Existing module checkpoints and future Core plan |
-| Other remaining applets | Not yet scheduled within the first sweep | Deferred until the campaign's second sweep | Apply the workflow when selected |
+| Core | In progress: `core-001`, on verified integration `fe342fb0`; whole-module audit and nine dedicated applet/Core boundary reviews | Selected implementation work follows first-sweep closeout | [Core handoff](core.md) |
 
 ## Retained records
 

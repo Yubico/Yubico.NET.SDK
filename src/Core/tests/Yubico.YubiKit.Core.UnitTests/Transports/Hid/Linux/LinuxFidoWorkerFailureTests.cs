@@ -91,26 +91,95 @@ public class LinuxFidoWorkerFailureTests
     {
         var api = new ReportApi();
         var claim = new Claim();
-        // The private-constructor setup lets the test hold admission before startup.
-        // No fake worker/queue replaces the production StartOpen/WorkLoop machinery.
+        // Construct before startup so the test can withhold native open dispatch.
         var owner = Assert.IsType<LinuxFidoHidNativeOwner>(Activator.CreateInstance(typeof(LinuxFidoHidNativeOwner),
             BindingFlags.Instance | BindingFlags.NonPublic, null, [api, new Reactor(), claim], null));
-        Task opened;
-        using (Field<Lock>(owner, "_sync").EnterScope())
+        Exception? primaryFailure = null;
+        try
         {
-            var start = typeof(LinuxFidoHidNativeOwner).GetMethod("StartOpen", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?? throw new InvalidOperationException("Missing owner startup method.");
-            opened = Assert.IsType<Task>(start.Invoke(owner, ["fake", Token]), exactMatch: false);
-            var worker = Field<Thread>(owner, "_worker");
-            WaitUntilParked(worker); // Startup signal is set; it can only block on admission.
-            worker.Interrupt();
+            var (opened, worker) = await LinuxWorkerFailureTestSetup.InterruptBeforeOpenDispatchAsync(owner, Token);
+            var failure = await Assert.ThrowsAsync<ThreadInterruptedException>(() => opened.WaitAsync(TimeSpan.FromSeconds(5), Token));
+            var closing = owner.ShutdownAsync();
+            Assert.Same(closing, owner.ShutdownAsync());
+            Assert.Same(failure, await Assert.ThrowsAsync<ThreadInterruptedException>(() => closing));
+            Assert.True(worker.Join(TimeSpan.FromSeconds(5)));
+            Assert.Equal(0, api.Opens);
+            Assert.Equal(0, api.Closes);
+            Assert.Equal(1, claim.Releases);
         }
-        var failure = await Assert.ThrowsAsync<ThreadInterruptedException>(() => opened.WaitAsync(TimeSpan.FromSeconds(5), Token));
-        Assert.Same(failure, await Assert.ThrowsAsync<ThreadInterruptedException>(() => owner.ShutdownAsync()));
-        Assert.Equal(0, api.Opens);
-        Assert.Equal(0, api.Closes);
+        catch (Exception error) { primaryFailure = error; throw; }
+        finally { await LinuxWorkerFailureTestSetup.DrainAsync(owner, owner.ShutdownAsync, primaryFailure); }
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task BeforeOpenSetupAssertionFailure_DrainsOriginalWorkerAndPreservesPrimaryFailure(bool otp, bool cleanupFault)
+    {
+        using var release = new ManualResetEventSlim();
+        var claim = new HeldReleaseClaim(release);
+        object owner = otp
+            ? Assert.IsType<LinuxOtpHidNativeOwner>(Activator.CreateInstance(typeof(LinuxOtpHidNativeOwner),
+                BindingFlags.Instance | BindingFlags.NonPublic, null, [new LinuxOtpHidConnectionTests.ReportApi(), claim], null))
+            : Assert.IsType<LinuxFidoHidNativeOwner>(Activator.CreateInstance(typeof(LinuxFidoHidNativeOwner),
+                BindingFlags.Instance | BindingFlags.NonPublic, null, [new ReportApi(), new Reactor(), claim], null));
+        Func<Task> shutdown = owner is LinuxOtpHidNativeOwner otpOwner ? otpOwner.ShutdownAsync : ((LinuxFidoHidNativeOwner)owner).ShutdownAsync;
+        var primary = new Xunit.Sdk.XunitException("Injected assertion after StartOpen, before setup returns its worker.");
+        var cleanupError = new IOException("Injected cleanup outcome failure.");
+        var failure = Task.Run(async () => await Record.ExceptionAsync(async () =>
+        {
+            Exception? primaryFailure = null;
+            try
+            {
+                await LinuxWorkerFailureTestSetup.InterruptBeforeOpenDispatchAsync(owner, Token, () => throw primary);
+            }
+            catch (Exception error) { primaryFailure = error; throw; }
+            finally
+            {
+                await LinuxWorkerFailureTestSetup.DrainAsync(owner, () =>
+                {
+                    var closing = shutdown();
+                    return cleanupFault ? Task.FromException(cleanupError) : closing;
+                }, primaryFailure);
+            }
+        }), Token);
+        try
+        {
+            await claim.Entered.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+            Assert.False(failure.IsCompleted); // Cleanup must drain even when its outcome faults.
+        }
+        finally
+        {
+            release.Set();
+            // Independent, uncancelled watchdog also drains this regression's red path.
+            try
+            {
+                await failure.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+                // Check the helper's retirement proof BEFORE the red-path safety join.
+                Assert.False(Field<Thread>(owner, "_worker").IsAlive);
+            }
+            finally { Assert.True(Field<Thread>(owner, "_worker").Join(TimeSpan.FromSeconds(5))); }
+        }
+        Assert.Same(primary, await failure);
+        if (cleanupFault) Assert.Same(cleanupError, primary.Data[LinuxWorkerFailureTestSetup.CleanupFailureKey]);
+        Assert.False(Field<Thread>(owner, "_worker").IsAlive);
         Assert.Equal(1, claim.Releases);
-        owner.RequestShutdown();
+    }
+
+    private sealed class HeldReleaseClaim(ManualResetEventSlim release) : IDisposable
+    {
+        internal TaskCompletionSource Entered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        internal int Releases { get; private set; }
+
+        public void Dispose()
+        {
+            Entered.TrySetResult();
+            // The test owns this release gate; runner cancellation must not abandon it.
+            if (!release.Wait(TimeSpan.FromSeconds(5), CancellationToken.None)) throw new TimeoutException("Claim release gate not released.");
+            Releases++;
+        }
     }
 
     [Theory]

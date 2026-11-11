@@ -76,22 +76,21 @@ public class LinuxOtpWorkerFailureTests
         var claim = new Claim();
         var owner = Assert.IsType<LinuxOtpHidNativeOwner>(Activator.CreateInstance(typeof(LinuxOtpHidNativeOwner),
             BindingFlags.Instance | BindingFlags.NonPublic, null, [api, claim], null));
-        Task opening;
-        using (Field<Lock>(owner, "_sync").EnterScope())
+        Exception? primaryFailure = null;
+        try
         {
-            var start = typeof(LinuxOtpHidNativeOwner).GetMethod("StartOpen", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?? throw new InvalidOperationException("Missing startup method.");
-            opening = Assert.IsType<Task>(start.Invoke(owner, ["fake", Token]), exactMatch: false);
-            var worker = Field<Thread>(owner, "_worker");
-            WaitUntilParked(worker);
-            worker.Interrupt();
+            var (opening, worker) = await LinuxWorkerFailureTestSetup.InterruptBeforeOpenDispatchAsync(owner, Token);
+            var initial = await Assert.ThrowsAsync<ThreadInterruptedException>(() => opening.WaitAsync(TimeSpan.FromSeconds(5), Token));
+            var closing = owner.ShutdownAsync();
+            Assert.Same(closing, owner.ShutdownAsync());
+            Assert.Same(initial, await Assert.ThrowsAsync<ThreadInterruptedException>(() => closing));
+            Assert.True(worker.Join(TimeSpan.FromSeconds(5)));
+            Assert.Equal(0, api.Opens);
+            Assert.Equal(0, api.Closes);
+            Assert.Equal(1, claim.Releases);
         }
-        var initial = await Assert.ThrowsAsync<ThreadInterruptedException>(() => opening.WaitAsync(TimeSpan.FromSeconds(5), Token));
-        Assert.Same(initial, await Assert.ThrowsAsync<ThreadInterruptedException>(() => owner.ShutdownAsync()));
-        Assert.Equal(0, api.Opens);
-        Assert.Equal(0, api.Closes);
-        Assert.Equal(1, claim.Releases);
-        owner.RequestShutdown();
+        catch (Exception error) { primaryFailure = error; throw; }
+        finally { await LinuxWorkerFailureTestSetup.DrainAsync(owner, owner.ShutdownAsync, primaryFailure); }
     }
 
     [Theory]

@@ -319,7 +319,7 @@ flowchart TD
     Slot --> Merge
     Merge --> Flat
     Flat --> Result
-    Owner -->|Apply(scan)| Feed
+    Owner -->|"Apply(scan)"| Feed
     Feed -->|atomic snapshot + tail per subscriber| Views
 ```
 
